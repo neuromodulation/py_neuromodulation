@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 mov_substr_list = ["TTL", "ANALOG", "MOV"]
-used_substr_list = ["ECOG", "SEEG"]
+used_substr_list = ["ecog", "seeg"]
 
 def set_M1(ch_names, ch_type):
     """
@@ -36,12 +36,6 @@ def set_M1(ch_names, ch_type):
     target[ch_mov] = 1
     df['target'] = target.astype(int)
 
-    rereference = ["" for x in range(len(ch_names)))]
-
-    for ch_idx, ch in enumerate(ch_names):
-        if ch_type[ch_idx] == "ECOG":
-            rereference[ch_idx]= "average"
-
-    df['rereference'] =rereference
+    df['rereference'] = ["average" for x in range(len(ch_names))]
 
     return df
