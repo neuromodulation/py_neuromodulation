@@ -11,10 +11,10 @@ The current implementation allows two different kinds of features:
 For bandpower features the Hjorth parameter can be used, as well as a Kalmanfilter for individual frequency bands. 
 In run_analysis.py the data is read, real time enabled normalization and rereference functions are called. Subsequently the specified features are calculated and written out to a time stacked dataframe. Functions have been optimized with respect to computational efficiency, and are encapsuled such that a hardware interface can easily replace the internal signal generator. 
 
-![image info](./pictures/modules_viz.png)
+![image info](./pictures/modules_viz.PNG)
 *Figure 1: py_neuromodulation modules*
 
-![image info](./pictures/Sharpwave_prominence.png)
+![image info](./pictures/Sharpwave_prominence.PNG)
 *Figure 2: Examplary prominence sharpwave features over time*
 
 In addition, a computational interpolation approach was implemented that allows for decoding with different electrode locations. Here different interpolation parameters for cortical (ECoG) and subcortical (LFP) signals can be defined. 
