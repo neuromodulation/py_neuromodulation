@@ -1,6 +1,6 @@
 {
-    "BIDS_path":  "C:\\Users\\ICN_admin\\Charité - Universitätsmedizin Berlin\\Interventional Cognitive Neuromodulation - Data\\Datasets\\BIDS_Berlin\\rawdata_Berlin\\",
-    "out_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\0303\\", 
+    "BIDS_path":  "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Beijing",
+    "out_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out", 
     "resampling_rate": 10, 
     "max_dist_cortex": 20, 
     "max_dist_subcortex": 5,
@@ -11,7 +11,7 @@
         "notch_filter" : true,
         "bandpass_filter" : true, 
         "raw_hjorth" : true,
-        "sharpwave_analysis" : true, 
+        "sharpwave_analysis" : false, 
         "return_raw" : true
     },
 
@@ -45,7 +45,7 @@
         "MaxPeakProminence" : false,
         "MaxTroughSharpness" : true, 
         "MaxPeakSharpness" : false, 
-        "MeanTroughSharpness" : true,
+        "MeanTroughSharpness" : false,
         "MeanPeakSharpness" : false, 
         "sharpness" : false
     }
