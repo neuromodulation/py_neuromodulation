@@ -1,6 +1,5 @@
 import mne
 import numpy as np
-from matplotlib import pyplot as plt
 import kalmanfilter, filter, sharpwaves, bandpower, hjorth_raw
 import pandas as pd
 from multiprocessing import Process, Manager
@@ -8,7 +7,7 @@ import time
 
 class Features:
     
-    def __init__(self, s, fs, line_noise, channels):
+    def __init__(self, s, fs, line_noise, channels) -> None:
         """
         s (dict) : json settings
         """
@@ -21,8 +20,8 @@ class Features:
         self.KF_dict = {}
         
         if s["methods"]["bandpass_filter"] is True:
-            self.filter_fun = filter.calc_band_filters(s["bandpass_filter_settings"]["frequency_ranges"], \
-                                                sample_rate=fs, filter_len=fs + 1)
+            self.filter_fun = filter.calc_band_filters(f_ranges=s["bandpass_filter_settings"]["frequency_ranges"], \
+                                                sfreq=fs, filter_length=fs + 1)
         
         for channel in self.ch_names:
             if s["methods"]["kalman_filter"] is True:
@@ -36,7 +35,7 @@ class Features:
                                             s["kalman_filter_settings"]["sigma_w"], \
                                             s["kalman_filter_settings"]["sigma_v"])
         
-    def estimate_features(self, data):
+    def estimate_features(self, data) -> dict:
         """
         
         Calculate features, as defined in settings.json
@@ -61,7 +60,7 @@ class Features:
                 fir_design='firwin', verbose=False, notch_widths=3, filter_length=data.shape[1]-1)
         
         if self.s["methods"]["bandpass_filter"]:
-            dat_filtered = filter.apply_filter(data.T, self.filter_fun, self.fs) # shape (bands, time)
+            dat_filtered = filter.apply_filter(data, self.filter_fun, self.fs) # shape (bands, time)
         else:
             dat_filtered = None
 
@@ -81,7 +80,7 @@ class Features:
         #return dict(features_) # this is necessary for multiprocessing approach 
         return features_
                     
-    def est_ch(self, features_, ch_idx, ch, dat_filtered, data):
+    def est_ch(self, features_, ch_idx, ch, dat_filtered, data) -> dict:
             
         if self.s["methods"]["bandpass_filter"]:
             features_ = bandpower.get_bandpower_features(features_, self.s, self.seglengths, dat_filtered, self.KF_dict, ch, ch_idx)

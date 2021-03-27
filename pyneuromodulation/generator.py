@@ -1,6 +1,6 @@
 
 
-def ieeg_raw_generator(ieeg_raw, df_M1, settings, fs):
+def ieeg_raw_generator(ieeg_raw, settings, fs):
     """
     This generator function mimics online data acquisition. 
     The df_M1 selected raw channels are iteratively sampled with fs.  
@@ -16,7 +16,6 @@ def ieeg_raw_generator(ieeg_raw, df_M1, settings, fs):
     cnt_fsnew = 0
     offset_start = int(settings["bandpass_filter_settings"]["segment_lengths"][0] * fs)
     fs_new = settings["resampling_rate"]
-    used_idx = df_M1[(df_M1["used"] == 1) & (df_M1["target"] == 0)].index
     
     for cnt in range(ieeg_raw.shape[1]):
         if cnt < offset_start:
@@ -26,4 +25,4 @@ def ieeg_raw_generator(ieeg_raw, df_M1, settings, fs):
         cnt_fsnew +=1
         if cnt_fsnew >= (fs/fs_new):
             cnt_fsnew = 0
-            yield ieeg_raw[used_idx,cnt-offset_start:cnt]
+            yield ieeg_raw[:,cnt-offset_start:cnt]

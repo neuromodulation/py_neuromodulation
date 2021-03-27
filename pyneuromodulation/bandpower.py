@@ -1,7 +1,5 @@
 import numpy as np 
-from numba import jit
 
-@jit
 def get_bandpower_features(features_, s, seglengths, dat_filtered, KF_dict, ch, ch_idx):
 
     for f_band in range(len(s["bandpass_filter_settings"]["frequency_ranges"])):
