@@ -8,10 +8,10 @@ class RT_rereference:
         """Initiatlize real time reference information
 
         Args:
-            ch_names (list): list of used channel names
+            ch_names (list): list of all ieeg_batch channel names
             refs (list): reference specification for rereferencing
-            to_ref_idx (list): ieeg_batch list of non target channel indizes for 
-                rereferencing
+            to_ref_idx (list): list of ieeg_batch indices that are not rereferenced, 
+                i.e. copied to "rereferenced" array
             cortex_idx (list): indices of cortical channels
             subcortex_idx (list): indices of subcortical channels
             split_data (bool, optional): If set to True, the rereferenced data will be 
@@ -33,9 +33,8 @@ class RT_rereference:
                 shape(n_channels, n_samples) - data to be rereferenced.
 
         Raises:
-            ValueError: [description]
-            ValueError: [description]
-            ValueError: [description]
+            ValueError: rereferencing using undefined channel 
+            ValueError: rereferencing according to same channel 
 
         Returns:
             reref_data (np.ndarray): rereferenced data
