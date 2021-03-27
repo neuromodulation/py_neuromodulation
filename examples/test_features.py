@@ -1,13 +1,10 @@
 import sys
 sys.path.append(r'C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation')
-import features 
 import numpy as np 
 import json
 import mne_bids
-import run_analysis
-import generator
+import run_analysis, generator, rereference, features, define_M1
 import pandas as pd
-import define_M1
 import os
 
 if __name__ == "__main__":
@@ -31,24 +28,31 @@ if __name__ == "__main__":
     df_M1 = pd.read_csv(PATH_M1, sep="\t") if PATH_M1 is not None and os.path.isfile(PATH_M1) \
         else define_M1.set_M1(raw_arr.ch_names, raw_arr.get_channel_types())
 
-    ch_names = list(df_M1[(df_M1["used"] == 1) & (df_M1["target"] == 0)]["name"])
+    ch_names = list(df_M1['name'])
+    refs = df_M1['rereference']
+    to_ref_idx = np.array(df_M1[(df_M1['target'] == 0) & (df_M1['used'] == 1) & \
+                    (df_M1["rereference"] != "None")].index)
 
-    refs = df_M1["rereference"]
-    rest_idx = np.array(df_M1[(df_M1["target"] == 0) & (df_M1["used"] == 1)].index)
+    to_ref_idx = np.array(df_M1[(df_M1['used'] == 1)].index)
+
     cortex_idx = np.where(df_M1.ECOG == 1)[0]
-    subcortex_idx = np.array(df_M1[(df_M1["ECOG"] == 0) & (df_M1["used"] == 1) & (df_M1["target"] == 0)].index)
-    used = np.where(df_M1.used == 1)[0]
+    subcortex_idx = np.array(df_M1[(df_M1["ECOG"] == 0) & \
+                    (df_M1['used'] == 1) & (df_M1['target'] == 0)].index)
+
+    ref_here = rereference.RT_rereference(ch_names, refs, to_ref_idx,\
+                    cortex_idx, subcortex_idx, split_data=False)
+
+
     #LIMIT_LOW = 15000
     #LIMIT_HIGH = 25000
     #ieeg_raw_lim = ieeg_raw[:,LIMIT_LOW:LIMIT_HIGH]
 
-    gen = generator.ieeg_raw_generator(ieeg_raw, df_M1, settings, fs) # clip for timing reasons 
+    gen = generator.ieeg_raw_generator(ieeg_raw, settings, fs) # clip for timing reasons 
 
     features_ = features.Features(s=settings, fs=fs, line_noise=line_noise, channels=ch_names)
 
     # call now run_analysis.py 
-    df_ = run_analysis.run(gen, features_, settings, ch_names, refs, rest_idx,\
-        cortex_idx, subcortex_idx, used)
+    df_ = run_analysis.run(gen, features_, settings, ref_here, list(df_M1.used))
 
     #resample_label 
     ind_label = np.where(df_M1["target"] == 1)[0]

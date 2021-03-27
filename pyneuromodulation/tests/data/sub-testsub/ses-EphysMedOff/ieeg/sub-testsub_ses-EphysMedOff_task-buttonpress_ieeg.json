@@ -1,7 +1,7 @@
 {
     "TaskName": "buttonpress",
     "Manufacturer": "BrainProducts",
-    "PowerLineFrequency": "n/a",
+    "PowerLineFrequency": 50,
     "SamplingFrequency": 2000.0,
     "SoftwareFilters": "n/a",
     "RecordingDuration": 20.0,
