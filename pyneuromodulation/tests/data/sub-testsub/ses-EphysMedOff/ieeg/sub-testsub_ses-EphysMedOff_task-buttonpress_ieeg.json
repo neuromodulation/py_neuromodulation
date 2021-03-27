@@ -1,0 +1,18 @@
+{
+    "TaskName": "buttonpress",
+    "Manufacturer": "BrainProducts",
+    "PowerLineFrequency": "n/a",
+    "SamplingFrequency": 2000.0,
+    "SoftwareFilters": "n/a",
+    "RecordingDuration": 20.0,
+    "RecordingType": "continuous",
+    "iEEGReference": "n/a",
+    "ECOGChannelCount": 8,
+    "SEEGChannelCount": 9,
+    "EEGChannelCount": 0,
+    "EOGChannelCount": 0,
+    "ECGChannelCount": 0,
+    "EMGChannelCount": 4,
+    "MiscChannelCount": 6,
+    "TriggerChannelCount": 0
+}
