@@ -57,10 +57,15 @@ def est_features_run(PATH_RUN) -> None:
 
     gen = generator.ieeg_raw_generator(ieeg_raw, settings, fs) # clip for timing reasons 
 
-    features_ = features.Features(s=settings, fs=fs, line_noise=line_noise, channels=ch_names)
+    feature_idx = np.where(np.logical_and(np.array((df_M1["used"] == 1)), \
+            np.array((df_M1["target"] == 0))))[0]
+
+    features_ = features.Features(s=settings, fs=fs, line_noise=line_noise, \
+        channels=np.array(ch_names)[feature_idx])
 
     # call now run_analysis.py 
-    df_ = run_analysis.run(gen, features_, settings, ref_here, list(df_M1.used))
+    
+    df_ = run_analysis.run(gen, features_, settings, ref_here, feature_idx)
 
     #resample_label 
     ind_label = np.where(df_M1["target"] == 1)[0]
@@ -93,5 +98,6 @@ if __name__ == "__main__":
     PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Beijing"
     layout = BIDSLayout(PATH_BIDS)
     run_files = layout.get( extension='.vhdr')
-    pool = multiprocessing.Pool()
-    pool.map(est_features_run, run_files)
+    est_features_run(run_files[0])
+    #pool = multiprocessing.Pool()
+    # pool.map(est_features_run, run_files)
