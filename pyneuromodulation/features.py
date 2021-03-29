@@ -1,6 +1,10 @@
 import mne
 import numpy as np
-import kalmanfilter, filter, sharpwaves, bandpower, hjorth_raw
+import kalmanfilter
+import filter
+import sharpwaves
+import bandpower
+import hjorth_raw
 import pandas as pd
 from multiprocessing import Process, Manager
 import time

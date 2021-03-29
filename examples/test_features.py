@@ -3,19 +3,27 @@ sys.path.append(r'C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulat
 import numpy as np 
 import json
 import mne_bids
-import run_analysis, generator, rereference, features, define_M1
+import run_analysis
+import generator
+import rereference
+import features
+import define_M1
 import pandas as pd
 import os
+import multiprocessing
+from bids import BIDSLayout
 
-if __name__ == "__main__":
+def est_features_run(PATH_RUN) -> None:
+    #PATH_RUN = r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\Data\Beijing\sub-FOG006\ses-EphysMedOn\ieeg\sub-FOG006_ses-EphysMedOn_task-ButtonPress_acq-StimOff_run-01_ieeg.vhdr"
 
-    PATH_RUN = r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\Data\Beijing\sub-FOG006\ses-EphysMedOn\ieeg\sub-FOG006_ses-EphysMedOn_task-ButtonPress_acq-StimOff_run-01_ieeg.vhdr"
     #PATH_M1 = r'C:\Users\ICN_admin\Charité - Universitätsmedizin Berlin\Interventional Cognitive Neuromodulation - Data\Datasets\BIDS_Berlin\derivatives\sub-002\ses-20200131\ieeg\sub-002_ses-20200131_task-SelfpacedRotationR_acq-MedOn+StimOff_run-4_channels_M1.tsv'
     PATH_M1 = None 
 
     # read settings 
     with open('settings.json', encoding='utf-8') as json_file:
         settings = json.load(json_file)
+
+    #PATH_OUT = settings["out_path"]
 
     entities = mne_bids.get_entities_from_fname(PATH_RUN)
     bids_path = mne_bids.BIDSPath(subject=entities["subject"], session=entities["session"], task=entities["task"], \
@@ -44,7 +52,7 @@ if __name__ == "__main__":
 
 
     #LIMIT_LOW = 15000
-    #LIMIT_HIGH = 25000
+    #LIMIT_HIGH = 22000
     #ieeg_raw_lim = ieeg_raw[:,LIMIT_LOW:LIMIT_HIGH]
 
     gen = generator.ieeg_raw_generator(ieeg_raw, settings, fs) # clip for timing reasons 
@@ -66,11 +74,24 @@ if __name__ == "__main__":
     else: 
         print("label dimensions don't match, saving downsampled label extra")
 
-    df_.to_pickle(os.path.join(settings["out_path"], os.path.basename(PATH_RUN)+"_FEATURES.p"))
+    # create out folder if doesn't exist 
+    folder_name = os.path.basename(PATH_RUN)[:-5]
+    if not os.path.exists(os.path.join(settings["out_path"], folder_name)):
+        os.makedirs(os.path.join(settings["out_path"], folder_name))
+
+    df_.to_pickle(os.path.join(settings["out_path"], folder_name, folder_name+"_FEATURES.p"))
+    
     # save used settings and M1 df as well 
-    with open(os.path.join(settings["out_path"], os.path.basename(PATH_RUN)+'_SETTINGS.json'), 'w') as f:
+    with open(os.path.join(settings["out_path"], folder_name, folder_name+'_SETTINGS.json'), 'w') as f:
         json.dump(settings, f)
 
-    df_M1.to_pickle(settings["out_path"]+"df_M1.py")
+    # save used df_M1 file 
+    df_M1.to_pickle(os.path.join(settings["out_path"], folder_name, folder_name+"_DF_M1.p"))
     
-    
+if __name__ == "__main__":
+
+    PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Beijing"
+    layout = BIDSLayout(PATH_BIDS)
+    run_files = layout.get( extension='.vhdr')
+    pool = multiprocessing.Pool()
+    pool.map(est_features_run, run_files)
