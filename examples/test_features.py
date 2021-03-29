@@ -1,5 +1,6 @@
 import sys
-sys.path.append(r'C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation')
+sys.path.append(
+    r'C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation')
 import numpy as np 
 import json
 import mne_bids
@@ -26,8 +27,12 @@ def est_features_run(PATH_RUN) -> None:
     #PATH_OUT = settings["out_path"]
 
     entities = mne_bids.get_entities_from_fname(PATH_RUN)
-    bids_path = mne_bids.BIDSPath(subject=entities["subject"], session=entities["session"], task=entities["task"], \
-        run=entities["run"], acquisition=entities["acquisition"], datatype="ieeg", root=settings["BIDS_path"])
+    bids_path = mne_bids.BIDSPath(subject=entities["subject"],
+                                  session=entities["session"],
+                                  task=entities["task"],
+                                  run=entities["run"],
+                                  acquisition=entities["acquisition"],
+                                  datatype="ieeg", root=settings["BIDS_path"])
     raw_arr = mne_bids.read_raw_bids(bids_path)
     ieeg_raw = raw_arr.get_data()
     fs = int(np.ceil(raw_arr.info["sfreq"]))
@@ -38,8 +43,8 @@ def est_features_run(PATH_RUN) -> None:
 
     ch_names = list(df_M1['name'])
     refs = df_M1['rereference']
-    to_ref_idx = np.array(df_M1[(df_M1['target'] == 0) & (df_M1['used'] == 1) & \
-                    (df_M1["rereference"] != "None")].index)
+    to_ref_idx = np.array(df_M1[(df_M1['target'] == 0) & (df_M1['used'] == 1)
+                                & (df_M1["rereference"] != "None")].index)
 
     to_ref_idx = np.array(df_M1[(df_M1['used'] == 1)].index)
 
@@ -47,8 +52,9 @@ def est_features_run(PATH_RUN) -> None:
     subcortex_idx = np.array(df_M1[(df_M1["ECOG"] == 0) & \
                     (df_M1['used'] == 1) & (df_M1['target'] == 0)].index)
 
-    ref_here = rereference.RT_rereference(ch_names, refs, to_ref_idx,\
-                    cortex_idx, subcortex_idx, split_data=False)
+    ref_here = rereference.RT_rereference(ch_names, refs, to_ref_idx,
+                                          cortex_idx, subcortex_idx,
+                                          split_data=False)
 
 
     #LIMIT_LOW = 15000
@@ -69,8 +75,10 @@ def est_features_run(PATH_RUN) -> None:
 
     #resample_label 
     ind_label = np.where(df_M1["target"] == 1)[0]
-    dat_ = ieeg_raw[ind_label, int(fs*settings["bandpass_filter_settings"]["segment_lengths"][0]):]
-    label_downsampled = dat_[:, ::int(np.ceil(fs / settings["resampling_rate"]))]
+    dat_ = ieeg_raw[ind_label,
+           int(fs*settings["bandpass_filter_settings"]["segment_lengths"][0]):]
+    label_downsampled = dat_[:,
+                        ::int(np.ceil(fs / settings["resampling_rate"]))]
 
     # and add to df 
     if df_.shape[0] == label_downsampled.shape[1]:
