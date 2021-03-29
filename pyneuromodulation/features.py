@@ -1,9 +1,11 @@
-import mne
-import numpy as np
-import kalmanfilter, filter, sharpwaves, bandpower, hjorth_raw
-import pandas as pd
 from multiprocessing import Process, Manager
-import time
+
+import numpy as np
+
+import mne
+
+import kalmanfilter, filter, sharpwaves, bandpower, hjorth_raw
+
 
 class Features:
     
@@ -60,7 +62,7 @@ class Features:
                 fir_design='firwin', verbose=False, notch_widths=3, filter_length=data.shape[1]-1)
         
         if self.s["methods"]["bandpass_filter"]:
-            dat_filtered = filter.apply_filter(data, self.filter_fun, self.fs) # shape (bands, time)
+            dat_filtered = filter.apply_filter(data, self.filter_fun) # shape (bands, time)
         else:
             dat_filtered = None
 

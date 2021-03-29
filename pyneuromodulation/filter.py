@@ -1,4 +1,4 @@
-from numpy import array, convolve, vstack, zeros
+from numpy import array, convolve, expand_dims, vstack
 
 from mne.filter import create_filter
 
@@ -40,7 +40,7 @@ def calc_band_filters(f_ranges, sfreq, filter_length="999ms",
     return filter_bank
 
 
-def apply_filter(data, filter_bank, sfreq):
+def apply_filter(data, filter_bank):
     """Apply previously calculated (bandpass) filters to data.
     Parameters
     ----------
@@ -48,8 +48,6 @@ def apply_filter(data, filter_bank, sfreq):
         segment of data.
     filter_bank : array
         output of calc_band_filters.
-    sfreq : float
-        sampling frequency.
     Returns
     -------
     filtered : array
@@ -58,11 +56,10 @@ def apply_filter(data, filter_bank, sfreq):
         decompose the signal
     """
     if data.ndim == 1:
-        filtered = zeros((1, filter_bank.shape[0], sfreq))
-        for filt in range(filter_bank.shape[0]):
-            filtered[0, filt, :] = convolve(
-                filter_bank[filt, :],
-                data)[int(sfreq-sfreq/2):int(sfreq+sfreq/2)]
+        filtered = array([convolve(filter_bank[filt, :], data[chan, :],
+                                   mode='same') \
+                          for filt in range(filter_bank.shape[0])])
+        filtered = expand_dims(filtered, axis=0)
     elif data.ndim == 2:
         filtered = array([[convolve(filter_bank[filt, :],
                                   data[chan,:], mode='same') \
