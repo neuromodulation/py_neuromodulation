@@ -106,6 +106,25 @@ def analyze_waveform(dat, DETECT_PEAKS, sample_rate, bp_low_cutoff=5, bp_high_cu
         }
 
         df = df.append(sharp_wave, ignore_index=True)
+    if df.shape == (0,0):
+        return pd.DataFrame({
+            "peak_left" : 0,
+            "peak_right" : 0,
+            "peak_idx_left" : 0,
+            "peak_idx_right" : 0,
+            "trough" : 0, # mV
+            "trough_idx" : 0,
+            "width" : 0, # ms
+            "prominence": 0, # mV
+            "interval" : 0, # ms
+            "decay_time": 0, # ms
+            "rise_time" : 0, # ms
+            "sharpness" : 0,
+            "rise_steepness" : 0,
+            "decay_steepness" : 0,
+            "slope_ratio" : 0
+        }, index=[0])
+
     return df 
 
 def get_sharpwave_features(features_, s, fs, data_, ch):
@@ -116,8 +135,6 @@ def get_sharpwave_features(features_, s, fs, data_, ch):
         df_sw = analyze_waveform(data_, DETECT_PEAKS=False, sample_rate=fs, \
             bp_low_cutoff=s["sharpwave_analysis_settings"]["filter_low_cutoff"], \
             bp_high_cutoff=s["sharpwave_analysis_settings"]["filter_high_cutoff"])
-        if df_sw.shape[1] == 0:
-            return #continue
 
         if s["sharpwave_analysis_settings"]["MaxTroughProminence"] is True:
             features_['_'.join([ch,'Sharpwave_MaxTroughprominence'])] = df_sw["prominence"].max() if df_sw["prominence"].max() is not None else 0
@@ -131,9 +148,6 @@ def get_sharpwave_features(features_, s, fs, data_, ch):
         df_sw = analyze_waveform(data_, DETECT_PEAKS=True, sample_rate=fs, \
             bp_low_cutoff=s["sharpwave_analysis_settings"]["filter_low_cutoff"], \
             bp_high_cutoff=s["sharpwave_analysis_settings"]["filter_high_cutoff"])
-        
-        if df_sw.shape[1] == 0:
-            return #continue
             
         if s["sharpwave_analysis_settings"]["MaxPeakProminence"] is True:
             features_['_'.join([ch,'Sharpwave_MaxPeakprominence'])] = df_sw["prominence"].max() if df_sw["prominence"].max() is not None else 0
