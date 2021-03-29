@@ -98,7 +98,8 @@ class NM_Reader:
                     xticklabels=feature_col_name,
                     yticklabels=feature_col_name)
         plt.title("Features channel: "+str(self.ch_name))
-        plt.show()
+        plt.savefig("Features_corr_matr_ch"+str(self.ch_name)+".png")
+        #plt.show()
     
     def plot_epochs_avg(self):
         
@@ -110,5 +111,6 @@ class NM_Reader:
                    np.round(np.arange(-self.epoch_len/2, self.epoch_len/2, 1/self.sfreq),2), rotation=90)
         plt.xlabel("Time [s]")
         plt.title("Movement aligned features channel: "+str(self.ch_name))
-        plt.show()
+        plt.savefig("MOV_algined_features_ch_"+str(self.ch_name)+".png")
+        #plt.show()
         
