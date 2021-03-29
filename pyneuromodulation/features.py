@@ -79,8 +79,7 @@ class Features:
                                 notch_widths=3, filter_length=data.shape[1]-1)
         
         if self.s["methods"]["bandpass_filter"]:
-            dat_filtered = filter.apply_filter(data, self.filter_fun,
-                                               self.fs)  # shape (bands, time)
+            dat_filtered = filter.apply_filter(data, self.filter_fun) # shape (bands, time)
         else:
             dat_filtered = None
 
