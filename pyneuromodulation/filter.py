@@ -17,8 +17,8 @@ def calc_band_filters(f_ranges, sfreq, filter_length="999ms",
     sfreq : float
         sampling frequency.
     filter_length : str, optional
-        length of the filter. Human readable (e.g."1000ms" or "1s"). Default is
-        "1000ms"
+        length of the filter. Human readable (e.g."1000ms" or "1s").
+        Default is "999ms".
     l_trans_bandwidth : float, optional
         Length of the lower transition band. The default is 4.
     h_trans_bandwidth : float, optional
