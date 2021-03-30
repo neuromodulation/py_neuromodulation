@@ -56,13 +56,13 @@ def apply_filter(data, filter_bank):
         decompose the signal
     """
     if data.ndim == 1:
-        filtered = array([convolve(filter_bank[filt, :], data[chan, :],
-                                   mode='same') \
-                          for filt in range(filter_bank.shape[0])])
+        filtered = array(
+            [convolve(filter_bank[filt, :], data, mode='same')
+             for filt in range(filter_bank.shape[0])])
         filtered = expand_dims(filtered, axis=0)
     elif data.ndim == 2:
-        filtered = array([[convolve(filter_bank[filt, :],
-                                  data[chan,:], mode='same') \
-                              for filt in range(filter_bank.shape[0])] \
-                             for chan in range(data.shape[0])])
+        filtered = array(
+            [[convolve(filter_bank[filt, :], data[chan, :], mode='same')
+              for filt in range(filter_bank.shape[0])]
+             for chan in range(data.shape[0])])
     return filtered

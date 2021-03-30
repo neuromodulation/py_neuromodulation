@@ -79,7 +79,7 @@ class Features:
                                 notch_widths=3, filter_length=data.shape[1]-1)
         
         if self.s["methods"]["bandpass_filter"]:
-            dat_filtered = filter.apply_filter(data, self.filter_fun) # shape (bands, time)
+            dat_filtered = filter.apply_filter(data, self.filter_fun)  # shape (bands, time)
         else:
             dat_filtered = None
 
@@ -96,27 +96,29 @@ class Features:
             ch = self.ch_names[ch_idx]
             features_ = self.est_ch(features_, ch_idx, ch, dat_filtered, data)
 
-
         #return dict(features_) # this is necessary for multiprocessing approach 
         return features_
                     
     def est_ch(self, features_, ch_idx, ch, dat_filtered, data) -> dict:
             
         if self.s["methods"]["bandpass_filter"]:
-            features_ = bandpower.get_bandpower_features(features_, self.s, self.seglengths, dat_filtered, self.KF_dict, ch, ch_idx)
+            features_ = bandpower.get_bandpower_features(
+                features_, self.s, self.seglengths, dat_filtered, self.KF_dict,
+                ch, ch_idx)
         
         if self.s["methods"]["raw_hjorth"]: 
-            features_ = hjorth_raw.get_hjorth_raw(features_, data[ch_idx,:], ch)
+            features_ = hjorth_raw.get_hjorth_raw(features_, data[ch_idx, :],
+                                                  ch)
         
         if self.s["methods"]["return_raw"]:
-            features_['_'.join([ch,'raw'])] = data[ch_idx, -1]  # data subsampling
+            features_['_'.join([ch, 'raw'])] = data[ch_idx, -1]  #  subsampling
         
         if self.s["methods"]["sharpwave_analysis"]: 
             #print('time taken for sharpwave estimation')
             #start = time.process_time()
             # take only last resampling_rate
             features_ = sharpwaves.get_sharpwave_features(
-                features_, self.s, self.fs, data[ch_idx,-int(
+                features_, self.s, self.fs, data[ch_idx, -int(
                     ceil(self.fs / self.s["resampling_rate"])):], ch)
             #print(time.process_time() - start)
         return features_

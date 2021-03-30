@@ -4,25 +4,26 @@ def ieeg_raw_generator(ieeg_raw, settings, fs):
     """
     This generator function mimics online data acquisition. 
     The df_M1 selected raw channels are iteratively sampled with fs.  
-    Args:
+    Arguments
+    ---------
         ieeg_raw (np array): shape (channels, time)
-        fs (float): 
-        fs_new (float): new resampled frequency 
-        offset_start (int): size of highest segmenth length, needs to be skipped at the start to have same feature size
-    Yields:
+        fs (float):
+    Returns
+    -------
         np.array: new batch for run function of full segment length shape
     """
 
     cnt_fsnew = 0
-    offset_start = int(settings["bandpass_filter_settings"]["segment_lengths"][0] * fs)
+    offset_start = int(
+        settings["bandpass_filter_settings"]["segment_lengths"][0] * fs)
     fs_new = settings["resampling_rate"]
     
     for cnt in range(ieeg_raw.shape[1]):
         if cnt < offset_start:
-            cnt_fsnew +=1
+            cnt_fsnew += 1
             continue
         
-        cnt_fsnew +=1
+        cnt_fsnew += 1
         if cnt_fsnew >= (fs/fs_new):
             cnt_fsnew = 0
-            yield ieeg_raw[:,cnt-offset_start:cnt]
+            yield ieeg_raw[:, cnt-offset_start:cnt]

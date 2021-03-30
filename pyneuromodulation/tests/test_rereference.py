@@ -1,17 +1,22 @@
-from threading import main_thread
-import numpy as np
-import pandas as pd
-import mne_bids
-import sys
 import json
 import os
+import sys
+
+from threading import main_thread
+import numpy as np
 from numpy.testing import assert_array_equal
+import pandas as pd
 from scipy.optimize.optimize import main
+
+import mne_bids
 
 # get py_neuromoulation files
 PATH_PYNEUROMODULATION = r'C:\Users\ICN_admin\Documents\py_neuromodulation'
 sys.path.append(os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation'))
-import define_M1, generator, rereference
+import define_M1
+import generator
+import rereference
+
 
 def read_example_data(PATH_PYNEUROMODULATION):
     """This test function return a data batch and automatic initialized M1 datafram
