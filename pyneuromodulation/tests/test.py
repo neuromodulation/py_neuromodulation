@@ -1,5 +1,6 @@
 import json
 import os
+from os.path import isdir
 import sys
 
 from threading import main_thread
@@ -16,6 +17,7 @@ sys.path.append(os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation'))
 import define_M1
 import generator
 import rereference
+import settings
 
 
 def read_example_data(PATH_PYNEUROMODULATION):
@@ -111,8 +113,11 @@ def test_rereference(ref_here, ieeg_batch, df_M1):
         assert_array_equal(ref_dat[bp_reref_idx,:], \
                         ieeg_batch[bp_reref_idx,:] - ieeg_batch[referenced_bp_channel,:])
 
+
 if __name__ == "__main__":
 
     ieeg_batch, df_M1 = read_example_data(PATH_PYNEUROMODULATION)
     ref_here = initialize_rereference(df_M1)
     test_rereference(ref_here, ieeg_batch, df_M1)
+    settings.test_settings(os.path.join(PATH_PYNEUROMODULATION, 'examples',
+                                        'settings.json'))
