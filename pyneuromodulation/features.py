@@ -31,23 +31,16 @@ class Features:
                 "bandpass_filter_settings"]["frequency_ranges"], sfreq=fs,
                                                        filter_length=fs - 1)
         
-        for channel in self.ch_names:
-            if s["methods"]["kalman_filter"] is True:
-                for bp_feature in s["bandpass_filter_settings"]["bandpower_"
-                                                                "features"]:
-                    if s["bandpass_filter_settings"][
-                            "bandpower_features"][bp_feature] is False:
-                        continue
-                    for fband_idx, f_band in enumerate(
-                            s["bandpass_filter_settings"]["feature_labels"]):
-                        if s["kalman_filter_settings"]["frequency_bands"][
-                                fband_idx] is True:
-                            self.KF_dict['_'.join([channel, bp_feature,
-                                                   f_band])] = \
-                                kalmanfilter.define_KF(
-                                    s["kalman_filter_settings"]["Tp"],
-                                    s["kalman_filter_settings"]["sigma_w"],
-                                    s["kalman_filter_settings"]["sigma_v"])
+        if s["methods"]["kalman_filter"] is True:
+            for bp_feature in [k for k, v in s["bandpass_filter_settings"][
+                               "bandpower_features"].items() if v is True]:
+                for f_band in s["kalman_filter_settings"]["frequency_bands"]:
+                    for channel in self.ch_names:
+                        self.KF_dict['_'.join([channel, bp_feature, f_band])] \
+                            = kalmanfilter.define_KF(
+                            s["kalman_filter_settings"]["Tp"],
+                            s["kalman_filter_settings"]["sigma_w"],
+                            s["kalman_filter_settings"]["sigma_v"])
         
     def estimate_features(self, data) -> dict:
         """

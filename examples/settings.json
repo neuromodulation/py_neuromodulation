@@ -24,7 +24,7 @@
         "Tp" : 0.1, 
         "sigma_w" : 0.7, 
         "sigma_v" : 1,
-        "frequency_bands" : [false,false,false,false,false,true,true,true,true]
+        "frequency_bands" : ["low gamma", "HFA", "all gamma", "high HFA"]
     },
 
     "bandpass_filter_settings": {
