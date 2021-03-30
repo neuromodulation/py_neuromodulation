@@ -1,10 +1,12 @@
-import os 
-import pandas as pd
-import json 
-import seaborn as sns
-from matplotlib import pyplot as plt
+import os
+import json
 import numpy as np
-import scipy
+from scipy.stats import zscore
+from pandas import read_pickle
+
+from matplotlib import pyplot as plt
+import seaborn as sns
+
 
 class NM_Reader:
     
@@ -25,16 +27,16 @@ class NM_Reader:
         return f_files
 
     def read_settings(self, feature_file) -> None:
-        with open(os.path.join(self.feature_path, feature_file, \
+        with open(os.path.join(self.feature_path, feature_file,
                                feature_file+"_SETTINGS.json")) as f:
             self.settings = json.load(f)
 
     def read_M1(self, feature_file) -> None:
-        self.df_M1 = pd.read_pickle(os.path.join(self.feature_path, feature_file, \
-                                feature_file+"_DF_M1.p"))   
+        self.df_M1 = read_pickle(os.path.join(self.feature_path, feature_file,
+                                 feature_file+"_DF_M1.p"))
     
     def read_file(self, feature_file) -> None:
-        self.features = pd.read_pickle(feature_file)
+        self.features = read_pickle(feature_file)
     
     def read_channel_data(self, ch_name) -> None:
         self.ch_name = ch_name
@@ -105,7 +107,7 @@ class NM_Reader:
         
         feature_col_name = [i for i in list(self.feature_ch_cols) if self.ch_name in i]
         plt.figure(figsize=(6,6), dpi=300)
-        plt.imshow(scipy.stats.zscore(np.mean(np.squeeze(self.X_epoch), axis=0), axis=0).T)
+        plt.imshow(zscore(np.mean(np.squeeze(self.X_epoch), axis=0), axis=0).T)
         plt.yticks(np.arange(0, len(feature_col_name), 1), feature_col_name)
         plt.xticks(np.arange(0, self.X_epoch.shape[1], 1), \
                    np.round(np.arange(-self.epoch_len/2, self.epoch_len/2, 1/self.sfreq),2), rotation=90)

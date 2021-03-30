@@ -1,5 +1,5 @@
-import numpy as np
-import pandas as pd
+from numpy import arange, nan
+from pandas import DataFrame
 
 
 def set_M1(ch_names, ch_types, reference='default'):
@@ -40,20 +40,19 @@ def set_M1(ch_names, ch_types, reference='default'):
     used_substrs = ["ecog", "seeg"]
     lfp_types = ['seeg', 'dbs', 'lfp']
 
-    df = pd.DataFrame(np.nan, index=np.arange(len(list(ch_names))),
+    df = DataFrame(nan, index=arange(len(list(ch_names))),
                       columns=['name', 'rereference', 'used', 'target', 'ECOG'])
     df['name'] = ch_names
-    # set used column
+
     df['used'] = [1 if any(used_substr.lower() in ch_name.lower()
                            or used_substr.lower() in ch_type.lower()
                            for used_substr in used_substrs)
                   else 0 for ch_type, ch_name in zip(ch_types, ch_names)]
-    # set target column
+
     df['target'] = [1 if any(mov_substr.lower() in ch_name.lower()
                              for mov_substr in mov_substrs) else 0
                     for ch_idx, ch_name in enumerate(ch_names)]
 
-    # set ECOG column
     df['ECOG'] = [1 if 'ecog' in ch_name.lower() or 'ecog'
                   in ch_types[ch_idx].lower()
                   else 0 for ch_idx, ch_name in enumerate(ch_names)]
