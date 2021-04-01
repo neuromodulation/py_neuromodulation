@@ -33,18 +33,22 @@
     },
 
     "bandpass_filter_settings": {
-            "feature_labels": ["theta", "alpha", "low beta", "high beta",
-                               "all beta", "low gamma", "HFA", "all gamma",
-                               "high HFA"],
-            "frequency_ranges": [[4, 8], [8, 12], [13, 20], [20, 35], [13, 35],
-                                 [60, 80], [90, 200], [60, 200], [200, 300]
-            ],
-            "segment_lengths": [1, 2, 3, 3, 3, 10, 10, 10, 10],
-            "bandpower_features": {
-            "activity" : true, 
-            "mobility" : true,
-            "complexity" : true 
-            }
+        "frequency_ranges": {
+            "theta" : [[4, 8], 1000],
+            "alpha" : [[8, 12], 500],
+            "low beta": [[13, 20], 333],
+            "high beta" : [[20, 35], 333],
+            "all beta" : [[13, 35], 333],
+            "low gamma" : [[60, 80], 100],
+            "HFA" : [[90, 200], 100],
+            "all gamma" : [[60, 200], 100],
+            "high HFA" : [[200, 300], 100]
+        },
+        "bandpower_features": {
+        "activity" : true,
+        "mobility" : false,
+        "complexity" : false
+        }
     },
 
     "sharpwave_analysis_settings": {
