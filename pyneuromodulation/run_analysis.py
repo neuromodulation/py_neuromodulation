@@ -31,7 +31,7 @@ def run(gen, features, settings, ref_here, used, resample_=None):
                     M is the total feature number
     """
 
-    fs_new = int(settings["resampling_rate"])
+    fs_new = int(settings["sampling_rate_features"])
     normalize_time = int(settings["normalization_settings"]["normalization_time"])
     offset = int(1000 * settings["bandpass_filter_settings"]["segment_lengths"][0])  # ms
     cnt_samples = 0

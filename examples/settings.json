@@ -1,7 +1,7 @@
 {
     "BIDS_path":  "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Beijing",
     "out_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out", 
-    "resampling_rate": 10, 
+    "sampling_rate_features": 10,
     "max_dist_cortex": 20, 
     "max_dist_subcortex": 5,
     "methods" : {

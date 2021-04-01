@@ -88,7 +88,7 @@ def est_features_run(PATH_RUN) -> None:
     dat_ = ieeg_raw[ind_label,
            int(fs*settings["bandpass_filter_settings"]["segment_lengths"][0]):]
     label_downsampled = dat_[:,
-                        ::int(np.ceil(fs / settings["resampling_rate"]))]
+                        ::int(np.ceil(fs / settings["sampling_rate_features"]))]
 
     # and add to df 
     if df_.shape[0] == label_downsampled.shape[1]:
