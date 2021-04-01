@@ -5,6 +5,7 @@
     "max_dist_cortex": 20, 
     "max_dist_subcortex": 5,
     "methods" : {
+        "resample_raw" : false,
         "normalization" : true,
         "kalman_filter" : true,
         "re_referencing" : true,
@@ -13,6 +14,10 @@
         "raw_hjorth" : true,
         "sharpwave_analysis" : false, 
         "return_raw" : true
+    },
+
+    "resample_raw_settings": {
+        "resample_freq" : 1200
     },
 
     "normalization_settings": {
@@ -34,7 +39,7 @@
             "frequency_ranges": [[4, 8], [8, 12], [13, 20], [20, 35], [13, 35],
                                  [60, 80], [90, 200], [60, 200], [200, 300]
             ],
-            "segment_lengths": [1, 2, 2, 3, 3, 3, 10, 10, 10, 10],
+            "segment_lengths": [1, 2, 3, 3, 3, 10, 10, 10, 10],
             "bandpower_features": {
             "activity" : true, 
             "mobility" : true,
