@@ -17,8 +17,8 @@ def ieeg_raw_generator(ieeg_raw, settings, fs):
     cnt_fsnew = 0
     offset_time = max([value[1] for value in settings[
         "bandpass_filter_settings"]["frequency_ranges"].values()])
-    offset_start = ceil(offset_time/1000 * fs, dtype=int)
-    fs_new = settings["resampling_rate"]
+    offset_start = ceil(offset_time/1000 * fs).astype(int)
+    fs_new = settings["sampling_rate_features"]
     
     for cnt in range(ieeg_raw.shape[1]):
         if cnt < offset_start:

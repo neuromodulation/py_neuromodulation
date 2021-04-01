@@ -24,7 +24,7 @@ class Features:
         self.seglengths = floor(
                 self.fs / 1000 * array([value[1] for value in s[
                     "bandpass_filter_settings"][
-                        "frequency_ranges"].values()]), dtype=int)
+                        "frequency_ranges"].values()])).astype(int)
         print("segment lengths:", self.seglengths)
         self.KF_dict = {}
         
