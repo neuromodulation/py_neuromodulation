@@ -51,11 +51,11 @@ def run(gen, features, settings, ref_here, used, resample_=None):
         if settings["methods"]["re_referencing"] is True:
             ieeg_batch = ref_here.rereference(ieeg_batch)
         ieeg_batch = ieeg_batch[used, :]
-        print("shape: ", ieeg_batch.shape)
 
         # resample
         if settings["methods"]["resample_raw"] is True:
             ieeg_batch = resample_.resample_raw(ieeg_batch)
+        print("batch shape: ", ieeg_batch.shape)
 
         # normalize (rereferenced) data
         if settings["methods"]["normalization"] is True:

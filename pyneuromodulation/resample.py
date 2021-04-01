@@ -33,11 +33,11 @@ class Resample:
             Resampled data
         """
         if self.down > 1.0:
-            data = resample(data, self.up, self.down)
+            data = resample(data, up=self.up, down=self.down)
         elif self.down < 1.0:
             self.up = self.down
             self.down = 1.0
-            data = resample(data, self.up, self.down)
+            data = resample(data, up=self.up, down=self.down)
         elif self.down == 1.0:
             pass
         return data

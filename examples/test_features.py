@@ -62,9 +62,9 @@ def est_features_run(PATH_RUN) -> None:
                                           cortex_idx, subcortex_idx,
                                           split_data=False)
 
-    #LIMIT_LOW = 15000
-    #LIMIT_HIGH = 22000
-    #ieeg_raw_lim = ieeg_raw[:,LIMIT_LOW:LIMIT_HIGH]
+    LIMIT_LOW = 50000
+    LIMIT_HIGH = 65000
+    #ieeg_raw = ieeg_raw[:,LIMIT_LOW:LIMIT_HIGH]
 
     gen = generator.ieeg_raw_generator(ieeg_raw, settings, fs)
 
