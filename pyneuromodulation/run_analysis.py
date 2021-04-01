@@ -33,7 +33,8 @@ def run(gen, features, settings, ref_here, used, resample_=None):
 
     fs_new = int(settings["sampling_rate_features"])
     normalize_time = int(settings["normalization_settings"]["normalization_time"])
-    offset = int(1000 * settings["bandpass_filter_settings"]["segment_lengths"][0])  # ms
+    offset = max([value[1] for value in settings[
+        "bandpass_filter_settings"]["frequency_ranges"].values()])  # ms
     cnt_samples = 0
 
     if settings["methods"]["normalization"] is True:
@@ -46,14 +47,15 @@ def run(gen, features, settings, ref_here, used, resample_=None):
         if ieeg_batch is None:
             return feature_arr
 
-        if settings["methods"]["resample_raw"] is True:
-            ieeg_batch = resample_.resample_raw(ieeg_batch)
-
         # call rereference
         if settings["methods"]["re_referencing"] is True:
             ieeg_batch = ref_here.rereference(ieeg_batch)
         ieeg_batch = ieeg_batch[used, :]
-        print("shape: ", ieeg_batch.shape)
+
+        # resample
+        if settings["methods"]["resample_raw"] is True:
+            ieeg_batch = resample_.resample_raw(ieeg_batch)
+        print("batch shape: ", ieeg_batch.shape)
 
         # normalize (rereferenced) data
         if settings["methods"]["normalization"] is True:

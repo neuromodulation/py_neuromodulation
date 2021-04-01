@@ -1,5 +1,5 @@
 #from multiprocessing import Process, Manager
-from numpy import arange, array, ceil
+from numpy import arange, array, ceil, floor
 
 from mne.filter import notch_filter
 
@@ -21,15 +21,18 @@ class Features:
         self.s = s  # settings
         self.fs = fs
         self.line_noise = line_noise
-        self.seglengths = (
-                self.fs / array(s["bandpass_filter_settings"][
-                                    "segment_lengths"])).astype(int)
+        self.seglengths = floor(
+                self.fs / 1000 * array([value[1] for value in s[
+                    "bandpass_filter_settings"][
+                        "frequency_ranges"].values()])).astype(int)
+        print("segment lengths:", self.seglengths)
         self.KF_dict = {}
         
         if s["methods"]["bandpass_filter"] is True:
-            self.filter_fun = filter.calc_band_filters(f_ranges=s[
-                "bandpass_filter_settings"]["frequency_ranges"], sfreq=fs,
-                                                       filter_length=fs - 1)
+            self.filter_fun = filter.calc_band_filters(f_ranges=[
+                value[0] for value in s["bandpass_filter_settings"][
+                    "frequency_ranges"].values()], sfreq=fs,
+                filter_length=fs - 1)
         
         if s["methods"]["kalman_filter"] is True:
             for bp_feature in [k for k, v in s["bandpass_filter_settings"][

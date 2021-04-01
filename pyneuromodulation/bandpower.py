@@ -20,7 +20,7 @@ def get_bandpower_features(features_, s, seglengths, dat_filtered, KF_dict, ch,
     features_
     """
     for idx, f_band in enumerate(s["bandpass_filter_settings"][
-                                     "feature_labels"]):
+                                     "frequency_ranges"].keys()):
         seglength = seglengths[idx]
         for bp_feature in [k for k, v in s["bandpass_filter_settings"][
                 "bandpower_features"].items() if v is True]:
@@ -42,14 +42,12 @@ def get_bandpower_features(features_, s, seglengths, dat_filtered, KF_dict, ch,
                 feature_calc = deriv_mobility / mobility
             if s["methods"]["kalman_filter"] is True:
                 if f_band in s["kalman_filter_settings"]["frequency_bands"]:
-                    KF_name = '_'.join([ch, bp_feature, s[
-                        "bandpass_filter_settings"]["feature_labels"][idx]])
+                    KF_name = '_'.join([ch, bp_feature, f_band])
                     KF_dict[KF_name].predict()
                     KF_dict[KF_name].update(feature_calc)
                     feature_calc = KF_dict[KF_name].x[0]  # filtered signal
     
             feature_name = '_'.join(
-                [ch, 'bandpass', bp_feature,
-                 s["bandpass_filter_settings"]["feature_labels"][idx]])
+                [ch, 'bandpass', bp_feature, f_band])
             features_[feature_name] = feature_calc
     return features_
