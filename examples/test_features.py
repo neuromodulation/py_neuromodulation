@@ -1,18 +1,23 @@
+import json
+import multiprocessing
+import os
 import sys
 sys.path.append(
     r'C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation')
-import numpy as np 
-import json
+
+import numpy as np
+import pandas as pd
+
+from bids import BIDSLayout
 import mne_bids
-import run_analysis
+
+import define_M1
+import features
 import generator
 import rereference
-import features
-import define_M1
-import pandas as pd
-import os
-import multiprocessing
-from bids import BIDSLayout
+import resample
+import run_analysis
+
 
 def est_features_run(PATH_RUN) -> None:
     #PATH_RUN = r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\Data\Beijing\sub-FOG006\ses-EphysMedOn\ieeg\sub-FOG006_ses-EphysMedOn_task-ButtonPress_acq-StimOff_run-01_ieeg.vhdr"
@@ -66,19 +71,24 @@ def est_features_run(PATH_RUN) -> None:
     feature_idx = np.where(np.logical_and(np.array((df_M1["used"] == 1)), \
             np.array((df_M1["target"] == 0))))[0]
 
+    resample_ = None
+    if settings["methods"]["resample_raw"] is True:
+        resample_ = resample.Resample(settings, fs)
+        fs = settings["resample_raw_settings"]["resample_freq"]
+
     features_ = features.Features(s=settings, fs=fs, line_noise=line_noise, \
         channels=np.array(ch_names)[feature_idx])
 
-    # call now run_analysis.py 
-    
-    df_ = run_analysis.run(gen, features_, settings, ref_here, feature_idx)
+    # call now run_analysis.py
+    df_ = run_analysis.run(gen, features_, settings, ref_here, feature_idx,
+                           resample_)
 
     #resample_label 
     ind_label = np.where(df_M1["target"] == 1)[0]
     dat_ = ieeg_raw[ind_label,
            int(fs*settings["bandpass_filter_settings"]["segment_lengths"][0]):]
     label_downsampled = dat_[:,
-                        ::int(np.ceil(fs / settings["resampling_rate"]))]
+                        ::int(np.ceil(fs / settings["sampling_rate_features"]))]
 
     # and add to df 
     if df_.shape[0] == label_downsampled.shape[1]:

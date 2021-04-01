@@ -24,7 +24,7 @@ def test_settings(settings, verbose=True):
 
     assert (isdir(s["BIDS_path"]))
     assert (isdir(s["out_path"]))
-    assert (isinstance(s["resampling_rate"], (float, int)))
+    assert (isinstance(s["sampling_rate_features"], (float, int)))
     assert (isinstance(s["max_dist_cortex"], (float, int)))
     assert (isinstance(s["max_dist_subcortex"], (float, int)))
     assert (isinstance(value, bool) for value in s["methods"].values()), \
