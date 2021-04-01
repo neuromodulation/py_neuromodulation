@@ -1,8 +1,8 @@
 {
     "BIDS_path":  "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Beijing",
-    "out_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out", 
+    "out_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out",
     "sampling_rate_features": 10,
-    "max_dist_cortex": 20, 
+    "max_dist_cortex": 20,
     "max_dist_subcortex": 5,
     "methods" : {
         "resample_raw" : true,
@@ -10,7 +10,7 @@
         "kalman_filter" : true,
         "re_referencing" : true,
         "notch_filter" : true,
-        "bandpass_filter" : true, 
+        "bandpass_filter" : true,
         "raw_hjorth" : true,
         "sharpwave_analysis" : true,
         "return_raw" : true
@@ -26,8 +26,8 @@
     },
 
     "kalman_filter_settings": {
-        "Tp" : 0.1, 
-        "sigma_w" : 0.7, 
+        "Tp" : 0.1,
+        "sigma_w" : 0.7,
         "sigma_v" : 1,
         "frequency_bands" : ["low gamma", "HFA", "all gamma", "high HFA"]
     },
@@ -52,14 +52,39 @@
     },
 
     "sharpwave_analysis_settings": {
-        "filter_low_cutoff" : 5, 
+        "filter_low_cutoff" : 5,
         "filter_high_cutoff" : 90,
-        "MaxTroughProminence" : true,
-        "MaxPeakProminence" : true,
-        "MaxTroughSharpness" : true, 
-        "MaxPeakSharpness" : true,
-        "MeanTroughSharpness" : true,
-        "MeanPeakSharpness" : true,
-        "sharpness" : true
+        "distance_troughs" : 5,
+        "distance_peaks" : 1,
+        "sharpwave_features" : {
+            "peak_left" : true,
+            "peak_right" : true,
+            "trough" : true,
+            "width" : true,
+            "prominence" : true,
+            "interval" : true,
+            "decay_time" : true,
+            "rise_time" : true,
+            "sharpness" : true,
+            "rise_sharpness" : true,
+            "decay_sharpness" : true,
+            "slope_ratio" : true
+        },
+        "detect_troughs" : {
+            "estimate" : true,
+            "distance_troughs" : 5,
+            "distance_peaks" : 1
+        },
+        "detect_peaks" : {
+            "estimate" : true,
+            "distance_troughs" : 1,
+            "distance_peaks" : 5
+        },
+        "estimator" : {
+            "mean" : true,
+            "median" : true,
+            "max" : true,
+            "min" : true
+        }
     }
 }
