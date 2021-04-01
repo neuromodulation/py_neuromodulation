@@ -30,7 +30,8 @@ def run(gen, features, settings, ref_here, used):
 
     fs_new = int(settings["resampling_rate"])
     normalize_time = int(settings["normalization_settings"]["normalization_time"])
-    offset = int(1000 * settings["bandpass_filter_settings"]["segment_lengths"][0])  # ms
+    offset = max([value[1] for value in settings[
+        "bandpass_filter_settings"]["frequency_ranges"].values()])  # ms
     cnt_samples = 0
 
     if settings["methods"]["normalization"] is True:
