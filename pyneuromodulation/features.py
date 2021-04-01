@@ -115,6 +115,6 @@ class Features:
             # take only last resampling_rate
             features_ = sharpwaves.get_sharpwave_features(
                 features_, self.s, self.fs, data[ch_idx, -int(
-                    ceil(self.fs / self.s["resampling_rate"])):], ch)
+                    ceil(self.fs / self.s["sampling_rate_features"])):], ch)
             #print(time.process_time() - start)
         return features_

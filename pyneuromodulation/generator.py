@@ -3,8 +3,8 @@ from numpy import ceil
 
 def ieeg_raw_generator(ieeg_raw, settings, fs):
     """
-    This generator function mimics online data acquisition. 
-    The df_M1 selected raw channels are iteratively sampled with fs.  
+    This generator function mimics online data acquisition.
+    The df_M1 selected raw channels are iteratively sampled with fs.
     Arguments
     ---------
         ieeg_raw (np array): shape (channels, time)
@@ -24,7 +24,7 @@ def ieeg_raw_generator(ieeg_raw, settings, fs):
         if cnt < offset_start:
             cnt_fsnew += 1
             continue
-        
+
         cnt_fsnew += 1
         if cnt_fsnew >= (fs/fs_new):
             cnt_fsnew = 0
