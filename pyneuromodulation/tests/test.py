@@ -18,7 +18,7 @@ import define_M1
 import generator
 import rereference
 import settings
-
+import sharpwaves
 
 def read_example_data(PATH_PYNEUROMODULATION):
     """This test function return a data batch and automatic initialized M1 datafram
@@ -29,6 +29,8 @@ def read_example_data(PATH_PYNEUROMODULATION):
     Returns:
         ieeg_batch (np.ndarray): (channels, samples)
         df_M1 (pd Dataframe): auto intialized table for rereferencing 
+        settings (dict): settings.json
+        fs (float): example sampling frequency
     """
     # read examplary settings file
     with open(os.path.join(PATH_PYNEUROMODULATION, 'examples', 'settings.json'), \
@@ -58,7 +60,7 @@ def read_example_data(PATH_PYNEUROMODULATION):
 
     ieeg_batch = next(gen, None)
 
-    return ieeg_batch, df_M1
+    return ieeg_batch, df_M1, settings, fs
 
 def initialize_rereference(df_M1):
     """The rereference class get's here instantiated given the supplied df_M1 table
@@ -113,11 +115,27 @@ def test_rereference(ref_here, ieeg_batch, df_M1):
         assert_array_equal(ref_dat[bp_reref_idx,:], \
                         ieeg_batch[bp_reref_idx,:] - ieeg_batch[referenced_bp_channel,:])
 
+def test_sharpwaves(data, features_, ch, example_settings, fs):
+
+    print("initialize sharpwave test object")
+    sw_features = sharpwaves.SharpwaveAnalyzer(example_settings["sharpwave_analysis_settings"], fs)
+    print("estimate sharpwave features")
+    features_ = sw_features.get_sharpwave_features(features_, data, ch)
+
 
 if __name__ == "__main__":
 
-    ieeg_batch, df_M1 = read_example_data(PATH_PYNEUROMODULATION)
+    ieeg_batch, df_M1, example_settings, fs = read_example_data(PATH_PYNEUROMODULATION)
     ref_here = initialize_rereference(df_M1)
-    test_rereference(ref_here, ieeg_batch, df_M1)
-    settings.test_settings(os.path.join(PATH_PYNEUROMODULATION, 'examples',
-                                        'settings.json'))
+    #test_rereference(ref_here, ieeg_batch, df_M1)
+    #settings.test_settings(os.path.join(PATH_PYNEUROMODULATION, 'examples',
+    #                                    'settings.json'))
+    
+    # test sharpwaves feature estimation for specifc channel
+    features_ = dict()
+    ch = df_M1.name.iloc[0]
+
+    # estimate only the last / new data coming from the new sampling frequency
+    # this speeds up estimation
+    index_sharpwave = int(fs / example_settings["sampling_rate_features"])
+    features_ = test_sharpwaves(ieeg_batch[0, -index_sharpwave:], features_, ch, example_settings, fs)
