@@ -52,10 +52,6 @@
     },
 
     "sharpwave_analysis_settings": {
-        "filter_low_cutoff" : 5,
-        "filter_high_cutoff" : 90,
-        "distance_troughs" : 5,
-        "distance_peaks" : 1,
         "sharpwave_features" : {
             "peak_left" : true,
             "peak_right" : true,
@@ -66,10 +62,12 @@
             "decay_time" : true,
             "rise_time" : true,
             "sharpness" : true,
-            "rise_sharpness" : true,
-            "decay_sharpness" : true,
+            "rise_steepness" : true,
+            "decay_steepness" : true,
             "slope_ratio" : true
         },
+        "filter_low_cutoff" : 5,
+        "filter_high_cutoff" : 90,
         "detect_troughs" : {
             "estimate" : true,
             "distance_troughs" : 5,
@@ -84,7 +82,8 @@
             "mean" : true,
             "median" : true,
             "max" : true,
-            "min" : true
+            "min" : true, 
+            "var" : true
         }
     }
 }
