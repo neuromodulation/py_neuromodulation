@@ -107,20 +107,21 @@ def est_features_run(PATH_RUN) -> None:
     df_.to_pickle(os.path.join(settings["out_path"], folder_name,
                                folder_name+"_FEATURES.p"))
 
-    # save used settings and M1 df as well
+    # save used settings and coordinates to settings as well
+    settings["sfreq"] = raw_arr.info["sfreq"]
+    if raw_arr.get_montage() is not None:
+        settings["coord_list"] = np.array(list(dict(raw_arr.get_montage().get_positions()
+                                          ["ch_pos"]).values())).tolist()
+        settings["coord_names"] = np.array(list(dict(raw_arr.get_montage().get_positions()
+                                           ["ch_pos"]).keys())).tolist()
+
     with open(os.path.join(settings["out_path"], folder_name,
                            folder_name+'_SETTINGS.json'), 'w') as f:
         json.dump(settings, f)
 
-    # save used df_M1 file
+    # save df_M1 file
     df_M1.to_csv(os.path.join(settings["out_path"], folder_name,
                               folder_name+"_DF_M1.csv"))
-
-    # save MNE.io.RawArray to json file
-    # This gives currently an error, needs to be defined
-    # with open(os.path.join(settings["out_path"], folder_name,
-    #                       folder_name+'_RawArrayInfo.json'), 'w') as f:
-    #    json.dump(raw_arr.__dict__, f)
 
 if __name__ == "__main__":
 

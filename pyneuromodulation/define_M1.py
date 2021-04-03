@@ -11,6 +11,8 @@ def set_M1(ch_names, ch_types, reference='default'):
     "LFP" or "DBS", else to 0. "target" is set to 1 for all channels containing
     "TTL", "ANALOG", "MOV" and "ROTA", else to 0
 
+    Possible channel types: https://github.com/mne-tools/mne-python/blob/6ae3b22033c745cce5cd5de9b92da54c13c36484/doc/_includes/channel_types.rst
+
     Args:
         ch_names (list):
             list of channel names. Should each contain one of the keywords
