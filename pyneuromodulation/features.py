@@ -101,23 +101,43 @@ class Features:
         return features_
                     
     def est_ch(self, features_, ch_idx, ch, dat_filtered, data) -> dict:
-            
+        """Estimate features for a given channel
+
+        Parameters
+        ----------
+        features_ dict : dict 
+            features.py output feature dict
+        ch_idx : int
+            channel index
+        ch : str
+            channel name
+        dat_filtered : np.ndarray
+            notch filtered and bandbass filtered data
+        data : np.ndarray)
+            notch filtered data
+
+        Returns
+        -------
+        features_ : dict
+            features.py output feature dict
+        """
+
         if self.s["methods"]["bandpass_filter"]:
             features_ = bandpower.get_bandpower_features(
                 features_, self.s, self.seglengths, dat_filtered, self.KF_dict,
                 ch, ch_idx)
-        
+
         if self.s["methods"]["raw_hjorth"]: 
             features_ = hjorth_raw.get_hjorth_raw(features_, data[ch_idx, :],
                                                   ch)
-        
+
         if self.s["methods"]["return_raw"]:
-            features_['_'.join([ch, 'raw'])] = data[ch_idx, -1]  #  subsampling
-        
+            features_['_'.join([ch, 'raw'])] = data[ch_idx, -1]  # subsampling
+
         if self.s["methods"]["sharpwave_analysis"]: 
             # print('time taken for sharpwave estimation')
             # start = time.process_time()
-            #  take only last resampling_rate
+            # take only last resampling_rate
 
             features_ = self.sw_features.get_sharpwave_features(features_,
                 data[ch_idx, -self.new_dat_index:], ch)

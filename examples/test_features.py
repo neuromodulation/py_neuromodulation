@@ -52,9 +52,9 @@ def est_features_run(PATH_RUN) -> None:
 
     to_ref_idx = np.array(df_M1[(df_M1['used'] == 1)].index)
 
-    cortex_idx = np.where(df_M1.ECOG == 1)[0]
-    subcortex_idx = np.array(df_M1[(df_M1["ECOG"] == 0) & (df_M1['used'] == 1)
-                                   & (df_M1['target'] == 0)].index)
+    cortex_idx = np.where(df_M1.type == 'ecog')[0]
+    subcortex_idx = np.array(df_M1[(df_M1["type"] == 'seeg') | (df_M1['type'] == 'dbs')
+                                   & (df_M1['type'] == 'lfp')].index)
 
     ref_here = rereference.RT_rereference(ch_names, refs, to_ref_idx,
                                           cortex_idx, subcortex_idx,
@@ -117,9 +117,10 @@ def est_features_run(PATH_RUN) -> None:
                               folder_name+"_DF_M1.csv"))
 
     # save MNE.io.RawArray to json file
-    with open(os.path.join(settings["out_path"], folder_name,
-                           folder_name+'_RawArrayInfo.json'), 'w') as f:
-        json.dump(raw_arr.__dict__, f)
+    # This gives currently an error, needs to be defined
+    # with open(os.path.join(settings["out_path"], folder_name,
+    #                       folder_name+'_RawArrayInfo.json'), 'w') as f:
+    #    json.dump(raw_arr.__dict__, f)
 
 if __name__ == "__main__":
 
