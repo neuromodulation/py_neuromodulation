@@ -79,9 +79,9 @@ def initialize_rereference(df_M1):
 
     to_ref_idx = np.array(df_M1[(df_M1['used'] == 1)].index)
 
-    cortex_idx = np.where(df_M1.ECOG == 1)[0]
-    subcortex_idx = np.array(df_M1[(df_M1["ECOG"] == 0) & \
-                    (df_M1['used'] == 1) & (df_M1['target'] == 0)].index)
+    cortex_idx = np.where(df_M1.type == 'ecog')[0]
+    subcortex_idx = np.array(df_M1[(df_M1["type"] == 'seeg') | (df_M1['type'] == 'dbs')
+                                   & (df_M1['type'] == 'lfp')].index)
 
     ref_here = rereference.RT_rereference(ch_names, refs, to_ref_idx,\
                     cortex_idx, subcortex_idx, split_data=False)
@@ -102,9 +102,9 @@ def test_rereference(ref_here, ieeg_batch, df_M1):
         assert_array_equal(ref_dat[no_ref_idx,:], ieeg_batch[no_ref_idx,:])
 
     print("test ecog average channels")
-    for ecog_ch_idx in np.where((df_M1.ECOG == 1) & (df_M1.rereference == 'average'))[0]:
+    for ecog_ch_idx in np.where((df_M1['type'] == 'ecog') & (df_M1.rereference == 'average'))[0]:
         assert_array_equal(ref_dat[ecog_ch_idx,:], ieeg_batch[ecog_ch_idx,:] - \
-                ieeg_batch[(df_M1["ECOG"] == 1) & (df_M1.index != ecog_ch_idx)].mean(axis=0))
+                ieeg_batch[(df_M1['type'] == 'ecog') & (df_M1.index != ecog_ch_idx)].mean(axis=0))
 
     print("test bipolar rereferenced channels")
     for bp_reref_idx in [ch_idx for ch_idx, ch in \
@@ -127,10 +127,10 @@ if __name__ == "__main__":
 
     ieeg_batch, df_M1, example_settings, fs = read_example_data(PATH_PYNEUROMODULATION)
     ref_here = initialize_rereference(df_M1)
-    #test_rereference(ref_here, ieeg_batch, df_M1)
+    test_rereference(ref_here, ieeg_batch, df_M1)
     #settings.test_settings(os.path.join(PATH_PYNEUROMODULATION, 'examples',
     #                                    'settings.json'))
-    
+
     # test sharpwaves feature estimation for specifc channel
     features_ = dict()
     ch = df_M1.name.iloc[0]

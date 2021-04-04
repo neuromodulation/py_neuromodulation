@@ -6,10 +6,12 @@ def set_M1(ch_names, ch_types, reference='default'):
     """Return dataframe with channel-specific settings.
 
     Return an M1 dataframe with the columns: "name", "rereference", "used",
-    "target", "ECOG"]. "name" is set to ch_names, "rereference" can be specified
+    "target", "type"]. "name" is set to ch_names, "rereference" can be specified
     individually. "used" is set to 1 for all channels containing "ECOG", "SEEG",
     "LFP" or "DBS", else to 0. "target" is set to 1 for all channels containing
     "TTL", "ANALOG", "MOV" and "ROTA", else to 0
+
+    Possible channel types: https://github.com/mne-tools/mne-python/blob/6ae3b22033c745cce5cd5de9b92da54c13c36484/doc/_includes/channel_types.rst
 
     Args:
         ch_names (list):
@@ -41,7 +43,7 @@ def set_M1(ch_names, ch_types, reference='default'):
     lfp_types = ['seeg', 'dbs', 'lfp']
 
     df = DataFrame(nan, index=arange(len(list(ch_names))),
-                      columns=['name', 'rereference', 'used', 'target', 'ECOG'])
+                      columns=['name', 'rereference', 'used', 'target', 'type'])
     df['name'] = ch_names
 
     df['used'] = [1 if any(used_substr.lower() in ch_name.lower()
@@ -53,9 +55,9 @@ def set_M1(ch_names, ch_types, reference='default'):
                              for mov_substr in mov_substrs) else 0
                     for ch_idx, ch_name in enumerate(ch_names)]
 
-    df['ECOG'] = [1 if 'ecog' in ch_name.lower() or 'ecog'
-                  in ch_types[ch_idx].lower()
-                  else 0 for ch_idx, ch_name in enumerate(ch_names)]
+    # note: BIDS types are in caps, mne.io.RawArray types lower case 
+    # s.t. 'type' will be in lower case here
+    df['type'] = ch_types
 
     if any(reference):
         if reference in ['default', 'Default']:
