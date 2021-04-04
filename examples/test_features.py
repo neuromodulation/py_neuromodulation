@@ -77,6 +77,8 @@ def est_features_run(PATH_RUN) -> None:
     if settings["methods"]["resample_raw"] is True:
         resample_ = resample.Resample(settings, fs)
         fs_new = settings["resample_raw_settings"]["resample_freq"]
+    else:
+        fs_new = fs
 
     features_ = features.Features(s=settings, fs=fs_new, line_noise=line_noise,
                                   channels=used_chs)
@@ -108,8 +110,8 @@ def est_features_run(PATH_RUN) -> None:
     if not os.path.exists(os.path.join(settings["out_path"], folder_name)):
         os.makedirs(os.path.join(settings["out_path"], folder_name))
 
-    df_.to_pickle(os.path.join(settings["out_path"], folder_name,
-                               folder_name+"_FEATURES.p"))
+    df_.to_csv(os.path.join(settings["out_path"], folder_name,
+                            folder_name+"_FEATURES.csv"))
 
     # save used settings and coordinates to settings as well
     settings["sfreq"] = raw_arr.info["sfreq"]
