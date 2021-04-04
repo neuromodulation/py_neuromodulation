@@ -5,17 +5,17 @@
     "max_dist_cortex": 20,
     "max_dist_subcortex": 5,
     "methods" : {
-        "resample_raw" : true,
+        "resample_raw" : false,
         "normalization" : true,
         "kalman_filter" : true,
-        "re_referencing" : true,
+        "re_referencing" : false,
         "notch_filter" : true,
         "bandpass_filter" : true,
         "raw_hjorth" : true,
         "sharpwave_analysis" : true,
         "return_raw" : true,
-        "pdc" : true,
-        "dtf" : true
+        "pdc" : false,
+        "dtf" : false
     },
 
     "resample_raw_settings": {
