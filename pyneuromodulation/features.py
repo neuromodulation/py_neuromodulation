@@ -46,6 +46,11 @@ class Features:
                             s["kalman_filter_settings"]["sigma_w"],
                             s["kalman_filter_settings"]["sigma_v"])
         
+        if s["methods"]["sharpwave_analysis"] is True:
+            self.sw_features = sharpwaves.SharpwaveAnalyzer(self.s["sharpwave_analysis_settings"],
+                                                            self.fs)
+        self.new_dat_index = int(self.fs / self.s["sampling_rate_features"])
+
     def estimate_features(self, data) -> dict:
         """
         
@@ -115,13 +120,14 @@ class Features:
             features_['_'.join([ch, 'raw'])] = data[ch_idx, -1]  #  subsampling
         
         if self.s["methods"]["sharpwave_analysis"]: 
-            #print('time taken for sharpwave estimation')
-            #start = time.process_time()
-            # take only last resampling_rate
-            features_ = sharpwaves.get_sharpwave_features(
-                features_, self.s, self.fs, data[ch_idx, -int(
-                    ceil(self.fs / self.s["sampling_rate_features"])):], ch)
-            #print(time.process_time() - start)
+            # print('time taken for sharpwave estimation')
+            # start = time.process_time()
+            #  take only last resampling_rate
+
+            features_ = self.sw_features.get_sharpwave_features(features_,
+                data[ch_idx, -self.new_dat_index:], ch)
+
+            # print(time.process_time() - start)
         return features_
 
     def est_connect(self, features_, filt, dat_filt) -> dict:
