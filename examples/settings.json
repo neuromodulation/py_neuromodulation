@@ -13,7 +13,9 @@
         "bandpass_filter" : true, 
         "raw_hjorth" : true,
         "sharpwave_analysis" : true,
-        "return_raw" : true
+        "return_raw" : true,
+        "pdc" : true,
+        "dtf" : true
     },
 
     "resample_raw_settings": {
