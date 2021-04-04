@@ -61,5 +61,25 @@
         "MeanTroughSharpness" : true,
         "MeanPeakSharpness" : true,
         "sharpness" : true
+    },
+
+    "pdc_settings": {
+        "frequency_ranges" : {
+            "all beta" : ["LFP_BS_STN_L_8", "ECOG_AT_SM_L_4"],
+            "all gamma" : ["LFP_BS_STN_L_8", "ECOG_AT_SM_L_4"]
+      },
+        "model_order" : "auto",
+        "max_order" : 10,
+        "num_fft" : "auto"
+    },
+
+    "dtf_settings": {
+        "frequency_ranges" : {
+            "all beta" : ["LFP_BS_STN_L_8", "ECOG_AT_SM_L_4"],
+            "all gamma" : ["LFP_BS_STN_L_8", "ECOG_AT_SM_L_4"]
+      },
+        "model_order" : "auto",
+        "max_order" : 10,
+        "num_fft" : "auto"
     }
 }
