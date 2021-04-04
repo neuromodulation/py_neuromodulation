@@ -13,7 +13,9 @@
         "bandpass_filter" : true,
         "raw_hjorth" : true,
         "sharpwave_analysis" : true,
-        "return_raw" : true
+        "return_raw" : true,
+        "pdc" : true,
+        "dtf" : true
     },
 
     "resample_raw_settings": {
@@ -85,5 +87,25 @@
             "min" : true, 
             "var" : true
         }
+    },
+
+    "pdc_settings": {
+        "frequency_ranges" : {
+            "all beta" : ["LFP_BS_STN_L_8", "ECOG_AT_SM_L_4"],
+            "all gamma" : ["LFP_BS_STN_L_8", "ECOG_AT_SM_L_4"]
+        },
+        "model_order" : "auto",
+        "max_order" : 10,
+        "num_fft" : "auto"
+    },
+
+    "dtf_settings": {
+        "frequency_ranges" : {
+            "all beta" : ["LFP_BS_STN_L_8", "ECOG_AT_SM_L_4"],
+            "all gamma" : ["LFP_BS_STN_L_8", "ECOG_AT_SM_L_4"]
+        },
+        "model_order" : "auto",
+        "max_order" : 10,
+        "num_fft" : "auto"
     }
 }

@@ -1,5 +1,5 @@
 #from multiprocessing import Process, Manager
-from numpy import arange, array, ceil, floor
+from numpy import arange, array, ceil, floor, where
 
 from mne.filter import notch_filter
 
@@ -7,6 +7,7 @@ import bandpower
 import filter
 import hjorth_raw
 import kalmanfilter
+import coherence
 import sharpwaves
 
 
@@ -97,6 +98,10 @@ class Features:
             ch = self.ch_names[ch_idx]
             features_ = self.est_ch(features_, ch_idx, ch, dat_filtered, data)
 
+        for filt_idx, filt in enumerate(self.s["bandpass_filter_settings"][
+                                            "frequency_ranges"].keys()):
+            features_ = self.est_connect(features_, filt, dat_filtered[:, filt_idx, :])
+
         #return dict(features_) # this is necessary for multiprocessing approach 
         return features_
                     
@@ -143,4 +148,24 @@ class Features:
                 data[ch_idx, -self.new_dat_index:], ch)
 
             # print(time.process_time() - start)
+        return features_
+
+    def est_connect(self, features_, filt, dat_filt) -> dict:
+
+        if self.s["methods"]["pdc"]:
+            if filt in self.s["pdc_settings"]["frequency_ranges"].keys():
+                chs = self.s["pdc_settings"]["frequency_ranges"][filt]
+                ch_idx = [self.ch_names.index(ch) for ch in chs]
+                dat_ = dat_filt[ch_idx]
+                features_ = coherence.get_pdc(
+                    features_, self.s, dat_, filt, chs)
+
+        if self.s["methods"]["dtf"]:
+            if filt in self.s["dtf_settings"]["frequency_ranges"].keys():
+                chs = self.s["dtf_settings"]["frequency_ranges"][filt]
+                ch_idx = [self.ch_names.index(ch) for ch in chs]
+                dat_ = dat_filt[ch_idx]
+                features_ = coherence.get_dtf(
+                    features_, self.s, dat_, filt, chs)
+
         return features_

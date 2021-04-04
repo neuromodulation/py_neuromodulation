@@ -1,8 +1,8 @@
 from numpy import diff, sqrt, var
 
 
-def get_bandpower_features(features_, s, seglengths, dat_filtered, KF_dict, ch,
-                           ch_idx):
+def get_bandpower_features(
+        features_, s, seglengths, dat_filtered, KF_dict, ch, ch_idx):
     """Calculate features derived from bandpass filtered signal.
 
     Parameters

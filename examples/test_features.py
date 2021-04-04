@@ -17,6 +17,7 @@ import generator
 import rereference
 import resample
 import run_analysis
+from settings import test_settings
 
 
 def est_features_run(PATH_RUN) -> None:
@@ -28,6 +29,8 @@ def est_features_run(PATH_RUN) -> None:
     # read settings
     with open('settings.json', encoding='utf-8') as json_file:
         settings = json.load(json_file)
+
+    test_settings(settings, verbose=True)
 
     #PATH_OUT = settings["out_path"]
 
@@ -68,6 +71,7 @@ def est_features_run(PATH_RUN) -> None:
 
     feature_idx = np.where(np.logical_and(np.array((df_M1["used"] == 1)),
                                           np.array((df_M1["target"] == 0))))[0]
+    used_chs = np.array(ch_names)[feature_idx].tolist()
 
     resample_ = None
     if settings["methods"]["resample_raw"] is True:
@@ -75,7 +79,7 @@ def est_features_run(PATH_RUN) -> None:
         fs_new = settings["resample_raw_settings"]["resample_freq"]
 
     features_ = features.Features(s=settings, fs=fs_new, line_noise=line_noise,
-                                  channels=np.array(ch_names)[feature_idx])
+                                  channels=used_chs)
 
     # call now run_analysis.py
     df_ = run_analysis.run(gen, features_, settings, ref_here, feature_idx,
