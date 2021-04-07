@@ -1,24 +1,39 @@
-from numpy import empty_like, mean, ndarray
+from numpy import array, empty_like, mean, ndarray, where
 from pandas import isnull
 
 
 class RT_rereference:
     
-    def __init__(self, ch_names, refs, to_ref_idx, cortex_idx, subcortex_idx,
-                 split_data=False) -> None:
+    def __init__(self, df, split_data=False) -> None:
+        """Initialize real-time rereference information.
+
+        Parameters
+        ----------
+        df
+        split_data
+        """
         """Initiatlize real time reference information
 
         Args:
-            ch_names (list): list of all ieeg_batch channel names
-            refs (list): reference specification for rereferencing
-            to_ref_idx (list): list of ieeg_batch indices that are not
-                rereferenced, i.e. copied to "rereferenced" array
-            cortex_idx (list): indices of cortical channels
-            subcortex_idx (list): indices of subcortical channels
-            split_data (bool, optional): If set to True, the rereferenced data
-                will be returned split into cortex and subcortex. Defaults to
+            df (Pandas DataFrame) : 
+                Dataframe containing information about rereferencing, as 
+                specified in M1.tsv.
+            split_data (bool, optional): 
+                If set to True, the rereferenced data will be returned split 
+                into cortex and subcortex. Defaults to
                 False.
         """
+
+        ch_names = list(df['name'])
+        refs = df['rereference']
+        cortex_idx, = where(df.type == 'ecog')
+        subcortex_idx = array(
+            df[(df["type"] == 'seeg')
+               | (df['type'] == 'dbs')
+               | (df['type'] == 'lfp')].index)
+        print(subcortex_idx)
+        to_ref_idx = array(df[(df['used'] == 0)].index)
+
         self.ch_names = ch_names
         self.refs = refs 
         self.to_ref_idx = to_ref_idx
@@ -42,9 +57,6 @@ class RT_rereference:
             reref_data (numpy ndarray): rereferenced data
         """
 
-        reref_data = empty_like(ieeg_batch)
-        reref_data[self.to_ref_idx] = ieeg_batch[self.to_ref_idx]
-
         data_subcortex = ieeg_batch[self.subcortex_idx]
         new_data_subcortex = empty_like(data_subcortex)
         for i, idx in enumerate(self.subcortex_idx):
@@ -66,9 +78,7 @@ class RT_rereference:
                                          'the recording channels.')
                     index.append(self.ch_names.index(ref_channels[j]))
 
-                new_data_subcortex[i] = ch - mean(ieeg_batch[index, :],
-                                                  axis=0)
-        reref_data[self.subcortex_idx, :] = new_data_subcortex
+                new_data_subcortex[i] = ch - mean(ieeg_batch[index, :], axis=0)
 
         data_cortex = ieeg_batch[self.cortex_idx]
         new_data_cortex = empty_like(data_cortex)
@@ -95,9 +105,12 @@ class RT_rereference:
 
                 new_data_cortex[i] = ch - mean(ieeg_batch[index, :],
                                                axis=0)
-        reref_data[self.cortex_idx, :] = new_data_cortex
 
         if self.split_data:
             return new_data_cortex, new_data_subcortex
         else:
+            reref_data = empty_like(ieeg_batch)
+            reref_data[self.to_ref_idx] = ieeg_batch[self.to_ref_idx]
+            reref_data[self.subcortex_idx, :] = new_data_subcortex
+            reref_data[self.cortex_idx, :] = new_data_cortex
             return reref_data
