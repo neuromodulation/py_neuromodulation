@@ -1,6 +1,16 @@
 # py_neuromodulation
 
-The py_neuromodulation module allows for real time capable processing of multimodal electrophysiological data. The primary use is movement prediction for adaptive deep brain stimulation (https://pubmed.ncbi.nlm.nih.gov/30607748/). 
+The py_neuromodulation module allows for real time capable processing of multimodal electrophysiological data. The primary use is movement prediction for adaptive deep brain stimulation (https://pubmed.ncbi.nlm.nih.gov/30607748/).
+
+For running this toolbox first create a new virtual conda environment: 
+`conda create --name pyneuromodulation`
+
+Then activate it:
+`conda activate pyneuromodulation`
+
+and install the required packages:
+`pip install -r requirements.txt`
+
 
 Internally a generator get's initialized which simulates a continuous data stream, as well as a feature object. 
 In settings.json different preprocessing parameter and feature generation types can be specified. 
