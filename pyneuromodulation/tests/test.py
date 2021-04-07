@@ -81,7 +81,7 @@ def initialize_rereference(df_M1):
 
     cortex_idx = np.where(df_M1.type == 'ecog')[0]
     subcortex_idx = np.array(df_M1[(df_M1["type"] == 'seeg') | (df_M1['type'] == 'dbs')
-                                   & (df_M1['type'] == 'lfp')].index)
+                                   | (df_M1['type'] == 'lfp')].index)
 
     ref_here = rereference.RT_rereference(ch_names, refs, to_ref_idx,\
                     cortex_idx, subcortex_idx, split_data=False)
@@ -128,8 +128,8 @@ if __name__ == "__main__":
     ieeg_batch, df_M1, example_settings, fs = read_example_data(PATH_PYNEUROMODULATION)
     ref_here = initialize_rereference(df_M1)
     test_rereference(ref_here, ieeg_batch, df_M1)
-    #settings.test_settings(os.path.join(PATH_PYNEUROMODULATION, 'examples',
-    #                                    'settings.json'))
+    settings.test_settings(os.path.join(PATH_PYNEUROMODULATION, 'examples',
+                                        'settings.json'))
 
     # test sharpwaves feature estimation for specifc channel
     features_ = dict()

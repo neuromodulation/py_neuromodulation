@@ -17,6 +17,7 @@ import generator
 import rereference
 import resample
 import run_analysis
+from settings import test_settings
 
 
 def est_features_run(PATH_RUN) -> None:
@@ -28,6 +29,8 @@ def est_features_run(PATH_RUN) -> None:
     # read settings
     with open('settings.json', encoding='utf-8') as json_file:
         settings = json.load(json_file)
+
+    test_settings(settings, verbose=True)
 
     #PATH_OUT = settings["out_path"]
 
@@ -96,8 +99,8 @@ def est_features_run(PATH_RUN) -> None:
     if not os.path.exists(os.path.join(settings["out_path"], folder_name)):
         os.makedirs(os.path.join(settings["out_path"], folder_name))
 
-    df_.to_pickle(os.path.join(settings["out_path"], folder_name,
-                               folder_name+"_FEATURES.p"))
+    df_.to_csv(os.path.join(settings["out_path"], folder_name,
+                            folder_name+"_FEATURES.csv"))
 
     # save used settings and coordinates to settings as well
     settings["sfreq"] = raw_arr.info["sfreq"]
