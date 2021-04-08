@@ -46,17 +46,13 @@ if __name__ == "__main__":
 
         # define M1
         df_M1 = define_M1.set_M1(ch_names, ch_types)
-        feature_idx = np.where(np.logical_and(np.array((df_M1["used"] == 1)),
-                               np.array((df_M1["target"] == 0))))[0]
-        used_chs = np.array(ch_names)[feature_idx].tolist()
-        refs = df_M1['rereference']
-        to_ref_idx = np.array(df_M1[(df_M1['used'] == 1)].index)
-        cortex_idx = np.where(df_M1.type == 'ecog')[0]
-        subcortex_idx = np.array(df_M1[(df_M1["type"] == 'seeg') | (df_M1['type'] == 'dbs')
-                                 | (df_M1['type'] == 'lfp')].index)
-        ref_here = rereference.RT_rereference(ch_names, refs, to_ref_idx,
-                                              cortex_idx, subcortex_idx,
-                                              split_data=False)
+
+        ref_here = rereference.RT_rereference(df_M1, split_data=False)
+
+        ch_names = df_M1['name'].to_numpy()
+        feature_idx, = np.where(np.logical_and(np.array((df_M1["used"] == 1)),
+                                           np.array((df_M1["target"] == 0))))
+        used_chs = ch_names[feature_idx].tolist()
 
         # initialize feature class from settings
         features_ = features.Features(s=settings, fs=sfreq, line_noise=line_noise,

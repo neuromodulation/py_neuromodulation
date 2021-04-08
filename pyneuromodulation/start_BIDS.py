@@ -54,15 +54,8 @@ def est_features_run(PATH_RUN, PATH_M1=None) -> None:
     df_M1 = pd.read_csv(PATH_M1, sep="\t") \
         if PATH_M1 is not None and os.path.isfile(PATH_M1) \
         else define_M1.set_M1(raw_arr.ch_names, raw_arr.get_channel_types())
-    ch_names = list(df_M1['name'])
-    refs = df_M1['rereference']
-    to_ref_idx = np.array(df_M1[(df_M1['used'] == 1)].index)
-    cortex_idx = np.where(df_M1.type == 'ecog')[0]
-    subcortex_idx = np.array(df_M1[(df_M1["type"] == 'seeg') | (df_M1['type'] == 'dbs')
-                                   | (df_M1['type'] == 'lfp')].index)
-    ref_here = rereference.RT_rereference(ch_names, refs, to_ref_idx,
-                                          cortex_idx, subcortex_idx,
-                                          split_data=False)
+    
+    ref_here = rereference.RT_rereference(df_M1, split_data=False)
 
     # optionally reduce timing for faster test completion
     # LIMIT_LOW = 50000
@@ -72,10 +65,6 @@ def est_features_run(PATH_RUN, PATH_M1=None) -> None:
     # initialize generator for run function
     gen = generator.ieeg_raw_generator(ieeg_raw, settings, fs)
 
-    feature_idx = np.where(np.logical_and(np.array((df_M1["used"] == 1)),
-                                          np.array((df_M1["target"] == 0))))[0]
-    used_chs = np.array(ch_names)[feature_idx].tolist()
-
     # define resampler for faster feature estimation
     resample_ = None
     if settings["methods"]["resample_raw"] is True:
@@ -83,6 +72,11 @@ def est_features_run(PATH_RUN, PATH_M1=None) -> None:
         fs_new = settings["resample_raw_settings"]["resample_freq"]
     else:
         fs_new = fs
+
+    ch_names = df_M1['name'].to_numpy()
+    feature_idx, = np.where(np.logical_and(np.array((df_M1["used"] == 1)),
+                                           np.array((df_M1["target"] == 0))))
+    used_chs = ch_names[feature_idx].tolist()
 
     # initialize feature class from settings
     features_ = features.Features(s=settings, fs=fs_new, line_noise=line_noise,
