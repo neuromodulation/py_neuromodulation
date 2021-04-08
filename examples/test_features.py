@@ -50,28 +50,13 @@ def est_features_run(PATH_RUN) -> None:
         if PATH_M1 is not None and os.path.isfile(PATH_M1) \
         else define_M1.set_M1(raw_arr.ch_names, raw_arr.get_channel_types())
 
-    ch_names = list(df_M1['name'])
-    refs = df_M1['rereference']
-
-    to_ref_idx = np.array(df_M1[(df_M1['used'] == 1)].index)
-
-    cortex_idx = np.where(df_M1.type == 'ecog')[0]
-    subcortex_idx = np.array(df_M1[(df_M1["type"] == 'seeg') | (df_M1['type'] == 'dbs')
-                                   | (df_M1['type'] == 'lfp')].index)
-
-    ref_here = rereference.RT_rereference(ch_names, refs, to_ref_idx,
-                                          cortex_idx, subcortex_idx,
-                                          split_data=False)
+    ref_here = rereference.RT_rereference(df_M1, split_data=False)
 
     LIMIT_LOW = 50000
     LIMIT_HIGH = 65000
     # ieeg_raw = ieeg_raw[:,LIMIT_LOW:LIMIT_HIGH]
 
     gen = generator.ieeg_raw_generator(ieeg_raw, settings, fs)
-
-    feature_idx = np.where(np.logical_and(np.array((df_M1["used"] == 1)),
-                                          np.array((df_M1["target"] == 0))))[0]
-    used_chs = np.array(ch_names)[feature_idx].tolist()
 
     resample_ = None
     if settings["methods"]["resample_raw"] is True:
@@ -80,6 +65,10 @@ def est_features_run(PATH_RUN) -> None:
     else:
         fs_new = fs
 
+    ch_names = df_M1['name'].to_numpy()
+    feature_idx, = np.where(np.logical_and(np.array((df_M1["used"] == 1)),
+                                           np.array((df_M1["target"] == 0))))
+    used_chs = ch_names[feature_idx].tolist()
     features_ = features.Features(s=settings, fs=fs_new, line_noise=line_noise,
                                   channels=used_chs)
 
@@ -88,7 +77,7 @@ def est_features_run(PATH_RUN) -> None:
                            resample_)
 
     # resample_label
-    ind_label = np.where(df_M1["target"] == 1)[0]
+    ind_label, = np.where(df_M1["target"] == 1)
     offset_time = max([value[1] for value in settings[
         "bandpass_filter_settings"]["frequency_ranges"].values()])
     offset_start = np.ceil(offset_time/1000 * fs).astype(int)
@@ -128,6 +117,7 @@ def est_features_run(PATH_RUN) -> None:
     # save df_M1 file
     df_M1.to_csv(os.path.join(settings["out_path"], folder_name,
                               folder_name+"_DF_M1.csv"))
+
 
 if __name__ == "__main__":
 
