@@ -1,0 +1,16 @@
+name: pyNeuromodulation
+channels:
+- defaults
+dependencies:
+- python
+- pip
+- numpy
+- scipy
+- matplotlib
+- pyqt
+- scikit-learn
+- pillow
+- pytest
+- pytest-cov
+- numpydoc
+- flake8

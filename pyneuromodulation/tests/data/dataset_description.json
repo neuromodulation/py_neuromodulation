@@ -1,0 +1,8 @@
+{
+    "Name": " ",
+    "BIDSVersion": "1.4.0",
+    "DatasetType": "raw",
+    "Authors": [
+        "Please cite MNE-BIDS in your publication before removing this (citations in README)"
+    ]
+}
