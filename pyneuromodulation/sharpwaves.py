@@ -29,10 +29,10 @@ class SharpwaveAnalyzer:
         self.sfreq = sfreq
         self.filter = \
             create_filter(None, sfreq,
-                          l_freq=sw_settings['filter_low_cutoff'],
+                          l_freq=15,
                           h_freq=sw_settings['filter_high_cutoff'],
-                          fir_design='firwin', l_trans_bandwidth=5,
-                          h_trans_bandwidth=5, filter_length=str(sfreq)+'ms',
+                          fir_design='firwin', l_trans_bandwidth=15,
+                          h_trans_bandwidth=15, filter_length=str(sfreq)+'ms',
                           verbose=False)
 
         # initialize used features
