@@ -1,6 +1,6 @@
 {
-    "BIDS_path":  "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Beijing",
-    "out_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out",
+    "BIDS_path":  "C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\pyneuromodulation\\tests\\data",
+    "out_path": "C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\pyneuromodulation\\tests\\data\\derivatives",
     "sampling_rate_features": 10,
     "max_dist_cortex": 20,
     "max_dist_subcortex": 5,
