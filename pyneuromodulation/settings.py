@@ -6,26 +6,18 @@ import os
 import numpy as np
 
 
-class Settings:
+class SettingsWrapper:
 
-    def __init__(self, settings_path='settings.json', m1_path=None,
-                 ch_names=None, ch_types=None) -> None:
+    def __init__(self, settings_path='settings.json') -> None:
         """initialize settings class with settings.json and setting df_M1 toolbox parameter
 
         Parameters
         ----------
         settings_path : str, optional
             path to settings.json, by default 'settings.json'
-        m1_path : string], optional
-            path to df_M1.tsv file, by default None
-        ch_names : list, optional
-            by default None
-        ch_types : list, optional
-            by default None
         """
         print("read settings.json")
         self.settings_path = settings_path
-        self.m1_path = m1_path
 
         with open(settings_path, encoding='utf-8') as json_file:
             self.settings = json.load(json_file)
@@ -33,38 +25,56 @@ class Settings:
         print("test settings")
         self.test_settings()
 
-        self.ch_names = ch_names
-        self.ch_types = ch_types
-
-        self.set_M1(m1_path)
-
-        self.feature_idx = np.where(np.logical_and(np.array((self.df_M1["used"] == 1)),
-                                    np.array((self.df_M1["target"] == 0))))[0]
-        
-        self.used_chs = self.ch_names[self.feature_idx].tolist()
-
-        self.ind_label = np.where(self.df_M1["target"] == 1)[0]
+    def set_fs_line_noise(self, fs, line_noise) -> None:
+        self.settings["fs"] = fs
+        self.settings["line_noise"] = line_noise
 
     def set_channel_names(self, ch_names) -> None:
-        self.ch_names = ch_names
+        self.settings["ch_names"] = ch_names
 
     def set_channel_types(self, ch_types) -> None:
-        self.ch_names = ch_types
+        self.settings["ch_types"] = ch_types
 
-    def set_M1(self, ch_names=None, ch_types=None) -> None:
-        """set df_M1 dataframe; specifies channel names, rereferencing method, ch_type, 
+    def add_coord(self, raw_arr):
+        """set coordinate information to settings from RawArray
+
+        Parameters
+        ----------
+        raw_arr : mne.io.RawArray
+        """
+        if raw_arr.get_montage() is not None:
+            self.settings["coord_list"] = np.array(list(dict(raw_arr.get_montage().get_positions()
+                                              ["ch_pos"]).values())).tolist()
+            self.settings["coord_names"] = np.array(list(dict(raw_arr.get_montage().get_positions()
+                                               ["ch_pos"]).keys())).tolist()
+        else:
+            self.settings["coord_list"] = None
+            self.settings["coord_names"] = None
+
+    def set_M1(self, m1_path=None, ch_names=None, ch_types=None) -> None:
+        """set df_M1 dataframe; specifies channel names, rereferencing method, ch_type,
         if a channel is used or not, and if a channel should be treated as a label
 
         Parameters
         ----------
+        m1_path : string, optional
+            path to df_M1.tsv file
         ch_names : list, optional
             by default None
         ch_types : list, optional
             BIDS compatible channel types, by default None
         """
+        self.m1_path = m1_path
+        self.settings["ch_names"] = ch_names
+        self.settings["ch_types"] = ch_types
         self.df_M1 = pd.read_csv(self.m1_path, sep="\t")\
             if self.m1_path is not None and os.path.isfile(self.m1_path)\
             else define_M1.set_M1(ch_names, ch_types)
+
+        self.settings["feature_idx"] = np.where(np.logical_and(np.array((self.df_M1["used"] == 1)),
+                                                np.array((self.df_M1["target"] == 0))))[0].tolist()
+
+        self.ind_label = np.where(self.df_M1["target"] == 1)[0]
 
     def test_settings(self, verbose=True) -> None:
         """Test if settings are specified correctly in settings.json

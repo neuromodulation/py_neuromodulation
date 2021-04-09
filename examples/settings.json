@@ -5,7 +5,7 @@
     "max_dist_cortex": 20,
     "max_dist_subcortex": 5,
     "methods" : {
-        "resample_raw" : false,
+        "resample_raw" : true,
         "normalization" : true,
         "kalman_filter" : true,
         "re_referencing" : true,
@@ -19,7 +19,7 @@
     },
 
     "resample_raw_settings": {
-        "resample_freq" : 1200
+        "resample_freq" : 1000
     },
 
     "normalization_settings": {
@@ -31,7 +31,7 @@
         "Tp" : 0.1,
         "sigma_w" : 0.7,
         "sigma_v" : 1,
-        "frequency_bands" : ["low gamma"]
+        "frequency_bands" : ["low gamma", "high gamma", "all gamma"]
     },
 
     "bandpass_filter_settings": {
@@ -41,7 +41,9 @@
             "low beta": [[13, 20], 333],
             "high beta" : [[20, 35], 333],
             "all beta" : [[13, 35], 333],
-            "low gamma" : [[60, 80], 100]
+            "low gamma" : [[60, 80], 100], 
+            "high gamma" : [[90, 200], 100],
+            "all gamma" : [[60, 200], 100]
         },
         "bandpower_features": {
         "activity" : true,

@@ -17,6 +17,6 @@ if __name__ == "__main__":
     # example single run file estimation
     start_BIDS.est_features_run(run_files[0])
 
-    # multiprocessing cohort analysis    
+    # multiprocessing cohort analysis  
     # pool = multiprocessing.Pool()
     # pool.map(start_BIDS.est_features_run, product(M1_files, run_files))

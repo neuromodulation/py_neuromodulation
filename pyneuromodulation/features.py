@@ -1,4 +1,4 @@
-#from multiprocessing import Process, Manager
+# from multiprocessing import Process, Manager
 from numpy import arange, array, ceil, floor, where
 
 from mne.filter import notch_filter
@@ -12,29 +12,33 @@ import sharpwaves
 
 
 class Features:
-    
-    def __init__(self, s, fs, line_noise, channels) -> None:
-        """
-        s (dict) : json settings
+
+    def __init__(self, s) -> None:
+        """Initialize Feature module
+
+        Parameters
+        ----------
+        s : dict
+            settings.SettingsWrapper initialized dictionary
         """
 
-        self.ch_names = channels
         self.s = s  # settings
-        self.fs = fs
-        self.line_noise = line_noise
+        self.ch_names = list(array(s["ch_names"])[s["feature_idx"]])
+        self.fs = s["fs"]
+        self.line_noise = s["line_noise"]
         self.seglengths = floor(
                 self.fs / 1000 * array([value[1] for value in s[
                     "bandpass_filter_settings"][
                         "frequency_ranges"].values()])).astype(int)
         print("segment lengths:", self.seglengths)
         self.KF_dict = {}
-        
+
         if s["methods"]["bandpass_filter"] is True:
             self.filter_fun = filter.calc_band_filters(f_ranges=[
                 value[0] for value in s["bandpass_filter_settings"][
-                    "frequency_ranges"].values()], sfreq=fs,
-                filter_length=fs - 1)
-        
+                    "frequency_ranges"].values()], sfreq=self.fs,
+                filter_length=self.fs - 1)
+
         if s["methods"]["kalman_filter"] is True:
             for bp_feature in [k for k, v in s["bandpass_filter_settings"][
                                "bandpower_features"].items() if v is True]:
@@ -45,41 +49,39 @@ class Features:
                             s["kalman_filter_settings"]["Tp"],
                             s["kalman_filter_settings"]["sigma_w"],
                             s["kalman_filter_settings"]["sigma_v"])
-        
+
         if s["methods"]["sharpwave_analysis"] is True:
             self.sw_features = sharpwaves.SharpwaveAnalyzer(self.s["sharpwave_analysis_settings"],
                                                             self.fs)
         self.new_dat_index = int(self.fs / self.s["sampling_rate_features"])
 
     def estimate_features(self, data) -> dict:
-        """
-        
-        Calculate features, as defined in settings.json
+        """ Calculate features, as defined in settings.json
         Features are based on bandpower, raw Hjorth parameters and sharp wave
         characteristics.
-        
+
+        Parameters
+        ----------
         data (np array) : (channels, time)
-        
-        returns: 
+
+        Returns
+        -------
         dat (pd Dataframe) with naming convention:
             channel_method_feature_(f_band)
         """
-        # this is done in a lot of loops unfortunately, 
-        # what could be done is to extract the outer channel loop,
-        # which could run in parallel
-        
-        #manager = Manager()
-        #features_ = manager.dict() #features_ = {}
+
+        # manager = Manager()
+        # features_ = manager.dict() #features_ = {}
         features_ = dict()
-        
-        # notch filter data before feature estimation 
+
+        # notch filter data before feature estimation
         if self.s["methods"]["notch_filter"]:
-            data = notch_filter(x=data, Fs=self.fs, trans_bandwidth=7,
+            data = notch_filter(x=data, Fs=self.fs, trans_bandwidth=15,
                                 freqs=arange(self.line_noise, 3*self.line_noise,
                                              self.line_noise),
                                 fir_design='firwin', verbose=False,
                                 notch_widths=3, filter_length=data.shape[1]-1)
-        
+
         if self.s["methods"]["bandpass_filter"]:
             dat_filtered = filter.apply_filter(data, self.filter_fun)  # shape (bands, time)
         else:
@@ -92,8 +94,7 @@ class Features:
         _ = [p.join() for p in job]
         '''
 
-        #sequential approach
-        #for ch_idx, ch in enumerate(self.ch_names):
+        # sequential approach
         for ch_idx in range(len(self.ch_names)):
             ch = self.ch_names[ch_idx]
             features_ = self.est_ch(features_, ch_idx, ch, dat_filtered, data)
@@ -102,15 +103,15 @@ class Features:
                                             "frequency_ranges"].keys()):
             features_ = self.est_connect(features_, filt, dat_filtered[:, filt_idx, :])
 
-        #return dict(features_) # this is necessary for multiprocessing approach 
+        # return dict(features_) # this is necessary for multiprocessing approach
         return features_
-                    
+
     def est_ch(self, features_, ch_idx, ch, dat_filtered, data) -> dict:
         """Estimate features for a given channel
 
         Parameters
         ----------
-        features_ dict : dict 
+        features_ dict : dict
             features.py output feature dict
         ch_idx : int
             channel index
@@ -139,13 +140,14 @@ class Features:
         if self.s["methods"]["return_raw"]:
             features_['_'.join([ch, 'raw'])] = data[ch_idx, -1]  # subsampling
 
-        if self.s["methods"]["sharpwave_analysis"]: 
+        if self.s["methods"]["sharpwave_analysis"]:
             # print('time taken for sharpwave estimation')
             # start = time.process_time()
             # take only last resampling_rate
 
             features_ = self.sw_features.get_sharpwave_features(features_,
-                data[ch_idx, -self.new_dat_index:], ch)
+                                                                data[ch_idx, self.new_dat_index:],
+                                                                ch)
 
             # print(time.process_time() - start)
         return features_
