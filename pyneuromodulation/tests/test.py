@@ -4,7 +4,6 @@ import sys
 import numpy as np
 from numpy.testing import assert_array_equal
 import pandas as pd
-
 import mne_bids
 
 # get py_neuromoulation files
@@ -30,7 +29,6 @@ def read_example_data(PATH_PYNEUROMODULATION):
         fs (float): example sampling frequency
     """
 
-    
     # read and test settings first to obtain BIDS path
     settings_wrapper = settings.SettingsWrapper(settings_path=os.path.join(PATH_PYNEUROMODULATION,
                                                 'examples', 'settings.json'))
@@ -62,23 +60,11 @@ def initialize_rereference(df_M1):
     """The rereference class get's here instantiated given the supplied df_M1 table
 
     Args:
-        df_M1 (pd Dataframe): rereference specifying table  
+        df_M1 (pd Dataframe): rereference specifying table
 
     Returns:
         RT_rereference: Rereference object
     """
-    # define rereference attributes
-    ch_names = list(df_M1['name'])
-    refs = df_M1['rereference']
-    to_ref_idx = np.array(df_M1[(df_M1['target'] == 0) & (df_M1['used'] == 1) &
-                          (df_M1["rereference"] != "None")].index)
-
-    to_ref_idx = np.array(df_M1[(df_M1['used'] == 1)].index)
-
-    cortex_idx = np.where(df_M1.type == 'ecog')[0]
-    subcortex_idx = np.array(df_M1[(df_M1["type"] == 'seeg') | (df_M1['type'] == 'dbs')
-                                   | (df_M1['type'] == 'lfp')].index)
-
     ref_here = rereference.RT_rereference(df_M1, split_data=False)
     return ref_here
 

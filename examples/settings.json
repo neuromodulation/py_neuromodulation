@@ -14,8 +14,8 @@
         "raw_hjorth" : true,
         "sharpwave_analysis" : true,
         "return_raw" : true,
-        "pdc" : false,
-        "dtf" : false
+        "pdc" : true,
+        "dtf" : true
     },
 
     "resample_raw_settings": {
@@ -90,8 +90,8 @@
 
     "pdc_settings": {
         "frequency_ranges" : {
-            "all beta" : ["LFP_BS_STN_L_8", "ECOG_AT_SM_L_4"],
-            "all gamma" : ["LFP_BS_STN_L_8", "ECOG_AT_SM_L_4"]
+            "all beta" : ["LFP_3_R_STN_PI", "ECOG_1_R_SM_HH"],
+            "all gamma" : ["LFP_4_R_STN_PI", "ECOG_2_R_SM_HH"]
         },
         "model_order" : "auto",
         "max_order" : 10,
@@ -100,8 +100,8 @@
 
     "dtf_settings": {
         "frequency_ranges" : {
-            "all beta" : ["LFP_BS_STN_L_8", "ECOG_AT_SM_L_4"],
-            "all gamma" : ["LFP_BS_STN_L_8", "ECOG_AT_SM_L_4"]
+            "all beta" : ["LFP_3_R_STN_PI", "ECOG_1_R_SM_HH"],
+            "all gamma" : ["LFP_4_R_STN_PI", "ECOG_2_R_SM_HH"]
         },
         "model_order" : "auto",
         "max_order" : 10,
