@@ -14,7 +14,7 @@ and install the required packages:
 
 `pip install -r requirements.txt --user`
 
-For running the LabStreamLayer example mne-realtime also needs to be installed: 
+For running the LabStreamingLayer example mne-realtime also needs to be installed: 
 
 `pip install https://api.github.com/repos/mne-tools/mne-realtime/zipball/master`
 
