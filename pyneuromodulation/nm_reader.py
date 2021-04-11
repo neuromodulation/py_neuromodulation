@@ -115,7 +115,7 @@ class NM_Reader:
                     yticklabels=feature_col_name)
         plt.title("Features channel: "+str(self.ch_name))
         PATH_save = os.path.join(self.feature_path, feature_file,
-                                 "Features_corr_matr_ch"+str(self.ch_name)+".png")
+                                 "Features_corr_matr_ch_"+str(self.ch_name)+".png")
         # axes ticks might be too messy
         plt.xticks([])
         plt.yticks([])

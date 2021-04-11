@@ -90,8 +90,8 @@
 
     "pdc_settings": {
         "frequency_ranges" : {
-            "all beta" : ["LFP_3_R_STN_PI", "ECOG_1_R_SM_HH"],
-            "all gamma" : ["LFP_4_R_STN_PI", "ECOG_2_R_SM_HH"]
+            "all beta" : ["LFP_BS_STN_L_1", "ECOG_AT_SM_L_1"],
+            "all gamma" : ["LFP_STN_L_234", "ECOG_AT_SM_L_2"]
         },
         "model_order" : "auto",
         "max_order" : 10,
@@ -100,8 +100,8 @@
 
     "dtf_settings": {
         "frequency_ranges" : {
-            "all beta" : ["LFP_3_R_STN_PI", "ECOG_1_R_SM_HH"],
-            "all gamma" : ["LFP_4_R_STN_PI", "ECOG_2_R_SM_HH"]
+            "all beta" : ["LFP_BS_STN_L_1", "ECOG_AT_SM_L_1"],
+            "all gamma" : ["LFP_STN_L_234", "ECOG_AT_SM_L_2"]
         },
         "model_order" : "auto",
         "max_order" : 10,
