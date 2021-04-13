@@ -9,6 +9,7 @@ from skopt.space import Real, Integer, Categorical
 from skopt.utils import use_named_args
 from skopt import gp_minimize, Optimizer
 from sklearn.linear_model import ElasticNet
+from sklearn.base import clone
 
 import pandas as pd
 import os
@@ -100,7 +101,7 @@ class Decoder:
 
         for train_index, test_index in self.cv_method.split(self.data):
 
-            model_train = self.model
+            model_train = clone(self.model)
             X_train, y_train = self.data[train_index, :], self.label[train_index]
             X_test, y_test = self.data[test_index], self.label[test_index]
 

@@ -20,7 +20,7 @@ if __name__ == "__main__":
                                 feature_file=FEATURE_FILE,
                                 model=model,
                                 eval_method=metrics.mean_absolute_error,
-                                cv_method=model_selection.KFold(n_splits=3, shuffle=True),
+                                cv_method=model_selection.KFold(n_splits=3, shuffle=False),
                                 threshold_score=True
                                 )
     # estimate model performance directly
