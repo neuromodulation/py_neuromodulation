@@ -3,7 +3,7 @@ import json
 import numpy as np
 from scipy.stats import zscore
 import pandas as pd
-
+import _pickle as cPickle
 from matplotlib import pyplot as plt
 import seaborn as sns
 
@@ -27,19 +27,20 @@ class NM_Reader:
         return f_files
 
     def read_settings(self, feature_file) -> None:
+        self.feature_file = feature_file
         with open(os.path.join(self.feature_path, feature_file,
-                               feature_file+"_SETTINGS.json")) as f:
+                               feature_file + "_SETTINGS.json")) as f:
             self.settings = json.load(f)
         return self.settings
 
     def read_M1(self, feature_file) -> None:
         self.df_M1 = pd.read_csv(os.path.join(self.feature_path, feature_file,
-                                 feature_file+"_DF_M1.csv"), header=0)
+                                 feature_file + "_DF_M1.csv"), header=0)
         return self.df_M1
 
     def read_file(self, feature_file) -> None:
         self.features = pd.read_csv(os.path.join(self.feature_path, feature_file,
-                                    feature_file+"_FEATURES.csv"), header=0)
+                                    feature_file + "_FEATURES.csv"), header=0)
 
     def read_channel_data(self, ch_name) -> None:
         self.ch_name = ch_name
@@ -78,15 +79,15 @@ class NM_Reader:
         """
 
         epoch_lim = int(epoch_len * sfreq)
-        ind_mov = np.where(np.diff(np.array(y_ > threshold)*1) == 1)[0]
-        low_limit = ind_mov > epoch_lim/2
-        up_limit = ind_mov < y_.shape[0]-epoch_lim/2
+        ind_mov = np.where(np.diff(np.array(y_ > threshold) * 1) == 1)[0]
+        low_limit = ind_mov > epoch_lim / 2
+        up_limit = ind_mov < y_.shape[0] - epoch_lim / 2
         ind_mov = ind_mov[low_limit & up_limit]
         epoch_ = np.zeros([ind_mov.shape[0], epoch_lim, data.shape[1], data.shape[2]])
         y_arr = np.zeros([ind_mov.shape[0], int(epoch_lim)])
         for idx, i in enumerate(ind_mov):
-            epoch_[idx, :, :, :] = data[i-epoch_lim//2:i + epoch_lim // 2, :, :]
-            y_arr[idx, :] = y_[i-epoch_lim//2:i+epoch_lim//2]
+            epoch_[idx, :, :, :] = data[i - epoch_lim // 2:i + epoch_lim // 2, :, :]
+            y_arr[idx, :] = y_[i - epoch_lim // 2:i + epoch_lim // 2]
         return epoch_, y_arr
 
     def get_epochs_ch(self, epoch_len, sfreq, threshold):
@@ -113,9 +114,9 @@ class NM_Reader:
         sns.heatmap(corr,
                     xticklabels=feature_col_name,
                     yticklabels=feature_col_name)
-        plt.title("Features channel: "+str(self.ch_name))
+        plt.title("Features channel: " + str(self.ch_name))
         PATH_save = os.path.join(self.feature_path, feature_file,
-                                 "Features_corr_matr_ch_"+str(self.ch_name)+".png")
+                                 "Features_corr_matr_ch_" + str(self.ch_name) + ".png")
         # axes ticks might be too messy
         plt.xticks([])
         plt.yticks([])
@@ -129,14 +130,26 @@ class NM_Reader:
         plt.imshow(zscore(np.mean(np.squeeze(self.X_epoch), axis=0), axis=0).T, aspect='auto')
         # plt.yticks(np.arange(0, len(feature_col_name), 1), feature_col_name)
         plt.xticks(np.arange(0, self.X_epoch.shape[1], 1),
-                   np.round(np.arange(-self.epoch_len/2, self.epoch_len/2, 1/self.sfreq), 2), rotation=90)
+                   np.round(np.arange(-self.epoch_len / 2, self.epoch_len / 2, 1 / self.sfreq), 2), rotation=90)
         plt.xlabel("Time [s]")
-        plt.title("Movement aligned features channel: "+str(self.ch_name))
+        plt.title("Movement aligned features channel: " + str(self.ch_name))
         # feature axes ticks might be too messy
         plt.yticks([])
         plt.tight_layout()
 
         PATH_save = os.path.join(self.feature_path, feature_file,
-                                 "MOV_algined_features_ch_"+str(self.ch_name)+".png")
+                                 "MOV_algined_features_ch_" + str(self.ch_name) + ".png")
         plt.savefig(PATH_save)
         # plt.show()
+    
+    def read_ML_estimations(self):
+        """Read estimated ML outputs
+
+        Returns
+        -------
+        nm_decode object
+        """
+        PATH_ML_ = os.path.join(self.feature_path, self.feature_file, self.feature_file + "_ML_RES.p")
+        with open(PATH_ML_, 'rb') as input:  # Overwrites any existing file.
+            ML_est = cPickle.load(input)
+        return ML_est
