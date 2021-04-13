@@ -17,6 +17,9 @@ if __name__ == "__main__":
 
     settings = nm_reader.read_settings(feature_file)
 
+    # optionally read ML estimations
+    ML_est = nm_reader.read_ML_estimations()
+
     _ = nm_reader.read_M1(feature_file)
     _ = nm_reader.read_file(feature_file)
 
