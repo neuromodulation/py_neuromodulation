@@ -44,7 +44,7 @@ class Decoder:
         """
 
         # for the bayesian opt. function the objective fct only uses a single parameter
-        # coming from gp_miminimize 
+        # coming from gp_miminimize
         # therefore declare other parameters to global s.t. the function ca acess those
 
         self.feature_path = feature_path
@@ -67,8 +67,8 @@ class Decoder:
         self.data = np.nan_to_num(np.array(self.features[[col for col in self.features.columns
                                   if not (('time' in col) or (self.target_ch in col))]]))
 
-        # crop here for example
-        self.data = self.data[:100, :]
+        # crop here features for example
+        self.data = self.data[:, :100]
 
         self.model = model
         self.eval_method = eval_method
@@ -165,8 +165,8 @@ class Decoder:
 
         self.space = space
 
-        opt = Optimizer(self.space, base_estimator=base_estimator, acq_func=acq_func, 
-                        acq_optimizer=acq_optimizer, 
+        opt = Optimizer(self.space, base_estimator=base_estimator, acq_func=acq_func,
+                        acq_optimizer=acq_optimizer,
                         initial_point_generator=initial_point_generator)
         for _ in range(rounds):
             next_x = opt.ask()
@@ -182,7 +182,23 @@ class Decoder:
         self.best_params = res.x
         return res
 
-    def save(self):
+    def train_final_model(self, bayes_opt=True) -> None:
+        """Train final model on all data
+
+        Parameters
+        ----------
+        bayes_opt : boolean
+            if True get best bayesian optimization parameters and train model with the
+            according parameters
+        """
+        print("training best model")
+        if bayes_opt is True:
+            for i in range(len(self.best_params)):
+                setattr(self.model, self.space[i].name, self.best_params[i])
+
+        self.model.fit(self.data, self.label)
+
+    def save(self) -> None:
         """Saves decoder object to pickle
         """
         PATH_OUT = os.path.join(self.feature_path, self.feature_file, self.feature_file + "_ML_RES.p")
