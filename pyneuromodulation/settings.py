@@ -57,10 +57,12 @@ class SettingsWrapper:
                                                                   enumerate(self.settings["coord_list"]) if
                                                                   (self.settings["coord_list"][ch_idx][0] > 0)
                                                                    and ("ECOG" in self.settings["coord_names"][ch_idx])]
+
+            # multiply by 1000 to get m instead of mm
             self.settings["coord"]["cortex_right"]["positions"] = 1000*np.array([ch for ch_idx, ch in enumerate(self.settings["coord_list"])
                                                                    if (self.settings["coord_list"][ch_idx][0] > 0) and
                                                                    ("ECOG" in self.settings["coord_names"][ch_idx])])
-            
+
             self.settings["coord"]["cortex_left"]["ch_names"] = [self.settings["coord_names"][ch_idx] for ch_idx, ch in
                                                                   enumerate(self.settings["coord_list"]) if
                                                                   (self.settings["coord_list"][ch_idx][0] <= 0)

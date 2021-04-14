@@ -2,6 +2,7 @@ import mne_bids
 import numpy as np
 import os
 import json
+import _pickle as cPickle
 
 
 def read_BIDS_data(PATH_RUN, BIDS_PATH):
@@ -56,7 +57,7 @@ def add_labels(df_, settings_wrapper, raw_arr_data):
     if ind_label.shape[0] != 0:
         offset_time = max([value[1] for value in settings_wrapper.settings[
             "bandpass_filter_settings"]["frequency_ranges"].values()])
-        offset_start = np.ceil(offset_time/1000 * settings_wrapper.settings["fs"]).astype(int)
+        offset_start = np.ceil(offset_time / 1000 * settings_wrapper.settings["fs"]).astype(int)
         dat_ = raw_arr_data[ind_label, offset_start:]
         if dat_.ndim == 1:
             dat_ = np.expand_dims(dat_, axis=0)
@@ -75,29 +76,49 @@ def add_labels(df_, settings_wrapper, raw_arr_data):
     return df_
 
 
-def save_features_and_settings(df_, folder_name, settings_wrapper):
+def save_features_and_settings(df_, run_analysis_, folder_name, settings_wrapper):
     """save settings.json, df_M1.tsv and features.csv
 
     Parameters
     ----------
     df_ : pd.Dataframe
         feature dataframe
+    run_analysis_ : run_analysis.py object
+        This includes all (optionally projected) run_analysis estimated data
+        inluding added the resampled labels in features_arr
     folder_name : string
         output path
     settings_wrapper : settings.py object
     """
     # create out folder if doesn't exist
     if not os.path.exists(os.path.join(settings_wrapper.settings["out_path"], folder_name)):
-        print("create output folder "+str(folder_name))
+        print("create output folder " + str(folder_name))
         os.makedirs(os.path.join(settings_wrapper.settings["out_path"], folder_name))
 
     df_.to_csv(os.path.join(settings_wrapper.settings["out_path"], folder_name,
-                            folder_name+"_FEATURES.csv"))
+                            folder_name + "_FEATURES.csv"))
+
+    # rewrite np arrays to lists for json format
+    settings_wrapper.settings["grid_cortex"] = np.array(settings_wrapper.settings["grid_cortex"]).tolist()
+    settings_wrapper.settings["grid_subcortex"] = np.array(settings_wrapper.settings["grid_subcortex"]).tolist()
+    settings_wrapper.settings["coord"]["cortex_right"]["positions"] = \
+        settings_wrapper.settings["coord"]["cortex_right"]["positions"].tolist()
+    settings_wrapper.settings["coord"]["cortex_left"]["positions"] = \
+        settings_wrapper.settings["coord"]["cortex_left"]["positions"].tolist()
+    settings_wrapper.settings["coord"]["subcortex_right"]["positions"] = \
+        settings_wrapper.settings["coord"]["subcortex_right"]["positions"].tolist()
+    settings_wrapper.settings["coord"]["subcortex_left"]["positions"] = \
+        settings_wrapper.settings["coord"]["subcortex_left"]["positions"].tolist()
 
     with open(os.path.join(settings_wrapper.settings["out_path"], folder_name,
-                           folder_name+'_SETTINGS.json'), 'w') as f:
+                           folder_name + '_SETTINGS.json'), 'w') as f:
         json.dump(settings_wrapper.settings, f)
 
     # save df_M1 as csv
     settings_wrapper.df_M1.to_csv(os.path.join(settings_wrapper.settings["out_path"], folder_name,
-                                  folder_name+"_DF_M1.csv"))
+                                  folder_name + "_DF_M1.csv"))
+
+    PATH_OUT = os.path.join(settings_wrapper.settings["out_path"], folder_name,
+                            folder_name + "_run_analysis.p")
+    with open(PATH_OUT, 'wb') as output:
+        cPickle.dump(run_analysis_, output)

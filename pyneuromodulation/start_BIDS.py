@@ -17,7 +17,6 @@ import projection
 sys.path.append(
     r'C:\Users\ICN_admin\Documents\py_neuromodulation\examples')
 
-
 def est_features_run(PATH_RUN, PATH_M1=None) -> None:
     """Start feature estimation by reading settings, creating or reading
     df_M1 file with default rereference function (ECoG CAR; depth LFP bipolar)
@@ -42,7 +41,8 @@ def est_features_run(PATH_RUN, PATH_M1=None) -> None:
             settings_wrapper.settings["methods"]["project_subcortex"] is True:
         settings_wrapper.add_coord(raw_arr.copy())  # if not copy ch_names is being set
         projection_ = projection.Projection(settings_wrapper.settings)
-
+    else:
+        projection_ = None
     # read df_M1 / create M1 if None specified
     settings_wrapper.set_M1(m1_path=None, ch_names=raw_arr.ch_names,
                             ch_types=raw_arr.get_channel_types())
@@ -54,12 +54,15 @@ def est_features_run(PATH_RUN, PATH_M1=None) -> None:
     LIMIT_HIGH = 65000
     raw_arr_data = raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
     '''
-    
+
     # initialize generator for run function
     gen = generator.ieeg_raw_generator(raw_arr_data, settings_wrapper.settings)
 
     # define resampler for faster feature estimation
-    ref_here = rereference.RT_rereference(settings_wrapper.df_M1, split_data=False)
+    if settings_wrapper.settings["methods"]["re_referencing"] is True:
+        rereference_ = rereference.RT_rereference(settings_wrapper.df_M1, split_data=False)
+    else:
+        rereference_ = None
 
     if settings_wrapper.settings["methods"]["resample_raw"] is True:
         resample_ = resample.Resample(settings_wrapper.settings)
@@ -69,12 +72,22 @@ def est_features_run(PATH_RUN, PATH_M1=None) -> None:
     # initialize feature class from settings
     features_ = features.Features(settings_wrapper.settings)
 
-    # call now run_analysis.py
-    df_ = run_analysis.run(gen, features_, settings_wrapper.settings, ref_here, projection_, resample_)
+    # initialize run object
+    run_analysis_ = run_analysis.Run(features_, settings_wrapper.settings, rereference_, projection_, resample_)
+
+    while True:
+        ieeg_batch = next(gen, None)
+        if ieeg_batch is not None:
+            run_analysis_.run(ieeg_batch)
+        else:
+            break
 
     # add resampled labels to feature dataframe
-    df_ = IO.add_labels(df_, settings_wrapper, raw_arr_data)
+    df_ = IO.add_labels(run_analysis_.feature_arr, settings_wrapper, raw_arr_data)
 
     # save settings.json, df_M1.tsv and features.csv
-    IO.save_features_and_settings(df_=df_, folder_name=os.path.basename(PATH_RUN)[:-5],
+    # plus pickled run_analysis including projections
+    run_analysis_.feature_arr = df_  # here the potential label stream is added
+    IO.save_features_and_settings(df_=df_, run_analysis_=run_analysis_,
+                                  folder_name=os.path.basename(PATH_RUN)[:-5],
                                   settings_wrapper=settings_wrapper)
