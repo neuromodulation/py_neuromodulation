@@ -19,7 +19,7 @@ if __name__ == "__main__":
 
 
     # importing the data
-    path = r"D:\Jupyter notebooks\Interventional Cognitive Neuromodulation\github files\py_neuromodulation\pyneuromodulation\tests\data\derivatives\sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg\sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg_FEATURES.csv"
+    path = r"D:\Jupyter notebooks\Interventional Cognitive Neuromodulation\write_out\sub-000_ses-right_task-force_run-0_ieeg\sub-000_ses-right_task-force_run-0_ieeg_FEATURES.csv"
 
     df = pd.read_csv(path)
 
@@ -74,7 +74,7 @@ if __name__ == "__main__":
             train_loss_results.append(epoch_loss_avg.result())
 
             if epoch % epoch_print == 0:
-                print("Epoch {:03d}: Loss: {:.3f}".format(epoch, epoch_loss_avg.result() ) )
+                print("Epoch {:04d}: Loss: {:.6f}".format(epoch, epoch_loss_avg.result() ) )
 
 
 
