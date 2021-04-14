@@ -98,6 +98,18 @@ def save_features_and_settings(df_, run_analysis_, folder_name, settings_wrapper
     df_.to_csv(os.path.join(settings_wrapper.settings["out_path"], folder_name,
                             folder_name + "_FEATURES.csv"))
 
+    # rewrite np arrays to lists for json format
+    settings_wrapper.settings["grid_cortex"] = np.array(settings_wrapper.settings["grid_cortex"]).tolist()
+    settings_wrapper.settings["grid_subcortex"] = np.array(settings_wrapper.settings["grid_subcortex"]).tolist()
+    settings_wrapper.settings["coord"]["cortex_right"]["positions"] = \
+        settings_wrapper.settings["coord"]["cortex_right"]["positions"].tolist()
+    settings_wrapper.settings["coord"]["cortex_left"]["positions"] = \
+        settings_wrapper.settings["coord"]["cortex_left"]["positions"].tolist()
+    settings_wrapper.settings["coord"]["subcortex_right"]["positions"] = \
+        settings_wrapper.settings["coord"]["subcortex_right"]["positions"].tolist()
+    settings_wrapper.settings["coord"]["subcortex_left"]["positions"] = \
+        settings_wrapper.settings["coord"]["subcortex_left"]["positions"].tolist()
+
     with open(os.path.join(settings_wrapper.settings["out_path"], folder_name,
                            folder_name + '_SETTINGS.json'), 'w') as f:
         json.dump(settings_wrapper.settings, f)

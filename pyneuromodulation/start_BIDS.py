@@ -81,11 +81,9 @@ def est_features_run(PATH_RUN, PATH_M1=None) -> None:
             run_analysis_.run(ieeg_batch)
         else:
             break
-    # call now run_analysis.py
-    df_ = run_analysis_.feature_array
 
     # add resampled labels to feature dataframe
-    df_ = IO.add_labels(df_, settings_wrapper, raw_arr_data)
+    df_ = IO.add_labels(run_analysis_.feature_arr, settings_wrapper, raw_arr_data)
 
     # save settings.json, df_M1.tsv and features.csv
     # plus pickled run_analysis including projections
