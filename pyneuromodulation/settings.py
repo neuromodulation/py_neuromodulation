@@ -37,7 +37,7 @@ class SettingsWrapper:
 
     def add_coord(self, raw_arr):
         """set coordinate information to settings from RawArray
-
+        The set coordinate positions are set as lists, since np.arrays cannot be saved in json
         Parameters
         ----------
         raw_arr : mne.io.RawArray
@@ -46,10 +46,62 @@ class SettingsWrapper:
             self.settings["coord_list"] = np.array(list(dict(raw_arr.get_montage().get_positions()
                                               ["ch_pos"]).values())).tolist()
             self.settings["coord_names"] = np.array(list(dict(raw_arr.get_montage().get_positions()
-                                               ["ch_pos"]).keys())).tolist()
+                                    ["ch_pos"]).keys())).tolist()
+                   
+            self.settings["coord"] = {}
+            self.settings["coord"]["cortex_right"] = {}
+            self.settings["coord"]["cortex_left"] = {}
+            self.settings["coord"]["subcortex_right"] = {}
+            self.settings["coord"]["subcortex_left"] = {}
+            self.settings["coord"]["cortex_right"]["ch_names"] = [self.settings["coord_names"][ch_idx] for ch_idx, ch in
+                                                                  enumerate(self.settings["coord_list"]) if
+                                                                  (self.settings["coord_list"][ch_idx][0] > 0)
+                                                                   and ("ECOG" in self.settings["coord_names"][ch_idx])]
+            self.settings["coord"]["cortex_right"]["positions"] = 1000*np.array([ch for ch_idx, ch in enumerate(self.settings["coord_list"])
+                                                                   if (self.settings["coord_list"][ch_idx][0] > 0) and
+                                                                   ("ECOG" in self.settings["coord_names"][ch_idx])])
+            
+            self.settings["coord"]["cortex_left"]["ch_names"] = [self.settings["coord_names"][ch_idx] for ch_idx, ch in
+                                                                  enumerate(self.settings["coord_list"]) if
+                                                                  (self.settings["coord_list"][ch_idx][0] <= 0)
+                                                                   and ("ECOG" in self.settings["coord_names"][ch_idx])]
+            self.settings["coord"]["cortex_left"]["positions"] = 1000*np.array([ch for ch_idx, ch in enumerate(self.settings["coord_list"])
+                                                                  if (self.settings["coord_list"][ch_idx][0] <= 0) and
+                                                                  ("ECOG" in self.settings["coord_names"][ch_idx])])
+
+            self.settings["coord"]["subcortex_right"]["ch_names"] = [self.settings["coord_names"][ch_idx] for ch_idx, ch in
+                                                                     enumerate(self.settings["coord_list"]) if
+                                                                     (self.settings["coord_list"][ch_idx][0] > 0)
+                                                                      and ("LFP" in self.settings["coord_names"][ch_idx])]
+            self.settings["coord"]["subcortex_right"]["positions"] = 1000*np.array([ch for ch_idx, ch in enumerate(self.settings["coord_list"])
+                                                                      if (self.settings["coord_list"][ch_idx][0] > 0) and
+                                                                      ("LFP" in self.settings["coord_names"][ch_idx])])
+
+            self.settings["coord"]["subcortex_left"]["ch_names"] = [self.settings["coord_names"][ch_idx] for ch_idx, ch in
+                                                                     enumerate(self.settings["coord_list"]) if
+                                                                     (self.settings["coord_list"][ch_idx][0] <= 0)
+                                                                      and ("LFP" in self.settings["coord_names"][ch_idx])]
+            self.settings["coord"]["subcortex_left"]["positions"] = 1000*np.array([ch for ch_idx, ch in enumerate(self.settings["coord_list"])
+                                                                      if (self.settings["coord_list"][ch_idx][0] <= 0) and
+                                                                      ("LFP" in self.settings["coord_names"][ch_idx])])
+            if os.path.isfile("grid_cortex.tsv"):
+                self.settings["grid_cortex"] = pd.read_csv("grid_cortex.tsv", sep="\t")  # left cortical grid
+            else:
+                self.settings["grid_cortex"] = None
+            if os.path.isfile("grid_subcortex.tsv"):
+                self.settings["grid_subcortex"] = pd.read_csv("grid_subcortex.tsv", sep="\t")  # left subcortical grid
+            else:
+                self.settings["grid_subcortex"] = None
+
+            if len(self.settings["coord"]["cortex_left"]["positions"]) == 0:
+                self.settings["sess_right"] = True
+            elif len(self.settings["coord"]["cortex_right"]["positions"]) == 0:
+                self.settings["sess_right"] = False
         else:
             self.settings["coord_list"] = None
             self.settings["coord_names"] = None
+            self.settings["grid_cortex"] = None
+            self.settings["grid_subcortex"] = None
 
     def set_M1(self, m1_path=None, ch_names=None, ch_types=None) -> None:
         """set df_M1 dataframe; specifies channel names, rereferencing method, ch_type,
@@ -99,8 +151,10 @@ class SettingsWrapper:
         assert (isdir(s["BIDS_path"]))
         assert (isdir(s["out_path"]))
         assert (isinstance(s["sampling_rate_features"], (float, int)))
-        assert (isinstance(s["max_dist_cortex"], (float, int)))
-        assert (isinstance(s["max_dist_subcortex"], (float, int)))
+        if s["methods"]["project_cortex"] is True:
+            assert (isinstance(s["project_cortex_settings"]["max_dist"], (float, int)))
+        if s["methods"]["project_subcortex"] is True:
+            assert (isinstance(s["project_subcortex_settings"]["max_dist"], (float, int)))
         assert (isinstance(value, bool) for value in s["methods"].values()), \
             "Methods must be a boolean value."
         assert (any(value is True for value in s["methods"].values())), \
