@@ -12,6 +12,7 @@ import resample
 import run_analysis
 import settings as nm_settings
 import IO
+import projection
 
 sys.path.append(
     r'C:\Users\ICN_admin\Documents\py_neuromodulation\examples')
@@ -35,6 +36,12 @@ def est_features_run(PATH_RUN, PATH_M1=None) -> None:
 
     # read BIDS data
     raw_arr, raw_arr_data, fs, line_noise = IO.read_BIDS_data(PATH_RUN, settings_wrapper.settings["BIDS_path"])
+
+    # (if available) add coordinates to settings
+    if settings_wrapper.settings["methods"]["project_cortex"] is True or \
+            settings_wrapper.settings["methods"]["project_subcortex"] is True:
+        settings_wrapper.add_coord(raw_arr.copy())  # if not copy ch_names is being set
+        projection_ = projection.Projection(settings_wrapper.settings)
 
     # read df_M1 / create M1 if None specified
     settings_wrapper.set_M1(m1_path=None, ch_names=raw_arr.ch_names,
@@ -63,7 +70,7 @@ def est_features_run(PATH_RUN, PATH_M1=None) -> None:
     features_ = features.Features(settings_wrapper.settings)
 
     # call now run_analysis.py
-    df_ = run_analysis.run(gen, features_, settings_wrapper.settings, ref_here, resample_)
+    df_ = run_analysis.run(gen, features_, settings_wrapper.settings, ref_here, projection_, resample_)
 
     # add resampled labels to feature dataframe
     df_ = IO.add_labels(df_, settings_wrapper, raw_arr_data)

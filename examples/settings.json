@@ -2,8 +2,6 @@
     "BIDS_path":  "C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\pyneuromodulation\\tests\\data",
     "out_path": "C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\pyneuromodulation\\tests\\data\\derivatives",
     "sampling_rate_features": 10,
-    "max_dist_cortex": 20,
-    "max_dist_subcortex": 5,
     "methods" : {
         "resample_raw" : true,
         "normalization" : true,
@@ -14,8 +12,10 @@
         "raw_hjorth" : true,
         "sharpwave_analysis" : true,
         "return_raw" : true,
-        "pdc" : true,
-        "dtf" : true
+        "project_cortex" : true,
+        "project_subcortex" : true,
+        "pdc" : false,
+        "dtf" : false
     },
 
     "resample_raw_settings": {
@@ -87,6 +87,14 @@
             "var" : true
         }
     },
+
+    "project_cortex_settings" : {
+        "max_dist": 20
+    }, 
+
+    "project_subcortex_settings" : {
+        "max_dist": 5
+    }, 
 
     "pdc_settings": {
         "frequency_ranges" : {
