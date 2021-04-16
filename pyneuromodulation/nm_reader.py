@@ -108,7 +108,7 @@ class NM_Reader:
 
     def plot_corr_matrix(self, feature_file):
 
-        feature_col_name = [i for i in list(self.feature_ch_cols) if self.ch_name in i]
+        feature_col_name = [i[len(self.ch_name)+1:] for i in list(self.feature_ch_cols) if self.ch_name in i]
         plt.figure(figsize=(7, 7))
         corr = self.feature_ch.corr()
         sns.heatmap(corr,
@@ -118,28 +118,41 @@ class NM_Reader:
         PATH_save = os.path.join(self.feature_path, feature_file,
                                  "Features_corr_matr_ch_" + str(self.ch_name) + ".png")
         # axes ticks might be too messy
-        plt.xticks([])
-        plt.yticks([])
-        plt.savefig(PATH_save)
+        #plt.xticks([])
+        #plt.yticks([])
+        plt.savefig(PATH_save, bbox_inches = "tight")
         # plt.show()
 
     def plot_epochs_avg(self, feature_file):
-
-        feature_col_name = [i for i in list(self.feature_ch_cols) if self.ch_name in i]
+        
+        # cut channel name of for axis + "_" for more dense plot
+        feature_col_name = [i[len(self.ch_name)+1:] for i in list(self.feature_ch_cols) if self.ch_name in i]
         plt.figure(figsize=(6, 6))
+        plt.subplot(211)
         plt.imshow(zscore(np.mean(np.squeeze(self.X_epoch), axis=0), axis=0).T, aspect='auto')
-        # plt.yticks(np.arange(0, len(feature_col_name), 1), feature_col_name)
+        plt.yticks(np.arange(0, len(feature_col_name), 1), feature_col_name)
         plt.xticks(np.arange(0, self.X_epoch.shape[1], 1),
                    np.round(np.arange(-self.epoch_len / 2, self.epoch_len / 2, 1 / self.sfreq), 2), rotation=90)
         plt.xlabel("Time [s]")
         plt.title("Movement aligned features channel: " + str(self.ch_name))
         # feature axes ticks might be too messy
-        plt.yticks([])
+        #plt.yticks([])
+
+        plt.subplot(212)
+        for i in range(self.y_epoch.shape[0]):
+            plt.plot(self.y_epoch[i,:], color="black", alpha=0.4)
+        plt.plot(self.y_epoch.mean(axis=0), color="black", alpha=1, linewidth=3.0, label="mean target")
+        plt.legend()
+        plt.ylabel("target")
+        plt.title(self.label_name)
+        plt.xticks(np.arange(0, self.X_epoch.shape[1], 1),
+                   np.round(np.arange(-self.epoch_len / 2, self.epoch_len / 2, 1 / self.sfreq), 2), rotation=90)
+        plt.xlabel("Time [s]")
         plt.tight_layout()
 
         PATH_save = os.path.join(self.feature_path, feature_file,
                                  "MOV_algined_features_ch_" + str(self.ch_name) + ".png")
-        plt.savefig(PATH_save)
+        plt.savefig(PATH_save, bbox_inches = "tight")
         # plt.show()
     
     def read_ML_estimations(self):
@@ -153,3 +166,15 @@ class NM_Reader:
         with open(PATH_ML_, 'rb') as input:  # Overwrites any existing file.
             ML_est = cPickle.load(input)
         return ML_est
+
+    def read_run_analyzer(self):
+        """Read run_analysis outputs. If target was set to true, a corresponding column was added to feature_arr
+        dataframe. 
+        Returns
+        -------
+        run_analysis object
+        """
+        PATH_ML_ = os.path.join(self.feature_path, self.feature_file, self.feature_file + "_run_analysis.p")
+        with open(PATH_ML_, 'rb') as input:  # Overwrites any existing file.
+            run_analysis = cPickle.load(input)
+        return run_analysis

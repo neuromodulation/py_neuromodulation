@@ -17,16 +17,19 @@ if __name__ == "__main__":
 
     settings = nm_reader.read_settings(feature_file)
 
+    # read run_analysis
+    run_anylyzer = nm_reader.read_run_analyzer()
+
     # optionally read ML estimations
     ML_est = nm_reader.read_ML_estimations()
 
     _ = nm_reader.read_M1(feature_file)
     _ = nm_reader.read_file(feature_file)
 
-    ch_name = "ECOG_1_R_SM_HH"
+    ch_name = "ECOG_AT_SM_L_6"
     dat_ch = nm_reader.read_channel_data(ch_name)
 
-    label_name = "TTL_1_clean"
+    label_name = "ANALOG_ROT_R_1"
     dat_label = nm_reader.read_label(label_name)
 
     X_epoch, y_epoch = nm_reader.get_epochs_ch(epoch_len=1,
