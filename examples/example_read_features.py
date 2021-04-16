@@ -20,6 +20,11 @@ if __name__ == "__main__":
     # read run_analysis
     run_anylyzer = nm_reader.read_run_analyzer()
 
+    # plot cortical projection
+    PATH_PLOT=r"C:\Users\ICN_admin\Documents\py_neuromodulation\plots"
+    nm_reader.read_plot_modules(PATH_PLOT)
+    nm_reader.plot_cortical_projection()
+
     # optionally read ML estimations
     ML_est = nm_reader.read_ML_estimations()
 

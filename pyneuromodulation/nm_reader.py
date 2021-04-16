@@ -2,10 +2,14 @@ import os
 import json
 import numpy as np
 from scipy.stats import zscore
+from scipy import io
 import pandas as pd
 import _pickle as cPickle
 from matplotlib import pyplot as plt
 import seaborn as sns
+import sys
+sys.path.append(
+    r'C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation')
 
 
 class NM_Reader:
@@ -176,5 +180,63 @@ class NM_Reader:
         """
         PATH_ML_ = os.path.join(self.feature_path, self.feature_file, self.feature_file + "_run_analysis.p")
         with open(PATH_ML_, 'rb') as input:  # Overwrites any existing file.
-            run_analysis = cPickle.load(input)
-        return run_analysis
+            self.run_analysis = cPickle.load(input)
+        return self.run_analysis
+
+    def read_plot_modules(self, PATH_PLOT=r"C:\Users\ICN_admin\Documents\py_neuromodulation\plots"):
+        """Read required .mat files for plotting
+
+        Parameters
+        ----------
+        PATH_PLOT : regexp, optional
+            path to plotting files, by default"
+        """
+        
+        self.faces = io.loadmat(os.path.join(PATH_PLOT, 'faces.mat'))
+        self.vertices = io.loadmat(os.path.join(PATH_PLOT, 'Vertices.mat'))
+        self.grid = io.loadmat(os.path.join(PATH_PLOT, 'grid.mat'))['grid']
+        self.stn_surf = io.loadmat(os.path.join(PATH_PLOT, 'STN_surf.mat'))
+        self.x_ver = self.stn_surf['vertices'][::2,0]
+        self.y_ver = self.stn_surf['vertices'][::2,1]
+        self.x_ecog = self.vertices['Vertices'][::1,0]
+        self.y_ecog = self.vertices['Vertices'][::1,1]
+        self.z_ecog = self.vertices['Vertices'][::1,2]
+        self.x_stn = self.stn_surf['vertices'][::1,0]
+        self.y_stn = self.stn_surf['vertices'][::1,1]
+        self.z_stn = self.stn_surf['vertices'][::1,2]
+
+    def plot_cortical_projection(self):
+        """Plot MNI brain including selected MNI cortical projection grid + used strip ECoG electrodes
+        """
+
+        if self.run_analysis is None:
+            print("read run_analysis first")
+            return
+
+        cortex_grid = np.array(self.run_analysis.projection.grid_cortex.T)
+
+
+        if self.run_analysis.settings["sess_right"] is True:
+            cortex_grid[0,:] = cortex_grid[0,:]*-1
+            ecog_strip = np.array(self.run_analysis.settings["coord"]["cortex_right"]["positions"]).T
+        else:
+            ecog_strip = np.array(self.run_analysis.settings["coord"]["cortex_left"]["positions"]).T
+
+
+        fig, axes = plt.subplots(1,1, facecolor=(1,1,1), \
+                                figsize=(14,9))#, dpi=300)
+        axes.scatter(self.x_ecog, self.y_ecog, c="gray", s=0.001)
+        axes.axes.set_aspect('equal', anchor='C')
+
+        grid_color = self.run_analysis.projection.proj_matrix_cortex.sum(axis=1)
+        pos_ecog = axes.scatter(cortex_grid[0,:],
+                                cortex_grid[1,:], c=grid_color, 
+                                s=30, alpha=0.8, cmap="viridis")
+
+        pos_elec = axes.scatter(ecog_strip[0,:],
+                                ecog_strip[1,:], c=np.ones(ecog_strip.shape[1]), 
+                                s=50, alpha=0.8, cmap="gray", marker="x")
+        plt.axis('off')
+        PATH_save = os.path.join(self.feature_path, self.feature_file,
+                                 "Cortical_Projection.png")
+        plt.savefig(PATH_save, bbox_inches = "tight")
