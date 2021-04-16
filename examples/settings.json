@@ -10,10 +10,10 @@
         "notch_filter" : true,
         "bandpass_filter" : true,
         "raw_hjorth" : true,
-        "sharpwave_analysis" : true,
+        "sharpwave_analysis" : false,
         "return_raw" : true,
         "project_cortex" : true,
-        "project_subcortex" : true,
+        "project_subcortex" : false,
         "pdc" : false,
         "dtf" : false
     },
