@@ -29,6 +29,8 @@ class Run:
         self.feature_arr = None
         self.proj_cortex_array = None
         self.proj_subcortex_array = None
+        self.dat_cortex = None
+        self.dat_subcortex = None
         self.reference = reference
         self.projection = projection
         self.resample = resample
@@ -41,12 +43,12 @@ class Run:
             "bandpass_filter_settings"]["frequency_ranges"].values()])  # ms
 
         if settings["methods"]["project_cortex"] is True:
-            self.idx_chs_lfp = []  # feature series indexes for dbs-lfp channels
+            self.idx_chs_ecog = []  # feature series indexes for dbs-lfp channels
             self.names_chs_ecog = []  # feature series name of ecog features
             self.ecog_channels = [settings["ch_names"][ch_idx] for ch_idx, ch in enumerate(settings["ch_types"])
                                     if ch == "ecog"]
         if settings["methods"]["project_subcortex"] is True:
-            self.idx_chs_ecog = []  # feature series indexes for ecog channels
+            self.idx_chs_lfp = []  # feature series indexes for ecog channels
             self.names_chs_lfp = []  # feature series name of lfp features
             #  mind here that settings["coord"]["subcortex_left/right"] is based on the "LFP" substring in the channel
             self.lfp_channels = settings["coord"]["subcortex_right"]["ch_names"] if settings["sess_right"] is True\
@@ -105,12 +107,12 @@ class Run:
             self.cnt_samples += self.sample_add
             feature_series["time"] = self.cnt_samples * 1000 / self.fs  # ms
             if self.settings["methods"]["project_cortex"] is True:
-                dat_cortex = vstack([feature_series.iloc[idx_ch].values for idx_ch in self.idx_chs_ecog])
+                self.dat_cortex = vstack([feature_series.iloc[idx_ch].values for idx_ch in self.idx_chs_ecog])
             if self.settings["methods"]["project_subcortex"] is True:
-                dat_subcortex = vstack([feature_series.iloc[idx_ch].values for idx_ch in self.idx_chs_lfp])
+                self.dat_subcortex = vstack([feature_series.iloc[idx_ch].values for idx_ch in self.idx_chs_lfp])
             if self.settings["methods"]["project_cortex"] is True or \
                     self.settings["methods"]["project_subcortex"] is True:
-                proj_cortex, proj_subcortex = self.projection.get_projected_cortex_subcortex_data(dat_cortex, dat_subcortex)
+                proj_cortex, proj_subcortex = self.projection.get_projected_cortex_subcortex_data(self.dat_cortex, self.dat_subcortex)
                 self.proj_cortex_array = concatenate((self.proj_cortex_array, expand_dims(proj_cortex, axis=0)), axis=0)
                 self.proj_subcortex_array = concatenate((self.proj_subcortex_array,
                                                          expand_dims(proj_subcortex, axis=0)), axis=0)
@@ -130,7 +132,7 @@ class Run:
                                           if ch.startswith(ecog_channel)])
                 self.names_chs_ecog.append([ch for _, ch in enumerate(feature_series.keys())
                                             if ch.startswith(ecog_channel)])
-            dat_cortex = vstack([feature_series.iloc[idx_ch].values for idx_ch in self.idx_chs_ecog])
+            self.dat_cortex = vstack([feature_series.iloc[idx_ch].values for idx_ch in self.idx_chs_ecog])
 
         if self.settings["methods"]["project_subcortex"] is True:
             # for lfp_channels select here only the ones from the correct hemisphere!
@@ -139,10 +141,10 @@ class Run:
                                         if ch.startswith(lfp_channel)])
                 self.names_chs_lfp.append([ch for _, ch in enumerate(feature_series.keys())
                                           if ch.startswith(lfp_channel)])
-            dat_subcortex = vstack([feature_series.iloc[idx_ch].values for idx_ch in self.idx_chs_lfp])
+            self.dat_subcortex = vstack([feature_series.iloc[idx_ch].values for idx_ch in self.idx_chs_lfp])
 
         if self.settings["methods"]["project_cortex"] is True or self.settings["methods"]["project_subcortex"] is True:
             # project now data
-            proj_cortex, proj_subcortex = self.projection.get_projected_cortex_subcortex_data(dat_cortex, dat_subcortex)
+            proj_cortex, proj_subcortex = self.projection.get_projected_cortex_subcortex_data(self.dat_cortex, self.dat_subcortex)
             self.proj_cortex_array = expand_dims(proj_cortex, axis=0)
             self.proj_subcortex_array = expand_dims(proj_subcortex, axis=0)
