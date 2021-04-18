@@ -8,8 +8,9 @@ import _pickle as cPickle
 from matplotlib import pyplot as plt
 import seaborn as sns
 import sys
-sys.path.append(
-    r'C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation')
+
+os.chdir(os.path.join(os.pardir,'pyneuromodulation'))
+sys.path.append(os.path.join(os.pardir,'pyneuromodulation'))
 
 
 class NM_Reader:
@@ -183,13 +184,13 @@ class NM_Reader:
             self.run_analysis = cPickle.load(input)
         return self.run_analysis
 
-    def read_plot_modules(self, PATH_PLOT=r"C:\Users\ICN_admin\Documents\py_neuromodulation\plots"):
+    def read_plot_modules(self, PATH_PLOT=os.path.join(os.pardir, 'plots')):
         """Read required .mat files for plotting
 
         Parameters
         ----------
         PATH_PLOT : regexp, optional
-            path to plotting files, by default"
+            path to plotting files, by default
         """
         
         self.faces = io.loadmat(os.path.join(PATH_PLOT, 'faces.mat'))

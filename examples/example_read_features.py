@@ -2,14 +2,16 @@ import sys
 import os
 import numpy as np
 
-sys.path.append(
-    r'C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation')
+os.chdir(os.path.join(os.pardir,'pyneuromodulation'))
+sys.path.append(os.path.join(os.pardir,'pyneuromodulation'))
+
 import nm_reader
 
 if __name__ == "__main__":
 
-    PATH_PYNEUROMODULATION = r"C:\Users\ICN_admin\Documents\py_neuromodulation"
-    FEATURE_PATH = os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation', 'tests', 'data', 'derivatives')
+    PATH_PYNEUROMODULATION = os.getcwd()
+
+    FEATURE_PATH = os.path.join(PATH_PYNEUROMODULATION, 'tests', 'data', 'derivatives')
     nm_reader = nm_reader.NM_Reader(FEATURE_PATH)
 
     feature_list = nm_reader.get_feature_list()
@@ -21,7 +23,7 @@ if __name__ == "__main__":
     run_anylyzer = nm_reader.read_run_analyzer()
 
     # plot cortical projection
-    PATH_PLOT=r"C:\Users\ICN_admin\Documents\py_neuromodulation\plots"
+    PATH_PLOT = os.path.join(os.pardir, 'plots')
     nm_reader.read_plot_modules(PATH_PLOT)
     nm_reader.plot_cortical_projection()
 
