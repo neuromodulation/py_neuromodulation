@@ -2,6 +2,8 @@ import sys
 from sklearn.linear_model import ElasticNet
 from sklearn import metrics, model_selection
 import xgboost
+import argparse
+
 
 import os
 os.chdir(os.path.join(os.pardir,'pyneuromodulation'))
@@ -14,6 +16,14 @@ if __name__ == "__main__":
 
     PATH_FEATURES = os.path.join(os.getcwd(),r"tests\data\derivatives" )
     FEATURE_FILE = r"sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg"
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f','--file',type=str,required=False)
+
+    args = parser.parse_args()
+
+    if args.file != None:
+        FEATURE_FILE =args.file
 
     # model = ElasticNet(max_iter=10000)
     model = xgboost.XGBRegressor()
