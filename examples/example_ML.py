@@ -2,20 +2,40 @@ import sys
 from sklearn.linear_model import ElasticNet
 from sklearn import metrics, model_selection
 import xgboost
+import argparse
 
-sys.path.append(
-    r'C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation')
+
+import os
+os.chdir(os.path.join(os.pardir,'pyneuromodulation'))
+sys.path.append(os.path.join(os.pardir,'pyneuromodulation'))
 
 import nm_decode
 from skopt.space import Real, Integer, Categorical
 
 if __name__ == "__main__":
 
-    PATH_FEATURES = r"C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\tests\data\derivatives"
+    PATH_FEATURES = os.path.join(os.getcwd(),r"tests\data\derivatives" )
     FEATURE_FILE = r"sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg"
 
-    # model = ElasticNet(max_iter=10000)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f','--file',type=str,required=False)
+    parser.add_argument('-m', '--model',type=str,required=False)
+
+    args = parser.parse_args()
+
+    if args.file != None:
+        FEATURE_FILE =args.file
+
+
     model = xgboost.XGBRegressor()
+
+    if args.model == "xgboost":
+        model = xgboost.XGBRegressor()
+
+    if args.model == "elasticnet":
+        model = ElasticNet(max_iter=10000)
+
+
     decoder = nm_decode.Decoder(feature_path=PATH_FEATURES,
                                 feature_file=FEATURE_FILE,
                                 model=model,
