@@ -19,14 +19,23 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-f','--file',type=str,required=False)
+    parser.add_argument('-m', '--model',type=str,required=False)
 
     args = parser.parse_args()
 
     if args.file != None:
         FEATURE_FILE =args.file
 
-    # model = ElasticNet(max_iter=10000)
+
     model = xgboost.XGBRegressor()
+
+    if args.model == "xgboost":
+        model = xgboost.XGBRegressor()
+
+    if args.model == "elasticnet":
+        model = ElasticNet(max_iter=10000)
+
+
     decoder = nm_decode.Decoder(feature_path=PATH_FEATURES,
                                 feature_file=FEATURE_FILE,
                                 model=model,
