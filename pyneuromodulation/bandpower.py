@@ -7,13 +7,21 @@ def get_bandpower_features(
 
     Parameters
     ----------
-    features_
-    s
-    seglengths
-    dat_filtered
-    KF_dict
-    ch
-    ch_idx
+    features_ : dict
+        Estimated feature dictionary
+    s : dict
+        settings dict
+    seglengths : list
+        list of time lengts for bandpower feature estimation
+    dat_filtered : ndarray, shape (M, n)
+        filtered array of M channels of length n
+    KF_dict : dict
+        Kalmanfilter dictionaries, channel, bandpower and frequency
+        band specific
+    ch : str
+        channel name
+    ch_idx : int
+        channel index 
 
     Returns
     -------
@@ -46,7 +54,7 @@ def get_bandpower_features(
                     KF_dict[KF_name].predict()
                     KF_dict[KF_name].update(feature_calc)
                     feature_calc = KF_dict[KF_name].x[0]  # filtered signal
-    
+
             feature_name = '_'.join(
                 [ch, 'bandpass', bp_feature, f_band])
             features_[feature_name] = feature_calc
