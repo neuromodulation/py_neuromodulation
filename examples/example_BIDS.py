@@ -4,15 +4,15 @@ from bids import BIDSLayout
 from itertools import product
 import os
 
-sys.path.append(
-    r'C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation')
-
+os.chdir(os.path.join(os.pardir,'pyneuromodulation'))
+sys.path.append(os.path.join(os.pardir,'pyneuromodulation'))
+sys.path.append(os.path.join(os.pardir, 'examples'))
 import start_BIDS
 
 if __name__ == "__main__":
 
     # example single run file estimation
-    PATH_PYNEUROMODULATION = r'C:\Users\ICN_admin\Documents\py_neuromodulation'
+    PATH_PYNEUROMODULATION = os.pardir
 
     BIDS_EXAMPLE_PATH = os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation',
                                      'tests', 'data')

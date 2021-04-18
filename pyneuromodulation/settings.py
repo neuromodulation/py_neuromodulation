@@ -8,7 +8,7 @@ import numpy as np
 
 class SettingsWrapper:
 
-    def __init__(self, settings_path='settings.json') -> None:
+    def __init__(self, settings_path=os.path.join(os.pardir, 'examples', 'settings.json')) -> None:
         """initialize settings class with settings.json and setting df_M1 toolbox parameter
 
         Parameters
@@ -86,12 +86,14 @@ class SettingsWrapper:
             self.settings["coord"]["subcortex_left"]["positions"] = 1000*np.array([ch for ch_idx, ch in enumerate(self.settings["coord_list"])
                                                                       if (self.settings["coord_list"][ch_idx][0] <= 0) and
                                                                       ("LFP" in self.settings["coord_names"][ch_idx])])
-            if os.path.isfile("grid_cortex.tsv"):
-                self.settings["grid_cortex"] = pd.read_csv("grid_cortex.tsv", sep="\t")  # left cortical grid
+            if os.path.isfile(os.path.join(os.pardir, 'examples', 'grid_cortex.tsv')):
+                self.settings["grid_cortex"] = pd.read_csv(os.path.join(os.pardir, 'examples', 'grid_cortex.tsv'),
+                                                           sep="\t")  # left cortical grid
             else:
                 self.settings["grid_cortex"] = None
-            if os.path.isfile("grid_subcortex.tsv"):
-                self.settings["grid_subcortex"] = pd.read_csv("grid_subcortex.tsv", sep="\t")  # left subcortical grid
+            if os.path.isfile(os.path.join(os.pardir, 'examples', 'grid_subcortex.tsv')):
+                self.settings["grid_subcortex"] = pd.read_csv(os.path.join(os.pardir, 'examples', 'grid_subcortex.tsv'),
+                                                              sep="\t")  # left subcortical grid
             else:
                 self.settings["grid_subcortex"] = None
 

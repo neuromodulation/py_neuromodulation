@@ -3,8 +3,6 @@ from sklearn.linear_model import ElasticNet
 from sklearn import metrics, model_selection
 import xgboost
 import argparse
-
-
 import os
 os.chdir(os.path.join(os.pardir,'pyneuromodulation'))
 sys.path.append(os.path.join(os.pardir,'pyneuromodulation'))
