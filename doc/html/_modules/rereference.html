@@ -1,0 +1,339 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>rereference &mdash; py_neuromodulation  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> py_neuromodulation
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../start_BIDS.html">start_BIDS.py</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Real-time processing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../settings.html">settings.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../run_analysis.html">run_analysis.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../resample.html">resample.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../normalization.html">realtime_normalization.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rereference.html">rereference.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../projection.html">projection.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../IO.html">IO.py</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Feature estimation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../features.html">features.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../filter.html">filter.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bandpower.html">bandpower.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../kalmanfilter.html">kalmanfilter.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hjorth_raw.html">hjorth_raw.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../sharpwaves.html">sharpwaves.py</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Real-time processing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../nm_reader.html">nm_reader.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nm_decode.html">nm_decode.py</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">py_neuromodulation</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>rereference</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for rereference</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span><span class="p">,</span> <span class="n">empty_like</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">where</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">isnull</span>
+
+
+<div class="viewcode-block" id="RT_rereference"><a class="viewcode-back" href="../rereference.html#rereference.RT_rereference">[docs]</a><span class="k">class</span> <span class="nc">RT_rereference</span><span class="p">:</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">split_data</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Initialize real-time rereference information.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df</span>
+<span class="sd">        split_data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Initiatlize real time reference information</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (Pandas DataFrame) : </span>
+<span class="sd">                Dataframe containing information about rereferencing, as </span>
+<span class="sd">                specified in M1.tsv.</span>
+<span class="sd">            split_data (bool, optional): </span>
+<span class="sd">                If set to True, the rereferenced data will be returned split </span>
+<span class="sd">                into cortex and subcortex. Defaults to</span>
+<span class="sd">                False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">ch_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+        <span class="n">refs</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;rereference&#39;</span><span class="p">]</span>
+        <span class="n">cortex_idx</span><span class="p">,</span> <span class="o">=</span> <span class="n">where</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;ecog&#39;</span><span class="p">)</span>
+        <span class="n">subcortex_idx</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span>
+            <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;seeg&#39;</span><span class="p">)</span>
+               <span class="o">|</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;dbs&#39;</span><span class="p">)</span>
+               <span class="o">|</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;lfp&#39;</span><span class="p">)]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">subcortex_idx</span><span class="p">)</span>
+        <span class="n">to_ref_idx</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;used&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ch_names</span> <span class="o">=</span> <span class="n">ch_names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refs</span> <span class="o">=</span> <span class="n">refs</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">to_ref_idx</span> <span class="o">=</span> <span class="n">to_ref_idx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cortex_idx</span> <span class="o">=</span> <span class="n">cortex_idx</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">subcortex_idx</span> <span class="o">=</span> <span class="n">subcortex_idx</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">split_data</span> <span class="o">=</span> <span class="n">split_data</span> 
+        
+<div class="viewcode-block" id="RT_rereference.rereference"><a class="viewcode-back" href="../rereference.html#rereference.RT_rereference.rereference">[docs]</a>    <span class="k">def</span> <span class="nf">rereference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ieeg_batch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
+
+        <span class="sd">&quot;&quot;&quot;Rereference data according to the initialized RT_rereference class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ieeg_batch (numpy ndarray) :</span>
+<span class="sd">                shape(n_channels, n_samples) - data to be rereferenced.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: rereferencing using undefined channel </span>
+<span class="sd">            ValueError: rereferencing according to same channel </span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            reref_data (numpy ndarray): rereferenced data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">data_subcortex</span> <span class="o">=</span> <span class="n">ieeg_batch</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">subcortex_idx</span><span class="p">]</span>
+        <span class="n">new_data_subcortex</span> <span class="o">=</span> <span class="n">empty_like</span><span class="p">(</span><span class="n">data_subcortex</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subcortex_idx</span><span class="p">):</span>
+            <span class="n">elec_channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subcortex_idx</span> <span class="o">==</span> <span class="n">idx</span>
+            <span class="n">ch</span> <span class="o">=</span> <span class="n">data_subcortex</span><span class="p">[</span><span class="n">elec_channel</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">isnull</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">idx</span><span class="p">]):</span>
+                <span class="n">new_data_subcortex</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ch</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;average&#39;</span><span class="p">:</span>
+                <span class="n">av</span> <span class="o">=</span> <span class="n">mean</span><span class="p">(</span><span class="n">data_subcortex</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">subcortex_idx</span> <span class="o">!=</span> <span class="n">idx</span><span class="p">,</span> <span class="p">:],</span>
+                          <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">new_data_subcortex</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ch</span> <span class="o">-</span> <span class="n">av</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">ref_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ref_channels</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">ref_channels</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ch_names</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;One or more of the &#39;</span>
+                                         <span class="s1">&#39;reference channels are not part of &#39;</span>
+                                         <span class="s1">&#39;the recording channels.&#39;</span><span class="p">)</span>
+                    <span class="n">index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ch_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">ref_channels</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span>
+
+                <span class="n">new_data_subcortex</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ch</span> <span class="o">-</span> <span class="n">mean</span><span class="p">(</span><span class="n">ieeg_batch</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">data_cortex</span> <span class="o">=</span> <span class="n">ieeg_batch</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cortex_idx</span><span class="p">]</span>
+        <span class="n">new_data_cortex</span> <span class="o">=</span> <span class="n">empty_like</span><span class="p">(</span><span class="n">data_cortex</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cortex_idx</span><span class="p">):</span>
+            <span class="n">elec_channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cortex_idx</span> <span class="o">==</span> <span class="n">idx</span>
+            <span class="n">ch</span> <span class="o">=</span> <span class="n">data_cortex</span><span class="p">[</span><span class="n">elec_channel</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;none&#39;</span> <span class="ow">or</span> <span class="n">isnull</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">idx</span><span class="p">]):</span>
+                <span class="n">new_data_cortex</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ch</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;average&#39;</span><span class="p">:</span>
+                <span class="n">av</span> <span class="o">=</span> <span class="n">mean</span><span class="p">(</span><span class="n">data_cortex</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cortex_idx</span> <span class="o">!=</span> <span class="n">idx</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">new_data_cortex</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ch</span> <span class="o">-</span> <span class="n">av</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">ref_channels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">refs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ref_channels</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">ref_channels</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ch_names</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;One or more of the reference &#39;</span>
+                                         <span class="s1">&#39;channels are not part of the &#39;</span>
+                                         <span class="s1">&#39;recorded channels.&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">ref_channels</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">ch_names</span><span class="p">[</span><span class="n">idx</span><span class="p">]:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;You cannot rereference to the same &#39;</span>
+                                         <span class="s1">&#39;channel.&#39;</span><span class="p">)</span>
+                    <span class="n">index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ch_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">ref_channels</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span>
+
+                <span class="n">new_data_cortex</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ch</span> <span class="o">-</span> <span class="n">mean</span><span class="p">(</span><span class="n">ieeg_batch</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="p">:],</span>
+                                               <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">new_data_cortex</span><span class="p">,</span> <span class="n">new_data_subcortex</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">reref_data</span> <span class="o">=</span> <span class="n">empty_like</span><span class="p">(</span><span class="n">ieeg_batch</span><span class="p">)</span>
+            <span class="n">reref_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">to_ref_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">ieeg_batch</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">to_ref_idx</span><span class="p">]</span>
+            <span class="n">reref_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">subcortex_idx</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">new_data_subcortex</span>
+            <span class="n">reref_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">cortex_idx</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">new_data_cortex</span>
+            <span class="k">return</span> <span class="n">reref_data</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Timon Merk.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

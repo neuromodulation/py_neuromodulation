@@ -1,0 +1,372 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>nm_reader.py &mdash; py_neuromodulation  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="nm_decode.py" href="nm_decode.html" />
+    <link rel="prev" title="sharpwaves.py" href="sharpwaves.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> py_neuromodulation
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="start_BIDS.html">start_BIDS.py</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Real-time processing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">settings.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run_analysis.html">run_analysis.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resample.html">resample.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="normalization.html">realtime_normalization.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rereference.html">rereference.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="projection.html">projection.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="IO.html">IO.py</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Feature estimation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="features.html">features.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filter.html">filter.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandpower.html">bandpower.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kalmanfilter.html">kalmanfilter.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hjorth_raw.html">hjorth_raw.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sharpwaves.html">sharpwaves.py</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Real-time processing</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">nm_reader.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nm_decode.html">nm_decode.py</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">py_neuromodulation</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>nm_reader.py</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/nm_reader.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="nm-reader-py">
+<h1>nm_reader.py<a class="headerlink" href="#nm-reader-py" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="nm_reader.NM_Reader">
+<em class="property">class </em><code class="sig-prename descclassname">nm_reader.</code><code class="sig-name descname">NM_Reader</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">feature_path</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_reader.html#NM_Reader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nm_reader.NM_Reader" title="Permalink to this definition">¶</a></dt>
+<dd><p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nm_reader.NM_Reader.get_epochs" title="nm_reader.NM_Reader.get_epochs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_epochs</span></code></a>(data, y_, epoch_len, sfreq[, …])</p></td>
+<td><p>Return epoched data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nm_reader.NM_Reader.plot_cortical_projection" title="nm_reader.NM_Reader.plot_cortical_projection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_cortical_projection</span></code></a>()</p></td>
+<td><p>Plot MNI brain including selected MNI cortical projection grid + used strip ECoG electrodes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nm_reader.NM_Reader.read_ML_estimations" title="nm_reader.NM_Reader.read_ML_estimations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_ML_estimations</span></code></a>()</p></td>
+<td><p>Read estimated ML outputs</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nm_reader.NM_Reader.read_plot_modules" title="nm_reader.NM_Reader.read_plot_modules"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_plot_modules</span></code></a>([PATH_PLOT])</p></td>
+<td><p>Read required .mat files for plotting</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nm_reader.NM_Reader.read_run_analyzer" title="nm_reader.NM_Reader.read_run_analyzer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_run_analyzer</span></code></a>()</p></td>
+<td><p>Read run_analysis outputs.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 68%" />
+<col style="width: 32%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>get_epochs_ch</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>get_feature_list</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>plot_corr_matrix</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>plot_epochs_avg</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>read_M1</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>read_channel_data</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>read_file</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>read_label</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>read_settings</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="nm_reader.NM_Reader.get_epochs">
+<code class="sig-name descname">get_epochs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">y_</span></em>, <em class="sig-param"><span class="n">epoch_len</span></em>, <em class="sig-param"><span class="n">sfreq</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_reader.html#NM_Reader.get_epochs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nm_reader.NM_Reader.get_epochs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return epoched data.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>data</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code></span></dt><dd><p>array of extracted features of shape (n_samples, n_channels, n_features)</p>
+</dd>
+<dt><strong>y_</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code></span></dt><dd><p>array of labels e.g. ones for movement and zeros for no movement or baseline corr. rotameter data</p>
+</dd>
+<dt><strong>sfreq</strong><span class="classifier">int/float</span></dt><dd><p>sampling frequency of data</p>
+</dd>
+<dt><strong>epoch_len</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:int</span></code></span></dt><dd><p>length of epoch in seconds</p>
+</dd>
+<dt><strong>threshold</strong><span class="classifier">int/float</span></dt><dd><dl class="simple">
+<dt>(Optional) threshold to be used for identifying events (default=0 for y_tr with only ones</dt><dd><p>and zeros)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">epoch_</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code></dt><dd><p>array of epoched ieeg data with shape (epochs,samples,channels,features)</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_arr</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code></dt><dd><p>array of epoched event label data with shape (epochs,samples)</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="nm_reader.NM_Reader.plot_cortical_projection">
+<code class="sig-name descname">plot_cortical_projection</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_reader.html#NM_Reader.plot_cortical_projection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nm_reader.NM_Reader.plot_cortical_projection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot MNI brain including selected MNI cortical projection grid + used strip ECoG electrodes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="nm_reader.NM_Reader.read_ML_estimations">
+<code class="sig-name descname">read_ML_estimations</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_reader.html#NM_Reader.read_ML_estimations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nm_reader.NM_Reader.read_ML_estimations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read estimated ML outputs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">nm_decode</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="nm_reader.NM_Reader.read_plot_modules">
+<code class="sig-name descname">read_plot_modules</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">PATH_PLOT</span><span class="o">=</span><span class="default_value">'..\\plots'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_reader.html#NM_Reader.read_plot_modules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nm_reader.NM_Reader.read_plot_modules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read required .mat files for plotting</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>PATH_PLOT</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">regexp</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">optional</span></code></span></dt><dd><p>path to plotting files, by default</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="nm_reader.NM_Reader.read_run_analyzer">
+<code class="sig-name descname">read_run_analyzer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_reader.html#NM_Reader.read_run_analyzer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nm_reader.NM_Reader.read_run_analyzer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read run_analysis outputs. If target was set to true, a corresponding column was added to feature_arr
+dataframe.
+:returns:
+:rtype: run_analysis object</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="nm_decode.html" class="btn btn-neutral float-right" title="nm_decode.py" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="sharpwaves.html" class="btn btn-neutral float-left" title="sharpwaves.py" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Timon Merk.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

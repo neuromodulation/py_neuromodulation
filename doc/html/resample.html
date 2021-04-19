@@ -1,0 +1,271 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>resample.py &mdash; py_neuromodulation  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="realtime_normalization.py" href="normalization.html" />
+    <link rel="prev" title="run_analysis.py" href="run_analysis.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> py_neuromodulation
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="start_BIDS.html">start_BIDS.py</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Real-time processing</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="settings.html">settings.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="run_analysis.html">run_analysis.py</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">resample.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="normalization.html">realtime_normalization.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rereference.html">rereference.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="projection.html">projection.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="IO.html">IO.py</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Feature estimation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="features.html">features.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="filter.html">filter.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandpower.html">bandpower.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kalmanfilter.html">kalmanfilter.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hjorth_raw.html">hjorth_raw.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sharpwaves.html">sharpwaves.py</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Real-time processing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="nm_reader.html">nm_reader.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nm_decode.html">nm_decode.py</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">py_neuromodulation</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>resample.py</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/resample.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="resample-py">
+<h1>resample.py<a class="headerlink" href="#resample-py" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="resample.Resample">
+<em class="property">class </em><code class="sig-prename descclassname">resample.</code><code class="sig-name descname">Resample</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/resample.html#Resample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#resample.Resample" title="Permalink to this definition">¶</a></dt>
+<dd><p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#resample.Resample.resample_raw" title="resample.Resample.resample_raw"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resample_raw</span></code></a>(data)</p></td>
+<td><p><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="resample.Resample.resample_raw">
+<code class="sig-name descname">resample_raw</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/resample.html#Resample.resample_raw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#resample.Resample.resample_raw" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl>
+<dt><strong>data</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">array</span></code></span></dt><dd><p>Data to resample</p>
+</dd>
+<dt><strong>Returns</strong></dt><dd></dd>
+<dt><strong>——-</strong></dt><dd></dd>
+<dt><strong>data: array</strong></dt><dd><p>Resampled data</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="normalization.html" class="btn btn-neutral float-right" title="realtime_normalization.py" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="run_analysis.html" class="btn btn-neutral float-left" title="run_analysis.py" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Timon Merk.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
