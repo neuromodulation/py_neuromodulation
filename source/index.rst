@@ -8,9 +8,40 @@ Welcome to py_neuromodulation's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
-   .. automodule:: start_BIDS
-      :members:
+   :caption: BIDS data feature estimation
+
+   start_BIDS
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Real-time processing
+
+   settings
+   run_analysis
+   resample
+   normalization
+   rereference
+   projection
+   IO
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Feature estimation
+
+   features
+   filter
+   bandpower
+   kalmanfilter
+   hjorth_raw
+   sharpwaves
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Real-time processing
+
+   nm_reader
+   nm_decode
+
 .. include:: ../README.md
 
 Indices and tables

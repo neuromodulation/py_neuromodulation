@@ -137,8 +137,6 @@ class SettingsWrapper:
 
         Parameters
         ----------
-        settings: dict, string or path
-            settings loaded as dictionary, or string/path pointing to settings.json.
         verbose: boolean
             set to True if feedback is desired.
         Returns

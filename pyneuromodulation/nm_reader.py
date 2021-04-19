@@ -7,11 +7,6 @@ import pandas as pd
 import _pickle as cPickle
 from matplotlib import pyplot as plt
 import seaborn as sns
-import sys
-
-os.chdir(os.path.join(os.pardir,'pyneuromodulation'))
-sys.path.append(os.path.join(os.pardir,'pyneuromodulation'))
-
 
 class NM_Reader:
 
