@@ -1,10 +1,33 @@
 from numpy import arange, mean, median
 
 
-# numba jit did not help here due to mean(axis) keyword
 def realtime_normalization(raw_arr, cnt_samples, normalize_samples, fs,
                            norm_type='mean'):
+    """Normalization according to past normalize_samples according to mean or median.
 
+    Parameters
+    ----------
+    raw_arr : ndarray
+        input array, shape (channels, time)
+    cnt_samples : int
+        current sample index
+    normalize_samples : int
+        number of past samples considered for normalization
+    fs : int
+        sampling frequency
+    norm_type : str, optional
+        data is normalization with subtract and divide by 'mean' or 'median' , by default 'mean'
+
+    Returns
+    -------
+    raw_norm : ndarray
+        normalized array
+
+    Raises
+    ------
+    TypeError
+        returned  if norm_type is not 'mean' or 'median'
+    """
     if cnt_samples == 0:
         return raw_arr
     if cnt_samples < normalize_samples:

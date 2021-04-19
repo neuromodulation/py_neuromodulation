@@ -4,8 +4,23 @@ from filterpy.kalman import KalmanFilter
 
 
 def define_KF(Tp, sigma_w, sigma_v):
-    """
-    Define Kalman filter according to white noise acceleration model.
+    """Define Kalman filter according to white noise acceleration model.
+    See DOI: 10.1109/TBME.2009.2038990  for explanation
+    See https://filterpy.readthedocs.io/en/latest/kalman/KalmanFilter.html#r64ca38088676-2 for implementation details
+
+    Parameters
+    ----------
+    Tp : float
+        prediction interval
+    sigma_w : float
+        process noise
+    sigma_v : float
+        measurement noise
+
+    Returns
+    -------
+    filterpy.KalmanFilter
+        initialized KalmanFilter object
     """
 
     f = KalmanFilter(dim_x=2, dim_z=1)

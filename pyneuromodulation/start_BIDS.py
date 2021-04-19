@@ -14,10 +14,6 @@ import settings as nm_settings
 import IO
 import projection
 
-os.chdir(os.path.join(os.pardir,'pyneuromodulation'))
-sys.path.append(os.path.join(os.pardir,'examples'))
-
-
 
 def est_features_run(PATH_RUN, PATH_M1=None) -> None:
     """Start feature estimation by reading settings, creating or reading
@@ -31,6 +27,9 @@ def est_features_run(PATH_RUN, PATH_M1=None) -> None:
     PATH_M1 : string
         absolute path to df_M1.csv file
     """
+
+    os.chdir(os.path.join(os.pardir,'pyneuromodulation'))
+    sys.path.append(os.path.join(os.pardir,'examples'))
 
     # read and test settings first to obtain BIDS path
     settings_wrapper = nm_settings.SettingsWrapper(settings_path=os.path.join(os.pardir, 'examples', 'settings.json'))
