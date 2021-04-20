@@ -47,6 +47,10 @@ print(sys.path)
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
+source_parsers = {
+    '.md': 'recommonmark.parser.CommonMarkParser',
+}
+source_suffix = ['.rst', '.md']
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
@@ -59,11 +63,9 @@ extensions = [
     'recommonmark'
 ]
 
-source_parsers = {
-    '.md': CommonMarkParser,
-}
+#source_suffix = ['.rst', '.md']
 
-source_suffix = ['.rst', '.md']
+
 
 autosummary_generate = True
 autodoc_default_options = {'inherited-members': None}
@@ -71,10 +73,6 @@ autodoc_default_options = {'inherited-members': None}
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 html_theme = 'sphinx_rtd_theme'
-
-numpydoc_class_members_toctree = False
-numpydoc_attributes_as_param_list = False
-numpydoc_xref_param_type = True
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -92,11 +90,3 @@ exclude_patterns = []
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-
-# At the bottom of conf.py
-def setup(app):
-    app.add_config_value('recommonmark_config', {
-            'url_resolver': lambda url: github_doc_root + url,
-            'auto_toc_tree_section': 'Contents',
-            }, True)
-    app.add_transform(AutoStructify)
