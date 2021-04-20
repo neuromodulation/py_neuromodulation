@@ -8,7 +8,7 @@ import projection
 
 class Run:
 
-    def __init__(self, features, settings, reference=None, projection=None, resample=None) -> None:
+    def __init__(self, features, settings, reference=None, projection=None, resample=None, verbose=True) -> None:
         """Initialize run class
 
         Parameters
@@ -23,6 +23,8 @@ class Run:
             projection object (needs to be initialized beforehand), by default None
         resample : resample.py object
             Resample object (needs to be initialized beforehand), by default None
+        verbose : boolean
+            if True, print out signal processed and computation time
         """
 
         self.features = features
@@ -37,6 +39,7 @@ class Run:
         self.settings = settings
         self.fs_new = int(settings["sampling_rate_features"])
         self.fs = features.fs
+        self.verbose = verbose
         self.sample_add = int(self.fs / self.fs_new)
         self.normalize_time = int(settings["normalization_settings"]["normalization_time"])
         self.offset = max([value[1] for value in settings[
@@ -81,8 +84,6 @@ class Run:
         if self.settings["methods"]["resample_raw"] is True:
             ieeg_batch = self.resample.resample_raw(ieeg_batch)
 
-        print("batch shape: ", ieeg_batch.shape)
-
         # normalize (rereferenced) data
         if self.settings["methods"]["normalization"] is True:
             if self.cnt_samples == 0:
@@ -118,8 +119,8 @@ class Run:
                                                          expand_dims(proj_subcortex, axis=0)), axis=0)
             self.feature_arr = self.feature_arr.append(feature_series, ignore_index=True)
 
-        print(str(np_round(feature_series["time"] / 1000, 2)) + ' seconds of data processed')
-        print("took: " + str(np_round(time() - start_time, 2)) + " seconds")
+        if self.verbose is True: print(str(np_round(feature_series["time"] / 1000, 2)) + ' seconds of data processed')
+        if self.verbose is True: print("took: " + str(np_round(time() - start_time, 2)) + " seconds")
 
     def init_projection_run(self, feature_series):
         self.cnt_samples += int(self.fs)

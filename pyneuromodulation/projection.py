@@ -30,11 +30,11 @@ class Projection:
 
         if self.sess_right is True:
 
-            cortex_grid_right = np.copy(self.grid_cortex)
-            cortex_grid_right[0, :] = cortex_grid_right[0, :] * -1
+            self.cortex_grid_right = np.copy(self.grid_cortex)
+            self.cortex_grid_right[0, :] = self.cortex_grid_right[0, :] * -1
 
-            subcortex_grid_right = np.copy(self.grid_subcortex)
-            subcortex_grid_right[0, :] = subcortex_grid_right[0, :] * -1
+            self.subcortex_grid_right = np.copy(self.grid_subcortex)
+            self.subcortex_grid_right[0, :] = self.subcortex_grid_right[0, :] * -1
 
             grid_session = [np.array(self.cortex_grid_right.T), np.array(self.subcortex_grid_right.T)]
             coord_arr = [self.coord["cortex_right"]["positions"], self.coord["subcortex_right"]["positions"]]
