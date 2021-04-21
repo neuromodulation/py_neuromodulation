@@ -27,9 +27,10 @@ if __name__ == "__main__":
     PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Pittsburgh"
     layout = BIDSLayout(PATH_BIDS)
     run_files = layout.get(extension='.vhdr')
-    #start_BIDS.est_features_run(run_files[5])
-
     M1_files = [None for i in range(len(run_files))]  # specify no M1 files
     pool = multiprocessing.Pool(processes=50)
+    
+    # call here the pool only with run files, M1 files are created on the fly
     pool.map(start_BIDS.est_features_run, run_files)
-    #pool.map(start_BIDS.est_features_run, product(M1_files, run_files))
+    
+    
