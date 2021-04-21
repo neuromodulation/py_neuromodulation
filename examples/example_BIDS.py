@@ -26,8 +26,16 @@ if __name__ == "__main__":
     
     PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Pittsburgh"
     layout = BIDSLayout(PATH_BIDS)
-    run_files = layout.get(extension='.vhdr')
-    M1_files = [None for i in range(len(run_files))]  # specify no M1 files
+    #run_files = layout.get(extension='.vhdr')
+    
+    # get here only the first run file for every subject
+    subjects = layout.get_subjects()
+    run_files = []
+    for sub in subjects:
+        run_files.append(layout.get(subject=sub, extension='.vhdr')[0])
+
+    #M1_files = [None for i in range(len(run_files))]  # specify no M1 files
+    #start_BIDS.est_features_run(run_files[0])
     pool = multiprocessing.Pool(processes=50)
     
     # call here the pool only with run files, M1 files are created on the fly
