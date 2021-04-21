@@ -163,8 +163,12 @@ class NM_Reader:
         nm_decode object
         """
         PATH_ML_ = os.path.join(self.feature_path, self.feature_file, self.feature_file + "_ML_RES.p")
-        with open(PATH_ML_, 'rb') as input:  # Overwrites any existing file.
-            ML_est = cPickle.load(input)
+        try:
+            with open(PATH_ML_, 'rb') as input:  # Overwrites any existing file.
+                ML_est = cPickle.load(input)
+        except FileNotFoundError:
+            print("no _ML file computed")
+            return None
         return ML_est
 
     def read_run_analyzer(self):
