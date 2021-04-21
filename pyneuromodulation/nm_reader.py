@@ -38,7 +38,7 @@ class NM_Reader:
                                  feature_file + "_DF_M1.csv"), header=0)
         return self.df_M1
 
-    def read_file(self, feature_file) -> None:
+    def read_features(self, feature_file) -> None:
         self.features = pd.read_csv(os.path.join(self.feature_path, feature_file,
                                     feature_file + "_FEATURES.csv"), header=0)
 

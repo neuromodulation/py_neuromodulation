@@ -31,7 +31,7 @@ if __name__ == "__main__":
     ML_est = nm_reader.read_ML_estimations()
 
     _ = nm_reader.read_M1(feature_file)
-    _ = nm_reader.read_file(feature_file)
+    _ = nm_reader.read_features(feature_file)
 
     ch_name = "ECOG_AT_SM_L_6"
     dat_ch = nm_reader.read_channel_data(ch_name)
