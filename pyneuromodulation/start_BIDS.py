@@ -50,11 +50,11 @@ def est_features_run(PATH_RUN, PATH_M1=None) -> None:
     settings_wrapper.set_fs_line_noise(fs, line_noise)
 
     # optionally reduce timing for faster test completion
-    '''
-    LIMIT_LOW = 50000
-    LIMIT_HIGH = 65000
-    raw_arr_data = raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
-    '''
+    
+    #LIMIT_LOW = 0
+    #LIMIT_HIGH = 5000
+    #raw_arr_data = raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
+
 
     # initialize generator for run function
     gen = generator.ieeg_raw_generator(raw_arr_data, settings_wrapper.settings)
@@ -74,7 +74,8 @@ def est_features_run(PATH_RUN, PATH_M1=None) -> None:
     features_ = features.Features(settings_wrapper.settings)
 
     # initialize run object
-    run_analysis_ = run_analysis.Run(features_, settings_wrapper.settings, rereference_, projection_, resample_)
+    run_analysis_ = run_analysis.Run(features_, settings_wrapper.settings,
+                                     rereference_, projection_, resample_, verbose=False)
 
     while True:
         ieeg_batch = next(gen, None)

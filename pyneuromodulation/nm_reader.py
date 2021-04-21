@@ -38,7 +38,7 @@ class NM_Reader:
                                  feature_file + "_DF_M1.csv"), header=0)
         return self.df_M1
 
-    def read_file(self, feature_file) -> None:
+    def read_features(self, feature_file) -> None:
         self.features = pd.read_csv(os.path.join(self.feature_path, feature_file,
                                     feature_file + "_FEATURES.csv"), header=0)
 
@@ -163,8 +163,12 @@ class NM_Reader:
         nm_decode object
         """
         PATH_ML_ = os.path.join(self.feature_path, self.feature_file, self.feature_file + "_ML_RES.p")
-        with open(PATH_ML_, 'rb') as input:  # Overwrites any existing file.
-            ML_est = cPickle.load(input)
+        try:
+            with open(PATH_ML_, 'rb') as input:  # Overwrites any existing file.
+                ML_est = cPickle.load(input)
+        except FileNotFoundError:
+            print("no _ML file computed")
+            return None
         return ML_est
 
     def read_run_analyzer(self):

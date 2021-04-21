@@ -130,18 +130,18 @@ class Run:
         if self.settings["methods"]["project_cortex"] is True:
             for ecog_channel in self.ecog_channels:
                 self.idx_chs_ecog.append([ch_idx for ch_idx, ch in enumerate(feature_series.keys())
-                                          if ch.startswith(ecog_channel)])
+                                          if ch.startswith(ecog_channel + '_')])
                 self.names_chs_ecog.append([ch for _, ch in enumerate(feature_series.keys())
-                                            if ch.startswith(ecog_channel)])
+                                            if ch.startswith(ecog_channel + '_')])
             self.dat_cortex = vstack([feature_series.iloc[idx_ch].values for idx_ch in self.idx_chs_ecog])
 
         if self.settings["methods"]["project_subcortex"] is True:
             # for lfp_channels select here only the ones from the correct hemisphere!
             for lfp_channel in self.lfp_channels:
                 self.idx_chs_lfp.append([ch_idx for ch_idx, ch in enumerate(feature_series.keys())
-                                        if ch.startswith(lfp_channel)])
+                                        if ch.startswith(ecog_channel + '_')])
                 self.names_chs_lfp.append([ch for _, ch in enumerate(feature_series.keys())
-                                          if ch.startswith(lfp_channel)])
+                                          if ch.startswith(ecog_channel + '_')])
             self.dat_subcortex = vstack([feature_series.iloc[idx_ch].values for idx_ch in self.idx_chs_lfp])
 
         if self.settings["methods"]["project_cortex"] is True or self.settings["methods"]["project_subcortex"] is True:
