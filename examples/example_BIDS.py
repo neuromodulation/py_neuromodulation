@@ -14,20 +14,22 @@ if __name__ == "__main__":
     # example single run file estimation
     PATH_PYNEUROMODULATION = os.pardir
 
-    BIDS_EXAMPLE_PATH = os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation',
-                                     'tests', 'data')
+    #BIDS_EXAMPLE_PATH = os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation',
+    #                                 'tests', 'data')
 
-    PATH_RUN = os.path.join(BIDS_EXAMPLE_PATH, 'sub-testsub', 'ses-EphysMedOff',
-                            'ieeg', "sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg.vhdr")
+    #PATH_RUN = os.path.join(BIDS_EXAMPLE_PATH, 'sub-testsub', 'ses-EphysMedOff',
+    #                        'ieeg', "sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg.vhdr")
 
-    start_BIDS.est_features_run(PATH_RUN)
+    #start_BIDS.est_features_run(PATH_RUN)
 
     # multiprocessing cohort analysis
-    '''
-    PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Beijing"
+    
+    PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Pittsburgh"
     layout = BIDSLayout(PATH_BIDS)
     run_files = layout.get(extension='.vhdr')
+    #start_BIDS.est_features_run(run_files[5])
+
     M1_files = [None for i in range(len(run_files))]  # specify no M1 files
-    pool = multiprocessing.Pool()
-    pool.map(start_BIDS.est_features_run, product(M1_files, run_files))
-    '''
+    pool = multiprocessing.Pool(processes=50)
+    pool.map(start_BIDS.est_features_run, run_files)
+    #pool.map(start_BIDS.est_features_run, product(M1_files, run_files))
