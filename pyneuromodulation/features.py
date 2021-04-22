@@ -24,7 +24,10 @@ class Features:
 
         self.s = s  # settings
         self.ch_names = list(array(s["ch_names"])[s["feature_idx"]])
-        self.fs = s["fs"]
+        if s["methods"]["resample_raw"] is True:
+            self.fs = s["resample_raw_settings"]["resample_freq"]
+        else:
+            self.fs = s["fs"]
         self.line_noise = s["line_noise"]
         self.seglengths = floor(
                 self.fs / 1000 * array([value[1] for value in s[

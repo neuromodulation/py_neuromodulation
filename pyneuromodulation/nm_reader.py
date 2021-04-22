@@ -42,9 +42,12 @@ class NM_Reader:
         self.features = pd.read_csv(os.path.join(self.feature_path, feature_file,
                                     feature_file + "_FEATURES.csv"), header=0)
 
-    def read_channel_data(self, ch_name) -> None:
+    def read_channel_data(self, ch_name, read_bp_activity_only=False) -> None:
         self.ch_name = ch_name
         self.feature_ch_cols = [i for i in list(self.features.columns) if ch_name in i]
+        if read_bp_activity_only:
+            bp_ = [f for f in self.feature_ch_cols if 'bandpass' in f and 'activity' in f]
+            self.feature_ch_cols = bp_[::-1]  # flip list s.t. theta band is lowest in subsequent plot
         self.feature_ch = self.features[self.feature_ch_cols]
         return self.feature_ch
 
@@ -129,7 +132,7 @@ class NM_Reader:
         feature_col_name = [i[len(self.ch_name)+1:] for i in list(self.feature_ch_cols) if self.ch_name in i]
         plt.figure(figsize=(6, 6))
         plt.subplot(211)
-        plt.imshow(zscore(np.mean(np.squeeze(self.X_epoch), axis=0), axis=0).T, aspect='auto')
+        plt.imshow(zscore(np.mean(np.squeeze(self.X_epoch), axis=0), axis=1).T, aspect='auto')
         plt.yticks(np.arange(0, len(feature_col_name), 1), feature_col_name)
         plt.xticks(np.arange(0, self.X_epoch.shape[1], 1),
                    np.round(np.arange(-self.epoch_len / 2, self.epoch_len / 2, 1 / self.sfreq), 2), rotation=90)
