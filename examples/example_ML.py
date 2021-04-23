@@ -12,7 +12,7 @@ from skopt.space import Real, Integer, Categorical
 
 if __name__ == "__main__":
 
-    PATH_FEATURES = os.path.join(os.getcwd(),r"tests\data\derivatives" )
+    PATH_FEATURES = os.path.join(os.getcwd(),'tests', 'data', 'derivatives')
     FEATURE_FILE = r"sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg"
     print("estimation Feature file "+str(FEATURE_FILE))
     parser = argparse.ArgumentParser()
