@@ -68,8 +68,8 @@ class Decoder:
         self.data = np.nan_to_num(np.array(self.features[[col for col in self.features.columns
                                   if not (('time' in col) or (self.target_ch in col))]]))
 
-        # crop here features for example
-        self.data = self.data[:, :100]
+        #crop here features for example
+        #self.data = self.data[:, :100]
 
         self.model = model
         self.eval_method = eval_method
