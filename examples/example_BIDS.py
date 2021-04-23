@@ -12,6 +12,7 @@ import start_BIDS
 
 if __name__ == "__main__":
 
+    print(os.getcwd())
     # example single run file estimation
     PATH_PYNEUROMODULATION = os.pardir
 
@@ -19,14 +20,14 @@ if __name__ == "__main__":
                                      'tests', 'data')
 
     # write BIDS example path in settings.json
-    with open('settings.json', encoding='utf-8') as json_file:
+    with open(os.path.join(os.pardir, 'examples', 'settings.json'), encoding='utf-8') as json_file:
         settings = json.load(json_file)
     settings["BIDS_path"] = BIDS_EXAMPLE_PATH
 
     # write relative feature output folder
     settings["out_path"] = os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation',
                                         'tests', 'data', 'derivatives')
-    with open('settings.json', 'w') as f:
+    with open(os.path.join(os.pardir, 'examples', 'settings.json'), 'w') as f:
         json.dump(settings, f)
 
     PATH_RUN = os.path.join(BIDS_EXAMPLE_PATH, 'sub-testsub', 'ses-EphysMedOff',
