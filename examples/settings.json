@@ -1,6 +1,6 @@
 {
-    "BIDS_path":  "C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\pyneuromodulation\\tests\\data",
-    "out_path": "C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\pyneuromodulation\\tests\\data\\derivatives",
+    "BIDS_path":  "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Beijing",
+    "out_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out",
     "sampling_rate_features": 10,
     "methods" : {
         "resample_raw" : true,
@@ -10,7 +10,7 @@
         "notch_filter" : true,
         "bandpass_filter" : true,
         "raw_hjorth" : true,
-        "sharpwave_analysis" : false,
+        "sharpwave_analysis" : true,
         "return_raw" : true,
         "project_cortex" : true,
         "project_subcortex" : false,
