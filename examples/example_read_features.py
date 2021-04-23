@@ -40,7 +40,8 @@ if __name__ == "__main__":
     label_name = "ANALOG_ROT_R_1"
     dat_label = nm_reader.read_label(label_name)
 
-    X_epoch, y_epoch = nm_reader.get_epochs_ch(epoch_len=1,
+    # estimating epochs, with shape (epochs,samples,channels,features)
+    X_epoch, y_epoch = nm_reader.get_epochs_ch(epoch_len=2,
                                                sfreq=settings["sampling_rate_features"],
                                                threshold=0.1)
 
