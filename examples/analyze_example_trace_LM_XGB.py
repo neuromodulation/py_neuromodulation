@@ -13,6 +13,7 @@ from sklearn import linear_model
 from sklearn import metrics 
 from sklearn import model_selection
 import xgboost
+import _pickle as cPickle
 
 
 PATH_PYNEUROMODULATION = os.getcwd()
@@ -67,11 +68,11 @@ def write_proj_and_avg_features(feature_file):
     nm_reader.plot_epochs_avg(feature_file)
 
 def run_ML_single_channel(feature_str):
-    model = linear_model.LinearRegression()
+    model = linear_model.LogisticRegression()
     decoder = nm_decode.Decoder(feature_path=FEATURE_PATH,
                                 feature_file=feature_str,
                                 model=model,
-                                eval_method=metrics.r2_score,
+                                eval_method=metrics.balanced_accuracy_score,
                                 cv_method=model_selection.KFold(n_splits=3, shuffle=False),
                                 threshold_score=True
                                 )
@@ -87,7 +88,7 @@ def run_ML_single_channel_XGB(feature_str):
     decoder = nm_decode.Decoder(feature_path=FEATURE_PATH,
                                 feature_file=feature_str,
                                 model=model,
-                                eval_method=metrics.accuracy_score,
+                                eval_method=metrics.balanced_accuracy_score,
                                 cv_method=model_selection.KFold(n_splits=3, shuffle=False),
                                 threshold_score=True
                                 )
@@ -95,10 +96,43 @@ def run_ML_single_channel_XGB(feature_str):
     # run estimations for channels individually 
     decoder.set_data_ind_channels()
     decoder.run_CV_ind_channels()
-
     decoder.save("XGB")
 
-FEATURE_PATH = r'C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\Pittsburgh'
+def run_ML_grid_points_LM(feature_str): 
+    model = linear_model.LogisticRegression()
+    decoder = nm_decode.Decoder(feature_path=FEATURE_PATH,
+                                feature_file=feature_str,
+                                model=model,
+                                eval_method=metrics.balanced_accuracy_score,
+                                cv_method=model_selection.KFold(n_splits=3, shuffle=False),
+                                threshold_score=True
+                                )
+    decoder.set_data_grid_points()
+    decoder.run_CV_grid_points()
+    decoder.save("LM")
+    # run estimations for channels individually 
+
+def run_ML_grid_points_XGB(feature_str): 
+    model = xgboost.XGBClassifier()
+    decoder = nm_decode.Decoder(feature_path=FEATURE_PATH,
+                                feature_file=feature_str,
+                                model=model,
+                                eval_method=metrics.balanced_accuracy_score,
+                                cv_method=model_selection.KFold(n_splits=3, shuffle=False),
+                                threshold_score=True
+                                )
+    decoder.set_data_grid_points()
+    decoder.run_CV_grid_points()
+    decoder.save("XGB")
+
+def read_ind_channel_results(feature_str):
+    PATH_ML_ = os.path.join(FEATURE_PATH, feature_str, feature_str + "_XGB_ML_RES.p")
+    # read ML results
+    with open(PATH_ML_, 'rb') as input: 
+        ML_res = cPickle.load(input)
+
+    # read 
+FEATURE_PATH = r'C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\Beijing'
 if __name__ == "__main__":
 
     
@@ -118,4 +152,4 @@ if __name__ == "__main__":
     #pool = multiprocessing.Pool(processes=30)
     #pool.map(run_ML_single_channel, feature_list)
     for feature_str in feature_list:
-        run_ML_single_channel_XGB(feature_str)
+        run_ML_grid_points_LM(feature_str)

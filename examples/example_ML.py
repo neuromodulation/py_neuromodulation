@@ -12,9 +12,9 @@ from skopt.space import Real, Integer, Categorical
 
 if __name__ == "__main__":
 
-    PATH_FEATURES = os.path.join(os.getcwd(),r"tests\data\derivatives" )
+    PATH_FEATURES = os.path.join(os.getcwd(),'tests', 'data', 'derivatives')
     FEATURE_FILE = r"sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg"
-
+    print("estimation Feature file "+str(FEATURE_FILE))
     parser = argparse.ArgumentParser()
     parser.add_argument('-f','--file',type=str,required=False)
     parser.add_argument('-m', '--model',type=str,required=False)
@@ -23,16 +23,14 @@ if __name__ == "__main__":
 
     if args.file != None:
         FEATURE_FILE =args.file
-
-
-    model = xgboost.XGBRegressor()
-
-    if args.model == "xgboost":
+    elif args.model == "xgboost":
+        model = xgboost.XGBRegressor()
+    else:
+        print("setting model to default XGBOOST")
         model = xgboost.XGBRegressor()
 
     if args.model == "elasticnet":
         model = ElasticNet(max_iter=10000)
-
 
     decoder = nm_decode.Decoder(feature_path=PATH_FEATURES,
                                 feature_file=FEATURE_FILE,
@@ -43,7 +41,7 @@ if __name__ == "__main__":
                                 )
     # estimate model performance directly
     # individual results will then be stored in the decoder object
-
+    print("running single cross validation")
     test_score_mean = decoder.run_CV()
 
     # run bayesian optimization
@@ -60,12 +58,15 @@ if __name__ == "__main__":
     acq_func = "EI"
     acq_optimizer = "sampling"
     initial_point_generator = "lhs"
+    print("runnig Bayesian Optimization")
     res_skopt = decoder.run_Bay_Opt(space_XGB, rounds=10, base_estimator=base_estimator,
                                     acq_func=acq_func, acq_optimizer=acq_optimizer,
                                     initial_point_generator=initial_point_generator)
     best_metric = res_skopt.fun
     best_params = res_skopt.x
 
+    print("training best model")
     decoder.train_final_model(bayes_opt=True)
 
+    print("saving model")
     decoder.save()

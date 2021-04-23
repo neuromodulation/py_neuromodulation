@@ -10,6 +10,7 @@ from skopt.utils import use_named_args
 from skopt import gp_minimize, Optimizer
 from sklearn.linear_model import ElasticNet
 from sklearn.base import clone
+from sklearn.utils import class_weight
 
 import pandas as pd
 import os
@@ -55,10 +56,12 @@ class Decoder:
 
         self.df_M1 = pd.read_csv(os.path.join(self.feature_path, feature_file,
                                  feature_file + "_DF_M1.csv"), header=0)
+        self.used_chs = list(self.df_M1[(self.df_M1["target"] == 0) & (self.df_M1["used"] == 1)]["name"])
 
         with open(os.path.join(self.feature_path, feature_file,
                                feature_file + "_SETTINGS.json")) as f:
             self.settings = json.load(f)
+        self.run_analysis = None
 
         # for simplicity, choose here only first one
         # lateron check laterality
@@ -95,8 +98,6 @@ class Decoder:
         self.label = np.nan_to_num(np.array(self.features[self.target_ch])) > 0.3
         self.data = np.nan_to_num(np.array(self.features[[col for col in self.features.columns
                                   if not (('time' in col) or (self.target_ch in col))]]))
-        #crop here features for example
-        #self.data = self.data[:, :100]
 
         self.model = model
         self.eval_method = eval_method
@@ -106,7 +107,6 @@ class Decoder:
     def set_data_ind_channels(self):
         """specified channel individual data
         """
-        self.used_chs = list(self.df_M1[(self.df_M1["target"] == 0) & (self.df_M1["used"] == 1)]["name"])
         self.ch_ind_data = {}
         for ch in self.used_chs:
             self.ch_ind_data[ch] = np.nan_to_num(np.array(self.features[[col for col in self.features.columns 
@@ -127,6 +127,39 @@ class Decoder:
             self.ch_ind_pr[ch]["y_train_pr"] = self.y_train_pr
             self.ch_ind_pr[ch]["X_train"] = self.X_train
             self.ch_ind_pr[ch]["X_test"] = self.X_test
+
+    def set_data_grid_points(self):
+        """Read the run_analysis 
+        Projected data has the shape (samples, grid points, features)
+        """
+
+        PATH_ML_ = os.path.join(self.feature_path, self.feature_file, self.feature_file + "_run_analysis.p")
+        with open(PATH_ML_, 'rb') as input:  # Overwrites any existing file.
+            self.run_analysis = cPickle.load(input)
+        
+        # get active grid points 
+        self.active_gridpoints = np.where(np.sum(self.run_analysis.proj_cortex_array, axis=(0,2)) !=0)[0]
+
+        # write data for every active grid point and run the cross validation 
+        self.grid_point_ind_data = {}
+        for grid_point in self.active_gridpoints:
+            self.grid_point_ind_data[grid_point] = self.run_analysis.proj_cortex_array[:,grid_point,:]  # samples, features
+
+    def run_CV_grid_points(self):
+        """run cross validation across grid points
+        """
+        self.gridpoint_ind_pr = {}
+        for grid_point in self.active_gridpoints:
+            self.run_CV(self.grid_point_ind_data[grid_point], self.label)
+            self.gridpoint_ind_pr[grid_point] = {}
+            self.gridpoint_ind_pr[grid_point]["score_train"] = self.score_train
+            self.gridpoint_ind_pr[grid_point]["score_test"] = self.score_test
+            self.gridpoint_ind_pr[grid_point]["y_test"] = self.y_test
+            self.gridpoint_ind_pr[grid_point]["y_train"] = self.y_train
+            self.gridpoint_ind_pr[grid_point]["y_test_pr"] = self.y_test_pr
+            self.gridpoint_ind_pr[grid_point]["y_train_pr"] = self.y_train_pr
+            self.gridpoint_ind_pr[grid_point]["X_train"] = self.X_train
+            self.gridpoint_ind_pr[grid_point]["X_test"] = self.X_test
 
     def run_CV(self, data=None, label=None):
         """Evaluate model performance on the specified cross validation. 
@@ -167,8 +200,19 @@ class Decoder:
             X_test, y_test = data[test_index], label[test_index]
 
             # optionally split training data also into train and validation
-            # X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, train_size=0.8,shuffle=False)
+            # for XGBOOST
+            #X_train, X_val, y_train, y_val = model_selection.train_test_split(X_train, y_train, train_size=0.8,shuffle=False)
 
+            classes_weights = class_weight.compute_sample_weight(
+                class_weight='balanced',
+                y=y_train
+            )
+
+            # XGBOOST
+            #model_train.fit(X_train, y_train, eval_set=[(X_val, y_val)],
+            #                early_stopping_rounds=10, sample_weight=classes_weights, verbose=False)
+
+            # LM 
             model_train.fit(X_train, y_train)
 
             y_test_pr = model_train.predict(X_test)
@@ -263,6 +307,11 @@ class Decoder:
     def save(self, str_save_add=None) -> None:
         """Saves decoder object to pickle
         """
+
+        # run_analysis does not need to be saved twice, since grid points are saved as well
+        if self.run_analysis is not None:
+            self.run_analysis = None
+
         if str_save_add is None:
             PATH_OUT = os.path.join(self.feature_path, self.feature_file, self.feature_file + "_ML_RES.p")
         else:
