@@ -192,7 +192,6 @@ class Decoder:
             if True get best bayesian optimization parameters and train model with the
             according parameters
         """
-        print("training best model")
         if bayes_opt is True:
             for i in range(len(self.best_params)):
                 setattr(self.model, self.space[i].name, self.best_params[i])
@@ -203,5 +202,6 @@ class Decoder:
         """Saves decoder object to pickle
         """
         PATH_OUT = os.path.join(self.feature_path, self.feature_file, self.feature_file + "_ML_RES.p")
+        print("model being saved to: " + str(PATH_OUT))
         with open(PATH_OUT, 'wb') as output:  # Overwrites any existing file.
             cPickle.dump(self, output)

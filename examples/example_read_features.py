@@ -23,6 +23,7 @@ if __name__ == "__main__":
     run_anylyzer = nm_reader.read_run_analyzer()
 
     # plot cortical projection
+    print("plotting cortical projections")
     PATH_PLOT = os.path.join(os.pardir, 'plots')
     nm_reader.read_plot_modules(PATH_PLOT)
     nm_reader.plot_cortical_projection()
@@ -43,5 +44,7 @@ if __name__ == "__main__":
                                                sfreq=settings["sampling_rate_features"],
                                                threshold=0.1)
 
+    print("plotting feature covariance matrix")
     nm_reader.plot_corr_matrix(feature_file)
+    print("plotting feature target averaged")
     nm_reader.plot_epochs_avg(feature_file)
