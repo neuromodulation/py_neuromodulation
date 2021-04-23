@@ -199,9 +199,13 @@ class Decoder:
 
         self.model.fit(self.data, self.label)
 
-    def save(self) -> None:
+    def save(self, str_save_add=None) -> None:
         """Saves decoder object to pickle
         """
-        PATH_OUT = os.path.join(self.feature_path, self.feature_file, self.feature_file + "_ML_RES.p")
+        if str_save_add is None:
+            PATH_OUT = os.path.join(self.feature_path, self.feature_file, self.feature_file + "_ML_RES.p")
+        else:
+            PATH_OUT = os.path.join(self.feature_path, self.feature_file, self.feature_file + 
+                                    "_" + str_save_add + "_ML_RES.p")
         with open(PATH_OUT, 'wb') as output:  # Overwrites any existing file.
             cPickle.dump(self, output)
