@@ -112,7 +112,7 @@ def save_features_and_settings(df_, run_analysis_, folder_name, settings_wrapper
 
     with open(os.path.join(settings_wrapper.settings["out_path"], folder_name,
                            folder_name + '_SETTINGS.json'), 'w') as f:
-        json.dumps(obj=settings_wrapper.settings, fp=f, indent=4)
+        json.dump(settings_wrapper.settings, f, indent=4)
 
     # save df_M1 as csv
     settings_wrapper.df_M1.to_csv(os.path.join(settings_wrapper.settings["out_path"], folder_name,
