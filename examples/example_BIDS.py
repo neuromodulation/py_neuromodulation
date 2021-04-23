@@ -28,7 +28,7 @@ if __name__ == "__main__":
     settings["out_path"] = os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation',
                                         'tests', 'data', 'derivatives')
     with open(os.path.join(os.pardir, 'examples', 'settings.json'), 'w') as f:
-        json.dump(settings, f)
+        json.dumps(settings, f, indent=4)
 
     PATH_RUN = os.path.join(BIDS_EXAMPLE_PATH, 'sub-testsub', 'ses-EphysMedOff',
                             'ieeg', "sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg.vhdr")
