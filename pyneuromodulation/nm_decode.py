@@ -62,12 +62,39 @@ class Decoder:
 
         # for simplicity, choose here only first one
         # lateron check laterality
-        self.target_ch = self.df_M1[self.df_M1["target"] == 1]["name"].iloc[0]
+        # try to set contralateral, if not take the first
+        target_channels = list(self.df_M1[self.df_M1["target"] == 1]["name"])
+        if len(target_channels) == 1:
+            self.target_ch = target_channels[0]
+        elif self.settings["sess_right"] is True:
+            # check if contralateral left (optimal clean) channel exists
+            left_targets = [t_ch for t_ch in target_channels if "LEFT" in t_ch]
+            if len(left_targets) == 1:
+                self.target_ch = left_targets[0]
+            else:
+                CLEAN_LEFT = [t_ch for t_ch in left_targets if "CLEAN" in t_ch ]
+                if len(CLEAN_LEFT) == 1:
+                    self.target_ch = CLEAN_LEFT[0]
+                else:
+                    # take first target
+                    self.target_ch = self.df_M1[self.df_M1["target"] == 1]["name"].iloc[0]
+        else: # left session
+            # check if contralateral right (optimal clean) channel exists
+            right_targets = [t_ch for t_ch in target_channels if "RIGHT" in t_ch]
+            if len(right_targets) == 1:
+                self.target_ch = right_targets[0]
+            else:
+                CLEAN_RIGHT = [t_ch for t_ch in right_targets if "CLEAN" in t_ch ]
+                if len(CLEAN_RIGHT) == 1:
+                    self.target_ch = CLEAN_RIGHT[0]
+                else:
+                    # take first target
+                    self.target_ch = self.df_M1[self.df_M1["target"] == 1]["name"].iloc[0]
 
-        self.label = np.nan_to_num(np.array(self.features[self.target_ch]))
+        # for classification dependin on the label, set to binary label 
+        self.label = np.nan_to_num(np.array(self.features[self.target_ch])) > 0.3
         self.data = np.nan_to_num(np.array(self.features[[col for col in self.features.columns
                                   if not (('time' in col) or (self.target_ch in col))]]))
-
         #crop here features for example
         #self.data = self.data[:, :100]
 
@@ -76,17 +103,51 @@ class Decoder:
         self.cv_method = cv_method
         self.threshold_score = threshold_score
 
-    def run_CV(self):
-        """Evaluate model performance on the specified cross validation
+    def set_data_ind_channels(self):
+        """specified channel individual data
+        """
+        self.used_chs = list(self.df_M1[(self.df_M1["target"] == 0) & (self.df_M1["used"] == 1)]["name"])
+        self.ch_ind_data = {}
+        for ch in self.used_chs:
+            self.ch_ind_data[ch] = np.nan_to_num(np.array(self.features[[col for col in self.features.columns 
+                                                          if col.startswith(ch)]]))
+    
+    def run_CV_ind_channels(self):
+        """run the CV for every specified channel
+        """
+        self.ch_ind_pr = {}
+        for ch in self.used_chs:
+            self.run_CV(self.ch_ind_data[ch], self.label)
+            self.ch_ind_pr[ch] = {}
+            self.ch_ind_pr[ch]["score_train"] = self.score_train
+            self.ch_ind_pr[ch]["score_test"] = self.score_test
+            self.ch_ind_pr[ch]["y_test"] = self.y_test
+            self.ch_ind_pr[ch]["y_train"] = self.y_train
+            self.ch_ind_pr[ch]["y_test_pr"] = self.y_test_pr
+            self.ch_ind_pr[ch]["y_train_pr"] = self.y_train_pr
+            self.ch_ind_pr[ch]["X_train"] = self.X_train
+            self.ch_ind_pr[ch]["X_test"] = self.X_test
+
+    def run_CV(self, data=None, label=None):
+        """Evaluate model performance on the specified cross validation. 
+        If no data and label is specified, use whole feature class attributes. 
 
         Parameters
         ----------
-
+        data (np.ndarray):
+            data to train and test with shape samples, features
+        label (np.ndarray):
+            label to train and test with shape samples, features
         Returns
         -------
         cv_res : float
             mean cross validation result
         """
+
+        if data is None:
+            print("use all channel data as features")
+            data = self.data
+            label = self.label
 
         # if xgboost being used, might be necessary to set the params individually
 
@@ -102,8 +163,8 @@ class Decoder:
         for train_index, test_index in self.cv_method.split(self.data):
 
             model_train = clone(self.model)
-            X_train, y_train = self.data[train_index, :], self.label[train_index]
-            X_test, y_test = self.data[test_index], self.label[test_index]
+            X_train, y_train = data[train_index, :], label[train_index]
+            X_test, y_test = data[test_index], label[test_index]
 
             # optionally split training data also into train and validation
             # X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, train_size=0.8,shuffle=False)
