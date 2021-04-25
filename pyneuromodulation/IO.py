@@ -90,13 +90,16 @@ def save_features_and_settings(df_, run_analysis_, folder_name, settings_wrapper
         output path
     settings_wrapper : settings.py object
     """
+
     # create out folder if doesn't exist
     if not os.path.exists(os.path.join(settings_wrapper.settings["out_path"], folder_name)):
         print("create output folder " + str(folder_name))
         os.makedirs(os.path.join(settings_wrapper.settings["out_path"], folder_name))
 
-    df_.to_csv(os.path.join(settings_wrapper.settings["out_path"], folder_name,
-                            folder_name + "_FEATURES.csv"))
+    PATH_OUT = os.path.join(settings_wrapper.settings["out_path"], folder_name,
+                            folder_name + "_FEATURES.csv")
+    df_.to_csv(PATH_OUT)
+    print("FEATURES.csv saved to " + str(PATH_OUT))
 
     # rewrite np arrays to lists for json format
     settings_wrapper.settings["grid_cortex"] = np.array(settings_wrapper.settings["grid_cortex"]).tolist()
@@ -110,15 +113,19 @@ def save_features_and_settings(df_, run_analysis_, folder_name, settings_wrapper
     settings_wrapper.settings["coord"]["subcortex_left"]["positions"] = \
         settings_wrapper.settings["coord"]["subcortex_left"]["positions"].tolist()
 
-    with open(os.path.join(settings_wrapper.settings["out_path"], folder_name,
-                           folder_name + '_SETTINGS.json'), 'w') as f:
+    PATH_OUT = os.path.join(settings_wrapper.settings["out_path"], folder_name,
+                           folder_name + '_SETTINGS.json')
+    with open(PATH_OUT, 'w') as f:
         json.dump(settings_wrapper.settings, f, indent=4)
+    print("settings.json saved to " + str(PATH_OUT))
 
-    # save df_M1 as csv
-    settings_wrapper.df_M1.to_csv(os.path.join(settings_wrapper.settings["out_path"], folder_name,
-                                  folder_name + "_DF_M1.csv"))
+    PATH_OUT = os.path.join(settings_wrapper.settings["out_path"], folder_name,
+                                  folder_name + "_DF_M1.csv")
+    settings_wrapper.df_M1.to_csv(PATH_OUT)
+    print("df_M1.csv saved to " + str(PATH_OUT))
 
     PATH_OUT = os.path.join(settings_wrapper.settings["out_path"], folder_name,
                             folder_name + "_run_analysis.p")
     with open(PATH_OUT, 'wb') as output:
         cPickle.dump(run_analysis_, output)
+    print("run analysis.p saved to " + str(PATH_OUT))
