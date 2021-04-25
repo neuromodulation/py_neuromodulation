@@ -126,7 +126,7 @@ class NM_Reader:
         plt.savefig(PATH_save, bbox_inches = "tight")
         # plt.show()
 
-    def plot_epochs_avg(self, feature_file):
+    def plot_epochs_avg(self, feature_file, verbose=False):
         
         # cut channel name of for axis + "_" for more dense plot
         feature_col_name = [i[len(self.ch_name)+1:] for i in list(self.feature_ch_cols) if self.ch_name in i]
@@ -157,6 +157,8 @@ class NM_Reader:
                                  "MOV_algined_features_ch_" + str(self.ch_name) + ".png")
         plt.savefig(PATH_save, bbox_inches = "tight")
         # plt.show()
+        if verbose:
+            print("Figure saved to: " + str(PATH_save))
     
     def read_ML_estimations(self):
         """Read estimated ML outputs
@@ -208,7 +210,7 @@ class NM_Reader:
         self.y_stn = self.stn_surf['vertices'][::1,1]
         self.z_stn = self.stn_surf['vertices'][::1,2]
 
-    def plot_cortical_projection(self):
+    def plot_cortical_projection(self, verbose=False):
         """Plot MNI brain including selected MNI cortical projection grid + used strip ECoG electrodes
         """
 
@@ -243,3 +245,6 @@ class NM_Reader:
         PATH_save = os.path.join(self.feature_path, self.feature_file,
                                  "Cortical_Projection.png")
         plt.savefig(PATH_save, bbox_inches = "tight")
+
+        if verbose:
+            print("Figure saved to: " + str(PATH_save))

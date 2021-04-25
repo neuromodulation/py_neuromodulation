@@ -50,7 +50,7 @@ def est_features_run(PATH_RUN, PATH_M1=None) -> None:
     settings_wrapper.set_fs_line_noise(fs, line_noise)
 
     # optionally reduce timing for faster test completion
-    
+
     #LIMIT_LOW = 0
     #LIMIT_HIGH = 10000
     #raw_arr_data = raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]

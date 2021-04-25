@@ -23,6 +23,7 @@ if __name__ == "__main__":
     run_anylyzer = nm_reader.read_run_analyzer()
 
     # plot cortical projection
+    print("plotting cortical projections")
     PATH_PLOT = os.path.join(os.pardir, 'plots')
     nm_reader.read_plot_modules(PATH_PLOT)
     nm_reader.plot_cortical_projection()
@@ -39,9 +40,12 @@ if __name__ == "__main__":
     label_name = "ANALOG_ROT_R_1"
     dat_label = nm_reader.read_label(label_name)
 
-    X_epoch, y_epoch = nm_reader.get_epochs_ch(epoch_len=1,
+    # estimating epochs, with shape (epochs,samples,channels,features)
+    X_epoch, y_epoch = nm_reader.get_epochs_ch(epoch_len=2,
                                                sfreq=settings["sampling_rate_features"],
                                                threshold=0.1)
 
+    print("plotting feature covariance matrix")
     nm_reader.plot_corr_matrix(feature_file)
+    print("plotting feature target averaged")
     nm_reader.plot_epochs_avg(feature_file)
