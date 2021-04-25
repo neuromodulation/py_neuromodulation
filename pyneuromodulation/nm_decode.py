@@ -10,6 +10,7 @@ from skopt.utils import use_named_args
 from skopt import gp_minimize, Optimizer
 from sklearn.linear_model import ElasticNet
 from sklearn.base import clone
+from sklearn.utils import class_weight
 
 import pandas as pd
 import os
@@ -55,38 +56,143 @@ class Decoder:
 
         self.df_M1 = pd.read_csv(os.path.join(self.feature_path, feature_file,
                                  feature_file + "_DF_M1.csv"), header=0)
+        self.used_chs = list(self.df_M1[(self.df_M1["target"] == 0) & (self.df_M1["used"] == 1)]["name"])
 
         with open(os.path.join(self.feature_path, feature_file,
                                feature_file + "_SETTINGS.json")) as f:
             self.settings = json.load(f)
+        self.run_analysis = None
 
         # for simplicity, choose here only first one
         # lateron check laterality
-        self.target_ch = self.df_M1[self.df_M1["target"] == 1]["name"].iloc[0]
+        # try to set contralateral, if not take the first
+        target_channels = list(self.df_M1[self.df_M1["target"] == 1]["name"])
+        if len(target_channels) == 1:
+            self.target_ch = target_channels[0]
+        elif self.settings["sess_right"] is True:
+            # check if contralateral left (optimal clean) channel exists
+            left_targets = [t_ch for t_ch in target_channels if "LEFT" in t_ch]
+            if len(left_targets) == 1:
+                self.target_ch = left_targets[0]
+            else:
+                CLEAN_LEFT = [t_ch for t_ch in left_targets if "CLEAN" in t_ch ]
+                if len(CLEAN_LEFT) == 1:
+                    self.target_ch = CLEAN_LEFT[0]
+                else:
+                    # take first target
+                    self.target_ch = self.df_M1[self.df_M1["target"] == 1]["name"].iloc[0]
+        else: # left session
+            # check if contralateral right (optimal clean) channel exists
+            right_targets = [t_ch for t_ch in target_channels if "RIGHT" in t_ch]
+            if len(right_targets) == 1:
+                self.target_ch = right_targets[0]
+            else:
+                CLEAN_RIGHT = [t_ch for t_ch in right_targets if "CLEAN" in t_ch ]
+                if len(CLEAN_RIGHT) == 1:
+                    self.target_ch = CLEAN_RIGHT[0]
+                else:
+                    # take first target
+                    self.target_ch = self.df_M1[self.df_M1["target"] == 1]["name"].iloc[0]
 
-        self.label = np.nan_to_num(np.array(self.features[self.target_ch]))
+        # for classification dependin on the label, set to binary label 
+        self.label = np.nan_to_num(np.array(self.features[self.target_ch])) > 0.3
         self.data = np.nan_to_num(np.array(self.features[[col for col in self.features.columns
                                   if not (('time' in col) or (self.target_ch in col))]]))
-
-        # crop here features for example
-        self.data = self.data[:, :100]
 
         self.model = model
         self.eval_method = eval_method
         self.cv_method = cv_method
         self.threshold_score = threshold_score
 
-    def run_CV(self):
-        """Evaluate model performance on the specified cross validation
+    def set_data_ind_channels(self):
+        """specified channel individual data
+        """
+        self.ch_ind_data = {}
+        for ch in self.used_chs:
+            self.ch_ind_data[ch] = np.nan_to_num(np.array(self.features[[col for col in self.features.columns 
+                                                          if col.startswith(ch)]]))
+    
+    def run_CV_ind_channels(self, XGB=True):
+        """run the CV for every specified channel
 
         Parameters
         ----------
+        XGB (boolean): 
+            if true split data into additinal validation, and run class weighted CV
+        """
+        self.ch_ind_pr = {}
+        for ch in self.used_chs:
+            self.run_CV(self.ch_ind_data[ch], self.label, XGB)
+            self.ch_ind_pr[ch] = {}
+            self.ch_ind_pr[ch]["score_train"] = self.score_train
+            self.ch_ind_pr[ch]["score_test"] = self.score_test
+            self.ch_ind_pr[ch]["y_test"] = self.y_test
+            self.ch_ind_pr[ch]["y_train"] = self.y_train
+            self.ch_ind_pr[ch]["y_test_pr"] = self.y_test_pr
+            self.ch_ind_pr[ch]["y_train_pr"] = self.y_train_pr
+            self.ch_ind_pr[ch]["X_train"] = self.X_train
+            self.ch_ind_pr[ch]["X_test"] = self.X_test
 
+    def set_data_grid_points(self):
+        """Read the run_analysis 
+        Projected data has the shape (samples, grid points, features)
+        """
+
+        PATH_ML_ = os.path.join(self.feature_path, self.feature_file, self.feature_file + "_run_analysis.p")
+        with open(PATH_ML_, 'rb') as input:  # Overwrites any existing file.
+            self.run_analysis = cPickle.load(input)
+        
+        # get active grid points 
+        self.active_gridpoints = np.where(np.sum(self.run_analysis.proj_cortex_array, axis=(0,2)) !=0)[0]
+
+        # write data for every active grid point and run the cross validation 
+        self.grid_point_ind_data = {}
+        for grid_point in self.active_gridpoints:
+            self.grid_point_ind_data[grid_point] = self.run_analysis.proj_cortex_array[:,grid_point,:]  # samples, features
+
+    def run_CV_grid_points(self, XGB=True):
+        """run cross validation across grid points
+
+        Parameters
+        ----------
+        XGB (boolean): 
+            if true split data into additinal validation, and run class weighted CV
+        """
+        self.gridpoint_ind_pr = {}
+        for grid_point in self.active_gridpoints:
+            self.run_CV(self.grid_point_ind_data[grid_point], self.label, XGB)
+            self.gridpoint_ind_pr[grid_point] = {}
+            self.gridpoint_ind_pr[grid_point]["score_train"] = self.score_train
+            self.gridpoint_ind_pr[grid_point]["score_test"] = self.score_test
+            self.gridpoint_ind_pr[grid_point]["y_test"] = self.y_test
+            self.gridpoint_ind_pr[grid_point]["y_train"] = self.y_train
+            self.gridpoint_ind_pr[grid_point]["y_test_pr"] = self.y_test_pr
+            self.gridpoint_ind_pr[grid_point]["y_train_pr"] = self.y_train_pr
+            self.gridpoint_ind_pr[grid_point]["X_train"] = self.X_train
+            self.gridpoint_ind_pr[grid_point]["X_test"] = self.X_test
+
+    def run_CV(self, data=None, label=None, XGB=True):
+        """Evaluate model performance on the specified cross validation. 
+        If no data and label is specified, use whole feature class attributes. 
+
+        Parameters
+        ----------
+        data (np.ndarray):
+            data to train and test with shape samples, features
+        label (np.ndarray):
+            label to train and test with shape samples, features
+        XGB (boolean): 
+            if true split data into additinal validation, and run class weighted CV
         Returns
         -------
         cv_res : float
             mean cross validation result
         """
+
+        if data is None:
+            print("use all channel data as features")
+            data = self.data
+            label = self.label
 
         # if xgboost being used, might be necessary to set the params individually
 
@@ -102,13 +208,25 @@ class Decoder:
         for train_index, test_index in self.cv_method.split(self.data):
 
             model_train = clone(self.model)
-            X_train, y_train = self.data[train_index, :], self.label[train_index]
-            X_test, y_test = self.data[test_index], self.label[test_index]
+            X_train, y_train = data[train_index, :], label[train_index]
+            X_test, y_test = data[test_index], label[test_index]
 
             # optionally split training data also into train and validation
-            # X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, train_size=0.8,shuffle=False)
+            # for XGBOOST
+            if XGB:
+                X_train, X_val, y_train, y_val = model_selection.train_test_split(X_train, y_train, train_size=0.8,shuffle=False)
 
-            model_train.fit(X_train, y_train)
+                classes_weights = class_weight.compute_sample_weight(
+                    class_weight='balanced',
+                    y=y_train
+                )
+
+                model_train.fit(X_train, y_train, eval_set=[(X_val, y_val)],
+                                early_stopping_rounds=10, sample_weight=classes_weights, verbose=False)
+
+            else:
+                # LM 
+                model_train.fit(X_train, y_train)
 
             y_test_pr = model_train.predict(X_test)
             y_train_pr = model_train.predict(X_train)
@@ -198,10 +316,20 @@ class Decoder:
 
         self.model.fit(self.data, self.label)
 
-    def save(self) -> None:
+    def save(self, str_save_add=None) -> None:
         """Saves decoder object to pickle
         """
-        PATH_OUT = os.path.join(self.feature_path, self.feature_file, self.feature_file + "_ML_RES.p")
+
+        # run_analysis does not need to be saved twice, since grid points are saved as well
+        if self.run_analysis is not None:
+            self.run_analysis = None
+
+        if str_save_add is None:
+            PATH_OUT = os.path.join(self.feature_path, self.feature_file, self.feature_file + "_ML_RES.p")
+        else:
+            PATH_OUT = os.path.join(self.feature_path, self.feature_file, self.feature_file + 
+                                    "_" + str_save_add + "_ML_RES.p")
+
         print("model being saved to: " + str(PATH_OUT))
         with open(PATH_OUT, 'wb') as output:  # Overwrites any existing file.
             cPickle.dump(self, output)

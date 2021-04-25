@@ -41,6 +41,7 @@ if __name__ == "__main__":
     layout = BIDSLayout(PATH_BIDS)
     #run_files = layout.get(extension='.vhdr')
 
+
     # get here only the first run file for every subject
     subjects = layout.get_subjects()
     run_files = []

@@ -52,7 +52,7 @@ def est_features_run(PATH_RUN, PATH_M1=None) -> None:
     # optionally reduce timing for faster test completion
 
     #LIMIT_LOW = 0
-    #LIMIT_HIGH = 5000
+    #LIMIT_HIGH = 10000
     #raw_arr_data = raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
 
 
