@@ -17,6 +17,7 @@ class NM_Reader:
         self.settings = None
         self.features = None
         self.feature_ch = None
+        self.run_analysis = None
 
     def get_feature_list(self) -> list:
         f_files = []
@@ -42,12 +43,14 @@ class NM_Reader:
         self.features = pd.read_csv(os.path.join(self.feature_path, feature_file,
                                     feature_file + "_FEATURES.csv"), header=0)
 
-    def read_channel_data(self, ch_name, read_bp_activity_only=True) -> None:
+    def read_channel_data(self, ch_name, read_bp_activity_only=False, read_sharpwave_prominence_only=False) -> None:
         self.ch_name = ch_name
-        self.feature_ch_cols = [i for i in list(self.features.columns) if ch_name in i]
+        self.feature_ch_cols_all = [i for i in list(self.features.columns) if ch_name in i]
         if read_bp_activity_only:
-            bp_ = [f for f in self.feature_ch_cols if 'bandpass' in f and 'activity' in f]
+            bp_ = [f for f in self.feature_ch_cols_all if 'bandpass' in f and 'activity' in f]
             self.feature_ch_cols = bp_[::-1]  # flip list s.t. theta band is lowest in subsequent plot
+        elif read_sharpwave_prominence_only is True:
+            self.feature_ch_cols = [f for f in self.feature_ch_cols_all if 'Sharpwave' in f and 'prominence' in f]
         self.feature_ch = self.features[self.feature_ch_cols]
         return self.feature_ch
 
@@ -108,57 +111,6 @@ class NM_Reader:
         self.X_epoch = X_epoch
         self.y_epoch = y_epoch
         return X_epoch, y_epoch
-
-    def plot_corr_matrix(self, feature_file):
-
-        feature_col_name = [i[len(self.ch_name)+1:] for i in list(self.feature_ch_cols) if self.ch_name in i]
-        plt.figure(figsize=(7, 7))
-        corr = self.feature_ch.corr()
-        sns.heatmap(corr,
-                    xticklabels=feature_col_name,
-                    yticklabels=feature_col_name)
-        plt.title("Features channel: " + str(self.ch_name))
-        PATH_save = os.path.join(self.feature_path, feature_file,
-                                 "Features_corr_matr_ch_" + str(self.ch_name) + ".png")
-        # axes ticks might be too messy
-        #plt.xticks([])
-        #plt.yticks([])
-        plt.savefig(PATH_save, bbox_inches = "tight")
-        print("Correlation matrix figure saved to " + str(PATH_save))
-
-    def plot_epochs_avg(self, feature_file):
-        
-        # cut channel name of for axis + "_" for more dense plot
-        feature_col_name = [i[len(self.ch_name)+1:] for i in list(self.feature_ch_cols) if self.ch_name in i]
-        plt.figure(figsize=(6, 6))
-        plt.subplot(211)
-        plt.imshow(zscore(np.mean(np.squeeze(self.X_epoch), axis=0), axis=1).T, aspect='auto')
-        plt.yticks(np.arange(0, len(feature_col_name), 1), feature_col_name)
-        plt.xticks(np.arange(0, self.X_epoch.shape[1], 1),
-                   np.round(np.arange(-self.epoch_len / 2, self.epoch_len / 2, 1 / self.sfreq), 2), rotation=90)
-        plt.xlabel("Time [s]")
-        plt.title("Movement aligned features channel: " + str(self.ch_name))
-        # feature axes ticks might be too messy
-        #plt.yticks([])
-
-        plt.subplot(212)
-        for i in range(self.y_epoch.shape[0]):
-            plt.plot(self.y_epoch[i,:], color="black", alpha=0.4)
-        plt.plot(self.y_epoch.mean(axis=0), color="black", alpha=1, linewidth=3.0, label="mean target")
-        plt.legend()
-        plt.ylabel("target")
-        plt.title(self.label_name)
-        plt.xticks(np.arange(0, self.X_epoch.shape[1], 1),
-                   np.round(np.arange(-self.epoch_len / 2, self.epoch_len / 2, 1 / self.sfreq), 2), rotation=90)
-        plt.xlabel("Time [s]")
-        plt.tight_layout()
-
-        PATH_save = os.path.join(self.feature_path, feature_file,
-                                 "MOV_algined_features_ch_" + str(self.ch_name) + ".png")
-        plt.savefig(PATH_save, bbox_inches = "tight")
-        # plt.show()
-        
-        print("Feature epoch average figure saved to: " + str(PATH_save))
     
     def read_ML_estimations(self):
         """Read estimated ML outputs
@@ -247,3 +199,62 @@ class NM_Reader:
         plt.savefig(PATH_save, bbox_inches = "tight")
 
         print("cortical projection figure saved to: " + str(PATH_save))
+
+    def plot_corr_matrix(self, feature_file, feature_str_add=None):
+
+        feature_col_name = [i[len(self.ch_name)+1:] for i in list(self.feature_ch_cols) if self.ch_name in i]
+        plt.figure(figsize=(7, 7))
+        corr = self.feature_ch.corr()
+        sns.heatmap(corr,
+                    xticklabels=feature_col_name,
+                    yticklabels=feature_col_name)
+        plt.title("Features channel: " + str(self.ch_name))
+        if feature_str_add is None:
+            PATH_save = os.path.join(self.feature_path, feature_file,
+                                 "Features_corr_matr_ch_" + str(self.ch_name) + ".png")
+        else:
+            PATH_save = os.path.join(self.feature_path, feature_file,
+                                 "Features_corr_matr_ch_" + str(self.ch_name) + "_" + feature_str_add + ".png")
+        # axes ticks might be too messy
+        #plt.xticks([])
+        #plt.yticks([])
+        plt.savefig(PATH_save, bbox_inches = "tight")
+        print("Correlation matrix figure saved to " + str(PATH_save))
+
+    def plot_epochs_avg(self, feature_file, feature_str_add=None):
+        
+        # cut channel name of for axis + "_" for more dense plot
+        feature_col_name = [i[len(self.ch_name)+1:] for i in list(self.feature_ch_cols) if self.ch_name in i]
+        plt.figure(figsize=(6, 6))
+        plt.subplot(211)
+        plt.imshow(zscore(np.mean(np.squeeze(self.X_epoch), axis=0), axis=1).T, aspect='auto')
+        plt.yticks(np.arange(0, len(feature_col_name), 1), feature_col_name)
+        plt.xticks(np.arange(0, self.X_epoch.shape[1], 1),
+                   np.round(np.arange(-self.epoch_len / 2, self.epoch_len / 2, 1 / self.sfreq), 2), rotation=90)
+        plt.xlabel("Time [s]")
+        plt.title("Movement aligned features channel: " + str(self.ch_name))
+        # feature axes ticks might be too messy
+        #plt.yticks([])
+
+        plt.subplot(212)
+        for i in range(self.y_epoch.shape[0]):
+            plt.plot(self.y_epoch[i,:], color="black", alpha=0.4)
+        plt.plot(self.y_epoch.mean(axis=0), color="black", alpha=1, linewidth=3.0, label="mean target")
+        plt.legend()
+        plt.ylabel("target")
+        plt.title(self.label_name)
+        plt.xticks(np.arange(0, self.X_epoch.shape[1], 1),
+                   np.round(np.arange(-self.epoch_len / 2, self.epoch_len / 2, 1 / self.sfreq), 2), rotation=90)
+        plt.xlabel("Time [s]")
+        plt.tight_layout()
+        
+        if feature_str_add is None:
+            PATH_save = os.path.join(self.feature_path, feature_file,
+                                 "MOV_algined_features_ch_" + str(self.ch_name) + ".png")
+        else:
+            PATH_save = os.path.join(self.feature_path, feature_file,
+                                 "MOV_algined_features_ch_" + str(self.ch_name) + "_" + feature_str_add + ".png")
+        plt.savefig(PATH_save, bbox_inches = "tight")
+        # plt.show()
+        
+        print("Feature epoch average figure saved to: " + str(PATH_save))
