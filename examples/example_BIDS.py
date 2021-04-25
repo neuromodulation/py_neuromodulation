@@ -40,6 +40,4 @@ def run_example_BIDS():
 
 if __name__ == "__main__":
 
-    
-
     run_example_BIDS()
