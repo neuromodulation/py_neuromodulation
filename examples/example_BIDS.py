@@ -4,17 +4,20 @@ from bids import BIDSLayout
 from itertools import product
 import os
 import json
+from pathlib import Path
 
-os.chdir(os.path.join(os.pardir,'pyneuromodulation'))
-sys.path.append(os.path.join(os.pardir,'pyneuromodulation'))
-sys.path.append(os.path.join(os.pardir, 'examples'))
+# first parent to get example folder, second py_neuromodulation folder
+PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent
+sys.path.append(os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation'))
+sys.path.append(os.path.join(Path(__file__).absolute().parent.parent,'examples'))
+
 import start_BIDS
 
-if __name__ == "__main__":
+def run_example_BIDS():
+    """run the example BIDS path in pyneuromodulation/tests/data
+    """
 
     print(os.getcwd())
-    # example single run file estimation
-    PATH_PYNEUROMODULATION = os.pardir
 
     BIDS_EXAMPLE_PATH = os.path.abspath(os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation',
                                         'tests', 'data'))
@@ -35,23 +38,8 @@ if __name__ == "__main__":
 
     start_BIDS.est_features_run(PATH_RUN)
 
-    # multiprocessing cohort analysis
-    '''
-    PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Pittsburgh"
-    layout = BIDSLayout(PATH_BIDS)
-    #run_files = layout.get(extension='.vhdr')
+if __name__ == "__main__":
 
+    
 
-    # get here only the first run file for every subject
-    subjects = layout.get_subjects()
-    run_files = []
-    for sub in subjects:
-        run_files.append(layout.get(subject=sub, extension='.vhdr')[0])
-
-    #M1_files = [None for i in range(len(run_files))]  # specify no M1 files
-    #start_BIDS.est_features_run(run_files[0])
-    pool = multiprocessing.Pool(processes=50)
-
-    # call here the pool only with run files, M1 files are created on the fly
-    pool.map(start_BIDS.est_features_run, run_files)
-    '''
+    run_example_BIDS()

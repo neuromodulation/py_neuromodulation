@@ -4,15 +4,17 @@ from sklearn import metrics, model_selection
 import xgboost
 import argparse
 import os
-os.chdir(os.path.join(os.pardir,'pyneuromodulation'))
-sys.path.append(os.path.join(os.pardir,'pyneuromodulation'))
+from pathlib import Path
+
+PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent
+sys.path.append(os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation'))
 
 import nm_decode
 from skopt.space import Real, Integer, Categorical
 
-if __name__ == "__main__":
+def run_example_ML():
 
-    PATH_FEATURES = os.path.join(os.getcwd(),'tests', 'data', 'derivatives')
+    PATH_FEATURES = os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation', 'tests', 'data', 'derivatives')
     FEATURE_FILE = r"sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg"
     print("estimation Feature file "+str(FEATURE_FILE))
     parser = argparse.ArgumentParser()
@@ -70,3 +72,7 @@ if __name__ == "__main__":
 
     print("saving model")
     decoder.save()
+
+if __name__ == "__main__":
+
+    run_example_ML()

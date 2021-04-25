@@ -1,18 +1,17 @@
 import sys 
 import os
 import numpy as np
+from pathlib import Path
 
-os.chdir(os.path.join(os.pardir,'pyneuromodulation'))
-sys.path.append(os.path.join(os.pardir,'pyneuromodulation'))
+PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent
+sys.path.append(os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation'))
 
-import nm_reader
+import nm_reader as NM_reader
 
-if __name__ == "__main__":
+def run_example_read_features():
 
-    PATH_PYNEUROMODULATION = os.getcwd()
-
-    FEATURE_PATH = os.path.join(PATH_PYNEUROMODULATION, 'tests', 'data', 'derivatives')
-    nm_reader = nm_reader.NM_Reader(FEATURE_PATH)
+    FEATURE_PATH = os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation', 'tests', 'data', 'derivatives')
+    nm_reader = NM_reader.NM_Reader(FEATURE_PATH)
 
     feature_list = nm_reader.get_feature_list()
     feature_file = feature_list[0]
@@ -49,3 +48,7 @@ if __name__ == "__main__":
     nm_reader.plot_corr_matrix(feature_file)
     print("plotting feature target averaged")
     nm_reader.plot_epochs_avg(feature_file)
+
+if __name__ == "__main__":
+
+    run_example_read_features()

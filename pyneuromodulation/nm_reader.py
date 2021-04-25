@@ -42,7 +42,7 @@ class NM_Reader:
         self.features = pd.read_csv(os.path.join(self.feature_path, feature_file,
                                     feature_file + "_FEATURES.csv"), header=0)
 
-    def read_channel_data(self, ch_name, read_bp_activity_only=False) -> None:
+    def read_channel_data(self, ch_name, read_bp_activity_only=True) -> None:
         self.ch_name = ch_name
         self.feature_ch_cols = [i for i in list(self.features.columns) if ch_name in i]
         if read_bp_activity_only:
@@ -124,9 +124,9 @@ class NM_Reader:
         #plt.xticks([])
         #plt.yticks([])
         plt.savefig(PATH_save, bbox_inches = "tight")
-        # plt.show()
+        print("Correlation matrix figure saved to " + str(PATH_save))
 
-    def plot_epochs_avg(self, feature_file, verbose=False):
+    def plot_epochs_avg(self, feature_file):
         
         # cut channel name of for axis + "_" for more dense plot
         feature_col_name = [i[len(self.ch_name)+1:] for i in list(self.feature_ch_cols) if self.ch_name in i]
@@ -157,8 +157,8 @@ class NM_Reader:
                                  "MOV_algined_features_ch_" + str(self.ch_name) + ".png")
         plt.savefig(PATH_save, bbox_inches = "tight")
         # plt.show()
-        if verbose:
-            print("Figure saved to: " + str(PATH_save))
+        
+        print("Feature epoch average figure saved to: " + str(PATH_save))
     
     def read_ML_estimations(self):
         """Read estimated ML outputs
@@ -210,7 +210,7 @@ class NM_Reader:
         self.y_stn = self.stn_surf['vertices'][::1,1]
         self.z_stn = self.stn_surf['vertices'][::1,2]
 
-    def plot_cortical_projection(self, verbose=False):
+    def plot_cortical_projection(self):
         """Plot MNI brain including selected MNI cortical projection grid + used strip ECoG electrodes
         """
 
@@ -246,5 +246,4 @@ class NM_Reader:
                                  "Cortical_Projection.png")
         plt.savefig(PATH_save, bbox_inches = "tight")
 
-        if verbose:
-            print("Figure saved to: " + str(PATH_save))
+        print("cortical projection figure saved to: " + str(PATH_save))

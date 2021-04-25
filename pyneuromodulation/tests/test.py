@@ -5,16 +5,23 @@ import numpy as np
 from numpy.testing import assert_array_equal
 import pandas as pd
 import mne_bids
+from pathlib import Path
 
-# get py_neuromoulation files
-PATH_PYNEUROMODULATION = r'C:\Users\ICN_admin\Documents\py_neuromodulation'
+# first parent to get test folder, second pyneuromodulation folder, then py_neuromodulation
+PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent.parent
 sys.path.append(os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation'))
+sys.path.append(os.path.join(PATH_PYNEUROMODULATION,'examples'))
+
 import define_M1
 import generator
 import rereference
 import settings
 import sharpwaves
 import IO
+
+import example_BIDS
+import example_ML
+import example_read_features
 
 def read_example_data(PATH_PYNEUROMODULATION):
     """This test function return a data batch and automatic initialized M1 datafram
@@ -104,6 +111,18 @@ def test_sharpwaves(data, features_, ch, example_settings, fs):
     print("estimate sharpwave features")
     features_ = sw_features.get_sharpwave_features(features_, data, ch)
 
+def test_BIDS_feature_estimation():
+    print("test feature estimation for example data")
+    example_BIDS.run_example_BIDS()
+
+def test_ML_features():
+    print("test ML feature estimation")
+    example_ML.run_example_ML()
+
+def test_feature_read_out():
+    print("test feature read out")
+    example_read_features.run_example_read_features()
+
 
 if __name__ == "__main__":
 
@@ -118,3 +137,10 @@ if __name__ == "__main__":
     # this speeds up estimation
     index_sharpwave = int(fs / example_settings["sampling_rate_features"])
     features_ = test_sharpwaves(ieeg_batch[0, -index_sharpwave:], features_, ch, example_settings, fs)
+
+    # running example files
+    test_BIDS_feature_estimation()
+    test_ML_features()
+    test_feature_read_out()
+
+    print("all tests passed through")
