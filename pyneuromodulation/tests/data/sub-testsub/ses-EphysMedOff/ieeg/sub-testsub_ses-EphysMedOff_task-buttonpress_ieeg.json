@@ -4,7 +4,7 @@
     "PowerLineFrequency": 50,
     "SamplingFrequency": 1375.0,
     "SoftwareFilters": "n/a",
-    "RecordingDuration": 20.0,
+    "RecordingDuration": 18.0,
     "RecordingType": "continuous",
     "iEEGReference": "n/a",
     "ECOGChannelCount": 6,

@@ -13,7 +13,7 @@ bids_path = mne_bids.BIDSPath(subject=entities["subject"], session=entities["ses
 raw_arr = mne_bids.read_raw_bids(bids_path)
 
 # crop data 
-raw_arr.crop(0, 20) # only first 20 s
+raw_arr.crop(102, 120) # pick three movements
 
 pybv.write_brainvision(data=raw_arr.get_data(), sfreq=raw_arr.info["sfreq"], ch_names=raw_arr.ch_names, 
                       fname_base="example", folder_out=os.getcwd())
