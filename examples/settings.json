@@ -1,118 +1,173 @@
 {
-    "BIDS_path":  "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Beijing",
-    "out_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out",
+    "BIDS_path": "c:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\pyneuromodulation\\tests\\data",
+    "out_path": "c:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\pyneuromodulation\\tests\\data\\derivatives",
     "sampling_rate_features": 10,
-    "methods" : {
-        "resample_raw" : true,
-        "normalization" : true,
-        "kalman_filter" : true,
-        "re_referencing" : true,
-        "notch_filter" : true,
-        "bandpass_filter" : true,
-        "raw_hjorth" : true,
-        "sharpwave_analysis" : true,
-        "return_raw" : true,
-        "project_cortex" : true,
-        "project_subcortex" : false,
-        "pdc" : false,
-        "dtf" : false
+    "methods": {
+        "resample_raw": true,
+        "normalization": true,
+        "kalman_filter": true,
+        "re_referencing": true,
+        "notch_filter": true,
+        "bandpass_filter": true,
+        "raw_hjorth": true,
+        "sharpwave_analysis": true,
+        "return_raw": true,
+        "project_cortex": true,
+        "project_subcortex": false,
+        "pdc": false,
+        "dtf": false
     },
-
     "resample_raw_settings": {
-        "resample_freq" : 1000
+        "resample_freq": 1000
     },
-
     "normalization_settings": {
-        "normalization_time" : 10,
-        "normalization_method" : "mean"
+        "normalization_time": 10,
+        "normalization_method": "mean"
     },
-
     "kalman_filter_settings": {
-        "Tp" : 0.1,
-        "sigma_w" : 0.7,
-        "sigma_v" : 1,
-        "frequency_bands" : ["low gamma", "high gamma", "all gamma"]
+        "Tp": 0.1,
+        "sigma_w": 0.7,
+        "sigma_v": 1,
+        "frequency_bands": [
+            "low gamma",
+            "high gamma",
+            "all gamma"
+        ]
     },
-
     "bandpass_filter_settings": {
         "frequency_ranges": {
-            "theta" : [[4, 8], 1000],
-            "alpha" : [[8, 12], 500],
-            "low beta": [[13, 20], 333],
-            "high beta" : [[20, 35], 333],
-            "all beta" : [[13, 35], 333],
-            "low gamma" : [[60, 80], 100], 
-            "high gamma" : [[90, 200], 100],
-            "all gamma" : [[60, 200], 100]
+            "theta": [
+                [
+                    4,
+                    8
+                ],
+                1000
+            ],
+            "alpha": [
+                [
+                    8,
+                    12
+                ],
+                500
+            ],
+            "low beta": [
+                [
+                    13,
+                    20
+                ],
+                333
+            ],
+            "high beta": [
+                [
+                    20,
+                    35
+                ],
+                333
+            ],
+            "all beta": [
+                [
+                    13,
+                    35
+                ],
+                333
+            ],
+            "low gamma": [
+                [
+                    60,
+                    80
+                ],
+                100
+            ],
+            "high gamma": [
+                [
+                    90,
+                    200
+                ],
+                100
+            ],
+            "all gamma": [
+                [
+                    60,
+                    200
+                ],
+                100
+            ]
         },
         "bandpower_features": {
-        "activity" : true,
-        "mobility" : true,
-        "complexity" : true
+            "activity": true,
+            "mobility": true,
+            "complexity": true
         }
     },
-
     "sharpwave_analysis_settings": {
-        "sharpwave_features" : {
-            "peak_left" : true,
-            "peak_right" : true,
-            "trough" : true,
-            "width" : true,
-            "prominence" : true,
-            "interval" : true,
-            "decay_time" : true,
-            "rise_time" : true,
-            "sharpness" : true,
-            "rise_steepness" : true,
-            "decay_steepness" : true,
-            "slope_ratio" : true
+        "sharpwave_features": {
+            "peak_left": true,
+            "peak_right": true,
+            "trough": true,
+            "width": true,
+            "prominence": true,
+            "interval": true,
+            "decay_time": true,
+            "rise_time": true,
+            "sharpness": true,
+            "rise_steepness": true,
+            "decay_steepness": true,
+            "slope_ratio": true
         },
-        "filter_low_cutoff" : 5,
-        "filter_high_cutoff" : 90,
-        "detect_troughs" : {
-            "estimate" : true,
-            "distance_troughs" : 5,
-            "distance_peaks" : 1
+        "filter_low_cutoff": 5,
+        "filter_high_cutoff": 90,
+        "detect_troughs": {
+            "estimate": true,
+            "distance_troughs": 5,
+            "distance_peaks": 1
         },
-        "detect_peaks" : {
-            "estimate" : true,
-            "distance_troughs" : 1,
-            "distance_peaks" : 5
+        "detect_peaks": {
+            "estimate": true,
+            "distance_troughs": 1,
+            "distance_peaks": 5
         },
-        "estimator" : {
-            "mean" : true,
-            "median" : true,
-            "max" : true,
-            "min" : true, 
-            "var" : true
+        "estimator": {
+            "mean": true,
+            "median": true,
+            "max": true,
+            "min": true,
+            "var": true
         }
     },
-
-    "project_cortex_settings" : {
+    "project_cortex_settings": {
         "max_dist": 20
-    }, 
-
-    "project_subcortex_settings" : {
-        "max_dist": 5
-    }, 
-
-    "pdc_settings": {
-        "frequency_ranges" : {
-            "all beta" : ["LFP_BS_STN_L_1", "ECOG_AT_SM_L_1"],
-            "all gamma" : ["LFP_STN_L_234", "ECOG_AT_SM_L_2"]
-        },
-        "model_order" : "auto",
-        "max_order" : 10,
-        "num_fft" : "auto"
     },
-
-    "dtf_settings": {
-        "frequency_ranges" : {
-            "all beta" : ["LFP_BS_STN_L_1", "ECOG_AT_SM_L_1"],
-            "all gamma" : ["LFP_STN_L_234", "ECOG_AT_SM_L_2"]
+    "project_subcortex_settings": {
+        "max_dist": 5
+    },
+    "pdc_settings": {
+        "frequency_ranges": {
+            "all beta": [
+                "LFP_BS_STN_L_1",
+                "ECOG_AT_SM_L_1"
+            ],
+            "all gamma": [
+                "LFP_STN_L_234",
+                "ECOG_AT_SM_L_2"
+            ]
         },
-        "model_order" : "auto",
-        "max_order" : 10,
-        "num_fft" : "auto"
+        "model_order": "auto",
+        "max_order": 10,
+        "num_fft": "auto"
+    },
+    "dtf_settings": {
+        "frequency_ranges": {
+            "all beta": [
+                "LFP_BS_STN_L_1",
+                "ECOG_AT_SM_L_1"
+            ],
+            "all gamma": [
+                "LFP_STN_L_234",
+                "ECOG_AT_SM_L_2"
+            ]
+        },
+        "model_order": "auto",
+        "max_order": 10,
+        "num_fft": "auto"
     }
 }

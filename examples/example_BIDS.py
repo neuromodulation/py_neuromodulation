@@ -4,17 +4,20 @@ from bids import BIDSLayout
 from itertools import product
 import os
 import json
+from pathlib import Path
 
-os.chdir(os.path.join(os.pardir,'pyneuromodulation'))
-sys.path.append(os.path.join(os.pardir,'pyneuromodulation'))
-sys.path.append(os.path.join(os.pardir, 'examples'))
+# first parent to get example folder, second py_neuromodulation folder
+PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent
+sys.path.append(os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation'))
+sys.path.append(os.path.join(Path(__file__).absolute().parent.parent,'examples'))
+
 import start_BIDS
 
-if __name__ == "__main__":
+def run_example_BIDS():
+    """run the example BIDS path in pyneuromodulation/tests/data
+    """
 
     print(os.getcwd())
-    # example single run file estimation
-    PATH_PYNEUROMODULATION = os.pardir
 
     BIDS_EXAMPLE_PATH = os.path.abspath(os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation',
                                         'tests', 'data'))
@@ -34,3 +37,9 @@ if __name__ == "__main__":
                             'ieeg', "sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg.vhdr")
 
     start_BIDS.est_features_run(PATH_RUN)
+
+if __name__ == "__main__":
+
+    
+
+    run_example_BIDS()

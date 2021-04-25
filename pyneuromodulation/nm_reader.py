@@ -42,7 +42,7 @@ class NM_Reader:
         self.features = pd.read_csv(os.path.join(self.feature_path, feature_file,
                                     feature_file + "_FEATURES.csv"), header=0)
 
-    def read_channel_data(self, ch_name, read_bp_activity_only=False) -> None:
+    def read_channel_data(self, ch_name, read_bp_activity_only=True) -> None:
         self.ch_name = ch_name
         self.feature_ch_cols = [i for i in list(self.features.columns) if ch_name in i]
         if read_bp_activity_only:
