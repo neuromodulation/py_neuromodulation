@@ -59,12 +59,13 @@ def est_features_run(PATH_RUN, PATH_M1=None) -> None:
     # initialize generator for run function
     gen = generator.ieeg_raw_generator(raw_arr_data, settings_wrapper.settings)
 
-    # define resampler for faster feature estimation
+    # initialize rereferencing
     if settings_wrapper.settings["methods"]["re_referencing"] is True:
         rereference_ = rereference.RT_rereference(settings_wrapper.df_M1, split_data=False)
     else:
         rereference_ = None
 
+    # define resampler for faster feature estimation
     if settings_wrapper.settings["methods"]["resample_raw"] is True:
         resample_ = resample.Resample(settings_wrapper.settings)
     else:

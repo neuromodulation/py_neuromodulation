@@ -5,15 +5,22 @@ from itertools import product
 from mne_realtime import LSLClient
 import json
 import numpy as np
+from pathlib import Path
 
-sys.path.append(
-    r'C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation')
+# first parent to get example folder, second py_neuromodulation folder
+PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent
+sys.path.append(os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation'))
+
 from settings import test_settings
 import define_M1
 import rereference
 import features
 import run_analysis
 import generator_LSL
+import settings as nm_settings
+import projection
+import IO
+import resample
 
 if __name__ == "__main__":
 
@@ -22,12 +29,22 @@ if __name__ == "__main__":
     HOST_NAME = "openbci_eeg_id43"
     PATH_RUN = HOST_NAME  # for saving data later on 
     CH_TYPE = "ecog"  # pretend ECoG signals, s.t. define_M1 works 
+
     # read settings
-    with open('settings.json', encoding='utf-8') as json_file:
-        settings = json.load(json_file)
+    settings_wrapper = nm_settings.SettingsWrapper('settings_LSL.json')
+
+    # (if available) add coordinates to settings here
+    '''
+    if settings_wrapper.settings["methods"]["project_cortex"] is True or \
+            settings_wrapper.settings["methods"]["project_subcortex"] is True:
+        settings_wrapper.add_coord(raw_arr.copy())  # if not copy ch_names is being set
+        projection_ = projection.Projection(settings_wrapper.settings)
+    else:
+        projection_ = None
+    '''
 
     # test settings
-    test_settings(settings, verbose=True)
+    test_settings(settings_wrapper.settings, verbose=True)
 
     line_noise = 50
 
@@ -45,13 +62,50 @@ if __name__ == "__main__":
         #    print(client.get_data_as_epoch(n_samples=sfreq)._data.shape)
 
         # define M1
-        df_M1 = define_M1.set_M1(ch_names, ch_types)
+        settings_wrapper.set_M1(m1_path=None, ch_names=ch_names, ch_types=ch_types)
+        settings_wrapper.set_fs_line_noise(sfreq, line_noise) 
+    
+         # initialize rereferencing
+        if settings_wrapper.settings["methods"]["re_referencing"] is True:
+            rereference_ = rereference.RT_rereference(settings_wrapper.df_M1, split_data=False)
+        else:
+            rereference_ = None
+        
+        # define resampler for faster feature estimation
+        if settings_wrapper.settings["methods"]["resample_raw"] is True:
+            resample_ = resample.Resample(settings_wrapper.settings)
+        else:
+            resample_ = None
 
-        ref_here = rereference.RT_rereference(df_M1, split_data=False)
+        # initialize feature class from settings
+        features_ = features.Features(settings_wrapper.settings)
+    
+        # initialize run object
+        run_analysis_ = run_analysis.Run(features_, settings_wrapper.settings,
+                                     rereference_, projection=None, resample=resample_, verbose=True)
+        
+        # this loop is now asynchron; replace later with thread that runs at given time
+        # in a cue run_analysis.run could then estimate the data batches
+        # run_analyis.run in fact expects every settings["sampling_rate_features"] a new data batch 
 
-        ch_names = df_M1['name'].to_numpy()
-        feature_idx, = np.where(np.logical_and(np.array((df_M1["used"] == 1)),
-                                           np.array((df_M1["target"] == 0))))
+        counter_samples = 0
+        while counter_samples < 100:
+            ieeg_batch = np.squeeze(client.get_data_as_epoch(n_samples=sfreq))
+            run_analysis_.run(ieeg_batch)
+            counter_samples += 1
+        
+        IO.save_features_and_settings(df_=run_analysis_.feature_arr, run_analysis_=run_analysis_,
+                                  folder_name=os.path.basename(PATH_RUN)[:-5],
+                                  settings_wrapper=settings_wrapper)
+
+
+
+#####################
+
+'''
+        ch_names = settings_wrapper.df_M1['name'].to_numpy()
+        feature_idx, = np.where(np.logical_and(np.array((settings_wrapper.df_M1["used"] == 1)),
+                                           np.array((settings_wrapper.df_M1["target"] == 0))))
         used_chs = ch_names[feature_idx].tolist()
 
         # initialize feature class from settings
@@ -82,3 +136,4 @@ if __name__ == "__main__":
         # save df_M1 as csv
         df_M1.to_csv(os.path.join(settings["out_path"], folder_name,
                                   folder_name+"_DF_M1.csv"))
+'''
