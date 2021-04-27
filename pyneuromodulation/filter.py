@@ -14,7 +14,7 @@ def calc_band_filters(f_ranges, sfreq, filter_length="999ms",
     ----------
     f_ranges : list of lists
         frequency ranges.
-    sfreq : float
+    sfreq : float | int
         sampling frequency.
     filter_length : str, optional
         length of the filter. Human readable (e.g."1000ms" or "1s").
