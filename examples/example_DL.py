@@ -1,11 +1,18 @@
 import sys
 import pandas as pd
 import numpy as np
-sys.path.append(r"D:\Jupyter notebooks\Interventional Cognitive Neuromodulation\github files\py_neuromodulation\pyneuromodulation")
+import os
+from pathlib import Path
+
+
+# first parent to get example folder, second py_neuromodulation folder
+PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent
+sys.path.append(os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation'))
+sys.path.append(os.path.join(Path(__file__).absolute().parent.parent,'examples'))
 
 from sklearn.model_selection import KFold, TimeSeriesSplit
 
-from dl_archs import tabnet_regression
+import dl_archs
 import training_utils as tu
 import tensorflow as tf
 
@@ -37,15 +44,27 @@ if __name__ == "__main__":
         batch_percentage = 10
         test_batch_num = int(np.floor(X_test.shape[0]//batch_percentage))
         batch_size = int(np.floor(X_train.shape[0]//batch_percentage))
-        model = tabnet_regression(num_features=X.shape[1]
+        # model = dl_archs.tabnet_regression(num_features=X.shape[1]
+        #                           , output_dim=1
+        #                           , feature_dim=X.shape[1]
+        #                           , num_decision_steps=6
+        #                           , relaxation_factor=1.5
+        #                           , batch_momentum=0.7
+        #                           , epsilon=0.00001
+        #                           , BATCH_SIZE=batch_size
+        #                           , virtual_batch_size=batch_size)
+
+        model = dl_archs.TabNet(num_features=X.shape[1]
                                   , output_dim=1
                                   , feature_dim=X.shape[1]
                                   , num_decision_steps=6
                                   , relaxation_factor=1.5
                                   , batch_momentum=0.7
                                   , epsilon=0.00001
-                                  , BATCH_SIZE=batch_size
-                                  , virtual_batch_size=batch_size)
+                                  , virtual_batch_size = batch_size
+                                  , batch_normalize_input=False
+                                  , tensor_image = False)
+
 
         optimizer = tf.keras.optimizers.RMSprop(learning_rate=0.01)
 

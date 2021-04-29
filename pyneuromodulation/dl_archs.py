@@ -19,8 +19,7 @@ def tabnet_regression(num_features = 128
         ,epsilon=0.00001
         ,BATCH_SIZE = 4000
         ,virtual_batch_size=2000
-        ,is_training = True
-):
+        ,is_training = True):
 
     input_layer = k.Input(shape=(num_features,))
     features = k.layers.BatchNormalization()(input_layer)
@@ -164,5 +163,133 @@ def tabnet_regression(num_features = 128
 
 
 
+class TabNet(k.Model):
+    def __init__(self,feature_dim, batch_momentum, virtual_batch_size,
+                 num_decision_steps, num_features, output_dim,
+                 relaxation_factor, batch_normalize_input=True,
+                 tensor_image = False, epsilon =0.00001,  **kwargs):
+
+        super(TabNet, self).__init__()
+        self.feature_dim = feature_dim
+        self.batch_momentum = batch_momentum
+        self.virtual_batch_size = virtual_batch_size
+        self.num_decision_steps = num_decision_steps
+        self.output_dim = output_dim
+        self.num_features = num_features
+        self.relaxation_factor = relaxation_factor
+        self.batch_normalize_input = batch_normalize_input
+        self.tensor_image = tensor_image
+        self.epsilon = epsilon
+        self.shared_b = self.shared_block
+
+
+    def complete_init(self):
+
+        self.output_aggregated = tf.zeros((self.batch_size, self.output_dim))
+        self.aggregated_mask_values = tf.zeros((self.batch_size, self.num_features))
+        self.mask_values = tf.zeros((self.batch_size, self.num_features))
+        self.complemantary_aggregated_mask_values = tf.ones(
+            [self.batch_size, self.num_features])
+        self.total_entropy = 0
+
+
+    def glu(self, act, n_units):
+      """Generalized linear unit nonlinear activation."""
+      return act[:, :n_units] * k.activations.sigmoid(act[:, n_units:])
+
+
+    def shared_block(self,input):
+        transform1 = k.layers.Dense(self.feature_dim*2, name = "Transform1",use_bias=False)(input)
+        transform1 = k.layers.BatchNormalization(momentum=self.batch_momentum, virtual_batch_size=self.virtual_batch_size)(transform1)
+        out1 = self.glu(transform1, self.feature_dim)
+
+        transform2 = k.layers.Dense(self.feature_dim*2, name = "Transform2",use_bias=False)(out1)
+        transform2 = k.layers.BatchNormalization(momentum=self.batch_momentum, virtual_batch_size=self.virtual_batch_size)(transform2)
+        out2 = (self.glu(transform2, self.feature_dim) + out1)* tf.math.sqrt(0.5) # This could be a place where important information is lost
+
+        return out2
+
+
+    def feature_transformer(self, input, i):
+        transform3 = k.layers.Dense(self.feature_dim*2,name="transform3_"+str(i) )(input)
+        transform3 = k.layers.BatchNormalization(momentum=self.batch_momentum, virtual_batch_size=self.virtual_batch_size)(transform3)
+        out3 = (self.glu(transform3,self.feature_dim)+input) * tf.math.sqrt(0.5)
+
+        transform4 = k.layers.Dense(self.feature_dim*2,name="transform3_"+str(i) )(out3)
+        transform4 = k.layers.BatchNormalization(momentum=self.batch_momentum, virtual_batch_size=self.virtual_batch_size)(transform4)
+        out4 = (self.glu(transform4,self.feature_dim)+out3) * tf.math.sqrt(0.5)
+
+        return out4
+
+    def split(self, transformed_features):
+
+        decision_out = k.layers.ReLU()(transformed_features[:, :self.output_dim])
+
+        self.output_aggregated += decision_out
+
+        scale_agg = tf.reduce_sum(
+            decision_out, axis=1, keepdims=True) / (self.num_decision_steps-1)
+
+        self.aggregated_mask_values += self.mask_values * scale_agg
+
+    def mask_update(self,coef_features, ni):
+
+        mask_values = k.layers.Dense(self.num_features,
+                                     name = 'transform_coeff'+str(ni),
+                                     use_bias=False)(coef_features)
+        mask_values = k.layers.BatchNormalization(momentum=self.batch_momentum,
+                                                  virtual_batch_size=self.virtual_batch_size)(mask_values)
+
+        mask_values *= self.complemantary_aggregated_mask_values
+        mask_values = tfa.layers.Sparsemax()(mask_values)
+
+        self.mask_values = mask_values
+
+        self.complemantary_aggregated_mask_values *= (self.relaxation_factor - mask_values)
+
+        self.total_entropy += tf.reduce_mean(
+            tf.reduce_sum(
+                -mask_values * tf.math.log(mask_values+self.epsilon),
+                axis=1)) / (self.num_decision_steps-1)
+
+        masked_features =  k.layers.Multiply()([mask_values,self.features])
+
+        return masked_features
+
+    def call(self, input):
+
+        if self.batch_normalize_input:
+            self.features = k.layers.BatchNormalization()(input)
+        else:
+            self.features = input
+
+        self.batch_size = tf.shape(self.features)[0]
+        self.complete_init()
+
+        masked_features = self.features
+
+        for ni in range(self.num_decision_steps):
+
+            shared = self.shared_b(masked_features)
+            transformed_f = self.feature_transformer(shared, ni)
+
+            if ni > 0 :
+                self.split(transformed_f)
+
+            features_for_coef = (transformed_f[:, self.output_dim:])
+
+            if ni < self.num_decision_steps-1:
+                masked_features = self.mask_update(features_for_coef,ni)
+
+                if self.tensor_image:
+                 tf.summary.image("Mask for step"+str(ni),
+                                  tf.expand_dims(tf.expand_dims(self.mask_values,0),3), max_outputs=1)
+
+
+        if self.tensor_image:
+            tf.summary.image("Aggregated mask",
+                             tf.expand_dims(tf.expand_dims(self.aggregated_mask_values,0),3),max_outputs=1)
+
+        return k.layers.Dense(self.output_dim,activation='linear',use_bias=False)(self.output_aggregated)
 
 
