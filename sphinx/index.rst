@@ -6,11 +6,13 @@
 Welcome to py_neuromodulation's documentation!
 ==============================================
 
+
 .. toctree::
    :maxdepth: 2
    :caption: BIDS data feature estimation
 
    start_BIDS
+   ParametrizationDefinition.ipynb
 
 .. toctree::
    :maxdepth: 2
