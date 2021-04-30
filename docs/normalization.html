@@ -32,6 +32,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -87,6 +88,7 @@
               <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="start_BIDS.html">start_BIDS.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametrizationDefinition.html">py_neuromodulation settings and preprocessing parametrization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Real-time processing</span></p>
 <ul class="current">
@@ -178,36 +180,60 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="realtime-normalization-py">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="realtime-normalization-py">
 <h1>realtime_normalization.py<a class="headerlink" href="#realtime-normalization-py" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="module-realtime_normalization"></span><dl class="py function">
 <dt id="realtime_normalization.realtime_normalization">
-<code class="sig-prename descclassname">realtime_normalization.</code><code class="sig-name descname">realtime_normalization</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">raw_arr</span></em>, <em class="sig-param"><span class="n">cnt_samples</span></em>, <em class="sig-param"><span class="n">normalize_samples</span></em>, <em class="sig-param"><span class="n">fs</span></em>, <em class="sig-param"><span class="n">norm_type</span><span class="o">=</span><span class="default_value">'mean'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/realtime_normalization.html#realtime_normalization"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#realtime_normalization.realtime_normalization" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">realtime_normalization.</span></code><code class="sig-name descname"><span class="pre">realtime_normalization</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cnt_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/realtime_normalization.html#realtime_normalization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#realtime_normalization.realtime_normalization" title="Permalink to this definition">¶</a></dt>
 <dd><p>Normalization according to past normalize_samples according to mean or median.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>raw_arr</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndarray</span></code></span></dt><dd><p>input array, shape (channels, time)</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>raw_arr</strong><span class="classifier">ndarray</span></dt><dd><p>input array, shape (channels, time)</p>
 </dd>
-<dt><strong>cnt_samples</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:int</span></code></span></dt><dd><p>current sample index</p>
+<dt><strong>cnt_samples</strong><span class="classifier">int</span></dt><dd><p>current sample index</p>
 </dd>
-<dt><strong>normalize_samples</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:int</span></code></span></dt><dd><p>number of past samples considered for normalization</p>
+<dt><strong>normalize_samples</strong><span class="classifier">int</span></dt><dd><p>number of past samples considered for normalization</p>
 </dd>
-<dt><strong>fs</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:int</span></code></span></dt><dd><p>sampling frequency</p>
+<dt><strong>fs</strong><span class="classifier">int</span></dt><dd><p>sampling frequency</p>
 </dd>
-<dt><strong>norm_type</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:str</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">optional</span></code></span></dt><dd><p>data is normalization with subtract and divide by ‘mean’ or ‘median’ , by default ‘mean’</p>
+<dt><strong>norm_type</strong><span class="classifier">str, optional</span></dt><dd><p>data is normalization with subtract and divide by ‘mean’ or ‘median’ , by default ‘mean’</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><dl>
-<dt><strong>raw_norm</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndarray</span></code></span></dt><dd><p>normalized array</p>
+<dd class="field-even"><dl class="simple">
+<dt><strong>raw_norm</strong><span class="classifier">ndarray</span></dt><dd><p>normalized array</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-odd">Raises</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">TypeError</span></code></dt><dd><p>returned  if norm_type is not ‘mean’ or ‘median’</p>
+<dt>TypeError</dt><dd><p>returned  if norm_type is not ‘mean’ or ‘median’</p>
 </dd>
 </dl>
 </dd>

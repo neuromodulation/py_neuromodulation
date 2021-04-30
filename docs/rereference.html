@@ -32,6 +32,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -87,6 +88,7 @@
               <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="start_BIDS.html">start_BIDS.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametrizationDefinition.html">py_neuromodulation settings and preprocessing parametrization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Real-time processing</span></p>
 <ul class="current">
@@ -178,11 +180,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="rereference-py">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="rereference-py">
 <h1>rereference.py<a class="headerlink" href="#rereference-py" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="rereference.RT_rereference">
-<em class="property">class </em><code class="sig-prename descclassname">rereference.</code><code class="sig-name descname">RT_rereference</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span></em>, <em class="sig-param"><span class="n">split_data</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rereference.html#RT_rereference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rereference.RT_rereference" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">rereference.</span></code><code class="sig-name descname"><span class="pre">RT_rereference</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rereference.html#RT_rereference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rereference.RT_rereference" title="Permalink to this definition">¶</a></dt>
 <dd><p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -197,7 +223,7 @@
 </table>
 <dl class="py method">
 <dt id="rereference.RT_rereference.rereference">
-<code class="sig-name descname">rereference</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ieeg_batch</span></em><span class="sig-paren">)</span> &#x2192; numpy.ndarray<a class="reference internal" href="_modules/rereference.html#RT_rereference.rereference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rereference.RT_rereference.rereference" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">rereference</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ieeg_batch</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="_modules/rereference.html#RT_rereference.rereference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rereference.RT_rereference.rereference" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rereference data according to the initialized RT_rereference class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

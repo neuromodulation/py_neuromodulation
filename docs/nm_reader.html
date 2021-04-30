@@ -32,6 +32,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -87,6 +88,7 @@
               <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="start_BIDS.html">start_BIDS.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametrizationDefinition.html">py_neuromodulation settings and preprocessing parametrization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Real-time processing</span></p>
 <ul>
@@ -178,11 +180,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="nm-reader-py">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="nm-reader-py">
 <h1>nm_reader.py<a class="headerlink" href="#nm-reader-py" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="nm_reader.NM_Reader">
-<em class="property">class </em><code class="sig-prename descclassname">nm_reader.</code><code class="sig-name descname">NM_Reader</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">feature_path</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_reader.html#NM_Reader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nm_reader.NM_Reader" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">nm_reader.</span></code><code class="sig-name descname"><span class="pre">NM_Reader</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feature_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_reader.html#NM_Reader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_reader.NM_Reader" title="Permalink to this definition">¶</a></dt>
 <dd><p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -231,7 +257,7 @@
 <tr class="row-even"><td><p><strong>read_channel_data</strong></p></td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><p><strong>read_file</strong></p></td>
+<tr class="row-odd"><td><p><strong>read_features</strong></p></td>
 <td></td>
 </tr>
 <tr class="row-even"><td><p><strong>read_label</strong></p></td>
@@ -244,18 +270,18 @@
 </table>
 <dl class="py method">
 <dt id="nm_reader.NM_Reader.get_epochs">
-<code class="sig-name descname">get_epochs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">y_</span></em>, <em class="sig-param"><span class="n">epoch_len</span></em>, <em class="sig-param"><span class="n">sfreq</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_reader.html#NM_Reader.get_epochs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nm_reader.NM_Reader.get_epochs" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_epochs</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epoch_len</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sfreq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_reader.html#NM_Reader.get_epochs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_reader.NM_Reader.get_epochs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return epoched data.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>data</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code></span></dt><dd><p>array of extracted features of shape (n_samples, n_channels, n_features)</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>data</strong><span class="classifier">np.ndarray</span></dt><dd><p>array of extracted features of shape (n_samples, n_channels, n_features)</p>
 </dd>
-<dt><strong>y_</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code></span></dt><dd><p>array of labels e.g. ones for movement and zeros for no movement or baseline corr. rotameter data</p>
+<dt><strong>y_</strong><span class="classifier">np.ndarray</span></dt><dd><p>array of labels e.g. ones for movement and zeros for no movement or baseline corr. rotameter data</p>
 </dd>
 <dt><strong>sfreq</strong><span class="classifier">int/float</span></dt><dd><p>sampling frequency of data</p>
 </dd>
-<dt><strong>epoch_len</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:int</span></code></span></dt><dd><p>length of epoch in seconds</p>
+<dt><strong>epoch_len</strong><span class="classifier">int</span></dt><dd><p>length of epoch in seconds</p>
 </dd>
 <dt><strong>threshold</strong><span class="classifier">int/float</span></dt><dd><dl class="simple">
 <dt>(Optional) threshold to be used for identifying events (default=0 for y_tr with only ones</dt><dd><p>and zeros)</p>
@@ -266,9 +292,9 @@
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">epoch_</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code></dt><dd><p>array of epoched ieeg data with shape (epochs,samples,channels,features)</p>
+<dt><a href="#id1"><span class="problematic" id="id2">epoch_</span></a> np.ndarray</dt><dd><p>array of epoched ieeg data with shape (epochs,samples,channels,features)</p>
 </dd>
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">y_arr</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code></dt><dd><p>array of epoched event label data with shape (epochs,samples)</p>
+<dt>y_arr np.ndarray</dt><dd><p>array of epoched event label data with shape (epochs,samples)</p>
 </dd>
 </dl>
 </dd>
@@ -277,18 +303,18 @@
 
 <dl class="py method">
 <dt id="nm_reader.NM_Reader.plot_cortical_projection">
-<code class="sig-name descname">plot_cortical_projection</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_reader.html#NM_Reader.plot_cortical_projection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nm_reader.NM_Reader.plot_cortical_projection" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">plot_cortical_projection</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_reader.html#NM_Reader.plot_cortical_projection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_reader.NM_Reader.plot_cortical_projection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot MNI brain including selected MNI cortical projection grid + used strip ECoG electrodes</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="nm_reader.NM_Reader.read_ML_estimations">
-<code class="sig-name descname">read_ML_estimations</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_reader.html#NM_Reader.read_ML_estimations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nm_reader.NM_Reader.read_ML_estimations" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">read_ML_estimations</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_reader.html#NM_Reader.read_ML_estimations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_reader.NM_Reader.read_ML_estimations" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read estimated ML outputs</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">nm_decode</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></dt><dd></dd>
+<dt>nm_decode object</dt><dd></dd>
 </dl>
 </dd>
 </dl>
@@ -296,12 +322,12 @@
 
 <dl class="py method">
 <dt id="nm_reader.NM_Reader.read_plot_modules">
-<code class="sig-name descname">read_plot_modules</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">PATH_PLOT</span><span class="o">=</span><span class="default_value">'..\\plots'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_reader.html#NM_Reader.read_plot_modules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nm_reader.NM_Reader.read_plot_modules" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">read_plot_modules</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PATH_PLOT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'..\\plots'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_reader.html#NM_Reader.read_plot_modules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_reader.NM_Reader.read_plot_modules" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read required .mat files for plotting</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>PATH_PLOT</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">regexp</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">optional</span></code></span></dt><dd><p>path to plotting files, by default</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>PATH_PLOT</strong><span class="classifier">regexp, optional</span></dt><dd><p>path to plotting files, by default</p>
 </dd>
 </dl>
 </dd>
@@ -310,7 +336,7 @@
 
 <dl class="py method">
 <dt id="nm_reader.NM_Reader.read_run_analyzer">
-<code class="sig-name descname">read_run_analyzer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_reader.html#NM_Reader.read_run_analyzer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nm_reader.NM_Reader.read_run_analyzer" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">read_run_analyzer</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_reader.html#NM_Reader.read_run_analyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_reader.NM_Reader.read_run_analyzer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read run_analysis outputs. If target was set to true, a corresponding column was added to feature_arr
 dataframe.
 :returns:

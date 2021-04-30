@@ -32,6 +32,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -86,6 +87,7 @@
               <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="start_BIDS.html">start_BIDS.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametrizationDefinition.html">py_neuromodulation settings and preprocessing parametrization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Real-time processing</span></p>
 <ul>
@@ -177,11 +179,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="nm-decode-py">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="nm-decode-py">
 <h1>nm_decode.py<a class="headerlink" href="#nm-decode-py" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="nm_decode.Decoder">
-<em class="property">class </em><code class="sig-prename descclassname">nm_decode.</code><code class="sig-name descname">Decoder</code><span class="sig-paren">(</span><em class="sig-param">feature_path</em>, <em class="sig-param">feature_file</em>, <em class="sig-param">model=LinearRegression(copy_X=True</em>, <em class="sig-param">fit_intercept=True</em>, <em class="sig-param">n_jobs=None</em>, <em class="sig-param">normalize=False)</em>, <em class="sig-param">eval_method=&lt;function r2_score&gt;</em>, <em class="sig-param">cv_method=KFold(n_splits=3</em>, <em class="sig-param">random_state=None</em>, <em class="sig-param">shuffle=False)</em>, <em class="sig-param">threshold_score=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_decode.html#Decoder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nm_decode.Decoder" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">nm_decode.</span></code><code class="sig-name descname"><span class="pre">Decoder</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">feature_path</span></em>, <em class="sig-param"><span class="pre">feature_file</span></em>, <em class="sig-param"><span class="pre">model=LinearRegression()</span></em>, <em class="sig-param"><span class="pre">eval_method=&lt;function</span> <span class="pre">r2_score&gt;</span></em>, <em class="sig-param"><span class="pre">cv_method=KFold(n_splits=3</span></em>, <em class="sig-param"><span class="pre">random_state=None</span></em>, <em class="sig-param"><span class="pre">shuffle=False)</span></em>, <em class="sig-param"><span class="pre">threshold_score=True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_decode.html#Decoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_decode.Decoder" title="Permalink to this definition">¶</a></dt>
 <dd><p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -192,11 +218,23 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#nm_decode.Decoder.run_Bay_Opt" title="nm_decode.Decoder.run_Bay_Opt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_Bay_Opt</span></code></a>(space[, rounds, base_estimator, …])</p></td>
 <td><p>Run skopt bayesian optimization skopt.Optimizer: <a class="reference external" href="https://scikit-optimize.github.io/stable/modules/generated/skopt.Optimizer.html#skopt.Optimizer">https://scikit-optimize.github.io/stable/modules/generated/skopt.Optimizer.html#skopt.Optimizer</a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nm_decode.Decoder.run_CV" title="nm_decode.Decoder.run_CV"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_CV</span></code></a>()</p></td>
-<td><p>Evaluate model performance on the specified cross validation</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nm_decode.Decoder.run_CV" title="nm_decode.Decoder.run_CV"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_CV</span></code></a>([data, label, XGB])</p></td>
+<td><p>Evaluate model performance on the specified cross validation.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nm_decode.Decoder.save" title="nm_decode.Decoder.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nm_decode.Decoder.run_CV_grid_points" title="nm_decode.Decoder.run_CV_grid_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_CV_grid_points</span></code></a>([XGB])</p></td>
+<td><p>run cross validation across grid points</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nm_decode.Decoder.run_CV_ind_channels" title="nm_decode.Decoder.run_CV_ind_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_CV_ind_channels</span></code></a>([XGB])</p></td>
+<td><p>run the CV for every specified channel</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nm_decode.Decoder.save" title="nm_decode.Decoder.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>([str_save_add])</p></td>
 <td><p>Saves decoder object to pickle</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nm_decode.Decoder.set_data_grid_points" title="nm_decode.Decoder.set_data_grid_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_data_grid_points</span></code></a>()</p></td>
+<td><p>Read the run_analysis Projected data has the shape (samples, grid points, features)</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nm_decode.Decoder.set_data_ind_channels" title="nm_decode.Decoder.set_data_ind_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_data_ind_channels</span></code></a>()</p></td>
+<td><p>specified channel individual data</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#nm_decode.Decoder.train_final_model" title="nm_decode.Decoder.train_final_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">train_final_model</span></code></a>([bayes_opt])</p></td>
 <td><p>Train final model on all data</p></td>
@@ -205,7 +243,7 @@
 </table>
 <dl class="py method">
 <dt id="nm_decode.Decoder.run_Bay_Opt">
-<code class="sig-name descname">run_Bay_Opt</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">space</span></em>, <em class="sig-param"><span class="n">rounds</span><span class="o">=</span><span class="default_value">10</span></em>, <em class="sig-param"><span class="n">base_estimator</span><span class="o">=</span><span class="default_value">'GP'</span></em>, <em class="sig-param"><span class="n">acq_func</span><span class="o">=</span><span class="default_value">'EI'</span></em>, <em class="sig-param"><span class="n">acq_optimizer</span><span class="o">=</span><span class="default_value">'sampling'</span></em>, <em class="sig-param"><span class="n">initial_point_generator</span><span class="o">=</span><span class="default_value">'lhs'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_decode.html#Decoder.run_Bay_Opt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nm_decode.Decoder.run_Bay_Opt" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">run_Bay_Opt</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_estimator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'GP'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acq_func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'EI'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acq_optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'sampling'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_point_generator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lhs'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_decode.html#Decoder.run_Bay_Opt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_decode.Decoder.run_Bay_Opt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run skopt bayesian optimization
 skopt.Optimizer:
 <a class="reference external" href="https://scikit-optimize.github.io/stable/modules/generated/skopt.Optimizer.html#skopt.Optimizer">https://scikit-optimize.github.io/stable/modules/generated/skopt.Optimizer.html#skopt.Optimizer</a></p>
@@ -213,25 +251,25 @@ skopt.Optimizer:
 <a class="reference external" href="https://scikit-optimize.github.io/stable/auto_examples/ask-and-tell.html#sphx-glr-auto-examples-ask-and-tell-py">https://scikit-optimize.github.io/stable/auto_examples/ask-and-tell.html#sphx-glr-auto-examples-ask-and-tell-py</a></p>
 <p>Special attention needs to be made with the run_CV output,
 some metrics are minimized (MAE), some are maximized (r^2)</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>space</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skopt</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">hyperparameter</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">space</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">definition</span></code></span></dt><dd></dd>
-<dt><strong>rounds</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:int</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">optional</span></code></span></dt><dd><p>optimizing rounds, by default 10</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>space</strong><span class="classifier">skopt hyperparameter space definition</span></dt><dd></dd>
+<dt><strong>rounds</strong><span class="classifier">int, optional</span></dt><dd><p>optimizing rounds, by default 10</p>
 </dd>
-<dt><strong>base_estimator</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:str</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">optional</span></code></span></dt><dd><p>surrogate model, used as optimization function instead of cross validation, by default “GP”</p>
+<dt><strong>base_estimator</strong><span class="classifier">str, optional</span></dt><dd><p>surrogate model, used as optimization function instead of cross validation, by default “GP”</p>
 </dd>
-<dt><strong>acq_func</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:str</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">optional</span></code></span></dt><dd><p>function to minimize over the posterior distribution, by default “EI”</p>
+<dt><strong>acq_func</strong><span class="classifier">str, optional</span></dt><dd><p>function to minimize over the posterior distribution, by default “EI”</p>
 </dd>
-<dt><strong>acq_optimizer</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:str</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">optional</span></code></span></dt><dd><p>method to minimize the acquisition function, by default “sampling”</p>
+<dt><strong>acq_optimizer</strong><span class="classifier">str, optional</span></dt><dd><p>method to minimize the acquisition function, by default “sampling”</p>
 </dd>
-<dt><strong>initial_point_generator</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:str</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">optional</span></code></span></dt><dd><p>sets a initial point generator, by default “lhs”</p>
+<dt><strong>initial_point_generator</strong><span class="classifier">str, optional</span></dt><dd><p>sets a initial point generator, by default “lhs”</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">skopt</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">result</span></code></dt><dd></dd>
+<dt>skopt result</dt><dd></dd>
 </dl>
 </dd>
 </dl>
@@ -239,12 +277,49 @@ some metrics are minimized (MAE), some are maximized (r^2)</p>
 
 <dl class="py method">
 <dt id="nm_decode.Decoder.run_CV">
-<code class="sig-name descname">run_CV</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_decode.html#Decoder.run_CV"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nm_decode.Decoder.run_CV" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate model performance on the specified cross validation</p>
-<dl class="field-list">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><dl>
-<dt><strong>cv_res</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:float</span></code></span></dt><dd><p>mean cross validation result</p>
+<code class="sig-name descname"><span class="pre">run_CV</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">XGB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_decode.html#Decoder.run_CV"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_decode.Decoder.run_CV" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate model performance on the specified cross validation.
+If no data and label is specified, use whole feature class attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>data (np.ndarray):</strong></dt><dd><p>data to train and test with shape samples, features</p>
+</dd>
+<dt><strong>label (np.ndarray):</strong></dt><dd><p>label to train and test with shape samples, features</p>
+</dd>
+<dt><strong>XGB (boolean):</strong></dt><dd><p>if true split data into additinal validation, and run class weighted CV</p>
+</dd>
+<dt><strong>Returns</strong></dt><dd></dd>
+<dt><strong>——-</strong></dt><dd></dd>
+<dt><strong>cv_res</strong><span class="classifier">float</span></dt><dd><p>mean cross validation result</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="nm_decode.Decoder.run_CV_grid_points">
+<code class="sig-name descname"><span class="pre">run_CV_grid_points</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">XGB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_decode.html#Decoder.run_CV_grid_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_decode.Decoder.run_CV_grid_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>run cross validation across grid points</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>XGB (boolean):</strong></dt><dd><p>if true split data into additinal validation, and run class weighted CV</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="nm_decode.Decoder.run_CV_ind_channels">
+<code class="sig-name descname"><span class="pre">run_CV_ind_channels</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">XGB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_decode.html#Decoder.run_CV_ind_channels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_decode.Decoder.run_CV_ind_channels" title="Permalink to this definition">¶</a></dt>
+<dd><p>run the CV for every specified channel</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>XGB (boolean):</strong></dt><dd><p>if true split data into additinal validation, and run class weighted CV</p>
 </dd>
 </dl>
 </dd>
@@ -253,18 +328,31 @@ some metrics are minimized (MAE), some are maximized (r^2)</p>
 
 <dl class="py method">
 <dt id="nm_decode.Decoder.save">
-<code class="sig-name descname">save</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="_modules/nm_decode.html#Decoder.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nm_decode.Decoder.save" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">save</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">str_save_add</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="_modules/nm_decode.html#Decoder.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_decode.Decoder.save" title="Permalink to this definition">¶</a></dt>
 <dd><p>Saves decoder object to pickle</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="nm_decode.Decoder.set_data_grid_points">
+<code class="sig-name descname"><span class="pre">set_data_grid_points</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_decode.html#Decoder.set_data_grid_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_decode.Decoder.set_data_grid_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the run_analysis
+Projected data has the shape (samples, grid points, features)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="nm_decode.Decoder.set_data_ind_channels">
+<code class="sig-name descname"><span class="pre">set_data_ind_channels</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_decode.html#Decoder.set_data_ind_channels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_decode.Decoder.set_data_ind_channels" title="Permalink to this definition">¶</a></dt>
+<dd><p>specified channel individual data</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="nm_decode.Decoder.train_final_model">
-<code class="sig-name descname">train_final_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bayes_opt</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="_modules/nm_decode.html#Decoder.train_final_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#nm_decode.Decoder.train_final_model" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">train_final_model</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bayes_opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="_modules/nm_decode.html#Decoder.train_final_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_decode.Decoder.train_final_model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Train final model on all data</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>bayes_opt</strong><span class="classifier"><span class="xref std std-ref">bool</span></span></dt><dd><p>if True get best bayesian optimization parameters and train model with the
+<dd class="field-odd"><dl class="simple">
+<dt><strong>bayes_opt</strong><span class="classifier">boolean</span></dt><dd><p>if True get best bayesian optimization parameters and train model with the
 according parameters</p>
 </dd>
 </dl>

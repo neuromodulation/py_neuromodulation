@@ -32,6 +32,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -87,6 +88,7 @@
               <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="start_BIDS.html">start_BIDS.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametrizationDefinition.html">py_neuromodulation settings and preprocessing parametrization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Real-time processing</span></p>
 <ul>
@@ -178,11 +180,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="sharpwaves-py">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="sharpwaves-py">
 <h1>sharpwaves.py<a class="headerlink" href="#sharpwaves-py" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="sharpwaves.SharpwaveAnalyzer">
-<em class="property">class </em><code class="sig-prename descclassname">sharpwaves.</code><code class="sig-name descname">SharpwaveAnalyzer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sw_settings</span></em>, <em class="sig-param"><span class="n">sfreq</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sharpwaves.html#SharpwaveAnalyzer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sharpwaves.SharpwaveAnalyzer" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">sharpwaves.</span></code><code class="sig-name descname"><span class="pre">SharpwaveAnalyzer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sw_settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sfreq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sharpwaves.html#SharpwaveAnalyzer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sharpwaves.SharpwaveAnalyzer" title="Permalink to this definition">¶</a></dt>
 <dd><p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -206,7 +232,7 @@
 </table>
 <dl class="py method">
 <dt id="sharpwaves.SharpwaveAnalyzer.analyze_waveform">
-<code class="sig-name descname">analyze_waveform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">peak_dist</span></em>, <em class="sig-param"><span class="n">trough_dist</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="_modules/sharpwaves.html#SharpwaveAnalyzer.analyze_waveform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sharpwaves.SharpwaveAnalyzer.analyze_waveform" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">analyze_waveform</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">peak_dist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trough_dist</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="_modules/sharpwaves.html#SharpwaveAnalyzer.analyze_waveform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sharpwaves.SharpwaveAnalyzer.analyze_waveform" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given the scipy.signal.find_peaks  trough/peak distance
 settings specified sharpwave features are estimated.</p>
 <dl class="field-list simple">
@@ -224,7 +250,7 @@ NoValidTroughException: Return if no adjacent peak can be found</p>
 
 <dl class="py method">
 <dt id="sharpwaves.SharpwaveAnalyzer.get_peaks_around">
-<code class="sig-name descname">get_peaks_around</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trough_ind</span></em>, <em class="sig-param"><span class="n">arr_ind_peaks</span></em>, <em class="sig-param"><span class="n">filtered_dat</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sharpwaves.html#SharpwaveAnalyzer.get_peaks_around"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sharpwaves.SharpwaveAnalyzer.get_peaks_around" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_peaks_around</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trough_ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arr_ind_peaks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filtered_dat</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sharpwaves.html#SharpwaveAnalyzer.get_peaks_around"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sharpwaves.SharpwaveAnalyzer.get_peaks_around" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the closest peaks to the right and left side a given trough.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -238,10 +264,10 @@ NoValidTroughException: Return if no adjacent peak can be found</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">peak_left_idx</span></code> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code>): <code class="xref py py-obj docutils literal notranslate"><span class="pre">index</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">of</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">left</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">peak</span></code></dt><dd></dd>
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">peak_right_idx</span></code> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code>): <code class="xref py py-obj docutils literal notranslate"><span class="pre">index</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">of</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">right</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">peak</span></code></dt><dd></dd>
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">peak_left_val</span></code> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code>): <code class="xref py py-obj docutils literal notranslate"><span class="pre">value</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">of</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">left</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">peak</span></code></dt><dd></dd>
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">peak_right_val</span></code> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code>): <code class="xref py py-obj docutils literal notranslate"><span class="pre">value</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">of</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">righ</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">peak</span></code></dt><dd></dd>
+<dt>peak_left_idx (np.ndarray): index of left peak</dt><dd></dd>
+<dt>peak_right_idx (np.ndarray): index of right peak</dt><dd></dd>
+<dt>peak_left_val (np.ndarray): value of left peak</dt><dd></dd>
+<dt>peak_right_val (np.ndarray): value of righ peak</dt><dd></dd>
 </dl>
 </dd>
 </dl>
@@ -249,7 +275,7 @@ NoValidTroughException: Return if no adjacent peak can be found</p>
 
 <dl class="py method">
 <dt id="sharpwaves.SharpwaveAnalyzer.get_sharpwave_features">
-<code class="sig-name descname">get_sharpwave_features</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">features_</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">ch</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sharpwaves.html#SharpwaveAnalyzer.get_sharpwave_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sharpwaves.SharpwaveAnalyzer.get_sharpwave_features" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_sharpwave_features</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/sharpwaves.html#SharpwaveAnalyzer.get_sharpwave_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sharpwaves.SharpwaveAnalyzer.get_sharpwave_features" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a new data batch, the peaks, troughs and sharpwave features
 are estimated. Importantly only new data is being analyzed here. In
 steps of 1/settings[“sampling_rate_features] are analyzed and returned.
@@ -270,7 +296,7 @@ Data is assumed to be notch filtered and bandpass filtered beforehand.</p>
 
 <dl class="py method">
 <dt id="sharpwaves.SharpwaveAnalyzer.initialize_sw_features">
-<code class="sig-name descname">initialize_sw_features</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="_modules/sharpwaves.html#SharpwaveAnalyzer.initialize_sw_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#sharpwaves.SharpwaveAnalyzer.initialize_sw_features" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">initialize_sw_features</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="_modules/sharpwaves.html#SharpwaveAnalyzer.initialize_sw_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sharpwaves.SharpwaveAnalyzer.initialize_sw_features" title="Permalink to this definition">¶</a></dt>
 <dd><p>Resets used attributes to empty lists</p>
 </dd></dl>
 

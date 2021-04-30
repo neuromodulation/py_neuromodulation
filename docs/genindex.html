@@ -32,6 +32,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -85,6 +86,7 @@
               <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="start_BIDS.html">start_BIDS.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametrizationDefinition.html">py_neuromodulation settings and preprocessing parametrization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Real-time processing</span></p>
 <ul>
@@ -402,10 +404,10 @@
       </ul></li>
       <li><a href="normalization.html#realtime_normalization.realtime_normalization">realtime_normalization() (in module realtime_normalization)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="rereference.html#rereference.RT_rereference.rereference">rereference() (rereference.RT_rereference method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="resample.html#resample.Resample">Resample (class in resample)</a>
 </li>
       <li><a href="resample.html#resample.Resample.resample_raw">resample_raw() (resample.Resample method)</a>
@@ -420,6 +422,10 @@
 </li>
       <li><a href="nm_decode.html#nm_decode.Decoder.run_CV">run_CV() (nm_decode.Decoder method)</a>
 </li>
+      <li><a href="nm_decode.html#nm_decode.Decoder.run_CV_grid_points">run_CV_grid_points() (nm_decode.Decoder method)</a>
+</li>
+      <li><a href="nm_decode.html#nm_decode.Decoder.run_CV_ind_channels">run_CV_ind_channels() (nm_decode.Decoder method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -430,8 +436,12 @@
 </li>
       <li><a href="IO.html#IO.save_features_and_settings">save_features_and_settings() (in module IO)</a>
 </li>
+      <li><a href="nm_decode.html#nm_decode.Decoder.set_data_grid_points">set_data_grid_points() (nm_decode.Decoder method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="nm_decode.html#nm_decode.Decoder.set_data_ind_channels">set_data_ind_channels() (nm_decode.Decoder method)</a>
+</li>
       <li><a href="settings.html#settings.SettingsWrapper.set_M1">set_M1() (settings.SettingsWrapper method)</a>
 </li>
       <li><a href="settings.html#settings.SettingsWrapper">SettingsWrapper (class in settings)</a>

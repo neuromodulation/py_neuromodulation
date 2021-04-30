@@ -32,6 +32,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -87,6 +88,7 @@
               <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="start_BIDS.html">start_BIDS.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametrizationDefinition.html">py_neuromodulation settings and preprocessing parametrization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Real-time processing</span></p>
 <ul>
@@ -178,28 +180,52 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="kalmanfilter-py">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="kalmanfilter-py">
 <h1>kalmanfilter.py<a class="headerlink" href="#kalmanfilter-py" title="Permalink to this headline">¶</a></h1>
 <span class="target" id="module-kalmanfilter"></span><dl class="py function">
 <dt id="kalmanfilter.define_KF">
-<code class="sig-prename descclassname">kalmanfilter.</code><code class="sig-name descname">define_KF</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Tp</span></em>, <em class="sig-param"><span class="n">sigma_w</span></em>, <em class="sig-param"><span class="n">sigma_v</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kalmanfilter.html#define_KF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#kalmanfilter.define_KF" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">kalmanfilter.</span></code><code class="sig-name descname"><span class="pre">define_KF</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Tp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/kalmanfilter.html#define_KF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kalmanfilter.define_KF" title="Permalink to this definition">¶</a></dt>
 <dd><p>Define Kalman filter according to white noise acceleration model.
 See DOI: 10.1109/TBME.2009.2038990  for explanation
 See <a class="reference external" href="https://filterpy.readthedocs.io/en/latest/kalman/KalmanFilter.html#r64ca38088676-2">https://filterpy.readthedocs.io/en/latest/kalman/KalmanFilter.html#r64ca38088676-2</a> for implementation details</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>Tp</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:float</span></code></span></dt><dd><p>prediction interval</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>Tp</strong><span class="classifier">float</span></dt><dd><p>prediction interval</p>
 </dd>
-<dt><strong>sigma_w</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:float</span></code></span></dt><dd><p>process noise</p>
+<dt><strong>sigma_w</strong><span class="classifier">float</span></dt><dd><p>process noise</p>
 </dd>
-<dt><strong>sigma_v</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:float</span></code></span></dt><dd><p>measurement noise</p>
+<dt><strong>sigma_v</strong><span class="classifier">float</span></dt><dd><p>measurement noise</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">filterpy.KalmanFilter</span></code></dt><dd><p>initialized KalmanFilter object</p>
+<dt>filterpy.KalmanFilter</dt><dd><p>initialized KalmanFilter object</p>
 </dd>
 </dl>
 </dd>

@@ -32,6 +32,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -39,7 +40,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="run_analysis.py" href="run_analysis.html" />
-    <link rel="prev" title="start_BIDS.py" href="start_BIDS.html" /> 
+    <link rel="prev" title="py_neuromodulation settings and preprocessing parametrization" href="ParametrizationDefinition.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -87,6 +88,7 @@
               <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="start_BIDS.html">start_BIDS.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametrizationDefinition.html">py_neuromodulation settings and preprocessing parametrization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Real-time processing</span></p>
 <ul class="current">
@@ -178,11 +180,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="settings-py">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="settings-py">
 <h1>settings.py<a class="headerlink" href="#settings-py" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="settings.SettingsWrapper">
-<em class="property">class </em><code class="sig-prename descclassname">settings.</code><code class="sig-name descname">SettingsWrapper</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">settings_path</span><span class="o">=</span><span class="default_value">'..\\examples\\settings.json'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/settings.html#SettingsWrapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#settings.SettingsWrapper" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">settings.</span></code><code class="sig-name descname"><span class="pre">SettingsWrapper</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'..\\examples\\settings.json'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/settings.html#SettingsWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#settings.SettingsWrapper" title="Permalink to this definition">¶</a></dt>
 <dd><p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -220,7 +246,7 @@
 </table>
 <dl class="py method">
 <dt id="settings.SettingsWrapper.add_coord">
-<code class="sig-name descname">add_coord</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">raw_arr</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/settings.html#SettingsWrapper.add_coord"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#settings.SettingsWrapper.add_coord" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">add_coord</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_arr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/settings.html#SettingsWrapper.add_coord"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#settings.SettingsWrapper.add_coord" title="Permalink to this definition">¶</a></dt>
 <dd><p>set coordinate information to settings from RawArray
 The set coordinate positions are set as lists, since np.arrays cannot be saved in json
 :param raw_arr:
@@ -229,17 +255,17 @@ The set coordinate positions are set as lists, since np.arrays cannot be saved i
 
 <dl class="py method">
 <dt id="settings.SettingsWrapper.set_M1">
-<code class="sig-name descname">set_M1</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">m1_path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ch_names</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ch_types</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="_modules/settings.html#SettingsWrapper.set_M1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#settings.SettingsWrapper.set_M1" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">set_M1</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">m1_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="_modules/settings.html#SettingsWrapper.set_M1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#settings.SettingsWrapper.set_M1" title="Permalink to this definition">¶</a></dt>
 <dd><p>set df_M1 dataframe; specifies channel names, rereferencing method, ch_type,
 if a channel is used or not, and if a channel should be treated as a label</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>m1_path</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:str</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">optional</span></code></span></dt><dd><p>path to df_M1.tsv file</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>m1_path</strong><span class="classifier">string, optional</span></dt><dd><p>path to df_M1.tsv file</p>
 </dd>
-<dt><strong>ch_names</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:list</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">optional</span></code></span></dt><dd><p>by default None</p>
+<dt><strong>ch_names</strong><span class="classifier">list, optional</span></dt><dd><p>by default None</p>
 </dd>
-<dt><strong>ch_types</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:list</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">optional</span></code></span></dt><dd><p>BIDS compatible channel types, by default None</p>
+<dt><strong>ch_types</strong><span class="classifier">list, optional</span></dt><dd><p>BIDS compatible channel types, by default None</p>
 </dd>
 </dl>
 </dd>
@@ -248,7 +274,7 @@ if a channel is used or not, and if a channel should be treated as a label</p>
 
 <dl class="py method">
 <dt id="settings.SettingsWrapper.test_settings">
-<code class="sig-name descname">test_settings</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="_modules/settings.html#SettingsWrapper.test_settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#settings.SettingsWrapper.test_settings" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">test_settings</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="_modules/settings.html#SettingsWrapper.test_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#settings.SettingsWrapper.test_settings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Test if settings are specified correctly in settings.json</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -274,7 +300,7 @@ if a channel is used or not, and if a channel should be treated as a label</p>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="run_analysis.html" class="btn btn-neutral float-right" title="run_analysis.py" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="start_BIDS.html" class="btn btn-neutral float-left" title="start_BIDS.py" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ParametrizationDefinition.html" class="btn btn-neutral float-left" title="py_neuromodulation settings and preprocessing parametrization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

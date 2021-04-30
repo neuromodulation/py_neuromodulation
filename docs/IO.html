@@ -32,6 +32,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -87,6 +88,7 @@
               <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="start_BIDS.html">start_BIDS.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametrizationDefinition.html">py_neuromodulation settings and preprocessing parametrization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Real-time processing</span></p>
 <ul class="current">
@@ -178,26 +180,50 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-IO">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-IO">
 <span id="io-py"></span><h1>IO.py<a class="headerlink" href="#module-IO" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt id="IO.add_labels">
-<code class="sig-prename descclassname">IO.</code><code class="sig-name descname">add_labels</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df_</span></em>, <em class="sig-param"><span class="n">settings_wrapper</span></em>, <em class="sig-param"><span class="n">raw_arr_data</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/IO.html#add_labels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#IO.add_labels" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">IO.</span></code><code class="sig-name descname"><span class="pre">add_labels</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settings_wrapper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_arr_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/IO.html#add_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#IO.add_labels" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a constructed feature data frame, resample the target labels and add to dataframe</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>df_</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></span></dt><dd><p>computed feature dataframe</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>df_</strong><span class="classifier">pd.DataFrame</span></dt><dd><p>computed feature dataframe</p>
 </dd>
-<dt><strong>settings_wrapper</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">settings.py</span></code></span></dt><dd><p>initialized settings used for feature estimation</p>
+<dt><strong>settings_wrapper</strong><span class="classifier">settings.py</span></dt><dd><p>initialized settings used for feature estimation</p>
 </dd>
-<dt><strong>raw_arr_data</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code></span></dt><dd><p>raw data including target</p>
+<dt><strong>raw_arr_data</strong><span class="classifier">np.ndarray</span></dt><dd><p>raw data including target</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><dl>
-<dt><strong>df_</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></span></dt><dd><p>computed feature dataframe including resampled features</p>
+<dd class="field-even"><dl class="simple">
+<dt><strong>df_</strong><span class="classifier">pd.DataFrame</span></dt><dd><p>computed feature dataframe including resampled features</p>
 </dd>
 </dl>
 </dd>
@@ -206,21 +232,21 @@
 
 <dl class="py function">
 <dt id="IO.read_BIDS_data">
-<code class="sig-prename descclassname">IO.</code><code class="sig-name descname">read_BIDS_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">PATH_RUN</span></em>, <em class="sig-param"><span class="n">BIDS_PATH</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/IO.html#read_BIDS_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#IO.read_BIDS_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">IO.</span></code><code class="sig-name descname"><span class="pre">read_BIDS_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PATH_RUN</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">BIDS_PATH</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/IO.html#read_BIDS_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#IO.read_BIDS_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a run path and bids data path, read the respective data</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>PATH_RUN</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:str</span></code></span></dt><dd></dd>
-<dt><strong>BIDS_PATH</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:str</span></code></span></dt><dd></dd>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>PATH_RUN</strong><span class="classifier">string</span></dt><dd></dd>
+<dt><strong>BIDS_PATH</strong><span class="classifier">string</span></dt><dd></dd>
 </dl>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><dl>
-<dt><strong>raw_arr</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mne.io.RawArray</span></code></span></dt><dd></dd>
-<dt><strong>raw_arr_data</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code></span></dt><dd></dd>
-<dt><strong>fs</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:int</span></code></span></dt><dd></dd>
-<dt><strong>line_noise</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:int</span></code></span></dt><dd></dd>
+<dd class="field-even"><dl class="simple">
+<dt><strong>raw_arr</strong><span class="classifier">mne.io.RawArray</span></dt><dd></dd>
+<dt><strong>raw_arr_data</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
+<dt><strong>fs</strong><span class="classifier">int</span></dt><dd></dd>
+<dt><strong>line_noise</strong><span class="classifier">int</span></dt><dd></dd>
 </dl>
 </dd>
 </dl>
@@ -228,19 +254,19 @@
 
 <dl class="py function">
 <dt id="IO.save_features_and_settings">
-<code class="sig-prename descclassname">IO.</code><code class="sig-name descname">save_features_and_settings</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df_</span></em>, <em class="sig-param"><span class="n">run_analysis_</span></em>, <em class="sig-param"><span class="n">folder_name</span></em>, <em class="sig-param"><span class="n">settings_wrapper</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/IO.html#save_features_and_settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#IO.save_features_and_settings" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">IO.</span></code><code class="sig-name descname"><span class="pre">save_features_and_settings</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_analysis_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settings_wrapper</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/IO.html#save_features_and_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#IO.save_features_and_settings" title="Permalink to this definition">¶</a></dt>
 <dd><p>save settings.json, df_M1.tsv and features.csv</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>df_</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pd.Dataframe</span></code></span></dt><dd><p>feature dataframe</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>df_</strong><span class="classifier">pd.Dataframe</span></dt><dd><p>feature dataframe</p>
 </dd>
-<dt><strong>run_analysis_</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_analysis.py</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></span></dt><dd><p>This includes all (optionally projected) run_analysis estimated data
+<dt><strong>run_analysis_</strong><span class="classifier">run_analysis.py object</span></dt><dd><p>This includes all (optionally projected) run_analysis estimated data
 inluding added the resampled labels in features_arr</p>
 </dd>
-<dt><strong>folder_name</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:str</span></code></span></dt><dd><p>output path</p>
+<dt><strong>folder_name</strong><span class="classifier">string</span></dt><dd><p>output path</p>
 </dd>
-<dt><strong>settings_wrapper</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">settings.py</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></span></dt><dd></dd>
+<dt><strong>settings_wrapper</strong><span class="classifier">settings.py object</span></dt><dd></dd>
 </dl>
 </dd>
 </dl>
