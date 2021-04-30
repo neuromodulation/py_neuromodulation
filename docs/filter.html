@@ -32,6 +32,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -87,6 +88,7 @@
               <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="start_BIDS.html">start_BIDS.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametrizationDefinition.html">py_neuromodulation settings and preprocessing parametrization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Real-time processing</span></p>
 <ul>
@@ -178,11 +180,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-filter">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="module-filter">
 <span id="filter-py"></span><h1>filter.py<a class="headerlink" href="#module-filter" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt id="filter.apply_filter">
-<code class="sig-prename descclassname">filter.</code><code class="sig-name descname">apply_filter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">filter_bank</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/filter.html#apply_filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#filter.apply_filter" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">filter.</span></code><code class="sig-name descname"><span class="pre">apply_filter</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_bank</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/filter.html#apply_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#filter.apply_filter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply previously calculated (bandpass) filters to data.
 :param data: segment of data.
 :type data: array (n_samples, ) or (n_channels, n_samples)
@@ -202,7 +228,7 @@ decompose the signal</p>
 
 <dl class="py function">
 <dt id="filter.calc_band_filters">
-<code class="sig-prename descclassname">filter.</code><code class="sig-name descname">calc_band_filters</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f_ranges</span></em>, <em class="sig-param"><span class="n">sfreq</span></em>, <em class="sig-param"><span class="n">filter_length</span><span class="o">=</span><span class="default_value">'999ms'</span></em>, <em class="sig-param"><span class="n">l_trans_bandwidth</span><span class="o">=</span><span class="default_value">4</span></em>, <em class="sig-param"><span class="n">h_trans_bandwidth</span><span class="o">=</span><span class="default_value">4</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/filter.html#calc_band_filters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#filter.calc_band_filters" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">filter.</span></code><code class="sig-name descname"><span class="pre">calc_band_filters</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_ranges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sfreq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'999ms'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_trans_bandwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_trans_bandwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/filter.html#calc_band_filters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#filter.calc_band_filters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate bandpass filters with adjustable length for given frequency
 ranges.
 This function returns for the given frequency band ranges the filter

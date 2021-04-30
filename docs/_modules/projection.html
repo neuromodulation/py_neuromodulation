@@ -32,6 +32,7 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -85,6 +86,7 @@
               <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../start_BIDS.html">start_BIDS.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ParametrizationDefinition.html">py_neuromodulation settings and preprocessing parametrization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Real-time processing</span></p>
 <ul>
@@ -207,11 +209,11 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sess_right</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
 
-            <span class="n">cortex_grid_right</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_cortex</span><span class="p">)</span>
-            <span class="n">cortex_grid_right</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">cortex_grid_right</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cortex_grid_right</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_cortex</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cortex_grid_right</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cortex_grid_right</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
 
-            <span class="n">subcortex_grid_right</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_subcortex</span><span class="p">)</span>
-            <span class="n">subcortex_grid_right</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">subcortex_grid_right</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">subcortex_grid_right</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_subcortex</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">subcortex_grid_right</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subcortex_grid_right</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>
 
             <span class="n">grid_session</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cortex_grid_right</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subcortex_grid_right</span><span class="o">.</span><span class="n">T</span><span class="p">)]</span>
             <span class="n">coord_arr</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="s2">&quot;cortex_right&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="p">[</span><span class="s2">&quot;subcortex_right&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">]]</span>

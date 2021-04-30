@@ -32,6 +32,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -87,6 +88,7 @@
               <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="start_BIDS.html">start_BIDS.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametrizationDefinition.html">py_neuromodulation settings and preprocessing parametrization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Real-time processing</span></p>
 <ul class="current">
@@ -178,11 +180,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="resample-py">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="resample-py">
 <h1>resample.py<a class="headerlink" href="#resample-py" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="resample.Resample">
-<em class="property">class </em><code class="sig-prename descclassname">resample.</code><code class="sig-name descname">Resample</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/resample.html#Resample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#resample.Resample" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">resample.</span></code><code class="sig-name descname"><span class="pre">Resample</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/resample.html#Resample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resample.Resample" title="Permalink to this definition">¶</a></dt>
 <dd><p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -201,11 +227,11 @@
 </table>
 <dl class="py method">
 <dt id="resample.Resample.resample_raw">
-<code class="sig-name descname">resample_raw</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/resample.html#Resample.resample_raw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#resample.Resample.resample_raw" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list">
+<code class="sig-name descname"><span class="pre">resample_raw</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/resample.html#Resample.resample_raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#resample.Resample.resample_raw" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>data</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">array</span></code></span></dt><dd><p>Data to resample</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>data</strong><span class="classifier">array</span></dt><dd><p>Data to resample</p>
 </dd>
 <dt><strong>Returns</strong></dt><dd></dd>
 <dt><strong>——-</strong></dt><dd></dd>

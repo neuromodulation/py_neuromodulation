@@ -32,6 +32,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -87,6 +88,7 @@
               <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="start_BIDS.html">start_BIDS.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametrizationDefinition.html">py_neuromodulation settings and preprocessing parametrization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Real-time processing</span></p>
 <ul>
@@ -178,11 +180,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="features-py">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="features-py">
 <h1>features.py<a class="headerlink" href="#features-py" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="features.Features">
-<em class="property">class </em><code class="sig-prename descclassname">features.</code><code class="sig-name descname">Features</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">s</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/features.html#Features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#features.Features" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">features.</span></code><code class="sig-name descname"><span class="pre">Features</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/features.html#Features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.Features" title="Permalink to this definition">¶</a></dt>
 <dd><p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -211,26 +237,26 @@
 </table>
 <dl class="py method">
 <dt id="features.Features.est_ch">
-<code class="sig-name descname">est_ch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">features_</span></em>, <em class="sig-param"><span class="n">ch_idx</span></em>, <em class="sig-param"><span class="n">ch</span></em>, <em class="sig-param"><span class="n">dat_filtered</span></em>, <em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span> &#x2192; dict<a class="reference internal" href="_modules/features.html#Features.est_ch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#features.Features.est_ch" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">est_ch</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dat_filtered</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">dict</span><a class="reference internal" href="_modules/features.html#Features.est_ch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.Features.est_ch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Estimate features for a given channel</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>features_ dict</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:dict</span></code></span></dt><dd><p>features.py output feature dict</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>features_ dict</strong><span class="classifier">dict</span></dt><dd><p>features.py output feature dict</p>
 </dd>
-<dt><strong>ch_idx</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:int</span></code></span></dt><dd><p>channel index</p>
+<dt><strong>ch_idx</strong><span class="classifier">int</span></dt><dd><p>channel index</p>
 </dd>
-<dt><strong>ch</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:str</span></code></span></dt><dd><p>channel name</p>
+<dt><strong>ch</strong><span class="classifier">str</span></dt><dd><p>channel name</p>
 </dd>
-<dt><strong>dat_filtered</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code></span></dt><dd><p>notch filtered and bandbass filtered data</p>
+<dt><strong>dat_filtered</strong><span class="classifier">np.ndarray</span></dt><dd><p>notch filtered and bandbass filtered data</p>
 </dd>
-<dt><strong>data</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code>)</span></dt><dd><p>notch filtered data</p>
+<dt><strong>data</strong><span class="classifier">np.ndarray)</span></dt><dd><p>notch filtered data</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><dl>
-<dt><strong>features_</strong><span class="classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">python:dict</span></code></span></dt><dd><p>features.py output feature dict</p>
+<dd class="field-even"><dl class="simple">
+<dt><strong>features_</strong><span class="classifier">dict</span></dt><dd><p>features.py output feature dict</p>
 </dd>
 </dl>
 </dd>
@@ -239,19 +265,19 @@
 
 <dl class="py method">
 <dt id="features.Features.estimate_features">
-<code class="sig-name descname">estimate_features</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span> &#x2192; dict<a class="reference internal" href="_modules/features.html#Features.estimate_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#features.Features.estimate_features" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">estimate_features</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">dict</span><a class="reference internal" href="_modules/features.html#Features.estimate_features"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#features.Features.estimate_features" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate features, as defined in settings.json
 Features are based on bandpower, raw Hjorth parameters and sharp wave
 characteristics.</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>data (np array)</strong><span class="classifier">(<code class="xref py py-obj docutils literal notranslate"><span class="pre">channels</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">time</span></code>)</span></dt><dd></dd>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>data (np array)</strong><span class="classifier">(channels, time)</span></dt><dd></dd>
 </dl>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">dat</span></code> (<code class="xref py py-obj docutils literal notranslate"><span class="pre">pd</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">Dataframe</span></code>) <code class="xref py py-obj docutils literal notranslate"><span class="pre">with</span></code> <code class="xref py py-obj docutils literal notranslate"><span class="pre">naming</span></code> convention:</dt><dd><p>channel_method_feature_(f_band)</p>
+<dt>dat (pd Dataframe) with naming convention:</dt><dd><p>channel_method_feature_(f_band)</p>
 </dd>
 </dl>
 </dd>

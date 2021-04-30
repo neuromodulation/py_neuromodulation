@@ -32,6 +32,7 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -85,6 +86,7 @@
               <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../start_BIDS.html">start_BIDS.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ParametrizationDefinition.html">py_neuromodulation settings and preprocessing parametrization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Real-time processing</span></p>
 <ul>
@@ -267,13 +269,16 @@
 <span class="sd">        output path</span>
 <span class="sd">    settings_wrapper : settings.py object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c1"># create out folder if doesn&#39;t exist</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;out_path&quot;</span><span class="p">],</span> <span class="n">folder_name</span><span class="p">)):</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;create output folder &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">folder_name</span><span class="p">))</span>
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;out_path&quot;</span><span class="p">],</span> <span class="n">folder_name</span><span class="p">))</span>
 
-    <span class="n">df_</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;out_path&quot;</span><span class="p">],</span> <span class="n">folder_name</span><span class="p">,</span>
-                            <span class="n">folder_name</span> <span class="o">+</span> <span class="s2">&quot;_FEATURES.csv&quot;</span><span class="p">))</span>
+    <span class="n">PATH_OUT</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;out_path&quot;</span><span class="p">],</span> <span class="n">folder_name</span><span class="p">,</span>
+                            <span class="n">folder_name</span> <span class="o">+</span> <span class="s2">&quot;_FEATURES.csv&quot;</span><span class="p">)</span>
+    <span class="n">df_</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">PATH_OUT</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;FEATURES.csv saved to &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">PATH_OUT</span><span class="p">))</span>
 
     <span class="c1"># rewrite np arrays to lists for json format</span>
     <span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;grid_cortex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;grid_cortex&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
@@ -287,18 +292,22 @@
     <span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;subcortex_left&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">]</span> <span class="o">=</span> \
         <span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;subcortex_left&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;out_path&quot;</span><span class="p">],</span> <span class="n">folder_name</span><span class="p">,</span>
-                           <span class="n">folder_name</span> <span class="o">+</span> <span class="s1">&#39;_SETTINGS.json&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+    <span class="n">PATH_OUT</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;out_path&quot;</span><span class="p">],</span> <span class="n">folder_name</span><span class="p">,</span>
+                           <span class="n">folder_name</span> <span class="o">+</span> <span class="s1">&#39;_SETTINGS.json&#39;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">PATH_OUT</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;settings.json saved to &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">PATH_OUT</span><span class="p">))</span>
 
-    <span class="c1"># save df_M1 as csv</span>
-    <span class="n">settings_wrapper</span><span class="o">.</span><span class="n">df_M1</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;out_path&quot;</span><span class="p">],</span> <span class="n">folder_name</span><span class="p">,</span>
-                                  <span class="n">folder_name</span> <span class="o">+</span> <span class="s2">&quot;_DF_M1.csv&quot;</span><span class="p">))</span>
+    <span class="n">PATH_OUT</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;out_path&quot;</span><span class="p">],</span> <span class="n">folder_name</span><span class="p">,</span>
+                                  <span class="n">folder_name</span> <span class="o">+</span> <span class="s2">&quot;_DF_M1.csv&quot;</span><span class="p">)</span>
+    <span class="n">settings_wrapper</span><span class="o">.</span><span class="n">df_M1</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">PATH_OUT</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;df_M1.csv saved to &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">PATH_OUT</span><span class="p">))</span>
 
     <span class="n">PATH_OUT</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;out_path&quot;</span><span class="p">],</span> <span class="n">folder_name</span><span class="p">,</span>
                             <span class="n">folder_name</span> <span class="o">+</span> <span class="s2">&quot;_run_analysis.p&quot;</span><span class="p">)</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">PATH_OUT</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">output</span><span class="p">:</span>
-        <span class="n">cPickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">run_analysis_</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span></div>
+        <span class="n">cPickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">run_analysis_</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;run analysis.p saved to &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">PATH_OUT</span><span class="p">))</span></div>
 </pre></div>
 
            </div>

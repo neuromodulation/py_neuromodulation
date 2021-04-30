@@ -32,6 +32,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -87,6 +88,7 @@
               <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="start_BIDS.html">start_BIDS.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametrizationDefinition.html">py_neuromodulation settings and preprocessing parametrization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Real-time processing</span></p>
 <ul class="current">
@@ -178,11 +180,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="projection-py">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="projection-py">
 <h1>projection.py<a class="headerlink" href="#projection-py" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="projection.Projection">
-<em class="property">class </em><code class="sig-prename descclassname">projection.</code><code class="sig-name descname">Projection</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection.html#Projection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection.Projection" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">projection.</span></code><code class="sig-name descname"><span class="pre">Projection</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection.html#Projection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#projection.Projection" title="Permalink to this definition">¶</a></dt>
 <dd><p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -200,7 +226,7 @@
 </table>
 <dl class="py method">
 <dt id="projection.Projection.calc_projection_matrix">
-<code class="sig-name descname">calc_projection_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection.html#Projection.calc_projection_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection.Projection.calc_projection_matrix" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">calc_projection_matrix</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection.html#Projection.calc_projection_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#projection.Projection.calc_projection_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates a projection matrix based on the used coordiniate arrays
 :returns: * <em>proj_matrix_cortex (np.array)</em> – cortical projection_matrix in shape [grid contacts, channel contact] defaults to None</p>
 <blockquote>
@@ -212,22 +238,22 @@
 
 <dl class="py method">
 <dt id="projection.Projection.get_projected_cortex_subcortex_data">
-<code class="sig-name descname">get_projected_cortex_subcortex_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dat_cortex</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dat_subcortex</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection.html#Projection.get_projected_cortex_subcortex_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#projection.Projection.get_projected_cortex_subcortex_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">get_projected_cortex_subcortex_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dat_cortex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dat_subcortex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection.html#Projection.get_projected_cortex_subcortex_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#projection.Projection.get_projected_cortex_subcortex_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Project cortical and subcortical data to predefined projection matrices</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>dat_cortex</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">optional</span></code></span></dt><dd><p>cortical features, by default None</p>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>dat_cortex</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>cortical features, by default None</p>
 </dd>
-<dt><strong>dat_subcortex</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">optional</span></code></span></dt><dd><p>subcortical features, by default None</p>
+<dt><strong>dat_subcortex</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>subcortical features, by default None</p>
 </dd>
 </dl>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><dl>
-<dt><strong>proj_cortex</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code></span></dt><dd><p>projected cortical features, by detault None</p>
+<dd class="field-even"><dl class="simple">
+<dt><strong>proj_cortex</strong><span class="classifier">np.ndarray</span></dt><dd><p>projected cortical features, by detault None</p>
 </dd>
-<dt><strong>proj_subcortex</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code></span></dt><dd><p>projected subcortical features, by detault None</p>
+<dt><strong>proj_subcortex</strong><span class="classifier">np.ndarray</span></dt><dd><p>projected subcortical features, by detault None</p>
 </dd>
 </dl>
 </dd>

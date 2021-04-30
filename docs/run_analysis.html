@@ -32,6 +32,7 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -87,6 +88,7 @@
               <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="start_BIDS.html">start_BIDS.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametrizationDefinition.html">py_neuromodulation settings and preprocessing parametrization</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Real-time processing</span></p>
 <ul class="current">
@@ -178,11 +180,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="run-analysis-py">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="run-analysis-py">
 <h1>run_analysis.py<a class="headerlink" href="#run-analysis-py" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="run_analysis.Run">
-<em class="property">class </em><code class="sig-prename descclassname">run_analysis.</code><code class="sig-name descname">Run</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">features</span></em>, <em class="sig-param"><span class="n">settings</span></em>, <em class="sig-param"><span class="n">reference</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">projection</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">resample</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/run_analysis.html#Run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#run_analysis.Run" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">run_analysis.</span></code><code class="sig-name descname"><span class="pre">Run</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/run_analysis.html#Run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#run_analysis.Run" title="Permalink to this definition">¶</a></dt>
 <dd><p class="rubric">Methods</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -208,12 +234,12 @@
 </table>
 <dl class="py method">
 <dt id="run_analysis.Run.run">
-<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ieeg_batch</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/run_analysis.html#Run.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#run_analysis.Run.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">run</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ieeg_batch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/run_analysis.html#Run.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#run_analysis.Run.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a new data batch, estimate features and store in object</p>
-<dl class="field-list">
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt><strong>ieeg_batch</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">np.ndarray</span></code></span></dt><dd></dd>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>ieeg_batch</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
 </dl>
 </dd>
 </dl>
