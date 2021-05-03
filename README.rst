@@ -58,8 +58,8 @@ Next the features can be investigated using
 
 In such manner features are plotted and individual channels are visualized on the MNI brain. 
 
-For further documentatin view `ParametrizationDefinition <ParametrizationDefinition.html#>`_ for description of necessary parametrization files. 
-`FeatureEstimationDemo <FeatureEstimationDemo.html#>`_ walks through an example feature estimation and explains sharpwave estimation. 
+For further documentatin view `ParametrizationDefinition <https://neuromodulation.github.io/py_neuromodulation/ParametrizationDefinition.html>`_ for description of necessary parametrization files. 
+`FeatureEstimationDemo <https://neuromodulation.github.io/py_neuromodulation/FeatureEstimationDemo.html>`_ walks through an example feature estimation and explains sharpwave estimation. 
 Note, to install an ipython kernel for the upper installed environment, install jupyter lab and  a respective ipython kernel:
 .. code-block::
 
