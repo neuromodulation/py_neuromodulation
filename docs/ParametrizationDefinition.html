@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>py_neuromodulation settings and preprocessing parametrization &mdash; py_neuromodulation  documentation</title>
+  <title>ParametrizationDefinition &mdash; py_neuromodulation  documentation</title>
   
 
   
@@ -41,8 +41,8 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="settings.py" href="settings.html" />
-    <link rel="prev" title="start_BIDS.py" href="start_BIDS.html" /> 
+    <link rel="next" title="FeatureEstimationDemo" href="FeatureEstimationDemo.html" />
+    <link rel="prev" title="Setup" href="setup.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -87,37 +87,23 @@
               
             
             
-              <p class="caption"><span class="caption-text">BIDS data feature estimation</span></p>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setup</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="start_BIDS.html">start_BIDS.py</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">py_neuromodulation settings and preprocessing parametrization</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#Examle:-automatic-rereference-parametrization">Examle: automatic rereference parametrization</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ParametrizationDefinition</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#settings.json">settings.json</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#df_M1">df_M1</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="FeatureEstimationDemo.html">FeatureEstimationDemo</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Real-time processing</span></p>
+<p class="caption"><span class="caption-text">Code</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="settings.html">settings.py</a></li>
-<li class="toctree-l1"><a class="reference internal" href="run_analysis.html">run_analysis.py</a></li>
-<li class="toctree-l1"><a class="reference internal" href="resample.html">resample.py</a></li>
-<li class="toctree-l1"><a class="reference internal" href="normalization.html">realtime_normalization.py</a></li>
-<li class="toctree-l1"><a class="reference internal" href="rereference.html">rereference.py</a></li>
-<li class="toctree-l1"><a class="reference internal" href="projection.html">projection.py</a></li>
-<li class="toctree-l1"><a class="reference internal" href="IO.html">IO.py</a></li>
-</ul>
-<p class="caption"><span class="caption-text">Feature estimation</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="features.html">features.py</a></li>
-<li class="toctree-l1"><a class="reference internal" href="filter.html">filter.py</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bandpower.html">bandpower.py</a></li>
-<li class="toctree-l1"><a class="reference internal" href="kalmanfilter.html">kalmanfilter.py</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hjorth_raw.html">hjorth_raw.py</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sharpwaves.html">sharpwaves.py</a></li>
-</ul>
-<p class="caption"><span class="caption-text">Real-time processing</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="nm_reader.html">nm_reader.py</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nm_decode.html">nm_decode.py</a></li>
+<li class="toctree-l1"><a class="reference internal" href="outline_parametrization.html">Parametrization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="outline_featureestimation.html">Feature Estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="outline_analysis.html">Analysis</a></li>
 </ul>
 
             
@@ -166,7 +152,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>py_neuromodulation settings and preprocessing parametrization</li>
+      <li>ParametrizationDefinition</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -455,10 +441,12 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="py_neuromodulation-settings-and-preprocessing-parametrization">
-<h1>py_neuromodulation settings and preprocessing parametrization<a class="headerlink" href="#py_neuromodulation-settings-and-preprocessing-parametrization" title="Permalink to this headline">¶</a></h1>
-<p>In order to estimate multimodal features of neurophysiologica data, certain parametrization steps are required. Here the following two parametrization files are explain: - <code class="docutils literal notranslate"><span class="pre">settings.json</span></code> - <code class="docutils literal notranslate"><span class="pre">df_M1.tsv</span></code></p>
-<p>The <code class="docutils literal notranslate"><span class="pre">settings.json</span></code> specifies the general feature processing. Most importantly all provided features can be enabled and disabled:</p>
+<div class="section" id="ParametrizationDefinition">
+<h1>ParametrizationDefinition<a class="headerlink" href="#ParametrizationDefinition" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="settings.json">
+<h2>settings.json<a class="headerlink" href="#settings.json" title="Permalink to this headline">¶</a></h2>
+<p>In order to estimate multimodal features of neurophysiological data, certain parametrization steps are required. Here the following two parametrization files are explained: - <code class="docutils literal notranslate"><span class="pre">settings.json</span></code> - <code class="docutils literal notranslate"><span class="pre">df_M1.csv</span></code></p>
+<p>The <code class="docutils literal notranslate"><span class="pre">settings.json</span></code> specifies the general feature processing. Most importantly, all provided features can be enabled and disabled:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;methods&quot;</span><span class="p">:</span>
 <span class="p">{</span>
         <span class="nt">&quot;resample_raw&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
@@ -487,7 +475,7 @@ div.rendered_html tbody tr:hover {
 <p><span class="math notranslate nohighlight">\(X_{norm} = \frac{X - median(X)}{median(X)}\)</span></p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;normalization_settings&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="nt">&quot;normalization_time&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-        <span class="nt">&quot;normalization_method&quot;</span><span class="p">:</span> <span class="s2">&quot;mean&quot;</span>
+        <span class="nt">&quot;normalization_method&quot;</span><span class="p">:</span> <span class="s2">&quot;median&quot;</span>
     <span class="p">}</span>
 </pre></div>
 </div>
@@ -512,11 +500,11 @@ sigma_w^2frac{T_p^2}{3} &amp; sigma_w^2T_p\</p>
     <span class="p">}</span>
 </pre></div>
 </div>
-<p>Individual frequency bands (specified in the <strong>bandpass_filter_settings</strong>) can be selected for Kalman Filtering. See <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/20172805/">“Real-time epileptic seizure prediction using AR models and support vector machines”</a> (Chisci et al 10) also for a great application of Kaman Filtering.</p>
-<p><strong>re_referencing</strong> constitutes an important aspect of electrophysiological signal processing. Most commonly bipolar and common average rereferencing are applied. Due to that reason a seperate file, <code class="docutils literal notranslate"><span class="pre">df_M1.csv</span></code> can be specified before feature estimation, or automatically during parametrization setup.<code class="docutils literal notranslate"><span class="pre">df_M1.csv</span></code> contains a column <em>rereference</em>, specifying the rereference methods - <em>average</em> for common average reference (across a channel type) - bipolar rereferencing by specifying the channel
-to rereference to, e.g. <em>LFP_BS_STN_L_1</em> - <em>none</em> for no rereferencing being used for this particular channel</p>
-<p><strong>notch_filter</strong> specifies notch filters at the specified line_noise and it’s harmonics.</p>
-<p><strong>bandpass_filter</strong> enables/disables band power feature estimation. Settings are defined in such manner:</p>
+<p>Individual frequency bands (specified in the <strong>bandpass_filter_settings</strong>) can be selected for Kalman Filtering (see <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/20172805/">“Real-time epileptic seizure prediction using AR models and support vector machines”</a> (Chisci et al 10))</p>
+<p><strong>re_referencing</strong> constitutes an important aspect of electrophysiological signal processing. Most commonly bipolar and common average rereferencing are applied. Due to that reason a seperate file, <code class="docutils literal notranslate"><span class="pre">df_M1.csv</span></code> can be specified before feature estimation, or it is automatically setup during parametrization.<code class="docutils literal notranslate"><span class="pre">df_M1.csv</span></code> contains a column <em>rereference</em>, specifying the rereference methods - <em>average</em> for common average rereference (across a channel type, e.g. ecog) - bipolar rereferencing, by
+specifying the channel name to rereference to, e.g. <em>LFP_BS_STN_L_1</em> - <em>none</em> for no rereferencing being used for this particular channel</p>
+<p><strong>notch_filter</strong> enables notch filters at the specified line_noise and it’s harmonics.</p>
+<p><strong>bandpass_filter</strong> enables band power feature estimation. Settings are defined in such manner:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;bandpass_filter_settings&quot;</span><span class="p">:</span> <span class="p">{</span>
     <span class="nt">&quot;frequency_ranges&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="nt">&quot;theta&quot;</span><span class="p">:</span> <span class="p">[</span>
@@ -535,10 +523,10 @@ to rereference to, e.g. <em>LFP_BS_STN_L_1</em> - <em>none</em> for no rerefere
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Here the name (in this case <em>theta</em>) get’s specified, and in the the subsequent list the frequency range (here from 4 - 8 Hz). Then the last parameter defines a time range in which FIR filtered data is used for feature estimation in milliseconds. Here the previous 1000 ms are used to estimate feature based on the FIR filtered signals in the range of 4 to 8 Hz. This might be advantageous when using shorter frequency bands, e.g. gamma, where estimating band power in a range of e.g. 100 ms might
-result in a temporal more specified feature calculation. A common way to estimate band power is to take the variance in FIR filtered data. This is equavilent for the activity <a class="reference external" href="https://en.wikipedia.org/wiki/Hjorth_parameters">Hjorth</a> activity parameter. The last key in the <em>bandpass_filter_settings</em> allows to take the <em>activity</em>, <em>mobility</em> and <em>complexity</em> Hjorth parameters as well. For estimating Hjorth parameetes of the raw unfiltered signal the <strong>raw_hjorth</strong> method can be enabled.</p>
-<p><strong>sharpwave_analysis</strong> allows for calculation of temporal sharpwave features. See <a class="reference external" href="https://www.sciencedirect.com/science/article/abs/pii/S1364661316302182">“Brain Oscillations and the Importance of Waveform Shape”</a> Cole et al 17 for a great motivation to use these features. Here sharpwave features are estimated using a prior bandpass filtering between <em>filter_low_cutoff</em> and <em>filter_high_cutoff</em>. The sharpwave peak and trough features can be calculated, defined by the <em>estimate</em> key.
-According to a current data batch one or more sharp wave can be detected. The subsequent resulting feature is returned rather by the <em>mean, median, maximum, minimum or variance</em> as defined by the <em>estimator</em>.</p>
+<p>Here the name (in this case <em>theta</em>) get’s specified, and in the the subsequent list the frequency range (here from 4 - 8 Hz) is defined. Then, the last parameter defines a time range in which FIR filtered data is used for feature estimation in milliseconds. Here the previous 1000 ms are used to estimate features based on the FIR filtered signals in the range of 4 to 8 Hz. This might be beneficial when using shorter frequency bands, e.g. gamma, where estimating band power in a range of e.g. 100
+ms might result in a temporal more specified feature calculation. A common way to estimate band power is to take the variance of FIR filtered data. This is equavilent to the activity <a class="reference external" href="https://en.wikipedia.org/wiki/Hjorth_parameters">Hjorth</a> parameter. The last key in the <em>bandpass_filter_settings</em> allows to take the <em>activity</em>, <em>mobility</em> and <em>complexity</em> Hjorth parameters as well. For estimating Hjorth parameters of the raw unfiltered signal, the <strong>raw_hjorth</strong> method can be enabled.</p>
+<p><strong>sharpwave_analysis</strong> allows for calculation of temporal sharpwave features. See <a class="reference external" href="https://www.sciencedirect.com/science/article/abs/pii/S1364661316302182">“Brain Oscillations and the Importance of Waveform Shape”</a> Cole et al 17 for a great motivation to use these features. Here, sharpwave features are estimated using a prior bandpass filter between <em>filter_low_cutoff</em> and <em>filter_high_cutoff</em>. The sharpwave peak and trough features can be calculated, defined by the <em>estimate</em> key. According
+to a current data batch one or more sharpwaves can be detected. The subsequent feature is returned rather by the <em>mean, median, maximum, minimum or variance</em> as defined by the <em>estimator</em>.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;sharpwave_analysis_settings&quot;</span><span class="p">:</span> <span class="p">{</span>
     <span class="nt">&quot;sharpwave_features&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="nt">&quot;peak_left&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
@@ -578,12 +566,13 @@ According to a current data batch one or more sharp wave can be detected. The su
 </div>
 <p>A separate tutorial on sharpwave features is provided in the documentation.</p>
 <p>Next, raw signals can be returned, specifed by the <strong>return_raw</strong> method.</p>
-<p><strong>projection_cortex</strong> and <strong>projection_subcortex</strong> allows then feature projection of individual channels a common subcortical or cortical grid, defined by <em>grid_cortex.tsv</em> and <em>subgrid_cortex.tsv</em>. For both projections a <em>max_dist</em> parameter needs to be specified, in which data is linearly interpolated, weighted by their grid point distance.</p>
-<p>Additionally <strong>pdc</strong> and <strong>dtf</strong> enable partical directed coherence, and direct transfer function, to enable connectiviy features for certain <em>frequency_bands</em> between specific channels.</p>
-<div class="section" id="Examle:-automatic-rereference-parametrization">
-<h2>Examle: automatic rereference parametrization<a class="headerlink" href="#Examle:-automatic-rereference-parametrization" title="Permalink to this headline">¶</a></h2>
+<p><strong>projection_cortex</strong> and <strong>projection_subcortex</strong> allows then feature projection of individual channels to a common subcortical or cortical grid, defined by <em>grid_cortex.tsv</em> and <em>subgrid_cortex.tsv</em>. For both projections a <em>max_dist</em> parameter needs to be specified, in which data is linearly interpolated, weighted by their inverse grid point distance.</p>
+<p>Additionally <strong>pdc</strong> and <strong>dtf</strong> enable partical directed coherence and direct transfer function, to enable connectiviy features for certain <em>frequency_bands</em> between specific channels.</p>
+</div>
+<div class="section" id="df_M1">
+<h2>df_M1<a class="headerlink" href="#df_M1" title="Permalink to this headline">¶</a></h2>
 <p>As described above, rereferencing will be estimated automatically given the specified channel types. To demonstrate a typical rereferencing scheme, here the example BIDS data in ‘py_neuromodulation/tree/main/pyneuromodulation/tests/data’ is read.</p>
-<p>Firs the path needs to specified, and necessary libaries imported:</p>
+<p>First, the path needs to specified and necessary libaries imported:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -642,7 +631,7 @@ current working directory: C:\Users\ICN_admin\Documents\py_neuromodulation\sphin
 PATH_PYNEUROMODULATION: C:\Users\ICN_admin\Documents\py_neuromodulation
 </pre></div></div>
 </div>
-<p>Then the df_M1.csv file is automatically specifed given the respective channel types. Since one channel contains a ‘analog’ substring, it is automaticaly assginged to be a <em>target</em> channel.</p>
+<p>Then the df_M1.csv file is automatically specifed given the respective channel types. Since one channel contains an ‘analog’ substring, it is automaticaly assginged to be a <em>target</em> channel.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -698,8 +687,8 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
   raw_arr = mne_bids.read_raw_bids(bids_path)
 </pre></div></div>
 </div>
-<p>Based on ‘seeg’ type (could be also dbs), the subsequent depth local field potential channel is selected for rereferencing. For ‘ecog’ channels, the average rereference function is automatically assigned.</p>
-<p>Note here also that channels can be used or disabled for feature analysis. Using a priori information regarding e.g. artifact contribution, this might be a useful function.</p>
+<p>Based on ‘seeg’ type (could be also ‘dbs’), the subsequent depth local field potential channel is selected for rereferencing. For ‘ecog’ channels, the average rereference function is automatically assigned.</p>
+<p>Note here also that channels can be ‘used’ for feature analysis.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
@@ -849,8 +838,8 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="settings.html" class="btn btn-neutral float-right" title="settings.py" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="start_BIDS.html" class="btn btn-neutral float-left" title="start_BIDS.py" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="FeatureEstimationDemo.html" class="btn btn-neutral float-right" title="FeatureEstimationDemo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="setup.html" class="btn btn-neutral float-left" title="Setup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

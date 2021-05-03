@@ -31,7 +31,6 @@ class RT_rereference:
             df[(df["type"] == 'seeg')
                | (df['type'] == 'dbs')
                | (df['type'] == 'lfp')].index)
-        print(subcortex_idx)
         to_ref_idx = array(df[(df['used'] == 0)].index)
 
         self.ch_names = ch_names
