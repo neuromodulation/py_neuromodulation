@@ -1,50 +1,28 @@
 .. py_neuromodulation documentation master file, created by
    sphinx-quickstart on Sun Apr 18 11:04:51 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
 Welcome to py_neuromodulation's documentation!
 ==============================================
 
+.. toctree::
+   :maxdepth: 3
+
+   setup
 
 .. toctree::
    :maxdepth: 2
-   :caption: BIDS data feature estimation
+   :caption: Examples
 
-   start_BIDS
-   ParametrizationDefinition.ipynb
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Real-time processing
-
-   settings
-   run_analysis
-   resample
-   normalization
-   rereference
-   projection
-   IO
+   ParametrizationDefinition
+   FeatureEstimationDemo
 
 .. toctree::
    :maxdepth: 2
-   :caption: Feature estimation
+   :caption: Code
 
-   features
-   filter
-   bandpower
-   kalmanfilter
-   hjorth_raw
-   sharpwaves
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Real-time processing
-
-   nm_reader
-   nm_decode
-
-.. include:: ../README.md
+   outline_parametrization
+   outline_featureestimation
+   outline_analysis
 
 Indices and tables
 ==================

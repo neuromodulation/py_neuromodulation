@@ -28,28 +28,22 @@ author = 'Timon Merk'
 source_parsers = {
     '.md': 'recommonmark.parser.CommonMarkParser',
 }
-source_suffix = ['.rst', '.md']
+
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
+    'sphinx.ext.mathjax',
     'numpydoc',
     'sphinx_rtd_theme',
     'sphinx.ext.napoleon',
-    'recommonmark',
-    "linkify"
+    'sphinx.ext.autosectionlabel',
+    'nbsphinx',
+    'recommonmark'
 ]
-
+source_suffix = ['.rst', '.md', '.ipynb']
 autosummary_generate = True
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
-
-# At the bottom of conf.py
-def setup(app):
-    app.add_config_value('recommonmark_config', {
-            'url_resolver': lambda url: github_doc_root + url,
-            'auto_toc_tree_section': 'Contents',
-            }, True)
-    app.add_transform(AutoStructify)
