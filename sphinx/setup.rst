@@ -41,6 +41,7 @@ To run feature estimation given the example BIDS data run in the example folder.
 
 This will write write a feature_arr.csv file in the 'pyneuromodulation/tests/data/derivatives' folder. 
 To estimate next a basic machine learning pipeline including Bayesian Optimization for xgboost, run 
+
 .. code-block::
 
     python example_ML.py
@@ -48,6 +49,7 @@ To estimate next a basic machine learning pipeline including Bayesian Optimizati
 This will save an 'ML_res.p' file in the 'pyneuromodulation/tests/data/derivatives' folder.
 
 Next the features can be investigated using 
+
 .. code-block::
 
     python example_read_features.py
@@ -57,6 +59,7 @@ In such manner features are plotted and individual channels are visualized on th
 For further documentatin view `ParametrizationDefinition <ParametrizationDefinition.html#>`_ for description of necessary parametrization files. 
 `FeatureEstimationDemo <FeatureEstimationDemo.html#>`_ walks through an example feature estimation and explains sharpwave estimation. 
 Note, to install an ipython kernel for the upper installed environment, install jupyter lab and  a respective ipython kernel:
+
 .. code-block::
 
     conda install -c conda-forge jupyterlab    
