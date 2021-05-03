@@ -2,8 +2,8 @@ py_neuromodulation
 ==================
 
 The py_neuromodulation toolbox allows for real time capable processing of multimodal electrophysiological data. The primary use is movement prediction for `adaptive deep brain stimulation <https://pubmed.ncbi.nlm.nih.gov/30607748/>`_.
-Find the documentation here https://neuromodulation.github.io/py_neuromodulation/ for example usage and parametrization. 
 
+Find the documentation here https://neuromodulation.github.io/py_neuromodulation/ for example usage and parametrization. 
 
 For running this toolbox first create a new virtual conda environment:
 
