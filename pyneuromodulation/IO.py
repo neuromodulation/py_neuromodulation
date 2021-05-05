@@ -76,7 +76,8 @@ def add_labels(df_, settings_wrapper, raw_arr_data):
     return df_
 
 
-def save_features_and_settings(df_, run_analysis_, folder_name, settings_wrapper):
+def save_features_and_settings(
+        df_, run_analysis_, folder_name, settings_wrapper):
     """save settings.json, df_M1.tsv and features.csv
 
     Parameters
@@ -92,9 +93,11 @@ def save_features_and_settings(df_, run_analysis_, folder_name, settings_wrapper
     """
 
     # create out folder if doesn't exist
-    if not os.path.exists(os.path.join(settings_wrapper.settings["out_path"], folder_name)):
-        print("create output folder " + str(folder_name))
-        os.makedirs(os.path.join(settings_wrapper.settings["out_path"], folder_name))
+    if not os.path.exists(
+            os.path.join(settings_wrapper.settings["out_path"], folder_name)):
+        print("Creating output folder: " + str(folder_name))
+        os.makedirs(
+            os.path.join(settings_wrapper.settings["out_path"], folder_name))
 
     PATH_OUT = os.path.join(settings_wrapper.settings["out_path"], folder_name,
                             folder_name + "_FEATURES.csv")
@@ -102,16 +105,20 @@ def save_features_and_settings(df_, run_analysis_, folder_name, settings_wrapper
     print("FEATURES.csv saved to " + str(PATH_OUT))
 
     # rewrite np arrays to lists for json format
-    settings_wrapper.settings["grid_cortex"] = np.array(settings_wrapper.settings["grid_cortex"]).tolist()
-    settings_wrapper.settings["grid_subcortex"] = np.array(settings_wrapper.settings["grid_subcortex"]).tolist()
-    settings_wrapper.settings["coord"]["cortex_right"]["positions"] = \
-        settings_wrapper.settings["coord"]["cortex_right"]["positions"].tolist()
-    settings_wrapper.settings["coord"]["cortex_left"]["positions"] = \
-        settings_wrapper.settings["coord"]["cortex_left"]["positions"].tolist()
-    settings_wrapper.settings["coord"]["subcortex_right"]["positions"] = \
-        settings_wrapper.settings["coord"]["subcortex_right"]["positions"].tolist()
-    settings_wrapper.settings["coord"]["subcortex_left"]["positions"] = \
-        settings_wrapper.settings["coord"]["subcortex_left"]["positions"].tolist()
+    if any((settings_wrapper.settings["methods"]["project_cortex"],
+            settings_wrapper.settings["methods"]["project_subcortex"])):
+        settings_wrapper.settings["grid_cortex"] = np.array(
+            settings_wrapper.settings["grid_cortex"]).tolist()
+        settings_wrapper.settings["grid_subcortex"] = np.array(
+            settings_wrapper.settings["grid_subcortex"]).tolist()
+        settings_wrapper.settings["coord"]["cortex_right"]["positions"] = \
+            settings_wrapper.settings["coord"]["cortex_right"]["positions"].tolist()
+        settings_wrapper.settings["coord"]["cortex_left"]["positions"] = \
+            settings_wrapper.settings["coord"]["cortex_left"]["positions"].tolist()
+        settings_wrapper.settings["coord"]["subcortex_right"]["positions"] = \
+            settings_wrapper.settings["coord"]["subcortex_right"]["positions"].tolist()
+        settings_wrapper.settings["coord"]["subcortex_left"]["positions"] = \
+            settings_wrapper.settings["coord"]["subcortex_left"]["positions"].tolist()
 
     PATH_OUT = os.path.join(settings_wrapper.settings["out_path"], folder_name,
                            folder_name + '_SETTINGS.json')

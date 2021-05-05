@@ -15,7 +15,7 @@ import IO
 import projection
 
 
-def est_features_run(PATH_RUN, PATH_M1=None) -> None:
+def est_features_run(PATH_RUN, PATH_M1=None, PATH_SETTINGS=None) -> None:
     """Start feature estimation by reading settings, creating or reading
     df_M1 file with default rereference function (ECoG CAR; depth LFP bipolar)
     Then save features to csv, settings and df_M1 to settings specified output folder.
@@ -26,35 +26,40 @@ def est_features_run(PATH_RUN, PATH_M1=None) -> None:
         absolute path to run file
     PATH_M1 : string
         absolute path to df_M1.csv file
+    PATH_SETTINGS : string
+        absolute path to settings.json file
     """
 
-    os.chdir(os.path.join(os.pardir,'pyneuromodulation'))
-    sys.path.append(os.path.join(os.pardir,'examples'))
-
     # read and test settings first to obtain BIDS path
-    settings_wrapper = nm_settings.SettingsWrapper(settings_path=os.path.join(os.pardir, 'examples', 'settings.json'))
+    if PATH_SETTINGS is None:
+        os.chdir(os.path.join(os.pardir,'pyneuromodulation'))
+        sys.path.append(os.path.join(os.pardir,'examples'))
+        settings_wrapper = nm_settings.SettingsWrapper(
+            settings_path=os.path.join(os.pardir, 'examples', 'settings.json'))
+    else:
+        settings_wrapper = nm_settings.SettingsWrapper(
+            settings_path=PATH_SETTINGS)
 
     # read BIDS data
     raw_arr, raw_arr_data, fs, line_noise = IO.read_BIDS_data(PATH_RUN, settings_wrapper.settings["BIDS_path"])
 
     # (if available) add coordinates to settings
-    if settings_wrapper.settings["methods"]["project_cortex"] is True or \
-            settings_wrapper.settings["methods"]["project_subcortex"] is True:
+    if any((settings_wrapper.settings["methods"]["project_cortex"],
+            settings_wrapper.settings["methods"]["project_subcortex"])):
         settings_wrapper.add_coord(raw_arr.copy())  # if not copy ch_names is being set
         projection_ = projection.Projection(settings_wrapper.settings)
     else:
         projection_ = None
+
     # read df_M1 / create M1 if None specified
-    settings_wrapper.set_M1(m1_path=None, ch_names=raw_arr.ch_names,
+    settings_wrapper.set_M1(m1_path=PATH_M1, ch_names=raw_arr.ch_names,
                             ch_types=raw_arr.get_channel_types())
     settings_wrapper.set_fs_line_noise(fs, line_noise)
 
     # optionally reduce timing for faster test completion
-
     #LIMIT_LOW = 0
     #LIMIT_HIGH = 10000
     #raw_arr_data = raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
-
 
     # initialize generator for run function
     gen = generator.ieeg_raw_generator(raw_arr_data, settings_wrapper.settings)
@@ -75,8 +80,9 @@ def est_features_run(PATH_RUN, PATH_M1=None) -> None:
     features_ = features.Features(settings_wrapper.settings)
 
     # initialize run object
-    run_analysis_ = run_analysis.Run(features_, settings_wrapper.settings,
-                                     rereference_, projection_, resample_, verbose=True)
+    run_analysis_ = run_analysis.Run(
+        features_, settings_wrapper.settings,rereference_, projection_,
+        resample_, verbose=True)
 
     while True:
         ieeg_batch = next(gen, None)
@@ -86,7 +92,8 @@ def est_features_run(PATH_RUN, PATH_M1=None) -> None:
             break
 
     # add resampled labels to feature dataframe
-    df_ = IO.add_labels(run_analysis_.feature_arr, settings_wrapper, raw_arr_data)
+    df_ = IO.add_labels(
+        run_analysis_.feature_arr, settings_wrapper, raw_arr_data)
 
     # save settings.json, df_M1.tsv and features.csv
     # plus pickled run_analysis including projections
