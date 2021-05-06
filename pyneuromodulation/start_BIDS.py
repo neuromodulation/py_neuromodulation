@@ -1,9 +1,13 @@
 import json
 import os
 import sys
+
 import numpy as np
 import pandas as pd
+from pathlib import Path
+
 from bids import BIDSLayout
+
 import define_M1
 import features
 import generator
@@ -15,7 +19,8 @@ import IO
 import projection
 
 
-def est_features_run(PATH_RUN, PATH_M1=None, PATH_SETTINGS=None) -> None:
+def est_features_run(
+        PATH_RUN, PATH_M1=None, PATH_SETTINGS=None, verbose=True) -> None:
     """Start feature estimation by reading settings, creating or reading
     df_M1 file with default rereference function (ECoG CAR; depth LFP bipolar)
     Then save features to csv, settings and df_M1 to settings specified output folder.
@@ -32,16 +37,18 @@ def est_features_run(PATH_RUN, PATH_M1=None, PATH_SETTINGS=None) -> None:
 
     # read and test settings first to obtain BIDS path
     if PATH_SETTINGS is None:
-        os.chdir(os.path.join(os.pardir,'pyneuromodulation'))
-        sys.path.append(os.path.join(os.pardir,'examples'))
+        PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent
+        settings_path = os.path.join(
+            PATH_PYNEUROMODULATION, 'examples', 'settings.json')
         settings_wrapper = nm_settings.SettingsWrapper(
-            settings_path=os.path.join(os.pardir, 'examples', 'settings.json'))
+            settings_path=settings_path)
     else:
         settings_wrapper = nm_settings.SettingsWrapper(
             settings_path=PATH_SETTINGS)
 
     # read BIDS data
-    raw_arr, raw_arr_data, fs, line_noise = IO.read_BIDS_data(PATH_RUN, settings_wrapper.settings["BIDS_path"])
+    raw_arr, raw_arr_data, fs, line_noise = IO.read_BIDS_data(
+        PATH_RUN, settings_wrapper.settings["BIDS_path"])
 
     # (if available) add coordinates to settings
     if any((settings_wrapper.settings["methods"]["project_cortex"],
@@ -66,7 +73,8 @@ def est_features_run(PATH_RUN, PATH_M1=None, PATH_SETTINGS=None) -> None:
 
     # initialize rereferencing
     if settings_wrapper.settings["methods"]["re_referencing"] is True:
-        rereference_ = rereference.RT_rereference(settings_wrapper.df_M1, split_data=False)
+        rereference_ = rereference.RT_rereference(
+            settings_wrapper.df_M1, split_data=False)
     else:
         rereference_ = None
 
@@ -77,12 +85,12 @@ def est_features_run(PATH_RUN, PATH_M1=None, PATH_SETTINGS=None) -> None:
         resample_ = None
 
     # initialize feature class from settings
-    features_ = features.Features(settings_wrapper.settings)
+    features_ = features.Features(settings_wrapper.settings, verbose=verbose)
 
     # initialize run object
     run_analysis_ = run_analysis.Run(
         features_, settings_wrapper.settings,rereference_, projection_,
-        resample_, verbose=True)
+        resample_, verbose=verbose)
 
     while True:
         ieeg_batch = next(gen, None)

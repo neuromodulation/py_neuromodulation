@@ -1,14 +1,16 @@
 import json
-from os.path import isdir
-import pandas as pd
-import define_M1
-import os 
+import os
+from pathlib import Path
+
 import numpy as np
+import pandas as pd
+
+import define_M1
 
 
 class SettingsWrapper:
 
-    def __init__(self, settings_path=os.path.join(os.pardir, 'examples', 'settings.json')) -> None:
+    def __init__(self, settings_path=None) -> None:
         """initialize settings class with settings.json and setting df_M1 toolbox parameter
 
         Parameters
@@ -16,13 +18,13 @@ class SettingsWrapper:
         settings_path : str, optional
             path to settings.json, by default 'settings.json'
         """
-        print("read settings.json")
+        print("Reading settings.json.")
         self.settings_path = settings_path
 
         with open(settings_path, encoding='utf-8') as json_file:
             self.settings = json.load(json_file)
 
-        print("test settings")
+        print("Testing settings.")
         self.test_settings()
 
     def set_fs_line_noise(self, fs, line_noise) -> None:
@@ -86,14 +88,19 @@ class SettingsWrapper:
             self.settings["coord"]["subcortex_left"]["positions"] = 1000*np.array([ch for ch_idx, ch in enumerate(self.settings["coord_list"])
                                                                       if (self.settings["coord_list"][ch_idx][0] <= 0) and
                                                                       ("LFP" in self.settings["coord_names"][ch_idx])])
-            if os.path.isfile(os.path.join(os.pardir, 'examples', 'grid_cortex.tsv')):
-                self.settings["grid_cortex"] = pd.read_csv(os.path.join(os.pardir, 'examples', 'grid_cortex.tsv'),
-                                                           sep="\t")  # left cortical grid
+            PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent
+            cortex_tsv = os.path.join(
+                PATH_PYNEUROMODULATION, 'examples', 'grid_cortex.tsv')
+            subcortex_tsv = os.path.join(
+                PATH_PYNEUROMODULATION, 'examples', 'grid_subcortex.tsv')
+            if os.path.isfile(cortex_tsv):
+                self.settings["grid_cortex"] = pd.read_csv(
+                    cortex_tsv, sep="\t")  # left cortical grid
             else:
                 self.settings["grid_cortex"] = None
-            if os.path.isfile(os.path.join(os.pardir, 'examples', 'grid_subcortex.tsv')):
-                self.settings["grid_subcortex"] = pd.read_csv(os.path.join(os.pardir, 'examples', 'grid_subcortex.tsv'),
-                                                              sep="\t")  # left subcortical grid
+            if os.path.isfile(subcortex_tsv):
+                self.settings["grid_subcortex"] = pd.read_csv(
+                    subcortex_tsv, sep="\t")  # left subcortical grid
             else:
                 self.settings["grid_subcortex"] = None
 
@@ -150,8 +157,8 @@ class SettingsWrapper:
                 s = json.load(json_file)
             assert (isinstance(s, dict))
 
-        assert (isdir(s["BIDS_path"]))
-        assert (isdir(s["out_path"]))
+        #assert (os.path.isdir(s["BIDS_path"]))
+        #assert (os.path.isdir(s["out_path"]))
         assert (isinstance(s["sampling_rate_features"], (float, int)))
         if s["methods"]["project_cortex"] is True:
             assert (isinstance(s["project_cortex_settings"]["max_dist"], (float, int)))
@@ -255,5 +262,5 @@ class SettingsWrapper:
             assert (isinstance(s["dtf_settings"]["num_fft"], (str, int))), \
                 "mum_fft in DTF settings must be either an integer or \"auto\"."
         if verbose:
-            print("No Error occurred when checking the settings.")
+            print("No Error occurred when testing the settings.")
         return
