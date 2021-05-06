@@ -10,7 +10,7 @@ from pathlib import Path
 # first parent to get test folder, second pyneuromodulation folder, then py_neuromodulation
 PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent.parent
 sys.path.append(os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation'))
-sys.path.append(os.path.join(PATH_PYNEUROMODULATION,'examples'))
+sys.path.append(os.path.join(PATH_PYNEUROMODULATION, 'examples'))
 
 import define_M1
 import generator
@@ -37,11 +37,16 @@ def read_example_data(PATH_PYNEUROMODULATION):
     """
 
     # read and test settings first to obtain BIDS path
-    settings_wrapper = settings.SettingsWrapper(settings_path=os.path.join(PATH_PYNEUROMODULATION,
-                                                'examples', 'settings.json'))
+    settings_wrapper = settings.SettingsWrapper(
+        settings_path=os.path.join(PATH_PYNEUROMODULATION, 'examples',
+                                   'settings.json'))
 
-    BIDS_EXAMPLE_PATH = os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation',
-                                     'tests', 'data')
+    BIDS_EXAMPLE_PATH = os.path.join(
+        PATH_PYNEUROMODULATION, 'pyneuromodulation', 'tests', 'data')
+
+    settings_wrapper.settings['BIDS_path'] = BIDS_EXAMPLE_PATH
+    settings_wrapper.settings['out_path'] = os.path.join(
+        BIDS_EXAMPLE_PATH, 'derivatives')
 
     PATH_RUN = os.path.join(BIDS_EXAMPLE_PATH, 'sub-testsub', 'ses-EphysMedOff',
                             'ieeg', "sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg.vhdr")

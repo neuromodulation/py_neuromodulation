@@ -40,17 +40,25 @@ class NM_Reader:
         return self.df_M1
 
     def read_features(self, feature_file) -> None:
-        self.features = pd.read_csv(os.path.join(self.feature_path, feature_file,
-                                    feature_file + "_FEATURES.csv"), header=0)
+        self.features = pd.read_csv(
+            os.path.join(self.feature_path, feature_file,
+                         feature_file + "_FEATURES.csv"), header=0)
+        return self.features
 
-    def read_channel_data(self, ch_name, read_bp_activity_only=False, read_sharpwave_prominence_only=False) -> None:
+    def read_channel_data(self, ch_name, read_bp_activity_only=False,
+                          read_sharpwave_prominence_only=False) -> None:
         self.ch_name = ch_name
         self.feature_ch_cols_all = [i for i in list(self.features.columns) if ch_name in i]
         if read_bp_activity_only:
-            bp_ = [f for f in self.feature_ch_cols_all if 'bandpass' in f and 'activity' in f]
+            bp_ = [f for f in self.feature_ch_cols_all if all(
+                x in f for x in ('bandpass', 'activity'))]
             self.feature_ch_cols = bp_[::-1]  # flip list s.t. theta band is lowest in subsequent plot
         elif read_sharpwave_prominence_only is True:
-            self.feature_ch_cols = [f for f in self.feature_ch_cols_all if 'Sharpwave' in f and 'prominence' in f]
+            self.feature_ch_cols = [
+                f for f in self.feature_ch_cols_all if all(
+                    x in f for x in ('Sharpwave', 'prominence'))]
+        else:
+            self.feature_ch_cols = self.feature_ch_cols_all
         self.feature_ch = self.features[self.feature_ch_cols]
         return self.feature_ch
 
@@ -101,13 +109,11 @@ class NM_Reader:
         self.epoch_len = epoch_len
         self.sfreq = sfreq
         self.threshold = threshold
-
         X = np.array(self.feature_ch)
-        np.expand_dims(X, axis=1)
-
-        X_epoch, y_epoch = self.get_epochs(data=np.expand_dims(np.array(self.feature_ch), axis=1),
-                                           y_=self.label, epoch_len=epoch_len,
-                                           sfreq=sfreq, threshold=threshold)
+        X = np.expand_dims(X, axis=1)
+        X_epoch, y_epoch = self.get_epochs(
+            data=X, y_=self.label, epoch_len=epoch_len, sfreq=sfreq,
+            threshold=threshold)
         self.X_epoch = X_epoch
         self.y_epoch = y_epoch
         return X_epoch, y_epoch
@@ -219,6 +225,7 @@ class NM_Reader:
         #plt.xticks([])
         #plt.yticks([])
         plt.savefig(PATH_save, bbox_inches = "tight")
+        plt.show()
         print("Correlation matrix figure saved to " + str(PATH_save))
 
     def plot_epochs_avg(self, feature_file, feature_str_add=None):
@@ -255,6 +262,5 @@ class NM_Reader:
             PATH_save = os.path.join(self.feature_path, feature_file,
                                  "MOV_algined_features_ch_" + str(self.ch_name) + "_" + feature_str_add + ".png")
         plt.savefig(PATH_save, bbox_inches = "tight")
-        # plt.show()
-        
+        plt.show()
         print("Feature epoch average figure saved to: " + str(PATH_save))

@@ -13,7 +13,7 @@ import sharpwaves
 
 class Features:
 
-    def __init__(self, s) -> None:
+    def __init__(self, s, verbose=None) -> None:
         """Initialize Feature module
 
         Parameters
@@ -23,6 +23,7 @@ class Features:
         """
 
         self.s = s  # settings
+        self.verbose = verbose
         self.ch_names = list(array(s["ch_names"])[s["feature_idx"]])
         if s["methods"]["resample_raw"] is True:
             self.fs = s["resample_raw_settings"]["resample_freq"]
@@ -33,14 +34,14 @@ class Features:
                 self.fs / 1000 * array([value[1] for value in s[
                     "bandpass_filter_settings"][
                         "frequency_ranges"].values()])).astype(int)
-        print("segment lengths:", self.seglengths)
+        print("Segment lengths (ms):", self.seglengths)
         self.KF_dict = {}
 
         if s["methods"]["bandpass_filter"] is True:
-            self.filter_fun = filter.calc_band_filters(f_ranges=[
-                value[0] for value in s["bandpass_filter_settings"][
+            self.filter_fun = filter.calc_band_filters(
+                f_ranges=[value[0] for value in s["bandpass_filter_settings"][
                     "frequency_ranges"].values()], sfreq=self.fs,
-                filter_length=self.fs - 1)
+                filter_length=self.fs - 1, verbose=self.verbose)
 
         if s["methods"]["kalman_filter"] is True:
             for bp_feature in [k for k, v in s["bandpass_filter_settings"][

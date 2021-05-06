@@ -3,8 +3,9 @@ from numpy import array, convolve, expand_dims, vstack
 from mne.filter import create_filter
 
 
-def calc_band_filters(f_ranges, sfreq, filter_length="999ms",
-                      l_trans_bandwidth=4, h_trans_bandwidth=4):
+def calc_band_filters(
+        f_ranges, sfreq, filter_length="999ms", l_trans_bandwidth=4,
+        h_trans_bandwidth=4, verbose=None):
     """Calculate bandpass filters with adjustable length for given frequency
     ranges.
     This function returns for the given frequency band ranges the filter
@@ -34,7 +35,7 @@ def calc_band_filters(f_ranges, sfreq, filter_length="999ms",
                           fir_design='firwin',
                           l_trans_bandwidth=l_trans_bandwidth,
                           h_trans_bandwidth=h_trans_bandwidth,
-                          filter_length=filter_length)
+                          filter_length=filter_length, verbose=verbose)
         filter_list.append(h)
     filter_bank = vstack(filter_list)
     return filter_bank

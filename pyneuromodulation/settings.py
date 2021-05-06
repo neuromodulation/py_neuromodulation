@@ -8,7 +8,7 @@ import numpy as np
 
 class SettingsWrapper:
 
-    def __init__(self, settings_path=os.path.join(os.pardir, 'examples', 'settings.json')) -> None:
+    def __init__(self, settings_path=None) -> None:
         """initialize settings class with settings.json and setting df_M1 toolbox parameter
 
         Parameters
@@ -16,13 +16,13 @@ class SettingsWrapper:
         settings_path : str, optional
             path to settings.json, by default 'settings.json'
         """
-        print("read settings.json")
+        print("Reading settings.json.")
         self.settings_path = settings_path
 
         with open(settings_path, encoding='utf-8') as json_file:
             self.settings = json.load(json_file)
 
-        print("test settings")
+        print("Testing settings.")
         self.test_settings()
 
     def set_fs_line_noise(self, fs, line_noise) -> None:
@@ -150,8 +150,8 @@ class SettingsWrapper:
                 s = json.load(json_file)
             assert (isinstance(s, dict))
 
-        assert (isdir(s["BIDS_path"]))
-        assert (isdir(s["out_path"]))
+        #assert (isdir(s["BIDS_path"]))
+        #assert (isdir(s["out_path"]))
         assert (isinstance(s["sampling_rate_features"], (float, int)))
         if s["methods"]["project_cortex"] is True:
             assert (isinstance(s["project_cortex_settings"]["max_dist"], (float, int)))
@@ -255,5 +255,5 @@ class SettingsWrapper:
             assert (isinstance(s["dtf_settings"]["num_fft"], (str, int))), \
                 "mum_fft in DTF settings must be either an integer or \"auto\"."
         if verbose:
-            print("No Error occurred when checking the settings.")
+            print("No Error occurred when testing the settings.")
         return

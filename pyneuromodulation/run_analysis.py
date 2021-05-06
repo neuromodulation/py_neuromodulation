@@ -8,7 +8,8 @@ import projection
 
 class Run:
 
-    def __init__(self, features, settings, reference=None, projection=None, resample=None, verbose=True) -> None:
+    def __init__(self, features, settings, reference=None, projection=None,
+                 resample=None, verbose=True) -> None:
         """Initialize run class
 
         Parameters
@@ -119,8 +120,9 @@ class Run:
                                                          expand_dims(proj_subcortex, axis=0)), axis=0)
             self.feature_arr = self.feature_arr.append(feature_series, ignore_index=True)
 
-        if self.verbose is True: print(str(np_round(feature_series["time"] / 1000, 2)) + ' seconds of data processed')
-        if self.verbose is True: print("took: " + str(np_round(time() - start_time, 2)) + " seconds")
+        if self.verbose is True:
+            print(str(np_round(feature_series["time"] / 1000, 2)) + ' seconds of data processed')
+            print("Last batch took: " + str(np_round(time() - start_time, 2)) + " seconds")
 
     def init_projection_run(self, feature_series):
         self.cnt_samples += int(self.fs)
