@@ -1,5 +1,5 @@
-from numpy import arange, mean, median
-from scipy.stats import zscore
+from numpy import arange, mean, median, std
+from numpy import clip as np_clip
 
 
 def realtime_normalization(raw_arr, cnt_samples, normalize_samples, fs,
@@ -20,6 +20,8 @@ def realtime_normalization(raw_arr, cnt_samples, normalize_samples, fs,
         data is normalized via subtraction of the 'mean' or 'median' and
         subsequent division by the 'mean' or 'median'. For z-scoring enter
         'zscore'.
+    clip : int | float, optional
+        value at which to clip after normalization
 
     Returns
     -------
@@ -31,23 +33,30 @@ def realtime_normalization(raw_arr, cnt_samples, normalize_samples, fs,
     ValueError
         returned  if norm_type is not 'mean', 'median' or 'zscore'
     """
+
     if cnt_samples == 0:
-        return raw_arr
-    if cnt_samples < normalize_samples:
+        n_idx = arange(0, raw_arr.shape[1], 1)
+    elif cnt_samples < normalize_samples:
         n_idx = arange(0, cnt_samples, 1)
     else:
-        n_idx = arange(cnt_samples - normalize_samples, cnt_samples+1, 1)
+        n_idx = arange(cnt_samples - normalize_samples + 1, cnt_samples + 1, 1)
 
     if norm_type == "mean":
-        norm_previous = mean(raw_arr[:, n_idx], axis=1)
+        mean_ = mean(raw_arr[:, n_idx], axis=1)
+        raw_norm = (raw_arr[:, -fs:].T - mean_) / mean_.T
     elif norm_type == "median":
-        norm_previous = median(raw_arr[:, n_idx], axis=1)
+        median_ = median(raw_arr[:, n_idx], axis=1)
+        raw_norm = (raw_arr[:, -fs:].T - median_) / median_.T
     elif norm_type == "zscore":
-        norm_previous = zscore(raw_arr[:, n_idx], axis=1)
+        mean_ = mean(raw_arr[:, n_idx], axis=1)
+        std_ = std(raw_arr[:, n_idx], axis=1)
+        raw_norm = (raw_arr[:, -fs:].T - mean_) / std_.T
     else:
         raise ValueError("Only `median`, `mean` and `zscore` are supported as "
                          f"normalization methods. Got {norm_type}.")
 
-    raw_norm = (raw_arr[:, -fs:].T - norm_previous) / norm_previous.T
+    if clip:
+        raw_norm = np_clip(raw_norm, a_min=-clip, a_max=clip)
+        pass
 
     return raw_norm.T
