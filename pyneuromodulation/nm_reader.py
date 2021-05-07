@@ -1,12 +1,16 @@
-import os
 import json
+import os
+import _pickle as cPickle
+from pathlib import Path
+
+from matplotlib import pyplot as plt
 import numpy as np
+import pandas as pd
 from scipy.stats import zscore
 from scipy import io
-import pandas as pd
-import _pickle as cPickle
-from matplotlib import pyplot as plt
+
 import seaborn as sns
+
 
 class NM_Reader:
 
@@ -146,7 +150,10 @@ class NM_Reader:
             self.run_analysis = cPickle.load(input)
         return self.run_analysis
 
-    def read_plot_modules(self, PATH_PLOT=os.path.join(os.pardir, 'plots')):
+    def read_plot_modules(self,
+                          PATH_PLOT=os.path.join(
+                              Path(__file__).absolute().parent.parent.parent,
+                              'plots')):
         """Read required .mat files for plotting
 
         Parameters
@@ -154,7 +161,7 @@ class NM_Reader:
         PATH_PLOT : regexp, optional
             path to plotting files, by default
         """
-        
+
         self.faces = io.loadmat(os.path.join(PATH_PLOT, 'faces.mat'))
         self.vertices = io.loadmat(os.path.join(PATH_PLOT, 'Vertices.mat'))
         self.grid = io.loadmat(os.path.join(PATH_PLOT, 'grid.mat'))['grid']
@@ -186,8 +193,7 @@ class NM_Reader:
             ecog_strip = np.array(self.run_analysis.settings["coord"]["cortex_left"]["positions"]).T
 
 
-        fig, axes = plt.subplots(1,1, facecolor=(1,1,1), \
-                                figsize=(14,9))#, dpi=300)
+        fig, axes = plt.subplots(1,1, facecolor=(1,1,1), figsize=(14,9))
         axes.scatter(self.x_ecog, self.y_ecog, c="gray", s=0.001)
         axes.axes.set_aspect('equal', anchor='C')
 

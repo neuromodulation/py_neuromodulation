@@ -11,7 +11,8 @@ import nm_reader as NM_reader
 
 def run_example_read_features():
 
-    FEATURE_PATH = os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation', 'tests', 'data', 'derivatives')
+    FEATURE_PATH = os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation',
+                                'tests', 'data', 'derivatives')
     nm_reader = NM_reader.NM_Reader(FEATURE_PATH)
 
     feature_list = nm_reader.get_feature_list()
@@ -27,7 +28,7 @@ def run_example_read_features():
 
     # plot cortical projection
     print("plotting cortical projections")
-    PATH_PLOT = os.path.join(os.pardir, 'plots')
+    PATH_PLOT = os.path.join(PATH_PYNEUROMODULATION, 'plots')
     nm_reader.read_plot_modules(PATH_PLOT)
     nm_reader.plot_cortical_projection()
 

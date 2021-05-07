@@ -26,12 +26,12 @@ class RT_rereference:
 
         ch_names = list(df['name'])
         refs = df['rereference']
-        cortex_idx, = where(df.type == 'ecog')
-        subcortex_idx = array(
-            df[(df["type"] == 'seeg')
-               | (df['type'] == 'dbs')
-               | (df['type'] == 'lfp')].index)
-        to_ref_idx = array(df[(df['used'] == 0)].index)
+        cortex_idx, = where((df.type == 'ecog') & (df.status == 'good'))
+        subcortex_idx, = where(
+            df.type.isin(('seeg', 'dbs', 'lfp')) & (df.status == 'good'))
+        to_ref_idx = where(
+            ~df.type.isin(
+                ('seeg', 'dbs', 'lfp', 'ecog')) | (df.status == 'bad'))
 
         self.ch_names = ch_names
         self.refs = refs 
@@ -64,19 +64,17 @@ class RT_rereference:
             if self.refs[idx] in ['none', 'None'] or isnull(self.refs[idx]):
                 new_data_subcortex[i] = ch
             elif self.refs[idx] == 'average':
-                av = mean(data_subcortex[self.subcortex_idx != idx, :],
-                          axis=0)
+                av = mean(data_subcortex[self.subcortex_idx != idx, :], axis=0)
                 new_data_subcortex[i] = ch - av
             else:
                 index = []
                 ref_channels = self.refs[idx].split('+')
                 for j in range(len(ref_channels)):
                     if ref_channels[j] not in self.ch_names:
-                        raise ValueError('One or more of the '
-                                         'reference channels are not part of '
-                                         'the recording channels.')
+                        raise ValueError(
+                            'One or more of the reference channels are not '
+                            'part of the recording channels.')
                     index.append(self.ch_names.index(ref_channels[j]))
-
                 new_data_subcortex[i] = ch - mean(ieeg_batch[index, :], axis=0)
 
         data_cortex = ieeg_batch[self.cortex_idx]
@@ -101,15 +99,13 @@ class RT_rereference:
                         raise ValueError('You cannot rereference to the same '
                                          'channel.')
                     index.append(self.ch_names.index(ref_channels[j]))
-
-                new_data_cortex[i] = ch - mean(ieeg_batch[index, :],
-                                               axis=0)
+                new_data_cortex[i] = ch - mean(ieeg_batch[index, :], axis=0)
 
         if self.split_data:
             return new_data_cortex, new_data_subcortex
         else:
             reref_data = empty_like(ieeg_batch)
-            reref_data[self.to_ref_idx] = ieeg_batch[self.to_ref_idx]
             reref_data[self.subcortex_idx, :] = new_data_subcortex
             reref_data[self.cortex_idx, :] = new_data_cortex
+            reref_data[self.to_ref_idx] = ieeg_batch[self.to_ref_idx]
             return reref_data
