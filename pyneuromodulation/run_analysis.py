@@ -42,7 +42,6 @@ class Run:
         self.fs = features.fs
         self.verbose = verbose
         self.sample_add = int(self.fs / self.fs_new)
-        self.normalize_time = int(settings["normalization_settings"]["normalization_time"])
         self.offset = max([value[1] for value in settings[
             "bandpass_filter_settings"]["frequency_ranges"].values()])  # ms
 
@@ -58,12 +57,12 @@ class Run:
             self.lfp_channels = settings["coord"]["subcortex_right"]["ch_names"] if settings["sess_right"] is True\
                                     else settings["coord"]["subcortex_left"]["ch_names"]
 
-        self.cnt_samples = 0
-
         if settings["methods"]["normalization"] is True:
-            #  normalization is here made for the raw signal
-            self.normalize_samples = int(self.normalize_time * features.fs)  
+            self.normalize_time = int(
+                settings["normalization_settings"]["normalization_time"])
+            self.normalize_samples = int(self.normalize_time * features.fs)
 
+        self.cnt_samples = 0
         self.feature_arr = DataFrame()
 
     def run(self, ieeg_batch):

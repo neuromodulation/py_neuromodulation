@@ -80,11 +80,12 @@ class Features:
 
         # notch filter data before feature estimation
         if self.s["methods"]["notch_filter"]:
-            data = notch_filter(x=data, Fs=self.fs, trans_bandwidth=15,
-                                freqs=arange(self.line_noise, 3*self.line_noise,
-                                             self.line_noise),
-                                fir_design='firwin', verbose=False,
-                                notch_widths=3, filter_length=data.shape[1]-1)
+            freqs = arange(
+                self.line_noise, 3 * self.line_noise, self.line_noise)
+            data = notch_filter(
+                x=data, Fs=self.fs, trans_bandwidth=15, freqs=freqs,
+                fir_design='firwin', notch_widths=3,
+                filter_length=data.shape[1]-1, verbose=False,)
 
         if self.s["methods"]["bandpass_filter"]:
             dat_filtered = filter.apply_filter(data, self.filter_fun)  # shape (bands, time)
@@ -103,9 +104,10 @@ class Features:
             ch = self.ch_names[ch_idx]
             features_ = self.est_ch(features_, ch_idx, ch, dat_filtered, data)
 
-        for filt_idx, filt in enumerate(self.s["bandpass_filter_settings"][
-                                            "frequency_ranges"].keys()):
-            features_ = self.est_connect(features_, filt, dat_filtered[:, filt_idx, :])
+        for filt_idx, filt in enumerate(
+                self.s["bandpass_filter_settings"]["frequency_ranges"].keys()):
+            features_ = self.est_connect(
+                features_, filt, dat_filtered[:, filt_idx, :])
 
         # return dict(features_) # this is necessary for multiprocessing approach
         return features_
@@ -138,22 +140,16 @@ class Features:
                 ch, ch_idx)
 
         if self.s["methods"]["raw_hjorth"]: 
-            features_ = hjorth_raw.get_hjorth_raw(features_, data[ch_idx, :],
-                                                  ch)
+            features_ = hjorth_raw.get_hjorth_raw(
+                features_, data[ch_idx, :], ch)
 
         if self.s["methods"]["return_raw"]:
             features_['_'.join([ch, 'raw'])] = data[ch_idx, -1]  # subsampling
 
         if self.s["methods"]["sharpwave_analysis"]:
-            # print('time taken for sharpwave estimation')
-            # start = time.process_time()
-            # take only last resampling_rate
+            features_ = self.sw_features.get_sharpwave_features(
+                features_, data[ch_idx, self.new_dat_index:], ch)
 
-            features_ = self.sw_features.get_sharpwave_features(features_,
-                                                                data[ch_idx, self.new_dat_index:],
-                                                                ch)
-
-            # print(time.process_time() - start)
         return features_
 
     def est_connect(self, features_, filt, dat_filt) -> dict:

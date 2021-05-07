@@ -1,6 +1,6 @@
 {
-    "BIDS_path": "c:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\pyneuromodulation\\tests\\data",
-    "out_path": "c:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\pyneuromodulation\\tests\\data\\derivatives",
+    "BIDS_path": "C:\\Users\\richa\\GitHub\\py_neuromodulation\\pyneuromodulation\\tests\\data",
+    "out_path": "C:\\Users\\richa\\GitHub\\py_neuromodulation\\pyneuromodulation\\tests\\data\\derivatives",
     "sampling_rate_features": 10,
     "methods": {
         "resample_raw": true,
@@ -7672,16 +7672,16 @@
     "sess_right": false,
     "ch_names": [
         "LFP_STN_R_234",
-        "LFP_STN_R_567",
+        "LFP_STN_R_567-LFP_STN_R_234",
         "LFP_BS_STN_L_1",
-        "LFP_STN_L_234",
-        "LFP_STN_L_567",
-        "ECOG_AT_SM_L_1",
-        "ECOG_AT_SM_L_2",
-        "ECOG_AT_SM_L_3",
-        "ECOG_AT_SM_L_4",
-        "ECOG_AT_SM_L_5",
-        "ECOG_AT_SM_L_6",
+        "LFP_STN_L_234-LFP_BS_STN_L_1",
+        "LFP_STN_L_567-LFP_STN_L_234",
+        "ECOG_AT_SM_L_1-avgref",
+        "ECOG_AT_SM_L_2-avgref",
+        "ECOG_AT_SM_L_3-avgref",
+        "ECOG_AT_SM_L_4-avgref",
+        "ECOG_AT_SM_L_5-avgref",
+        "ECOG_AT_SM_L_6-avgref",
         "ANALOG_ROT_R_1"
     ],
     "ch_types": [

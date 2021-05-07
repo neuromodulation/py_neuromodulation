@@ -26,6 +26,9 @@ class SettingsWrapper:
 
         print("Testing settings.")
         self.test_settings()
+        self.m1_path = None
+        self.df_M1 = None
+        self.ind_label = None
 
     def set_fs_line_noise(self, fs, line_noise) -> None:
         self.settings["fs"] = fs
@@ -45,20 +48,23 @@ class SettingsWrapper:
         raw_arr : mne.io.RawArray
         """
         if raw_arr.get_montage() is not None:
-            self.settings["coord_list"] = np.array(list(dict(raw_arr.get_montage().get_positions()
-                                              ["ch_pos"]).values())).tolist()
-            self.settings["coord_names"] = np.array(list(dict(raw_arr.get_montage().get_positions()
-                                    ["ch_pos"]).keys())).tolist()
+            self.settings["coord_list"] = np.array(
+                list(dict(raw_arr.get_montage().get_positions()
+                          ["ch_pos"]).values())).tolist()
+            self.settings["coord_names"] = np.array(
+                list(dict(raw_arr.get_montage().get_positions()
+                          ["ch_pos"]).keys())).tolist()
                    
             self.settings["coord"] = {}
             self.settings["coord"]["cortex_right"] = {}
             self.settings["coord"]["cortex_left"] = {}
             self.settings["coord"]["subcortex_right"] = {}
             self.settings["coord"]["subcortex_left"] = {}
-            self.settings["coord"]["cortex_right"]["ch_names"] = [self.settings["coord_names"][ch_idx] for ch_idx, ch in
-                                                                  enumerate(self.settings["coord_list"]) if
-                                                                  (self.settings["coord_list"][ch_idx][0] > 0)
-                                                                   and ("ECOG" in self.settings["coord_names"][ch_idx])]
+            self.settings["coord"]["cortex_right"]["ch_names"] = [
+                self.settings["coord_names"][ch_idx] for ch_idx, ch
+                in enumerate(self.settings["coord_list"])
+                if (self.settings["coord_list"][ch_idx][0] > 0)
+                and ("ECOG" in self.settings["coord_names"][ch_idx])]
 
             # multiply by 1000 to get m instead of mm
             self.settings["coord"]["cortex_right"]["positions"] = 1000*np.array([ch for ch_idx, ch in enumerate(self.settings["coord_list"])
@@ -66,9 +72,9 @@ class SettingsWrapper:
                                                                    ("ECOG" in self.settings["coord_names"][ch_idx])])
 
             self.settings["coord"]["cortex_left"]["ch_names"] = [self.settings["coord_names"][ch_idx] for ch_idx, ch in
-                                                                  enumerate(self.settings["coord_list"]) if
-                                                                  (self.settings["coord_list"][ch_idx][0] <= 0)
-                                                                   and ("ECOG" in self.settings["coord_names"][ch_idx])]
+                                                                 enumerate(self.settings["coord_list"]) if
+                                                                 (self.settings["coord_list"][ch_idx][0] <= 0)
+                                                                 and ("ECOG" in self.settings["coord_names"][ch_idx])]
             self.settings["coord"]["cortex_left"]["positions"] = 1000*np.array([ch for ch_idx, ch in enumerate(self.settings["coord_list"])
                                                                   if (self.settings["coord_list"][ch_idx][0] <= 0) and
                                                                   ("ECOG" in self.settings["coord_names"][ch_idx])])
@@ -128,15 +134,14 @@ class SettingsWrapper:
             BIDS compatible channel types, by default None
         """
         self.m1_path = m1_path
-        self.settings["ch_names"] = ch_names
-        self.settings["ch_types"] = ch_types
         self.df_M1 = pd.read_csv(self.m1_path, sep="\t")\
             if self.m1_path is not None and os.path.isfile(self.m1_path)\
             else define_M1.set_M1(ch_names, ch_types)
-
-        self.settings["feature_idx"] = np.where(np.logical_and(np.array((self.df_M1["used"] == 1)),
-                                                np.array((self.df_M1["target"] == 0))))[0].tolist()
-
+        self.settings["ch_names"] = self.df_M1['new_name'].tolist()
+        self.settings["ch_types"] = self.df_M1['type'].tolist()
+        self.settings["feature_idx"] = np.where(
+            self.df_M1["used"] & ~self.df_M1["target"])[0].tolist()
+        # If multiple targets exist, select only the first
         self.ind_label = np.where(self.df_M1["target"] == 1)[0]
 
     def test_settings(self, verbose=True) -> None:
@@ -248,10 +253,11 @@ class SettingsWrapper:
                 "bandpass_filter_settings."
             assert (isinstance(value, list) for value in s["dtf_settings"][
                 "frequency_ranges"].values()), "Channels for DTF must be " \
-                                            "specified as a list."
+                                               "specified as a list."
             assert (isinstance(value, list) for value in s[
                 "pdc_settings"]["frequency_ranges"].values())
-            assert (isinstance(s["dtf_settings"]["model_order"], (str, int))), \
+            assert (
+                isinstance(s["dtf_settings"]["model_order"], (str, int))), \
                 "Model order in DTF settings must be either an integer or \"auto\"."
             if isinstance(s["dtf_settings"]["model_order"], int):
                 assert (s["dtf_settings"]["model_order"] == 'auto'), \
