@@ -75,7 +75,7 @@ class Run:
         """
         start_time = time()
 
-        # call rereference
+        # rereference
         if self.settings["methods"]["re_referencing"] is True:
             ieeg_batch = self.reference.rereference(ieeg_batch)
         ieeg_batch = ieeg_batch[self.settings["feature_idx"], :]
@@ -84,19 +84,18 @@ class Run:
         if self.settings["methods"]["resample_raw"] is True:
             ieeg_batch = self.resample.resample_raw(ieeg_batch)
 
-        # normalize (rereferenced) data
+        # normalize raw data
         if self.settings["methods"]["normalization"] is True:
             if self.cnt_samples == 0:
                 self.raw_arr = ieeg_batch
             else:
-                self.raw_arr = concatenate((self.raw_arr, ieeg_batch), axis=1)
-
+                self.raw_arr = concatenate(
+                    (self.raw_arr, ieeg_batch[:, -self.sample_add:]), axis=1)
             raw_norm = \
                 realtime_normalization.realtime_normalization(
                     self.raw_arr, self.cnt_samples, self.normalize_samples, self.fs,
-                    self.settings["normalization_settings"]["normalization_method"])
-
-            # calculate features
+                    self.settings["normalization_settings"]["normalization_method"],
+                    self.settings["normalization_settings"]["clip"])
             feature_series = Series(self.features.estimate_features(raw_norm))
         else:
             feature_series = Series(self.features.estimate_features(ieeg_batch))

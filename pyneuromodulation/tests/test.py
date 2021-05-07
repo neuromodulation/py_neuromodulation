@@ -90,16 +90,16 @@ def test_rereference(ref_here, ieeg_batch, df_M1):
     """
     ref_dat = ref_here.rereference(ieeg_batch)
 
-    print("test the channels which are used but not rereferenced") 
+    print("Testing channels which are used but not rereferenced.")
     for no_ref_idx in np.where((df_M1.rereference == "None") & df_M1.used == 1)[0]:
         assert_array_equal(ref_dat[no_ref_idx, :], ieeg_batch[no_ref_idx, :])
 
-    print("test ecog average channels")
+    print("Testing ECOG average reference.")
     for ecog_ch_idx in np.where((df_M1['type'] == 'ecog') & (df_M1.rereference == 'average'))[0]:
         assert_array_equal(ref_dat[ecog_ch_idx, :], ieeg_batch[ecog_ch_idx, :] -
                            ieeg_batch[(df_M1['type'] == 'ecog') & (df_M1.index != ecog_ch_idx)].mean(axis=0))
 
-    print("test bipolar rereferenced channels")
+    print("Testing bipolar reference.")
     for bp_reref_idx in [ch_idx for ch_idx, ch in
                          enumerate(df_M1.rereference) if ch in list(df_M1.name)]:
         # bp_reref_idx is the channel index of the rereference anode
@@ -111,21 +111,21 @@ def test_rereference(ref_here, ieeg_batch, df_M1):
 
 def test_sharpwaves(data, features_, ch, example_settings, fs):
 
-    print("initialize sharpwave test object")
+    print("Initializing sharp wave test object.")
     sw_features = sharpwaves.SharpwaveAnalyzer(example_settings["sharpwave_analysis_settings"], fs)
-    print("estimate sharpwave features")
+    print("Estimating sharp wave features.")
     features_ = sw_features.get_sharpwave_features(features_, data, ch)
 
 def test_BIDS_feature_estimation():
-    print("test feature estimation for example data")
+    print("Testing feature estimation for example data.")
     example_BIDS.run_example_BIDS()
 
 def test_ML_features():
-    print("test ML feature estimation")
+    print("Testing machine learning feature estimation.")
     example_ML.run_example_ML()
 
 def test_feature_read_out():
-    print("test feature read out")
+    print("Testing feature read out.")
     example_read_features.run_example_read_features()
 
 
@@ -148,4 +148,4 @@ if __name__ == "__main__":
     test_ML_features()
     test_feature_read_out()
 
-    print("all tests passed through")
+    print("All tests passed through.")

@@ -22,7 +22,8 @@
     },
     "normalization_settings": {
         "normalization_time": 10,
-        "normalization_method": "mean"
+        "normalization_method": "zscore",
+        "clip": 3
     },
     "kalman_filter_settings": {
         "Tp": 0.1,

@@ -1,6 +1,6 @@
 {
-    "BIDS_path": "c:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\pyneuromodulation\\tests\\data",
-    "out_path": "c:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\pyneuromodulation\\tests\\data\\derivatives",
+    "BIDS_path": "C:\\Users\\richa\\GitHub\\py_neuromodulation\\pyneuromodulation\\tests\\data",
+    "out_path": "C:\\Users\\richa\\GitHub\\py_neuromodulation\\pyneuromodulation\\tests\\data\\derivatives",
     "sampling_rate_features": 10,
     "methods": {
         "resample_raw": true,
@@ -22,7 +22,8 @@
     },
     "normalization_settings": {
         "normalization_time": 10,
-        "normalization_method": "mean"
+        "normalization_method": "zscore",
+        "clip": 3
     },
     "kalman_filter_settings": {
         "Tp": 0.1,

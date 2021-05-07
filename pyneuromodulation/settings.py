@@ -180,7 +180,7 @@ class SettingsWrapper:
             assert (isinstance(s["normalization_settings"]["normalization_time"],
                     (float, int)))
             assert (s["normalization_settings"]["normalization_method"] in [
-                "mean", "median"])
+                "mean", "median", "zscore"])
         if s["methods"]["kalman_filter"] is True:
             assert (isinstance(s["kalman_filter_settings"]["Tp"], (float, int)))
             assert (isinstance(s["kalman_filter_settings"]["sigma_w"],
