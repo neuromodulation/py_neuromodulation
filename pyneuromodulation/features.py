@@ -25,8 +25,8 @@ class Features:
         self.s = s  # settings
         self.verbose = verbose
         self.ch_names = list(array(s["ch_names"])[s["feature_idx"]])
-        if s["methods"]["resample_raw"] is True:
-            self.fs = s["resample_raw_settings"]["resample_freq"]
+        if s["methods"]["raw_resampling"] is True:
+            self.fs = s["raw_resampling_settings"]["resample_freq"]
         else:
             self.fs = s["fs"]
         self.line_noise = s["line_noise"]

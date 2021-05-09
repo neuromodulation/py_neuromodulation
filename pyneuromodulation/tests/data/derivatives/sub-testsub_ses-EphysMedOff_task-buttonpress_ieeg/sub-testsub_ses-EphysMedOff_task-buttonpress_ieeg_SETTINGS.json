@@ -3,8 +3,9 @@
     "out_path": "C:\\Users\\richa\\GitHub\\py_neuromodulation\\pyneuromodulation\\tests\\data\\derivatives",
     "sampling_rate_features": 10,
     "methods": {
-        "resample_raw": true,
-        "normalization": true,
+        "raw_resampling": true,
+        "raw_normalization": true,
+        "feature_normalization": true,
         "kalman_filter": true,
         "re_referencing": true,
         "notch_filter": true,
@@ -17,11 +18,16 @@
         "pdc": false,
         "dtf": false
     },
-    "resample_raw_settings": {
+    "raw_resampling_settings": {
         "resample_freq": 1000
     },
-    "normalization_settings": {
-        "normalization_time": 10,
+    "raw_normalization_settings": {
+        "normalization_time": 30,
+        "normalization_method": "zscore",
+        "clip": 3
+    },
+    "feature_normalization_settings": {
+        "normalization_time": 30,
         "normalization_method": "zscore",
         "clip": 3
     },

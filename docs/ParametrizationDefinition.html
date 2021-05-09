@@ -449,7 +449,7 @@ div.rendered_html tbody tr:hover {
 <p>The <code class="docutils literal notranslate"><span class="pre">settings.json</span></code> specifies the general feature processing. Most importantly, all provided features can be enabled and disabled:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;methods&quot;</span><span class="p">:</span>
 <span class="p">{</span>
-        <span class="nt">&quot;resample_raw&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+        <span class="nt">&quot;raw_resampling&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
         <span class="nt">&quot;normalization&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
         <span class="nt">&quot;kalman_filter&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
         <span class="nt">&quot;re_referencing&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
@@ -465,15 +465,15 @@ div.rendered_html tbody tr:hover {
 <span class="p">}</span>
 </pre></div>
 </div>
-<p><strong>resample_raw</strong> defines a resampling rate to which the original data is downsampled to. This can be of advantage, since high sampling frequencies automatically require higher computational cost. In the method specific settings the resampling frequency can be defined:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;resample_raw_settings&quot;</span><span class="p">:</span> <span class="p">{</span>
+<p><strong>raw_resampling</strong> defines a resampling rate to which the original data is downsampled to. This can be of advantage, since high sampling frequencies automatically require higher computational cost. In the method specific settings the resampling frequency can be defined:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;raw_resampling_settings&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="nt">&quot;resample_freq&quot;</span><span class="p">:</span> <span class="mi">1000</span>
     <span class="p">}</span>
 </pre></div>
 </div>
 <p><strong>normalization</strong> allows for normalizing the past <em>normalization_time</em> according to either the <em>mean</em> or <em>median</em> <em>normalization_method</em> in the following manner for <em>median</em>:</p>
 <p><span class="math notranslate nohighlight">\(X_{norm} = \frac{X - median(X)}{median(X)}\)</span></p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;normalization_settings&quot;</span><span class="p">:</span> <span class="p">{</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;raw_normalization_settings&quot;</span><span class="p">:</span> <span class="p">{</span>
         <span class="nt">&quot;normalization_time&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
         <span class="nt">&quot;normalization_method&quot;</span><span class="p">:</span> <span class="s2">&quot;median&quot;</span>
     <span class="p">}</span>

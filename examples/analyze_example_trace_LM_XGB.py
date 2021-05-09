@@ -219,21 +219,21 @@ if __name__ == "__main__":
 
     # plot projection 
     '''
-    for feature_file in feature_list:
+    for feature_file in feature_index:
         write_proj_and_avg_features(feature_file)
     or when being sure: pool
     #pool = multiprocessing.Pool(processes=8)
-    #pool.map(write_proj_and_avg_features, feature_list)
+    #pool.map(write_proj_and_avg_features, feature_index)
     '''
 
     # run ML analysis
     '''
-    for feature_str in feature_list:
+    for feature_str in feature_index:
         run_ML_XGB(feature_str)
     '''
     # run LM estimation multiprocessing
     #pool = multiprocessing.Pool(processes=30)
-    #pool.map(run_ML_single_channel, feature_list)
+    #pool.map(run_ML_single_channel, feature_index)
 
     performance_dict = {}
     for feature_str in feature_list:

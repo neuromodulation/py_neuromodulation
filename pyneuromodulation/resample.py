@@ -14,11 +14,11 @@ class Resample:
 
         self.s = settings
         self.fs = settings["fs"]
-        self.fs_new = settings["resample_raw_settings"]["resample_freq"]
+        self.fs_new = settings["raw_resampling_settings"]["resample_freq"]
         self.down = self.fs / self.fs_new
         self.up = 1.0
 
-    def resample_raw(self, data):
+    def raw_resampling(self, data):
         """
 
         Parameters

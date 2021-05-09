@@ -173,14 +173,24 @@ class SettingsWrapper:
             "Methods must be a boolean value."
         assert (any(value is True for value in s["methods"].values())), \
             "Set at least one method to True."
-        if s["methods"]["resample_raw"] is True:
-            assert (isinstance(s["resample_raw_settings"]["resample_freq"],
+        if s["methods"]["raw_resampling"] is True:
+            assert (isinstance(s["raw_resampling_settings"]["resample_freq"],
                     (float, int)))
-        if s["methods"]["normalization"] is True:
-            assert (isinstance(s["normalization_settings"]["normalization_time"],
+        if s["methods"]["raw_normalization"] is True:
+            assert (isinstance(s["raw_normalization_settings"]["normalization_time"],
                     (float, int)))
-            assert (s["normalization_settings"]["normalization_method"] in [
+            assert (s["raw_normalization_settings"]["normalization_method"] in [
                 "mean", "median", "zscore"])
+            assert isinstance(s["raw_normalization_settings"]["clip"],
+                              (float, int, bool))
+        if s["methods"]["feature_normalization"] is True:
+            assert (isinstance(
+                s["feature_normalization_settings"]["normalization_time"],
+                (float, int)))
+            assert (s["feature_normalization_settings"]["normalization_method"] in [
+                "mean", "median", "zscore"])
+            assert isinstance(s["feature_normalization_settings"]["clip"],
+                              (float, int, bool))
         if s["methods"]["kalman_filter"] is True:
             assert (isinstance(s["kalman_filter_settings"]["Tp"], (float, int)))
             assert (isinstance(s["kalman_filter_settings"]["sigma_w"],
