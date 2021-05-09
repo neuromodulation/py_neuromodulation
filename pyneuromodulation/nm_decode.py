@@ -214,15 +214,17 @@ class Decoder:
             # optionally split training data also into train and validation
             # for XGBOOST
             if XGB:
-                X_train, X_val, y_train, y_val = model_selection.train_test_split(X_train, y_train, train_size=0.8,shuffle=False)
+                X_train, X_val, y_train, y_val = \
+                    model_selection.train_test_split(
+                        X_train, y_train, train_size=0.8,shuffle=False)
 
                 classes_weights = class_weight.compute_sample_weight(
-                    class_weight='balanced',
-                    y=y_train
-                )
+                    class_weight='balanced', y=y_train)
 
-                model_train.fit(X_train, y_train, eval_set=[(X_val, y_val)],
-                                early_stopping_rounds=10, sample_weight=classes_weights, verbose=False)
+                model_train.fit(
+                    X_train, y_train, eval_set=[(X_val, y_val)],
+                    early_stopping_rounds=10, sample_weight=classes_weights,
+                    verbose=False)
 
             else:
                 # LM 

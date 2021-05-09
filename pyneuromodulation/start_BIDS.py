@@ -79,7 +79,7 @@ def est_features_run(
         rereference_ = None
 
     # define resampler for faster feature estimation
-    if settings_wrapper.settings["methods"]["resample_raw"] is True:
+    if settings_wrapper.settings["methods"]["raw_resampling"] is True:
         resample_ = resample.Resample(settings_wrapper.settings)
     else:
         resample_ = None

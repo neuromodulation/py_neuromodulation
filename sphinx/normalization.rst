@@ -1,5 +1,5 @@
-realtime_normalization.py
+normalize_raw.py
 =============
 
-.. automodule:: realtime_normalization
+.. automodule:: normalize_raw
       :members:

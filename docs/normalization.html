@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>realtime_normalization.py &mdash; py_neuromodulation  documentation</title>
+  <title>normalize_raw.py &mdash; py_neuromodulation  documentation</title>
   
 
   
@@ -99,7 +99,7 @@
 <li class="toctree-l2"><a class="reference internal" href="settings.html">settings.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="run_analysis.html">run_analysis.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="resample.html">resample.py</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">realtime_normalization.py</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">normalize_raw.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="rereference.html">rereference.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="projection.html">projection.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IO.html">IO.py</a></li>
@@ -157,7 +157,7 @@
         
           <li><a href="outline_parametrization.html">Parametrization</a> &raquo;</li>
         
-      <li>realtime_normalization.py</li>
+      <li>normalize_raw.py</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -201,10 +201,10 @@
 }
 </style>
 <div class="section" id="realtime-normalization-py">
-<h1>realtime_normalization.py<a class="headerlink" href="#realtime-normalization-py" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="module-realtime_normalization"></span><dl class="py function">
-<dt id="realtime_normalization.realtime_normalization">
-<code class="sig-prename descclassname"><span class="pre">realtime_normalization.</span></code><code class="sig-name descname"><span class="pre">realtime_normalization</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cnt_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/realtime_normalization.html#realtime_normalization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#realtime_normalization.realtime_normalization" title="Permalink to this definition">¶</a></dt>
+<h1>normalize_raw.py<a class="headerlink" href="#realtime-normalization-py" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-normalize_raw"></span><dl class="py function">
+<dt id="normalize_raw.normalize_raw">
+<code class="sig-prename descclassname"><span class="pre">normalize_raw.</span></code><code class="sig-name descname"><span class="pre">normalize_raw</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cnt_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/normalize_raw.html#normalize_raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#normalize_raw.normalize_raw" title="Permalink to this definition">¶</a></dt>
 <dd><p>Normalization according to past normalize_samples according to mean or median.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

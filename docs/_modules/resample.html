@@ -178,11 +178,11 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">=</span> <span class="n">settings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;fs&quot;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fs_new</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;resample_raw_settings&quot;</span><span class="p">][</span><span class="s2">&quot;resample_freq&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fs_new</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;raw_resampling_settings&quot;</span><span class="p">][</span><span class="s2">&quot;resample_freq&quot;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">down</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">fs_new</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">up</span> <span class="o">=</span> <span class="mf">1.0</span>
 
-<div class="viewcode-block" id="Resample.resample_raw"><a class="viewcode-back" href="../resample.html#resample.Resample.resample_raw">[docs]</a>    <span class="k">def</span> <span class="nf">resample_raw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="Resample.raw_resampling"><a class="viewcode-back" href="../resample.html#resample.Resample.raw_resampling">[docs]</a>    <span class="k">def</span> <span class="nf">raw_resampling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        Parameters</span>

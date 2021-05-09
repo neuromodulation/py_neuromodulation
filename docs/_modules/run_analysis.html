@@ -166,7 +166,7 @@
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">concatenate</span><span class="p">,</span> <span class="n">squeeze</span><span class="p">,</span> <span class="n">vstack</span><span class="p">,</span> <span class="n">expand_dims</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="nb">round</span> <span class="k">as</span> <span class="n">np_round</span>
 <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">Series</span>
-<span class="kn">import</span> <span class="nn">realtime_normalization</span>
+<span class="kn">import</span> <span class="nn">normalize_raw</span>
 <span class="kn">import</span> <span class="nn">projection</span>
 
 
@@ -205,7 +205,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">fs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_add</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">fs_new</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">normalize_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;normalization_time&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalize_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;raw_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;normalization_time&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">[</span>
             <span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_ranges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>  <span class="c1"># ms</span>
 
@@ -245,8 +245,8 @@
         <span class="n">ieeg_batch</span> <span class="o">=</span> <span class="n">ieeg_batch</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;feature_idx&quot;</span><span class="p">],</span> <span class="p">:]</span>
 
         <span class="c1"># resample</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;resample_raw&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">ieeg_batch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resample</span><span class="o">.</span><span class="n">resample_raw</span><span class="p">(</span><span class="n">ieeg_batch</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;raw_resampling&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">ieeg_batch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resample</span><span class="o">.</span><span class="n">raw_resampling</span><span class="p">(</span><span class="n">ieeg_batch</span><span class="p">)</span>
 
         <span class="c1"># normalize (rereferenced) data</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;normalization&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -256,9 +256,9 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">raw_arr</span> <span class="o">=</span> <span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_arr</span><span class="p">,</span> <span class="n">ieeg_batch</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
             <span class="n">raw_norm</span> <span class="o">=</span> \
-                <span class="n">realtime_normalization</span><span class="o">.</span><span class="n">realtime_normalization</span><span class="p">(</span>
+                <span class="n">normalize_raw</span><span class="o">.</span><span class="n">normalize_raw</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">raw_arr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cnt_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;normalization_method&quot;</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;raw_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;normalization_method&quot;</span><span class="p">])</span>
 
             <span class="c1"># calculate features</span>
             <span class="n">feature_series</span> <span class="o">=</span> <span class="n">Series</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">estimate_features</span><span class="p">(</span><span class="n">raw_norm</span><span class="p">))</span>
