@@ -39,7 +39,7 @@ def run_example_read_features():
     dat_label = nm_reader.read_label(label_name)
     nm_reader.label = stats.zscore(dat_label)*-1  # the label is flipped in the example
 
-    ch_name = "ECOG_AT_SM_L_6"
+    ch_name = "ECOG_AT_SM_L_1"
 
     # Fist case: filter for bandpass activity features only
     dat_ch = nm_reader.read_channel_data(ch_name, read_bp_activity_only=True)

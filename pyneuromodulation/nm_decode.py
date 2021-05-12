@@ -11,6 +11,7 @@ from skopt import gp_minimize, Optimizer
 from sklearn.linear_model import ElasticNet
 from sklearn.base import clone
 from sklearn.utils import class_weight
+from matplotlib import pyplot as plt
 
 import pandas as pd
 import os
@@ -56,7 +57,7 @@ class Decoder:
 
         self.df_M1 = pd.read_csv(os.path.join(self.feature_path, feature_file,
                                  feature_file + "_DF_M1.csv"), header=0)
-        self.used_chs = list(self.df_M1[(self.df_M1["target"] == 0) & (self.df_M1["used"] == 1)]["name"])
+        self.used_chs = list(self.df_M1[(self.df_M1["target"] == 0) & (self.df_M1["used"] == 1)]["new_name"])
 
         with open(os.path.join(self.feature_path, feature_file,
                                feature_file + "_SETTINGS.json")) as f:
@@ -95,22 +96,38 @@ class Decoder:
                     self.target_ch = self.df_M1[self.df_M1["target"] == 1]["name"].iloc[0]
 
         # for classification dependin on the label, set to binary label 
-        self.label = np.nan_to_num(np.array(self.features[self.target_ch])) > 0.3
+        self.label = np.nan_to_num(np.array(self.features[self.target_ch])) > 4*10**(-7)
         self.data = np.nan_to_num(np.array(self.features[[col for col in self.features.columns
                                   if not (('time' in col) or (self.target_ch in col))]]))
+
+        
+        #_, self.label = self.append_time_dim(self.data, self.label, 2)
 
         self.model = model
         self.eval_method = eval_method
         self.cv_method = cv_method
         self.threshold_score = threshold_score
 
+    def append_time_dim(self, arr, y_, time_stamps):
+        """
+        apply added time dimension for the data array and label given time_stamps (with downsample_rate=100) in 100ms / need to check with 1375Hz
+        """
+        time_arr = np.zeros([arr.shape[0]-time_stamps, int(time_stamps*arr.shape[1])])
+        for time_idx, time_ in enumerate(np.arange(time_stamps, arr.shape[0])):
+            for time_point in range(time_stamps):
+                time_arr[time_idx, time_point*arr.shape[1]:(time_point+1)*arr.shape[1]] = arr[time_-time_point,:]
+        return time_arr, y_[time_stamps:]
+
+
     def set_data_ind_channels(self):
         """specified channel individual data
         """
         self.ch_ind_data = {}
         for ch in self.used_chs:
-            self.ch_ind_data[ch] = np.nan_to_num(np.array(self.features[[col for col in self.features.columns 
+            data_ch = np.nan_to_num(np.array(self.features[[col for col in self.features.columns 
                                                           if col.startswith(ch)]]))
+            #self.ch_ind_data[ch], _ = self.append_time_dim(data_ch, self.label, 2)
+            self.ch_ind_data[ch] = data_ch
     
     def run_CV_ind_channels(self, XGB=True):
         """run the CV for every specified channel
@@ -205,7 +222,7 @@ class Decoder:
         self.X_test = []
         self.X_train = []
 
-        for train_index, test_index in self.cv_method.split(self.data):
+        for train_index, test_index in self.cv_method.split(data):
 
             model_train = clone(self.model)
             X_train, y_train = data[train_index, :], label[train_index]
@@ -216,14 +233,14 @@ class Decoder:
             if XGB:
                 X_train, X_val, y_train, y_val = \
                     model_selection.train_test_split(
-                        X_train, y_train, train_size=0.8,shuffle=False)
+                        X_train, y_train, train_size=0.6,shuffle=False)
 
                 classes_weights = class_weight.compute_sample_weight(
                     class_weight='balanced', y=y_train)
 
                 model_train.fit(
                     X_train, y_train, eval_set=[(X_val, y_val)],
-                    early_stopping_rounds=10, sample_weight=classes_weights,
+                    early_stopping_rounds=5, sample_weight=classes_weights,
                     verbose=False)
 
             else:
@@ -253,7 +270,7 @@ class Decoder:
 
         return np.mean(self.score_test)
 
-    def run_Bay_Opt(self, space, rounds=10, base_estimator="GP", acq_func="EI",
+    def run_Bay_Opt(self, space, XGB=True, rounds=10, base_estimator="GP", acq_func="EI",
                     acq_optimizer="sampling", initial_point_generator="lhs"):
         """Run skopt bayesian optimization
         skopt.Optimizer:
@@ -294,7 +311,7 @@ class Decoder:
             # set model values
             for i in range(len(next_x)):
                 setattr(self.model, self.space[i].name, next_x[i])
-            f_val = self.run_CV()
+            f_val = self.run_CV(XGB)
             res = opt.tell(next_x, f_val)
             print(f_val)
 

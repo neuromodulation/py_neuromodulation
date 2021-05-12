@@ -3,8 +3,11 @@ import os
 import matplotlib
 import numpy as np 
 from scipy import stats
+from pathlib import Path
 
-os.chdir(os.path.join(os.pardir,'pyneuromodulation'))
+PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent
+sys.path.append(os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation'))
+sys.path.append(os.path.join(Path(__file__).absolute().parent.parent,'examples'))
 sys.path.append(os.path.join(os.pardir,'pyneuromodulation'))
 
 import nm_reader
@@ -21,7 +24,7 @@ import matplotlib
 
 
 PATH_PYNEUROMODULATION = os.getcwd()
-PATH_PLOT = os.path.join(os.pardir, 'plots')
+PATH_PLOT = os.path.join(Path(__file__).absolute().parent.parent, 'plots')
 
 def write_proj_and_avg_features(feature_file):
     """Plot projected grid. Plot movement aligned features
@@ -191,7 +194,7 @@ def plot_cohort_performances(performance_dict=None):
     print("saved Figure")
 
 # needs to be accesible for all functions
-FEATURE_PATH = r'C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\Beijing'
+FEATURE_PATH = r'C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\sub005'
 faces = io.loadmat(os.path.join(PATH_PLOT, 'faces.mat'))
 vertices = io.loadmat(os.path.join(PATH_PLOT, 'Vertices.mat'))
 grid = io.loadmat(os.path.join(PATH_PLOT, 'grid.mat'))['grid']
@@ -217,31 +220,33 @@ if __name__ == "__main__":
     nm_reader = nm_reader.NM_Reader(FEATURE_PATH)
     feature_list = nm_reader.get_feature_list()
 
-    # plot projection 
-    '''
-    for feature_file in feature_index:
-        write_proj_and_avg_features(feature_file)
-    or when being sure: pool
-    #pool = multiprocessing.Pool(processes=8)
-    #pool.map(write_proj_and_avg_features, feature_index)
-    '''
-
-    # run ML analysis
-    '''
-    for feature_str in feature_index:
-        run_ML_XGB(feature_str)
-    '''
-    # run LM estimation multiprocessing
-    #pool = multiprocessing.Pool(processes=30)
-    #pool.map(run_ML_single_channel, feature_index)
-
-    performance_dict = {}
+    # run ML for this run
     for feature_str in feature_list:
-        # read ML results across patients
-        performance_dict = read_ind_channel_results(feature_str, performance_dict)
-    
-    # now save as meta analysis data 
-    # save a dict with concatenated arrays for channels 
-    with open(r'C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\META\Beijing_out.p', 'wb') as output:  
-            cPickle.dump(performance_dict, output)
-    plot_cohort_performances(performance_dict=performance_dict)
+        model = xgboost.XGBClassifier()
+        decoder = nm_decode.Decoder(feature_path=FEATURE_PATH,
+                                    feature_file=feature_str,
+                                    model=model,
+                                    eval_method=metrics.balanced_accuracy_score,
+                                    cv_method=model_selection.KFold(n_splits=5, shuffle=False),
+                                    threshold_score=True
+                                    )
+        
+        if feature_str == 'sub-005_ses-EphysMedOff01_task-SelfpacedRotationL_acq-StimOff_run-01_ieeg':
+            decoder.label = np.nan_to_num(np.array(decoder.features[decoder.target_ch])) > 4*10**(-7)
+        elif feature_str == 'sub-005_ses-EphysMedOff01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg':
+            decoder.label = np.nan_to_num(np.array(-decoder.features[decoder.target_ch])) > 0
+        elif feature_str == 'sub-005_ses-EphysMedOn01_task-SelfpacedRotationL_acq-StimOff_run-01_ieeg':
+            decoder.label = np.nan_to_num(np.array(-2*10**(-7)+decoder.features[decoder.target_ch])) > 0
+        elif feature_str == 'sub-005_ses-EphysMedOn01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg':
+            decoder.label = np.nan_to_num(np.array(-decoder.features[decoder.target_ch])) > 0
+
+        plt.figure()
+        plt.plot((10**7)*decoder.features[decoder.target_ch])
+        plt.plot(decoder.label)
+        plt.show()
+
+        # run estimations for channels and grid points individually 
+        decoder.set_data_ind_channels()
+
+        decoder.run_CV_ind_channels(XGB=True)
+        decoder.save("XGB")

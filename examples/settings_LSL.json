@@ -1,35 +1,28 @@
 {
-    "BIDS_path": "C:\\Users\\ICN_admin\\OneDrive - Charité - Universitätsmedizin Berlin\\Data\\BIDS_Berlin_ECOG_LFP\\rawdata",
-    "out_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\sub005",
+    "BIDS_path": "c:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\pyneuromodulation\\tests\\data",
+    "out_path": "c:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\pyneuromodulation\\tests\\data\\derivatives",
     "sampling_rate_features": 10,
     "methods": {
-        "raw_resampling": true,
-        "raw_normalization": true,
-        "feature_normalization": false,
+        "resample_raw": false,
+        "normalization": true,
         "kalman_filter": true,
         "re_referencing": true,
         "notch_filter": true,
         "bandpass_filter": true,
-        "raw_hjorth": false,
-        "sharpwave_analysis": false,
-        "return_raw": false,
+        "raw_hjorth": true,
+        "sharpwave_analysis": true,
+        "return_raw": true,
         "project_cortex": false,
         "project_subcortex": false,
         "pdc": false,
         "dtf": false
     },
-    "raw_resampling_settings": {
+    "resample_raw_settings": {
         "resample_freq": 1000
     },
-    "raw_normalization_settings": {
+    "normalization_settings": {
         "normalization_time": 10,
-        "normalization_method": "median",
-        "clip": 3
-    },
-    "feature_normalization_settings": {
-        "normalization_time": 30,
-        "normalization_method": "zscore",
-        "clip": 3
+        "normalization_method": "mean"
     },
     "kalman_filter_settings": {
         "Tp": 0.1,
@@ -102,8 +95,8 @@
         },
         "bandpower_features": {
             "activity": true,
-            "mobility": false,
-            "complexity": false
+            "mobility": true,
+            "complexity": true
         }
     },
     "sharpwave_analysis_settings": {

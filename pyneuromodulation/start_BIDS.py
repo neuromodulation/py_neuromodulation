@@ -20,7 +20,7 @@ import projection
 
 
 def est_features_run(
-        PATH_RUN, PATH_M1=None, PATH_SETTINGS=None, verbose=True) -> None:
+        PATH_RUN, PATH_M1=None, PATH_SETTINGS=None, verbose=False) -> None:
     """Start feature estimation by reading settings, creating or reading
     df_M1 file with default rereference function (ECoG CAR; depth LFP bipolar)
     Then save features to csv, settings and df_M1 to settings specified output folder.
