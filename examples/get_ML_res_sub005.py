@@ -72,4 +72,5 @@ if __name__ == "__main__":
         # read ML results across patients
         performance_dict = read_ind_channel_results(feature_str, performance_dict)
     
-    
+    with open(os.path.join(FEATURE_PATH, "performance_dict.p", 'wb') as output:  # Overwrites any existing file.
+        cPickle.dump(performance_dict, output)
