@@ -56,7 +56,7 @@ class Decoder:
 
         self.df_M1 = pd.read_csv(os.path.join(self.feature_path, feature_file,
                                  feature_file + "_DF_M1.csv"), header=0)
-        self.used_chs = list(self.df_M1[(self.df_M1["target"] == 0) & (self.df_M1["used"] == 1)]["name"])
+        self.used_chs = list(self.df_M1[(self.df_M1["target"] == 0) & (self.df_M1["used"] == 1)]["new_name"])
 
         with open(os.path.join(self.feature_path, feature_file,
                                feature_file + "_SETTINGS.json")) as f:
