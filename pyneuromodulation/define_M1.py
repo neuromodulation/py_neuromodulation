@@ -50,7 +50,7 @@ def set_M1(ch_names, ch_types, reference='default', bads=None,
     if not (len(ch_names) == len(ch_types)):
         raise Exception("Sorry, no numbers below zero")
 
-    mov_substrs = ['ttl', 'analog', 'mov', 'rota']
+    mov_substrs = ['ttl', 'analog', 'mov', 'rota', 'squared']
     used_substrs = ['ecog', 'seeg']
     lfp_types = ['seeg', 'dbs', 'lfp']
 
@@ -93,9 +93,9 @@ def set_M1(ch_names, ch_types, reference='default', bads=None,
             [lfp_ch for lfp_ch in lfp_chs if '_l_' in lfp_ch.lower()])
         lfp_r = sorted(
             [lfp_ch for lfp_ch in lfp_chs if '_r_' in lfp_ch.lower()])
-        lfp_l_refs = [lfp_l[i - 1] if i > 0 else 'None' for i in
+        lfp_l_refs = [lfp_l[i - 1] if i > 0 else lfp_l[-1] for i in
                       range(len(lfp_l))]
-        lfp_r_refs = [lfp_r[i - 1] if i > 0 else 'None' for i in
+        lfp_r_refs = [lfp_r[i - 1] if i > 0 else lfp_r[-1] for i in
                       range(len(lfp_r))]
         ref_idx = list(df.columns).index('rereference')
         for ecog_ch in ecog_chs:

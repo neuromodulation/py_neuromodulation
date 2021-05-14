@@ -240,7 +240,8 @@ class NM_Reader:
         feature_col_name = [i[len(self.ch_name)+1:] for i in list(self.feature_ch_cols) if self.ch_name in i]
         plt.figure(figsize=(6, 6))
         plt.subplot(211)
-        plt.imshow(zscore(np.mean(np.squeeze(self.X_epoch), axis=0), axis=1).T, aspect='auto')
+        plt.imshow(zscore(np.mean(np.squeeze(self.X_epoch), axis=0), axis=0).T,
+                   aspect='auto')
         plt.yticks(np.arange(0, len(feature_col_name), 1), feature_col_name)
         plt.xticks(np.arange(0, self.X_epoch.shape[1], 1),
                    np.round(np.arange(-self.epoch_len / 2, self.epoch_len / 2, 1 / self.sfreq), 2), rotation=90)
