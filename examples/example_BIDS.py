@@ -13,6 +13,7 @@ sys.path.append(os.path.join(Path(__file__).absolute().parent.parent,'examples')
 
 import start_BIDS
 
+
 def run_example_BIDS():
     """run the example BIDS path in pyneuromodulation/tests/data
     """
@@ -42,6 +43,7 @@ def run_example_BIDS():
         "sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg.vhdr")
 
     start_BIDS.est_features_run(PATH_RUN)
+
 
 if __name__ == "__main__":
 

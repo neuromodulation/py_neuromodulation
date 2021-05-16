@@ -1,12 +1,5 @@
-import json
 import os
-import sys
-
-import numpy as np
-import pandas as pd
 from pathlib import Path
-
-from bids import BIDSLayout
 
 import define_M1
 import features
@@ -51,9 +44,11 @@ def est_features_run(
         PATH_RUN, settings_wrapper.settings["BIDS_path"])
 
     # (if available) add coordinates to settings
+    if raw_arr.get_montage() is not None:
+        settings_wrapper.add_coord(raw_arr.copy())
+
     if any((settings_wrapper.settings["methods"]["project_cortex"],
             settings_wrapper.settings["methods"]["project_subcortex"])):
-        settings_wrapper.add_coord(raw_arr.copy())  # if not copy ch_names is being set
         projection_ = projection.Projection(settings_wrapper.settings)
     else:
         projection_ = None
@@ -64,9 +59,9 @@ def est_features_run(
     settings_wrapper.set_fs_line_noise(fs, line_noise)
 
     # optionally reduce timing for faster test completion
-    #LIMIT_LOW = 0
-    #LIMIT_HIGH = 10000
-    #raw_arr_data = raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
+    # LIMIT_LOW = 0
+    # LIMIT_HIGH = 10000
+    # raw_arr_data = raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
 
     # initialize generator for run function
     gen = generator.ieeg_raw_generator(raw_arr_data, settings_wrapper.settings)
@@ -89,7 +84,7 @@ def est_features_run(
 
     # initialize run object
     run_analysis_ = run_analysis.Run(
-        features_, settings_wrapper.settings,rereference_, projection_,
+        features_, settings_wrapper.settings, rereference_, projection_,
         resample_, verbose=verbose)
 
     while True:
