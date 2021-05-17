@@ -16,12 +16,19 @@ if __name__ == "__main__":
     # example single run file estimation
     
 
-    PATH_BIDS = "C:\\Users\\ICN_admin\\OneDrive - Charité - Universitätsmedizin Berlin\\pipeline-MotOnsetPred_2021-04-26"
+    PATH_BIDS = r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\Data\Beijing"
     layout = BIDSLayout(PATH_BIDS)
-    run_files = layout.get(extension='.vhdr')
+    subjects = layout.get_subjects()
+    run_files = []
+    for sub in subjects:
+        if sub != "FOG013":
+            try:
+                run_files.append(layout.get(subject=sub, task='ButtonPress', extension='.vhdr')[0])
+            except:
+                pass
     
-    #for run_file in run_files:
-    #    start_BIDS.est_features_run(run_file)
+    for run_file in run_files:
+        start_BIDS.est_features_run(run_file)
 
     pool = multiprocessing.Pool(processes=20)
     

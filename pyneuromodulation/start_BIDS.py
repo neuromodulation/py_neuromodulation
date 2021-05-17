@@ -13,7 +13,8 @@ import projection
 
 
 def est_features_run(
-        PATH_RUN, PATH_M1=None, PATH_SETTINGS=None, verbose=True) -> None:
+        PATH_RUN, PATH_M1=None, PATH_SETTINGS=None,
+        verbose=False) -> None:
     """Start feature estimation by reading settings, creating or reading
     df_M1 file with default rereference function (ECoG CAR; depth LFP bipolar)
     Then save features to csv, settings and df_M1 to settings specified output folder.
@@ -59,9 +60,9 @@ def est_features_run(
     settings_wrapper.set_fs_line_noise(fs, line_noise)
 
     # optionally reduce timing for faster test completion
-    # LIMIT_LOW = 0
-    # LIMIT_HIGH = 10000
-    # raw_arr_data = raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
+    LIMIT_LOW = 0
+    LIMIT_HIGH = 4000
+    raw_arr_data = raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
 
     # initialize generator for run function
     gen = generator.ieeg_raw_generator(raw_arr_data, settings_wrapper.settings)
