@@ -105,8 +105,7 @@ def save_features_and_settings(
     print("FEATURES.csv saved to " + str(PATH_OUT))
 
     # rewrite np arrays to lists for json format
-    if any((settings_wrapper.settings["methods"]["project_cortex"],
-            settings_wrapper.settings["methods"]["project_subcortex"])):
+    if settings_wrapper.settings["coord"] is not None:
         settings_wrapper.settings["grid_cortex"] = np.array(
             settings_wrapper.settings["grid_cortex"]).tolist()
         settings_wrapper.settings["grid_subcortex"] = np.array(
