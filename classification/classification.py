@@ -1,4 +1,5 @@
 from operator import itemgetter
+import pprint
 
 import numpy as np
 import pandas as pd
@@ -7,9 +8,12 @@ from bayes_opt import BayesianOptimization
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.under_sampling import RandomUnderSampler
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (average_precision_score, balanced_accuracy_score,
                              log_loss)
 from sklearn.model_selection import GroupShuffleSplit
+from skopt import BayesSearchCV
+from skopt.space import Real, Categorical, Integer
 from xgboost import XGBClassifier
 
 
@@ -190,10 +194,101 @@ def classify_xgb(features, events, ch_name, target_begin, target_end,
         labels_pred = model.predict(
             features_test, iteration_range=(0, model.best_iteration))
         acc = balanced_accuracy_score(labels_test, labels_pred)
-        #labels_score = model.decision_function(labels_test)
+        #labels_score = model.decision_function(features_test)
         #ap = average_precision_score(labels_test, labels_score)
         accuracy.append(acc)
         AP.append(0.)
+    if verbose:
+        print(ch_name, ':', 'CV-AP: ', np.mean(AP), 'CV-Accuracy: ',
+              np.mean(accuracy))
+    return np.mean(AP), np.mean(accuracy)
+
+
+def classify_lr(features, events, ch_name, target_begin, target_end,
+                dist_onset, dist_end, verbose):
+    """
+
+    Parameters
+    ----------
+    features
+    events
+    ch_name
+    target_begin
+    target_end
+    dist_onset
+    dist_end
+    verbose
+
+    Returns
+    -------
+
+    """
+    def bo_tune(solver, C, max_iter):
+        # Cross validating with the specified parameters in 5 folds
+        scores = list()
+        for train_index, test_index in cv_inner.split(
+                features_train, labels_train, groups_inner):
+            model = LogisticRegression(solver=solver, C=C, max_iter=max_iter)
+            X_train, X_test = \
+                features_train[train_index], features_train[test_index]
+            y_train, y_test = labels_train[train_index], \
+                              labels_train[test_index]
+            if np.mean(y_train) != 0.5:
+                X_train, y_train = balance_samples(
+                    X_train, y_train, 'oversample')
+            model.fit(X_train, y_train)
+            y_probs = model.predict_proba(X_test)
+            #print('y_probs.shape', y_probs.shape, 'y_test.shape', y_test.shape)
+            score = log_loss(y_test, y_probs, labels=[0, 1])
+            scores.append(score)
+        # Return the negative MLOGLOSS
+        return -1.0 * np.mean(scores)
+    print("Channel:", ch_name)
+    cols = [col for col in features.columns if ch_name in col]
+    feat_picks = features[cols]
+    data = feat_picks.values
+    features, labels, events_used, groups = get_feat_array(
+        data, events, sfreq=10,
+        target_begin=target_begin, target_end=target_end,
+        dist_onset=dist_onset, dist_end=dist_end)
+
+    cv_outer = GroupShuffleSplit(n_splits=5, train_size=0.8)
+    accuracy, AP = [], []
+    # Perform Bayesian optimization once for each outer fold
+    for train_ind, test_ind in cv_outer.split(features, labels, groups):
+        features_train, features_test = features[train_ind], \
+                                        features[test_ind]
+        labels_train, labels_test = labels[train_ind], labels[test_ind]
+        groups_train = groups[train_ind]
+        groups_inner = groups[train_ind]
+        if np.mean(labels_train) != 0.5:
+
+            features_train = np.concatenate((
+                features_train, np.expand_dims(groups_train, axis=1)), axis=1)
+            features_train, labels_train = balance_samples(
+                features_train, labels_train, 'oversample')
+            groups_train = features_train[:, -1]
+            features_train = features_train[:, :-1]
+        cv_inner = GroupShuffleSplit(n_splits=5, train_size=0.8,
+                                     random_state=42)
+        # Now perform Bayesian Optimization
+        estimator = LogisticRegression()
+        spaces = {'solver': Categorical([
+                          'newton-cg', 'saga']),
+                  'C': Real(pow(10, -3), pow(10, 0), prior="log-uniform"),
+                  'max_iter': Integer(100, 1000)}
+        model = BayesSearchCV(estimator=estimator, search_spaces=spaces,
+                              n_iter=15, scoring='neg_log_loss', refit=True,
+                              cv=cv_inner, iid=True, verbose=0)
+        model.fit(features_train, labels_train, groups_train)
+        print("Best_params_: %s" % model.best_params_)
+        # Now train outer model with optimized parameters
+        labels_pred = model.predict(features_test)
+        acc = balanced_accuracy_score(labels_test, labels_pred)
+        labels_score = model.decision_function(features_test)
+        ap = average_precision_score(labels_test, labels_score)
+        accuracy.append(acc)
+        AP.append(ap)
     if verbose:
         print(ch_name, ':', 'CV-AP: ', np.mean(AP), 'CV-Accuracy: ',
               np.mean(accuracy))
@@ -325,7 +420,7 @@ def init_classification(
         intention up to motor onset.
     out_file : path | string
         Name and path of the file where classification performance is saved.
-    classifier : {'lda', 'xgb'}
+    classifier : {'lda', 'xgb', 'lr'}
         Method for classification. Use 'lda' for regularized shrinkage Linear
         Discriminant Analysis. Use 'xgb' for XGBoost classifier with
         hyperparameter optimization using Bayesian Optimization. Default is
@@ -371,6 +466,10 @@ def init_classification(
                 dist_onset, dist_end, verbose=False)
         elif classifier == 'xgb':
             AP, accuracy = classify_xgb(
+                features, events, ch_name, target_begin, target_end,
+                dist_onset, dist_end, verbose=True)
+        elif classifier == 'lr':
+            AP, accuracy = classify_lr(
                 features, events, ch_name, target_begin, target_end,
                 dist_onset, dist_end, verbose=True)
         scores_list.append([AP, accuracy])
