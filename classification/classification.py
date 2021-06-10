@@ -1,5 +1,7 @@
+from colorama import Fore, Style
 from operator import itemgetter
 import os
+
 
 import numpy as np
 import pandas as pd
@@ -62,7 +64,7 @@ def classify_lr(X_train, X_test, y_train, y_test, group_train):
     """"""
     def bo_tune(C, max_iter):
         # Cross validating with the specified parameters in 5 folds
-        cv_inner = GroupShuffleSplit(n_splits=5, train_size=0.8,
+        cv_inner = GroupShuffleSplit(n_splits=3, train_size=0.66,
                                      random_state=42)
         scores = list()
         for train_index, test_index in cv_inner.split(
@@ -84,7 +86,7 @@ def classify_lr(X_train, X_test, y_train, y_test, group_train):
     # Perform Bayesian Optimization
     bo = BayesianOptimization(
         bo_tune, {'C': (0.1, 10.0), 'max_iter': (100, 1000)})
-    bo.maximize(init_points=8, n_iter=7, acq='ei')
+    bo.maximize(init_points=8, n_iter=12, acq='ei')
     # Train outer model with optimized parameters
     params = bo.max['params']
     params['max_iter'] = int(params['max_iter'])
@@ -184,11 +186,98 @@ def classify_svm_rbf(X_train, X_test, y_train, y_test, group_train):
     return balanced_accuracy_score(y_test, y_pred)
 
 
+def classify_svm_poly(X_train, X_test, y_train, y_test, group_train):
+    """"""
+    def bo_tune(C, max_iter, tol):
+        # Cross validating with the specified parameters in 5 folds
+        cv_inner = GroupShuffleSplit(n_splits=5, train_size=0.8,
+                                     random_state=42)
+        scores = list()
+        for train_index, test_index in cv_inner.split(
+                X_train, y_train, group_train):
+            X_tr, X_te = X_train[train_index], X_train[test_index]
+            y_tr, y_te = y_train[train_index], y_train[test_index]
+            if np.mean(y_tr) != 0.5:
+                X_tr, y_tr = balance_samples(X_tr, y_tr, 'oversample')
+            inner_model = SVC(kernel='poly', C=C, max_iter=max_iter, tol=tol,
+                              gamma='scale', shrinking=True, class_weight=None,
+                              probability=True, verbose=False)
+            inner_model.fit(X_tr, y_tr)
+            y_probs = inner_model.predict_proba(X_te)
+            #print('y_probs.shape', y_probs.shape, 'y_test.shape', y_test.shape)
+            score = log_loss(y_te, y_probs, labels=[0, 1])
+            scores.append(score)
+        # Return the negative MLOGLOSS
+        return -1.0 * np.mean(scores)
+
+    # Perform Bayesian Optimization
+    bo = BayesianOptimization(
+        bo_tune, {'C': (pow(10, -1), pow(10, 1)), 'max_iter': (100, 1000),
+                  'tol': (1e-4, 1e-2)})
+    bo.maximize(init_points=8, n_iter=7, acq='ei')
+    # Train outer model with optimized parameters
+    params = bo.max['params']
+    params['max_iter'] = int(params['max_iter'])
+    model = SVC(kernel='rbf', C=params['C'], max_iter=params['max_iter'],
+                tol=params['tol'], gamma='scale', shrinking=True,
+                class_weight=None, verbose=False)
+    # Train outer model with optimized parameters
+    if np.mean(y_train) != 0.5:
+        X_train, y_train = balance_samples(X_train, y_train, 'oversample')
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    return balanced_accuracy_score(y_test, y_pred)
+
+
+def classify_svm_sig(X_train, X_test, y_train, y_test, group_train):
+    """"""
+    def bo_tune(C, max_iter, tol):
+        # Cross validating with the specified parameters in 5 folds
+        cv_inner = GroupShuffleSplit(n_splits=5, train_size=0.8,
+                                     random_state=42)
+        scores = list()
+        for train_index, test_index in cv_inner.split(
+                X_train, y_train, group_train):
+            X_tr, X_te = X_train[train_index], X_train[test_index]
+            y_tr, y_te = y_train[train_index], y_train[test_index]
+            if np.mean(y_tr) != 0.5:
+                X_tr, y_tr = balance_samples(X_tr, y_tr, 'oversample')
+            inner_model = SVC(kernel='sigmoid', C=C, max_iter=max_iter,
+                              tol=tol, gamma='scale', shrinking=True,
+                              class_weight=None, probability=True,
+                              verbose=False)
+            inner_model.fit(X_tr, y_tr)
+            y_probs = inner_model.predict_proba(X_te)
+            #print('y_probs.shape', y_probs.shape, 'y_test.shape', y_test.shape)
+            score = log_loss(y_te, y_probs, labels=[0, 1])
+            scores.append(score)
+        # Return the negative MLOGLOSS
+        return -1.0 * np.mean(scores)
+
+    # Perform Bayesian Optimization
+    bo = BayesianOptimization(
+        bo_tune, {'C': (pow(10, -1), pow(10, 1)), 'max_iter': (100, 1000),
+                  'tol': (1e-4, 1e-2)})
+    bo.maximize(init_points=8, n_iter=7, acq='ei')
+    # Train outer model with optimized parameters
+    params = bo.max['params']
+    params['max_iter'] = int(params['max_iter'])
+    model = SVC(kernel='rbf', C=params['C'], max_iter=params['max_iter'],
+                tol=params['tol'], gamma='scale', shrinking=True,
+                class_weight=None, verbose=False)
+    # Train outer model with optimized parameters
+    if np.mean(y_train) != 0.5:
+        X_train, y_train = balance_samples(X_train, y_train, 'oversample')
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    return balanced_accuracy_score(y_test, y_pred)
+
+
 def classify_xgb(X_train, X_test, y_train, y_test, group_train):
     """"""
     def bo_tune(max_depth, gamma, learning_rate, subsample, colsample_bytree):
         # Cross validating with the specified parameters in 5 folds
-        cv_inner = GroupShuffleSplit(n_splits=5, train_size=0.8,
+        cv_inner = GroupShuffleSplit(n_splits=3, train_size=0.66,
                                      random_state=42)
         scores = list()
         for train_index, test_index in cv_inner.split(
@@ -399,11 +488,14 @@ def init_classification(
     results = list()
     fold = 0
     for train_ind, test_ind in cv_outer.split(features.values, labels, groups):
+        print(Fore.LIGHTCYAN_EX + f"Fold no.: {fold}")
+        print(Style.RESET_ALL)
         features_train, features_test = features.iloc[train_ind], \
                                         features.iloc[test_ind]
         y_train, y_test = labels[train_ind], labels[test_ind]
         groups_train = groups[train_ind]
         for ch_name in ch_names:
+            print("Channel: ", ch_name)
             cols = [col for col in features_train.columns if ch_name in col]
             X_train = features_train[cols].values
             X_test = features_test[cols].values
@@ -421,6 +513,12 @@ def init_classification(
                     X_train, X_test, y_train, y_test, groups_train)
             elif classifier == 'svm_rbf':
                 accuracy = classify_svm_rbf(
+                    X_train, X_test, y_train, y_test, groups_train)
+            elif classifier == 'svm_poly':
+                accuracy = classify_svm_poly(
+                    X_train, X_test, y_train, y_test, groups_train)
+            elif classifier == 'svm_sig':
+                accuracy = classify_svm_sig(
                     X_train, X_test, y_train, y_test, groups_train)
             else:
                 raise ValueError(f"Classifier not found: {classifier}")

@@ -104,10 +104,11 @@ class Features:
             ch = self.ch_names[ch_idx]
             features_ = self.est_ch(features_, ch_idx, ch, dat_filtered, data)
 
-        for filt_idx, filt in enumerate(
-                self.s["bandpass_filter_settings"]["frequency_ranges"].keys()):
-            features_ = self.est_connect(
-                features_, filt, dat_filtered[:, filt_idx, :])
+        if self.s["methods"]["pdc"] is True or self.s["methods"]["dtf"] is True:
+            for filt_idx, filt in enumerate(
+                    self.s["bandpass_filter_settings"]["frequency_ranges"].keys()):
+                features_ = self.est_connect(
+                    features_, filt, dat_filtered[:, filt_idx, :])
 
         # return dict(features_) # this is necessary for multiprocessing approach
         return features_

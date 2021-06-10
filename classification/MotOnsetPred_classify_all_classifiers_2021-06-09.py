@@ -173,14 +173,34 @@ def run_classification_diff(
 
 ### BERLIN
 root_berlin = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\Berlin_ECOG_LFP_derivatives\pipeline-MotOnsetPred_2021-04-26'
-deriv_root_berlin = os.path.join(root_berlin, 'derivatives', 'feat_no_norm')
+deriv_root_berlin = os.path.join(root_berlin, 'derivatives', 'feat_add_HFA_no_norm')
 nm_reader_berlin = NM_reader.NM_Reader(deriv_root_berlin)
-feature_list_berlin = nm_reader_berlin.get_feature_list()
-print(*feature_list_berlin, sep='\n')
+#feature_list_berlin = nm_reader_berlin.get_feature_list()
+#print(*feature_list_berlin, sep='\n')
+feature_list_berlin =[
+    "sub-002_ses-EphysMedOff01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg",
+    "sub-002_ses-EphysMedOff02_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg",
+    "sub-002_ses-EphysMedOff03_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg",
+    #"sub-002_ses-EphysMedOff03_task-SelfpacedRotationR_acq-StimOn_run-01_ieeg",
+    "sub-003_ses-EphysMedOff01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg",
+    "sub-003_ses-EphysMedOn03_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg",
+    "sub-004_ses-EphysMedOff01_task-SelfpacedRotationL_acq-StimOff_run-01_ieeg",
+    "sub-004_ses-EphysMedOff01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg",
+    "sub-004_ses-EphysMedOn01_task-SelfpacedRotationL_acq-StimOff_run-01_ieeg",
+    "sub-004_ses-EphysMedOn01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg",
+    "sub-005_ses-EphysMedOff01_task-SelfpacedRotationL_acq-StimOff_run-01_ieeg",
+    "sub-005_ses-EphysMedOff01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg",
+    #"sub-005_ses-EphysMedOff02_task-SelfpacedRotationL_acq-StimOn_run-01_ieeg",
+    #"sub-005_ses-EphysMedOff02_task-SelfpacedRotationR_acq-StimOn_run-01_ieeg",
+    "sub-005_ses-EphysMedOn01_task-SelfpacedRotationL_acq-StimOff_run-01_ieeg",
+    "sub-005_ses-EphysMedOn01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg"
+    #"sub-005_ses-EphysMedOn02_task-SelfpacedRotationL_acq-StimOn_run-01_ieeg",
+    #"sub-005_ses-EphysMedOn02_task-SelfpacedRotationR_acq-StimOn_run-01_ieeg"
+]
 
 ### BEIJING
 root_beijing = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\Beijing_ECOG_LFP_derivatives\pipeline-MotOnsetPred_2021-04-26'
-deriv_root_beijing = os.path.join(root_beijing, 'derivatives', 'feat_no_norm')
+deriv_root_beijing = os.path.join(root_beijing, 'derivatives', 'feat_add_HFA_no_norm')
 nm_reader_beijing = NM_reader.NM_Reader(deriv_root_beijing)
 #feature_list = nm_reader.get_feature_list()
 #print(*feature_list, sep='\n')
@@ -192,9 +212,10 @@ feature_list_beijing = [
     'sub-FOGC001_ses-EphysMedOff_task-ButtonPress_acq-StimOff_run-01_ieeg'
 ]
 
-classifiers = ['lda', 'lr', 'svm_lin', 'svm_rbf', 'svm_poly', 'svm_sig', 'xgb']
-classifiers = ['svm_rbf']
-out_root = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\PROJECT_motor_onset_results\MotOnsetPred_2021-06-08'
+classifiers = ['lda', 'lr', 'xgb', 'svm_lin', 'svm_rbf', 'svm_poly', 'svm_sig']
+#classifiers = ['lda', 'lr']
+classifiers = ['lr', 'xgb', 'svm_lin', 'svm_rbf', 'svm_poly', 'svm_sig']
+out_root = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\PROJECT_motor_onset_results\MotOnsetPred_2021-06-10_compare_norm+classifiers'
 targets = [(0., "MovementEnd"), (-1., 0.)]
 feature_lists = [feature_list_berlin, feature_list_beijing]
 nm_readers = [nm_reader_berlin, nm_reader_beijing]
