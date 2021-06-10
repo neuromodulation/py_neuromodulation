@@ -1,5 +1,5 @@
 from operator import itemgetter
-import pprint
+import os
 
 import numpy as np
 import pandas as pd
@@ -12,8 +12,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (average_precision_score, balanced_accuracy_score,
                              log_loss)
 from sklearn.model_selection import GroupShuffleSplit
-from skopt import BayesSearchCV
-from skopt.space import Real, Categorical, Integer
+from sklearn.svm import SVC
 from xgboost import XGBClassifier
 
 
@@ -48,268 +47,215 @@ def balance_samples(data, target, method='oversample'):
     return data, target
 
 
-def classify_lda(features, events, ch_name, target_begin, target_end,
-                 dist_onset, dist_end, verbose):
-    """
-
-    Parameters
-    ----------
-    features
-    events
-    ch_name
-    target_begin
-    target_end
-    dist_onset
-    dist_end
-    verbose
-
-    Returns
-    -------
-
-    """
-    cols = [col for col in features.columns if ch_name in col]
-    feat_picks = features[cols]
-    data = feat_picks.values
-    X, y, events_used, groups = get_feat_array(
-        data, events, sfreq=10, 
-        target_begin=target_begin, target_end=target_end,
-        dist_onset=dist_onset, dist_end=dist_end)
-    clf = LinearDiscriminantAnalysis(solver='lsqr', shrinkage='auto')
-    cv = GroupShuffleSplit(n_splits=5, train_size=0.8)
-    accuracy, AP = get_class_scores(X, y, cv, clf, groups)
-    if verbose:
-        print(ch_name, ':', 'CV-AP: ', AP, 'CV-Accuracy: ', accuracy)
-    return AP, accuracy
+def classify_lda(X_train, X_test, y_train, y_test):
+    """"""
+    if np.mean(y_train) != 0.5:
+        X_train, y_train = balance_samples(
+            X_train, y_train, 'oversample')
+    model = LinearDiscriminantAnalysis(solver='lsqr', shrinkage='auto')
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    return balanced_accuracy_score(y_test, y_pred)
 
 
-def classify_xgb(features, events, ch_name, target_begin, target_end,
-                 dist_onset, dist_end, verbose):
-    """
-
-    Parameters
-    ----------
-    features
-    events
-    ch_name
-    target_begin
-    target_end
-    dist_onset
-    dist_end
-    verbose
-
-    Returns
-    -------
-
-    """
-    def bo_tune_xgb(max_depth, gamma, learning_rate, subsample,
-                    colsample_bytree):
+def classify_lr(X_train, X_test, y_train, y_test, group_train):
+    """"""
+    def bo_tune(C, max_iter):
         # Cross validating with the specified parameters in 5 folds
+        cv_inner = GroupShuffleSplit(n_splits=5, train_size=0.8,
+                                     random_state=42)
         scores = list()
         for train_index, test_index in cv_inner.split(
-                features_train, labels_train, groups_inner):
-            model = XGBClassifier(
+                X_train, y_train, group_train):
+            X_tr, X_te = X_train[train_index], X_train[test_index]
+            y_tr, y_te = y_train[train_index], y_train[test_index]
+            if np.mean(y_tr) != 0.5:
+                X_tr, y_tr = balance_samples(X_tr, y_tr, 'oversample')
+            inner_model = LogisticRegression(
+                solver='newton-cg', C=C, max_iter=int(max_iter))
+            inner_model.fit(X_tr, y_tr)
+            y_probs = inner_model.predict_proba(X_te)
+            #print('y_probs.shape', y_probs.shape, 'y_test.shape', y_test.shape)
+            score = log_loss(y_te, y_probs, labels=[0, 1])
+            scores.append(score)
+        # Return the negative MLOGLOSS
+        return -1.0 * np.mean(scores)
+
+    # Perform Bayesian Optimization
+    bo = BayesianOptimization(
+        bo_tune, {'C': (0.1, 10.0), 'max_iter': (100, 1000)})
+    bo.maximize(init_points=8, n_iter=7, acq='ei')
+    # Train outer model with optimized parameters
+    params = bo.max['params']
+    params['max_iter'] = int(params['max_iter'])
+    model = LogisticRegression(
+        solver='newton-cg', max_iter=params['max_iter'], C=params['C'])
+    # Train outer model with optimized parameters
+    if np.mean(y_train) != 0.5:
+        X_train, y_train = balance_samples(X_train, y_train, 'oversample')
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    return balanced_accuracy_score(y_test, y_pred)
+
+
+def classify_svm_lin(X_train, X_test, y_train, y_test, group_train):
+    """"""
+    def bo_tune(C, max_iter, tol):
+        # Cross validating with the specified parameters in 5 folds
+        cv_inner = GroupShuffleSplit(n_splits=5, train_size=0.8,
+                                     random_state=42)
+        scores = list()
+        for train_index, test_index in cv_inner.split(
+                X_train, y_train, group_train):
+            X_tr, X_te = X_train[train_index], X_train[test_index]
+            y_tr, y_te = y_train[train_index], y_train[test_index]
+            if np.mean(y_tr) != 0.5:
+                X_tr, y_tr = balance_samples(X_tr, y_tr, 'oversample')
+            inner_model = SVC(kernel='linear', C=C, max_iter=max_iter, tol=tol,
+                              gamma='scale', shrinking=True, class_weight=None,
+                              probability=True, verbose=False)
+            inner_model.fit(X_tr, y_tr)
+            y_probs = inner_model.predict_proba(X_te)
+            #print('y_probs.shape', y_probs.shape, 'y_test.shape', y_test.shape)
+            score = log_loss(y_te, y_probs, labels=[0, 1])
+            scores.append(score)
+        # Return the negative MLOGLOSS
+        return -1.0 * np.mean(scores)
+
+    # Perform Bayesian Optimization
+    bo = BayesianOptimization(
+        bo_tune, {'C': (pow(10, -1), pow(10, 1)), 'max_iter': (100, 1000),
+                  'tol': (1e-4, 1e-2)})
+    bo.maximize(init_points=8, n_iter=7, acq='ei')
+    # Train outer model with optimized parameters
+    params = bo.max['params']
+    params['max_iter'] = int(params['max_iter'])
+    model = SVC(kernel='linear', C=params['C'], max_iter=params['max_iter'],
+                tol=params['tol'], gamma='scale', shrinking=True,
+                class_weight=None, verbose=False)
+    # Train outer model with optimized parameters
+    if np.mean(y_train) != 0.5:
+        X_train, y_train = balance_samples(X_train, y_train, 'oversample')
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    return balanced_accuracy_score(y_test, y_pred)
+
+
+def classify_svm_rbf(X_train, X_test, y_train, y_test, group_train):
+    """"""
+    def bo_tune(C, max_iter, tol):
+        # Cross validating with the specified parameters in 5 folds
+        cv_inner = GroupShuffleSplit(n_splits=5, train_size=0.8,
+                                     random_state=42)
+        scores = list()
+        for train_index, test_index in cv_inner.split(
+                X_train, y_train, group_train):
+            X_tr, X_te = X_train[train_index], X_train[test_index]
+            y_tr, y_te = y_train[train_index], y_train[test_index]
+            if np.mean(y_tr) != 0.5:
+                X_tr, y_tr = balance_samples(X_tr, y_tr, 'oversample')
+            inner_model = SVC(kernel='rbf', C=C, max_iter=max_iter, tol=tol,
+                              gamma='scale', shrinking=True, class_weight=None,
+                              probability=True, verbose=False)
+            inner_model.fit(X_tr, y_tr)
+            y_probs = inner_model.predict_proba(X_te)
+            #print('y_probs.shape', y_probs.shape, 'y_test.shape', y_test.shape)
+            score = log_loss(y_te, y_probs, labels=[0, 1])
+            scores.append(score)
+        # Return the negative MLOGLOSS
+        return -1.0 * np.mean(scores)
+
+    # Perform Bayesian Optimization
+    bo = BayesianOptimization(
+        bo_tune, {'C': (pow(10, -1), pow(10, 1)), 'max_iter': (100, 1000),
+                  'tol': (1e-4, 1e-2)})
+    bo.maximize(init_points=8, n_iter=7, acq='ei')
+    # Train outer model with optimized parameters
+    params = bo.max['params']
+    params['max_iter'] = int(params['max_iter'])
+    model = SVC(kernel='rbf', C=params['C'], max_iter=params['max_iter'],
+                tol=params['tol'], gamma='scale', shrinking=True,
+                class_weight=None, verbose=False)
+    # Train outer model with optimized parameters
+    if np.mean(y_train) != 0.5:
+        X_train, y_train = balance_samples(X_train, y_train, 'oversample')
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    return balanced_accuracy_score(y_test, y_pred)
+
+
+def classify_xgb(X_train, X_test, y_train, y_test, group_train):
+    """"""
+    def bo_tune(max_depth, gamma, learning_rate, subsample, colsample_bytree):
+        # Cross validating with the specified parameters in 5 folds
+        cv_inner = GroupShuffleSplit(n_splits=5, train_size=0.8,
+                                     random_state=42)
+        scores = list()
+        for train_index, test_index in cv_inner.split(
+                X_train, y_train, group_train):
+            X_tr, X_te = X_train[train_index], X_train[test_index]
+            y_tr, y_te = y_train[train_index], y_train[test_index]
+            groups_split = group_train[train_index]
+            val_inner_split = GroupShuffleSplit(
+                n_splits=1, train_size=0.75, random_state=41)
+            for train_ind, val_ind in val_inner_split.split(
+                    X_tr, y_tr, groups_split):
+                X_tr, X_va = X_tr[train_ind], X_tr[val_ind]
+                y_tr, y_va = y_tr[train_ind], y_tr[val_ind]
+                if np.mean(y_tr) != 0.5:
+                    X_tr, y_tr = balance_samples(
+                        X_tr, y_tr, 'oversample')
+            eval_set_inner = [(X_va, y_va)]
+            inner_model = XGBClassifier(
                 objective='multi:softprob', use_label_encoder=False,
                 num_class=2, eval_metric='mlogloss', gamma=gamma,
                 learning_rate=learning_rate, max_depth=int(max_depth),
                 n_estimators=100, colsample_bytree=colsample_bytree,
                 subsample=subsample)
-            X_train, X_test = \
-                features_train[train_index], features_train[test_index]
-            y_train, y_test = labels_train[train_index], \
-                              labels_train[test_index]
-            groups_split = groups_inner[train_index]
-            val_inner_split = GroupShuffleSplit(
-                n_splits=1, train_size=0.75, random_state=41)
-            for train_ind, val_ind in val_inner_split.split(X_train, y_train,
-                                                            groups_split):
-                X_train, X_val = X_train[train_ind], X_train[val_ind]
-                y_train, y_val = y_train[train_ind], y_train[val_ind]
-                if np.mean(y_train) != 0.5:
-                    X_train, y_train = balance_samples(
-                        X_train, y_train, 'oversample')
-            eval_set = [(X_val, y_val)]
-            model.fit(X_train, y_train, eval_metric="mlogloss",
-                      eval_set=eval_set,
-                      early_stopping_rounds=25, verbose=False)
-            y_probs = model.predict_proba(
-                X_test, iteration_range=(0, model.best_iteration))
+            inner_model.fit(X_tr, y_tr, eval_metric="mlogloss",
+                      eval_set=eval_set_inner, early_stopping_rounds=25,
+                            verbose=False)
+            y_probs = inner_model.predict_proba(
+                X_te, iteration_range=(0, model.best_iteration))
             #print('y_probs.shape', y_probs.shape, 'y_test.shape', y_test.shape)
-            score = log_loss(y_test, y_probs, labels=[0, 1])
+            score = log_loss(y_te, y_probs, labels=[0, 1])
             scores.append(score)
         # Return the negative MLOGLOSS
         return -1.0 * np.mean(scores)
 
-    cols = [col for col in features.columns if ch_name in col]
-    feat_picks = features[cols]
-    data = feat_picks.values
-    features, labels, events_used, groups = get_feat_array(
-        data, events, sfreq=10,
-        target_begin=target_begin, target_end=target_end,
-        dist_onset=dist_onset, dist_end=dist_end)
+    # Perform Bayesian Optimization
+    xgb_bo = BayesianOptimization(
+        bo_tune, {'max_depth': (4, 10), 'gamma': (0, 1),
+                      'learning_rate': (0.001, 0.3),
+                      'colsample_bytree': (0.1, 1),
+                      'subsample': (0.8, 1)})
+    xgb_bo.maximize(init_points=8, n_iter=7, acq='ei')
+    # Train outer model with optimized parameters
+    params = xgb_bo.max['params']
+    params['max_depth'] = int(params['max_depth'])
+    model = XGBClassifier(
+        objective='multi:softprob', use_label_encoder=False, num_class=2,
+        eval_metric='mlogloss', gamma=params['gamma'],
+        learning_rate=params['learning_rate'], max_depth=params['max_depth'],
+        n_estimators=200, colsample_bytree=params['colsample_bytree'],
+        subsample=params['subsample'])
+    val_split = GroupShuffleSplit(n_splits=1, train_size=0.75)
+    for train_ind, val_ind in val_split.split(X_train, y_train, group_train):
+        X_train, X_val = X_train[train_ind], X_train[val_ind]
+        y_train, y_val = y_train[train_ind], y_train[
+            val_ind]
+        eval_set = [(X_val, y_val)]
+        if np.mean(y_train) != 0.5:
+            X_train, y_train = balance_samples(X_train, y_train, 'oversample')
+    model.fit(X_train, y_train, eval_metric=["merror", "mlogloss"],
+              eval_set=eval_set, early_stopping_rounds=25, verbose=False)
+    y_pred = model.predict(X_test, iteration_range=(0, model.best_iteration))
 
-    cv_outer = GroupShuffleSplit(n_splits=5, train_size=0.8)
-    accuracy, AP = [], []
-    # Perform Bayesian optimization once for each outer fold
-    for train_ind, test_ind in cv_outer.split(features, labels, groups):
-        features_train, features_test = features[train_ind], \
-                                        features[test_ind]
-        labels_train, labels_test = labels[train_ind], labels[test_ind]
-        groups_train = groups[train_ind]
-        groups_inner = groups[train_ind]
-        cv_inner = GroupShuffleSplit(n_splits=5, train_size=0.8,
-                                     random_state=42)
-        # Now perform Bayesian Optimization
-        xgb_bo = BayesianOptimization(
-            bo_tune_xgb, {'max_depth': (4, 10), 'gamma': (0, 1),
-                          'learning_rate': (0.001, 0.3),
-                          'colsample_bytree': (0.1, 1),
-                          'subsample': (0.8, 1)})
-        xgb_bo.maximize(init_points=8, n_iter=7, acq='ei')
-        # Now train outer model with optimized parameters
-        params = xgb_bo.max['params']
-        params['max_depth'] = int(params['max_depth'])
-        model = XGBClassifier(objective='multi:softprob',
-                              use_label_encoder=False,
-                              num_class=2, eval_metric='mlogloss',
-                              gamma=params['gamma'],
-                              learning_rate=params['learning_rate'],
-                              max_depth=params['max_depth'],
-                              n_estimators=200,
-                              colsample_bytree=params['colsample_bytree'],
-                              subsample=params['subsample'])
-        val_split = GroupShuffleSplit(n_splits=1, train_size=0.75)
-        for train_ind, val_ind in val_split.split(
-                features_train, labels_train, groups_train):
-            features_train, features_val = features_train[train_ind], \
-                                           features_train[val_ind]
-            labels_train, labels_val = labels_train[train_ind], labels_train[
-                val_ind]
-            if np.mean(labels_train) != 0.5:
-                features_train, labels_train = balance_samples(
-                    features_train, labels_train, 'oversample')
-        eval_set = [(features_val, labels_val)]
-        model.fit(features_train, labels_train,
-                  eval_metric=["merror", "mlogloss"],
-                  eval_set=eval_set, early_stopping_rounds=25, verbose=False)
-        labels_pred = model.predict(
-            features_test, iteration_range=(0, model.best_iteration))
-        acc = balanced_accuracy_score(labels_test, labels_pred)
-        #labels_score = model.decision_function(features_test)
-        #ap = average_precision_score(labels_test, labels_score)
-        accuracy.append(acc)
-        AP.append(0.)
-    if verbose:
-        print(ch_name, ':', 'CV-AP: ', np.mean(AP), 'CV-Accuracy: ',
-              np.mean(accuracy))
-    return np.mean(AP), np.mean(accuracy)
-
-
-def classify_lr(features, events, ch_name, target_begin, target_end,
-                dist_onset, dist_end, verbose):
-    """
-
-    Parameters
-    ----------
-    features
-    events
-    ch_name
-    target_begin
-    target_end
-    dist_onset
-    dist_end
-    verbose
-
-    Returns
-    -------
-
-    """
-    def bo_tune(solver, C, max_iter):
-        # Cross validating with the specified parameters in 5 folds
-        scores = list()
-        for train_index, test_index in cv_inner.split(
-                features_train, labels_train, groups_inner):
-            model = LogisticRegression(solver=solver, C=C, max_iter=max_iter)
-            X_train, X_test = \
-                features_train[train_index], features_train[test_index]
-            y_train, y_test = labels_train[train_index], \
-                              labels_train[test_index]
-            if np.mean(y_train) != 0.5:
-                X_train, y_train = balance_samples(
-                    X_train, y_train, 'oversample')
-            model.fit(X_train, y_train)
-            y_probs = model.predict_proba(X_test)
-            #print('y_probs.shape', y_probs.shape, 'y_test.shape', y_test.shape)
-            score = log_loss(y_test, y_probs, labels=[0, 1])
-            scores.append(score)
-        # Return the negative MLOGLOSS
-        return -1.0 * np.mean(scores)
-    print("Channel:", ch_name)
-    cols = [col for col in features.columns if ch_name in col]
-    feat_picks = features[cols]
-    data = feat_picks.values
-    features, labels, events_used, groups = get_feat_array(
-        data, events, sfreq=10,
-        target_begin=target_begin, target_end=target_end,
-        dist_onset=dist_onset, dist_end=dist_end)
-
-    cv_outer = GroupShuffleSplit(n_splits=5, train_size=0.8)
-    accuracy, AP = [], []
-    # Perform Bayesian optimization once for each outer fold
-    for train_ind, test_ind in cv_outer.split(features, labels, groups):
-        features_train, features_test = features[train_ind], \
-                                        features[test_ind]
-        labels_train, labels_test = labels[train_ind], labels[test_ind]
-        groups_train = groups[train_ind]
-        groups_inner = groups[train_ind]
-        if np.mean(labels_train) != 0.5:
-
-            features_train = np.concatenate((
-                features_train, np.expand_dims(groups_train, axis=1)), axis=1)
-            features_train, labels_train = balance_samples(
-                features_train, labels_train, 'oversample')
-            groups_train = features_train[:, -1]
-            features_train = features_train[:, :-1]
-        cv_inner = GroupShuffleSplit(n_splits=5, train_size=0.8,
-                                     random_state=42)
-        # Now perform Bayesian Optimization
-        estimator = LogisticRegression()
-        spaces = {'solver': Categorical([
-                          'newton-cg', 'saga']),
-                  'C': Real(pow(10, -3), pow(10, 0), prior="log-uniform"),
-                  'max_iter': Integer(100, 1000)}
-        model = BayesSearchCV(estimator=estimator, search_spaces=spaces,
-                              n_iter=15, scoring='neg_log_loss', refit=True,
-                              cv=cv_inner, iid=True, verbose=0)
-        model.fit(features_train, labels_train, groups_train)
-        print("Best_params_: %s" % model.best_params_)
-        # Now train outer model with optimized parameters
-        labels_pred = model.predict(features_test)
-        acc = balanced_accuracy_score(labels_test, labels_pred)
-        labels_score = model.decision_function(features_test)
-        ap = average_precision_score(labels_test, labels_score)
-        accuracy.append(acc)
-        AP.append(ap)
-    if verbose:
-        print(ch_name, ':', 'CV-AP: ', np.mean(AP), 'CV-Accuracy: ',
-              np.mean(accuracy))
-    return np.mean(AP), np.mean(accuracy)
+    return balanced_accuracy_score(y_test, y_pred)
 
 
 def get_class_scores(features, labels, cross_val, classifier, groups):
-    """
-
-    Parameters
-    ----------
-    features
-    labels
-    cross_val
-    classifier
-    groups
-
-    Returns
-    -------
-
-    """
+    """"""
     accuracy, average_precision = [], []
     for train, test in cross_val.split(features, labels, groups):
         X_train = features[train]
@@ -328,22 +274,7 @@ def get_class_scores(features, labels, cross_val, classifier, groups):
 
 def get_feat_array(
         data, events, sfreq, target_begin, target_end, dist_onset, dist_end):
-    """
-
-    Parameters
-    ----------
-    data
-    events
-    sfreq
-    target_begin
-    target_end
-    dist_onset
-    dist_end
-
-    Returns
-    -------
-
-    """
+    """"""
     dist_onset = int(dist_onset * sfreq)
     dist_end = int(dist_end * sfreq)
     
@@ -410,11 +341,11 @@ def init_classification(
         the end of a trial (e.g. a movement).
     ch_names : list
         List of all channel names.
-    movement_begin : int | float
+    target_begin : int | float
         Begin of target to be used for classification. Use e.g. 0.0 for target
         begin at movement onset or e.g. -1.5 for classifying movement intention
         starting -1.5s before motor onset.
-    movement_end : int | float | 'MovementEnd'
+    target_end : int | float | 'MovementEnd'
         End of target to be used for classification. Use 'MovementEnd' for
         target end at movement end or e.g. 0.0 for classifying movement
         intention up to motor onset.
@@ -456,25 +387,49 @@ def init_classification(
     exceptions = [
         'sub-FOG006_ses-EphysMedOn_task-ButtonPress_acq-StimOff_run-01_ieeg',
         'sub-003_ses-EphysMedOn03_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg']
-    scores_list = list()
     dist_end = 0. if any([exc in out_file for exc in exceptions]) \
             else dist_end
-    for ch_name in ch_names:
-        if classifier == 'lda':
-            AP, accuracy = classify_lda(
-                features, events, ch_name, target_begin, target_end,
-                dist_onset, dist_end, verbose=False)
-        elif classifier == 'xgb':
-            AP, accuracy = classify_xgb(
-                features, events, ch_name, target_begin, target_end,
-                dist_onset, dist_end, verbose=True)
-        elif classifier == 'lr':
-            AP, accuracy = classify_lr(
-                features, events, ch_name, target_begin, target_end,
-                dist_onset, dist_end, verbose=True)
-        scores_list.append([AP, accuracy])
-    curr_df = pd.DataFrame(data=scores_list, index=ch_names, 
-                           columns=['average_precision', 'accuracy'])
+    data = features.values
+    data, labels, events_used, groups = get_feat_array(
+        data, events, sfreq=10,
+        target_begin=target_begin, target_end=target_end,
+        dist_onset=dist_onset, dist_end=dist_end)
+    features = pd.DataFrame(data, columns=features.columns)
+    cv_outer = GroupShuffleSplit(n_splits=5, train_size=0.8)
+    results = list()
+    fold = 0
+    for train_ind, test_ind in cv_outer.split(features.values, labels, groups):
+        features_train, features_test = features.iloc[train_ind], \
+                                        features.iloc[test_ind]
+        y_train, y_test = labels[train_ind], labels[test_ind]
+        groups_train = groups[train_ind]
+        for ch_name in ch_names:
+            cols = [col for col in features_train.columns if ch_name in col]
+            X_train = features_train[cols].values
+            X_test = features_test[cols].values
+            if classifier == 'lda':
+                accuracy = classify_lda(
+                    X_train, X_test, y_train, y_test)
+            elif classifier == 'xgb':
+                accuracy = classify_xgb(
+                    X_train, X_test, y_train, y_test, groups_train)
+            elif classifier == 'lr':
+                accuracy = classify_lr(
+                    X_train, X_test, y_train, y_test, groups_train)
+            elif classifier == 'svm_lin':
+                accuracy = classify_svm_lin(
+                    X_train, X_test, y_train, y_test, groups_train)
+            elif classifier == 'svm_rbf':
+                accuracy = classify_svm_rbf(
+                    X_train, X_test, y_train, y_test, groups_train)
+            else:
+                raise ValueError(f"Classifier not found: {classifier}")
+            results.append([accuracy, fold, ch_name])
+        fold += 1
+    curr_df = pd.DataFrame(data=results,
+                           columns=['accuracy', 'fold', 'channel_name'])
+    if not os.path.isdir(os.path.dirname(out_file)):
+        os.makedirs(os.path.dirname(out_file))
     curr_df.to_csv(out_file, sep='\t')
     
 

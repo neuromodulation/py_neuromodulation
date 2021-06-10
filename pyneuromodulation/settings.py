@@ -180,7 +180,7 @@ class SettingsWrapper:
             assert (isinstance(s["raw_normalization_settings"]["normalization_time"],
                     (float, int)))
             assert (s["raw_normalization_settings"]["normalization_method"] in [
-                "mean", "median", "zscore"])
+                "mean", "median", "zscore", "zscore-median"])
             assert isinstance(s["raw_normalization_settings"]["clip"],
                               (float, int, bool))
         if s["methods"]["feature_normalization"] is True:
@@ -188,7 +188,7 @@ class SettingsWrapper:
                 s["feature_normalization_settings"]["normalization_time"],
                 (float, int)))
             assert (s["feature_normalization_settings"]["normalization_method"] in [
-                "mean", "median", "zscore"])
+                "mean", "median", "zscore", "zscore-median"])
             assert isinstance(s["feature_normalization_settings"]["clip"],
                               (float, int, bool))
         if s["methods"]["kalman_filter"] is True:

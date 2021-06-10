@@ -14,8 +14,9 @@ def normalize_raw(raw_arr, normalize_samples, fs, method='mean', clip=False):
         sampling frequency
     method : str | default is 'mean'
         data is normalized via subtraction of the 'mean' or 'median' and
-        subsequent division by the 'mean' or 'median'. For z-scoring enter
-        'zscore'.
+        subsequent division by the 'mean' or 'median'. For z-scoring via
+        subtraction of the mean enter 'zscore'. For z-scoring via subtraction
+        of the median enter 'zscore-median'.
     clip : int | float, optional
         value at which to clip after normalization
 
@@ -45,9 +46,14 @@ def normalize_raw(raw_arr, normalize_samples, fs, method='mean', clip=False):
         mean_ = mean(raw_arr[:, n_idx], axis=1)
         std_ = std(raw_arr[:, n_idx], axis=1)
         raw_norm = (raw_arr[:, -fs:].T - mean_) / std_.T
+    elif method == "zscore-median":
+        median_ = median(raw_arr[:, n_idx], axis=1)
+        std_ = std(raw_arr[:, n_idx], axis=1)
+        raw_norm = (raw_arr[:, -fs:].T - median_) / std_.T
     else:
-        raise ValueError("Only `median`, `mean` and `zscore` are supported as "
-                         f"raw normalization methods. Got {method}.")
+        raise ValueError("Only `median`, `mean`, `zscore` and `zscore-median` "
+                         "are supported as feature normalization methods. Got "
+                         f"{method}.")
 
     if clip:
         if isinstance(clip, bool):
@@ -74,8 +80,9 @@ def normalize_features(
         number of past samples considered for normalization
     method : str | default is 'mean'
         data is normalized via subtraction of the 'mean' or 'median' and
-        subsequent division by the 'mean' or 'median'. For z-scoring enter
-        'zscore'.
+        subsequent division by the 'mean' or 'median'. For z-scoring via
+        subtraction of the mean enter 'zscore'. For z-scoring via subtraction
+        of the median enter 'zscore-median'.
     clip : int | float, optional
         value at which to clip on the lower and upper end after normalization.
         Useful for artifact rejection and handling of outliers.
@@ -105,10 +112,13 @@ def normalize_features(
     elif method == 'zscore':
         curr_ = (curr_ - prev_.iloc[n_idx].mean()) \
                 / prev_.iloc[n_idx].std(ddof=0)
+    elif method == 'zscore-median':
+        curr_ = (curr_ - prev_.iloc[n_idx].median()) \
+                / prev_.iloc[n_idx].std(ddof=0)
     else:
-        raise ValueError("Only `median`, `mean` and `zscore` are supported as "
-                         f"feature normalization methods. Got {method}.")
-
+        raise ValueError("Only `median`, `mean`, `zscore` and `zscore-median` "
+                         "are supported as feature normalization methods. Got "
+                         f"{method}.")
     if clip:
         if isinstance(clip, bool):
             clip = 3.0
