@@ -127,7 +127,7 @@ def run_classification(
 
 
 def run_classification_diff(
-        feat_list, nm_reader_, classifier, target_beg, target_en):
+        feat_list, nm_reader_, classifier, target_beg, target_en, optimize):
     """"""
     for feature_file in feat_list:
         print("File: ", feature_file)
@@ -162,13 +162,15 @@ def run_classification_diff(
         if target_end == "MovementEnd":
             prefix = '_movement_'
         else:
-            prefix = '_mot_intention_'
-        out_name = feature_file + prefix + classifier + '_results_' + \
-                   str(i * 100) + 'ms' + '_diff' + '.tsv'
+            prefix = '_mot_intention'
+        opt_str = '_no_opt_' if not optimize else '_'
+        out_name = feature_file + prefix + classifier + opt_str + '_results_' \
+                   + str(i * 100) + 'ms' + '_diff' + '.tsv'
         out_path = os.path.join(out_root, feature_file, out_name)
         classification.init_classification(
             features_, events_, channels_, target_beg, target_en, out_path,
-            classifier=classifier, dist_onset=2., dist_end=2.)
+            classifier=classifier, dist_onset=2., dist_end=2.,
+            optimize=optimize)
 
 
 ### BERLIN
@@ -212,21 +214,23 @@ feature_list_beijing = [
     'sub-FOGC001_ses-EphysMedOff_task-ButtonPress_acq-StimOff_run-01_ieeg'
 ]
 
-classifiers = ['lda', 'lr', 'xgb', 'svm_lin', 'svm_rbf', 'svm_poly', 'svm_sig']
-#classifiers = ['lda', 'lr']
-classifiers = ['lr', 'xgb', 'svm_lin', 'svm_rbf', 'svm_poly', 'svm_sig']
+#classifiers = ['lda', 'lr','catboost']
+classifiers = ['xgb_opt']
+classifiers = ['lin_svm', 'svm_lin', 'svm_rbf', 'svm_poly', 'svm_sig']
+classifiers = ['xgb_opt']
 out_root = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\PROJECT_motor_onset_results\MotOnsetPred_2021-06-10_compare_norm+classifiers'
 targets = [(0., "MovementEnd"), (-1., 0.)]
 feature_lists = [feature_list_berlin, feature_list_beijing]
 nm_readers = [nm_reader_berlin, nm_reader_beijing]
 
-for feature_list, nm_reader in zip(feature_lists, nm_readers):
-    for target_begin, target_end in targets:
-        print('target_begin, target_end: ', target_begin, target_end)
-        for clf in classifiers:
-            print('Classifier: ', clf)
+for clf in classifiers:
+    opt = True if 'opt' in clf else False
+    print('Classifier: ', clf)
+    for feature_list, nm_reader in zip(feature_lists[:], nm_readers[:]):
+        for target_begin, target_end in targets[1:]:
+            print('target_begin, target_end: ', target_begin, target_end)
             run_classification_diff(
-                feature_list, nm_reader, clf, target_begin, target_end)
+                feature_list, nm_reader, clf, target_begin, target_end, opt)
 
 ### MOVEMENT ###
 ###################
