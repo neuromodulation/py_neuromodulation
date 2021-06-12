@@ -388,7 +388,7 @@ def classify_svm_sig(X_train, X_test, y_train, y_test, group_train, optimize):
             if np.mean(y_tr) != 0.5:
                 X_tr, y_tr = balance_samples(X_tr, y_tr, 'oversample')
             inner_model = SVC(kernel='sigmoid', C=C, max_iter=max_iter,
-                              tol=tol, gamma='scale', shrinking=True,
+                              tol=tol, gamma='auto', shrinking=True,
                               class_weight=None, probability=True,
                               verbose=False)
             inner_model.fit(X_tr, y_tr)
@@ -408,7 +408,7 @@ def classify_svm_sig(X_train, X_test, y_train, y_test, group_train, optimize):
         params = bo.max['params']
         params['max_iter'] = int(params['max_iter'])
         model = SVC(kernel='sigmoid', C=params['C'], max_iter=params['max_iter'],
-                    tol=params['tol'], gamma='scale', shrinking=True,
+                    tol=params['tol'], gamma='auto', shrinking=True,
                     class_weight=None, verbose=False)
     else:
         # Use default values
@@ -435,7 +435,7 @@ def classify_xgb(X_train, X_test, y_train, y_test, group_train, optimize):
             y_tr, y_te = y_train[train_index], y_train[test_index]
             groups_split = group_train[train_index]
             val_inner_split = GroupShuffleSplit(
-                n_splits=1, train_size=0.75, random_state=41)
+                n_splits=1, train_size=0.8, random_state=41)
             for train_ind, val_ind in val_inner_split.split(
                     X_tr, y_tr, groups_split):
                 X_tr, X_va = X_tr[train_ind], X_tr[val_ind]
@@ -445,16 +445,14 @@ def classify_xgb(X_train, X_test, y_train, y_test, group_train, optimize):
                         X_tr, y_tr, 'oversample')
             eval_set_inner = [(X_va, y_va)]
             inner_model = XGBClassifier(
-                objective='multi:softprob', use_label_encoder=False,
-                num_class=2, eval_metric='mlogloss', gamma=gamma,
+                objective='binary:logistic', use_label_encoder=False,
+                eval_metric='logloss', n_estimators=200, gamma=gamma,
                 learning_rate=learning_rate, max_depth=int(max_depth),
-                n_estimators=100, colsample_bytree=colsample_bytree,
-                subsample=subsample)
+                colsample_bytree=colsample_bytree, subsample=subsample)
             inner_model.fit(
-                X_tr, y_tr, eval_metric="mlogloss", eval_set=eval_set_inner,
-                early_stopping_rounds=25, verbose=False)
-            y_probs = inner_model.predict_proba(
-                X_te, iteration_range=(0, inner_model.best_iteration))
+                X_tr, y_tr, eval_set=eval_set_inner, early_stopping_rounds=10,
+                verbose=False)
+            y_probs = inner_model.predict_proba(X_te)
             #print('y_probs.shape', y_probs.shape, 'y_test.shape', y_test.shape)
             score = log_loss(y_te, y_probs, labels=[0, 1])
             scores.append(score)
@@ -472,18 +470,18 @@ def classify_xgb(X_train, X_test, y_train, y_test, group_train, optimize):
         params = xgb_bo.max['params']
         params['max_depth'] = int(params['max_depth'])
         model = XGBClassifier(
-            objective='multi:softprob', use_label_encoder=False, num_class=2,
-            eval_metric='mlogloss', gamma=params['gamma'],
-            learning_rate=params['learning_rate'], max_depth=params['max_depth'],
-            n_estimators=200, colsample_bytree=params['colsample_bytree'],
-            subsample=params['subsample'])
+            objective='binary:logistic', use_label_encoder=False,
+            n_estimators=200, eval_metric='logloss', gamma=params['gamma'],
+            learning_rate=params['learning_rate'],
+            max_depth=params['max_depth'], subsample=params['subsample'],
+            colsample_bytree=params['colsample_bytree'])
     else:
         # Use default values
         model = XGBClassifier(
-            objective='multi:softprob', use_label_encoder=False, num_class=2,
-            eval_metric='mlogloss')
+            objective='binary:logistic', use_label_encoder=False,
+            n_estimators=200, eval_metric='logloss')
     # Train outer model
-    val_split = GroupShuffleSplit(n_splits=1, train_size=0.75)
+    val_split = GroupShuffleSplit(n_splits=1, train_size=0.8)
     for train_ind, val_ind in val_split.split(X_train, y_train, group_train):
         X_train, X_val = X_train[train_ind], X_train[val_ind]
         y_train, y_val = y_train[train_ind], y_train[
@@ -491,9 +489,9 @@ def classify_xgb(X_train, X_test, y_train, y_test, group_train, optimize):
         eval_set = [(X_val, y_val)]
         if np.mean(y_train) != 0.5:
             X_train, y_train = balance_samples(X_train, y_train, 'oversample')
-    model.fit(X_train, y_train, eval_metric="mlogloss",
-              eval_set=eval_set, early_stopping_rounds=25, verbose=False)
-    y_pred = model.predict(X_test, iteration_range=(0, model.best_iteration))
+    model.fit(X_train, y_train, eval_set=eval_set, early_stopping_rounds=10,
+              verbose=False)
+    y_pred = model.predict(X_test)
 
     return balanced_accuracy_score(y_test, y_pred)
 
@@ -652,8 +650,8 @@ def init_classification(
         for ch_name in ch_names:
             print("Channel: ", ch_name)
             cols = [col for col in features_train.columns if ch_name in col]
-            X_train = features_train[cols].values
-            X_test = features_test[cols].values
+            X_train = np.ascontiguousarray(features_train[cols].values)
+            X_test = np.ascontiguousarray(features_test[cols].values)
             if 'catboost' in classifier:
                 accuracy = classify_catboost(
                     X_train, X_test, y_train, y_test, groups_train, optimize)

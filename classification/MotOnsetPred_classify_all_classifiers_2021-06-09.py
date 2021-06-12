@@ -162,9 +162,9 @@ def run_classification_diff(
         if target_end == "MovementEnd":
             prefix = '_movement_'
         else:
-            prefix = '_mot_intention'
+            prefix = '_mot_intention_'
         opt_str = '_no_opt_' if not optimize else '_'
-        out_name = feature_file + prefix + classifier + opt_str + '_results_' \
+        out_name = feature_file + prefix + classifier + opt_str + 'results_' \
                    + str(i * 100) + 'ms' + '_diff' + '.tsv'
         out_path = os.path.join(out_root, feature_file, out_name)
         classification.init_classification(
@@ -172,10 +172,13 @@ def run_classification_diff(
             classifier=classifier, dist_onset=2., dist_end=2.,
             optimize=optimize)
 
+#suffix = 'add_HFA_no_norm'
+#suffix = 'add_HFA_10s_norm'
+suffix = 'add_HFA_30s_norm'
 
 ### BERLIN
 root_berlin = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\Berlin_ECOG_LFP_derivatives\pipeline-MotOnsetPred_2021-04-26'
-deriv_root_berlin = os.path.join(root_berlin, 'derivatives', 'feat_add_HFA_no_norm')
+deriv_root_berlin = os.path.join(root_berlin, 'derivatives', 'feat_' + suffix)
 nm_reader_berlin = NM_reader.NM_Reader(deriv_root_berlin)
 #feature_list_berlin = nm_reader_berlin.get_feature_list()
 #print(*feature_list_berlin, sep='\n')
@@ -202,7 +205,7 @@ feature_list_berlin =[
 
 ### BEIJING
 root_beijing = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\Beijing_ECOG_LFP_derivatives\pipeline-MotOnsetPred_2021-04-26'
-deriv_root_beijing = os.path.join(root_beijing, 'derivatives', 'feat_add_HFA_no_norm')
+deriv_root_beijing = os.path.join(root_beijing, 'derivatives', 'feat_' + suffix)
 nm_reader_beijing = NM_reader.NM_Reader(deriv_root_beijing)
 #feature_list = nm_reader.get_feature_list()
 #print(*feature_list, sep='\n')
@@ -216,9 +219,11 @@ feature_list_beijing = [
 
 #classifiers = ['lda', 'lr','catboost']
 classifiers = ['xgb_opt']
-classifiers = ['lin_svm', 'svm_lin', 'svm_rbf', 'svm_poly', 'svm_sig']
-classifiers = ['xgb_opt']
-out_root = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\PROJECT_motor_onset_results\MotOnsetPred_2021-06-10_compare_norm+classifiers'
+classifiers = ['lda', 'lr', 'catboost', 'xgb', 'lin_svm', 'svm_lin', 'svm_rbf',
+               'svm_poly', 'svm_sig']
+
+results_root = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\PROJECT_motor_onset_results'
+out_root = os.path.join(results_root, 'MotOnsetPred_2021-06-10_' + suffix)
 targets = [(0., "MovementEnd"), (-1., 0.)]
 feature_lists = [feature_list_berlin, feature_list_beijing]
 nm_readers = [nm_reader_berlin, nm_reader_beijing]
@@ -227,21 +232,7 @@ for clf in classifiers:
     opt = True if 'opt' in clf else False
     print('Classifier: ', clf)
     for feature_list, nm_reader in zip(feature_lists[:], nm_readers[:]):
-        for target_begin, target_end in targets[1:]:
+        for target_begin, target_end in targets[:]:
             print('target_begin, target_end: ', target_begin, target_end)
             run_classification_diff(
                 feature_list, nm_reader, clf, target_begin, target_end, opt)
-
-### MOVEMENT ###
-###################
-#target_begin = 0.
-#target_end = "MovementEnd"
-#run_classification(feature_list, nm_reader, 'lda', target_begin, target_end)
-#run_classification_diff(feature_list, nm_reader, 'lda', target_begin, target_end)
-
-### MOTOR ONSET ###
-#target_begin = -1.
-#target_end = 0.
-#run_classification(feature_list, nm_reader, 'lda', target_begin, target_end)
-#run_classification_diff(feature_list, nm_reader, 'lda', target_begin, target_end)
-###################
