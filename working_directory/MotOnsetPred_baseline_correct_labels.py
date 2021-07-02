@@ -1,7 +1,12 @@
 import os
+import sys
+sys.path.insert(
+    0, r'C:\Users\richa\GitHub\py_neuromodulation\working_directory'
+)
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 import mne_bids
 
@@ -91,3 +96,12 @@ data = raw.get_data(picks=[ch for ch in raw.ch_names if 'ANALOG' in ch])
 y_corrected, onoff, y = ieeg.baseline_correction(
     y=data.squeeze(), method='baseline_rope', param=1e4, thr=1e-1,
     normalize=True, Decimate=1, Verbose=True)
+plt.plot(y_corrected)
+plt.plot(y)
+plt.show()
+y_corrected2, onoff, y = ieeg.baseline_correction(
+    y=data.squeeze(), method='baseline_rope', param=1e4, thr=1e-1,
+    normalize=False, Decimate=1, Verbose=True)
+plt.plot(y_corrected2)
+plt.plot(y)
+plt.show()

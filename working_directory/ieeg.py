@@ -12,7 +12,7 @@ import mne
 import mne_bids
 import json
 import multiprocessing
-#import cvxpy as cp
+import cvxpy as cp
 from pybv import write_brainvision
 #from numba import njit
 # from bids import BIDSLayout
@@ -322,12 +322,12 @@ def write_out_raw(vhdr_file, folder_out, session, var_rolling_window=1.0, resamp
     return x_filtered_zscored, mov_label_zscored, settings["resampling_rate"]
 
 def NormalizeData(data):
-    minv=np.min(data)
-    maxv=np.max(data)
-    data_new=(data - np.min(data)) / (np.max(data) - np.min(data))
+    minv = np.min(data)
+    maxv = np.max(data)
+    data_new = (data - np.min(data)) / (np.max(data) - np.min(data))
     return data_new, minv, maxv
 
-def DeNormalizeData(data,minv, maxv):
+def DeNormalizeData(data, minv, maxv):
 
     data_new=(data + minv) * (maxv - minv)
     return data_new
@@ -409,38 +409,43 @@ def baseline_correction(y, method='baseline_rope', param=1e4, thr=1e-1,
     onoff: squared signal useful for onset target evaluation.
     y: original signal
     """
-    if Decimate!=1:
-        if Verbose: print('>>Signal decimation is being done')
+    if Decimate != 1:
+        if Verbose:
+            print('>>Signal decimation is being done')
         y=signal.decimate(y, Decimate)
 
-    if method=='baseline_als' and np.size(param)!=2:
-        raise ValueError("If baseline_als method is desired, param should be a 2 length object")
-    if method=='baseline_rope' and np.size(param)>1:
-        raise ValueError("If baseline_rope method is desired, param should be a number")
+    if method == 'baseline_als' and np.size(param)!=2:
+        raise ValueError("If baseline_als method is desired, param should be "
+                         "a 2 length object")
+    if method == 'baseline_rope' and np.size(param)>1:
+        raise ValueError("If baseline_rope method is desired, param should be "
+                         "a number")
 
     if method=='baseline_als':
-        if Verbose: print('>>baseline_als is being used')
-        z=baseline_als(y, lam=param[0], p=param[1])
+        if Verbose:
+            print('>>baseline_als is being used')
+        z = baseline_als(y, lam=param[0], p=param[1])
     else:
-        if Verbose: print('>>baseline_rope is being used')
-        z=baseline_rope(y, lam=param)
+        if Verbose:
+            print('>>baseline_rope is being used')
+        z = baseline_rope(y, lam=param)
 
     #subtract baseline
-    y_corrected=y-z
+    y_corrected = y-z
 
     #normalize
-    y_corrected, minv, maxvx=NormalizeData(y_corrected)
+    y_corrected, minv, maxv = NormalizeData(y_corrected)
 
     #eliminate interferation
-    y_corrected[y_corrected<thr]=0
+    y_corrected[y_corrected<thr] = 0
     #create on-off signal
     onoff=np.zeros(np.size(y_corrected))
-    onoff[y_corrected>0]=1
+    onoff[y_corrected>0] = 1
 
     if normalize:
-        y, Nan, Nan=NormalizeData(y)
+        y, Nan, Nan = NormalizeData(y)
     else:
-        y_corrected=DeNormalizeData(y_corrected, minv, maxv)
+        y_corrected = DeNormalizeData(y_corrected, minv, maxv)
     return y_corrected, onoff, y
 
 def create_events_array(onoff, raw_target_channel, sf):

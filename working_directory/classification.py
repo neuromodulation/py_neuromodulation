@@ -22,6 +22,12 @@ from sklearn.utils.class_weight import compute_sample_weight
 from sklearn.svm import LinearSVC, SVC
 from xgboost import XGBClassifier
 
+try:
+    from sklearnex import patch_sklearn
+    patch_sklearn()
+except:
+    pass
+
 
 def balance_samples(data, target, method='oversample'):
     """Balance class sizes to create equal class distributions.
