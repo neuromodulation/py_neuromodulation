@@ -16,7 +16,8 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (average_precision_score, balanced_accuracy_score,
                              log_loss)
-from sklearn.model_selection import GroupShuffleSplit
+from sklearn.model_selection import GroupKFold, GroupShuffleSplit
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.utils.class_weight import compute_sample_weight
 from sklearn.svm import LinearSVC, SVC
 from xgboost import XGBClassifier
@@ -62,7 +63,7 @@ def balance_samples(data, target, method='oversample'):
 
 
 def classify_catboost(X_train, X_test, y_train, y_test, group_train, optimize,
-                      balance):
+                      balance, return_model=False):
     """"""
     def bo_tune(max_depth, learning_rate, bagging_temperature, l2_leaf_reg,
                 random_strength):
@@ -137,11 +138,14 @@ def classify_catboost(X_train, X_test, y_train, y_test, group_train, optimize,
                   early_stopping_rounds=25, sample_weight=sample_weight,
                   verbose=False)
         y_pred = model.predict(X_test)
+    if return_model:
+        return balanced_accuracy_score(y_test, y_pred), model
+    else:
+        return balanced_accuracy_score(y_test, y_pred)
 
-    return balanced_accuracy_score(y_test, y_pred)
 
-
-def classify_lda(X_train, X_test, y_train, y_test, balance):
+def classify_lda(X_train, X_test, y_train, y_test, balance,
+                 return_model=False):
     """"""
     if balance == 'weight':
         raise ValueError("Sample weights cannot be balanced for Linear "
@@ -152,11 +156,14 @@ def classify_lda(X_train, X_test, y_train, y_test, balance):
     model = LinearDiscriminantAnalysis(solver='lsqr', shrinkage='auto')
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
-    return balanced_accuracy_score(y_test, y_pred)
+    if return_model:
+        return balanced_accuracy_score(y_test, y_pred), model
+    else:
+        return balanced_accuracy_score(y_test, y_pred)
 
 
 def classify_lr(X_train, X_test, y_train, y_test, group_train, optimize,
-                balance):
+                balance, return_model=False):
     """"""
     def bo_tune(C, max_iter):
         # Cross validating with the specified parameters in 5 folds
@@ -195,11 +202,14 @@ def classify_lr(X_train, X_test, y_train, y_test, group_train, optimize,
         X_train, y_train, balance)
     model.fit(X_train, y_train, sample_weight=sample_weight)
     y_pred = model.predict(X_test)
-    return balanced_accuracy_score(y_test, y_pred)
+    if return_model:
+        return balanced_accuracy_score(y_test, y_pred), model
+    else:
+        return balanced_accuracy_score(y_test, y_pred)
 
 
 def classify_lin_svm(X_train, X_test, y_train, y_test, group_train, optimize,
-                     balance):
+                     balance, return_model=False):
     """"""
     def bo_tune(C, max_iter, tol):
         # Cross validating with the specified parameters in 5 folds
@@ -248,11 +258,14 @@ def classify_lin_svm(X_train, X_test, y_train, y_test, group_train, optimize,
         X_train, y_train, balance)
     model.fit(X_train, y_train, sample_weight=sample_weight)
     y_pred = model.predict(X_test)
-    return balanced_accuracy_score(y_test, y_pred)
+    if return_model:
+        return balanced_accuracy_score(y_test, y_pred), model
+    else:
+        return balanced_accuracy_score(y_test, y_pred)
 
 
 def classify_svm_lin(X_train, X_test, y_train, y_test, group_train, optimize,
-                     balance):
+                     balance, return_model=False):
     """"""
     def bo_tune(C, max_iter, tol):
         # Cross validating with the specified parameters in 5 folds
@@ -270,7 +283,6 @@ def classify_svm_lin(X_train, X_test, y_train, y_test, group_train, optimize,
                               probability=True, verbose=False)
             inner_model.fit(X_tr, y_tr, sample_weight=sample_weight)
             y_probs = inner_model.predict_proba(X_te)
-            #print('y_probs.shape', y_probs.shape, 'y_test.shape', y_test.shape)
             score = log_loss(y_te, y_probs, labels=[0, 1])
             scores.append(score)
         # Return the negative MLOGLOSS
@@ -296,11 +308,14 @@ def classify_svm_lin(X_train, X_test, y_train, y_test, group_train, optimize,
         X_train, y_train, balance)
     model.fit(X_train, y_train, sample_weight=sample_weight)
     y_pred = model.predict(X_test)
-    return balanced_accuracy_score(y_test, y_pred)
+    if return_model:
+        return balanced_accuracy_score(y_test, y_pred), model
+    else:
+        return balanced_accuracy_score(y_test, y_pred)
 
 
 def classify_svm_rbf(X_train, X_test, y_train, y_test, group_train, optimize,
-                     balance):
+                     balance, return_model=False):
     """"""
     def bo_tune(C, max_iter, tol):
         # Cross validating with the specified parameters in 5 folds
@@ -318,7 +333,6 @@ def classify_svm_rbf(X_train, X_test, y_train, y_test, group_train, optimize,
                               probability=True, verbose=False)
             inner_model.fit(X_tr, y_tr, sample_weight=sample_weight)
             y_probs = inner_model.predict_proba(X_te)
-            #print('y_probs.shape', y_probs.shape, 'y_test.shape', y_test.shape)
             score = log_loss(y_te, y_probs, labels=[0, 1])
             scores.append(score)
         # Return the negative MLOGLOSS
@@ -344,11 +358,14 @@ def classify_svm_rbf(X_train, X_test, y_train, y_test, group_train, optimize,
         X_train, y_train, balance)
     model.fit(X_train, y_train, sample_weight=sample_weight)
     y_pred = model.predict(X_test)
-    return balanced_accuracy_score(y_test, y_pred)
+    if return_model:
+        return balanced_accuracy_score(y_test, y_pred), model
+    else:
+        return balanced_accuracy_score(y_test, y_pred)
 
 
 def classify_svm_poly(X_train, X_test, y_train, y_test, group_train, optimize,
-                      balance):
+                      balance, return_model=False):
     """"""
     def bo_tune(C, max_iter, tol):
         # Cross validating with the specified parameters in 5 folds
@@ -366,7 +383,6 @@ def classify_svm_poly(X_train, X_test, y_train, y_test, group_train, optimize,
                               probability=True, verbose=False)
             inner_model.fit(X_tr, y_tr, sample_weight=sample_weight)
             y_probs = inner_model.predict_proba(X_te)
-            #print('y_probs.shape', y_probs.shape, 'y_test.shape', y_test.shape)
             score = log_loss(y_te, y_probs, labels=[0, 1])
             scores.append(score)
         # Return the negative MLOGLOSS
@@ -392,11 +408,14 @@ def classify_svm_poly(X_train, X_test, y_train, y_test, group_train, optimize,
         X_train, y_train, balance)
     model.fit(X_train, y_train, sample_weight=sample_weight)
     y_pred = model.predict(X_test)
-    return balanced_accuracy_score(y_test, y_pred)
+    if return_model:
+        return balanced_accuracy_score(y_test, y_pred), model
+    else:
+        return balanced_accuracy_score(y_test, y_pred)
 
 
 def classify_svm_sig(X_train, X_test, y_train, y_test, group_train, optimize,
-                     balance):
+                     balance, return_model=False):
     """"""
     def bo_tune(C, max_iter, tol):
         # Cross validating with the specified parameters in 5 folds
@@ -415,7 +434,6 @@ def classify_svm_sig(X_train, X_test, y_train, y_test, group_train, optimize,
                               verbose=False)
             inner_model.fit(X_tr, y_tr, sample_weight=sample_weight)
             y_probs = inner_model.predict_proba(X_te)
-            #print('y_probs.shape', y_probs.shape, 'y_test.shape', y_test.shape)
             score = log_loss(y_te, y_probs, labels=[0, 1])
             scores.append(score)
         # Return the negative MLOGLOSS
@@ -441,11 +459,14 @@ def classify_svm_sig(X_train, X_test, y_train, y_test, group_train, optimize,
         X_train, y_train, balance)
     model.fit(X_train, y_train, sample_weight=sample_weight)
     y_pred = model.predict(X_test)
-    return balanced_accuracy_score(y_test, y_pred)
+    if return_model:
+        return balanced_accuracy_score(y_test, y_pred), model
+    else:
+        return balanced_accuracy_score(y_test, y_pred)
 
 
 def classify_xgb(X_train, X_test, y_train, y_test, group_train, optimize,
-                 balance):
+                 balance, return_model=False):
     """"""
     def bo_tune(max_depth, gamma, learning_rate, subsample, colsample_bytree):
         # Cross validating with the specified parameters in 5 folds
@@ -454,7 +475,8 @@ def classify_xgb(X_train, X_test, y_train, y_test, group_train, optimize,
         scores = list()
         for train_index, test_index in cv_inner.split(
                 X_train, y_train, group_train):
-            X_tr, X_te = X_train[train_index], X_train[test_index]
+            X_tr = np.ascontiguousarray(X_train[train_index])
+            X_te = np.ascontiguousarray(X_train[test_index])
             y_tr, y_te = y_train[train_index], y_train[test_index]
             groups_split = group_train[train_index]
             val_inner_split = GroupShuffleSplit(
@@ -505,9 +527,11 @@ def classify_xgb(X_train, X_test, y_train, y_test, group_train, optimize,
     # Train outer model
     val_split = GroupShuffleSplit(n_splits=1, train_size=0.8)
     for train_ind, val_ind in val_split.split(X_train, y_train, group_train):
-        X_train, X_val = X_train[train_ind], X_train[val_ind]
-        y_train, y_val = y_train[train_ind], y_train[
-            val_ind]
+        X_val = np.ascontiguousarray(X_train[val_ind])
+        X_train = np.ascontiguousarray(X_train[train_ind])
+        #X_train = X_train[train_ind]
+        #X_val = X_train[val_ind]
+        y_train, y_val = np.ascontiguousarray(y_train[train_ind]), np.ascontiguousarray(y_train[val_ind])
         eval_set = [(X_val, y_val)]
         X_train, y_train, sample_weight = balance_samples(
             X_train, y_train, balance)
@@ -515,8 +539,10 @@ def classify_xgb(X_train, X_test, y_train, y_test, group_train, optimize,
                   early_stopping_rounds=10, sample_weight=sample_weight,
                   verbose=False)
         y_pred = model.predict(X_test)
-
-    return balanced_accuracy_score(y_test, y_pred)
+    if return_model:
+        return balanced_accuracy_score(y_test, y_pred), model
+    else:
+        return balanced_accuracy_score(y_test, y_pred)
 
 
 def get_class_scores(features, labels, cross_val, classifier, groups, balance):
@@ -590,10 +616,23 @@ def get_feat_array(
         np.array(events_used), np.concatenate(group_list)
 
 
+def get_feat_array_prediction(
+        data, events, events_used, sfreq, begin, end):
+    """"""
+    begin = int(begin * sfreq)
+    end = int(end * sfreq)
+    epochs = list()
+    for ind in events_used:
+        epoch = data[events[ind] + begin:events[ind] + end + 1]
+        if len(epoch) == end - begin + 1:
+            epochs.append(epoch)
+    return np.stack(epochs, axis=0).squeeze()
+
+
 def init_classification(
         features, events, ch_names, target_begin, target_end, out_file,
         classifier='lda', dist_onset=2., dist_end=2., optimize=False,
-        balance='oversample'):
+        balance='oversample', use_channels='single'):
     """Calculate classification performance and write to *.tsv file.
 
     Parameters
@@ -653,6 +692,8 @@ def init_classification(
     exceptions = [
         'sub-FOG006_ses-EphysMedOn_task-ButtonPress_acq-StimOff_run-01_ieeg',
         'sub-003_ses-EphysMedOn03_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg']
+    if use_channels == 'all':
+        ch_names = ['LFP', 'ECOG']
     dist_end = 0. if any([exc in out_file for exc in exceptions]) \
             else dist_end
     data = features.values
@@ -669,7 +710,7 @@ def init_classification(
         print(Style.RESET_ALL)
         features_train, features_test = features.iloc[train_ind], \
                                         features.iloc[test_ind]
-        y_train, y_test = labels[train_ind], labels[test_ind]
+        y_train, y_test = np.ascontiguousarray(labels[train_ind]), np.ascontiguousarray(labels[test_ind])
         groups_train = groups[train_ind]
         for ch_name in ch_names:
             print("Channel: ", ch_name)
@@ -715,17 +756,19 @@ def init_classification(
                 raise ValueError(f"Classifier not found: {classifier}")
             results.append([accuracy, fold, ch_name])
         fold += 1
-    curr_df = pd.DataFrame(data=results,
-                           columns=['accuracy', 'fold', 'channel_name'])
+    curr_df = pd.DataFrame(
+        data=results, columns=['accuracy', 'fold', ch_name])
     if not os.path.isdir(os.path.dirname(out_file)):
         os.makedirs(os.path.dirname(out_file))
+    print("Writing file: ", out_file)
     curr_df.to_csv(out_file, sep='\t')
 
 
 def init_prediction(
-        features, events, ch_names, target_begin, target_end, out_file,
+        features, target, events, ch_names, target_begin, target_end, out_file,
         classifier='lda', dist_onset=2., dist_end=2., optimize=False,
-        balance='oversample'):
+        balance='oversample', use_channels='single', pred_begin=-4.,
+        pred_end=3.):
     """Calculate classification performance and write to *.tsv file.
 
     Parameters
@@ -764,27 +807,12 @@ def init_prediction(
     Returns
     -------
     None
-
-    Examples
-    --------
-    Following are two examples on how to employ init_classification. First
-    example demonstrates how to classify movement itself using sLDA, whereas
-    the second example demonstrates how motor intention could be classified
-    using XGBoost.
-
-    >>> init_classification(features=features_, events=events_,
-    >>>     channels=channels_, target_begin=0., target_end="Movement_End",
-    >>>     out_path='movement_classif_results.tsv', classifier='lda',
-    >>>     dist_onset=2., dist_end=2.)
-
-    >>> init_classification(features=features_, events=events_,
-    >>>     channels=channels_, target_begin=0., target_end="Movement_End",
-    >>>     out_path='motor_intention_classif_results.tsv', classifier='xgb',
-    >>>     dist_onset=2., dist_end=3.)
     """
     exceptions = [
         'sub-FOG006_ses-EphysMedOn_task-ButtonPress_acq-StimOff_run-01_ieeg',
         'sub-003_ses-EphysMedOn03_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg']
+    if use_channels == 'all':
+        ch_names = ['LFP', 'ECOG']
     dist_end = 0. if any([exc in out_file for exc in exceptions]) \
             else dist_end
     data = features.values
@@ -792,66 +820,94 @@ def init_prediction(
         data, events, sfreq=10,
         target_begin=target_begin, target_end=target_end,
         dist_onset=dist_onset, dist_end=dist_end)
-    features = pd.DataFrame(data, columns=features.columns)
-    cv_outer = GroupShuffleSplit(n_splits=5, train_size=0.8)
+    feature_epochs = pd.DataFrame(data, columns=features.columns)
+    cv_outer = GroupKFold(n_splits=5)
     results = list()
+    target_epochs = list()
+    classifications = {ch_name: list() for ch_name in ch_names + ['Movement']}
     fold = 0
-    for train_ind, test_ind in cv_outer.split(features.values, labels, groups):
+    for train_ind, test_ind in cv_outer.split(
+            feature_epochs.values, labels, groups):
         print(Fore.LIGHTCYAN_EX + f"Fold no.: {fold}")
         print(Style.RESET_ALL)
-        features_train, features_test = features.iloc[train_ind], \
-                                        features.iloc[test_ind]
-        y_train, y_test = labels[train_ind], labels[test_ind]
+        features_train, features_test = feature_epochs.iloc[train_ind], \
+                                        feature_epochs.iloc[test_ind]
+        y_train, y_test = np.ascontiguousarray(labels[train_ind]), np.ascontiguousarray(labels[test_ind])
         groups_train = groups[train_ind]
+        evs_test = np.unique(groups[test_ind]) * 2
+        target_pred = get_feat_array_prediction(
+            target.values, events, evs_test, sfreq=10, begin=pred_begin,
+            end=pred_end).squeeze()
+        for i, epoch in enumerate(target_pred):
+            if abs(epoch.min()) > abs(epoch.max()):
+                target_pred[i] = epoch * -1.
+            target_pred[i] = (epoch - epoch.min()) / (
+                    epoch.max() - epoch.min())
+        classifications['Movement'].append(target_pred)
         for ch_name in ch_names:
             print("Channel: ", ch_name)
             cols = [col for col in features_train.columns if ch_name in col]
             X_train = np.ascontiguousarray(features_train[cols].values)
             X_test = np.ascontiguousarray(features_test[cols].values)
             if 'catboost' in classifier:
-                accuracy = classify_catboost(
+                accuracy, model = classify_catboost(
                     X_train, X_test, y_train, y_test, groups_train, optimize,
-                    balance)
+                    balance, return_model=True)
             elif 'lda' in classifier:
-                accuracy = classify_lda(
-                    X_train, X_test, y_train, y_test, balance)
+                accuracy, model = classify_lda(
+                    X_train, X_test, y_train, y_test, balance,
+                    return_model=True)
             elif 'lin_svm' in classifier:
-                accuracy = classify_lin_svm(
+                accuracy, model = classify_lin_svm(
                     X_train, X_test, y_train, y_test, groups_train, optimize,
-                    balance)
+                    balance, return_model=True)
             elif 'lr' in classifier:
-                accuracy = classify_lr(
+                accuracy, model = classify_lr(
                     X_train, X_test, y_train, y_test, groups_train, optimize,
-                    balance)
+                    balance, return_model=True)
             elif 'svm_lin' in classifier:
-                accuracy = classify_svm_lin(
+                accuracy, model = classify_svm_lin(
                     X_train, X_test, y_train, y_test, groups_train, optimize,
-                    balance)
+                    balance, return_model=True)
             elif 'svm_rbf' in classifier:
-                accuracy = classify_svm_rbf(
+                accuracy, model = classify_svm_rbf(
                     X_train, X_test, y_train, y_test, groups_train, optimize,
-                    balance)
+                    balance, return_model=True)
             elif 'svm_poly' in classifier:
-                accuracy = classify_svm_poly(
+                accuracy, model = classify_svm_poly(
                     X_train, X_test, y_train, y_test, groups_train, optimize,
-                    balance)
+                    balance, return_model=True)
             elif 'svm_sig' in classifier:
-                accuracy = classify_svm_sig(
+                accuracy, model = classify_svm_sig(
                     X_train, X_test, y_train, y_test, groups_train, optimize,
-                    balance)
+                    balance, return_model=True)
             elif 'xgb' in classifier:
-                accuracy = classify_xgb(
+                accuracy, model = classify_xgb(
                     X_train, X_test, y_train, y_test, groups_train, optimize,
-                    balance)
+                    balance, return_model=True)
             else:
                 raise ValueError(f"Classifier not found: {classifier}")
+            features_pred = get_feat_array_prediction(
+                features[cols].values, events, evs_test,
+                sfreq=10, begin=pred_begin, end=pred_end)
+            classifications[ch_name].append(
+                predict_epochs(model, features_pred))
             results.append([accuracy, fold, ch_name])
         fold += 1
-    curr_df = pd.DataFrame(data=results,
-                           columns=['accuracy', 'fold', 'channel_name'])
-    if not os.path.isdir(os.path.dirname(out_file)):
-        os.makedirs(os.path.dirname(out_file))
-    curr_df.to_csv(out_file, sep='\t')
+    for key in classifications.keys():
+        classifications[key] = np.concatenate(classifications[key])
+    for ch_name in ch_names:
+        title = ch_name + ': ' + str(target_begin)  + ' - ' + str(target_end)
+        plot_predictions(
+            classifications[ch_name], label=classifications['Movement'],
+            label_name='Movement',title=title, sfreq=10, axis_time=(-4.,3),
+            savefig=False)
+    #curr_df = pd.DataFrame(
+     #   data=results, columns=['accuracy', 'fold', ch_name])
+    #if not os.path.isdir(os.path.dirname(out_file)):
+     #   os.makedirs(os.path.dirname(out_file))
+    #print("Writing file: ", out_file)
+    #curr_df.to_csv(out_file, sep='\t')
     
 
 def max_val(list_, ind):
@@ -879,22 +935,23 @@ def plot_features(
     dist_onset = int(dist_onset * sfreq)
     dist_end = int(dist_end * sfreq)
     samp_begin = int(time_begin * sfreq)
-    samp_end = int(time_end * sfreq)
+    samp_end = int(time_end * sfreq + 1)
     x = list()
     data = features.values
     for i, ind in enumerate(np.arange(0, len(events), 2)):
         append = True
         if i == 0:
-            try:
-                data_plot = \
-                    data[events[ind] + samp_begin:events[ind] + samp_end]
-            except:
+            data_plot = \
+                data[events[ind] + samp_begin:events[ind] + samp_end]
+            if data_plot.shape[0] != samp_end - samp_begin:
                 append = False
         elif (events[ind] - dist_onset) - (events[ind - 1] + dist_end) <= 0:
             append = False
         else:
             data_plot = \
                 data[events[ind] + samp_begin:events[ind] + samp_end]
+            if data_plot.shape[0] != samp_end - samp_begin:
+                append = False
         if append:
             x.extend(np.expand_dims(data_plot, axis=0))
     x = np.mean(np.stack(x, axis=0), axis=0)
@@ -903,28 +960,68 @@ def plot_features(
     n_rows = 2
     n_cols = int(math.ceil(len(ch_names)/n_rows))
     fig, axs = plt.subplots(figsize=(n_cols*3, 5), nrows=n_rows, ncols=n_cols,
-                            dpi=300, sharex=True, sharey=True)
+                            dpi=300, sharex=False, sharey=True)
     ind = 0
+    ch_names.sort()
     for row in np.arange(n_rows):
         for col in np.arange(n_cols):
-            if row * col <= len(ch_names):
+            if ind < len(ch_names):
                 ch_name = ch_names[ind]
-                cols = [col for col in features.columns if ch_name in col]
+                cols = [col for col in features.columns
+                        if ch_name in col]
+                #cols = [col for col in features.columns
+                 #       if ch_name in col and "diff" not in col]
+                yticks = ["Theta", "Alpha", "Low Beta", "High Beta",
+                          "Low Gamma", "High Gamma", "High Frequency Activity",
+                          "Theta Derivation", "Alpha Derivation",
+                          "Low Beta Derivation", "High Beta Derivation",
+                          "Low Gamma Derivation", "High Gamma Derivation",
+                          "High Frequency Activity Derivation"]
+                #yticks = ["Theta", "Alpha", "Low Beta", "High Beta",
+                 #         "Low Gamma", "High Gamma", "High Frequency Activity"]
                 x = features[cols].values
                 ax = axs[row, col]
                 ax.imshow(
                     zscore(x, axis=0).T, cmap='viridis', aspect='auto',
-                    origin='upper', vmin=-3., vmax=3.)
+                    origin='lower', vmin=-3., vmax=3.)
                 ax.set_yticks(np.arange(len(cols)))
-                ax.set_yticklabels(cols)
-                ax.set_xticks(np.arange(0, x.shape[0], sfreq))
-                #ax.set_xticklabels(np.arange(time_begin, time_end, 1))
+                ax.set_yticklabels(yticks)
+                ax.set_xticks(np.arange(0, x.shape[0] + 1, sfreq))
+                ax.set_xticklabels(
+                    np.arange(time_begin, time_end + 1, 1, dtype=int))
                 ax.set_title(str(ch_name))
                 ind += 1
-        for ax in axs.flat:
-            ax.set(xlabel="Time [s]", ylabel="Features")
-        fig.suptitle('Movement Aligned Features - Individual Channels')
-        if not os.path.isdir(os.path.dirname(path)):
-            os.makedirs(os.path.dirname(path))
-        fig.tight_layout()
-        fig.savefig(path)
+    for ax in axs.flat:
+        ax.set(xlabel="Time [s]", ylabel="Features")
+    fig.suptitle('Movement Aligned Features - Individual Channels')
+    if not os.path.isdir(os.path.dirname(path)):
+        os.makedirs(os.path.dirname(path))
+    fig.tight_layout()
+    fig.savefig(path)
+    plt.close(fig)
+
+
+def plot_predictions(predictions, label, label_name, title, sfreq, axis_time,
+                     savefig=False, filename=None):
+    """"""
+    fig, axs = plt.subplots(figsize=(5,3))
+    axs.plot(predictions.mean(axis=0), label='Predictions')
+    axs.plot(label.mean(axis=0), color='m', label=label_name)
+    axs.legend(loc='upper right')
+    axs.set_xticks(np.arange(0, predictions.shape[1] + 1, sfreq))
+    axs.set_xticklabels(
+        np.arange(axis_time[0], axis_time[1] + 1, 1))
+    axs.set(xlabel="Time [s]", ylabel="Prediction Rate")
+    fig.suptitle(title)
+    fig.tight_layout()
+    plt.show()
+    if savefig:
+        fig.savefig(filename)
+
+
+def predict_epochs(model, features):
+    """"""
+    predictions = np.empty((features.shape[0], features.shape[1]))
+    for i, feat in enumerate(features):
+        predictions[i] = model.predict(feat)
+    return predictions

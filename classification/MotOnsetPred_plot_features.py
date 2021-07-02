@@ -168,18 +168,18 @@ def run_feature_plot(feat_list, nm_reader_, sfreq_, time_beg, time_en, suffix_,
             feat_list.append(features_.shift(s, axis=0))
         features_ = pd.concat(feat_list, axis=1)
         features_ = features_.fillna(0.)
-        #print('Features: ', features_.shape)
         out_name = feature_file + '_features_' \
-                   + str(i * 100) + 'ms' + '_diff_' + suffix_ + '.png'
-        out_path = os.path.join(root, out_name)
-    classification.plot_features(
-        features_, events_, channels_, out_path, sfreq_, time_beg, time_en,
-        dist_onset=2., dist_end=2.)
-
+                   + str(i * 100) + 'ms_' + '_diff_' + suffix_ + '.png'
+        #out_name = feature_file + '_features_' \
+         #          + str(i * 100) + 'ms_' + suffix_ + '.png'
+        out_path = os.path.join(root, suffix_ + '_features', out_name)
+        classification.plot_features(
+            features_, events_, channels_, out_path, sfreq_, time_beg, time_en,
+            dist_onset=2., dist_end=2.)
 
 
 suffixes = ['add_HFA_no_norm', 'add_HFA_10s_norm', 'add_HFA_30s_norm']
-for suffix in suffixes[1:2]:
+for suffix in suffixes[:]:
 
     ### BERLIN
     root_berlin = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\Berlin_ECOG_LFP_derivatives\pipeline-MotOnsetPred_2021-04-26'
@@ -235,10 +235,10 @@ for suffix in suffixes[1:2]:
                    ]
     results_root = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\PROJECT_motor_onset_results'
     out_root = os.path.join(results_root, 'MotOnsetPred_2021-06-10_plots')
-    feature_lists = [feature_list_berlin[:1], feature_list_beijing]
+    feature_lists = [feature_list_berlin[:], feature_list_beijing]
     nm_readers = [nm_reader_berlin, nm_reader_beijing]
 
-    for feature_list, nm_reader in zip(feature_lists[:1], nm_readers[:1]):
+    for feature_list, nm_reader in zip(feature_lists[:], nm_readers[:]):
         time_begin = -3.
         time_end = 3.
         sfreq = 10
