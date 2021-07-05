@@ -372,7 +372,7 @@ def baseline_rope(y, lam=1):
     constraints = [b <= y]
     problem = cp.Problem(objective, constraints)
     problem.solve(solver="SCS")
-    z=b.value #--> baseline
+    z = b.value #--> baseline
 
     return z
 
@@ -412,16 +412,16 @@ def baseline_correction(y, method='baseline_rope', param=1e4, thr=1e-1,
     if Decimate != 1:
         if Verbose:
             print('>>Signal decimation is being done')
-        y=signal.decimate(y, Decimate)
+        y = signal.decimate(y, Decimate)
 
-    if method == 'baseline_als' and np.size(param)!=2:
+    if method == 'baseline_als' and np.size(param) != 2:
         raise ValueError("If baseline_als method is desired, param should be "
                          "a 2 length object")
     if method == 'baseline_rope' and np.size(param)>1:
         raise ValueError("If baseline_rope method is desired, param should be "
                          "a number")
 
-    if method=='baseline_als':
+    if method == 'baseline_als':
         if Verbose:
             print('>>baseline_als is being used')
         z = baseline_als(y, lam=param[0], p=param[1])
@@ -437,10 +437,10 @@ def baseline_correction(y, method='baseline_rope', param=1e4, thr=1e-1,
     y_corrected, minv, maxv = NormalizeData(y_corrected)
 
     #eliminate interferation
-    y_corrected[y_corrected<thr] = 0
+    y_corrected[y_corrected < thr] = 0
     #create on-off signal
-    onoff=np.zeros(np.size(y_corrected))
-    onoff[y_corrected>0] = 1
+    onoff = np.zeros(np.size(y_corrected))
+    onoff[y_corrected > 0] = 1
 
     if normalize:
         y, Nan, Nan = NormalizeData(y)

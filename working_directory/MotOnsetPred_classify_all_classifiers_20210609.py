@@ -233,6 +233,11 @@ for suffix in suffixes:
                    'svm_rbf_balance_weights', 'svm_poly_balance_weights',
                    'xgb_balance_weights', 'svm_sig_balance_weights'
                    ]
+    classifiers = ['lda_oversample']
+    classifiers = ['lr_oversample', 'catboost_oversample',
+                   'xgb_oversample', 'lin_svm_oversample',
+                   'svm_lin_oversample', 'svm_rbf_oversample',
+                   'svm_poly_oversample', 'svm_sig_oversample']
     results_root = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\PROJECT_motor_onset_results'
     out_root = os.path.join(results_root, 'MotOnsetPred_2021-06-10_' + suffix)
     targets = [(0., "MovementEnd"), (-1., 0.)]

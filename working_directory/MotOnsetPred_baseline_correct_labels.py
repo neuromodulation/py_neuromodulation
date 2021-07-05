@@ -92,16 +92,21 @@ ind = 0
 file = files[ind]
 raw = mne_bids.read_raw_bids(file, verbose=False)
 print(*raw.ch_names, sep='\n')
-data = raw.get_data(picks=[ch for ch in raw.ch_names if 'ANALOG' in ch])
+data = raw.get_data(picks=[ch for ch in raw.ch_names if 'ANALOG' in ch]).squeeze()
+if np.abs(data.min()) > np.abs(data.max()):
+    data = data * -1.
+plt.plot(data.squeeze())
+data.shape
+data = data[:-2000]
 y_corrected, onoff, y = ieeg.baseline_correction(
-    y=data.squeeze(), method='baseline_rope', param=1e4, thr=1e-1,
+    y=data, method='baseline_als', param=[1e2, 1e-4], thr=0.,
     normalize=True, Decimate=1, Verbose=True)
+#plt.plot(y)
 plt.plot(y_corrected)
-plt.plot(y)
 plt.show()
 y_corrected2, onoff, y = ieeg.baseline_correction(
-    y=data.squeeze(), method='baseline_rope', param=1e4, thr=1e-1,
-    normalize=False, Decimate=1, Verbose=True)
+    y=data.squeeze(), method='baseline_rope', param=1e1, thr=1e-1,
+    normalize=True, Decimate=1, Verbose=True)
 plt.plot(y_corrected2)
-plt.plot(y)
+#plt.plot(y)
 plt.show()

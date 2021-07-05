@@ -763,7 +763,7 @@ def init_classification(
             results.append([accuracy, fold, ch_name])
         fold += 1
     curr_df = pd.DataFrame(
-        data=results, columns=['accuracy', 'fold', ch_name])
+        data=results, columns=['accuracy', 'fold', 'channel_name'])
     if not os.path.isdir(os.path.dirname(out_file)):
         os.makedirs(os.path.dirname(out_file))
     print("Writing file: ", out_file)
