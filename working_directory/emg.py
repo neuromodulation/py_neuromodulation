@@ -117,6 +117,7 @@ def get_emg_rms(raw, emg_ch, window_len, analog_ch, rereference=False):
                                ch_types=['emg'] * len(window_len) + ['misc'],
                                sfreq=raw_emg.info['sfreq'])
     raw_rms = mne.io.RawArray(data_all, info_rms)
+    raw_rms.info['meas_date'] = raw.info['meas_date']
     raw_rms.info['line_freq'] = raw.info['line_freq']
     raw_rms.set_annotations(raw.annotations)
     return raw_rms

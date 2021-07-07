@@ -114,7 +114,7 @@ def classify_catboost(X_train, X_test, y_train, y_test, group_train, optimize,
                                             'bagging_temperature': (0.0, 1.0),
                                             'l2_leaf_reg': (1, 30),
                                             'random_strength': (0.01, 1.)})
-        bo.maximize(init_points=8, n_iter=12, acq='ei')
+        bo.maximize(init_points=10, n_iter=20, acq='ei')
         params = bo.max['params']
         params['max_depth'] = round(params['max_depth'])
         model = CatBoostClassifier(
@@ -171,13 +171,13 @@ def classify_lda(X_train, X_test, y_train, y_test, balance,
 def classify_lr(X_train, X_test, y_train, y_test, group_train, optimize,
                 balance, return_model=False):
     """"""
-    def bo_tune(C, max_iter):
+    def bo_tune(C):
         # Cross validating with the specified parameters in 5 folds
         cv_inner = GroupShuffleSplit(n_splits=3, train_size=0.66,
                                      random_state=42)
         scores = list()
         inner_model = LogisticRegression(
-            solver='newton-cg', C=C, max_iter=int(max_iter))
+            solver='newton-cg', C=C, max_iter=500)
         for train_index, test_index in cv_inner.split(
                 X_train, y_train, group_train):
             X_tr, X_te = X_train[train_index], X_train[test_index]
@@ -193,13 +193,13 @@ def classify_lr(X_train, X_test, y_train, y_test, group_train, optimize,
     if optimize:
         # Perform Bayesian Optimization
         bo = BayesianOptimization(
-            bo_tune, {'C': (0.1, 10.0), 'max_iter': (100, 1000)})
-        bo.maximize(init_points=8, n_iter=12, acq='ei')
+            bo_tune, {'C': (0.01, 1.0)})
+        bo.maximize(init_points=10, n_iter=20, acq='ei')
         # Train outer model with optimized parameters
         params = bo.max['params']
-        params['max_iter'] = int(params['max_iter'])
+        #params['max_iter'] = int(params['max_iter'])
         model = LogisticRegression(
-            solver='newton-cg', max_iter=params['max_iter'], C=params['C'])
+            solver='newton-cg', max_iter=500, C=params['C'])
     else:
         # use default values
         model = LogisticRegression(solver='newton-cg')
@@ -217,7 +217,7 @@ def classify_lr(X_train, X_test, y_train, y_test, group_train, optimize,
 def classify_lin_svm(X_train, X_test, y_train, y_test, group_train, optimize,
                      balance, return_model=False):
     """"""
-    def bo_tune(C, max_iter, tol):
+    def bo_tune(C, tol):
         # Cross validating with the specified parameters in 5 folds
         cv_inner = GroupShuffleSplit(n_splits=3, train_size=0.66,
                                      random_state=42)
@@ -229,8 +229,8 @@ def classify_lin_svm(X_train, X_test, y_train, y_test, group_train, optimize,
             X_tr, y_tr, sample_weight = balance_samples(
                 X_tr, y_tr, balance)
             inner_model = LinearSVC(penalty='l2', fit_intercept=True,
-                                    C=C, max_iter=max_iter, tol=tol,
-                                    gamma='scale', shrinking=True,
+                                    C=C, max_iter=500, tol=tol,
+                                    shrinking=True,
                                     class_weight=None, probability=True,
                                     verbose=False)
             inner_model.fit(X_tr, y_tr, sample_weight=sample_weight)
@@ -245,14 +245,14 @@ def classify_lin_svm(X_train, X_test, y_train, y_test, group_train, optimize,
     if optimize:
         # Perform Bayesian Optimization
         bo = BayesianOptimization(
-            bo_tune, {'C': (1e-1, 1e1), 'max_iter': (100, 1000),
+            bo_tune, {'C': (1e-1, 1e1),
                       'tol': (1e-5, 1e-3)})
-        bo.maximize(init_points=8, n_iter=12, acq='ei')
+        bo.maximize(init_points=10, n_iter=20, acq='ei')
         # Train outer model with optimized parameters
         params = bo.max['params']
-        params['max_iter'] = int(params['max_iter'])
+        #params['max_iter'] = 500
         model = LinearSVC(penalty='l2', fit_intercept=True, C=params['C'],
-                          max_iter=params['max_iter'], tol=params['tol'],
+                          max_iter=500, tol=params['tol'],
                           shrinking=True, class_weight=None,
                           verbose=False)
     else:
@@ -273,7 +273,7 @@ def classify_lin_svm(X_train, X_test, y_train, y_test, group_train, optimize,
 def classify_svm_lin(X_train, X_test, y_train, y_test, group_train, optimize,
                      balance, return_model=False):
     """"""
-    def bo_tune(C, max_iter, tol):
+    def bo_tune(C, tol):
         # Cross validating with the specified parameters in 5 folds
         cv_inner = GroupShuffleSplit(n_splits=3, train_size=0.66,
                                      random_state=42)
@@ -284,7 +284,7 @@ def classify_svm_lin(X_train, X_test, y_train, y_test, group_train, optimize,
             y_tr, y_te = y_train[train_index], y_train[test_index]
             X_tr, y_tr, sample_weight = balance_samples(
                 X_tr, y_tr, balance)
-            inner_model = SVC(kernel='linear', C=C, max_iter=max_iter, tol=tol,
+            inner_model = SVC(kernel='linear', C=C, max_iter=500, tol=tol,
                               gamma='scale', shrinking=True, class_weight=None,
                               probability=True, verbose=False)
             inner_model.fit(X_tr, y_tr, sample_weight=sample_weight)
@@ -296,13 +296,13 @@ def classify_svm_lin(X_train, X_test, y_train, y_test, group_train, optimize,
     if optimize:
         # Perform Bayesian Optimization
         bo = BayesianOptimization(
-            bo_tune, {'C': (pow(10, -1), pow(10, 1)), 'max_iter': (100, 1000),
+            bo_tune, {'C': (pow(10, -1), pow(10, 1)),
                       'tol': (1e-4, 1e-2)})
-        bo.maximize(init_points=8, n_iter=12, acq='ei')
+        bo.maximize(init_points=10, n_iter=20, acq='ei')
         # Train outer model with optimized parameters
         params = bo.max['params']
-        params['max_iter'] = int(params['max_iter'])
-        model = SVC(kernel='linear', C=params['C'], max_iter=params['max_iter'],
+        #params['max_iter'] = 500
+        model = SVC(kernel='linear', C=params['C'], max_iter=500,
                     tol=params['tol'], gamma='scale', shrinking=True,
                     class_weight=None, verbose=False)
     else:
@@ -323,7 +323,7 @@ def classify_svm_lin(X_train, X_test, y_train, y_test, group_train, optimize,
 def classify_svm_rbf(X_train, X_test, y_train, y_test, group_train, optimize,
                      balance, return_model=False):
     """"""
-    def bo_tune(C, max_iter, tol):
+    def bo_tune(C, tol):
         # Cross validating with the specified parameters in 5 folds
         cv_inner = GroupShuffleSplit(n_splits=3, train_size=0.66,
                                      random_state=42)
@@ -334,7 +334,7 @@ def classify_svm_rbf(X_train, X_test, y_train, y_test, group_train, optimize,
             y_tr, y_te = y_train[train_index], y_train[test_index]
             X_tr, y_tr, sample_weight = balance_samples(
                 X_tr, y_tr, balance)
-            inner_model = SVC(kernel='rbf', C=C, max_iter=max_iter, tol=tol,
+            inner_model = SVC(kernel='rbf', C=C, max_iter=500, tol=tol,
                               gamma='scale', shrinking=True, class_weight=None,
                               probability=True, verbose=False)
             inner_model.fit(X_tr, y_tr, sample_weight=sample_weight)
@@ -346,13 +346,12 @@ def classify_svm_rbf(X_train, X_test, y_train, y_test, group_train, optimize,
     if optimize:
         # Perform Bayesian Optimization
         bo = BayesianOptimization(
-            bo_tune, {'C': (pow(10, -1), pow(10, 1)), 'max_iter': (100, 1000),
+            bo_tune, {'C': (pow(10, -1), pow(10, 1)),
                       'tol': (1e-4, 1e-2)})
-        bo.maximize(init_points=8, n_iter=12, acq='ei')
+        bo.maximize(init_points=10, n_iter=20, acq='ei')
         # Train outer model with optimized parameters
         params = bo.max['params']
-        params['max_iter'] = int(params['max_iter'])
-        model = SVC(kernel='rbf', C=params['C'], max_iter=params['max_iter'],
+        model = SVC(kernel='rbf', C=params['C'], max_iter=500,
                     tol=params['tol'], gamma='scale', shrinking=True,
                     class_weight=None, verbose=False)
     else:
@@ -373,7 +372,7 @@ def classify_svm_rbf(X_train, X_test, y_train, y_test, group_train, optimize,
 def classify_svm_poly(X_train, X_test, y_train, y_test, group_train, optimize,
                       balance, return_model=False):
     """"""
-    def bo_tune(C, max_iter, tol):
+    def bo_tune(C, tol):
         # Cross validating with the specified parameters in 5 folds
         cv_inner = GroupShuffleSplit(n_splits=3, train_size=0.66,
                                      random_state=42)
@@ -384,7 +383,7 @@ def classify_svm_poly(X_train, X_test, y_train, y_test, group_train, optimize,
             y_tr, y_te = y_train[train_index], y_train[test_index]
             X_tr, y_tr, sample_weight = balance_samples(
                 X_tr, y_tr, balance)
-            inner_model = SVC(kernel='poly', C=C, max_iter=max_iter, tol=tol,
+            inner_model = SVC(kernel='poly', C=C, max_iter=500, tol=tol,
                               gamma='scale', shrinking=True, class_weight=None,
                               probability=True, verbose=False)
             inner_model.fit(X_tr, y_tr, sample_weight=sample_weight)
@@ -396,13 +395,12 @@ def classify_svm_poly(X_train, X_test, y_train, y_test, group_train, optimize,
     if optimize:
         # Perform Bayesian Optimization
         bo = BayesianOptimization(
-            bo_tune, {'C': (pow(10, -1), pow(10, 1)), 'max_iter': (100, 1000),
+            bo_tune, {'C': (pow(10, -1), pow(10, 1)),
                       'tol': (1e-4, 1e-2)})
-        bo.maximize(init_points=8, n_iter=12, acq='ei')
+        bo.maximize(init_points=10, n_iter=20, acq='ei')
         # Train outer model with optimized parameters
         params = bo.max['params']
-        params['max_iter'] = int(params['max_iter'])
-        model = SVC(kernel='poly', C=params['C'], max_iter=params['max_iter'],
+        model = SVC(kernel='poly', C=params['C'], max_iter=500,
                     tol=params['tol'], gamma='scale', shrinking=True,
                     class_weight=None, verbose=False)
     else:
@@ -423,7 +421,7 @@ def classify_svm_poly(X_train, X_test, y_train, y_test, group_train, optimize,
 def classify_svm_sig(X_train, X_test, y_train, y_test, group_train, optimize,
                      balance, return_model=False):
     """"""
-    def bo_tune(C, max_iter, tol):
+    def bo_tune(C, tol):
         # Cross validating with the specified parameters in 5 folds
         cv_inner = GroupShuffleSplit(n_splits=3, train_size=0.66,
                                      random_state=42)
@@ -434,7 +432,7 @@ def classify_svm_sig(X_train, X_test, y_train, y_test, group_train, optimize,
             y_tr, y_te = y_train[train_index], y_train[test_index]
             X_tr, y_tr, sample_weight = balance_samples(
                 X_tr, y_tr, balance)
-            inner_model = SVC(kernel='sigmoid', C=C, max_iter=max_iter,
+            inner_model = SVC(kernel='sigmoid', C=C, max_iter=500,
                               tol=tol, gamma='auto', shrinking=True,
                               class_weight=None, probability=True,
                               verbose=False)
@@ -447,13 +445,12 @@ def classify_svm_sig(X_train, X_test, y_train, y_test, group_train, optimize,
     if optimize:
         # Perform Bayesian Optimization
         bo = BayesianOptimization(
-            bo_tune, {'C': (pow(10, -1), pow(10, 1)), 'max_iter': (100, 1000),
+            bo_tune, {'C': (pow(10, -1), pow(10, 1)),
                       'tol': (1e-4, 1e-2)})
-        bo.maximize(init_points=8, n_iter=12, acq='ei')
+        bo.maximize(init_points=10, n_iter=20, acq='ei')
         # Train outer model with optimized parameters
         params = bo.max['params']
-        params['max_iter'] = int(params['max_iter'])
-        model = SVC(kernel='sigmoid', C=params['C'], max_iter=params['max_iter'],
+        model = SVC(kernel='sigmoid', C=params['C'], max_iter=500,
                     tol=params['tol'], gamma='auto', shrinking=True,
                     class_weight=None, verbose=False)
     else:
@@ -515,7 +512,7 @@ def classify_xgb(X_train, X_test, y_train, y_test, group_train, optimize,
                           'learning_rate': (0.001, 0.3),
                           'colsample_bytree': (0.1, 1),
                           'subsample': (0.8, 1)})
-        xgb_bo.maximize(init_points=8, n_iter=12, acq='ei')
+        xgb_bo.maximize(init_points=10, n_iter=20, acq='ei')
         # Train outer model with optimized parameters
         params = xgb_bo.max['params']
         params['max_depth'] = int(params['max_depth'])
