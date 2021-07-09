@@ -1,12 +1,11 @@
 import os
 import sys
 
-from time import time as time
-
 import mne_bids
 
 sys.path.insert(
     0, r'C:\Users\richa\GitHub\py_neuromodulation\pyneuromodulation')
+import define_M1
 import start_BIDS
 
 
@@ -79,7 +78,7 @@ def get_all_files(path, suffix, get_bids=False, prefix=None, bids_root=None,
 
 
 root = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\PROJECT_motor_onset_results\pipeline-motor_intention_pred_2021-07-02'
-deriv_root = os.path.join(root, 'derivatives')
+deriv_root = os.path.join(root, 'derivatives', 'feat_EMG_RMS_200')
 
 beijing_files = get_all_files(
     path=root, suffix='vhdr', get_bids=True, prefix='ButtonPress',
@@ -93,10 +92,11 @@ files = beijing_files + berlin_files
 
 path_settings = os.path.join(
     deriv_root, 'feat_EMG_RMS_200', 'settings.json')
-for file in files[:]:
+for file in files:
+    # write M1
     path_df = os.path.join(
-        deriv_root, file.update(extension=None).basename+'_m1.tsv')
-    start = time()
-    start_BIDS.est_features_run(
-        file, PATH_M1=path_df, PATH_SETTINGS=path_settings, verbose=True)
-    print("Elapsed time: ", time()-start, " seconds")
+        deriv_root, file.update(extension=None).basename + '_m1.tsv')
+    raw = mne_bids.read_raw_bids(file, verbose=False)
+    df = define_M1.set_M1(raw.ch_names, raw.get_channel_types())
+    df['used'] = 0
+    df.to_csv(path_df, sep="\t", index=False)

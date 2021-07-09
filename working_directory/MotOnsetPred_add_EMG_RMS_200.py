@@ -1,12 +1,14 @@
 import os
 import sys
-
 from time import time as time
+
+import pandas as pd
 
 import mne_bids
 
 sys.path.insert(
     0, r'C:\Users\richa\GitHub\py_neuromodulation\pyneuromodulation')
+import nm_reader as NM_reader
 import start_BIDS
 
 
@@ -81,22 +83,46 @@ def get_all_files(path, suffix, get_bids=False, prefix=None, bids_root=None,
 root = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\PROJECT_motor_onset_results\pipeline-motor_intention_pred_2021-07-02'
 deriv_root = os.path.join(root, 'derivatives', 'feat_EMG_RMS_200')
 
-beijing_files = get_all_files(
-    path=root, suffix='vhdr', get_bids=True, prefix='ButtonPress',
-    bids_root=root, verbose=True, extension=None)
+suffixes = [
+    'add_HFA_no_norm_add_RMS',
+    'add_HFA_10s_norm_add_RMS',
+    'add_HFA_30s_norm_add_RMS']
 
-berlin_files = get_all_files(
-    path=root, suffix='vhdr', get_bids=True, prefix='SelfpacedRotation',
-    bids_root=root, verbose=True, extension=None)
-
-files = beijing_files + berlin_files
-
-path_settings = os.path.join(
-    deriv_root, 'settings.json')
-for file in files[:]:
-    path_df = os.path.join(
-        deriv_root, file.update(extension=None).basename+'_m1.tsv')
-    start = time()
-    start_BIDS.est_features_run(
-        file, PATH_M1=path_df, PATH_SETTINGS=path_settings, verbose=True)
-    print("Elapsed time: ", time()-start, " seconds")
+for suffix in suffixes:
+    root_berlin = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\PROJECT_motor_onset_results\pipeline-motor_intention_pred_2021-07-02\derivatives'
+    feat_root = os.path.join(root_berlin, 'feat_' + suffix)
+    feature_list = [
+        "sub-002_ses-EphysMedOff01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg",
+        "sub-002_ses-EphysMedOff02_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg",
+        "sub-002_ses-EphysMedOff03_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg",
+        "sub-002_ses-EphysMedOff03_task-SelfpacedRotationR_acq-StimOn_run-01_ieeg",
+        "sub-003_ses-EphysMedOff01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg",
+        "sub-003_ses-EphysMedOn03_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg",
+        "sub-004_ses-EphysMedOff01_task-SelfpacedRotationL_acq-StimOff_run-01_ieeg",
+        "sub-004_ses-EphysMedOff01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg",
+        "sub-004_ses-EphysMedOn01_task-SelfpacedRotationL_acq-StimOff_run-01_ieeg",
+        "sub-004_ses-EphysMedOn01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg",
+        "sub-005_ses-EphysMedOff01_task-SelfpacedRotationL_acq-StimOff_run-01_ieeg",
+        "sub-005_ses-EphysMedOff01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg",
+        "sub-005_ses-EphysMedOff02_task-SelfpacedRotationL_acq-StimOn_run-01_ieeg",
+        "sub-005_ses-EphysMedOff02_task-SelfpacedRotationR_acq-StimOn_run-01_ieeg",
+        "sub-005_ses-EphysMedOn01_task-SelfpacedRotationL_acq-StimOff_run-01_ieeg",
+        "sub-005_ses-EphysMedOn01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg",
+        "sub-005_ses-EphysMedOn02_task-SelfpacedRotationL_acq-StimOn_run-01_ieeg",
+        "sub-005_ses-EphysMedOn02_task-SelfpacedRotationR_acq-StimOn_run-01_ieeg",
+        'sub-FOG008_ses-EphysMedOn_task-ButtonPress_acq-StimOff_run-01_ieeg',
+        'sub-FOG010_ses-EphysMedOff_task-ButtonPress_acq-StimOff_run-01_ieeg',
+        'sub-FOGC001_ses-EphysMedOff_task-ButtonPress_acq-StimOff_run-01_ieeg'
+    ]
+    for ft in feature_list[:]:
+        rms_file = os.path.join(deriv_root, ft, ft + '_FEATURES.csv')
+        df_rms = pd.read_csv(rms_file, index_col=0)
+        feat_file = os.path.join(feat_root, ft, ft + '_FEATURES.csv')
+        df_feat = pd.read_csv(feat_file, index_col=0)
+        rms_cols = [col for col in df_rms.columns if 'RMS_200' in col]
+        if rms_cols:
+            print("Columns found:")
+            print(*rms_cols, sep='\n')
+            for col in rms_cols:
+                df_feat[col] = df_rms[col]
+            df_feat.to_csv(feat_file)

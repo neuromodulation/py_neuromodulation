@@ -189,11 +189,12 @@ def run_prediction(
         settings_ = nm_reader_.read_settings(feature_file)
         channels_ = np.array(settings_['ch_names'])[settings_['feature_idx']]
         try:
-            label_ = nm_reader_.read_label('rota_squared')
-        except:
             label_ = nm_reader_.read_label('EMG_squared')
-        targets = ['analog', 'rota', 'rms', 'emg_squared']
+        except:
+            label_ = nm_reader_.read_label('rota_squared')
+        targets = ['rms_200', 'analog', 'rota', 'emg_squared']
         #targets = ['rota_squared', 'emg_squared']
+        #targets = ['rms']
         i = 0
         target_ = pd.DataFrame()
         while len(target_.columns) == 0:
@@ -204,6 +205,7 @@ def run_prediction(
                 target_[col] = features_[col]
             i += 1
         assert len(col_picks) == 1, f"Multiple targets found: {col_picks}"
+        print(*col_picks, sep='\n')
         dat_label_ = label_.values
         diff_ = np.zeros_like(dat_label_, dtype=int)
         diff_[1:] = np.diff(dat_label_)
@@ -246,12 +248,15 @@ def run_prediction(
             pred_begin=-4., pred_end=3.)
 
 
-suffixes = ['add_HFA_no_norm', 'add_HFA_10s_norm', 'add_HFA_30s_norm']
-suffixes = ['add_HFA_10s_norm']
+suffixes = [
+    'add_HFA_no_norm_add_RMS',
+    'add_HFA_10s_norm_add_RMS',
+    'add_HFA_30s_norm_add_RMS']
+
 for suffix in suffixes:
 
     ### BERLIN
-    root_berlin = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\Berlin_ECOG_LFP_derivatives\pipeline-MotOnsetPred_2021-04-26'
+    root_berlin = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\PROJECT_motor_onset_results\pipeline-motor_intention_pred_2021-07-02'
     deriv_root_berlin = os.path.join(root_berlin, 'derivatives', 'feat_' + suffix)
     nm_reader_berlin = NM_reader.NM_Reader(deriv_root_berlin)
     #feature_list_berlin = nm_reader_berlin.get_feature_list()
@@ -278,7 +283,7 @@ for suffix in suffixes:
     ]
 
     ### BEIJING
-    root_beijing = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\Beijing_ECOG_LFP_derivatives\pipeline-MotOnsetPred_2021-04-26'
+    root_beijing = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\PROJECT_motor_onset_results\pipeline-motor_intention_pred_2021-07-02'
     deriv_root_beijing = os.path.join(root_beijing, 'derivatives', 'feat_' + suffix)
     nm_reader_beijing = NM_reader.NM_Reader(deriv_root_beijing)
     #feature_list = nm_reader.get_feature_list()
@@ -302,11 +307,11 @@ for suffix in suffixes:
                    'svm_rbf_balance_weights', 'svm_poly_balance_weights',
                    'xgb_balance_weights', 'svm_sig_balance_weights'
                    ]
-    classifiers = ['lr_balance_weights']
+    classifiers = ['lda']
     results_root = r'C:\Users\richa\OneDrive - Charité - Universitätsmedizin Berlin\PROJECT_motor_onset_results'
     out_root = os.path.join(results_root, 'MotOnsetPred_2021-06-10_' + suffix)
     targets = [(0., "MovementEnd"), (-1., 0.)]
-    feature_lists = [feature_list_berlin, feature_list_beijing]
+    feature_lists = [feature_list_berlin[2:], feature_list_beijing]
     nm_readers = [nm_reader_berlin, nm_reader_beijing]
 
     for clf in classifiers:
