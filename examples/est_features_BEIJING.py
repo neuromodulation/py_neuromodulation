@@ -27,8 +27,8 @@ if __name__ == "__main__":
             except:
                 pass
     
-    for run_file in run_files:
-        start_BIDS.est_features_run(run_file)
+    #for run_file in run_files:
+    #    start_BIDS.est_features_run(run_file)
 
     pool = multiprocessing.Pool(processes=20)
     

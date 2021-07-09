@@ -60,9 +60,9 @@ def est_features_run(
     settings_wrapper.set_fs_line_noise(fs, line_noise)
 
     # optionally reduce timing for faster test completion
-    LIMIT_LOW = 0
-    LIMIT_HIGH = 4000
-    raw_arr_data = raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
+    # LIMIT_LOW = 0
+    # LIMIT_HIGH = 4000
+    # raw_arr_data = raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
 
     # initialize generator for run function
     gen = generator.ieeg_raw_generator(raw_arr_data, settings_wrapper.settings)
