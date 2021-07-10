@@ -149,7 +149,7 @@ class Features:
 
         if self.s["methods"]["sharpwave_analysis"]:
             features_ = self.sw_features.get_sharpwave_features(
-                features_, data[ch_idx, self.new_dat_index:], ch)
+                features_, data[ch_idx, -self.new_dat_index:], ch)
 
         return features_
 
