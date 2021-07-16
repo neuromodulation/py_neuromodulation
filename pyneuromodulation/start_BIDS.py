@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import mne
 
 import define_M1
 import features
@@ -13,11 +14,11 @@ import projection
 
 
 def est_features_run(
-        PATH_RUN, PATH_M1=None, PATH_SETTINGS=None, verbose=True) -> None:
+        PATH_RUN, PATH_M1=None, PATH_SETTINGS=None, 
+        PATH_ANNOTATIONS=None, verbose=True) -> None:
     """Start feature estimation by reading settings, creating or reading
     df_M1 file with default rereference function (ECoG CAR; depth LFP bipolar)
     Then save features to csv, settings and df_M1 to settings specified output folder.
-
     Parameters
     ----------
     PATH_RUN : string
@@ -26,6 +27,8 @@ def est_features_run(
         absolute path to df_M1.csv file
     PATH_SETTINGS : string
         absolute path to settings.json file
+    PATH_ANNOTATIONS : string
+        absolute path to folder with mne annotations.txt
     """
 
     # read and test settings first to obtain BIDS path
@@ -43,6 +46,15 @@ def est_features_run(
     raw_arr, raw_arr_data, fs, line_noise = IO.read_BIDS_data(
         PATH_RUN, settings_wrapper.settings["BIDS_path"])
 
+    # potentially read annotations
+    try:
+        annot = mne.read_annotations(os.path.join(PATH_ANNOTATIONS, PATH_RUN.filename[:-5]+".txt"))
+        raw_arr.set_annotations(annot)
+        # annotations starting with "BAD" are omitted with reject_by_annotations 'omit' param
+        raw_arr_data = raw_arr.get_data(reject_by_annotation='omit') 
+    except FileNotFoundError:
+        pass
+
     # (if available) add coordinates to settings
     if raw_arr.get_montage() is not None:
         settings_wrapper.add_coord(raw_arr.copy())
@@ -59,9 +71,9 @@ def est_features_run(
     settings_wrapper.set_fs_line_noise(fs, line_noise)
 
     # optionally reduce timing for faster test completion
-    # LIMIT_LOW = 0
-    # LIMIT_HIGH = 10000
-    # raw_arr_data = raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
+    #LIMIT_LOW = 0 # start at 100s 
+    #LIMIT_HIGH = 137500 + 20*1375 # add 20 s data analysis
+    #raw_arr_data = raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
 
     # initialize generator for run function
     gen = generator.ieeg_raw_generator(raw_arr_data, settings_wrapper.settings)
@@ -72,6 +84,9 @@ def est_features_run(
             settings_wrapper.df_M1, split_data=False)
     else:
         rereference_ = None
+        # reset df_M1 from default values
+        settings_wrapper.df_M1["rereference"] = None
+        settings_wrapper.df_M1["new_name"] = settings_wrapper.df_M1["name"]
 
     # define resampler for faster feature estimation
     if settings_wrapper.settings["methods"]["raw_resampling"] is True:
