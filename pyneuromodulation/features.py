@@ -92,7 +92,7 @@ class Features:
         else:
             dat_filtered = None
 
-        # mutliprocessing approach
+        # multiprocessing approach
         '''
         job = [Process(target=self.est_ch, args=(features_, ch_idx, ch)) for ch_idx, ch in enumerate(self.ch_names)]
         _ = [p.start() for p in job]
