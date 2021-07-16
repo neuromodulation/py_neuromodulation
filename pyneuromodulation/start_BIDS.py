@@ -47,13 +47,16 @@ def est_features_run(
         PATH_RUN, settings_wrapper.settings["BIDS_path"])
 
     # potentially read annotations
-    try:
-        annot = mne.read_annotations(os.path.join(PATH_ANNOTATIONS, PATH_RUN.filename[:-5]+".txt"))
-        raw_arr.set_annotations(annot)
-        # annotations starting with "BAD" are omitted with reject_by_annotations 'omit' param
-        raw_arr_data = raw_arr.get_data(reject_by_annotation='omit') 
-    except FileNotFoundError:
-        pass
+    if PATH_ANNOTATIONS is not None:
+        try:
+            annot = mne.read_annotations(os.path.join(PATH_ANNOTATIONS, os.path.basename(PATH_RUN)[:-5]+".txt"))
+            raw_arr.set_annotations(annot)
+            # annotations starting with "BAD" are omitted with reject_by_annotations 'omit' param
+            raw_arr_data = raw_arr.get_data(reject_by_annotation='omit')
+        except FileNotFoundError:
+            print("Annotations file could not be found")
+            print("expected location: "+str(os.path.join(PATH_ANNOTATIONS, os.path.basename(PATH_RUN)[:-5]+".txt")))
+            pass
 
     # (if available) add coordinates to settings
     if raw_arr.get_montage() is not None:
