@@ -200,42 +200,8 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="realtime-normalization-py">
-<h1>normalize_raw.py<a class="headerlink" href="#realtime-normalization-py" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="module-normalize_raw"></span><dl class="py function">
-<dt id="normalize_raw.normalize_raw">
-<code class="sig-prename descclassname"><span class="pre">normalize_raw.</span></code><code class="sig-name descname"><span class="pre">normalize_raw</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cnt_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/normalize_raw.html#normalize_raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#normalize_raw.normalize_raw" title="Permalink to this definition">¶</a></dt>
-<dd><p>Normalization according to past normalize_samples according to mean or median.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>raw_arr</strong><span class="classifier">ndarray</span></dt><dd><p>input array, shape (channels, time)</p>
-</dd>
-<dt><strong>cnt_samples</strong><span class="classifier">int</span></dt><dd><p>current sample index</p>
-</dd>
-<dt><strong>normalize_samples</strong><span class="classifier">int</span></dt><dd><p>number of past samples considered for normalization</p>
-</dd>
-<dt><strong>fs</strong><span class="classifier">int</span></dt><dd><p>sampling frequency</p>
-</dd>
-<dt><strong>norm_type</strong><span class="classifier">str, optional</span></dt><dd><p>data is normalization with subtract and divide by ‘mean’ or ‘median’ , by default ‘mean’</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>raw_norm</strong><span class="classifier">ndarray</span></dt><dd><p>normalized array</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>TypeError</dt><dd><p>returned  if norm_type is not ‘mean’ or ‘median’</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
+<div class="section" id="normalize-raw-py">
+<h1>normalize_raw.py<a class="headerlink" href="#normalize-raw-py" title="Permalink to this headline">¶</a></h1>
 </div>
 
 

@@ -193,10 +193,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span> <span class="o">=</span> <span class="n">sfreq</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filter</span> <span class="o">=</span> \
             <span class="n">create_filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">sfreq</span><span class="p">,</span>
-                          <span class="n">l_freq</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+                          <span class="n">l_freq</span><span class="o">=</span><span class="n">sw_settings</span><span class="p">[</span><span class="s1">&#39;filter_low_cutoff&#39;</span><span class="p">],</span>
                           <span class="n">h_freq</span><span class="o">=</span><span class="n">sw_settings</span><span class="p">[</span><span class="s1">&#39;filter_high_cutoff&#39;</span><span class="p">],</span>
-                          <span class="n">fir_design</span><span class="o">=</span><span class="s1">&#39;firwin&#39;</span><span class="p">,</span> <span class="n">l_trans_bandwidth</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
-                          <span class="n">h_trans_bandwidth</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">filter_length</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">sfreq</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;ms&#39;</span><span class="p">,</span>
+                          <span class="n">fir_design</span><span class="o">=</span><span class="s1">&#39;firwin&#39;</span><span class="p">,</span> <span class="n">l_trans_bandwidth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                          <span class="n">h_trans_bandwidth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">filter_length</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">sfreq</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;ms&#39;</span><span class="p">,</span>
                           <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># initialize used features</span>
@@ -333,7 +333,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">peaks</span> <span class="o">=</span> <span class="n">find_peaks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="n">peak_dist</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">troughs</span> <span class="o">=</span> <span class="n">find_peaks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="n">trough_dist</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">troughs</span> <span class="o">=</span> <span class="n">find_peaks</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="n">trough_dist</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="k">for</span> <span class="n">trough_idx</span> <span class="ow">in</span> <span class="n">troughs</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>

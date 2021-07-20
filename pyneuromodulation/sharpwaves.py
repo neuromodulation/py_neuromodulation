@@ -31,8 +31,8 @@ class SharpwaveAnalyzer:
             create_filter(None, sfreq,
                           l_freq=sw_settings['filter_low_cutoff'],
                           h_freq=sw_settings['filter_high_cutoff'],
-                          fir_design='firwin', l_trans_bandwidth=15,
-                          h_trans_bandwidth=15, filter_length=str(sfreq)+'ms',
+                          fir_design='firwin', l_trans_bandwidth=4,
+                          h_trans_bandwidth=4, filter_length=str(sfreq)+'ms',
                           verbose=False)
 
         # initialize used features
@@ -169,7 +169,7 @@ class SharpwaveAnalyzer:
         """
 
         peaks = find_peaks(self.filtered_data, distance=peak_dist)[0]
-        troughs = find_peaks(self.filtered_data, distance=trough_dist)[0]
+        troughs = find_peaks(-self.filtered_data, distance=trough_dist)[0]
 
         for trough_idx in troughs:
             try:

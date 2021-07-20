@@ -479,7 +479,7 @@ div.rendered_html tbody tr:hover {
 <span class="kn">import</span> <span class="nn">rereference</span>
 <span class="kn">import</span> <span class="nn">resample</span>
 <span class="kn">import</span> <span class="nn">run_analysis</span>
-<span class="kn">import</span> <span class="nn">normalize_raw</span>
+<span class="kn">import</span> <span class="nn">normalization</span>
 <span class="kn">import</span> <span class="nn">projection</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;current working directory: &quot;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
@@ -543,9 +543,9 @@ used run path: C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-read settings.json
-test settings
-No Error occurred when checking the settings.
+Reading settings.json.
+Testing settings.
+No Error occurred when testing the settings.
 Extracting parameters from C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\tests\data\sub-testsub\ses-EphysMedOff\ieeg\sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg.vhdr...
 Setting channel info structure...
 Reading channel info from C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\tests\data\sub-testsub\ses-EphysMedOff\ieeg\sub-testsub_ses-EphysMedOff_task-buttonpress_channels.tsv.
@@ -610,16 +610,20 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
       <th>used</th>
       <th>target</th>
       <th>type</th>
+      <th>status</th>
+      <th>new_name</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
       <td>LFP_STN_R_234</td>
-      <td>None</td>
+      <td>LFP_STN_R_567</td>
       <td>1</td>
       <td>0</td>
       <td>seeg</td>
+      <td>good</td>
+      <td>LFP_STN_R_234-LFP_STN_R_567</td>
     </tr>
     <tr>
       <th>1</th>
@@ -628,14 +632,18 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
       <td>1</td>
       <td>0</td>
       <td>seeg</td>
+      <td>good</td>
+      <td>LFP_STN_R_567-LFP_STN_R_234</td>
     </tr>
     <tr>
       <th>2</th>
       <td>LFP_BS_STN_L_1</td>
-      <td>None</td>
+      <td>LFP_STN_L_567</td>
       <td>1</td>
       <td>0</td>
       <td>seeg</td>
+      <td>good</td>
+      <td>LFP_BS_STN_L_1-LFP_STN_L_567</td>
     </tr>
     <tr>
       <th>3</th>
@@ -644,6 +652,8 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
       <td>1</td>
       <td>0</td>
       <td>seeg</td>
+      <td>good</td>
+      <td>LFP_STN_L_234-LFP_BS_STN_L_1</td>
     </tr>
     <tr>
       <th>4</th>
@@ -652,6 +662,8 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
       <td>1</td>
       <td>0</td>
       <td>seeg</td>
+      <td>good</td>
+      <td>LFP_STN_L_567-LFP_STN_L_234</td>
     </tr>
     <tr>
       <th>5</th>
@@ -660,6 +672,8 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
       <td>1</td>
       <td>0</td>
       <td>ecog</td>
+      <td>good</td>
+      <td>ECOG_AT_SM_L_1-avgref</td>
     </tr>
     <tr>
       <th>6</th>
@@ -668,6 +682,8 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
       <td>1</td>
       <td>0</td>
       <td>ecog</td>
+      <td>good</td>
+      <td>ECOG_AT_SM_L_2-avgref</td>
     </tr>
     <tr>
       <th>7</th>
@@ -676,6 +692,8 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
       <td>1</td>
       <td>0</td>
       <td>ecog</td>
+      <td>good</td>
+      <td>ECOG_AT_SM_L_3-avgref</td>
     </tr>
     <tr>
       <th>8</th>
@@ -684,6 +702,8 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
       <td>1</td>
       <td>0</td>
       <td>ecog</td>
+      <td>good</td>
+      <td>ECOG_AT_SM_L_4-avgref</td>
     </tr>
     <tr>
       <th>9</th>
@@ -692,6 +712,8 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
       <td>1</td>
       <td>0</td>
       <td>ecog</td>
+      <td>good</td>
+      <td>ECOG_AT_SM_L_5-avgref</td>
     </tr>
     <tr>
       <th>10</th>
@@ -700,6 +722,8 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
       <td>1</td>
       <td>0</td>
       <td>ecog</td>
+      <td>good</td>
+      <td>ECOG_AT_SM_L_6-avgref</td>
     </tr>
     <tr>
       <th>11</th>
@@ -708,6 +732,8 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
       <td>0</td>
       <td>1</td>
       <td>misc</td>
+      <td>good</td>
+      <td>ANALOG_ROT_R_1</td>
     </tr>
   </tbody>
 </table>
@@ -734,7 +760,8 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
  &#39;out_path&#39;: &#39;C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\pyneuromodulation\\tests\\data\\derivatives&#39;,
  &#39;sampling_rate_features&#39;: 10,
  &#39;methods&#39;: {&#39;raw_resampling&#39;: True,
-  &#39;normalization&#39;: True,
+  &#39;raw_normalization&#39;: True,
+  &#39;feature_normalization&#39;: True,
   &#39;kalman_filter&#39;: True,
   &#39;re_referencing&#39;: True,
   &#39;notch_filter&#39;: True,
@@ -747,8 +774,12 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
   &#39;pdc&#39;: False,
   &#39;dtf&#39;: False},
  &#39;raw_resampling_settings&#39;: {&#39;resample_freq&#39;: 1000},
- &#39;raw_normalization_settings&#39;: {&#39;normalization_time&#39;: 10,
-  &#39;normalization_method&#39;: &#39;mean&#39;},
+ &#39;raw_normalization_settings&#39;: {&#39;normalization_time&#39;: 30,
+  &#39;normalization_method&#39;: &#39;zscore&#39;,
+  &#39;clip&#39;: 3},
+ &#39;feature_normalization_settings&#39;: {&#39;normalization_time&#39;: 30,
+  &#39;normalization_method&#39;: &#39;zscore&#39;,
+  &#39;clip&#39;: 3},
  &#39;kalman_filter_settings&#39;: {&#39;Tp&#39;: 0.1,
   &#39;sigma_w&#39;: 0.7,
   &#39;sigma_v&#39;: 1,
@@ -803,17 +834,17 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
   &#39;model_order&#39;: &#39;auto&#39;,
   &#39;max_order&#39;: 10,
   &#39;num_fft&#39;: &#39;auto&#39;},
- &#39;ch_names&#39;: [&#39;LFP_STN_R_234&#39;,
-  &#39;LFP_STN_R_567&#39;,
-  &#39;LFP_BS_STN_L_1&#39;,
-  &#39;LFP_STN_L_234&#39;,
-  &#39;LFP_STN_L_567&#39;,
-  &#39;ECOG_AT_SM_L_1&#39;,
-  &#39;ECOG_AT_SM_L_2&#39;,
-  &#39;ECOG_AT_SM_L_3&#39;,
-  &#39;ECOG_AT_SM_L_4&#39;,
-  &#39;ECOG_AT_SM_L_5&#39;,
-  &#39;ECOG_AT_SM_L_6&#39;,
+ &#39;ch_names&#39;: [&#39;LFP_STN_R_234-LFP_STN_R_567&#39;,
+  &#39;LFP_STN_R_567-LFP_STN_R_234&#39;,
+  &#39;LFP_BS_STN_L_1-LFP_STN_L_567&#39;,
+  &#39;LFP_STN_L_234-LFP_BS_STN_L_1&#39;,
+  &#39;LFP_STN_L_567-LFP_STN_L_234&#39;,
+  &#39;ECOG_AT_SM_L_1-avgref&#39;,
+  &#39;ECOG_AT_SM_L_2-avgref&#39;,
+  &#39;ECOG_AT_SM_L_3-avgref&#39;,
+  &#39;ECOG_AT_SM_L_4-avgref&#39;,
+  &#39;ECOG_AT_SM_L_5-avgref&#39;,
+  &#39;ECOG_AT_SM_L_6-avgref&#39;,
   &#39;ANALOG_ROT_R_1&#39;],
  &#39;ch_types&#39;: [&#39;seeg&#39;,
   &#39;seeg&#39;,
@@ -849,7 +880,8 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 {&#39;raw_resampling&#39;: True,
- &#39;normalization&#39;: True,
+ &#39;raw_normalization&#39;: True,
+ &#39;feature_normalization&#39;: True,
  &#39;kalman_filter&#39;: True,
  &#39;re_referencing&#39;: True,
  &#39;notch_filter&#39;: True,
@@ -882,9 +914,27 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
 </pre></div>
 </div>
 </div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;project_cortex&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+True
+</pre></div></div>
+</div>
 <p>We can now inspect the individual coordinates, and the projected grid points. Therfore we read first a standard MNI hull, defined in the plot folder:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -900,7 +950,7 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
 </div>
 <p>Since the grid is defined for the left hemisphere, we might switch the x coordinates for right electrodes. Then the ECoG channel coordinates (crosses) and used grid points (circles) are visualized:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -935,13 +985,13 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/FeatureEstimationDemo_15_0.png" src="_images/FeatureEstimationDemo_15_0.png" />
+<img alt="_images/FeatureEstimationDemo_16_0.png" src="_images/FeatureEstimationDemo_16_0.png" />
 </div>
 </div>
 <p>As visible, only grid points are active (channel data is projected unto them as shown in yellow) within the <em>max_dist</em> of every individual channel for the cortical and subcortical grid.</p>
 <p>Next, the <strong>rereference</strong> and <strong>resample</strong> classes get instantiated, and an acquisition system is simulated by a <strong>generator</strong>:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -968,7 +1018,7 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
 <h2>Feature Estimation<a class="headerlink" href="#Feature-Estimation" title="Permalink to this headline">¶</a></h2>
 <p>Now the used <strong>feature</strong> and <strong>run_analysis</strong> classes are instantiated. Here FIR Filters and Kalman Filters are parametrized. During online feature estimation filters only have to be applied, instead of a repetitive calculatation, which in turn saves computational time.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -978,7 +1028,6 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
 <span class="c1"># initialize run object</span>
 <span class="n">run_analysis_</span> <span class="o">=</span> <span class="n">run_analysis</span><span class="o">.</span><span class="n">Run</span><span class="p">(</span><span class="n">features_</span><span class="p">,</span> <span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">,</span>
                                  <span class="n">rereference_</span><span class="p">,</span> <span class="n">projection_</span><span class="p">,</span> <span class="n">resample_</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
 </pre></div>
 </div>
 </div>
@@ -987,7 +1036,7 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-segment lengths: [1000  500  333  333  333  100  100  100]
+Segment lengths (ms): [1000  500  333  333  333  100  100  100]
 No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
 Setting up band-pass filter from 4 - 8 Hz
 
@@ -1104,7 +1153,7 @@ Designing a one-pass, zero-phase, non-causal bandpass filter:
 </div>
 <p>Given the previously initialized generator, we can now receive a first data batch of 1 sec in shape (channels, samples):</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[61]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1113,7 +1162,7 @@ Designing a one-pass, zero-phase, non-causal bandpass filter:
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[62]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1122,7 +1171,7 @@ Designing a one-pass, zero-phase, non-causal bandpass filter:
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[62]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1132,7 +1181,7 @@ Designing a one-pass, zero-phase, non-causal bandpass filter:
 </div>
 <p>This allows us to estimate the previously assigned features:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[63]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1146,12 +1195,12 @@ Designing a one-pass, zero-phase, non-causal bandpass filter:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-1.0 seconds of data processed
-took: 0.35 seconds
+1.6 seconds of data processed
+Last batch took: 0.18 seconds
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[64]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1160,7 +1209,7 @@ took: 0.35 seconds
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[64]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1182,62 +1231,206 @@ took: 0.35 seconds
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>LFP_STN_R_234_bandpass_activity_theta</th>
-      <th>LFP_STN_R_234_bandpass_mobility_theta</th>
-      <th>LFP_STN_R_234_bandpass_complexity_theta</th>
-      <th>LFP_STN_R_234_bandpass_activity_alpha</th>
-      <th>LFP_STN_R_234_bandpass_mobility_alpha</th>
-      <th>LFP_STN_R_234_bandpass_complexity_alpha</th>
-      <th>LFP_STN_R_234_bandpass_activity_low beta</th>
-      <th>LFP_STN_R_234_bandpass_mobility_low beta</th>
-      <th>LFP_STN_R_234_bandpass_complexity_low beta</th>
-      <th>LFP_STN_R_234_bandpass_activity_high beta</th>
+      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_activity_theta</th>
+      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_mobility_theta</th>
+      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_complexity_theta</th>
+      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_activity_alpha</th>
+      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_mobility_alpha</th>
+      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_complexity_alpha</th>
+      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_activity_low beta</th>
+      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_mobility_low beta</th>
+      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_complexity_low beta</th>
+      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_activity_high beta</th>
       <th>...</th>
-      <th>ECOG_AT_SM_L_6_Sharpwave_Max_Trough_width</th>
-      <th>ECOG_AT_SM_L_6_Sharpwave_Max_Trough_prominence</th>
-      <th>ECOG_AT_SM_L_6_Sharpwave_Max_Trough_interval</th>
-      <th>ECOG_AT_SM_L_6_Sharpwave_Max_Trough_decay_time</th>
-      <th>ECOG_AT_SM_L_6_Sharpwave_Max_Trough_rise_time</th>
-      <th>ECOG_AT_SM_L_6_Sharpwave_Max_Trough_sharpness</th>
-      <th>ECOG_AT_SM_L_6_Sharpwave_Max_Trough_rise_steepness</th>
-      <th>ECOG_AT_SM_L_6_Sharpwave_Max_Trough_decay_steepness</th>
-      <th>ECOG_AT_SM_L_6_Sharpwave_Max_Trough_slope_ratio</th>
+      <th>ECOG_AT_SM_L_6-avgref_Sharpwave_Max_Trough_width</th>
+      <th>ECOG_AT_SM_L_6-avgref_Sharpwave_Max_Trough_prominence</th>
+      <th>ECOG_AT_SM_L_6-avgref_Sharpwave_Max_Trough_interval</th>
+      <th>ECOG_AT_SM_L_6-avgref_Sharpwave_Max_Trough_decay_time</th>
+      <th>ECOG_AT_SM_L_6-avgref_Sharpwave_Max_Trough_rise_time</th>
+      <th>ECOG_AT_SM_L_6-avgref_Sharpwave_Max_Trough_sharpness</th>
+      <th>ECOG_AT_SM_L_6-avgref_Sharpwave_Max_Trough_rise_steepness</th>
+      <th>ECOG_AT_SM_L_6-avgref_Sharpwave_Max_Trough_decay_steepness</th>
+      <th>ECOG_AT_SM_L_6-avgref_Sharpwave_Max_Trough_slope_ratio</th>
       <th>time</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>0</th>
-      <td>186.436586</td>
-      <td>0.035995</td>
-      <td>1.288037</td>
-      <td>97.252103</td>
-      <td>0.063342</td>
-      <td>1.039736</td>
-      <td>25.040398</td>
-      <td>0.102785</td>
-      <td>1.044861</td>
-      <td>59.381882</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
       <td>...</td>
-      <td>111.0</td>
-      <td>198.301776</td>
-      <td>83.0</td>
-      <td>-6.0</td>
-      <td>83.0</td>
-      <td>67.096443</td>
-      <td>34.774695</td>
-      <td>34.774695</td>
-      <td>26.308198</td>
+      <td>0.00000</td>
+      <td>0.000000</td>
+      <td>0.0</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
       <td>1000.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>-1.000000</td>
+      <td>-1.000000</td>
+      <td>-1.000000</td>
+      <td>1.000000</td>
+      <td>-1.000000</td>
+      <td>-1.000000</td>
+      <td>-1.000000</td>
+      <td>1.000000</td>
+      <td>-1.000000</td>
+      <td>-1.000000</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>1.000000</td>
+      <td>NaN</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>-1.000000</td>
+      <td>-1.000000</td>
+      <td>1.000000</td>
+      <td>-1.000000</td>
+      <td>1100.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>-1.413856</td>
+      <td>0.986026</td>
+      <td>1.411066</td>
+      <td>0.719298</td>
+      <td>-1.413113</td>
+      <td>1.002520</td>
+      <td>-1.002182</td>
+      <td>0.939468</td>
+      <td>1.407790</td>
+      <td>-1.375475</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>0.742469</td>
+      <td>NaN</td>
+      <td>-0.707107</td>
+      <td>-0.707107</td>
+      <td>0.438655</td>
+      <td>-0.288772</td>
+      <td>1.027999</td>
+      <td>-0.849363</td>
+      <td>1200.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-1.133993</td>
+      <td>1.628242</td>
+      <td>-1.522077</td>
+      <td>0.867106</td>
+      <td>-1.000275</td>
+      <td>-0.947065</td>
+      <td>-0.823012</td>
+      <td>1.531718</td>
+      <td>0.160493</td>
+      <td>-1.519733</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>0.825928</td>
+      <td>NaN</td>
+      <td>-0.577350</td>
+      <td>-0.577350</td>
+      <td>0.578837</td>
+      <td>0.001586</td>
+      <td>1.134153</td>
+      <td>-0.937460</td>
+      <td>1300.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-0.564420</td>
+      <td>1.496153</td>
+      <td>-1.568611</td>
+      <td>1.630299</td>
+      <td>-0.830257</td>
+      <td>-1.045311</td>
+      <td>-0.752502</td>
+      <td>1.376794</td>
+      <td>-0.327432</td>
+      <td>-1.099329</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>0.916122</td>
+      <td>NaN</td>
+      <td>-0.500000</td>
+      <td>-0.500000</td>
+      <td>0.717736</td>
+      <td>0.287253</td>
+      <td>1.217577</td>
+      <td>-1.027123</td>
+      <td>1400.0</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>-0.032050</td>
+      <td>0.917335</td>
+      <td>-0.947647</td>
+      <td>1.491794</td>
+      <td>-0.463283</td>
+      <td>-1.449514</td>
+      <td>-0.746026</td>
+      <td>1.142843</td>
+      <td>-0.476464</td>
+      <td>-0.895653</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>1.000204</td>
+      <td>NaN</td>
+      <td>-0.447214</td>
+      <td>-0.447214</td>
+      <td>0.842543</td>
+      <td>0.555343</td>
+      <td>1.278756</td>
+      <td>-1.104789</td>
+      <td>1500.0</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>1.794198</td>
+      <td>0.037151</td>
+      <td>-1.286162</td>
+      <td>1.157103</td>
+      <td>-1.207859</td>
+      <td>-1.193593</td>
+      <td>1.422738</td>
+      <td>-0.561030</td>
+      <td>1.380136</td>
+      <td>1.524448</td>
+      <td>...</td>
+      <td>-2.44949</td>
+      <td>-2.377112</td>
+      <td>NaN</td>
+      <td>2.445754</td>
+      <td>-2.448673</td>
+      <td>-2.358675</td>
+      <td>-2.405600</td>
+      <td>-2.408255</td>
+      <td>2.379510</td>
+      <td>1600.0</td>
     </tr>
   </tbody>
 </table>
-<p>1 rows × 1629 columns</p>
+<p>7 rows × 1629 columns</p>
 </div></div>
 </div>
 <p>As seen above already 1629 features are calculated based on this data batch. For every analyzed data batch, a subsequent row is appended to the <a href="#id1"><span class="problematic" id="id2">run_analysis_</span></a>.feature_arr. Let’s show some features for a signle channel:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[65]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1247,7 +1440,7 @@ took: 0.35 seconds
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[66]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1256,7 +1449,7 @@ took: 0.35 seconds
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[66]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1279,56 +1472,128 @@ took: 0.35 seconds
     <tr style="text-align: right;">
       <th></th>
       <th>0</th>
+      <th>1</th>
+      <th>2</th>
+      <th>3</th>
+      <th>4</th>
+      <th>5</th>
+      <th>6</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>ECOG_AT_SM_L_1_bandpass_activity_theta</th>
-      <td>301.988380</td>
+      <th>ECOG_AT_SM_L_1-avgref_bandpass_activity_theta</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-1.053859</td>
+      <td>-1.320893</td>
+      <td>-1.707613</td>
+      <td>-1.412793</td>
+      <td>-1.375319</td>
     </tr>
     <tr>
-      <th>ECOG_AT_SM_L_1_bandpass_mobility_theta</th>
-      <td>0.043729</td>
+      <th>ECOG_AT_SM_L_1-avgref_bandpass_mobility_theta</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-0.636474</td>
+      <td>-1.729447</td>
+      <td>-1.689738</td>
+      <td>-1.865972</td>
+      <td>-0.103034</td>
     </tr>
     <tr>
-      <th>ECOG_AT_SM_L_1_bandpass_complexity_theta</th>
-      <td>1.123472</td>
+      <th>ECOG_AT_SM_L_1-avgref_bandpass_complexity_theta</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.378971</td>
+      <td>1.507552</td>
+      <td>1.774458</td>
+      <td>1.834773</td>
+      <td>0.517982</td>
     </tr>
     <tr>
-      <th>ECOG_AT_SM_L_1_bandpass_activity_alpha</th>
-      <td>230.717464</td>
+      <th>ECOG_AT_SM_L_1-avgref_bandpass_activity_alpha</th>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>-1.250933</td>
+      <td>-0.990942</td>
+      <td>-1.491038</td>
+      <td>-1.133773</td>
+      <td>-0.926004</td>
     </tr>
     <tr>
-      <th>ECOG_AT_SM_L_1_bandpass_mobility_alpha</th>
-      <td>0.061104</td>
+      <th>ECOG_AT_SM_L_1-avgref_bandpass_mobility_alpha</th>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>-1.076922</td>
+      <td>0.368802</td>
+      <td>1.763838</td>
+      <td>1.307799</td>
+      <td>-0.853319</td>
     </tr>
     <tr>
       <th>...</th>
       <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
     </tr>
     <tr>
-      <th>ECOG_AT_SM_L_1_Sharpwave_Max_Trough_rise_time</th>
-      <td>50.000000</td>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Trough_rise_time</th>
+      <td>0.0</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>-2.449490</td>
     </tr>
     <tr>
-      <th>ECOG_AT_SM_L_1_Sharpwave_Max_Trough_sharpness</th>
-      <td>8.367930</td>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Trough_sharpness</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.087625</td>
+      <td>1.192496</td>
+      <td>1.266637</td>
+      <td>1.317329</td>
+      <td>-2.275016</td>
     </tr>
     <tr>
-      <th>ECOG_AT_SM_L_1_Sharpwave_Max_Trough_rise_steepness</th>
-      <td>6.260852</td>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Trough_rise_steepness</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.056160</td>
+      <td>1.162467</td>
+      <td>1.240359</td>
+      <td>1.294825</td>
+      <td>-2.294153</td>
     </tr>
     <tr>
-      <th>ECOG_AT_SM_L_1_Sharpwave_Max_Trough_decay_steepness</th>
-      <td>6.260852</td>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Trough_decay_steepness</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.056160</td>
+      <td>1.162467</td>
+      <td>1.240359</td>
+      <td>1.294825</td>
+      <td>-2.372784</td>
     </tr>
     <tr>
-      <th>ECOG_AT_SM_L_1_Sharpwave_Max_Trough_slope_ratio</th>
-      <td>6.247737</td>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Trough_slope_ratio</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.870741</td>
+      <td>0.922869</td>
+      <td>0.992129</td>
+      <td>1.057685</td>
+      <td>2.259754</td>
     </tr>
   </tbody>
 </table>
-<p>148 rows × 1 columns</p>
+<p>148 rows × 7 columns</p>
 </div></div>
 </div>
 </div>
@@ -1336,20 +1601,28 @@ took: 0.35 seconds
 <h2>Sharpwave features<a class="headerlink" href="#Sharpwave-features" title="Permalink to this headline">¶</a></h2>
 <p>Now let’s investigate sharpwave features. First, data for a specific channel is bandpass filtered in a predefined range (here 5 - 80 Hz):</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[67]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw_norm</span> <span class="o">=</span> <span class="n">normalize_raw</span><span class="o">.</span><span class="n">normalize_raw</span><span class="p">(</span>
-                <span class="n">run_analysis_</span><span class="o">.</span><span class="n">raw_arr</span><span class="p">,</span> <span class="n">run_analysis_</span><span class="o">.</span><span class="n">cnt_samples</span><span class="p">,</span> <span class="n">run_analysis_</span><span class="o">.</span><span class="n">normalize_samples</span><span class="p">,</span>
-                <span class="n">run_analysis_</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span>
-                <span class="n">run_analysis_</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;raw_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;normalization_method&quot;</span><span class="p">])</span>
+<span></span><span class="n">normalize_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;raw_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;normalization_time&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">fs</span><span class="p">)</span>
+<span class="n">raw_norm</span> <span class="o">=</span> <span class="n">normalization</span><span class="o">.</span><span class="n">normalize_raw</span><span class="p">(</span><span class="n">ieeg_batch</span><span class="p">,</span> <span class="n">normalize_samples</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>Then troughs and peaks are identified, subsequently different features are estimated.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[120]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">run_analysis_</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;detect_troughs&quot;</span><span class="p">][</span><span class="s2">&quot;distance_troughs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span><span class="o">*</span><span class="mf">1.375</span>
+<span class="n">run_analysis_</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;detect_troughs&quot;</span><span class="p">][</span><span class="s2">&quot;distance_peaks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.375</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[123]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1365,38 +1638,9 @@ took: 0.35 seconds
 </pre></div>
 </div>
 </div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">run_analysis_</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">used_features</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-[&#39;peak_left&#39;,
- &#39;peak_right&#39;,
- &#39;trough&#39;,
- &#39;width&#39;,
- &#39;prominence&#39;,
- &#39;interval&#39;,
- &#39;decay_time&#39;,
- &#39;rise_time&#39;,
- &#39;sharpness&#39;,
- &#39;rise_steepness&#39;,
- &#39;decay_steepness&#39;,
- &#39;slope_ratio&#39;]
-</pre></div></div>
-</div>
 <p>In this example plot, the trough sharpness is visualized for the estimated data batch:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[124]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1406,10 +1650,10 @@ took: 0.35 seconds
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">filtered_data</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;[5-80]Hz filtered data&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">peaks</span><span class="p">,</span> <span class="n">filtered_data</span><span class="p">[</span><span class="n">peaks</span><span class="p">],</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;peaks&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">troughs</span><span class="p">,</span> <span class="n">filtered_data</span><span class="p">[</span><span class="n">troughs</span><span class="p">],</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;troughs&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">troughs</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">run_analysis_</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">sharpness</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
-       <span class="n">label</span><span class="o">=</span><span class="s2">&quot;trough sharpness&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="c1">#plt.bar(troughs[1:], run_analysis_.features.sw_features.sharpness, width=4, color=&quot;red&quot;,</span>
+<span class="c1">#       label=&quot;trough sharpness&quot;, alpha=0.5)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1001</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1001</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span><span class="o">/</span><span class="mi">1000</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1375</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1375</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span><span class="o">/</span><span class="mi">1375</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time [s]&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;ECoG trace&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Sharpwave feature estimation&quot;</span><span class="p">)</span>
@@ -1418,24 +1662,24 @@ took: 0.35 seconds
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[124]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x1d3633cc9a0&gt;
+&lt;matplotlib.legend.Legend at 0x2bc3fc8c9d0&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/FeatureEstimationDemo_35_1.png" src="_images/FeatureEstimationDemo_35_1.png" />
+<img alt="_images/FeatureEstimationDemo_36_1.png" src="_images/FeatureEstimationDemo_36_1.png" />
 </div>
 </div>
 <p>As seen above this sharpness characteristic is a useful feature for any decoding analysis, and might represent additional signal decoding characteristics. Since in one data batch a different number of peaks and troughs can be detected, the returning feature_arr included features of certain predefined operations on these sharpwave characteristics within this batch. Those are defined in the “estimator” key:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1444,7 +1688,7 @@ took: 0.35 seconds
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="output_area docutils container">

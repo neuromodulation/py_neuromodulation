@@ -163,6 +163,7 @@
             
   <h1>Source code for bandpower</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">diff</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">var</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">log</span> <span class="k">as</span> <span class="n">np_log</span>
 
 
 <div class="viewcode-block" id="get_bandpower_features"><a class="viewcode-back" href="../bandpower.html#bandpower.get_bandpower_features">[docs]</a><span class="k">def</span> <span class="nf">get_bandpower_features</span><span class="p">(</span>
@@ -197,7 +198,8 @@
         <span class="k">for</span> <span class="n">bp_feature</span> <span class="ow">in</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span>
                 <span class="s2">&quot;bandpower_features&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">bp_feature</span> <span class="o">==</span> <span class="s2">&quot;activity&quot;</span><span class="p">:</span>
-                <span class="n">feature_calc</span> <span class="o">=</span> <span class="n">var</span><span class="p">(</span><span class="n">dat_filtered</span><span class="p">[</span><span class="n">ch_idx</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="o">-</span><span class="n">seglength</span><span class="p">:])</span>
+                <span class="n">feature_calc</span> <span class="o">=</span> <span class="n">np_log</span><span class="p">(</span>
+                    <span class="n">var</span><span class="p">(</span><span class="n">dat_filtered</span><span class="p">[</span><span class="n">ch_idx</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="o">-</span><span class="n">seglength</span><span class="p">:]))</span>
             <span class="k">elif</span> <span class="n">bp_feature</span> <span class="o">==</span> <span class="s2">&quot;mobility&quot;</span><span class="p">:</span>
                 <span class="n">deriv_variance</span> <span class="o">=</span> <span class="n">var</span><span class="p">(</span><span class="n">diff</span><span class="p">(</span><span class="n">dat_filtered</span><span class="p">[</span><span class="n">ch_idx</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span>
                                           <span class="o">-</span><span class="n">seglength</span><span class="p">:]))</span>

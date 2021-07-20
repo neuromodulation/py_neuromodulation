@@ -177,7 +177,7 @@
 
 <div class="viewcode-block" id="Features"><a class="viewcode-back" href="../features.html#features.Features">[docs]</a><span class="k">class</span> <span class="nc">Features</span><span class="p">:</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Initialize Feature module</span>
 
 <span class="sd">        Parameters</span>
@@ -187,6 +187,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">=</span> <span class="n">s</span>  <span class="c1"># settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ch_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">array</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;ch_names&quot;</span><span class="p">])[</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;feature_idx&quot;</span><span class="p">]])</span>
         <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;raw_resampling&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;raw_resampling_settings&quot;</span><span class="p">][</span><span class="s2">&quot;resample_freq&quot;</span><span class="p">]</span>
@@ -197,14 +198,14 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="o">/</span> <span class="mi">1000</span> <span class="o">*</span> <span class="n">array</span><span class="p">([</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span>
                     <span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span>
                         <span class="s2">&quot;frequency_ranges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()]))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;segment lengths:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">seglengths</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Segment lengths (ms):&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">seglengths</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">KF_dict</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;bandpass_filter&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">filter_fun</span> <span class="o">=</span> <span class="nb">filter</span><span class="o">.</span><span class="n">calc_band_filters</span><span class="p">(</span><span class="n">f_ranges</span><span class="o">=</span><span class="p">[</span>
-                <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filter_fun</span> <span class="o">=</span> <span class="nb">filter</span><span class="o">.</span><span class="n">calc_band_filters</span><span class="p">(</span>
+                <span class="n">f_ranges</span><span class="o">=</span><span class="p">[</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span>
                     <span class="s2">&quot;frequency_ranges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span> <span class="n">sfreq</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span>
-                <span class="n">filter_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">filter_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fs</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;kalman_filter&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">bp_feature</span> <span class="ow">in</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span>
@@ -243,18 +244,19 @@
 
         <span class="c1"># notch filter data before feature estimation</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;notch_filter&quot;</span><span class="p">]:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">notch_filter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">Fs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span> <span class="n">trans_bandwidth</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
-                                <span class="n">freqs</span><span class="o">=</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">line_noise</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">line_noise</span><span class="p">,</span>
-                                             <span class="bp">self</span><span class="o">.</span><span class="n">line_noise</span><span class="p">),</span>
-                                <span class="n">fir_design</span><span class="o">=</span><span class="s1">&#39;firwin&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                                <span class="n">notch_widths</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">filter_length</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">freqs</span> <span class="o">=</span> <span class="n">arange</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">line_noise</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_noise</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_noise</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">notch_filter</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">Fs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span> <span class="n">trans_bandwidth</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">freqs</span><span class="o">=</span><span class="n">freqs</span><span class="p">,</span>
+                <span class="n">fir_design</span><span class="o">=</span><span class="s1">&#39;firwin&#39;</span><span class="p">,</span> <span class="n">notch_widths</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                <span class="n">filter_length</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;bandpass_filter&quot;</span><span class="p">]:</span>
             <span class="n">dat_filtered</span> <span class="o">=</span> <span class="nb">filter</span><span class="o">.</span><span class="n">apply_filter</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter_fun</span><span class="p">)</span>  <span class="c1"># shape (bands, time)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">dat_filtered</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="c1"># mutliprocessing approach</span>
+        <span class="c1"># multiprocessing approach</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        job = [Process(target=self.est_ch, args=(features_, ch_idx, ch)) for ch_idx, ch in enumerate(self.ch_names)]</span>
 <span class="sd">        _ = [p.start() for p in job]</span>
@@ -266,9 +268,11 @@
             <span class="n">ch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ch_names</span><span class="p">[</span><span class="n">ch_idx</span><span class="p">]</span>
             <span class="n">features_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_ch</span><span class="p">(</span><span class="n">features_</span><span class="p">,</span> <span class="n">ch_idx</span><span class="p">,</span> <span class="n">ch</span><span class="p">,</span> <span class="n">dat_filtered</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">filt_idx</span><span class="p">,</span> <span class="n">filt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span>
-                                            <span class="s2">&quot;frequency_ranges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
-            <span class="n">features_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_connect</span><span class="p">(</span><span class="n">features_</span><span class="p">,</span> <span class="n">filt</span><span class="p">,</span> <span class="n">dat_filtered</span><span class="p">[:,</span> <span class="n">filt_idx</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;pdc&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;dtf&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">filt_idx</span><span class="p">,</span> <span class="n">filt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_ranges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="n">features_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">est_connect</span><span class="p">(</span>
+                    <span class="n">features_</span><span class="p">,</span> <span class="n">filt</span><span class="p">,</span> <span class="n">dat_filtered</span><span class="p">[:,</span> <span class="n">filt_idx</span><span class="p">,</span> <span class="p">:])</span>
 
         <span class="c1"># return dict(features_) # this is necessary for multiprocessing approach</span>
         <span class="k">return</span> <span class="n">features_</span></div>
@@ -301,22 +305,16 @@
                 <span class="n">ch</span><span class="p">,</span> <span class="n">ch_idx</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;raw_hjorth&quot;</span><span class="p">]:</span> 
-            <span class="n">features_</span> <span class="o">=</span> <span class="n">hjorth_raw</span><span class="o">.</span><span class="n">get_hjorth_raw</span><span class="p">(</span><span class="n">features_</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">ch_idx</span><span class="p">,</span> <span class="p">:],</span>
-                                                  <span class="n">ch</span><span class="p">)</span>
+            <span class="n">features_</span> <span class="o">=</span> <span class="n">hjorth_raw</span><span class="o">.</span><span class="n">get_hjorth_raw</span><span class="p">(</span>
+                <span class="n">features_</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">ch_idx</span><span class="p">,</span> <span class="p">:],</span> <span class="n">ch</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;return_raw&quot;</span><span class="p">]:</span>
             <span class="n">features_</span><span class="p">[</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">ch</span><span class="p">,</span> <span class="s1">&#39;raw&#39;</span><span class="p">])]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">ch_idx</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># subsampling</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;sharpwave_analysis&quot;</span><span class="p">]:</span>
-            <span class="c1"># print(&#39;time taken for sharpwave estimation&#39;)</span>
-            <span class="c1"># start = time.process_time()</span>
-            <span class="c1"># take only last resampling_rate</span>
+            <span class="n">features_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">get_sharpwave_features</span><span class="p">(</span>
+                <span class="n">features_</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">ch_idx</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">new_dat_index</span><span class="p">:],</span> <span class="n">ch</span><span class="p">)</span>
 
-            <span class="n">features_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">get_sharpwave_features</span><span class="p">(</span><span class="n">features_</span><span class="p">,</span>
-                                                                <span class="n">data</span><span class="p">[</span><span class="n">ch_idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_dat_index</span><span class="p">:],</span>
-                                                                <span class="n">ch</span><span class="p">)</span>
-
-            <span class="c1"># print(time.process_time() - start)</span>
         <span class="k">return</span> <span class="n">features_</span></div>
 
     <span class="k">def</span> <span class="nf">est_connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features_</span><span class="p">,</span> <span class="n">filt</span><span class="p">,</span> <span class="n">dat_filt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
