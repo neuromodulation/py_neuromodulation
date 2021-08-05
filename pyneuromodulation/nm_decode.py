@@ -143,12 +143,12 @@ class Decoder:
             self.run_analysis = cPickle.load(input)
         
         # get active grid points 
-        self.active_gridpoints = np.where(np.sum(self.run_analysis.proj_cortex_array, axis=(0,2)) !=0)[0]
+        self.active_gridpoints = np.where(np.sum(self.run_analysis.projection.proj_matrix_cortex, axis=1) !=0)[0]
 
         # write data for every active grid point and run the cross validation 
         self.grid_point_ind_data = {}
         for grid_point in self.active_gridpoints:
-            self.grid_point_ind_data[grid_point] = self.run_analysis.proj_cortex_array[:,grid_point,:]  # samples, features
+            self.grid_point_ind_data[grid_point] = np.nan_to_num(self.run_analysis.proj_cortex_array[:,grid_point,:])  # samples, features
 
     def run_CV_grid_points(self, XGB=True):
         """run cross validation across grid points
