@@ -231,7 +231,7 @@ class NM_Reader:
         #plt.xticks([])
         #plt.yticks([])
         plt.savefig(PATH_save, bbox_inches = "tight")
-        plt.show()
+        #plt.show()
         print("Correlation matrix figure saved to " + str(PATH_save))
 
     def plot_epochs_avg(self, feature_file, feature_str_add=None):
@@ -269,5 +269,5 @@ class NM_Reader:
             PATH_save = os.path.join(self.feature_path, feature_file,
                                  "MOV_algined_features_ch_" + str(self.ch_name) + "_" + feature_str_add + ".png")
         plt.savefig(PATH_save, bbox_inches = "tight")
-        plt.show()
+        #plt.show()
         print("Feature epoch average figure saved to: " + str(PATH_save))
