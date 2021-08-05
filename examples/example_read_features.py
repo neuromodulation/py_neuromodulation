@@ -6,7 +6,6 @@ from scipy import stats
 
 PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent
 sys.path.append(os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation'))
-
 import nm_reader as NM_reader
 
 def run_example_read_features():
