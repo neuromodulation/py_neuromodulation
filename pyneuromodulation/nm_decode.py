@@ -75,24 +75,38 @@ class Decoder:
             if len(left_targets) == 1:
                 self.target_ch = left_targets[0]
             else:
-                CLEAN_LEFT = [t_ch for t_ch in left_targets if "CLEAN" in t_ch ]
+                CLEAN_LEFT = [t_ch for t_ch in left_targets if ("CLEAN" in t_ch) or 
+                              ("squared" in t_ch)]
                 if len(CLEAN_LEFT) == 1:
                     self.target_ch = CLEAN_LEFT[0]
                 else:
-                    # take first target
-                    self.target_ch = self.df_M1[self.df_M1["target"] == 1]["name"].iloc[0]
+                    # search for "clean" or "squared" channel without laterality included
+                    ch_without_lat = [t_ch for t_ch in list(self.df_M1[self.df_M1["target"] == 1]["name"]) 
+                                      if ("CLEAN" in t_ch) or ("squared" in t_ch)]
+                    if len(ch_without_lat) != 0:
+                        self.target_ch = ch_without_lat[0]
+                    else:
+                        # take first target
+                        self.target_ch = self.df_M1[self.df_M1["target"] == 1]["name"].iloc[0]
         else: # left session
             # check if contralateral right (optimal clean) channel exists
             right_targets = [t_ch for t_ch in target_channels if "RIGHT" in t_ch]
             if len(right_targets) == 1:
                 self.target_ch = right_targets[0]
             else:
-                CLEAN_RIGHT = [t_ch for t_ch in right_targets if "CLEAN" in t_ch ]
+                CLEAN_RIGHT = [t_ch for t_ch in right_targets if ("CLEAN" in t_ch) or 
+                              ("squared" in t_ch)]
                 if len(CLEAN_RIGHT) == 1:
                     self.target_ch = CLEAN_RIGHT[0]
                 else:
-                    # take first target
-                    self.target_ch = self.df_M1[self.df_M1["target"] == 1]["name"].iloc[0]
+                    # search for "clean" or "squared" channel without laterality included
+                    ch_without_lat = [t_ch for t_ch in list(self.df_M1[self.df_M1["target"] == 1]["name"]) 
+                                      if ("CLEAN" in t_ch) or ("squared" in t_ch)]
+                    if len(ch_without_lat) != 0:
+                        self.target_ch = ch_without_lat[0]
+                    else:
+                        # take first target
+                        self.target_ch = self.df_M1[self.df_M1["target"] == 1]["name"].iloc[0]
 
         # for classification dependin on the label, set to binary label 
         self.label = np.nan_to_num(np.array(self.features[self.target_ch])) > 0.3
