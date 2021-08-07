@@ -169,7 +169,7 @@ class Decoder:
 
         Parameters
         ----------
-        XGB (boolean): 
+        XGB (boolean):
             if true split data into additinal validation, and run class weighted CV
         """
         self.gridpoint_ind_pr = {}
@@ -224,6 +224,9 @@ class Decoder:
             model_train = clone(self.model)
             X_train, y_train = data[train_index, :], label[train_index]
             X_test, y_test = data[test_index], label[test_index]
+
+            if y_train.sum() == 0:  # only one class present
+                continue
 
             # optionally split training data also into train and validation
             # for XGBOOST
