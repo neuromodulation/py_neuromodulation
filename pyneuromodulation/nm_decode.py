@@ -156,8 +156,13 @@ class Decoder:
         with open(PATH_ML_, 'rb') as input:  # Overwrites any existing file.
             self.run_analysis = cPickle.load(input)
         
-        # get active grid points 
+        # get active grid points
         self.active_gridpoints = np.where(np.sum(self.run_analysis.projection.proj_matrix_cortex, axis=1) !=0)[0]
+
+        # set grid point feature names
+        ch = self.run_analysis.features.ch_names[0]
+        l_features = list(self.run_analysis.feature_arr.columns)
+        self.feature_names  = [f[len(ch)+1:] for f in l_features if f.startswith(ch)]
 
         # write data for every active grid point and run the cross validation 
         self.grid_point_ind_data = {}
