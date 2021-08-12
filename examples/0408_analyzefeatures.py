@@ -1,11 +1,11 @@
-import sys 
+import sys
 import os
 import numpy as np
 from pathlib import Path
 from scipy import stats
 import multiprocessing
 from sklearn import linear_model
-from sklearn import metrics 
+from sklearn import metrics
 from sklearn import model_selection
 import xgboost
 import _pickle as cPickle
@@ -15,28 +15,24 @@ import matplotlib
 import bids
 from bids import BIDSLayout
 
-
-PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent
-sys.path.append(os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation'))
-
-import nm_reader as NM_reader
-import nm_decode
-import start_BIDS
-import settings as nm_settings
+from pyneuromodulation import nm_reader as NM_reader
+from pyneuromodulation import nm_decode
+from pyneuromodulation import start_BIDS
+from pyneuromodulation import settings as nm_settings
 
 
 class FeatureReadWrapper:
 
     def __init__(self, feature_path="C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\try_0408",
-                feature_file=None, plt_cort_projection=False,
-                read_features=True) -> None:
-        """FeatureReadWrapper enables a lot of analysis on top of NM_reader and NM_Decoder
+                 feature_file=None, plt_cort_projection=False,
+                 read_features=True) -> None:
+        """FeatureReadWrapper enables analysis methods on top of NM_reader and NM_Decoder
 
         Parameters
         ----------
         feature_path : str, optional
             Path to py_neuromodulation estimated feature runs, where each feature is a folder,
-            by default "C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408"
+            by default "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\try_0408"
         feature_file : str, optional
             specific feature run, if None it is set to the first feature folder in feature_path
         plt_cort_projection : bool, optional
@@ -52,7 +48,7 @@ class FeatureReadWrapper:
             self.feature_file = self.feature_list[0]
         else:
             self.feature_file = feature_file
-        
+
         self.settings = self.nm_reader.read_settings(feature_file)
         self.ch_names = self.settings["ch_names"]
         self.ch_names_ECOG = [ch_name for ch_name in self.ch_names if "ECOG" in ch_name]
@@ -60,15 +56,15 @@ class FeatureReadWrapper:
         # read run_analysis
         self.run_analyzer = self.nm_reader.read_run_analyzer()
 
-        self.PATH_PLOT = os.path.join(PATH_PYNEUROMODULATION, 'plots')
+        self.PATH_PLOT = os.path.abspath("plots")
         self.nm_reader.read_plot_modules(self.PATH_PLOT)
         if plt_cort_projection is True:
             self.nm_reader.plot_cortical_projection()
 
         _ = self.nm_reader.read_M1(self.feature_file)
-        
+
         target_names = list(self.nm_reader.df_M1[self.nm_reader.df_M1["target"] == 1]["name"])
-        target_clean = [target for target in target_names if ("clean" in target) or \
+        target_clean = [target for target in target_names if ("clean" in target) or
                         ("squared" in target) or ("CLEAN" in target)]
         if len(target_clean) == 0:
             target = target_names[0]
@@ -88,20 +84,20 @@ class FeatureReadWrapper:
         if read_features is True:
             _ = self.nm_reader.read_features(self.feature_file)
             self.nm_reader.label = np.nan_to_num(np.array(self.nm_reader.read_label(target))) > 0.3
-    
+
     def read_plotting_modules(self):
         self.faces = io.loadmat(os.path.join(self.PATH_PLOT, 'faces.mat'))
         self.vertices = io.loadmat(os.path.join(self.PATH_PLOT, 'Vertices.mat'))
         self.grid = io.loadmat(os.path.join(self.PATH_PLOT, 'grid.mat'))['grid']
         self.stn_surf = io.loadmat(os.path.join(self.PATH_PLOT, 'STN_surf.mat'))
-        self.x_ver = self.stn_surf['vertices'][::2,0]
-        self.y_ver = self.stn_surf['vertices'][::2,1]
-        self.x_ecog = self.vertices['Vertices'][::1,0]
-        self.y_ecog = self.vertices['Vertices'][::1,1]
-        self.z_ecog = self.vertices['Vertices'][::1,2]
-        self.x_stn = self.stn_surf['vertices'][::1,0]
-        self.y_stn = self.stn_surf['vertices'][::1,1]
-        self.z_stn = self.stn_surf['vertices'][::1,2]
+        self.x_ver = self.stn_surf['vertices'][::2, 0]
+        self.y_ver = self.stn_surf['vertices'][::2, 1]
+        self.x_ecog = self.vertices['Vertices'][::1, 0]
+        self.y_ecog = self.vertices['Vertices'][::1, 1]
+        self.z_ecog = self.vertices['Vertices'][::1, 2]
+        self.x_stn = self.stn_surf['vertices'][::1, 0]
+        self.y_stn = self.stn_surf['vertices'][::1, 1]
+        self.z_stn = self.stn_surf['vertices'][::1, 2]
 
     def plot_subject_grid_ch_performance(self, sub, performance_dict=None, plt_grid=False):
         """plot subject specific performance for individual channeal and optional grid points
@@ -115,16 +111,16 @@ class FeatureReadWrapper:
         plt_grid : bool, optional
             True to plot grid performances, by default False
         """
-        #if performance_dict is None:
-        #    with open(r'C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\META\Beijing_out.p', 'rb') as input: 
+        # if performance_dict is None:
+        #    with open(r'C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\META\Beijing_out.p', 'rb') as input:
         #        performance_dict = cPickle.load(input)
-        
+
         ecog_strip_performance = []
         ecog_coords_strip = []
         cortex_grid = []
         grid_performance = []
 
-        ch_ =  list(performance_dict[sub].keys())
+        ch_ = list(performance_dict[sub].keys())
         for ch in ch_:
             if 'grid_' not in ch:
                 ecog_coords_strip.append(performance_dict[sub][ch]["coord"])
@@ -132,24 +128,24 @@ class FeatureReadWrapper:
             elif plt_grid is True and 'grid_' in ch:
                 cortex_grid.append(performance_dict[sub][ch]["coord"])
                 grid_performance.append(performance_dict[sub][ch]["performance"])
-        
+
         ecog_coords_strip = np.vstack(ecog_coords_strip).T
-        if ecog_coords_strip[0,0] > 0:  # it's on the right side GIVEN IT'S CONTRALATERAL
-            ecog_coords_strip[0,:] *= -1
-        
-        fig, axes = plt.subplots(1,1, facecolor=(1,1,1), \
-                                    figsize=(14,9))#, dpi=300)
+        if ecog_coords_strip[0, 0] > 0:  # it's on the right side GIVEN IT'S CONTRALATERAL
+            ecog_coords_strip[0, :] *= -1
+
+        fig, axes = plt.subplots(1, 1, facecolor=(1, 1, 1),
+                                 figsize=(14, 9))  # , dpi=300)
         axes.scatter(self.x_ecog, self.y_ecog, c="gray", s=0.001)
         axes.axes.set_aspect('equal', anchor='C')
 
-        pos_elec = axes.scatter(ecog_coords_strip[0,:],
-                                ecog_coords_strip[1,:], c=ecog_strip_performance, 
+        pos_elec = axes.scatter(ecog_coords_strip[0, :],
+                                ecog_coords_strip[1, :], c=ecog_strip_performance,
                                 s=50, alpha=0.8, cmap="viridis", marker="x")
 
         if plt_grid is True:
             cortex_grid = np.array(cortex_grid).T
-            pos_ecog = axes.scatter(cortex_grid[0,:],
-                                    cortex_grid[1,:], c=grid_performance, 
+            pos_ecog = axes.scatter(cortex_grid[0, :],
+                                    cortex_grid[1, :], c=grid_performance,
                                     s=30, alpha=0.8, cmap="viridis")
 
         plt.axis('off')
@@ -179,14 +175,13 @@ class FeatureReadWrapper:
         print("plotting feature target averaged")
         self.nm_reader.plot_epochs_avg(self.feature_file, feature_str_add="bandpass")
 
-
         # Second case: filter for sharpwave prominence features only
         dat_ch = self.nm_reader.read_channel_data(ch_name, read_sharpwave_prominence_only=True)
 
         # estimating epochs, with shape (epochs,samples,channels,features)
         X_epoch, y_epoch = self.nm_reader.get_epochs_ch(epoch_len=4,
-                                                    sfreq=self.settings["sampling_rate_features"],
-                                                    threshold=0.1)
+                                                        sfreq=self.settings["sampling_rate_features"],
+                                                        threshold=0.1)
         if plt_corr_matr is True:
             print("plotting feature covariance matrix")
             self.nm_reader.plot_corr_matrix(self.feature_file,
@@ -226,10 +221,10 @@ class FeatureReadWrapper:
 
     def read_ind_channel_results(self, performance_dict, subject_name=None,
                                  feature_file=None, DEFAULT_PERFORMANCE=0.5):
-        if feature_file is not None: 
+        if feature_file is not None:
             self.feature_file = feature_file
 
-        PATH_ML_ = os.path.join(self.feature_path, self.feature_file, 
+        PATH_ML_ = os.path.join(self.feature_path, self.feature_file,
                                 self.feature_file + "_LM_ML_RES.p")
 
         # read ML results
@@ -238,8 +233,9 @@ class FeatureReadWrapper:
 
         performance_dict[subject_name] = {}
 
-        # channels 
-        ch_to_use = list(np.array(ML_res.settings["ch_names"])[np.where(np.array(ML_res.settings["ch_types"]) == 'ecog')[0]])
+        # channels
+        ch_to_use = list(np.array(ML_res.settings["ch_names"])
+                         [np.where(np.array(ML_res.settings["ch_types"]) == 'ecog')[0]])
         for ch in ch_to_use:
 
             performance_dict[subject_name][ch] = {}  # should be 7 for Berlin
@@ -249,8 +245,8 @@ class FeatureReadWrapper:
             else:
                 cortex_name = "cortex_left"
 
-            idx_ = [idx for idx, i in enumerate(ML_res.settings["coord"][cortex_name]["ch_names"]) 
-                        if ch.startswith(i+'-')][0]
+            idx_ = [idx for idx, i in enumerate(ML_res.settings["coord"][cortex_name]["ch_names"])
+                    if ch.startswith(i+'-')][0]
             coords = ML_res.settings["coord"][cortex_name]["positions"][idx_]
             performance_dict[subject_name][ch]["coord"] = coords
             performance_dict[subject_name][ch]["performance"] = np.mean(ML_res.ch_ind_pr[ch]["score_test"])
@@ -259,9 +255,11 @@ class FeatureReadWrapper:
         performance_dict[subject_name]["active_gridpoints"] = ML_res.active_gridpoints
         for grid_point in range(len(ML_res.settings["grid_cortex"])):
             performance_dict[subject_name]["grid_"+str(grid_point)] = {}
-            performance_dict[subject_name]["grid_"+str(grid_point)]["coord"] = ML_res.settings["grid_cortex"][grid_point]
+            performance_dict[subject_name]["grid_"+str(grid_point)]["coord"] = \
+                ML_res.settings["grid_cortex"][grid_point]
             if grid_point in ML_res.active_gridpoints:
-                performance_dict[subject_name]["grid_"+str(grid_point)]["performance"] = np.mean(ML_res.gridpoint_ind_pr[grid_point]["score_test"])
+                performance_dict[subject_name]["grid_"+str(grid_point)]["performance"] = \
+                    np.mean(ML_res.gridpoint_ind_pr[grid_point]["score_test"])
             else:
                 # set non interpolated grid point to default performance
                 performance_dict[subject_name]["grid_"+str(grid_point)]["performance"] = DEFAULT_PERFORMANCE
@@ -273,14 +271,11 @@ def multiprocess_pipeline_run_wrapper(PATH_RUN):
     if type(PATH_RUN) is bids.layout.models.BIDSFile:
         PATH_RUN = PATH_RUN.path
 
-    PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent
-    settings_path = os.path.join(PATH_PYNEUROMODULATION, 'examples',
-                                 'settings.json')
-    settings_wrapper = nm_settings.SettingsWrapper(settings_path=settings_path)
+    settings_wrapper = nm_settings.SettingsWrapper(settings_path='settings.json')
 
     start_BIDS.est_features_run(PATH_RUN)
     feature_path = settings_wrapper.settings["out_path"]
-    feature_file = os.path.basename(PATH_RUN)[:-5]
+    feature_file = os.path.basename(PATH_RUN)[:-5]  # cut off ".vhdr"
 
     feature_wrapper = FeatureReadWrapper(feature_path, feature_file,
                                          plt_cort_projection=True)
@@ -290,8 +285,9 @@ def multiprocess_pipeline_run_wrapper(PATH_RUN):
     feature_wrapper.run_ML_LM()
 
     performance_dict = {}
-    # subject_name is different for other cohort, save subject name in settings
-    subject_name = feature_wrapper.feature_file[4:10]  
+
+    # subject_name is different across cohorts
+    subject_name = feature_wrapper.feature_file[4:10]
     performance_dict = feature_wrapper.read_ind_channel_results(performance_dict,
                                                                 subject_name)
 
@@ -329,8 +325,8 @@ def run_cohort(cohort="Pittsburgh"):
         if feature_file not in folders:
             run_files_left.append(run_file)
 
-    #multiprocess_pipeline_run_wrapper(run_files[0])
-    pool = multiprocessing.Pool(processes=55)  # most on Ryzen 2990WX is 63 
+    # multiprocess_pipeline_run_wrapper(run_files[0])
+    pool = multiprocessing.Pool(processes=55)  # most on Ryzen 2990WX is 63
     pool.map(multiprocess_pipeline_run_wrapper, run_files_left)
 
 
@@ -341,7 +337,6 @@ def read_cohort(feature_path, cohort):
     performance_dict = {}
 
     for feature_file in feature_paths:
-        
         feature_wrapper = FeatureReadWrapper(feature_path, feature_file,
                                              plt_cort_projection=False, read_features=False)
         subject_name = feature_file[feature_file.find("sub-"):feature_file.find("_ses")]
@@ -349,7 +344,8 @@ def read_cohort(feature_path, cohort):
         subject_name = feature_file[:-5]
         performance_dict = feature_wrapper.read_ind_channel_results(performance_dict,
                                                                     subject_name)
-    np.save('cohort_'+cohort+'.npy', performance_dict) 
+    np.save('cohort_'+cohort+'.npy', performance_dict)
+
 
 def cohort_wrapper_read_cohort():
     cohorts = ["Pittsburgh", "Beijing", "Berlin"]
@@ -357,10 +353,11 @@ def cohort_wrapper_read_cohort():
     for cohort in cohorts:
         read_cohort(os.path.join(feature_path, cohort), cohort)
 
+
 def read_all_grid_points(grid_point_all, feature_path, feature_file, cohort):
-    
+
     feature_wrapper = FeatureReadWrapper(feature_path, feature_file,
-                                            plt_cort_projection=False)
+                                         plt_cort_projection=False)
 
     model = linear_model.LogisticRegression(class_weight="balanced")
     decoder = nm_decode.Decoder(feature_path=feature_path,
@@ -375,13 +372,13 @@ def read_all_grid_points(grid_point_all, feature_path, feature_file, cohort):
     decoder.target_ch = feature_wrapper.label_name  # label name
     # run estimations for channels and grid points individually
     # currently the MLp file get's saved only, and overwrited previous files
-    #decoder.set_data_ind_channels()
+    # decoder.set_data_ind_channels()
     decoder.set_data_grid_points()
     subject_name = feature_file[feature_file.find("sub-")+4:feature_file.find("_ses")]
     sess_name = feature_file[feature_file.find("ses-")+4:feature_file.find("_task")]
     task_name = feature_file[feature_file.find("task-")+5:feature_file.find("_run")]
     run_number = feature_file[feature_file.find("run-")+4:feature_file.find("_ieeg")]
-    
+
     for grid_point in list(decoder.grid_point_ind_data.keys()):
         if grid_point not in grid_point_all:
             grid_point_all[grid_point] = {}
@@ -396,7 +393,7 @@ def read_all_grid_points(grid_point_all, feature_path, feature_file, cohort):
         grid_point_all[grid_point][cohort][subject_name][feature_file]["label"] = decoder.label
         grid_point_all[grid_point][cohort][subject_name][feature_file]["label_name"] = decoder.target_ch
 
-        # check laterality 
+        # check laterality
         lat = "CON"  # Beijing is always contralateral
         # Pittsburgh Subjects
         if ("LEFT" in decoder.target_ch and "LEFT" in decoder.run_analysis.features.ch_names[0]) or \
@@ -433,7 +430,6 @@ def run_cohort_leave_one_patient_out_CV():
     performance_leave_one_patient_out = {}
 
     for cohort in ["Pittsburgh", "Beijing", "Berlin"]:
-        
         performance_leave_one_patient_out[cohort] = {}
 
         for grid_point in list(grid_point_all.keys()):
@@ -442,7 +438,7 @@ def run_cohort_leave_one_patient_out_CV():
             if len(list(grid_point_all[grid_point][cohort].keys())) <= 1:
                 continue  # cannot do leave one out prediction with a single subject
             performance_leave_one_patient_out[cohort][grid_point] = {}
-           
+
             for subject_test in list(grid_point_all[grid_point][cohort].keys()):
                 X_test = []
                 y_test = []
@@ -451,27 +447,29 @@ def run_cohort_leave_one_patient_out_CV():
                         continue
                     X_test.append(grid_point_all[grid_point][cohort][subject_test][run]["data"])
                     y_test.append(grid_point_all[grid_point][cohort][subject_test][run]["label"])
-                if len(X_test) >1:
+                if len(X_test) > 1:
                     X_test = np.concatenate(X_test, axis=0)
                     y_test = np.concatenate(y_test, axis=0)
                 else:
-                    X_test = X_test[0]; y_test = y_test[0]
+                    X_test = X_test[0]
+                    y_test = y_test[0]
                 X_train = []
                 y_train = []
                 for subject_train in list(grid_point_all[grid_point][cohort].keys()):
-                    if subject_test == subject_train: 
+                    if subject_test == subject_train:
                         continue
                     for run in list(grid_point_all[grid_point][cohort][subject_train].keys()):
                         if grid_point_all[grid_point][cohort][subject_train][run]["lat"] != "CON":
                             continue
                         X_train.append(grid_point_all[grid_point][cohort][subject_train][run]["data"])
                         y_train.append(grid_point_all[grid_point][cohort][subject_train][run]["label"])
-                if len(X_test) >1:
+                if len(X_test) > 1:
                     X_train = np.concatenate(X_train, axis=0)
                     y_train = np.concatenate(y_train, axis=0)
                 else:
-                    X_train = X_train[0]; y_train = y_train[0]
-                
+                    X_train = X_train[0]
+                    y_train = y_train[0]
+
                 # run here ML estimation
                 model = linear_model.LogisticRegression(class_weight="balanced")
                 model.fit(X_train, y_train)
@@ -486,9 +484,9 @@ def run_cohort_leave_one_patient_out_CV():
                     metrics.balanced_accuracy_score(y_test, y_te_pr)
                 performance_leave_one_patient_out[cohort][grid_point][subject_test]["performance_train"] = \
                     metrics.balanced_accuracy_score(y_train, y_tr_pr)
-    
+
     # add the cortex grid for plotting
-    feature_path="C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\try_0408\\Beijing"
+    feature_path = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\try_0408\\Beijing"
     nm_reader = NM_reader.NM_Reader(feature_path)
     feature_file = nm_reader.get_feature_list()[0]
     grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
@@ -502,19 +500,20 @@ def run_cohort_leave_one_cohort_out_CV():
     performance_leave_one_cohort_out = {}
 
     for cohort_test in ["Pittsburgh", "Beijing", "Berlin"]:
-        
-        if cohort_test not in  performance_leave_one_cohort_out:
-               performance_leave_one_cohort_out[cohort_test] = {}
+
+        if cohort_test not in performance_leave_one_cohort_out:
+            performance_leave_one_cohort_out[cohort_test] = {}
 
         for grid_point in list(grid_point_all.keys()):
             if cohort_test not in grid_point_all[grid_point]:
                 continue
-            if len(list(grid_point_all[grid_point].keys())) ==1:
+            if len(list(grid_point_all[grid_point].keys())) == 1:
                 continue  # cannot do leave one cohort prediction with a single cohort
-            
-            X_train = []; y_train = []
+
+            X_train = []
+            y_train = []
             for cohort_train in ["Pittsburgh", "Beijing", "Berlin"]:
-                if cohort_test == cohort_train: 
+                if cohort_test == cohort_train:
                     continue
                 if cohort_train not in grid_point_all[grid_point]:
                     continue
@@ -524,27 +523,30 @@ def run_cohort_leave_one_cohort_out_CV():
                             continue
                         X_train.append(grid_point_all[grid_point][cohort_train][subject_test][run]["data"])
                         y_train.append(grid_point_all[grid_point][cohort_train][subject_test][run]["label"])
-            if len(X_train) >1:
+            if len(X_train) > 1:
                 X_train = np.concatenate(X_train, axis=0)
                 y_train = np.concatenate(y_train, axis=0)
             else:
-                X_train = X_train[0]; y_train = y_train[0]
+                X_train = X_train[0]
+                y_train = y_train[0]
             model = linear_model.LogisticRegression(class_weight="balanced")
             model.fit(X_train, y_train)
 
             performance_leave_one_cohort_out[cohort_test][grid_point] = {}
             for subject_test in list(grid_point_all[grid_point][cohort_test].keys()):
-                X_test = []; y_test = []
+                X_test = []
+                y_test = []
                 for run in list(grid_point_all[grid_point][cohort_test][subject_test].keys()):
                     if grid_point_all[grid_point][cohort_test][subject_test][run]["lat"] != "CON":
                         continue
                     X_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["data"])
                     y_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["label"])
-                if len(X_test) >1:
+                if len(X_test) > 1:
                     X_test = np.concatenate(X_test, axis=0)
                     y_test = np.concatenate(y_test, axis=0)
                 else:
-                    X_test = X_test[0]; y_test = y_test[0]
+                    X_test = X_test[0]
+                    y_test = y_test[0]
 
                 y_tr_pr = model.predict(X_train)
                 y_te_pr = model.predict(X_test)
@@ -559,7 +561,7 @@ def run_cohort_leave_one_cohort_out_CV():
                     metrics.balanced_accuracy_score(y_train, y_tr_pr)
 
     # add the cortex grid for plotting
-    feature_path="C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\try_0408\\Beijing"
+    feature_path = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\try_0408\\Beijing"
     nm_reader = NM_reader.NM_Reader(feature_path)
     feature_file = nm_reader.get_feature_list()[0]
     grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
@@ -571,8 +573,7 @@ if __name__ == "__main__":
 
     #run_cohort_leave_one_patient_out_CV()
     run_cohort_leave_one_cohort_out_CV()
-    #run single run
-
+    # run single run
     # PATH_RUN = r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\Data\Pittsburgh\sub-000\ses-right\ieeg\sub-000_ses-right_task-force_run-3_ieeg.vhdr"
     # multiprocess_pipeline_run_wrapper(PATH_RUN)
-    
+
