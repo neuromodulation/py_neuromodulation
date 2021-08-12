@@ -7,7 +7,7 @@ from pyneuromodulation import settings as nm_settings
 
 
 def est_features_run(
-        PATH_RUN, PATH_M1=None, PATH_SETTINGS=None, 
+        PATH_RUN, PATH_M1=None, PATH_SETTINGS=None,
         PATH_ANNOTATIONS=None, verbose=True) -> None:
     """Start feature estimation by reading settings, creating or reading
     df_M1 file with default rereference function (ECoG CAR; depth LFP bipolar)
@@ -26,14 +26,9 @@ def est_features_run(
 
     # read and test settings first to obtain BIDS path
     if PATH_SETTINGS is None:
-        PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent
-        settings_path = os.path.join(
-            PATH_PYNEUROMODULATION, 'examples', 'settings.json')
-        settings_wrapper = nm_settings.SettingsWrapper(
-            settings_path=settings_path)
+        settings_wrapper = nm_settings.SettingsWrapper('settings.json')
     else:
-        settings_wrapper = nm_settings.SettingsWrapper(
-            settings_path=PATH_SETTINGS)
+        settings_wrapper = nm_settings.SettingsWrapper(settings_path=PATH_SETTINGS)
 
     # read BIDS data
     raw_arr, raw_arr_data, fs, line_noise = IO.read_BIDS_data(
@@ -61,7 +56,7 @@ def est_features_run(
     else:
         projection_ = None
 
-    # read df_M1 / create M1 if None specified
+    # read df_M1 or create M1 if None specified
     settings_wrapper.set_M1(m1_path=PATH_M1, ch_names=raw_arr.ch_names,
                             ch_types=raw_arr.get_channel_types())
     settings_wrapper.set_fs_line_noise(fs, line_noise)
