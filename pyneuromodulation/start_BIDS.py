@@ -2,15 +2,8 @@ import os
 from pathlib import Path
 import mne
 
-import define_M1
-import features
-import generator
-import rereference
-import resample
-import run_analysis
-import settings as nm_settings
-import IO
-import projection
+from pyneuromodulation import IO, projection, generator, rereference, run_analysis, features, resample
+from pyneuromodulation import settings as nm_settings
 
 
 def est_features_run(
@@ -74,9 +67,9 @@ def est_features_run(
     settings_wrapper.set_fs_line_noise(fs, line_noise)
 
     # optionally reduce timing for faster test completion
-    #LIMIT_LOW = 0 # start at 100s 
-    #LIMIT_HIGH = 120000# add 20 s data analysis
-    #raw_arr_data = raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
+    # LIMIT_LOW = 0 # start at 100s
+    # LIMIT_HIGH = 120000# add 20 s data analysis
+    # raw_arr_data = raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
 
     # select only ECoG
     settings_wrapper.df_M1.loc[(settings_wrapper.df_M1["type"] == "seeg") |

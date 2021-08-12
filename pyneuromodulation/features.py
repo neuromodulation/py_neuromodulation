@@ -3,12 +3,7 @@ from numpy import arange, array, ceil, floor, where
 
 from mne.filter import notch_filter
 
-import bandpower
-import filter
-import hjorth_raw
-import kalmanfilter
-import coherence
-import sharpwaves
+from pyneuromodulation import bandpower, filter, hjorth_raw, kalmanfilter, sharpwaves, coherence
 
 
 class Features:
@@ -140,7 +135,7 @@ class Features:
                 features_, self.s, self.seglengths, dat_filtered, self.KF_dict,
                 ch, ch_idx)
 
-        if self.s["methods"]["raw_hjorth"]: 
+        if self.s["methods"]["raw_hjorth"]:
             features_ = hjorth_raw.get_hjorth_raw(
                 features_, data[ch_idx, :], ch)
 

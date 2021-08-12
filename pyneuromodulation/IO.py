@@ -120,13 +120,13 @@ def save_features_and_settings(
             settings_wrapper.settings["coord"]["subcortex_left"]["positions"].tolist()
 
     PATH_OUT = os.path.join(settings_wrapper.settings["out_path"], folder_name,
-                           folder_name + '_SETTINGS.json')
+                            folder_name + '_SETTINGS.json')
     with open(PATH_OUT, 'w') as f:
         json.dump(settings_wrapper.settings, f, indent=4)
     print("settings.json saved to " + str(PATH_OUT))
 
     PATH_OUT = os.path.join(settings_wrapper.settings["out_path"], folder_name,
-                                  folder_name + "_DF_M1.csv")
+                            folder_name + "_DF_M1.csv")
     settings_wrapper.df_M1.to_csv(PATH_OUT)
     print("df_M1.csv saved to " + str(PATH_OUT))
 

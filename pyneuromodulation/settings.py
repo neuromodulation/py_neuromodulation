@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-import define_M1
+from pyneuromodulation import define_M1
 
 
 class SettingsWrapper:
@@ -54,7 +54,7 @@ class SettingsWrapper:
             self.settings["coord_names"] = np.array(
                 list(dict(raw_arr.get_montage().get_positions()
                           ["ch_pos"]).keys())).tolist()
-                   
+
             self.settings["coord"] = {}
             self.settings["coord"]["cortex_right"] = {}
             self.settings["coord"]["cortex_left"] = {}
@@ -67,33 +67,40 @@ class SettingsWrapper:
                 and ("ECOG" in self.settings["coord_names"][ch_idx])]
 
             # multiply by 1000 to get m instead of mm
-            self.settings["coord"]["cortex_right"]["positions"] = 1000*np.array([ch for ch_idx, ch in enumerate(self.settings["coord_list"])
-                                                                   if (self.settings["coord_list"][ch_idx][0] > 0) and
-                                                                   ("ECOG" in self.settings["coord_names"][ch_idx])])
+            self.settings["coord"]["cortex_right"]["positions"] = \
+                1000*np.array([ch for ch_idx, ch in enumerate(self.settings["coord_list"])
+                              if (self.settings["coord_list"][ch_idx][0] > 0) and
+                              ("ECOG" in self.settings["coord_names"][ch_idx])])
 
-            self.settings["coord"]["cortex_left"]["ch_names"] = [self.settings["coord_names"][ch_idx] for ch_idx, ch in
-                                                                 enumerate(self.settings["coord_list"]) if
-                                                                 (self.settings["coord_list"][ch_idx][0] <= 0)
-                                                                 and ("ECOG" in self.settings["coord_names"][ch_idx])]
-            self.settings["coord"]["cortex_left"]["positions"] = 1000*np.array([ch for ch_idx, ch in enumerate(self.settings["coord_list"])
-                                                                  if (self.settings["coord_list"][ch_idx][0] <= 0) and
-                                                                  ("ECOG" in self.settings["coord_names"][ch_idx])])
+            self.settings["coord"]["cortex_left"]["ch_names"] = \
+                [self.settings["coord_names"][ch_idx] for ch_idx, ch in
+                 enumerate(self.settings["coord_list"]) if
+                 (self.settings["coord_list"][ch_idx][0] <= 0)
+                 and ("ECOG" in self.settings["coord_names"][ch_idx])]
+            self.settings["coord"]["cortex_left"]["positions"] = \
+                1000*np.array([ch for ch_idx, ch in enumerate(self.settings["coord_list"])
+                              if (self.settings["coord_list"][ch_idx][0] <= 0) and
+                              ("ECOG" in self.settings["coord_names"][ch_idx])])
 
-            self.settings["coord"]["subcortex_right"]["ch_names"] = [self.settings["coord_names"][ch_idx] for ch_idx, ch in
-                                                                     enumerate(self.settings["coord_list"]) if
-                                                                     (self.settings["coord_list"][ch_idx][0] > 0)
-                                                                      and ("LFP" in self.settings["coord_names"][ch_idx])]
-            self.settings["coord"]["subcortex_right"]["positions"] = 1000*np.array([ch for ch_idx, ch in enumerate(self.settings["coord_list"])
-                                                                      if (self.settings["coord_list"][ch_idx][0] > 0) and
-                                                                      ("LFP" in self.settings["coord_names"][ch_idx])])
+            self.settings["coord"]["subcortex_right"]["ch_names"] = \
+                [self.settings["coord_names"][ch_idx] for ch_idx, ch in
+                 enumerate(self.settings["coord_list"]) if
+                 (self.settings["coord_list"][ch_idx][0] > 0)
+                 and ("LFP" in self.settings["coord_names"][ch_idx])]
+            self.settings["coord"]["subcortex_right"]["positions"] = \
+                1000*np.array([ch for ch_idx, ch in enumerate(self.settings["coord_list"])
+                               if (self.settings["coord_list"][ch_idx][0] > 0) and
+                               ("LFP" in self.settings["coord_names"][ch_idx])])
 
-            self.settings["coord"]["subcortex_left"]["ch_names"] = [self.settings["coord_names"][ch_idx] for ch_idx, ch in
-                                                                     enumerate(self.settings["coord_list"]) if
-                                                                     (self.settings["coord_list"][ch_idx][0] <= 0)
-                                                                      and ("LFP" in self.settings["coord_names"][ch_idx])]
-            self.settings["coord"]["subcortex_left"]["positions"] = 1000*np.array([ch for ch_idx, ch in enumerate(self.settings["coord_list"])
-                                                                      if (self.settings["coord_list"][ch_idx][0] <= 0) and
-                                                                      ("LFP" in self.settings["coord_names"][ch_idx])])
+            self.settings["coord"]["subcortex_left"]["ch_names"] = \
+                [self.settings["coord_names"][ch_idx] for ch_idx, ch in
+                 enumerate(self.settings["coord_list"]) if
+                 (self.settings["coord_list"][ch_idx][0] <= 0)
+                 and ("LFP" in self.settings["coord_names"][ch_idx])]
+            self.settings["coord"]["subcortex_left"]["positions"] = \
+                1000*np.array([ch for ch_idx, ch in enumerate(self.settings["coord_list"])
+                              if (self.settings["coord_list"][ch_idx][0] <= 0) and
+                              ("LFP" in self.settings["coord_names"][ch_idx])])
             PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent
             cortex_tsv = os.path.join(
                 PATH_PYNEUROMODULATION, 'examples', 'grid_cortex.tsv')
@@ -162,8 +169,8 @@ class SettingsWrapper:
                 s = json.load(json_file)
             assert (isinstance(s, dict))
 
-        #assert (os.path.isdir(s["BIDS_path"]))
-        #assert (os.path.isdir(s["out_path"]))
+        # assert (os.path.isdir(s["BIDS_path"]))
+        # assert (os.path.isdir(s["out_path"]))
         assert (isinstance(s["sampling_rate_features"], (float, int)))
         if s["methods"]["project_cortex"] is True:
             assert (isinstance(s["project_cortex_settings"]["max_dist"], (float, int)))
@@ -200,16 +207,14 @@ class SettingsWrapper:
             assert (s["kalman_filter_settings"]["frequency_bands"]), \
                 "No frequency bands specified for Kalman filter."
             assert (isinstance(s["kalman_filter_settings"]["frequency_bands"],
-                            list)), "Frequency bands for Kalman filter must " \
-                                    "be specified as a list."
+                    list)), "Frequency bands for Kalman filter must be specified as a list."
             assert (item in s["bandpass_filter_settings"][
                 "frequency_ranges"].values() for item in s[
                 "kalman_filter_settings"]["frequency_bands"]), \
                 "Frequency bands for Kalman filter must also be specified in " \
                 "bandpass_filter_settings."
         if s["methods"]["bandpass_filter"] is True:
-            assert (isinstance(s["bandpass_filter_settings"]["frequency_ranges"],
-                            dict))
+            assert (isinstance(s["bandpass_filter_settings"]["frequency_ranges"], dict))
             assert (isinstance(value, list) for value in s[
                 "bandpass_filter_settings"]["frequency_ranges"].values())
             assert (len(value) == 2 for value in s[
@@ -223,8 +228,7 @@ class SettingsWrapper:
             assert (isinstance(value, bool) for value in s[
                 "bandpass_filter_settings"]["bandpower_features"].values())
             assert (any(value is True for value in s["bandpass_filter_settings"][
-                "bandpower_features"].values())), "Set at least one " \
-                                                "bandpower_feature to True."
+                "bandpower_features"].values())), "Set at least one bandpower_feature to True."
         if s["methods"]["sharpwave_analysis"] is True:
             assert (isinstance(s["sharpwave_analysis_settings"][
                                 "filter_low_cutoff"], (int, float)))
@@ -240,8 +244,7 @@ class SettingsWrapper:
                 "Frequency bands for PDC must also be specified in " \
                 "bandpass_filter_settings."
             assert (isinstance(value, list) for value in s["pdc_settings"][
-                "frequency_ranges"].values()), "Channels for PDC must be " \
-                                            "specified as a list."
+                "frequency_ranges"].values()), "Channels for PDC must be specified as a list."
             assert (isinstance(value, list) for value in s[
                 "pdc_settings"]["frequency_ranges"].values())
             assert (isinstance(s["pdc_settings"]["model_order"], (str, int))), \

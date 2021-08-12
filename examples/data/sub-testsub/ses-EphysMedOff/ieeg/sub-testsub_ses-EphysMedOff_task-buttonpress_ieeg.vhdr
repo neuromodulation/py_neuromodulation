@@ -1,0 +1,37 @@
+Brain Vision Data Exchange Header File Version 1.0
+; Written using pybv 0.5.0
+
+[Common Infos]
+Codepage=UTF-8
+DataFile=sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg.eeg
+MarkerFile=sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg.vmrk
+DataFormat=BINARY
+; Data orientation: MULTIPLEXED=ch1,pt1, ch2,pt1 ...
+DataOrientation=MULTIPLEXED
+NumberOfChannels=12
+; Sampling interval in microseconds
+SamplingInterval=727.2727272727273
+
+[Binary Infos]
+BinaryFormat=IEEE_FLOAT_32
+
+[Channel Infos]
+; Each entry: Ch<Channel number>=<Name>,<Reference channel name>,
+; <Resolution in "Unit">,<Unit>, Future extensions..
+; Fields are delimited by commas, some fields might be omitted (empty).
+; Commas in channel names are coded as "\1".
+Ch1=LFP_STN_R_234,,0.1,µV
+Ch2=LFP_STN_R_567,,0.1,µV
+Ch3=LFP_BS_STN_L_1,,0.1,µV
+Ch4=LFP_STN_L_234,,0.1,µV
+Ch5=LFP_STN_L_567,,0.1,µV
+Ch6=ECOG_AT_SM_L_1,,0.1,µV
+Ch7=ECOG_AT_SM_L_2,,0.1,µV
+Ch8=ECOG_AT_SM_L_3,,0.1,µV
+Ch9=ECOG_AT_SM_L_4,,0.1,µV
+Ch10=ECOG_AT_SM_L_5,,0.1,µV
+Ch11=ECOG_AT_SM_L_6,,0.1,µV
+Ch12=ANALOG_ROT_R_1,,0.1,µV
+
+[Comment]
+

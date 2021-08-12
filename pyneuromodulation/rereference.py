@@ -3,7 +3,7 @@ from pandas import isnull
 
 
 class RT_rereference:
-    
+
     def __init__(self, df, split_data=False) -> None:
         """Initialize real-time rereference information.
 
@@ -15,11 +15,11 @@ class RT_rereference:
         """Initiatlize real time reference information
 
         Args:
-            df (Pandas DataFrame) : 
-                Dataframe containing information about rereferencing, as 
+            df (Pandas DataFrame) :
+                Dataframe containing information about rereferencing, as
                 specified in M1.tsv.
-            split_data (bool, optional): 
-                If set to True, the rereferenced data will be returned split 
+            split_data (bool, optional):
+                If set to True, the rereferenced data will be returned split
                 into cortex and subcortex. Defaults to
                 False.
         """
@@ -34,12 +34,12 @@ class RT_rereference:
                 ('seeg', 'dbs', 'lfp', 'ecog')) | (df.status == 'bad'))
 
         self.ch_names = ch_names
-        self.refs = refs 
+        self.refs = refs
         self.to_ref_idx = to_ref_idx
-        self.cortex_idx = cortex_idx 
-        self.subcortex_idx = subcortex_idx 
-        self.split_data = split_data 
-        
+        self.cortex_idx = cortex_idx
+        self.subcortex_idx = subcortex_idx
+        self.split_data = split_data
+
     def rereference(self, ieeg_batch) -> ndarray:
 
         """Rereference data according to the initialized RT_rereference class.
@@ -49,8 +49,8 @@ class RT_rereference:
                 shape(n_channels, n_samples) - data to be rereferenced.
 
         Raises:
-            ValueError: rereferencing using undefined channel 
-            ValueError: rereferencing according to same channel 
+            ValueError: rereferencing using undefined channel
+            ValueError: rereferencing according to same channel
 
         Returns:
             reref_data (numpy ndarray): rereferenced data

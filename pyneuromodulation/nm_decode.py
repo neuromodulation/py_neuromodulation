@@ -1,9 +1,3 @@
-# read feature file 
-# setup 3 fold non shuffled CV 
-# what woult be optimal
-# initialize with a single run, extract features; and label 
-# how do I know which one is the label? 
-
 from sklearn import model_selection, metrics, linear_model
 from skopt.space import Real, Integer, Categorical
 from skopt.utils import use_named_args
@@ -18,6 +12,7 @@ import json
 import numpy as np
 import xgboost as xgb
 import _pickle as cPickle
+
 
 class Decoder:
 
@@ -75,32 +70,33 @@ class Decoder:
             if len(left_targets) == 1:
                 self.target_ch = left_targets[0]
             else:
-                CLEAN_LEFT = [t_ch for t_ch in left_targets if ("CLEAN" in t_ch) or 
+                CLEAN_LEFT = [t_ch for t_ch in left_targets if ("CLEAN" in t_ch) or
                               ("squared" in t_ch)]
                 if len(CLEAN_LEFT) == 1:
                     self.target_ch = CLEAN_LEFT[0]
                 else:
                     # search for "clean" or "squared" channel without laterality included
-                    ch_without_lat = [t_ch for t_ch in list(self.df_M1[self.df_M1["target"] == 1]["name"]) 
+                    ch_without_lat = [t_ch for t_ch in list(self.df_M1[self.df_M1["target"] == 1]["name"])
                                       if ("CLEAN" in t_ch) or ("squared" in t_ch)]
                     if len(ch_without_lat) != 0:
                         self.target_ch = ch_without_lat[0]
                     else:
                         # take first target
                         self.target_ch = self.df_M1[self.df_M1["target"] == 1]["name"].iloc[0]
-        else: # left session
+        else:
+            # left session
             # check if contralateral right (optimal clean) channel exists
             right_targets = [t_ch for t_ch in target_channels if "RIGHT" in t_ch]
             if len(right_targets) == 1:
                 self.target_ch = right_targets[0]
             else:
-                CLEAN_RIGHT = [t_ch for t_ch in right_targets if ("CLEAN" in t_ch) or 
-                              ("squared" in t_ch)]
+                CLEAN_RIGHT = [t_ch for t_ch in right_targets if ("CLEAN" in t_ch) or
+                               ("squared" in t_ch)]
                 if len(CLEAN_RIGHT) == 1:
                     self.target_ch = CLEAN_RIGHT[0]
                 else:
                     # search for "clean" or "squared" channel without laterality included
-                    ch_without_lat = [t_ch for t_ch in list(self.df_M1[self.df_M1["target"] == 1]["name"]) 
+                    ch_without_lat = [t_ch for t_ch in list(self.df_M1[self.df_M1["target"] == 1]["name"])
                                       if ("CLEAN" in t_ch) or ("squared" in t_ch)]
                     if len(ch_without_lat) != 0:
                         self.target_ch = ch_without_lat[0]
@@ -108,7 +104,7 @@ class Decoder:
                         # take first target
                         self.target_ch = self.df_M1[self.df_M1["target"] == 1]["name"].iloc[0]
 
-        # for classification dependin on the label, set to binary label 
+        # for classification dependin on the label, set to binary label
         self.label = np.nan_to_num(np.array(self.features[self.target_ch])) > 0.3
         self.data = np.nan_to_num(np.array(self.features[[col for col in self.features.columns
                                   if not (('time' in col) or (self.target_ch in col))]]))
@@ -123,15 +119,15 @@ class Decoder:
         """
         self.ch_ind_data = {}
         for ch in self.used_chs:
-            self.ch_ind_data[ch] = np.nan_to_num(np.array(self.features[[col for col in self.features.columns 
+            self.ch_ind_data[ch] = np.nan_to_num(np.array(self.features[[col for col in self.features.columns
                                                           if col.startswith(ch)]]))
-    
+
     def run_CV_ind_channels(self, XGB=True):
         """run the CV for every specified channel
 
         Parameters
         ----------
-        XGB (boolean): 
+        XGB (boolean):
             if true split data into additinal validation, and run class weighted CV
         """
         self.ch_ind_pr = {}
@@ -148,26 +144,27 @@ class Decoder:
             self.ch_ind_pr[ch]["X_test"] = self.X_test
 
     def set_data_grid_points(self):
-        """Read the run_analysis 
+        """Read the run_analysis
         Projected data has the shape (samples, grid points, features)
         """
 
         PATH_ML_ = os.path.join(self.feature_path, self.feature_file, self.feature_file + "_run_analysis.p")
         with open(PATH_ML_, 'rb') as input:  # Overwrites any existing file.
             self.run_analysis = cPickle.load(input)
-        
+
         # get active grid points
-        self.active_gridpoints = np.where(np.sum(self.run_analysis.projection.proj_matrix_cortex, axis=1) !=0)[0]
+        self.active_gridpoints = np.where(np.sum(self.run_analysis.projection.proj_matrix_cortex, axis=1) != 0)[0]
 
         # set grid point feature names
         ch = self.run_analysis.features.ch_names[0]
         l_features = list(self.run_analysis.feature_arr.columns)
-        self.feature_names  = [f[len(ch)+1:] for f in l_features if f.startswith(ch)]
+        self.feature_names = [f[len(ch)+1:] for f in l_features if f.startswith(ch)]
 
-        # write data for every active grid point and run the cross validation 
+        # write data for every active grid point and run the cross validation
         self.grid_point_ind_data = {}
         for grid_point in self.active_gridpoints:
-            self.grid_point_ind_data[grid_point] = np.nan_to_num(self.run_analysis.proj_cortex_array[:,grid_point,:])  # samples, features
+            # samples, features
+            self.grid_point_ind_data[grid_point] = np.nan_to_num(self.run_analysis.proj_cortex_array[:, grid_point, :])
 
     def run_CV_grid_points(self, XGB=True):
         """run cross validation across grid points
@@ -191,8 +188,8 @@ class Decoder:
             self.gridpoint_ind_pr[grid_point]["X_test"] = self.X_test
 
     def run_CV(self, data=None, label=None, XGB=True):
-        """Evaluate model performance on the specified cross validation. 
-        If no data and label is specified, use whole feature class attributes. 
+        """Evaluate model performance on the specified cross validation.
+        If no data and label is specified, use whole feature class attributes.
 
         Parameters
         ----------
@@ -200,7 +197,7 @@ class Decoder:
             data to train and test with shape samples, features
         label (np.ndarray):
             label to train and test with shape samples, features
-        XGB (boolean): 
+        XGB (boolean):
             if true split data into additinal validation, and run class weighted CV
         Returns
         -------
@@ -238,7 +235,7 @@ class Decoder:
             if XGB:
                 X_train, X_val, y_train, y_val = \
                     model_selection.train_test_split(
-                        X_train, y_train, train_size=0.8,shuffle=False)
+                        X_train, y_train, train_size=0.8, shuffle=False)
 
                 classes_weights = class_weight.compute_sample_weight(
                     class_weight='balanced', y=y_train)
@@ -249,7 +246,7 @@ class Decoder:
                     verbose=False)
 
             else:
-                # LM 
+                # LM
                 model_train.fit(X_train, y_train)
 
             y_test_pr = model_train.predict(X_test)
@@ -351,7 +348,7 @@ class Decoder:
         if str_save_add is None:
             PATH_OUT = os.path.join(self.feature_path, self.feature_file, self.feature_file + "_ML_RES.p")
         else:
-            PATH_OUT = os.path.join(self.feature_path, self.feature_file, self.feature_file + 
+            PATH_OUT = os.path.join(self.feature_path, self.feature_file, self.feature_file +
                                     "_" + str_save_add + "_ML_RES.p")
 
         print("model being saved to: " + str(PATH_OUT))

@@ -78,7 +78,8 @@ class Projection:
                 sum_distances = np.sum(1 / rec_distances)
 
                 for ch_idx, used_channel in enumerate(used_channels):
-                    proj_matrix[grid_point, used_channel] = (1 / distance_matrix[grid_point, used_channel]) / sum_distances
+                    proj_matrix[grid_point, used_channel] = \
+                        (1 / distance_matrix[grid_point, used_channel]) / sum_distances
             proj_matrix_run[loc_] = proj_matrix
 
         return proj_matrix_run[0], proj_matrix_run[1]  # cortex, subcortex
@@ -99,14 +100,14 @@ class Projection:
         self.vertices = io.loadmat(os.path.join(PATH_PLOT, 'Vertices.mat'))
         self.grid = io.loadmat(os.path.join(PATH_PLOT, 'grid.mat'))['grid']
         self.stn_surf = io.loadmat(os.path.join(PATH_PLOT, 'STN_surf.mat'))
-        self.x_ver = self.stn_surf['vertices'][::2,0]
-        self.y_ver = self.stn_surf['vertices'][::2,1]
-        self.x_ecog = self.vertices['Vertices'][::1,0]
-        self.y_ecog = self.vertices['Vertices'][::1,1]
-        self.z_ecog = self.vertices['Vertices'][::1,2]
-        self.x_stn = self.stn_surf['vertices'][::1,0]
-        self.y_stn = self.stn_surf['vertices'][::1,1]
-        self.z_stn = self.stn_surf['vertices'][::1,2]
+        self.x_ver = self.stn_surf['vertices'][::2, 0]
+        self.y_ver = self.stn_surf['vertices'][::2, 1]
+        self.x_ecog = self.vertices['Vertices'][::1, 0]
+        self.y_ecog = self.vertices['Vertices'][::1, 1]
+        self.z_ecog = self.vertices['Vertices'][::1, 2]
+        self.x_stn = self.stn_surf['vertices'][::1, 0]
+        self.y_stn = self.stn_surf['vertices'][::1, 1]
+        self.z_stn = self.stn_surf['vertices'][::1, 2]
 
     def plot_cortical_projection(self):
         """Plot MNI brain including selected MNI cortical projection grid + used strip ECoG electrodes
@@ -116,38 +117,38 @@ class Projection:
         ecog_strip = np.array(self.ecog_strip).T
 
         if self.sess_right is True:
-            cortex_grid[0,:] = cortex_grid[0,:]*-1
+            cortex_grid[0, :] = cortex_grid[0, :]*-1
 
-        fig, axes = plt.subplots(1,1, facecolor=(1,1,1), figsize=(14,9))
+        fig, axes = plt.subplots(1, 1, facecolor=(1, 1, 1), figsize=(14, 9))
         axes.scatter(self.x_ecog, self.y_ecog, c="gray", s=0.001)
         axes.axes.set_aspect('equal', anchor='C')
 
         grid_color = self.proj_matrix_cortex.sum(axis=1)
-        pos_ecog = axes.scatter(cortex_grid[0,:],
-                                cortex_grid[1,:], c=grid_color, 
+        pos_ecog = axes.scatter(cortex_grid[0, :],
+                                cortex_grid[1, :], c=grid_color,
                                 s=30, alpha=0.8, cmap="viridis")
 
-        pos_elec = axes.scatter(ecog_strip[0,:],
-                                ecog_strip[1,:], c=np.ones(ecog_strip.shape[1]), 
+        pos_elec = axes.scatter(ecog_strip[0, :],
+                                ecog_strip[1, :], c=np.ones(ecog_strip.shape[1]),
                                 s=50, alpha=0.8, cmap="gray", marker="x")
         plt.axis('off')
 
-    def plot_grid_elec_3d(self):
+    def plot_grid_elec_3d(self, ecog_strip):
         ax = plt.axes(projection='3d')
-        #if self.sess_right is True:
-        #self.cortex_grid[0,:] = self.cortex_grid[0,:]*-1
-        
-        # Plot becomes slow
-        #ax.scatter3D(self.x_ecog[::100], self.y_ecog[::100], self.z_ecog[::100], cmap='gray', s=100, alpha=0.4)
-        grid_color = self.proj_matrix_cortex.sum(axis=1)
-        pos_ecog = ax.scatter3D(self.cortex_grid[0,:],
-                                        self.cortex_grid[1,:], self.cortex_grid[2,:], c=grid_color, 
-                                        s=300, alpha=0.8, cmap="viridis")
+        # if self.sess_right is True:
+        # self.cortex_grid[0,:] = self.cortex_grid[0,:]*-1
 
-        pos_elec = ax.scatter(self.ecog_strip[0,:],
-                                        self.ecog_strip[1,:], self.ecog_strip[2,:], c=np.ones(ecog_strip.shape[1]), 
-                                        s=500, alpha=0.8, cmap="gray", marker="o")
-        
+        # Plot becomes slow
+        # ax.scatter3D(self.x_ecog[::100], self.y_ecog[::100], self.z_ecog[::100], cmap='gray', s=100, alpha=0.4)
+        grid_color = self.proj_matrix_cortex.sum(axis=1)
+        pos_ecog = ax.scatter3D(self.cortex_grid[0, :],
+                                self.cortex_grid[1, :], self.cortex_grid[2, :], c=grid_color,
+                                s=300, alpha=0.8, cmap="viridis")
+
+        pos_elec = ax.scatter(self.ecog_strip[0, :],
+                              self.ecog_strip[1, :], self.ecog_strip[2, :], c=np.ones(ecog_strip.shape[1]),
+                              s=500, alpha=0.8, cmap="gray", marker="o")
+
     def get_projected_cortex_subcortex_data(self, dat_cortex=None, dat_subcortex=None):
         """Project cortical and subcortical data to predefined projection matrices
 
