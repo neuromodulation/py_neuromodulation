@@ -75,9 +75,13 @@ def est_features_run(
 
     # optionally reduce timing for faster test completion
     #LIMIT_LOW = 0 # start at 100s 
-    #LIMIT_HIGH = 137500 + 20*1375 # add 20 s data analysis
+    #LIMIT_HIGH = 120000# add 20 s data analysis
     #raw_arr_data = raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
 
+    # select only ECoG
+    settings_wrapper.df_M1.loc[(settings_wrapper.df_M1["type"] == "seeg") |
+                               (settings_wrapper.df_M1["type"] == "dbs"),
+                               "used"] = 0
     # initialize generator for run function
     gen = generator.ieeg_raw_generator(raw_arr_data, settings_wrapper.settings)
 

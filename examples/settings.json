@@ -1,10 +1,10 @@
 {
-    "BIDS_path": "C:\\Users\\richa\\GitHub\\py_neuromodulation\\pyneuromodulation\\tests\\data",
-    "out_path": "C:\\Users\\richa\\GitHub\\py_neuromodulation\\pyneuromodulation\\tests\\data\\derivatives",
+    "BIDS_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Pittsburgh",
+    "out_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\try_0408\\Pittsburgh",
     "sampling_rate_features": 10,
     "methods": {
         "raw_resampling": true,
-        "raw_normalization": true,
+        "raw_normalization": false,
         "feature_normalization": true,
         "kalman_filter": true,
         "re_referencing": true,
@@ -12,7 +12,7 @@
         "bandpass_filter": true,
         "raw_hjorth": true,
         "sharpwave_analysis": true,
-        "return_raw": true,
+        "return_raw": false,
         "project_cortex": true,
         "project_subcortex": false,
         "pdc": false,
@@ -102,14 +102,14 @@
         },
         "bandpower_features": {
             "activity": true,
-            "mobility": true,
-            "complexity": true
+            "mobility": false,
+            "complexity": false
         }
     },
     "sharpwave_analysis_settings": {
         "sharpwave_features": {
-            "peak_left": true,
-            "peak_right": true,
+            "peak_left": false,
+            "peak_right": false,
             "trough": true,
             "width": true,
             "prominence": true,
@@ -117,12 +117,12 @@
             "decay_time": true,
             "rise_time": true,
             "sharpness": true,
-            "rise_steepness": true,
-            "decay_steepness": true,
-            "slope_ratio": true
+            "rise_steepness": false,
+            "decay_steepness": false,
+            "slope_ratio": false
         },
         "filter_low_cutoff": 5,
-        "filter_high_cutoff": 90,
+        "filter_high_cutoff": 80,
         "detect_troughs": {
             "estimate": true,
             "distance_troughs": 5,
@@ -135,10 +135,10 @@
         },
         "estimator": {
             "mean": true,
-            "median": true,
+            "median": false,
             "max": true,
-            "min": true,
-            "var": true
+            "min": false,
+            "var": false
         }
     },
     "project_cortex_settings": {
