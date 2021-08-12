@@ -130,7 +130,7 @@ def compute_order(X, p_max):
         bic[p] += S
 
     p = argmin(nan_to_num(bic, nan=np_inf, posinf=np_inf))
-    #p = argmin(bic)
+    # p = argmin(bic)
     return p, bic
 
 
@@ -155,10 +155,10 @@ def spectral_density(A, n_fft=None):
     A2[1:p + 1, :, :] = A  # start at 1 !
     fA = fft(A2, axis=0)
     freqs = fftfreq(n_fft)
-    I = eye(N)
+    I_ = eye(N)
 
     for i in range(n_fft):
-        fA[i] = la_inv(I - fA[i])
+        fA[i] = la_inv(I_ - fA[i])
 
     return fA, freqs
 

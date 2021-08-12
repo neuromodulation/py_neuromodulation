@@ -1,10 +1,9 @@
 from time import time
-
 from numpy import concatenate, vstack, expand_dims
 from numpy import round as np_round
 from pandas import DataFrame, Series
 
-import normalization
+from pyneuromodulation import normalization
 
 
 class Run:

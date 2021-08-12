@@ -22,7 +22,7 @@ def get_bandpower_features(
     ch : str
         channel name
     ch_idx : int
-        channel index 
+        channel index
 
     Returns
     -------

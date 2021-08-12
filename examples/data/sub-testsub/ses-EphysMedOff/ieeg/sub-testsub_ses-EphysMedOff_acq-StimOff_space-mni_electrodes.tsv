@@ -1,0 +1,15 @@
+﻿name	x	y	z	size	impedance
+ECOG_AT_SM_L_1	-47	-26	65	n/a	n/a
+ECOG_AT_SM_L_2	-46	-15.5	63	n/a	n/a
+ECOG_AT_SM_L_3	-45.5	-5.5	60.5	n/a	n/a
+ECOG_AT_SM_L_4	-44.5	4	57.5	n/a	n/a
+ECOG_AT_SM_L_5	-42	14	53.5	n/a	n/a
+ECOG_AT_SM_L_6	-39	22.5	49.5	n/a	n/a
+LFP_STN_R_234	11.8	-15	-7.7	n/a	n/a
+LFP_STN_R_567	12.39	-14.29	-5.9	n/a	n/a
+LFP_BS_STN_L_1	-11.3	-15.9	-9.9	n/a	n/a
+LFP_STN_L_234	-11.8	-15	-7.7	n/a	n/a
+LFP_STN_L_567	-12.39	-14.29	-5.9	n/a	n/a
+LFP_3_R_STN_PI	12.93	-13.41	-4.1	n/a	n/a
+LFP_4_R_STN_PI	13.4	-12.52	-2.2	n/a	n/a
+ANALOG_ROT_R_1	n/a	n/a	n/a	n/a	n/a

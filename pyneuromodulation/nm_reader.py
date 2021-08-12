@@ -121,7 +121,7 @@ class NM_Reader:
         self.X_epoch = X_epoch
         self.y_epoch = y_epoch
         return X_epoch, y_epoch
-    
+
     def read_ML_estimations(self):
         """Read estimated ML outputs
 
@@ -140,7 +140,7 @@ class NM_Reader:
 
     def read_run_analyzer(self):
         """Read run_analysis outputs. If target was set to true, a corresponding column was added to feature_arr
-        dataframe. 
+        dataframe.
         Returns
         -------
         run_analysis object
@@ -166,14 +166,14 @@ class NM_Reader:
         self.vertices = io.loadmat(os.path.join(PATH_PLOT, 'Vertices.mat'))
         self.grid = io.loadmat(os.path.join(PATH_PLOT, 'grid.mat'))['grid']
         self.stn_surf = io.loadmat(os.path.join(PATH_PLOT, 'STN_surf.mat'))
-        self.x_ver = self.stn_surf['vertices'][::2,0]
-        self.y_ver = self.stn_surf['vertices'][::2,1]
-        self.x_ecog = self.vertices['Vertices'][::1,0]
-        self.y_ecog = self.vertices['Vertices'][::1,1]
-        self.z_ecog = self.vertices['Vertices'][::1,2]
-        self.x_stn = self.stn_surf['vertices'][::1,0]
-        self.y_stn = self.stn_surf['vertices'][::1,1]
-        self.z_stn = self.stn_surf['vertices'][::1,2]
+        self.x_ver = self.stn_surf['vertices'][::2, 0]
+        self.y_ver = self.stn_surf['vertices'][::2, 1]
+        self.x_ecog = self.vertices['Vertices'][::1, 0]
+        self.y_ecog = self.vertices['Vertices'][::1, 1]
+        self.z_ecog = self.vertices['Vertices'][::1, 2]
+        self.x_stn = self.stn_surf['vertices'][::1, 0]
+        self.y_stn = self.stn_surf['vertices'][::1, 1]
+        self.z_stn = self.stn_surf['vertices'][::1, 2]
 
     def plot_cortical_projection(self):
         """Plot MNI brain including selected MNI cortical projection grid + used strip ECoG electrodes
@@ -185,30 +185,28 @@ class NM_Reader:
 
         cortex_grid = np.array(self.run_analysis.projection.grid_cortex.T)
 
-
         if self.run_analysis.settings["sess_right"] is True:
-            cortex_grid[0,:] = cortex_grid[0,:]*-1
+            cortex_grid[0, :] = cortex_grid[0, :]*-1
             ecog_strip = np.array(self.run_analysis.settings["coord"]["cortex_right"]["positions"]).T
         else:
             ecog_strip = np.array(self.run_analysis.settings["coord"]["cortex_left"]["positions"]).T
 
-
-        fig, axes = plt.subplots(1,1, facecolor=(1,1,1), figsize=(14,9))
+        _, axes = plt.subplots(1, 1, facecolor=(1, 1, 1), figsize=(14, 9))
         axes.scatter(self.x_ecog, self.y_ecog, c="gray", s=0.001)
         axes.axes.set_aspect('equal', anchor='C')
 
         grid_color = self.run_analysis.projection.proj_matrix_cortex.sum(axis=1)
-        pos_ecog = axes.scatter(cortex_grid[0,:],
-                                cortex_grid[1,:], c=grid_color, 
+        pos_ecog = axes.scatter(cortex_grid[0, :],
+                                cortex_grid[1, :], c=grid_color,
                                 s=30, alpha=0.8, cmap="viridis")
 
-        pos_elec = axes.scatter(ecog_strip[0,:],
-                                ecog_strip[1,:], c=np.ones(ecog_strip.shape[1]), 
+        pos_elec = axes.scatter(ecog_strip[0, :],
+                                ecog_strip[1, :], c=np.ones(ecog_strip.shape[1]),
                                 s=50, alpha=0.8, cmap="gray", marker="x")
         plt.axis('off')
         PATH_save = os.path.join(self.feature_path, self.feature_file,
                                  "Cortical_Projection.png")
-        plt.savefig(PATH_save, bbox_inches = "tight")
+        plt.savefig(PATH_save, bbox_inches="tight")
 
         print("cortical projection figure saved to: " + str(PATH_save))
 
@@ -223,19 +221,19 @@ class NM_Reader:
         plt.title("Features channel: " + str(self.ch_name))
         if feature_str_add is None:
             PATH_save = os.path.join(self.feature_path, feature_file,
-                                 "Features_corr_matr_ch_" + str(self.ch_name) + ".png")
+                                     "Features_corr_matr_ch_" + str(self.ch_name) + ".png")
         else:
             PATH_save = os.path.join(self.feature_path, feature_file,
-                                 "Features_corr_matr_ch_" + str(self.ch_name) + "_" + feature_str_add + ".png")
+                                     "Features_corr_matr_ch_" + str(self.ch_name) + "_" + feature_str_add + ".png")
         # axes ticks might be too messy
-        #plt.xticks([])
-        #plt.yticks([])
-        plt.savefig(PATH_save, bbox_inches = "tight")
-        #plt.show()
+        # plt.xticks([])
+        # plt.yticks([])
+        plt.savefig(PATH_save, bbox_inches="tight")
+        # plt.show()
         print("Correlation matrix figure saved to " + str(PATH_save))
 
     def plot_epochs_avg(self, feature_file, feature_str_add=None):
-        
+
         # cut channel name of for axis + "_" for more dense plot
         feature_col_name = [i[len(self.ch_name)+1:] for i in list(self.feature_ch_cols) if self.ch_name in i]
         plt.figure(figsize=(6, 6))
@@ -248,11 +246,11 @@ class NM_Reader:
         plt.xlabel("Time [s]")
         plt.title("Movement aligned features channel: " + str(self.ch_name))
         # feature axes ticks might be too messy
-        #plt.yticks([])
+        # plt.yticks([])
 
         plt.subplot(212)
         for i in range(self.y_epoch.shape[0]):
-            plt.plot(self.y_epoch[i,:], color="black", alpha=0.4)
+            plt.plot(self.y_epoch[i, :], color="black", alpha=0.4)
         plt.plot(self.y_epoch.mean(axis=0), color="black", alpha=1, linewidth=3.0, label="mean target")
         plt.legend()
         plt.ylabel("target")
@@ -261,13 +259,13 @@ class NM_Reader:
                    np.round(np.arange(-self.epoch_len / 2, self.epoch_len / 2, 1 / self.sfreq), 2), rotation=90)
         plt.xlabel("Time [s]")
         plt.tight_layout()
-        
+
         if feature_str_add is None:
             PATH_save = os.path.join(self.feature_path, feature_file,
-                                 "MOV_algined_features_ch_" + str(self.ch_name) + ".png")
+                                     "MOV_algined_features_ch_" + str(self.ch_name) + ".png")
         else:
             PATH_save = os.path.join(self.feature_path, feature_file,
-                                 "MOV_algined_features_ch_" + str(self.ch_name) + "_" + feature_str_add + ".png")
-        plt.savefig(PATH_save, bbox_inches = "tight")
-        #plt.show()
+                                     "MOV_algined_features_ch_" + str(self.ch_name) + "_" + feature_str_add + ".png")
+        plt.savefig(PATH_save, bbox_inches="tight")
+        # plt.show()
         print("Feature epoch average figure saved to: " + str(PATH_save))

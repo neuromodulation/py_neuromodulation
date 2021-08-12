@@ -1,6 +1,6 @@
 {
-    "BIDS_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Pittsburgh",
-    "out_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\try_0408\\Pittsburgh",
+    "BIDS_path": "C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\examples\\data",
+    "out_path": "C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\examples\\data\\derivatives",
     "sampling_rate_features": 10,
     "methods": {
         "raw_resampling": true,

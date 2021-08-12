@@ -68,7 +68,7 @@ def set_M1(ch_names, ch_types, reference='default', bads=None,
                              for mov_substr in mov_substrs) else 0
                     for ch_idx, ch_name in enumerate(ch_names)]
 
-    # note: BIDS types are in caps, mne.io.RawArray types lower case 
+    # note: BIDS types are in caps, mne.io.RawArray types lower case
     # s.t. 'type' will be in lower case here
     df['type'] = ch_types
 
@@ -91,10 +91,10 @@ def set_M1(ch_names, ch_types, reference='default', bads=None,
                 other_chs.append(ch_name)
         lfp_l = sorted(
             [lfp_ch for lfp_ch in lfp_chs if ('_l_' in lfp_ch.lower())
-                                       or ('_left_' in lfp_ch.lower())])
+             or ('_left_' in lfp_ch.lower())])
         lfp_r = sorted(
             [lfp_ch for lfp_ch in lfp_chs if ('_r_' in lfp_ch.lower())
-                                       or ('_right_' in lfp_ch.lower())])
+             or ('_right_' in lfp_ch.lower())])
         lfp_l_refs = [lfp_l[i - 1] if i > 0 else lfp_l[-1] for i in
                       range(len(lfp_l))]
         lfp_r_refs = [lfp_r[i - 1] if i > 0 else lfp_r[-1] for i in

@@ -2,7 +2,7 @@ from numpy import diff, sqrt, var
 
 
 def get_hjorth_raw(features_, data_, ch):
-    
+
     features_['_'.join([ch, 'RawHjorth_Activity'])] = var(data_)
     deriv_variance = var(diff(data_))
     mobility = sqrt(deriv_variance / var(data_))
