@@ -2,7 +2,8 @@ import os
 from pathlib import Path
 import mne
 
-from pyneuromodulation import IO, projection, generator, rereference, run_analysis, features, resample
+from pyneuromodulation import nm_IO, nm_projection, nm_generator, nm_rereference, \
+    nm_run_analysis, nm_features, nm_resample
 from pyneuromodulation import settings as nm_settings
 
 
@@ -26,12 +27,12 @@ def est_features_run(
 
     # read and test settings first to obtain BIDS path
     if PATH_SETTINGS is None:
-        settings_wrapper = nm_settings.SettingsWrapper('settings.json')
+        settings_wrapper = nm_settings.SettingsWrapper('nm_settings.json')
     else:
         settings_wrapper = nm_settings.SettingsWrapper(settings_path=PATH_SETTINGS)
 
     # read BIDS data
-    raw_arr, raw_arr_data, fs, line_noise = IO.read_BIDS_data(
+    raw_arr, raw_arr_data, fs, line_noise = nm_IO.read_BIDS_data(
         PATH_RUN, settings_wrapper.settings["BIDS_path"])
 
     # potentially read annotations
@@ -52,7 +53,7 @@ def est_features_run(
 
     if any((settings_wrapper.settings["methods"]["project_cortex"],
             settings_wrapper.settings["methods"]["project_subcortex"])):
-        projection_ = projection.Projection(settings_wrapper.settings)
+        projection_ = nm_projection.Projection(settings_wrapper.settings)
     else:
         projection_ = None
 
@@ -71,11 +72,11 @@ def est_features_run(
                                (settings_wrapper.df_M1["type"] == "dbs"),
                                "used"] = 0
     # initialize generator for run function
-    gen = generator.ieeg_raw_generator(raw_arr_data, settings_wrapper.settings)
+    gen = nm_generator.ieeg_raw_generator(raw_arr_data, settings_wrapper.settings)
 
     # initialize rereferencing
     if settings_wrapper.settings["methods"]["re_referencing"] is True:
-        rereference_ = rereference.RT_rereference(
+        rereference_ = nm_rereference.RT_rereference(
             settings_wrapper.df_M1, split_data=False)
     else:
         rereference_ = None
@@ -85,15 +86,15 @@ def est_features_run(
 
     # define resampler for faster feature estimation
     if settings_wrapper.settings["methods"]["raw_resampling"] is True:
-        resample_ = resample.Resample(settings_wrapper.settings)
+        resample_ = nm_resample.Resample(settings_wrapper.settings)
     else:
         resample_ = None
 
     # initialize feature class from settings
-    features_ = features.Features(settings_wrapper.settings, verbose=verbose)
+    features_ = nm_features.Features(settings_wrapper.settings, verbose=verbose)
 
     # initialize run object
-    run_analysis_ = run_analysis.Run(
+    run_analysis_ = nm_run_analysis.Run(
         features_, settings_wrapper.settings, rereference_, projection_,
         resample_, verbose=verbose)
 
@@ -105,12 +106,12 @@ def est_features_run(
             break
 
     # add resampled labels to feature dataframe
-    df_ = IO.add_labels(
+    df_ = nm_IO.add_labels(
         run_analysis_.feature_arr, settings_wrapper, raw_arr_data)
 
     # save settings.json, df_M1.tsv and features.csv
     # plus pickled run_analysis including projections
     run_analysis_.feature_arr = df_  # here the potential label stream is added
-    IO.save_features_and_settings(df_=df_, run_analysis_=run_analysis_,
-                                  folder_name=os.path.basename(PATH_RUN)[:-5],
-                                  settings_wrapper=settings_wrapper)
+    nm_IO.save_features_and_settings(df_=df_, run_analysis_=run_analysis_,
+                                     folder_name=os.path.basename(PATH_RUN)[:-5],
+                                     settings_wrapper=settings_wrapper)

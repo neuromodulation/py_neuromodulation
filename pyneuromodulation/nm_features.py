@@ -3,7 +3,7 @@ from numpy import arange, array, ceil, floor, where
 
 from mne.filter import notch_filter
 
-from pyneuromodulation import bandpower, filter, hjorth_raw, kalmanfilter, sharpwaves, coherence
+from pyneuromodulation import nm_bandpower, nm_filter, nm_hjorth_raw, nm_kalmanfilter, nm_sharpwaves, nm_coherence
 
 
 class Features:
@@ -44,14 +44,14 @@ class Features:
                 for f_band in s["kalman_filter_settings"]["frequency_bands"]:
                     for channel in self.ch_names:
                         self.KF_dict['_'.join([channel, bp_feature, f_band])] \
-                            = kalmanfilter.define_KF(
+                            = nm_kalmanfilter.define_KF(
                             s["kalman_filter_settings"]["Tp"],
                             s["kalman_filter_settings"]["sigma_w"],
                             s["kalman_filter_settings"]["sigma_v"])
 
         if s["methods"]["sharpwave_analysis"] is True:
-            self.sw_features = sharpwaves.SharpwaveAnalyzer(self.s["sharpwave_analysis_settings"],
-                                                            self.fs)
+            self.sw_features = nm_sharpwaves.SharpwaveAnalyzer(self.s["sharpwave_analysis_settings"],
+                                                               self.fs)
         self.new_dat_index = int(self.fs / self.s["sampling_rate_features"])
 
     def estimate_features(self, data) -> dict:
@@ -131,12 +131,12 @@ class Features:
         """
 
         if self.s["methods"]["bandpass_filter"]:
-            features_ = bandpower.get_bandpower_features(
+            features_ = nm_bandpower.get_bandpower_features(
                 features_, self.s, self.seglengths, dat_filtered, self.KF_dict,
                 ch, ch_idx)
 
         if self.s["methods"]["raw_hjorth"]:
-            features_ = hjorth_raw.get_hjorth_raw(
+            features_ = nm_hjorth_raw.get_hjorth_raw(
                 features_, data[ch_idx, :], ch)
 
         if self.s["methods"]["return_raw"]:
@@ -155,7 +155,7 @@ class Features:
                 chs = self.s["pdc_settings"]["frequency_ranges"][filt]
                 ch_idx = [self.ch_names.index(ch) for ch in chs]
                 dat_ = dat_filt[ch_idx]
-                features_ = coherence.get_pdc(
+                features_ = nm_coherence.get_pdc(
                     features_, self.s, dat_, filt, chs)
 
         if self.s["methods"]["dtf"]:
@@ -163,7 +163,7 @@ class Features:
                 chs = self.s["dtf_settings"]["frequency_ranges"][filt]
                 ch_idx = [self.ch_names.index(ch) for ch in chs]
                 dat_ = dat_filt[ch_idx]
-                features_ = coherence.get_dtf(
+                features_ = nm_coherence.get_dtf(
                     features_, self.s, dat_, filt, chs)
 
         return features_

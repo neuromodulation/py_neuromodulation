@@ -7,21 +7,13 @@ import pandas as pd
 import mne_bids
 from pathlib import Path
 
-# first parent to get test folder, second pyneuromodulation folder, then py_neuromodulation
-PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent.parent
-sys.path.append(os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation'))
-sys.path.append(os.path.join(PATH_PYNEUROMODULATION, 'examples'))
-
-import define_M1
-import generator
-import rereference
-import settings
-import sharpwaves
-import IO
+from pyneuromodulation import nm_define_M1, nm_generator, nm_rereference, nm_settings, \
+    nm_sharpwaves, nm_IO
 
 import example_BIDS
 import example_ML
 import example_read_features
+
 
 def read_example_data(PATH_PYNEUROMODULATION):
     """This test function return a data batch and automatic initialized M1 datafram
@@ -37,9 +29,9 @@ def read_example_data(PATH_PYNEUROMODULATION):
     """
 
     # read and test settings first to obtain BIDS path
-    settings_wrapper = settings.SettingsWrapper(
+    settings_wrapper = nm_settings.SettingsWrapper(
         settings_path=os.path.join(PATH_PYNEUROMODULATION, 'examples',
-                                   'settings.json'))
+                                   'nm_settings.json'))
 
     BIDS_EXAMPLE_PATH = os.path.join(
         PATH_PYNEUROMODULATION, 'pyneuromodulation', 'tests', 'data')
@@ -51,7 +43,7 @@ def read_example_data(PATH_PYNEUROMODULATION):
     PATH_RUN = os.path.join(BIDS_EXAMPLE_PATH, 'sub-testsub', 'ses-EphysMedOff',
                             'ieeg', "sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg.vhdr")
     # read BIDS data
-    raw_arr, raw_arr_data, fs, line_noise = IO.read_BIDS_data(PATH_RUN, BIDS_EXAMPLE_PATH)
+    raw_arr, raw_arr_data, fs, line_noise = nm_IO.read_BIDS_data(PATH_RUN, BIDS_EXAMPLE_PATH)
 
     settings_wrapper.test_settings()
 
@@ -61,7 +53,7 @@ def read_example_data(PATH_PYNEUROMODULATION):
     settings_wrapper.set_fs_line_noise(fs, line_noise)
 
     # initialize generator for run function
-    gen = generator.ieeg_raw_generator(raw_arr_data, settings_wrapper.settings)
+    gen = nm_generator.ieeg_raw_generator(raw_arr_data, settings_wrapper.settings)
 
     ieeg_batch = next(gen, None)
 
@@ -77,7 +69,7 @@ def initialize_rereference(df_M1):
     Returns:
         RT_rereference: Rereference object
     """
-    ref_here = rereference.RT_rereference(df_M1, split_data=False)
+    ref_here = nm_rereference.RT_rereference(df_M1, split_data=False)
     return ref_here
 
 
@@ -112,25 +104,30 @@ def test_rereference(ref_here, ieeg_batch, df_M1):
 def test_sharpwaves(data, features_, ch, example_settings, fs):
 
     print("Initializing sharp wave test object.")
-    sw_features = sharpwaves.SharpwaveAnalyzer(example_settings["sharpwave_analysis_settings"], fs)
+    sw_features = nm_sharpwaves.SharpwaveAnalyzer(example_settings["sharpwave_analysis_settings"], fs)
     print("Estimating sharp wave features.")
     features_ = sw_features.get_sharpwave_features(features_, data, ch)
+
 
 def test_BIDS_feature_estimation():
     print("Testing feature estimation for example data.")
     example_BIDS.run_example_BIDS()
 
+
 def test_ML_features():
     print("Testing machine learning feature estimation.")
     example_ML.run_example_ML()
+
 
 def test_feature_read_out():
     print("Testing feature read out.")
     example_read_features.run_example_read_features()
 
 
+# test modules should NOT have a main function, they're called only by pytest
 if __name__ == "__main__":
 
+    # example data muss zum pfad von examples referenziereb (mit Parent)
     ieeg_batch, df_M1, example_settings, fs = read_example_data(PATH_PYNEUROMODULATION)
     ref_here = initialize_rereference(df_M1)
     test_rereference(ref_here, ieeg_batch, df_M1)

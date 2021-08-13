@@ -5,20 +5,20 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from pyneuromodulation import define_M1
+from pyneuromodulation import nm_define_M1
 
 
 class SettingsWrapper:
 
     def __init__(self, settings_path=None) -> None:
-        """initialize settings class with settings.json and setting df_M1 toolbox parameter
+        """initialize settings class with nm_settings.json and setting df_M1 toolbox parameter
 
         Parameters
         ----------
         settings_path : str, optional
-            path to settings.json, by default 'settings.json'
+            path to nm_settings.json, by default 'nm_settings.json'
         """
-        print("Reading settings.json.")
+        print("Reading nm_settings.json.")
         self.settings_path = settings_path
 
         with open(settings_path, encoding='utf-8') as json_file:
@@ -143,7 +143,7 @@ class SettingsWrapper:
         self.m1_path = m1_path
         self.df_M1 = pd.read_csv(self.m1_path, sep="\t")\
             if self.m1_path is not None and os.path.isfile(self.m1_path)\
-            else define_M1.set_M1(ch_names, ch_types)
+            else nm_define_M1.set_M1(ch_names, ch_types)
         self.settings["ch_names"] = self.df_M1['new_name'].tolist()
         self.settings["ch_types"] = self.df_M1['type'].tolist()
         self.settings["feature_idx"] = np.where(
@@ -152,7 +152,7 @@ class SettingsWrapper:
         self.ind_label = np.where(self.df_M1["target"] == 1)[0]
 
     def test_settings(self, verbose=True) -> None:
-        """Test if settings are specified correctly in settings.json
+        """Test if settings are specified correctly in nm_settings.json
 
         Parameters
         ----------

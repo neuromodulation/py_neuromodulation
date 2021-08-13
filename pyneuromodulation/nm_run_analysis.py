@@ -3,7 +3,7 @@ from numpy import concatenate, vstack, expand_dims
 from numpy import round as np_round
 from pandas import DataFrame, Series
 
-from pyneuromodulation import normalization
+from pyneuromodulation import nm_normalization
 
 
 class Run:
@@ -105,7 +105,7 @@ class Run:
             else:
                 self.raw_arr = concatenate(
                     (self.raw_arr, ieeg_batch[:, -self.sample_add:]), axis=1)
-            ieeg_batch = normalization.normalize_raw(
+            ieeg_batch = nm_normalization.normalize_raw(
                 self.raw_arr, self.raw_normalize_samples, self.fs,
                 self.settings["raw_normalization_settings"]["normalization_method"],
                 self.settings["raw_normalization_settings"]["clip"])
@@ -132,7 +132,7 @@ class Run:
             if self.settings["methods"]["feature_normalization"]:
                 self.feature_arr_raw = self.feature_arr_raw.append(
                     feature_series, ignore_index=True)
-                feature_series = normalization.normalize_features(
+                feature_series = nm_normalization.normalize_features(
                     feature_series, self.feature_arr_raw,
                     self.feat_normalize_samples,
                     self.settings["feature_normalization_settings"][

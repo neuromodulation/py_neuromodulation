@@ -4,6 +4,7 @@ import os
 from matplotlib import pyplot as plt
 from pathlib import Path
 
+
 class Projection:
 
     def __init__(self, settings, plot_projection=False) -> None:
