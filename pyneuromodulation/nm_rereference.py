@@ -17,7 +17,7 @@ class RT_rereference:
         Args:
             df (Pandas DataFrame) :
                 Dataframe containing information about rereferencing, as
-                specified in M1.tsv.
+                specified in nm_channels.csv.
             split_data (bool, optional):
                 If set to True, the rereferenced data will be returned split
                 into cortex and subcortex. Defaults to

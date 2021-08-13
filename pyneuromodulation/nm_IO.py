@@ -53,7 +53,7 @@ def add_labels(df_, settings_wrapper, raw_arr_data):
         computed feature dataframe including resampled features
     """
     # resample_label
-    ind_label = np.where(settings_wrapper.df_M1["target"] == 1)[0]
+    ind_label = np.where(settings_wrapper.nm_channels["target"] == 1)[0]
     if ind_label.shape[0] != 0:
         offset_time = max([value[1] for value in settings_wrapper.settings[
             "bandpass_filter_settings"]["frequency_ranges"].values()])
@@ -66,7 +66,7 @@ def add_labels(df_, settings_wrapper, raw_arr_data):
 
         # and add to df
         if df_.shape[0] == label_downsampled.shape[1]:
-            for idx, label_ch in enumerate(settings_wrapper.df_M1["name"][ind_label]):
+            for idx, label_ch in enumerate(settings_wrapper.nm_channels["name"][ind_label]):
                 df_[label_ch] = label_downsampled[idx, :]
         else:
             print("label dimensions don't match, saving downsampled label extra")
@@ -78,7 +78,7 @@ def add_labels(df_, settings_wrapper, raw_arr_data):
 
 def save_features_and_settings(
         df_, run_analysis_, folder_name, settings_wrapper):
-    """save settings.json, df_M1.tsv and features.csv
+    """save settings.json, nm_channels.csv and features.csv
 
     Parameters
     ----------
@@ -126,9 +126,9 @@ def save_features_and_settings(
     print("settings.json saved to " + str(PATH_OUT))
 
     PATH_OUT = os.path.join(settings_wrapper.settings["out_path"], folder_name,
-                            folder_name + "_DF_M1.csv")
-    settings_wrapper.df_M1.to_csv(PATH_OUT)
-    print("df_M1.csv saved to " + str(PATH_OUT))
+                            folder_name + "_nm_channels.csv")
+    settings_wrapper.nm_channels.to_csv(PATH_OUT)
+    print("nm_channels.csv saved to " + str(PATH_OUT))
 
     PATH_OUT = os.path.join(settings_wrapper.settings["out_path"], folder_name,
                             folder_name + "_run_analysis.p")

@@ -1,17 +1,16 @@
 import json
 import os
 from pathlib import Path
-
 import numpy as np
 import pandas as pd
 
-from pyneuromodulation import nm_define_M1
+from pyneuromodulation import nm_define_nmchannels
 
 
 class SettingsWrapper:
 
     def __init__(self, settings_path=None) -> None:
-        """initialize settings class with nm_settings.json and setting df_M1 toolbox parameter
+        """initialize settings class with nm_settings.json and setting nm_channels toolbox parameter
 
         Parameters
         ----------
@@ -26,8 +25,8 @@ class SettingsWrapper:
 
         print("Testing settings.")
         self.test_settings()
-        self.m1_path = None
-        self.df_M1 = None
+        self.nm_channels_path = None
+        self.nm_channels = None
         self.ind_label = None
 
     def set_fs_line_noise(self, fs, line_noise) -> None:
@@ -127,29 +126,29 @@ class SettingsWrapper:
             self.settings["grid_cortex"] = None
             self.settings["grid_subcortex"] = None
 
-    def set_M1(self, m1_path=None, ch_names=None, ch_types=None) -> None:
-        """set df_M1 dataframe; specifies channel names, rereferencing method, ch_type,
+    def set_nm_channels(self, nm_channels_path=None, ch_names=None, ch_types=None) -> None:
+        """set nm_channels dataframe; specifies channel names, rereferencing method, ch_type,
         if a channel is used or not, and if a channel should be treated as a label
 
         Parameters
         ----------
-        m1_path : string, optional
-            path to df_M1.tsv file
+        nm_channels_path : string, optional
+            path to nm_channels.tsv file
         ch_names : list, optional
             by default None
         ch_types : list, optional
             BIDS compatible channel types, by default None
         """
-        self.m1_path = m1_path
-        self.df_M1 = pd.read_csv(self.m1_path, sep="\t")\
-            if self.m1_path is not None and os.path.isfile(self.m1_path)\
-            else nm_define_M1.set_M1(ch_names, ch_types)
-        self.settings["ch_names"] = self.df_M1['new_name'].tolist()
-        self.settings["ch_types"] = self.df_M1['type'].tolist()
+        self.nm_channels_path = nm_channels_path
+        self.nm_channels = pd.read_csv(self.nm_channels_path, sep="\t")\
+            if self.nm_channels_path is not None and os.path.isfile(self.nm_channels_path)\
+            else nm_define_nmchannels.set_nm_channels(ch_names, ch_types)
+        self.settings["ch_names"] = self.nm_channels['new_name'].tolist()
+        self.settings["ch_types"] = self.nm_channels['type'].tolist()
         self.settings["feature_idx"] = np.where(
-            self.df_M1["used"] & ~self.df_M1["target"])[0].tolist()
+            self.nm_channels["used"] & ~self.nm_channels["target"])[0].tolist()
         # If multiple targets exist, select only the first
-        self.ind_label = np.where(self.df_M1["target"] == 1)[0]
+        self.ind_label = np.where(self.nm_channels["target"] == 1)[0]
 
     def test_settings(self, verbose=True) -> None:
         """Test if settings are specified correctly in nm_settings.json

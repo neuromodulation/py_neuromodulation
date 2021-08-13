@@ -4,7 +4,7 @@ from numpy import ceil
 def ieeg_raw_generator(ieeg_raw, settings):
     """
     This generator function mimics online data acquisition.
-    The df_M1 selected raw channels are iteratively sampled with fs.
+    The nm_channels.csv selected raw channels are iteratively sampled with fs.
     Arguments
     ---------
         ieeg_raw (np array): shape (channels, time)

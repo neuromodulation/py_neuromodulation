@@ -2,11 +2,11 @@ from numpy import arange, nan
 from pandas import DataFrame
 
 
-def set_M1(ch_names, ch_types, reference='default', bads=None,
+def set_nm_channels(ch_names, ch_types, reference='default', bads=None,
            new_names='default'):
     """Return dataframe with channel-specific settings.
 
-    Return an M1 dataframe with the columns: "name", "rereference", "used",
+    Return an nm_channels dataframe with the columns: "name", "rereference", "used",
     "target", "type"]. "name" is set to ch_names, "rereference" can be
     specified individually. "used" is set to 1 for all channels containing
     "ECOG", "SEEG", "LFP" or "DBS", else to 0. "target" is set to 1 for all
@@ -44,7 +44,7 @@ def set_M1(ch_names, ch_types, reference='default', bads=None,
 
     Returns
     -------
-        df: DataFrame in M1 format
+        df: DataFrame in nm_channels format
     """
 
     if not (len(ch_names) == len(ch_types)):

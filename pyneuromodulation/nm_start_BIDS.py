@@ -8,17 +8,17 @@ from pyneuromodulation import settings as nm_settings
 
 
 def est_features_run(
-        PATH_RUN, PATH_M1=None, PATH_SETTINGS=None,
+        PATH_RUN, PATH_NM_CHANNELS=None, PATH_SETTINGS=None,
         PATH_ANNOTATIONS=None, verbose=True) -> None:
     """Start feature estimation by reading settings, creating or reading
-    df_M1 file with default rereference function (ECoG CAR; depth LFP bipolar)
-    Then save features to csv, settings and df_M1 to settings specified output folder.
+    nm_channels.csv file with default rereference function (ECoG CAR; depth LFP bipolar)
+    Then save features to csv, settings and nm_channels to settings specified output folder.
     Parameters
     ----------
     PATH_RUN : string
         absolute path to run file
-    PATH_M1 : string
-        absolute path to df_M1.csv file
+    PATH_NM_channels : string
+        absolute path to nm_channels.csv file
     PATH_SETTINGS : string
         absolute path to settings.json file
     PATH_ANNOTATIONS : string
@@ -57,9 +57,9 @@ def est_features_run(
     else:
         projection_ = None
 
-    # read df_M1 or create M1 if None specified
-    settings_wrapper.set_M1(m1_path=PATH_M1, ch_names=raw_arr.ch_names,
-                            ch_types=raw_arr.get_channel_types())
+    # read nm_channels.csv or create nm_channels if None specified
+    settings_wrapper.set_nm_channels(nm_channels_path=PATH_NM_CHANNELS, ch_names=raw_arr.ch_names,
+                                     ch_types=raw_arr.get_channel_types())
     settings_wrapper.set_fs_line_noise(fs, line_noise)
 
     # optionally reduce timing for faster test completion
@@ -68,8 +68,8 @@ def est_features_run(
     # raw_arr_data = raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
 
     # select only ECoG
-    settings_wrapper.df_M1.loc[(settings_wrapper.df_M1["type"] == "seeg") |
-                               (settings_wrapper.df_M1["type"] == "dbs"),
+    settings_wrapper.nm_channels.loc[(settings_wrapper.nm_channels["type"] == "seeg") |
+                               (settings_wrapper.nm_channels["type"] == "dbs"),
                                "used"] = 0
     # initialize generator for run function
     gen = nm_generator.ieeg_raw_generator(raw_arr_data, settings_wrapper.settings)
@@ -77,12 +77,12 @@ def est_features_run(
     # initialize rereferencing
     if settings_wrapper.settings["methods"]["re_referencing"] is True:
         rereference_ = nm_rereference.RT_rereference(
-            settings_wrapper.df_M1, split_data=False)
+            settings_wrapper.nm_channels, split_data=False)
     else:
         rereference_ = None
-        # reset df_M1 from default values
-        settings_wrapper.df_M1["rereference"] = None
-        settings_wrapper.df_M1["new_name"] = settings_wrapper.df_M1["name"]
+        # reset nm_channels from default values
+        settings_wrapper.nm_channels["rereference"] = None
+        settings_wrapper.nm_channels["new_name"] = settings_wrapper.nm_channels["name"]
 
     # define resampler for faster feature estimation
     if settings_wrapper.settings["methods"]["raw_resampling"] is True:
@@ -109,7 +109,7 @@ def est_features_run(
     df_ = nm_IO.add_labels(
         run_analysis_.feature_arr, settings_wrapper, raw_arr_data)
 
-    # save settings.json, df_M1.tsv and features.csv
+    # save settings.json, nm_channels.csv and features.csv
     # plus pickled run_analysis including projections
     run_analysis_.feature_arr = df_  # here the potential label stream is added
     nm_IO.save_features_and_settings(df_=df_, run_analysis_=run_analysis_,

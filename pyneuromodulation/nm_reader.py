@@ -17,7 +17,7 @@ class NM_Reader:
     def __init__(self, feature_path) -> None:
 
         self.feature_path = feature_path
-        self.df_M1 = None
+        self.nm_channels = None
         self.settings = None
         self.features = None
         self.feature_ch = None
@@ -38,10 +38,10 @@ class NM_Reader:
             self.settings = json.load(f)
         return self.settings
 
-    def read_M1(self, feature_file) -> None:
-        self.df_M1 = pd.read_csv(os.path.join(self.feature_path, feature_file,
-                                 feature_file + "_DF_M1.csv"), header=0)
-        return self.df_M1
+    def read_nm_channels(self, feature_file) -> None:
+        self.nm_channels = pd.read_csv(os.path.join(self.feature_path, feature_file,
+                                       feature_file + "_nm_channels.csv"), header=0)
+        return self.nm_channels
 
     def read_features(self, feature_file) -> None:
         self.features = pd.read_csv(
