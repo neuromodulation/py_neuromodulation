@@ -5,7 +5,8 @@ from itertools import product
 import os
 import json
 from pathlib import Path
-from pyneuromodulation import nm_start_BIDS
+from sklearn import linear_model
+from pyneuromodulation import nm_start_BIDS, nm_analysis
 
 
 def run_example_BIDS():
@@ -20,10 +21,17 @@ def run_example_BIDS():
     nm_BIDS = nm_start_BIDS.NM_BIDS(PATH_RUN)
 
     # add specific BIDS_PATH and out_path
-    nm_BIDS.settings_wrapper.settings["BIDS_path"] = os.path.abspath('examples\\data')
-    nm_BIDS.settings_wrapper.settings["out_path"] = os.path.abspath(os.path.join('examples', 'data', 'derivatives'))
+    nm_BIDS.settings_wrapper.settings['BIDS_path'] = os.path.abspath('examples\\data')
+    nm_BIDS.settings_wrapper.settings['out_path'] = os.path.abspath(os.path.join('examples', 'data', 'derivatives'))
 
-    nm_BIDS.run_bids()
+    #nm_BIDS.run_bids()
 
     # plot features for ECoG channels
-    
+    feature_reader = nm_analysis.FeatureReadWrapper(feature_path=nm_BIDS.settings_wrapper.settings['out_path'],
+                                                    plt_cort_projection=True)
+    #feature_reader.plot_features()
+    model = linear_model.LogisticRegression(class_weight='balanced')
+    feature_reader.run_ML_model(model=model)
+
+    performance_dict = feature_reader.read_ind_channel_results(read_grid_points=True, read_channels=True)
+    feature_reader.plot_subject_grid_ch_performance(performance_dict=performance_dict, plt_grid=True)

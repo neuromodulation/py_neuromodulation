@@ -10,8 +10,6 @@ import _pickle as cPickle
 
 from pyneuromodulation import nm_reader as NM_reader
 from pyneuromodulation import nm_decode
-from pyneuromodulation import start_BIDS
-from pyneuromodulation import settings as nm_settings
 
 
 class FeatureReadWrapper:
@@ -42,7 +40,7 @@ class FeatureReadWrapper:
         else:
             self.feature_file = feature_file
 
-        self.settings = self.nm_reader.read_settings(feature_file)
+        self.settings = self.nm_reader.read_settings(self.feature_file)
         self.ch_names = self.settings["ch_names"]
         self.ch_names_ECOG = [ch_name for ch_name in self.ch_names if "ECOG" in ch_name]
 
@@ -51,6 +49,7 @@ class FeatureReadWrapper:
 
         self.PATH_PLOT = os.path.abspath("plots")
         self.nm_reader.read_plot_modules(self.PATH_PLOT)
+        self.read_plotting_modules()
         if plt_cort_projection is True:
             self.nm_reader.plot_cortical_projection()
 
@@ -95,13 +94,13 @@ class FeatureReadWrapper:
         self.y_stn = self.stn_surf['vertices'][::1, 1]
         self.z_stn = self.stn_surf['vertices'][::1, 2]
 
-    def plot_subject_grid_ch_performance(self, sub, performance_dict=None, plt_grid=False):
+    def plot_subject_grid_ch_performance(self, subject_name=None, performance_dict=None, plt_grid=False):
         """plot subject specific performance for individual channeal and optional grid points
 
         Parameters
         ----------
-        sub : string
-            used subject
+        sub : string, optional
+            used subject, by default None
         performance_dict : dict, optional
             [description], by default None
         plt_grid : bool, optional
@@ -116,14 +115,17 @@ class FeatureReadWrapper:
         cortex_grid = []
         grid_performance = []
 
-        ch_ = list(performance_dict[sub].keys())
+        if subject_name is None:
+            subject_name = self.feature_file[self.feature_file.find('sub-'):self.feature_file.find('_ses')][4:]
+
+        ch_ = list(performance_dict[subject_name].keys())
         for ch in ch_:
-            if 'grid_' not in ch:
-                ecog_coords_strip.append(performance_dict[sub][ch]["coord"])
-                ecog_strip_performance.append(performance_dict[sub][ch]["performance"])
+            if 'grid' not in ch:
+                ecog_coords_strip.append(performance_dict[subject_name][ch]["coord"])
+                ecog_strip_performance.append(performance_dict[subject_name][ch]["performance"])
             elif plt_grid is True and 'grid_' in ch:
-                cortex_grid.append(performance_dict[sub][ch]["coord"])
-                grid_performance.append(performance_dict[sub][ch]["performance"])
+                cortex_grid.append(performance_dict[subject_name][ch]["coord"])
+                grid_performance.append(performance_dict[subject_name][ch]["performance"])
 
         ecog_coords_strip = np.vstack(ecog_coords_strip).T
         if ecog_coords_strip[0, 0] > 0:  # it's on the right side GIVEN IT'S CONTRALATERAL
@@ -286,6 +288,8 @@ class FeatureReadWrapper:
         """
         if feature_file is not None:
             self.feature_file = feature_file
+        if subject_name is None:
+            subject_name = self.feature_file[self.feature_file.find('sub-'):self.feature_file.find('_ses')][4:]
 
         PATH_ML_ = os.path.join(self.feature_path, self.feature_file,
                                 self.feature_file + '_' + ML_model_name + '_ML_RES.p')
