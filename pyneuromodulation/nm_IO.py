@@ -77,7 +77,7 @@ def add_labels(df_, settings_wrapper, raw_arr_data):
 
 
 def save_features_and_settings(
-        df_, run_analysis_, folder_name, settings_wrapper):
+        df_, run_analysis, folder_name, settings_wrapper):
     """save settings.json, nm_channels.csv and features.csv
 
     Parameters
@@ -133,5 +133,5 @@ def save_features_and_settings(
     PATH_OUT = os.path.join(settings_wrapper.settings["out_path"], folder_name,
                             folder_name + "_run_analysis.p")
     with open(PATH_OUT, 'wb') as output:
-        cPickle.dump(run_analysis_, output)
+        cPickle.dump(run_analysis, output)
     print("run analysis.p saved to " + str(PATH_OUT))

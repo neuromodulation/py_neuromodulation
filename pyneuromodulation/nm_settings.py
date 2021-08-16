@@ -100,21 +100,11 @@ class SettingsWrapper:
                 1000*np.array([ch for ch_idx, ch in enumerate(self.settings["coord_list"])
                               if (self.settings["coord_list"][ch_idx][0] <= 0) and
                               ("LFP" in self.settings["coord_names"][ch_idx])])
-            PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent
-            cortex_tsv = os.path.join(
-                PATH_PYNEUROMODULATION, 'examples', 'grid_cortex.tsv')
-            subcortex_tsv = os.path.join(
-                PATH_PYNEUROMODULATION, 'examples', 'grid_subcortex.tsv')
-            if os.path.isfile(cortex_tsv):
-                self.settings["grid_cortex"] = pd.read_csv(
-                    cortex_tsv, sep="\t")  # left cortical grid
-            else:
-                self.settings["grid_cortex"] = None
-            if os.path.isfile(subcortex_tsv):
-                self.settings["grid_subcortex"] = pd.read_csv(
-                    subcortex_tsv, sep="\t")  # left subcortical grid
-            else:
-                self.settings["grid_subcortex"] = None
+
+            self.settings["grid_cortex"] = pd.read_csv(
+                'pyneuromodulation\\grid_cortex.tsv', sep="\t")  # left cortical grid
+            self.settings["grid_subcortex"] = pd.read_csv(
+                'pyneuromodulation\\grid_subcortex.tsv', sep="\t")  # left subcortical grid
 
             if len(self.settings["coord"]["cortex_left"]["positions"]) == 0:
                 self.settings["sess_right"] = True

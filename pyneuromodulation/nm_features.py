@@ -33,7 +33,7 @@ class Features:
         self.KF_dict = {}
 
         if s["methods"]["bandpass_filter"] is True:
-            self.filter_fun = filter.calc_band_filters(
+            self.filter_fun = nm_filter.calc_band_filters(
                 f_ranges=[value[0] for value in s["bandpass_filter_settings"][
                     "frequency_ranges"].values()], sfreq=self.fs,
                 filter_length=self.fs - 1, verbose=self.verbose)
@@ -83,7 +83,7 @@ class Features:
                 filter_length=data.shape[1]-1, verbose=False,)
 
         if self.s["methods"]["bandpass_filter"]:
-            dat_filtered = filter.apply_filter(data, self.filter_fun)  # shape (bands, time)
+            dat_filtered = nm_filter.apply_filter(data, self.filter_fun)  # shape (bands, time)
         else:
             dat_filtered = None
 
