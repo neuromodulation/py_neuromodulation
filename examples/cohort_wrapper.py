@@ -24,7 +24,7 @@ def multiprocess_pipeline_run_wrapper(PATH_RUN):
     if type(PATH_RUN) is bids.layout.models.BIDSFile:
         PATH_RUN = PATH_RUN.path
 
-    settings_wrapper = nm_settings.SettingsWrapper(settings_path='settings.json')
+    settings_wrapper = nm_settings.SettingsWrapper(settings_path='nm_settings.json')
 
     nm_start_BIDS.est_features_run(PATH_RUN)
     feature_path = settings_wrapper.settings["out_path"]
@@ -75,18 +75,18 @@ def run_cohort(cohort="Pittsburgh"):
         run_files = layout.get(extension='.vhdr')
 
     # check OPTIONALLY which 'runs' where not estimated through yet, and run those
-    run_files_left = []
-    directory = r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408\Pittsburgh"
-    folders_path = [x[0] for x in os.walk(directory)]
-    folders = [os.path.basename(x) for x in folders_path[1:]]
-    for run_file in run_files:
-        feature_file = os.path.basename(run_file.path)[:-5]
-        if feature_file not in folders:
-            run_files_left.append(run_file)
-
+    #run_files_left = []
+    #directory = r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408\Pittsburgh"
+    #folders_path = [x[0] for x in os.walk(directory)]
+    #folders = [os.path.basename(x) for x in folders_path[1:]]
+    #for run_file in run_files:
+    #    feature_file = os.path.basename(run_file.path)[:-5]
+    #    if feature_file not in folders:
+    #        run_files_left.append(run_file)
+    
     # multiprocess_pipeline_run_wrapper(run_files[0])
     pool = multiprocessing.Pool(processes=55)  # most on Ryzen CPU 2990WX is 63
-    pool.map(multiprocess_pipeline_run_wrapper, run_files_left)
+    pool.map(multiprocess_pipeline_run_wrapper, run_files)
 
 
 def read_cohort_results(feature_path, cohort):
@@ -350,8 +350,10 @@ def run_cohort_leave_one_cohort_out_CV():
 
 if __name__ == "__main__":
 
-    #run_cohort_leave_one_patient_out_CV()
-    run_cohort_leave_one_cohort_out_CV()
+    for cohort in ['Berlin', 'Beijing', 'Pittsburgh']:
+        run_cohort(cohort)
+
+    run_cohort_leave_one_patient_out_CV()
     # run single run
     # PATH_RUN = r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\Data\Pittsburgh\sub-000\ses-right\ieeg\sub-000_ses-right_task-force_run-3_ieeg.vhdr"
     # multiprocess_pipeline_run_wrapper(PATH_RUN)
