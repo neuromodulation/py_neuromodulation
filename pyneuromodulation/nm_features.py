@@ -19,7 +19,7 @@ class Features:
 
         self.s = s  # settings
         self.verbose = verbose
-        self.ch_names = list(array(s["ch_names"])[s["feature_idx"]])
+        self.ch_names = list(s["ch_names"])
         if s["methods"]["raw_resampling"] is True:
             self.fs = s["raw_resampling_settings"]["resample_freq"]
         else:

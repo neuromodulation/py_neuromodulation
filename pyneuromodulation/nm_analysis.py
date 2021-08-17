@@ -94,7 +94,8 @@ class FeatureReadWrapper:
         self.y_stn = self.stn_surf['vertices'][::1, 1]
         self.z_stn = self.stn_surf['vertices'][::1, 2]
 
-    def plot_subject_grid_ch_performance(self, subject_name=None, performance_dict=None, plt_grid=False):
+    def plot_subject_grid_ch_performance(self, subject_name=None, performance_dict=None,
+                                         plt_grid=False, output_name="LM"):
         """plot subject specific performance for individual channeal and optional grid points
 
         Parameters
@@ -105,6 +106,8 @@ class FeatureReadWrapper:
             [description], by default None
         plt_grid : bool, optional
             True to plot grid performances, by default False
+        output_name : string, optional
+            figure output_name, by default "LM"
         """
         # if performance_dict is None:
         #    with open(r'C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\META\Beijing_out.p', 'rb') as input:
@@ -151,7 +154,8 @@ class FeatureReadWrapper:
         cbar = fig.colorbar(pos_elec)
         cbar.set_label("Balanced Accuracy")
 
-        PATH_SAVE = os.path.join(self.feature_path, self.feature_file, 'grid_channel_performance.png')
+        PATH_SAVE = os.path.join(self.feature_path, self.feature_file,
+                                 output_name+'_grid_channel_performance.png')
         plt.savefig(PATH_SAVE, bbox_inches="tight")
         print("saved Figure to : " + str(PATH_SAVE))
 
@@ -216,7 +220,7 @@ class FeatureReadWrapper:
                      model=linear_model.LogisticRegression(class_weight="balanced"),
                      eval_method=metrics.balanced_accuracy_score,
                      cv_method=model_selection.KFold(n_splits=3, shuffle=False),
-                     output_name="LM"):
+                     output_name="LM", USE_XGB=False):
         """machine learning model evaluation for ECoG strip channels and/or grid points
 
         Parameters
@@ -236,6 +240,8 @@ class FeatureReadWrapper:
             valdation strategy, by default model_selection.KFold(n_splits=3, shuffle=False)
         output_name : str, optional
             saving name, by default "LM"
+        USE_XGB : bool, optional
+            if xgboost is used, data is split into further validation for early stopping, by default False
         """
         if feature_file is not None:
             self.feature_file = feature_file
@@ -252,10 +258,10 @@ class FeatureReadWrapper:
 
         if estimate_gridpoints:
             decoder.set_data_grid_points()
-            decoder.run_CV_grid_points(XGB=False)
+            decoder.run_CV_grid_points(XGB=USE_XGB)
         if estimate_channels:
             decoder.set_data_ind_channels()
-            decoder.run_CV_ind_channels(XGB=False)
+            decoder.run_CV_ind_channels(XGB=USE_XGB)
 
         decoder.save(output_name)
 

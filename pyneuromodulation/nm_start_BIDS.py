@@ -9,7 +9,7 @@ from pyneuromodulation import nm_IO, nm_projection, nm_generator, nm_rereference
 class NM_BIDS:
 
     def __init__(self, PATH_RUN, PATH_NM_CHANNELS=None, PATH_SETTINGS=None,
-                 PATH_ANNOTATIONS=None, LIMIT_DATA=False, LIMIT_LOW=0, LIMIT_HIGH=120000,
+                 PATH_ANNOTATIONS=None, LIMIT_DATA=False, LIMIT_LOW=0, LIMIT_HIGH=25000,
                  ECOG_ONLY=False, verbose=True) -> None:
         """Start feature estimation by reading settings, creating or reading
         nm_channels.csv file with default rereference function (ECoG CAR; depth LFP bipolar)
@@ -41,6 +41,7 @@ class NM_BIDS:
         self.PATH_NM_CHANNELS = PATH_NM_CHANNELS
         self.PATH_RUN = PATH_RUN
         self.PATH_ANNOTATIONS = PATH_ANNOTATIONS
+        self.ECOG_ONLY = ECOG_ONLY
         self.verbose = verbose
         self.settings_wrapper = None
         self.raw_arr = None
@@ -57,19 +58,16 @@ class NM_BIDS:
 
         # read BIDS data
         self.raw_arr, self.raw_arr_data, self.fs, self.line_noise = nm_IO.read_BIDS_data(
-            self.PATH_RUN, self.settings_wrapper.settings["BIDS_path"])
+            self.PATH_RUN, self.settings_wrapper.settings['BIDS_path'])
 
         if self.PATH_ANNOTATIONS is not None:
             self.set_annotations(self.PATH_ANNOTATIONS)
 
-        self.set_projection()
         self.set_nm_channels()
+        self.set_projection()
 
         if LIMIT_DATA is True:
             self.limit_data(LIMIT_LOW, LIMIT_HIGH)
-
-        if ECOG_ONLY is True:
-            self.select_ECoG_only()
 
         self.set_generator()
         self.set_rereferencing()
@@ -121,7 +119,8 @@ class NM_BIDS:
             self.PATH_NM_CHANNELS = PATH_NM_CHANNELS
         # read nm_channels.csv or create nm_channels if None specified
         self.settings_wrapper.set_nm_channels(nm_channels_path=self.PATH_NM_CHANNELS, ch_names=self.raw_arr.ch_names,
-                                              ch_types=self.raw_arr.get_channel_types())
+                                              ch_types=self.raw_arr.get_channel_types(), bads=self.raw_arr.info["bads"],
+                                              ECOG_ONLY=self.ECOG_ONLY)
         self.settings_wrapper.set_fs_line_noise(self.fs, self.line_noise)
 
     def limit_data(self, LIMIT_LOW=0, LIMIT_HIGH=120000):
@@ -138,10 +137,6 @@ class NM_BIDS:
         self.LIMIT_LOW = LIMIT_LOW
         self.LIMIT_HIGH = LIMIT_HIGH
         self.raw_arr_data = self.raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
-
-    def select_ECoG_only(self):
-        self.settings_wrapper.nm_channels.loc[(self.settings_wrapper.nm_channels["type"] == "seeg") |
-                                              (self.settings_wrapper.nm_channels["type"] == "dbs"), "used"] = 0
 
     def set_generator(self):
         """initialize generator for run function

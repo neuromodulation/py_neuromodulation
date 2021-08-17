@@ -236,14 +236,15 @@ class Decoder:
             if XGB:
                 X_train, X_val, y_train, y_val = \
                     model_selection.train_test_split(
-                        X_train, y_train, train_size=0.8, shuffle=False)
-
+                        X_train, y_train, train_size=0.7, shuffle=False)
+                if y_train.sum() == 0:
+                    continue
                 classes_weights = class_weight.compute_sample_weight(
                     class_weight='balanced', y=y_train)
 
                 model_train.fit(
                     X_train, y_train, eval_set=[(X_val, y_val)],
-                    early_stopping_rounds=10, sample_weight=classes_weights,
+                    early_stopping_rounds=7, sample_weight=classes_weights,
                     verbose=False)
 
             else:

@@ -21,12 +21,18 @@ from pyneuromodulation import nm_decode, nm_start_BIDS, nm_settings, nm_analysis
 
 def multiprocess_pipeline_run_wrapper(PATH_RUN):
 
+
+    # This function assumes that the nm_settings.json are correct! In other files, e.g. nm_analysis the settings
+    # are also read again
     if type(PATH_RUN) is bids.layout.models.BIDSFile:
         PATH_RUN = PATH_RUN.path
 
-    settings_wrapper = nm_settings.SettingsWrapper(settings_path='nm_settings.json')
+    settings_wrapper = nm_settings.SettingsWrapper(settings_path=
+        r"C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\nm_settings.json")
 
-    nm_start_BIDS.est_features_run(PATH_RUN)
+    nm_BIDS = nm_start_BIDS.NM_BIDS(PATH_RUN, ECOG_ONLY=True)
+    nm_BIDS.run_bids()
+
     feature_path = settings_wrapper.settings["out_path"]
     feature_file = os.path.basename(PATH_RUN)[:-5]  # cut off ".vhdr"
 
@@ -35,8 +41,9 @@ def multiprocess_pipeline_run_wrapper(PATH_RUN):
     feature_wrapper.read_plotting_modules()
 
     feature_wrapper.plot_features()
+    #model = xgboost.XGBClassifier()
+    #feature_wrapper.run_ML_model(model=model, output_name="XGB", USE_XGB=True)
     feature_wrapper.run_ML_model()
-
     performance_dict = {}
 
     # subject_name is different across cohorts
@@ -46,7 +53,7 @@ def multiprocess_pipeline_run_wrapper(PATH_RUN):
 
     feature_wrapper.plot_subject_grid_ch_performance(subject_name,
                                                      performance_dict=performance_dict,
-                                                     plt_grid=True)
+                                                     plt_grid=True, output_name="LM")
 
 
 def run_cohort(cohort="Pittsburgh"):
@@ -75,18 +82,18 @@ def run_cohort(cohort="Pittsburgh"):
         run_files = layout.get(extension='.vhdr')
 
     # check OPTIONALLY which 'runs' where not estimated through yet, and run those
-    #run_files_left = []
-    #directory = r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408\Pittsburgh"
-    #folders_path = [x[0] for x in os.walk(directory)]
-    #folders = [os.path.basename(x) for x in folders_path[1:]]
-    #for run_file in run_files:
-    #    feature_file = os.path.basename(run_file.path)[:-5]
-    #    if feature_file not in folders:
-    #        run_files_left.append(run_file)
-    
-    # multiprocess_pipeline_run_wrapper(run_files[0])
+    run_files_left = []
+    directory = r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_1708\Berlin"
+    folders_path = [x[0] for x in os.walk(directory)]
+    folders = [os.path.basename(x) for x in folders_path[1:]]
+    for run_file in run_files:
+        feature_file = os.path.basename(run_file.path)[:-5]
+        if feature_file not in folders:
+            run_files_left.append(run_file)
+
+    #multiprocess_pipeline_run_wrapper(run_files[0])
     pool = multiprocessing.Pool(processes=55)  # most on Ryzen CPU 2990WX is 63
-    pool.map(multiprocess_pipeline_run_wrapper, run_files)
+    pool.map(multiprocess_pipeline_run_wrapper, run_files_left)
 
 
 def read_cohort_results(feature_path, cohort):
@@ -187,9 +194,8 @@ def read_all_grid_points(grid_point_all, feature_path, feature_file, cohort):
     return grid_point_all
 
 
-def cohort_wrapper_read_all_grid_points():
+def cohort_wrapper_read_all_grid_points(feature_path_cohorts=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408"):
     cohorts = ["Pittsburgh", "Beijing", "Berlin"]
-    feature_path_cohorts = r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408"
     grid_point_all = {}
     for cohort in cohorts:
         print("COHORT: "+cohort)
@@ -348,12 +354,13 @@ def run_cohort_leave_one_cohort_out_CV():
     np.save('performance_leave_one_cohort_out.npy', performance_leave_one_cohort_out)
 
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
+#    run_cohort('Beijing')
+    
+    #for cohort in ['Berlin', 'Beijing', 'Pittsburgh']:
+        
 
-    for cohort in ['Berlin', 'Beijing', 'Pittsburgh']:
-        run_cohort(cohort)
-
-    run_cohort_leave_one_patient_out_CV()
+    #run_cohort_leave_one_patient_out_CV()
     # run single run
     # PATH_RUN = r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\Data\Pittsburgh\sub-000\ses-right\ieeg\sub-000_ses-right_task-force_run-3_ieeg.vhdr"
     # multiprocess_pipeline_run_wrapper(PATH_RUN)
