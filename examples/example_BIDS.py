@@ -5,26 +5,33 @@ from itertools import product
 import os
 import json
 from pathlib import Path
-from pyneuromodulation import start_BIDS
+from sklearn import linear_model
+from pyneuromodulation import nm_start_BIDS, nm_analysis
 
 
 def run_example_BIDS():
     """run the example BIDS path in pyneuromodulation/tests/data
     """
 
-    # write BIDS example path in settings.json
-    PATH_SETTINGS = os.path.abspath('examples\\settings.json')
-    with open(PATH_SETTINGS, encoding='utf-8') as json_file:
-        settings = json.load(json_file)
-    settings["BIDS_path"] = os.path.abspath('examples\\data')
-
-    # write relative feature output folder
-    settings["out_path"] = os.path.abspath(os.path.join('examples', 'data', 'derivatives'))
-    with open('examples\\settings.json', 'w') as f:
-        json.dump(settings, f, indent=4)
-
     PATH_RUN = os.path.join(
         os.path.abspath('examples\\data'), 'sub-testsub', 'ses-EphysMedOff', 'ieeg',
         "sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg.vhdr")
 
-    start_BIDS.est_features_run(PATH_RUN, PATH_SETTINGS=PATH_SETTINGS)
+    # read default settings
+    nm_BIDS = nm_start_BIDS.NM_BIDS(PATH_RUN)
+
+    # add specific BIDS_PATH and out_path
+    nm_BIDS.settings_wrapper.settings['BIDS_path'] = os.path.abspath('examples\\data')
+    nm_BIDS.settings_wrapper.settings['out_path'] = os.path.abspath(os.path.join('examples', 'data', 'derivatives'))
+
+    #nm_BIDS.run_bids()
+
+    # plot features for ECoG channels
+    feature_reader = nm_analysis.FeatureReadWrapper(feature_path=nm_BIDS.settings_wrapper.settings['out_path'],
+                                                    plt_cort_projection=True)
+    #feature_reader.plot_features()
+    model = linear_model.LogisticRegression(class_weight='balanced')
+    feature_reader.run_ML_model(model=model)
+
+    performance_dict = feature_reader.read_ind_channel_results(read_grid_points=True, read_channels=True)
+    feature_reader.plot_subject_grid_ch_performance(performance_dict=performance_dict, plt_grid=True)

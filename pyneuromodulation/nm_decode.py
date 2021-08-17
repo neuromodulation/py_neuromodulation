@@ -22,7 +22,7 @@ class Decoder:
                  cv_method=model_selection.KFold(n_splits=3, shuffle=False),
                  threshold_score=True) -> None:
         """Imitialize here a feature file for processing
-        Read settings.json df_M1.tsv and features.csv
+        Read settings.json nm_channels.csv and features.csv
         Read target label
 
         Parameters
@@ -49,9 +49,10 @@ class Decoder:
         self.features = pd.read_csv(os.path.join(feature_path, feature_file,
                                     feature_file + "_FEATURES.csv"), header=0)
 
-        self.df_M1 = pd.read_csv(os.path.join(self.feature_path, feature_file,
-                                 feature_file + "_DF_M1.csv"), header=0)
-        self.used_chs = list(self.df_M1[(self.df_M1["target"] == 0) & (self.df_M1["used"] == 1)]["new_name"])
+        self.nm_channels = pd.read_csv(os.path.join(self.feature_path, feature_file,
+                                       feature_file + "_nm_channels.csv"), header=0)
+        self.used_chs = list(self.nm_channels[(self.nm_channels["target"] == 0) &
+                             (self.nm_channels["used"] == 1)]["new_name"])
 
         with open(os.path.join(self.feature_path, feature_file,
                                feature_file + "_SETTINGS.json")) as f:
@@ -61,7 +62,7 @@ class Decoder:
         # for simplicity, choose here only first one
         # lateron check laterality
         # try to set contralateral, if not take the first
-        target_channels = list(self.df_M1[self.df_M1["target"] == 1]["name"])
+        target_channels = list(self.nm_channels[self.nm_channels["target"] == 1]["name"])
         if len(target_channels) == 1:
             self.target_ch = target_channels[0]
         elif self.settings["sess_right"] is True:
@@ -76,13 +77,13 @@ class Decoder:
                     self.target_ch = CLEAN_LEFT[0]
                 else:
                     # search for "clean" or "squared" channel without laterality included
-                    ch_without_lat = [t_ch for t_ch in list(self.df_M1[self.df_M1["target"] == 1]["name"])
+                    ch_without_lat = [t_ch for t_ch in list(self.nm_channels[self.nm_channels["target"] == 1]["name"])
                                       if ("CLEAN" in t_ch) or ("squared" in t_ch)]
                     if len(ch_without_lat) != 0:
                         self.target_ch = ch_without_lat[0]
                     else:
                         # take first target
-                        self.target_ch = self.df_M1[self.df_M1["target"] == 1]["name"].iloc[0]
+                        self.target_ch = self.nm_channels[self.nm_channels["target"] == 1]["name"].iloc[0]
         else:
             # left session
             # check if contralateral right (optimal clean) channel exists
@@ -96,13 +97,13 @@ class Decoder:
                     self.target_ch = CLEAN_RIGHT[0]
                 else:
                     # search for "clean" or "squared" channel without laterality included
-                    ch_without_lat = [t_ch for t_ch in list(self.df_M1[self.df_M1["target"] == 1]["name"])
+                    ch_without_lat = [t_ch for t_ch in list(self.nm_channels[self.nm_channels["target"] == 1]["name"])
                                       if ("CLEAN" in t_ch) or ("squared" in t_ch)]
                     if len(ch_without_lat) != 0:
                         self.target_ch = ch_without_lat[0]
                     else:
                         # take first target
-                        self.target_ch = self.df_M1[self.df_M1["target"] == 1]["name"].iloc[0]
+                        self.target_ch = self.nm_channels[self.nm_channels["target"] == 1]["name"].iloc[0]
 
         # for classification dependin on the label, set to binary label
         self.label = np.nan_to_num(np.array(self.features[self.target_ch])) > 0.3
