@@ -220,7 +220,7 @@ class FeatureReadWrapper:
                      model=linear_model.LogisticRegression(class_weight="balanced"),
                      eval_method=metrics.balanced_accuracy_score,
                      cv_method=model_selection.KFold(n_splits=3, shuffle=False),
-                     output_name="LM", USE_XGB=False):
+                     output_name="LM", TRAIN_VAL_SPLIT=False):
         """machine learning model evaluation for ECoG strip channels and/or grid points
 
         Parameters
@@ -240,8 +240,8 @@ class FeatureReadWrapper:
             valdation strategy, by default model_selection.KFold(n_splits=3, shuffle=False)
         output_name : str, optional
             saving name, by default "LM"
-        USE_XGB : bool, optional
-            if xgboost is used, data is split into further validation for early stopping, by default False
+        TRAIN_VAL_SPLIT : bool, optional
+            data is split into further validation for early stopping, by default False
         """
         if feature_file is not None:
             self.feature_file = feature_file
@@ -258,10 +258,10 @@ class FeatureReadWrapper:
 
         if estimate_gridpoints:
             decoder.set_data_grid_points()
-            decoder.run_CV_grid_points(XGB=USE_XGB)
+            decoder.run_CV_grid_points(TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT)
         if estimate_channels:
             decoder.set_data_ind_channels()
-            decoder.run_CV_ind_channels(XGB=USE_XGB)
+            decoder.run_CV_ind_channels(TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT)
 
         decoder.save(output_name)
 

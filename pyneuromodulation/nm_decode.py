@@ -123,17 +123,17 @@ class Decoder:
             self.ch_ind_data[ch] = np.nan_to_num(np.array(self.features[[col for col in self.features.columns
                                                           if col.startswith(ch)]]))
 
-    def run_CV_ind_channels(self, XGB=True):
+    def run_CV_ind_channels(self, TRAIN_VAL_SPLIT=True):
         """run the CV for every specified channel
 
         Parameters
         ----------
-        XGB (boolean):
+        TRAIN_VAL_SPLIT (boolean):
             if true split data into additinal validation, and run class weighted CV
         """
         self.ch_ind_pr = {}
         for ch in self.used_chs:
-            self.run_CV(self.ch_ind_data[ch], self.label, XGB)
+            self.run_CV(self.ch_ind_data[ch], self.label, TRAIN_VAL_SPLIT)
             self.ch_ind_pr[ch] = {}
             self.ch_ind_pr[ch]["score_train"] = self.score_train
             self.ch_ind_pr[ch]["score_test"] = self.score_test
@@ -167,7 +167,7 @@ class Decoder:
             # samples, features
             self.grid_point_ind_data[grid_point] = np.nan_to_num(self.run_analysis.proj_cortex_array[:, grid_point, :])
 
-    def run_CV_grid_points(self, XGB=True):
+    def run_CV_grid_points(self, TRAIN_VAL_SPLIT=True):
         """run cross validation across grid points
 
         Parameters
@@ -177,7 +177,7 @@ class Decoder:
         """
         self.gridpoint_ind_pr = {}
         for grid_point in self.active_gridpoints:
-            self.run_CV(self.grid_point_ind_data[grid_point], self.label, XGB)
+            self.run_CV(self.grid_point_ind_data[grid_point], self.label, TRAIN_VAL_SPLIT)
             self.gridpoint_ind_pr[grid_point] = {}
             self.gridpoint_ind_pr[grid_point]["score_train"] = self.score_train
             self.gridpoint_ind_pr[grid_point]["score_test"] = self.score_test
@@ -188,7 +188,7 @@ class Decoder:
             self.gridpoint_ind_pr[grid_point]["X_train"] = self.X_train
             self.gridpoint_ind_pr[grid_point]["X_test"] = self.X_test
 
-    def run_CV(self, data=None, label=None, XGB=True):
+    def run_CV(self, data=None, label=None, TRAIN_VAL_SPLIT=True):
         """Evaluate model performance on the specified cross validation.
         If no data and label is specified, use whole feature class attributes.
 
@@ -233,7 +233,7 @@ class Decoder:
 
             # optionally split training data also into train and validation
             # for XGBOOST
-            if XGB:
+            if TRAIN_VAL_SPLIT:
                 X_train, X_val, y_train, y_val = \
                     model_selection.train_test_split(
                         X_train, y_train, train_size=0.7, shuffle=False)
