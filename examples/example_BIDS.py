@@ -15,21 +15,18 @@ def run_example_BIDS():
 
     PATH_RUN = os.path.join(
         os.path.abspath('examples\\data'), 'sub-testsub', 'ses-EphysMedOff', 'ieeg',
-        "sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg.vhdr")
+        "sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg.vhdr")
 
     # read default settings
-    nm_BIDS = nm_start_BIDS.NM_BIDS(PATH_RUN)
+    nm_BIDS = nm_start_BIDS.NM_BIDS(PATH_RUN, PATH_BIDS=os.path.abspath('examples\\data'),
+                                    PATH_OUT=os.path.abspath(os.path.join('examples', 'data', 'derivatives')))
 
-    # add specific BIDS_PATH and out_path
-    nm_BIDS.settings_wrapper.settings['BIDS_path'] = os.path.abspath('examples\\data')
-    nm_BIDS.settings_wrapper.settings['out_path'] = os.path.abspath(os.path.join('examples', 'data', 'derivatives'))
-
-    #nm_BIDS.run_bids()
+    nm_BIDS.run_bids()
 
     # plot features for ECoG channels
     feature_reader = nm_analysis.FeatureReadWrapper(feature_path=nm_BIDS.settings_wrapper.settings['out_path'],
                                                     plt_cort_projection=True)
-    #feature_reader.plot_features()
+    feature_reader.plot_features()
     model = linear_model.LogisticRegression(class_weight='balanced')
     feature_reader.run_ML_model(model=model)
 

@@ -9,7 +9,8 @@ from pyneuromodulation import nm_IO, nm_projection, nm_generator, nm_rereference
 class NM_BIDS:
 
     def __init__(self, PATH_RUN, PATH_NM_CHANNELS=None, PATH_SETTINGS=None,
-                 PATH_ANNOTATIONS=None, LIMIT_DATA=False, LIMIT_LOW=0, LIMIT_HIGH=25000,
+                 PATH_ANNOTATIONS=None, PATH_BIDS=None, PATH_OUT=None,
+                 LIMIT_DATA=False, LIMIT_LOW=0, LIMIT_HIGH=25000,
                  ECOG_ONLY=False, verbose=True) -> None:
         """Start feature estimation by reading settings, creating or reading
         nm_channels.csv file with default rereference function (ECoG CAR; depth LFP bipolar)
@@ -25,6 +26,10 @@ class NM_BIDS:
             absolute path to settings.json file, by default None
         PATH_ANNOTATIONS : string, optional
             absolute path to folder with mne annotations.txt, by default None
+        PATH_BIDS : string, optional
+            absolute path to BIDS folder, by default None
+        PATH_OUT : string, optional
+            absolute path to feature output folder, by default None
         LIMIT_DATA : bool, optional
             restrict processsing samples, by default False
         LIMIT_LOW : int, optional
@@ -54,7 +59,7 @@ class NM_BIDS:
         self.features = None
         self.run_analysis = None
 
-        self.set_settings(self.PATH_SETTINGS)
+        self.set_settings(self.PATH_SETTINGS, PATH_BIDS=PATH_BIDS, PATH_OUT=PATH_OUT)
 
         # read BIDS data
         self.raw_arr, self.raw_arr_data, self.fs, self.line_noise = nm_IO.read_BIDS_data(
@@ -80,15 +85,18 @@ class NM_BIDS:
         self.add_labels()
         self.save_features()
 
-    def set_settings(self, PATH_SETTINGS=None):
-        if PATH_SETTINGS is None and self.PATH_SETTINGS is not None:
-            self.PATH_SETTINGS = PATH_SETTINGS
-        elif PATH_SETTINGS is None:
+    def set_settings(self, PATH_SETTINGS=None, PATH_BIDS=None, PATH_OUT=None):
+        if PATH_SETTINGS is None:
+            # if no path to nm_settings.json is given, take the deafult one in py_neuromodulation
             PATH_SETTINGS = os.path.join(os.path.dirname(nm_IO.__file__), 'nm_settings.json')
             self.settings_wrapper = nm_settings.SettingsWrapper(PATH_SETTINGS)
         else:
             # PATH_SETTINGS is parametrized
             self.settings_wrapper = nm_settings.SettingsWrapper(settings_path=self.PATH_SETTINGS)
+        if PATH_BIDS is not None:
+            self.settings_wrapper.settings["BIDS_path"] = PATH_BIDS
+        if PATH_OUT is not None:
+            self.settings_wrapper.settings["out_path"] = PATH_OUT
 
     def set_annotations(self):
         try:

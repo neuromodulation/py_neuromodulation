@@ -1,6 +1,6 @@
 {
-    "BIDS_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Berlin_VoluntaryMovement",
-    "out_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\try_1708\\Berlin",
+    "BIDS_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Beijing",
+    "out_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\try_1708\\Beijing",
     "sampling_rate_features": 10,
     "methods": {
         "raw_resampling": true,
