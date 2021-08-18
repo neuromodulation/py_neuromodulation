@@ -3,7 +3,7 @@ from pandas import DataFrame
 
 
 def set_nm_channels(ch_names, ch_types, reference='default', bads=None,
-           new_names='default'):
+                    new_names='default', ECOG_ONLY=False):
     """Return dataframe with channel-specific settings.
 
     Return an nm_channels dataframe with the columns: "name", "rereference", "used",
@@ -41,6 +41,8 @@ def set_nm_channels(ch_names, ch_types, reference='default', bads=None,
             `None` if no renaming should be performed. 'default' will infer
             channel renaming from re-referencing information. If a list is
             given, it should be in the same order as `ch_names`.
+        ECOG_ONLY : boolean, default: False
+            if True, set only 'ecog' channel type to used
 
     Returns
     -------
@@ -71,6 +73,9 @@ def set_nm_channels(ch_names, ch_types, reference='default', bads=None,
     # note: BIDS types are in caps, mne.io.RawArray types lower case
     # s.t. 'type' will be in lower case here
     df['type'] = ch_types
+
+    if ECOG_ONLY is True:
+        df.loc[(df["type"] == "seeg") | (df["type"] == "dbs"), "used"] = 0
 
     if isinstance(reference, str):
         if not (reference in ['default', 'Default']):
@@ -128,6 +133,7 @@ def set_nm_channels(ch_names, ch_types, reference='default', bads=None,
         if isinstance(bads, str):
             bads = [bads]
         df['status'] = ['bad' if ch in bads else 'good' for ch in ch_names]
+        df.loc[df['status'] == 'bad', 'used'] = 0  # setting bad channels to not being used
     else:
         df['status'] = 'good'
 

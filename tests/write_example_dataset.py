@@ -45,10 +45,12 @@ if __name__ == "__main__":
 
     data_to_write = mne.io.read_raw_brainvision("example.vhdr")
 
+    # example.eeg / .vhdr need to be deleted afterwards
+
     data_to_write = set_chtypes(data_to_write)
     data_to_write.info["line_freq"] = 50
 
     mne_bids.write_raw_bids(data_to_write, mne_bids.BIDSPath(subject="testsub", session="EphysMedOff",
-                            task="buttonpress", datatype="ieeg",
-                            root=r"C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\tests\data"),
+                            task="buttonpress", datatype="ieeg", run="0",
+                            root=r"C:\Users\ICN_admin\Documents\py_neuromodulation\examples\data"),
                             overwrite=True)

@@ -116,7 +116,8 @@ class SettingsWrapper:
             self.settings["grid_cortex"] = None
             self.settings["grid_subcortex"] = None
 
-    def set_nm_channels(self, nm_channels_path=None, ch_names=None, ch_types=None) -> None:
+    def set_nm_channels(self, nm_channels_path=None, ch_names=None, ch_types=None,
+                        bads=None, ECOG_ONLY=False) -> None:
         """set nm_channels dataframe; specifies channel names, rereferencing method, ch_type,
         if a channel is used or not, and if a channel should be treated as a label
 
@@ -128,17 +129,23 @@ class SettingsWrapper:
             by default None
         ch_types : list, optional
             BIDS compatible channel types, by default None
+        bads : list, optional
+            bad channels from raw_arr.info["bads"], by default None
+        ECOG_ONLY : boolean, by default False
+            if True set 'seeg' or 'dbs' channels unused
         """
         self.nm_channels_path = nm_channels_path
         self.nm_channels = pd.read_csv(self.nm_channels_path, sep="\t")\
             if self.nm_channels_path is not None and os.path.isfile(self.nm_channels_path)\
-            else nm_define_nmchannels.set_nm_channels(ch_names, ch_types)
-        self.settings["ch_names"] = self.nm_channels['new_name'].tolist()
-        self.settings["ch_types"] = self.nm_channels['type'].tolist()
+            else nm_define_nmchannels.set_nm_channels(ch_names, ch_types, bads=bads, ECOG_ONLY=ECOG_ONLY)
+        self.settings["ch_names"] = self.nm_channels[self.nm_channels['used'] == 1]['new_name'].tolist()
+        self.settings["ch_types"] = self.nm_channels[self.nm_channels['used'] == 1]['type'].tolist()
+
+        # feature_idx indexes the nm_channels dataframe which channels are being feature estimated
         self.settings["feature_idx"] = np.where(
-            self.nm_channels["used"] & ~self.nm_channels["target"])[0].tolist()
+            self.nm_channels["used"] & ~self.nm_channels['target'])[0].tolist()
         # If multiple targets exist, select only the first
-        self.ind_label = np.where(self.nm_channels["target"] == 1)[0]
+        self.ind_label = np.where(self.nm_channels['target'] == 1)[0]
 
     def test_settings(self, verbose=True) -> None:
         """Test if settings are specified correctly in nm_settings.json

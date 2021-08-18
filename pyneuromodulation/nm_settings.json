@@ -1,6 +1,6 @@
 {
-    "BIDS_path": "C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\examples\\data",
-    "out_path": "C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\examples\\data\\derivatives",
+    "BIDS_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Beijing",
+    "out_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\try_1708\\Beijing",
     "sampling_rate_features": 10,
     "methods": {
         "raw_resampling": true,
@@ -71,13 +71,6 @@
                 ],
                 333
             ],
-            "all beta": [
-                [
-                    13,
-                    35
-                ],
-                333
-            ],
             "low gamma": [
                 [
                     60,
@@ -92,10 +85,10 @@
                 ],
                 100
             ],
-            "all gamma": [
+            "HFA": [
                 [
-                    60,
-                    200
+                    200,
+                    400
                 ],
                 100
             ]

@@ -1,0 +1,13 @@
+﻿name	type	units	low_cutoff	high_cutoff	description	sampling_frequency	status	status_description
+LFP_STN_R_234	SEEG	µV	0.0	687.5	StereoEEG	1375.0	good	n/a
+LFP_STN_R_567	SEEG	µV	0.0	687.5	StereoEEG	1375.0	good	n/a
+LFP_BS_STN_L_1	SEEG	µV	0.0	687.5	StereoEEG	1375.0	good	n/a
+LFP_STN_L_234	SEEG	µV	0.0	687.5	StereoEEG	1375.0	good	n/a
+LFP_STN_L_567	SEEG	µV	0.0	687.5	StereoEEG	1375.0	good	n/a
+ECOG_AT_SM_L_1	ECOG	µV	0.0	687.5	Electrocorticography	1375.0	good	n/a
+ECOG_AT_SM_L_2	ECOG	µV	0.0	687.5	Electrocorticography	1375.0	good	n/a
+ECOG_AT_SM_L_3	ECOG	µV	0.0	687.5	Electrocorticography	1375.0	good	n/a
+ECOG_AT_SM_L_4	ECOG	µV	0.0	687.5	Electrocorticography	1375.0	good	n/a
+ECOG_AT_SM_L_5	ECOG	µV	0.0	687.5	Electrocorticography	1375.0	good	n/a
+ECOG_AT_SM_L_6	ECOG	µV	0.0	687.5	Electrocorticography	1375.0	good	n/a
+ANALOG_ROT_R_1	MISC	µV	0.0	687.5	Miscellaneous	1375.0	good	n/a

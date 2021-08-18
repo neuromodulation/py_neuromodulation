@@ -12,16 +12,15 @@ PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent
 sys.path.append(os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation'))
 sys.path.append(os.path.join(Path(__file__).absolute().parent.parent,'examples'))
 
-import start_BIDS
-import IO
+import nm_IO
 
-PATH_RUN = r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\Data\Berlin_VoluntaryMovement\sub-005\ses-EphysMedOff02\ieeg\sub-005_ses-EphysMedOff02_task-SelfpacedRotationR_acq-StimOn_run-01_ieeg.vhdr"
+PATH_RUN = r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\Data\Berlin_VoluntaryMovement\sub-002\ses-EphysMedOff03\ieeg\sub-002_ses-EphysMedOff03_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg.vhdr"
 BIDS_PATH = r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\Data\Berlin_VoluntaryMovement"
 
 if __name__ == "__main__":
 
 
-    raw_arr, _, _, _ = IO.read_BIDS_data(PATH_RUN, BIDS_PATH)
+    raw_arr, _, _, _ = nm_IO.read_BIDS_data(PATH_RUN, BIDS_PATH)
     l_ch = [ch for ch in raw_arr.ch_names if 'ECOG' in ch]
     l_ch.append('rota_squared')
     fig = raw_arr.pick(l_ch).plot(scalings='auto', lowpass=200, highpass=2, block=True)
