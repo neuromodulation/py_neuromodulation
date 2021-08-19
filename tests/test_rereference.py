@@ -7,12 +7,15 @@ import pandas as pd
 import mne_bids
 from pathlib import Path
 
+sys.path.append(os.path.join(Path(__file__).parent.parent, 'pyneuromodulation'))
+sys.path.append(os.path.join(Path(__file__).parent.parent, 'examples'))
+
 from pyneuromodulation import nm_define_nmchannels, nm_generator, nm_rereference, nm_settings, \
     nm_sharpwaves, nm_IO
 from examples import example_BIDS
 
 
-class Test:
+class TestWrapper:
 
     def __init__(self):
         """This test function sets a data batch and automatic initialized M1 datafram
@@ -31,12 +34,13 @@ class Test:
         self.settings_wrapper = nm_settings.SettingsWrapper(
             settings_path=os.path.join(os.path.dirname(nm_define_nmchannels .__file__), 'nm_settings.json'))
 
-        self.settings_wrapper.settings['BIDS_path'] = os.path.join(os.path.dirname(example_BIDS.__file___), 'data')
+        #self.settings_wrapper.settings['BIDS_path'] = os.path.join(os.path.dirname(example_BIDS.__file___), 'data')
+        self.settings_wrapper.settings['BIDS_path'] = os.path.join(Path(__file__).parent.parent, 'examples', 'data')
         self.settings_wrapper.settings['out_path'] = os.path.join(
             self.settings_wrapper.settings['BIDS_path'], 'derivatives')
 
         PATH_RUN = os.path.join(self.settings_wrapper.settings['BIDS_path'], 'sub-testsub', 'ses-EphysMedOff',
-                                'ieeg', "sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg.vhdr")
+                                'ieeg', "sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg.vhdr")
         # read BIDS data
         self.raw_arr, self.raw_arr_data, self.fs, self.line_noise = \
             nm_IO.read_BIDS_data(PATH_RUN, self.settings_wrapper.settings['BIDS_path'])
@@ -54,10 +58,6 @@ class Test:
         self.ieeg_batch = next(self.gen, None)
 
         self.initialize_rereference()
-
-        self.test_rereference()
-
-        self.test_sharpwaves()
 
     def initialize_rereference(self):
         """The rereference class get's here instantiated given the supplied df_M1 table
@@ -102,15 +102,7 @@ class Test:
             assert_array_equal(ref_dat[bp_reref_idx, :],
                                self.ieeg_batch[bp_reref_idx, :] - self.ieeg_batch[referenced_bp_channel, :])
 
-    def test_sharpwaves(self):
 
-        print("Initializing sharp wave test object.")
-        sw_features = nm_sharpwaves.SharpwaveAnalyzer(self.settings_wrapper.settings["sharpwave_analysis_settings"],
-                                                      self.fs)
-        print("Estimating sharp wave features.")
-        features = sw_features.get_sharpwave_features(features_={}, data=self.ieeg_batch,
-                                                      ch=self.settings_wrapper.nm_channels.name.iloc[0])
-
-
-if __name__ == "__main__":
-    test = Test()
+def test_run():
+    test_wrapper = TestWrapper()
+    test_wrapper.test_rereference()
