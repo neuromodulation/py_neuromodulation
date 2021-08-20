@@ -107,7 +107,7 @@ class SharpwaveAnalyzer:
 
         # check settings if troughs and peaks are analyzed
 
-        for detect_troughs in [False, True]:
+        for detect_troughs in [True, False]:
 
             if detect_troughs is False:
                 if self.sw_settings["detect_peaks"]["estimate"] is False:
@@ -115,20 +115,16 @@ class SharpwaveAnalyzer:
                 key_name = 'Peak'
                 # the detect_troughs loop start with peaks, s.t. data does not
                 # need to be flipped
-                dist_troughs = self.sw_settings["detect_peaks"]["distance_troughs"]
-                dist_peaks = self.sw_settings["detect_peaks"]["distance_peaks"]
 
             if detect_troughs is True:
                 if self.sw_settings["detect_troughs"]["estimate"] is False:
                     continue
                 key_name = 'Trough'
-                dist_troughs = self.sw_settings["detect_troughs"]["distance_troughs"]
-                dist_peaks = self.sw_settings["detect_troughs"]["distance_peaks"]
 
                 self.filtered_data = -self.filtered_data
 
             self.initialize_sw_features()  # reset sharpwave feature attriubtes to empty lists
-            self.analyze_waveform(dist_troughs, dist_peaks)
+            self.analyze_waveform()
 
             if self.sw_settings["estimator"]["mean"] is True:
                 for feature_name in self.used_features:
@@ -153,14 +149,12 @@ class SharpwaveAnalyzer:
 
         return features_
 
-    def analyze_waveform(self, peak_dist, trough_dist) -> None:
+    def analyze_waveform(self) -> None:
         """ Given the scipy.signal.find_peaks  trough/peak distance
         settings specified sharpwave features are estimated.
 
         Parameters
         ----------
-        peak_dist (int): scipy.signal.find_peaks min distance between peaks
-        trough_dist (int): scipy.signal.find_peaks min distance between troughs
 
         Raises:
             NoValidTroughException: Return if no adjacent peak can be found
@@ -168,8 +162,8 @@ class SharpwaveAnalyzer:
 
         """
 
-        peaks = find_peaks(self.filtered_data, distance=peak_dist)[0]
-        troughs = find_peaks(-self.filtered_data, distance=trough_dist)[0]
+        peaks = find_peaks(self.filtered_data, distance=self.sw_settings["detect_troughs"]["distance_peaks"])[0]
+        troughs = find_peaks(-self.filtered_data, distance=self.sw_settings["detect_troughs"]["distance_troughs"])[0]
 
         for trough_idx in troughs:
             try:
