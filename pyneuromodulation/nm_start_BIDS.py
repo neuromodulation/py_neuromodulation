@@ -9,7 +9,7 @@ from pyneuromodulation import nm_IO, nm_projection, nm_generator, nm_rereference
 class NM_BIDS:
 
     def __init__(self, PATH_RUN, PATH_NM_CHANNELS=None, PATH_SETTINGS=None,
-                 PATH_ANNOTATIONS=None, PATH_BIDS=None, PATH_OUT=None,
+                 PATH_ANNOTATIONS=None, PATH_BIDS=None, PATH_GRIDS=None, PATH_OUT=None,
                  LIMIT_DATA=False, LIMIT_LOW=0, LIMIT_HIGH=25000,
                  ECOG_ONLY=False, verbose=True) -> None:
         """Start feature estimation by reading settings, creating or reading
@@ -28,6 +28,8 @@ class NM_BIDS:
             absolute path to folder with mne annotations.txt, by default None
         PATH_BIDS : string, optional
             absolute path to BIDS folder, by default None
+        PATH_GRID : string, optional
+            absolute path to grid_cortex.tsv and grid_subcortex.tsv folder, by default None
         PATH_OUT : string, optional
             absolute path to feature output folder, by default None
         LIMIT_DATA : bool, optional
@@ -46,6 +48,7 @@ class NM_BIDS:
         self.PATH_NM_CHANNELS = PATH_NM_CHANNELS
         self.PATH_RUN = PATH_RUN
         self.PATH_ANNOTATIONS = PATH_ANNOTATIONS
+        self.PATH_GRIDS = PATH_GRIDS
         self.ECOG_ONLY = ECOG_ONLY
         self.verbose = verbose
         self.settings_wrapper = None
@@ -114,8 +117,7 @@ class NM_BIDS:
     def set_projection(self):
         # (if available) add coordinates to settings
         if self.raw_arr.get_montage() is not None:
-            self.settings_wrapper.add_coord(self.raw_arr.copy())
-
+            self.settings_wrapper.add_coord(self.raw_arr.copy(), self.PATH_GRIDS)
         if any((self.settings_wrapper.settings["methods"]["project_cortex"],
                 self.settings_wrapper.settings["methods"]["project_subcortex"])):
             self.projection = nm_projection.Projection(self.settings_wrapper.settings)

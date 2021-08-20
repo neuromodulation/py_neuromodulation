@@ -209,13 +209,13 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#nm_decode.Decoder.run_Bay_Opt" title="nm_decode.Decoder.run_Bay_Opt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_Bay_Opt</span></code></a>(space[, rounds, base_estimator, …])</p></td>
 <td><p>Run skopt bayesian optimization skopt.Optimizer: <a class="reference external" href="https://scikit-optimize.github.io/stable/modules/generated/skopt.Optimizer.html#skopt.Optimizer">https://scikit-optimize.github.io/stable/modules/generated/skopt.Optimizer.html#skopt.Optimizer</a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nm_decode.Decoder.run_CV" title="nm_decode.Decoder.run_CV"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_CV</span></code></a>([data, label, XGB])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nm_decode.Decoder.run_CV" title="nm_decode.Decoder.run_CV"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_CV</span></code></a>([data, label, TRAIN_VAL_SPLIT])</p></td>
 <td><p>Evaluate model performance on the specified cross validation.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nm_decode.Decoder.run_CV_grid_points" title="nm_decode.Decoder.run_CV_grid_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_CV_grid_points</span></code></a>([XGB])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nm_decode.Decoder.run_CV_grid_points" title="nm_decode.Decoder.run_CV_grid_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_CV_grid_points</span></code></a>([TRAIN_VAL_SPLIT])</p></td>
 <td><p>run cross validation across grid points</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nm_decode.Decoder.run_CV_ind_channels" title="nm_decode.Decoder.run_CV_ind_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_CV_ind_channels</span></code></a>([XGB])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nm_decode.Decoder.run_CV_ind_channels" title="nm_decode.Decoder.run_CV_ind_channels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_CV_ind_channels</span></code></a>([TRAIN_VAL_SPLIT])</p></td>
 <td><p>run the CV for every specified channel</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#nm_decode.Decoder.save" title="nm_decode.Decoder.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>([str_save_add])</p></td>
@@ -268,7 +268,7 @@ some metrics are minimized (MAE), some are maximized (r^2)</p>
 
 <dl class="py method">
 <dt id="nm_decode.Decoder.run_CV">
-<code class="sig-name descname"><span class="pre">run_CV</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">XGB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_decode.html#Decoder.run_CV"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_decode.Decoder.run_CV" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">run_CV</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TRAIN_VAL_SPLIT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_decode.html#Decoder.run_CV"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_decode.Decoder.run_CV" title="Permalink to this definition">¶</a></dt>
 <dd><p>Evaluate model performance on the specified cross validation.
 If no data and label is specified, use whole feature class attributes.</p>
 <dl class="field-list simple">
@@ -291,7 +291,7 @@ If no data and label is specified, use whole feature class attributes.</p>
 
 <dl class="py method">
 <dt id="nm_decode.Decoder.run_CV_grid_points">
-<code class="sig-name descname"><span class="pre">run_CV_grid_points</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">XGB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_decode.html#Decoder.run_CV_grid_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_decode.Decoder.run_CV_grid_points" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">run_CV_grid_points</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">TRAIN_VAL_SPLIT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_decode.html#Decoder.run_CV_grid_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_decode.Decoder.run_CV_grid_points" title="Permalink to this definition">¶</a></dt>
 <dd><p>run cross validation across grid points</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -305,12 +305,12 @@ If no data and label is specified, use whole feature class attributes.</p>
 
 <dl class="py method">
 <dt id="nm_decode.Decoder.run_CV_ind_channels">
-<code class="sig-name descname"><span class="pre">run_CV_ind_channels</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">XGB</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_decode.html#Decoder.run_CV_ind_channels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_decode.Decoder.run_CV_ind_channels" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">run_CV_ind_channels</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">TRAIN_VAL_SPLIT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_decode.html#Decoder.run_CV_ind_channels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_decode.Decoder.run_CV_ind_channels" title="Permalink to this definition">¶</a></dt>
 <dd><p>run the CV for every specified channel</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>XGB (boolean):</strong></dt><dd><p>if true split data into additinal validation, and run class weighted CV</p>
+<dt><strong>TRAIN_VAL_SPLIT (boolean):</strong></dt><dd><p>if true split data into additinal validation, and run class weighted CV</p>
 </dd>
 </dl>
 </dd>

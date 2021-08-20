@@ -39,12 +39,14 @@ class SettingsWrapper:
     def set_channel_types(self, ch_types) -> None:
         self.settings["ch_types"] = ch_types
 
-    def add_coord(self, raw_arr):
+    def add_coord(self, raw_arr, PATH_GRIDS=None):
         """set coordinate information to settings from RawArray
         The set coordinate positions are set as lists, since np.arrays cannot be saved in json
         Parameters
         ----------
         raw_arr : mne.io.RawArray
+        PATH_GRIDS : string, optional
+            absolute path to grid_cortex.tsv and grid_subcortex.tsv, by default: None
         """
         if raw_arr.get_montage() is not None:
             self.settings["coord_list"] = np.array(
@@ -100,11 +102,16 @@ class SettingsWrapper:
                 1000*np.array([ch for ch_idx, ch in enumerate(self.settings["coord_list"])
                               if (self.settings["coord_list"][ch_idx][0] <= 0) and
                               ("LFP" in self.settings["coord_names"][ch_idx])])
-
-            self.settings["grid_cortex"] = pd.read_csv(
-                'pyneuromodulation\\grid_cortex.tsv', sep="\t")  # left cortical grid
-            self.settings["grid_subcortex"] = pd.read_csv(
-                'pyneuromodulation\\grid_subcortex.tsv', sep="\t")  # left subcortical grid
+            if PATH_GRIDS is None:
+                self.settings["grid_cortex"] = pd.read_csv(
+                    'pyneuromodulation\\grid_cortex.tsv', sep="\t")  # left cortical grid
+                self.settings["grid_subcortex"] = pd.read_csv(
+                    'pyneuromodulation\\grid_subcortex.tsv', sep="\t")  # left subcortical grid
+            else:
+                self.settings["grid_cortex"] = pd.read_csv(
+                    os.path.join(PATH_GRIDS, 'grid_cortex.tsv'), sep="\t")  # left cortical grid
+                self.settings["grid_subcortex"] = pd.read_csv(
+                    os.path.join(PATH_GRIDS, 'grid_subcortex.tsv'), sep="\t")  # left subcortical grid
 
             if len(self.settings["coord"]["cortex_left"]["positions"]) == 0:
                 self.settings["sess_right"] = True

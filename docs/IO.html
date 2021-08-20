@@ -200,74 +200,8 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="module-IO">
-<span id="io-py"></span><h1>IO.py<a class="headerlink" href="#module-IO" title="Permalink to this headline">¶</a></h1>
-<dl class="py function">
-<dt id="IO.add_labels">
-<code class="sig-prename descclassname"><span class="pre">IO.</span></code><code class="sig-name descname"><span class="pre">add_labels</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settings_wrapper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_arr_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/IO.html#add_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#IO.add_labels" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given a constructed feature data frame, resample the target labels and add to dataframe</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>df_</strong><span class="classifier">pd.DataFrame</span></dt><dd><p>computed feature dataframe</p>
-</dd>
-<dt><strong>settings_wrapper</strong><span class="classifier">settings.py</span></dt><dd><p>initialized settings used for feature estimation</p>
-</dd>
-<dt><strong>raw_arr_data</strong><span class="classifier">np.ndarray</span></dt><dd><p>raw data including target</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>df_</strong><span class="classifier">pd.DataFrame</span></dt><dd><p>computed feature dataframe including resampled features</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="IO.read_BIDS_data">
-<code class="sig-prename descclassname"><span class="pre">IO.</span></code><code class="sig-name descname"><span class="pre">read_BIDS_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PATH_RUN</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">BIDS_PATH</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/IO.html#read_BIDS_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#IO.read_BIDS_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given a run path and bids data path, read the respective data</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>PATH_RUN</strong><span class="classifier">string</span></dt><dd></dd>
-<dt><strong>BIDS_PATH</strong><span class="classifier">string</span></dt><dd></dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>raw_arr</strong><span class="classifier">mne.io.RawArray</span></dt><dd></dd>
-<dt><strong>raw_arr_data</strong><span class="classifier">np.ndarray</span></dt><dd></dd>
-<dt><strong>fs</strong><span class="classifier">int</span></dt><dd></dd>
-<dt><strong>line_noise</strong><span class="classifier">int</span></dt><dd></dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="IO.save_features_and_settings">
-<code class="sig-prename descclassname"><span class="pre">IO.</span></code><code class="sig-name descname"><span class="pre">save_features_and_settings</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_analysis_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settings_wrapper</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/IO.html#save_features_and_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#IO.save_features_and_settings" title="Permalink to this definition">¶</a></dt>
-<dd><p>save settings.json, df_M1.tsv and features.csv</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>df_</strong><span class="classifier">pd.Dataframe</span></dt><dd><p>feature dataframe</p>
-</dd>
-<dt><strong>run_analysis_</strong><span class="classifier">run_analysis.py object</span></dt><dd><p>This includes all (optionally projected) run_analysis estimated data
-inluding added the resampled labels in features_arr</p>
-</dd>
-<dt><strong>folder_name</strong><span class="classifier">string</span></dt><dd><p>output path</p>
-</dd>
-<dt><strong>settings_wrapper</strong><span class="classifier">settings.py object</span></dt><dd></dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
+<div class="section" id="io-py">
+<h1>IO.py<a class="headerlink" href="#io-py" title="Permalink to this headline">¶</a></h1>
 </div>
 
 

@@ -93,8 +93,8 @@
 <p class="caption"><span class="caption-text">Examples</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">ParametrizationDefinition</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#settings.json">settings.json</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#df_M1">df_M1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nm_settings.json">nm_settings.json</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nm_channels.csv">nm_channels.csv</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="FeatureEstimationDemo.html">FeatureEstimationDemo</a></li>
@@ -443,10 +443,10 @@ div.rendered_html tbody tr:hover {
 </style>
 <div class="section" id="ParametrizationDefinition">
 <h1>ParametrizationDefinition<a class="headerlink" href="#ParametrizationDefinition" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="settings.json">
-<h2>settings.json<a class="headerlink" href="#settings.json" title="Permalink to this headline">¶</a></h2>
-<p>In order to estimate multimodal features of neurophysiological data, certain parametrization steps are required. Here the following two parametrization files are explained: - <code class="docutils literal notranslate"><span class="pre">settings.json</span></code> - <code class="docutils literal notranslate"><span class="pre">df_M1.csv</span></code></p>
-<p>The <code class="docutils literal notranslate"><span class="pre">settings.json</span></code> specifies the general feature processing. Most importantly, all provided features can be enabled and disabled:</p>
+<div class="section" id="nm_settings.json">
+<h2>nm_settings.json<a class="headerlink" href="#nm_settings.json" title="Permalink to this headline">¶</a></h2>
+<p>In order to estimate multimodal features of neurophysiological data, certain parametrization steps are required. Here the following two parametrization files are explained: - <code class="docutils literal notranslate"><span class="pre">nm_settings.json</span></code> - <code class="docutils literal notranslate"><span class="pre">nm_channels.csv</span></code></p>
+<p>The <code class="docutils literal notranslate"><span class="pre">nm_settings.json</span></code> specifies the general feature processing. Most importantly, all provided features can be enabled and disabled:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;methods&quot;</span><span class="p">:</span>
 <span class="p">{</span>
         <span class="nt">&quot;raw_resampling&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
@@ -501,8 +501,8 @@ sigma_w^2frac{T_p^2}{3} &amp; sigma_w^2T_p\</p>
 </pre></div>
 </div>
 <p>Individual frequency bands (specified in the <strong>bandpass_filter_settings</strong>) can be selected for Kalman Filtering (see <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/20172805/">“Real-time epileptic seizure prediction using AR models and support vector machines”</a> (Chisci et al 10))</p>
-<p><strong>re_referencing</strong> constitutes an important aspect of electrophysiological signal processing. Most commonly bipolar and common average rereferencing are applied. Due to that reason a seperate file, <code class="docutils literal notranslate"><span class="pre">df_M1.csv</span></code> can be specified before feature estimation, or it is automatically setup during parametrization.<code class="docutils literal notranslate"><span class="pre">df_M1.csv</span></code> contains a column <em>rereference</em>, specifying the rereference methods - <em>average</em> for common average rereference (across a channel type, e.g. ecog) - bipolar rereferencing, by
-specifying the channel name to rereference to, e.g. <em>LFP_BS_STN_L_1</em> - <em>none</em> for no rereferencing being used for this particular channel</p>
+<p><strong>re_referencing</strong> constitutes an important aspect of electrophysiological signal processing. Most commonly bipolar and common average rereferencing are applied. Due to that reason a seperate file, <code class="docutils literal notranslate"><span class="pre">nm_channels.csv</span></code> can be specified before feature estimation, or it is automatically setup during parametrization.<code class="docutils literal notranslate"><span class="pre">nm_channels.csv</span></code> contains a column <em>rereference</em>, specifying the rereference methods - <em>average</em> for common average rereference (across a channel type, e.g. ecog) - bipolar
+rereferencing, by specifying the channel name to rereference to, e.g. <em>LFP_BS_STN_L_1</em> - <em>none</em> for no rereferencing being used for this particular channel</p>
 <p><strong>notch_filter</strong> enables notch filters at the specified line_noise and it’s harmonics.</p>
 <p><strong>bandpass_filter</strong> enables band power feature estimation. Settings are defined in such manner:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;bandpass_filter_settings&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -569,12 +569,12 @@ to a current data batch one or more sharpwaves can be detected. The subsequent f
 <p><strong>projection_cortex</strong> and <strong>projection_subcortex</strong> allows then feature projection of individual channels to a common subcortical or cortical grid, defined by <em>grid_cortex.tsv</em> and <em>subgrid_cortex.tsv</em>. For both projections a <em>max_dist</em> parameter needs to be specified, in which data is linearly interpolated, weighted by their inverse grid point distance.</p>
 <p>Additionally <strong>pdc</strong> and <strong>dtf</strong> enable partical directed coherence and direct transfer function, to enable connectiviy features for certain <em>frequency_bands</em> between specific channels.</p>
 </div>
-<div class="section" id="df_M1">
-<h2>df_M1<a class="headerlink" href="#df_M1" title="Permalink to this headline">¶</a></h2>
-<p>As described above, rereferencing will be estimated automatically given the specified channel types. To demonstrate a typical rereferencing scheme, here the example BIDS data in ‘py_neuromodulation/tree/main/pyneuromodulation/tests/data’ is read.</p>
+<div class="section" id="nm_channels.csv">
+<h2>nm_channels.csv<a class="headerlink" href="#nm_channels.csv" title="Permalink to this headline">¶</a></h2>
+<p>As described above, rereferencing will be estimated automatically given the specified channel types. To demonstrate a typical rereferencing scheme, here the example BIDS data in ‘py_neuromodulation/examples/data’ is read.</p>
 <p>First, the path needs to specified and necessary libaries imported:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -584,41 +584,29 @@ to a current data batch one or more sharpwaves can be detected. The subsequent f
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
-<span class="c1"># first parent to get example folder, second py_neuromodulation folder</span>
+<span class="c1"># first specify path to get example folder, second py_neuromodulation folder</span>
 <span class="n">PATH_PYNEUROMODULATION</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;__file__&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>  <span class="c1"># &quot;__file__&quot; required for ipynb</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_PYNEUROMODULATION</span><span class="p">,</span> <span class="s1">&#39;pyneuromodulation&#39;</span><span class="p">))</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;__file__&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span><span class="s1">&#39;examples&#39;</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_PYNEUROMODULATION</span><span class="p">))</span>
 
-<span class="kn">import</span> <span class="nn">start_BIDS</span>
-<span class="kn">import</span> <span class="nn">settings</span> <span class="k">as</span> <span class="nn">nm_settings</span>
-<span class="kn">import</span> <span class="nn">IO</span>
+<span class="kn">from</span> <span class="nn">pyneuromodulation</span> <span class="kn">import</span> <span class="n">nm_start_BIDS</span><span class="p">,</span> <span class="n">nm_settings</span><span class="p">,</span> <span class="n">nm_IO</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;current working directory: &quot;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PATH_PYNEUROMODULATION: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">PATH_PYNEUROMODULATION</span><span class="p">))</span>
-<span class="n">BIDS_EXAMPLE_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_PYNEUROMODULATION</span><span class="p">,</span> <span class="s1">&#39;pyneuromodulation&#39;</span><span class="p">,</span>
-                                    <span class="s1">&#39;tests&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">))</span>
-
-<span class="c1"># write BIDS example path in settings.json</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="s1">&#39;examples&#39;</span><span class="p">,</span> <span class="s1">&#39;settings.json&#39;</span><span class="p">),</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
-    <span class="n">settings</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">json_file</span><span class="p">)</span>
-<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;BIDS_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">BIDS_EXAMPLE_PATH</span>
-
-<span class="c1"># write relative feature output folder</span>
-<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;out_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_PYNEUROMODULATION</span><span class="p">,</span> <span class="s1">&#39;pyneuromodulation&#39;</span><span class="p">,</span>
-                                    <span class="s1">&#39;tests&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;derivatives&#39;</span><span class="p">))</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="s1">&#39;examples&#39;</span><span class="p">,</span> <span class="s1">&#39;settings.json&#39;</span><span class="p">)),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span></span><span class="n">BIDS_EXAMPLE_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_PYNEUROMODULATION</span><span class="p">,</span>
+                                    <span class="s1">&#39;examples&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">))</span>
 
 <span class="n">PATH_RUN</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BIDS_EXAMPLE_PATH</span><span class="p">,</span> <span class="s1">&#39;sub-testsub&#39;</span><span class="p">,</span> <span class="s1">&#39;ses-EphysMedOff&#39;</span><span class="p">,</span>
-                        <span class="s1">&#39;ieeg&#39;</span><span class="p">,</span> <span class="s2">&quot;sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg.vhdr&quot;</span><span class="p">)</span>
+                        <span class="s1">&#39;ieeg&#39;</span><span class="p">,</span> <span class="s2">&quot;sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg.vhdr&quot;</span><span class="p">)</span>
 
+
+<span class="n">settings_wrapper</span> <span class="o">=</span> <span class="n">nm_settings</span><span class="o">.</span><span class="n">SettingsWrapper</span><span class="p">(</span><span class="n">settings_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="s1">&#39;pyneuromodulation&#39;</span><span class="p">,</span> <span class="s1">&#39;nm_settings.json&#39;</span><span class="p">))</span>
+<span class="c1"># read and test settings first to obtain BIDS path</span>
+<span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;BIDS_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">BIDS_EXAMPLE_PATH</span>
 </pre></div>
 </div>
 </div>
@@ -627,27 +615,22 @@ to a current data batch one or more sharpwaves can be detected. The subsequent f
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-current working directory: C:\Users\ICN_admin\Documents\py_neuromodulation\sphinx
-PATH_PYNEUROMODULATION: C:\Users\ICN_admin\Documents\py_neuromodulation
+Reading nm_settings.json.
+Testing settings.
+No Error occurred when testing the settings.
 </pre></div></div>
 </div>
-<p>Then the df_M1.csv file is automatically specifed given the respective channel types. Since one channel contains an ‘analog’ substring, it is automaticaly assginged to be a <em>target</em> channel.</p>
+<p>Then the nm_channels.csv file is automatically specifed given the respective channel types. Since one channel contains an ‘analog’ substring, it is automaticaly assginged to be a <em>target</em> channel.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span><span class="s1">&#39;pyneuromodulation&#39;</span><span class="p">))</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span><span class="s1">&#39;examples&#39;</span><span class="p">))</span>
-
-<span class="c1"># read and test settings first to obtain BIDS path</span>
-<span class="n">settings_wrapper</span> <span class="o">=</span> <span class="n">nm_settings</span><span class="o">.</span><span class="n">SettingsWrapper</span><span class="p">(</span><span class="n">settings_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="s1">&#39;examples&#39;</span><span class="p">,</span> <span class="s1">&#39;settings.json&#39;</span><span class="p">))</span>
-
-<span class="c1"># read BIDS data</span>
-<span class="n">raw_arr</span><span class="p">,</span> <span class="n">raw_arr_data</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">line_noise</span> <span class="o">=</span> <span class="n">IO</span><span class="o">.</span><span class="n">read_BIDS_data</span><span class="p">(</span><span class="n">PATH_RUN</span><span class="p">,</span> <span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;BIDS_path&quot;</span><span class="p">])</span>
+<span></span><span class="c1"># read BIDS data</span>
+<span class="n">raw_arr</span><span class="p">,</span> <span class="n">raw_arr_data</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">line_noise</span> <span class="o">=</span> <span class="n">nm_IO</span><span class="o">.</span><span class="n">read_BIDS_data</span><span class="p">(</span><span class="n">PATH_RUN</span><span class="p">,</span> <span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;BIDS_path&quot;</span><span class="p">])</span>
 
 <span class="c1"># read df_M1 / create M1 if None specified</span>
-<span class="n">settings_wrapper</span><span class="o">.</span><span class="n">set_M1</span><span class="p">(</span><span class="n">m1_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ch_names</span><span class="o">=</span><span class="n">raw_arr</span><span class="o">.</span><span class="n">ch_names</span><span class="p">,</span>
+<span class="n">settings_wrapper</span><span class="o">.</span><span class="n">set_nm_channels</span><span class="p">(</span><span class="n">nm_channels_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ch_names</span><span class="o">=</span><span class="n">raw_arr</span><span class="o">.</span><span class="n">ch_names</span><span class="p">,</span>
                         <span class="n">ch_types</span><span class="o">=</span><span class="n">raw_arr</span><span class="o">.</span><span class="n">get_channel_types</span><span class="p">())</span>
 <span class="n">settings_wrapper</span><span class="o">.</span><span class="n">set_fs_line_noise</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="n">line_noise</span><span class="p">)</span>
 </pre></div>
@@ -658,14 +641,11 @@ PATH_PYNEUROMODULATION: C:\Users\ICN_admin\Documents\py_neuromodulation
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Reading settings.json.
-Testing settings.
-No Error occurred when testing the settings.
-Extracting parameters from C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\tests\data\sub-testsub\ses-EphysMedOff\ieeg\sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg.vhdr...
+Extracting parameters from C:\Users\ICN_admin\Documents\py_neuromodulation\examples\data\sub-testsub\ses-EphysMedOff\ieeg\sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg.vhdr...
 Setting channel info structure...
-Reading channel info from C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\tests\data\sub-testsub\ses-EphysMedOff\ieeg\sub-testsub_ses-EphysMedOff_task-buttonpress_channels.tsv.
+Reading channel info from C:\Users\ICN_admin\Documents\py_neuromodulation\examples\data\sub-testsub\ses-EphysMedOff\ieeg\sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_channels.tsv.
 Reading in coordinate system frame Other: None.
-Reading electrode coords from C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\tests\data\sub-testsub\ses-EphysMedOff\ieeg\sub-testsub_ses-EphysMedOff_acq-StimOff_space-mni_electrodes.tsv.
+Reading electrode coords from C:\Users\ICN_admin\Documents\py_neuromodulation\examples\data\sub-testsub\ses-EphysMedOff\ieeg\sub-testsub_ses-EphysMedOff_acq-StimOff_space-mni_electrodes.tsv.
 The read in electrodes file is:
  [(&#39;name&#39;, [&#39;ECOG_AT_SM_L_1&#39;, &#39;ECOG_AT_SM_L_2&#39;, &#39;ECOG_AT_SM_L_3&#39;, &#39;ECOG_AT_SM_L_4&#39;, &#39;ECOG_AT_SM_L_5&#39;, &#39;ECOG_AT_SM_L_6&#39;, &#39;LFP_STN_R_234&#39;, &#39;LFP_STN_R_567&#39;, &#39;LFP_BS_STN_L_1&#39;, &#39;LFP_STN_L_234&#39;, &#39;LFP_STN_L_567&#39;, &#39;LFP_3_R_STN_PI&#39;, &#39;LFP_4_R_STN_PI&#39;, &#39;ANALOG_ROT_R_1&#39;]), (&#39;x&#39;, [&#39;-47&#39;, &#39;-46&#39;, &#39;-45.5&#39;, &#39;-44.5&#39;, &#39;-42&#39;, &#39;-39&#39;, &#39;11.8&#39;, &#39;12.39&#39;, &#39;-11.3&#39;, &#39;-11.8&#39;, &#39;-12.39&#39;, &#39;12.93&#39;, &#39;13.4&#39;, &#39;n/a&#39;]), (&#39;y&#39;, [&#39;-26&#39;, &#39;-15.5&#39;, &#39;-5.5&#39;, &#39;4&#39;, &#39;14&#39;, &#39;22.5&#39;, &#39;-15&#39;, &#39;-14.29&#39;, &#39;-15.9&#39;, &#39;-15&#39;, &#39;-14.29&#39;, &#39;-13.41&#39;, &#39;-12.52&#39;, &#39;n/a&#39;]), (&#39;z&#39;, [&#39;65&#39;, &#39;63&#39;, &#39;60.5&#39;, &#39;57.5&#39;, &#39;53.5&#39;, &#39;49.5&#39;, &#39;-7.7&#39;, &#39;-5.9&#39;, &#39;-9.9&#39;, &#39;-7.7&#39;, &#39;-5.9&#39;, &#39;-4.1&#39;, &#39;-2.2&#39;, &#39;n/a&#39;]), (&#39;size&#39;, [&#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;])]
 </pre></div></div>
@@ -675,31 +655,31 @@ The read in electrodes file is:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: RuntimeWarning: Did not find any events.tsv associated with sub-testsub_ses-EphysMedOff_task-buttonpress.
+C:\Users\ICN_admin\Anaconda3\envs\pyneuromodulation\lib\site-packages\mne_bids\path.py:1303: RuntimeWarning: Did not find any events.tsv associated with sub-testsub_ses-EphysMedOff_task-buttonpress_run-0.
 
-The search_str was &#34;C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\tests\data\sub-testsub\**\sub-testsub_ses-EphysMedOff*events.tsv&#34;
-  raw_arr = mne_bids.read_raw_bids(bids_path)
-C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: RuntimeWarning: Defaulting coordinate frame to unknown from coordinate system input Other
-  raw_arr = mne_bids.read_raw_bids(bids_path)
-C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: RuntimeWarning: There are channels without locations (n/a) that are not marked as bad: [&#39;ANALOG_ROT_R_1&#39;]
-  raw_arr = mne_bids.read_raw_bids(bids_path)
-C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: RuntimeWarning: Fiducial point nasion not found, assuming identity unknown to head transformation
-  raw_arr = mne_bids.read_raw_bids(bids_path)
+The search_str was &#34;C:\Users\ICN_admin\Documents\py_neuromodulation\examples\data\sub-testsub\**\sub-testsub_ses-EphysMedOff*events.tsv&#34;
+  warn(msg)
+C:\Users\ICN_admin\Anaconda3\envs\pyneuromodulation\lib\site-packages\mne_bids\dig.py:467: RuntimeWarning: Defaulting coordinate frame to unknown from coordinate system input Other
+  warn(f&#34;Defaulting coordinate frame to unknown &#34;
+C:\Users\ICN_admin\Anaconda3\envs\pyneuromodulation\lib\site-packages\mne_bids\dig.py:514: RuntimeWarning: There are channels without locations (n/a) that are not marked as bad: [&#39;ANALOG_ROT_R_1&#39;]
+  warn(f&#34;There are channels without locations &#34;
+C:\Users\ICN_admin\Anaconda3\envs\pyneuromodulation\lib\site-packages\mne_bids\dig.py:521: RuntimeWarning: Fiducial point nasion not found, assuming identity unknown to head transformation
+  raw.set_montage(montage, on_missing=&#39;warn&#39;, verbose=verbose)
 </pre></div></div>
 </div>
 <p>Based on ‘seeg’ type (could be also ‘dbs’), the subsequent depth local field potential channel is selected for rereferencing. For ‘ecog’ channels, the average rereference function is automatically assigned.</p>
 <p>Note here also that channels can be ‘used’ for feature analysis.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">df_M1</span>
+<span></span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">nm_channels</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
