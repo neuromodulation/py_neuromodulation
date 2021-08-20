@@ -9,6 +9,8 @@ from pathlib import Path
 
 sys.path.append(os.path.join(Path(__file__).parent.parent, 'pyneuromodulation'))
 sys.path.append(os.path.join(Path(__file__).parent.parent, 'examples'))
+# https://stackoverflow.com/a/10253916/5060208
+# despite that pytest needs to be envoked by python: python -m pytest tests/
 
 from pyneuromodulation import nm_define_nmchannels, nm_generator, nm_rereference, nm_settings, \
     nm_sharpwaves, nm_IO
