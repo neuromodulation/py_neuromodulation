@@ -447,8 +447,8 @@ div.rendered_html tbody tr:hover {
 <h1>FeatureEstimationDemo<a class="headerlink" href="#FeatureEstimationDemo" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="Read-example-BIDS-data">
 <h2>Read example BIDS data<a class="headerlink" href="#Read-example-BIDS-data" title="Permalink to this headline">¶</a></h2>
-<p>In this demo the basic offline workflow of py_neuromodulation will be demonstrated. For that, the example BIDS dataset in <em>pyneuromodulation/tests/data/</em> will be analyzed. The respective <code class="docutils literal notranslate"><span class="pre">settings.json</span></code> are stored in <em>examples/settings.json</em>, the <code class="docutils literal notranslate"><span class="pre">df_M1.csv</span></code> is created given the <em>channel_type</em> information from the BIDS data.</p>
-<p>A projection will be defined based on the <em>examples/grid_cortex.tsv</em> and <em>examples/grid_subcortex.tsv</em> files. Band power features and sharpwave features will then be estimated and projected to the provided grid.</p>
+<p>In this demo the basic offline workflow of py_neuromodulation will be demonstrated. For that, the example BIDS dataset in <em>pyneuromodulation/examples/data/</em> will be analyzed. The parametrization <code class="docutils literal notranslate"><span class="pre">nm_settings.json</span></code> is stored in the package directory <em>pyneuromodulation/nm_settings.json</em>, a <code class="docutils literal notranslate"><span class="pre">nm_channels.csv</span></code> is created given the <em>channel_type</em> information from the BIDS data.</p>
+<p>A projection will be defined based on the <em>pyneuromodulation/grid_cortex.tsv</em> and <em>pyneuromodulation/grid_subcortex.tsv</em> files. Band power features and sharpwave features will then be estimated and projected to the provided grid.</p>
 <p>First, necessary modules will be included and the BIDS_PATH and RUN_PATH, the path to the BIDS brainvision run file, will be defined given the example.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -465,41 +465,21 @@ div.rendered_html tbody tr:hover {
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span> <span class="nn">scipy</span>
 
-<span class="c1"># first parent to get example folder, second py_neuromodulation folder</span>
+<span class="c1"># first specify path to get example folder, second py_neuromodulation folder</span>
 <span class="n">PATH_PYNEUROMODULATION</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;__file__&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>  <span class="c1"># &quot;__file__&quot; required for ipynb</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_PYNEUROMODULATION</span><span class="p">,</span> <span class="s1">&#39;pyneuromodulation&#39;</span><span class="p">))</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;__file__&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span><span class="s1">&#39;examples&#39;</span><span class="p">))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_PYNEUROMODULATION</span><span class="p">))</span>
 
-<span class="kn">import</span> <span class="nn">start_BIDS</span>
-<span class="kn">import</span> <span class="nn">settings</span> <span class="k">as</span> <span class="nn">nm_settings</span>
-<span class="kn">import</span> <span class="nn">IO</span>
-<span class="kn">import</span> <span class="nn">define_M1</span>
-<span class="kn">import</span> <span class="nn">features</span>
-<span class="kn">import</span> <span class="nn">generator</span>
-<span class="kn">import</span> <span class="nn">rereference</span>
-<span class="kn">import</span> <span class="nn">resample</span>
-<span class="kn">import</span> <span class="nn">run_analysis</span>
-<span class="kn">import</span> <span class="nn">normalization</span>
-<span class="kn">import</span> <span class="nn">projection</span>
+<span class="kn">from</span> <span class="nn">pyneuromodulation</span> <span class="kn">import</span> <span class="n">nm_start_BIDS</span><span class="p">,</span> <span class="n">nm_settings</span><span class="p">,</span> <span class="n">nm_IO</span><span class="p">,</span> <span class="n">nm_define_nmchannels</span><span class="p">,</span> <span class="n">nm_features</span><span class="p">,</span> \
+                              <span class="n">nm_generator</span><span class="p">,</span> <span class="n">nm_rereference</span><span class="p">,</span> <span class="n">nm_resample</span><span class="p">,</span> <span class="n">nm_run_analysis</span><span class="p">,</span> <span class="n">nm_normalization</span><span class="p">,</span> <span class="n">nm_projection</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;current working directory: &quot;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;__file__&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span><span class="s1">&#39;pyneuromodulation&#39;</span><span class="p">))</span>
+
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PATH_PYNEUROMODULATION: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">PATH_PYNEUROMODULATION</span><span class="p">))</span>
-<span class="n">BIDS_EXAMPLE_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_PYNEUROMODULATION</span><span class="p">,</span> <span class="s1">&#39;pyneuromodulation&#39;</span><span class="p">,</span>
-                                    <span class="s1">&#39;tests&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">))</span>
-
-<span class="c1"># write BIDS example path in settings.json</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="s1">&#39;examples&#39;</span><span class="p">,</span> <span class="s1">&#39;settings.json&#39;</span><span class="p">),</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
-    <span class="n">settings</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">json_file</span><span class="p">)</span>
-<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;BIDS_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">BIDS_EXAMPLE_PATH</span>
-
-<span class="c1"># write relative feature output folder</span>
-<span class="n">settings</span><span class="p">[</span><span class="s2">&quot;out_path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_PYNEUROMODULATION</span><span class="p">,</span> <span class="s1">&#39;pyneuromodulation&#39;</span><span class="p">,</span>
-                                    <span class="s1">&#39;tests&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;derivatives&#39;</span><span class="p">))</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="s1">&#39;examples&#39;</span><span class="p">,</span> <span class="s1">&#39;settings.json&#39;</span><span class="p">)),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">BIDS_EXAMPLE_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_PYNEUROMODULATION</span><span class="p">,</span>
+                                    <span class="s1">&#39;examples&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">))</span>
 
 <span class="n">PATH_RUN</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BIDS_EXAMPLE_PATH</span><span class="p">,</span> <span class="s1">&#39;sub-testsub&#39;</span><span class="p">,</span> <span class="s1">&#39;ses-EphysMedOff&#39;</span><span class="p">,</span>
-                        <span class="s1">&#39;ieeg&#39;</span><span class="p">,</span> <span class="s2">&quot;sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg.vhdr&quot;</span><span class="p">)</span>
+                        <span class="s1">&#39;ieeg&#39;</span><span class="p">,</span> <span class="s2">&quot;sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg.vhdr&quot;</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">used run path: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">PATH_RUN</span><span class="p">))</span>
 </pre></div>
@@ -510,31 +490,72 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-current working directory: C:\Users\ICN_admin\Documents\py_neuromodulation\sphinx
 PATH_PYNEUROMODULATION: C:\Users\ICN_admin\Documents\py_neuromodulation
 
-used run path: C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\tests\data\sub-testsub\ses-EphysMedOff\ieeg\sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg.vhdr
+used run path: C:\Users\ICN_admin\Documents\py_neuromodulation\examples\data\sub-testsub\ses-EphysMedOff\ieeg\sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg.vhdr
 </pre></div></div>
 </div>
-<p>Next, the used settings will be read, and mne-bids will be used to read the example data.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span><span class="s1">&#39;pyneuromodulation&#39;</span><span class="p">))</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span><span class="s1">&#39;examples&#39;</span><span class="p">))</span>
-
-<span class="c1"># read and test settings first to obtain BIDS path</span>
-<span class="n">settings_wrapper</span> <span class="o">=</span> <span class="n">nm_settings</span><span class="o">.</span><span class="n">SettingsWrapper</span><span class="p">(</span><span class="n">settings_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="s1">&#39;examples&#39;</span><span class="p">,</span> <span class="s1">&#39;settings.json&#39;</span><span class="p">))</span>
-
-<span class="c1"># read BIDS data</span>
-<span class="n">raw_arr</span><span class="p">,</span> <span class="n">raw_arr_data</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">line_noise</span> <span class="o">=</span> <span class="n">IO</span><span class="o">.</span><span class="n">read_BIDS_data</span><span class="p">(</span><span class="n">PATH_RUN</span><span class="p">,</span> <span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;BIDS_path&quot;</span><span class="p">])</span>
-
-<span class="c1"># read df_M1 / create M1 if None specified</span>
-<span class="n">settings_wrapper</span><span class="o">.</span><span class="n">set_M1</span><span class="p">(</span><span class="n">m1_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ch_names</span><span class="o">=</span><span class="n">raw_arr</span><span class="o">.</span><span class="n">ch_names</span><span class="p">,</span>
-                        <span class="n">ch_types</span><span class="o">=</span><span class="n">raw_arr</span><span class="o">.</span><span class="n">get_channel_types</span><span class="p">())</span>
-<span class="n">settings_wrapper</span><span class="o">.</span><span class="n">set_fs_line_noise</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="n">line_noise</span><span class="p">)</span>
+<span></span><span class="n">PATH_RUN</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&#39;C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\examples\\data\\sub-testsub\\ses-EphysMedOff\\ieeg\\sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg.vhdr&#39;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">BIDS_EXAMPLE_PATH</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&#39;C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\examples\\data&#39;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">PATH_PYNEUROMODULATION</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WindowsPath(&#39;C:/Users/ICN_admin/Documents/py_neuromodulation&#39;)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">nm_BIDS</span> <span class="o">=</span> <span class="n">nm_start_BIDS</span><span class="o">.</span><span class="n">NM_BIDS</span><span class="p">(</span><span class="n">PATH_RUN</span><span class="p">,</span> <span class="n">PATH_BIDS</span><span class="o">=</span><span class="n">BIDS_EXAMPLE_PATH</span><span class="p">,</span> <span class="n">PATH_GRIDS</span><span class="o">=</span>
+                               <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_PYNEUROMODULATION</span><span class="p">,</span> <span class="s1">&#39;pyneuromodulation&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -543,47 +564,172 @@ used run path: C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Reading settings.json.
+Reading nm_settings.json.
 Testing settings.
 No Error occurred when testing the settings.
-Extracting parameters from C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\tests\data\sub-testsub\ses-EphysMedOff\ieeg\sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg.vhdr...
+Extracting parameters from C:\Users\ICN_admin\Documents\py_neuromodulation\examples\data\sub-testsub\ses-EphysMedOff\ieeg\sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg.vhdr...
 Setting channel info structure...
-Reading channel info from C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\tests\data\sub-testsub\ses-EphysMedOff\ieeg\sub-testsub_ses-EphysMedOff_task-buttonpress_channels.tsv.
+Reading channel info from C:\Users\ICN_admin\Documents\py_neuromodulation\examples\data\sub-testsub\ses-EphysMedOff\ieeg\sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_channels.tsv.
 Reading in coordinate system frame Other: None.
-Reading electrode coords from C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\tests\data\sub-testsub\ses-EphysMedOff\ieeg\sub-testsub_ses-EphysMedOff_acq-StimOff_space-mni_electrodes.tsv.
+Reading electrode coords from C:\Users\ICN_admin\Documents\py_neuromodulation\examples\data\sub-testsub\ses-EphysMedOff\ieeg\sub-testsub_ses-EphysMedOff_acq-StimOff_space-mni_electrodes.tsv.
 The read in electrodes file is:
  [(&#39;name&#39;, [&#39;ECOG_AT_SM_L_1&#39;, &#39;ECOG_AT_SM_L_2&#39;, &#39;ECOG_AT_SM_L_3&#39;, &#39;ECOG_AT_SM_L_4&#39;, &#39;ECOG_AT_SM_L_5&#39;, &#39;ECOG_AT_SM_L_6&#39;, &#39;LFP_STN_R_234&#39;, &#39;LFP_STN_R_567&#39;, &#39;LFP_BS_STN_L_1&#39;, &#39;LFP_STN_L_234&#39;, &#39;LFP_STN_L_567&#39;, &#39;LFP_3_R_STN_PI&#39;, &#39;LFP_4_R_STN_PI&#39;, &#39;ANALOG_ROT_R_1&#39;]), (&#39;x&#39;, [&#39;-47&#39;, &#39;-46&#39;, &#39;-45.5&#39;, &#39;-44.5&#39;, &#39;-42&#39;, &#39;-39&#39;, &#39;11.8&#39;, &#39;12.39&#39;, &#39;-11.3&#39;, &#39;-11.8&#39;, &#39;-12.39&#39;, &#39;12.93&#39;, &#39;13.4&#39;, &#39;n/a&#39;]), (&#39;y&#39;, [&#39;-26&#39;, &#39;-15.5&#39;, &#39;-5.5&#39;, &#39;4&#39;, &#39;14&#39;, &#39;22.5&#39;, &#39;-15&#39;, &#39;-14.29&#39;, &#39;-15.9&#39;, &#39;-15&#39;, &#39;-14.29&#39;, &#39;-13.41&#39;, &#39;-12.52&#39;, &#39;n/a&#39;]), (&#39;z&#39;, [&#39;65&#39;, &#39;63&#39;, &#39;60.5&#39;, &#39;57.5&#39;, &#39;53.5&#39;, &#39;49.5&#39;, &#39;-7.7&#39;, &#39;-5.9&#39;, &#39;-9.9&#39;, &#39;-7.7&#39;, &#39;-5.9&#39;, &#39;-4.1&#39;, &#39;-2.2&#39;, &#39;n/a&#39;]), (&#39;size&#39;, [&#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;, &#39;n/a&#39;])]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+C:\Users\ICN_admin\Anaconda3\envs\pyneuromodulation\lib\site-packages\mne_bids\path.py:1303: RuntimeWarning: Did not find any events.tsv associated with sub-testsub_ses-EphysMedOff_task-buttonpress_run-0.
+
+The search_str was &#34;C:\Users\ICN_admin\Documents\py_neuromodulation\examples\data\sub-testsub\**\sub-testsub_ses-EphysMedOff*events.tsv&#34;
+  warn(msg)
+C:\Users\ICN_admin\Anaconda3\envs\pyneuromodulation\lib\site-packages\mne_bids\dig.py:467: RuntimeWarning: Defaulting coordinate frame to unknown from coordinate system input Other
+  warn(f&#34;Defaulting coordinate frame to unknown &#34;
+C:\Users\ICN_admin\Anaconda3\envs\pyneuromodulation\lib\site-packages\mne_bids\dig.py:514: RuntimeWarning: There are channels without locations (n/a) that are not marked as bad: [&#39;ANALOG_ROT_R_1&#39;]
+  warn(f&#34;There are channels without locations &#34;
+C:\Users\ICN_admin\Anaconda3\envs\pyneuromodulation\lib\site-packages\mne_bids\dig.py:521: RuntimeWarning: Fiducial point nasion not found, assuming identity unknown to head transformation
+  raw.set_montage(montage, on_missing=&#39;warn&#39;, verbose=verbose)
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area stderr docutils container">
+<div class="output_area docutils container">
 <div class="highlight"><pre>
-C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: RuntimeWarning: Did not find any events.tsv associated with sub-testsub_ses-EphysMedOff_task-buttonpress.
+Segment lengths (ms): [1000  500  333  333  100  100  100]
+No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
+Setting up band-pass filter from 4 - 8 Hz
 
-The search_str was &#34;C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\tests\data\sub-testsub\**\sub-testsub_ses-EphysMedOff*events.tsv&#34;
-  raw_arr = mne_bids.read_raw_bids(bids_path)
-C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: RuntimeWarning: Defaulting coordinate frame to unknown from coordinate system input Other
-  raw_arr = mne_bids.read_raw_bids(bids_path)
-C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: RuntimeWarning: There are channels without locations (n/a) that are not marked as bad: [&#39;ANALOG_ROT_R_1&#39;]
-  raw_arr = mne_bids.read_raw_bids(bids_path)
-C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: RuntimeWarning: Fiducial point nasion not found, assuming identity unknown to head transformation
-  raw_arr = mne_bids.read_raw_bids(bids_path)
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandpass filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 4.00
+- Lower transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 2.00 Hz)
+- Upper passband edge: 8.00 Hz
+- Upper transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 10.00 Hz)
+- Filter length: 999 samples (0.999 sec)
+
+No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
+Setting up band-pass filter from 8 - 12 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandpass filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 8.00
+- Lower transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 6.00 Hz)
+- Upper passband edge: 12.00 Hz
+- Upper transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 14.00 Hz)
+- Filter length: 999 samples (0.999 sec)
+
+No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
+Setting up band-pass filter from 13 - 20 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandpass filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 13.00
+- Lower transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 11.00 Hz)
+- Upper passband edge: 20.00 Hz
+- Upper transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 22.00 Hz)
+- Filter length: 999 samples (0.999 sec)
+
+No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
+Setting up band-pass filter from 20 - 35 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandpass filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 20.00
+- Lower transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 18.00 Hz)
+- Upper passband edge: 35.00 Hz
+- Upper transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 37.00 Hz)
+- Filter length: 999 samples (0.999 sec)
+
+No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
+Setting up band-pass filter from 60 - 80 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandpass filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 60.00
+- Lower transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 58.00 Hz)
+- Upper passband edge: 80.00 Hz
+- Upper transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 82.00 Hz)
+- Filter length: 999 samples (0.999 sec)
+
+No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
+Setting up band-pass filter from 90 - 2e+02 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandpass filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 90.00
+- Lower transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 88.00 Hz)
+- Upper passband edge: 200.00 Hz
+- Upper transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 202.00 Hz)
+- Filter length: 999 samples (0.999 sec)
+
+No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
+Setting up band-pass filter from 2e+02 - 4e+02 Hz
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandpass filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower passband edge: 200.00
+- Lower transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 198.00 Hz)
+- Upper passband edge: 400.00 Hz
+- Upper transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 402.00 Hz)
+- Filter length: 999 samples (0.999 sec)
+
 </pre></div></div>
 </div>
-<p>Let’s check the specified df_M1 dataframe:</p>
+<p>Next, the used settings will be read, and mne-bids will be used to read the example data.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">df_M1</span>
+<span></span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;BIDS_path&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&#39;C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\examples\\data&#39;
+</pre></div></div>
+</div>
+<p>Let’s check the specified <code class="docutils literal notranslate"><span class="pre">nm_channels</span></code> dataframe:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">nm_channels</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -739,28 +885,28 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
 </table>
 </div></div>
 </div>
-<p>We can see that the data contains depth LFP electrodes from the Subthalamic Nucleus and a ECoG strip. Bipolar rereferencing was defined for the depth electrodes, and common average rereference for the ECoG electrodes. Importantly <em>ANALOG_ROT_R_1</em> is used as a target channel. After feature estimation, this channel will be normalized and added in a time aligned manner to the features.</p>
+<p>The data contains depth LFP electrodes from the Subthalamic Nucleus (STN) and a ECoG strip electrode. Bipolar rereferencing was defined by default for the depth electrodes, and common average rereference for the ECoG electrodes. Importantly <em>ANALOG_ROT_R_1</em> is used as a target channel. After feature estimation, this channel will be normalized and added in a time aligned manner to the features output csv file.</p>
 <p>Next we will check the used settings:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span>
+<span></span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;BIDS_path&#39;: &#39;C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\pyneuromodulation\\tests\\data&#39;,
- &#39;out_path&#39;: &#39;C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\pyneuromodulation\\tests\\data\\derivatives&#39;,
+{&#39;BIDS_path&#39;: &#39;C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\examples\\data&#39;,
+ &#39;out_path&#39;: &#39;C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\try_1708\\Beijing&#39;,
  &#39;sampling_rate_features&#39;: 10,
  &#39;methods&#39;: {&#39;raw_resampling&#39;: True,
-  &#39;raw_normalization&#39;: True,
+  &#39;raw_normalization&#39;: False,
   &#39;feature_normalization&#39;: True,
   &#39;kalman_filter&#39;: True,
   &#39;re_referencing&#39;: True,
@@ -768,7 +914,7 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
   &#39;bandpass_filter&#39;: True,
   &#39;raw_hjorth&#39;: True,
   &#39;sharpwave_analysis&#39;: True,
-  &#39;return_raw&#39;: True,
+  &#39;return_raw&#39;: False,
   &#39;project_cortex&#39;: True,
   &#39;project_subcortex&#39;: False,
   &#39;pdc&#39;: False,
@@ -788,13 +934,12 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
    &#39;alpha&#39;: [[8, 12], 500],
    &#39;low beta&#39;: [[13, 20], 333],
    &#39;high beta&#39;: [[20, 35], 333],
-   &#39;all beta&#39;: [[13, 35], 333],
    &#39;low gamma&#39;: [[60, 80], 100],
    &#39;high gamma&#39;: [[90, 200], 100],
-   &#39;all gamma&#39;: [[60, 200], 100]},
+   &#39;HFA&#39;: [[200, 400], 100]},
   &#39;bandpower_features&#39;: {&#39;activity&#39;: True,
-   &#39;mobility&#39;: True,
-   &#39;complexity&#39;: True}},
+   &#39;mobility&#39;: False,
+   &#39;complexity&#39;: False}},
  &#39;sharpwave_analysis_settings&#39;: {&#39;sharpwave_features&#39;: {&#39;peak_left&#39;: True,
    &#39;peak_right&#39;: True,
    &#39;trough&#39;: True,
@@ -806,20 +951,20 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
    &#39;sharpness&#39;: True,
    &#39;rise_steepness&#39;: True,
    &#39;decay_steepness&#39;: True,
-   &#39;slope_ratio&#39;: True},
+   &#39;slope_ratio&#39;: False},
   &#39;filter_low_cutoff&#39;: 5,
-  &#39;filter_high_cutoff&#39;: 90,
+  &#39;filter_high_cutoff&#39;: 80,
   &#39;detect_troughs&#39;: {&#39;estimate&#39;: True,
-   &#39;distance_troughs&#39;: 5,
-   &#39;distance_peaks&#39;: 1},
+   &#39;distance_troughs&#39;: 15,
+   &#39;distance_peaks&#39;: 15},
   &#39;detect_peaks&#39;: {&#39;estimate&#39;: True,
-   &#39;distance_troughs&#39;: 1,
-   &#39;distance_peaks&#39;: 5},
+   &#39;distance_troughs&#39;: 15,
+   &#39;distance_peaks&#39;: 15},
   &#39;estimator&#39;: {&#39;mean&#39;: True,
-   &#39;median&#39;: True,
+   &#39;median&#39;: False,
    &#39;max&#39;: True,
-   &#39;min&#39;: True,
-   &#39;var&#39;: True}},
+   &#39;min&#39;: False,
+   &#39;var&#39;: False}},
  &#39;project_cortex_settings&#39;: {&#39;max_dist&#39;: 20},
  &#39;project_subcortex_settings&#39;: {&#39;max_dist&#39;: 5},
  &#39;pdc_settings&#39;: {&#39;frequency_ranges&#39;: {&#39;all beta&#39;: [&#39;LFP_BS_STN_L_1&#39;,
@@ -844,8 +989,7 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
   &#39;ECOG_AT_SM_L_3-avgref&#39;,
   &#39;ECOG_AT_SM_L_4-avgref&#39;,
   &#39;ECOG_AT_SM_L_5-avgref&#39;,
-  &#39;ECOG_AT_SM_L_6-avgref&#39;,
-  &#39;ANALOG_ROT_R_1&#39;],
+  &#39;ECOG_AT_SM_L_6-avgref&#39;],
  &#39;ch_types&#39;: [&#39;seeg&#39;,
   &#39;seeg&#39;,
   &#39;seeg&#39;,
@@ -856,31 +1000,130 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
   &#39;ecog&#39;,
   &#39;ecog&#39;,
   &#39;ecog&#39;,
-  &#39;ecog&#39;,
-  &#39;misc&#39;],
+  &#39;ecog&#39;],
  &#39;feature_idx&#39;: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
  &#39;fs&#39;: 1375,
- &#39;line_noise&#39;: 50}
+ &#39;line_noise&#39;: 50,
+ &#39;coord_list&#39;: [[0.011800000000000001, -0.015, -0.0077],
+  [0.01239, -0.014289999999999999, -0.005900000000000001],
+  [-0.011300000000000001, -0.0159, -0.0099],
+  [-0.011800000000000001, -0.015, -0.0077],
+  [-0.01239, -0.014289999999999999, -0.005900000000000001],
+  [-0.047, -0.026, 0.065],
+  [-0.046, -0.0155, 0.063],
+  [-0.0455, -0.0055, 0.0605],
+  [-0.0445, 0.004, 0.0575],
+  [-0.042, 0.014, 0.0535],
+  [-0.039, 0.0225, 0.0495]],
+ &#39;coord_names&#39;: [&#39;LFP_STN_R_234&#39;,
+  &#39;LFP_STN_R_567&#39;,
+  &#39;LFP_BS_STN_L_1&#39;,
+  &#39;LFP_STN_L_234&#39;,
+  &#39;LFP_STN_L_567&#39;,
+  &#39;ECOG_AT_SM_L_1&#39;,
+  &#39;ECOG_AT_SM_L_2&#39;,
+  &#39;ECOG_AT_SM_L_3&#39;,
+  &#39;ECOG_AT_SM_L_4&#39;,
+  &#39;ECOG_AT_SM_L_5&#39;,
+  &#39;ECOG_AT_SM_L_6&#39;],
+ &#39;coord&#39;: {&#39;cortex_right&#39;: {&#39;ch_names&#39;: [],
+   &#39;positions&#39;: array([], dtype=float64)},
+  &#39;cortex_left&#39;: {&#39;ch_names&#39;: [&#39;ECOG_AT_SM_L_1&#39;,
+    &#39;ECOG_AT_SM_L_2&#39;,
+    &#39;ECOG_AT_SM_L_3&#39;,
+    &#39;ECOG_AT_SM_L_4&#39;,
+    &#39;ECOG_AT_SM_L_5&#39;,
+    &#39;ECOG_AT_SM_L_6&#39;],
+   &#39;positions&#39;: array([[-47. , -26. ,  65. ],
+          [-46. , -15.5,  63. ],
+          [-45.5,  -5.5,  60.5],
+          [-44.5,   4. ,  57.5],
+          [-42. ,  14. ,  53.5],
+          [-39. ,  22.5,  49.5]])},
+  &#39;subcortex_right&#39;: {&#39;ch_names&#39;: [&#39;LFP_STN_R_234&#39;, &#39;LFP_STN_R_567&#39;],
+   &#39;positions&#39;: array([[ 11.8 , -15.  ,  -7.7 ],
+          [ 12.39, -14.29,  -5.9 ]])},
+  &#39;subcortex_left&#39;: {&#39;ch_names&#39;: [&#39;LFP_BS_STN_L_1&#39;,
+    &#39;LFP_STN_L_234&#39;,
+    &#39;LFP_STN_L_567&#39;],
+   &#39;positions&#39;: array([[-11.3 , -15.9 ,  -9.9 ],
+          [-11.8 , -15.  ,  -7.7 ],
+          [-12.39, -14.29,  -5.9 ]])}},
+ &#39;grid_cortex&#39;:         x      y     z
+ 0  -13.10 -67.70  69.1
+ 1  -35.50 -60.00  66.0
+ 2  -48.30 -55.10  58.2
+ 3  -60.00 -51.80  48.0
+ 4  -16.90 -51.60  78.0
+ 5  -34.80 -49.30  71.7
+ 6  -67.50 -47.10  31.0
+ 7  -46.10 -43.70  61.1
+ 8  -59.80 -39.60  53.3
+ 9  -14.20 -39.10  81.1
+ 10 -28.30 -31.20  76.0
+ 11 -42.30 -30.70  70.2
+ 12 -67.60 -30.10  41.2
+ 13 -50.50 -24.40  64.4
+ 14 -14.60 -22.70  80.2
+ 15 -60.90 -18.70  50.9
+ 16 -31.60 -16.90  75.2
+ 17  -5.10 -12.60  77.3
+ 18 -65.60 -10.80  37.8
+ 19 -41.80 -10.20  67.0
+ 20 -55.10  -4.01  53.2
+ 21 -22.70   1.20  72.0
+ 22  -5.80   2.80  74.8
+ 23 -49.20   3.70  54.7
+ 24 -34.50   3.90  66.5
+ 25 -61.55   6.20  35.9
+ 26 -63.60   8.30  25.7
+ 27 -40.40  11.80  60.7
+ 28 -48.70  14.50  50.5
+ 29 -21.80  16.00  68.9
+ 30 -58.20  18.20  27.3
+ 31  -7.00  18.40  70.3
+ 32 -36.30  19.90  59.6
+ 33 -48.10  24.60  44.0
+ 34 -56.80  28.52  20.8
+ 35  -7.30  33.80  61.7
+ 36 -22.20  35.00  57.2
+ 37 -36.80  35.40  47.0
+ 38 -46.80  35.60  36.0,
+ &#39;grid_subcortex&#39;:          x     y     z
+ 0    -32.5 -40.0 -20.0
+ 1    -32.5 -40.0 -15.0
+ 2    -32.5 -40.0 -10.0
+ 3    -32.5 -40.0  -5.0
+ 4    -32.5 -40.0   0.0
+ ...    ...   ...   ...
+ 1423  -2.5  40.0  15.0
+ 1424  -2.5  40.0  20.0
+ 1425  -2.5  40.0  25.0
+ 1426  -2.5  40.0  30.0
+ 1427  -2.5  40.0  35.0
+
+ [1428 rows x 3 columns],
+ &#39;sess_right&#39;: False}
 </pre></div></div>
 </div>
-<p>Many signal processing and feature estimation parameters are here defined. Most importantly the <code class="docutils literal notranslate"><span class="pre">settings_wrapper.setttings[&quot;methods&quot;]</span></code> tells us which signal processing and features should be estimated:</p>
+<p>Many signal processing and feature estimation parameters are here defined. Most importantly the <code class="docutils literal notranslate"><span class="pre">setttings[&quot;methods&quot;]</span></code> tells us which signal processing and features should be estimated:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">]</span>
+<span></span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 {&#39;raw_resampling&#39;: True,
- &#39;raw_normalization&#39;: True,
+ &#39;raw_normalization&#39;: False,
  &#39;feature_normalization&#39;: True,
  &#39;kalman_filter&#39;: True,
  &#39;re_referencing&#39;: True,
@@ -888,53 +1131,21 @@ C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\IO.py:32: Runt
  &#39;bandpass_filter&#39;: True,
  &#39;raw_hjorth&#39;: True,
  &#39;sharpwave_analysis&#39;: True,
- &#39;return_raw&#39;: True,
+ &#39;return_raw&#39;: False,
  &#39;project_cortex&#39;: True,
  &#39;project_subcortex&#39;: False,
  &#39;pdc&#39;: False,
  &#39;dtf&#39;: False}
 </pre></div></div>
 </div>
-<p>As defined, data will be <strong>resampled</strong>, <strong>normalized</strong> and <strong>rereferenced</strong> (as defined in the df_M1) before feature estimation. Then, <strong>bandpower features</strong>, <strong>sharpwave features</strong> and <strong>hjorth parameters</strong> are calculated. Additionally, gamma band features will be Kalman filtered. Since <em>project_cortex</em> is set to true, projection to a grid is also enabled.</p>
+<p>As defined, data will be <strong>resampled</strong>, <strong>normalized</strong> and <strong>rereferenced</strong> (as defined in the nm_channels) before feature estimation. Then, <strong>bandpower features</strong>, <strong>sharpwave features</strong> and <strong>hjorth parameters</strong> are calculated. Additionally, gamma band features will be Kalman filtered. Since <em>project_cortex</em> is set to true, projection to a grid is also enabled.</p>
 </div>
 <div class="section" id="Grid-projection">
 <h2>Grid projection<a class="headerlink" href="#Grid-projection" title="Permalink to this headline">¶</a></h2>
-<p>Next we will read the cortical grid, defined in <em>examples/grid_cortex.tsv</em>, and calculate the <strong>projection matrices</strong> from individual channels to the grid:</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">if</span> <span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;project_cortex&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">or</span> \
-    <span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;project_subcortex&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-    <span class="n">settings_wrapper</span><span class="o">.</span><span class="n">add_coord</span><span class="p">(</span><span class="n">raw_arr</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>  <span class="c1"># if not copy ch_names is being set</span>
-    <span class="n">projection_</span> <span class="o">=</span> <span class="n">projection</span><span class="o">.</span><span class="n">Projection</span><span class="p">(</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="n">projection_</span> <span class="o">=</span> <span class="kc">None</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;project_cortex&quot;</span><span class="p">]</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
-</pre></div>
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-True
-</pre></div></div>
-</div>
+<p>Next we will read the cortical grid, defined in <em>pyneuromodulation/grid_cortex.tsv</em>, and calculate the <strong>projection matrix</strong> from individual channels to the grid:</p>
 <p>We can now inspect the individual coordinates, and the projected grid points. Therfore we read first a standard MNI hull, defined in the plot folder:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -948,19 +1159,19 @@ True
 </pre></div>
 </div>
 </div>
-<p>Since the grid is defined for the left hemisphere, we might switch the x coordinates for right electrodes. Then the ECoG channel coordinates (crosses) and used grid points (circles) are visualized:</p>
+<p>Since the grid is defined for the left hemisphere, we might switch the x coordinates for right electrodes. Then the ECoG channel coordinates and used grid points are visualized:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">cortex_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">projection_</span><span class="o">.</span><span class="n">grid_cortex</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+<span></span><span class="n">cortex_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">grid_cortex</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
 
-<span class="k">if</span> <span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sess_right&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+<span class="k">if</span> <span class="n">nm_BIDS</span><span class="o">.</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sess_right&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
     <span class="n">cortex_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">cortex_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span><span class="o">*-</span><span class="mi">1</span>
-    <span class="n">ecog_strip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;cortex_right&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">ecog_strip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;cortex_right&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
 <span class="k">else</span><span class="p">:</span>
-    <span class="n">ecog_strip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;cortex_left&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">ecog_strip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;cortex_left&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
 
 
 <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> \
@@ -968,201 +1179,54 @@ True
 <span class="n">axes</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x_ecog</span><span class="p">,</span> <span class="n">y_ecog</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
 <span class="n">axes</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">,</span> <span class="n">anchor</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
 
-<span class="n">grid_color</span> <span class="o">=</span> <span class="n">projection_</span><span class="o">.</span><span class="n">proj_matrix_cortex</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">grid_color</span> <span class="o">=</span> <span class="n">nm_BIDS</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">proj_matrix_cortex</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">pos_ecog</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">cortex_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span>
                         <span class="n">cortex_grid</span><span class="p">[</span><span class="mi">1</span><span class="p">,:],</span> <span class="n">c</span><span class="o">=</span><span class="n">grid_color</span><span class="p">,</span>
-                        <span class="n">s</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">)</span>
+                        <span class="n">s</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;cortical grid projection&quot;</span><span class="p">)</span>
 
 <span class="n">pos_elec</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">ecog_strip</span><span class="p">[</span><span class="mi">0</span><span class="p">,:],</span>
                         <span class="n">ecog_strip</span><span class="p">[</span><span class="mi">1</span><span class="p">,:],</span> <span class="n">c</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ecog_strip</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
-                        <span class="n">s</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+                        <span class="n">s</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;ecog strip electrode contacts&quot;</span><span class="p">)</span>
+<span class="n">axes</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
+<span class="n">axes</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="_images/FeatureEstimationDemo_16_0.png" src="_images/FeatureEstimationDemo_16_0.png" />
-</div>
-</div>
-<p>As visible, only grid points are active (channel data is projected unto them as shown in yellow) within the <em>max_dist</em> of every individual channel for the cortical and subcortical grid.</p>
-<p>Next, the <strong>rereference</strong> and <strong>resample</strong> classes get instantiated, and an acquisition system is simulated by a <strong>generator</strong>:</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># initialize generator for run function</span>
-<span class="n">gen</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">ieeg_raw_generator</span><span class="p">(</span><span class="n">raw_arr_data</span><span class="p">,</span> <span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
-
-<span class="c1"># initialize rereferencing</span>
-<span class="k">if</span> <span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;re_referencing&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-    <span class="n">rereference_</span> <span class="o">=</span> <span class="n">rereference</span><span class="o">.</span><span class="n">RT_rereference</span><span class="p">(</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">df_M1</span><span class="p">,</span> <span class="n">split_data</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="n">rereference_</span> <span class="o">=</span> <span class="kc">None</span>
-
-
-<span class="c1"># define resampler for faster feature estimation</span>
-<span class="k">if</span> <span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;raw_resampling&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-    <span class="n">resample_</span> <span class="o">=</span> <span class="n">resample</span><span class="o">.</span><span class="n">Resample</span><span class="p">(</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="n">resample_</span> <span class="o">=</span> <span class="kc">None</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="Feature-Estimation">
-<h2>Feature Estimation<a class="headerlink" href="#Feature-Estimation" title="Permalink to this headline">¶</a></h2>
-<p>Now the used <strong>feature</strong> and <strong>run_analysis</strong> classes are instantiated. Here FIR Filters and Kalman Filters are parametrized. During online feature estimation filters only have to be applied, instead of a repetitive calculatation, which in turn saves computational time.</p>
-<div class="nbinput docutils container">
+<div class="nboutput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># initialize feature class from settings</span>
-<span class="n">features_</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">Features</span><span class="p">(</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span>
-
-<span class="c1"># initialize run object</span>
-<span class="n">run_analysis_</span> <span class="o">=</span> <span class="n">run_analysis</span><span class="o">.</span><span class="n">Run</span><span class="p">(</span><span class="n">features_</span><span class="p">,</span> <span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">,</span>
-                                 <span class="n">rereference_</span><span class="p">,</span> <span class="n">projection_</span><span class="p">,</span> <span class="n">resample_</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(-79.05561408996581, 79.27910194396972, -116.16637420654297, 83.09801483154297)
+</pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<div class="highlight"><pre>
-Segment lengths (ms): [1000  500  333  333  333  100  100  100]
-No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
-Setting up band-pass filter from 4 - 8 Hz
-
-FIR filter parameters
----------------------
-Designing a one-pass, zero-phase, non-causal bandpass filter:
-- Windowed time-domain design (firwin) method
-- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
-- Lower passband edge: 4.00
-- Lower transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 2.00 Hz)
-- Upper passband edge: 8.00 Hz
-- Upper transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 10.00 Hz)
-- Filter length: 999 samples (0.999 sec)
-
-No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
-Setting up band-pass filter from 8 - 12 Hz
-
-FIR filter parameters
----------------------
-Designing a one-pass, zero-phase, non-causal bandpass filter:
-- Windowed time-domain design (firwin) method
-- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
-- Lower passband edge: 8.00
-- Lower transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 6.00 Hz)
-- Upper passband edge: 12.00 Hz
-- Upper transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 14.00 Hz)
-- Filter length: 999 samples (0.999 sec)
-
-No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
-Setting up band-pass filter from 13 - 20 Hz
-
-FIR filter parameters
----------------------
-Designing a one-pass, zero-phase, non-causal bandpass filter:
-- Windowed time-domain design (firwin) method
-- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
-- Lower passband edge: 13.00
-- Lower transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 11.00 Hz)
-- Upper passband edge: 20.00 Hz
-- Upper transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 22.00 Hz)
-- Filter length: 999 samples (0.999 sec)
-
-No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
-Setting up band-pass filter from 20 - 35 Hz
-
-FIR filter parameters
----------------------
-Designing a one-pass, zero-phase, non-causal bandpass filter:
-- Windowed time-domain design (firwin) method
-- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
-- Lower passband edge: 20.00
-- Lower transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 18.00 Hz)
-- Upper passband edge: 35.00 Hz
-- Upper transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 37.00 Hz)
-- Filter length: 999 samples (0.999 sec)
-
-No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
-Setting up band-pass filter from 13 - 35 Hz
-
-FIR filter parameters
----------------------
-Designing a one-pass, zero-phase, non-causal bandpass filter:
-- Windowed time-domain design (firwin) method
-- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
-- Lower passband edge: 13.00
-- Lower transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 11.00 Hz)
-- Upper passband edge: 35.00 Hz
-- Upper transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 37.00 Hz)
-- Filter length: 999 samples (0.999 sec)
-
-No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
-Setting up band-pass filter from 60 - 80 Hz
-
-FIR filter parameters
----------------------
-Designing a one-pass, zero-phase, non-causal bandpass filter:
-- Windowed time-domain design (firwin) method
-- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
-- Lower passband edge: 60.00
-- Lower transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 58.00 Hz)
-- Upper passband edge: 80.00 Hz
-- Upper transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 82.00 Hz)
-- Filter length: 999 samples (0.999 sec)
-
-No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
-Setting up band-pass filter from 90 - 2e+02 Hz
-
-FIR filter parameters
----------------------
-Designing a one-pass, zero-phase, non-causal bandpass filter:
-- Windowed time-domain design (firwin) method
-- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
-- Lower passband edge: 90.00
-- Lower transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 88.00 Hz)
-- Upper passband edge: 200.00 Hz
-- Upper transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 202.00 Hz)
-- Filter length: 999 samples (0.999 sec)
-
-No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
-Setting up band-pass filter from 60 - 2e+02 Hz
-
-FIR filter parameters
----------------------
-Designing a one-pass, zero-phase, non-causal bandpass filter:
-- Windowed time-domain design (firwin) method
-- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
-- Lower passband edge: 60.00
-- Lower transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 58.00 Hz)
-- Upper passband edge: 200.00 Hz
-- Upper transition bandwidth: 4.00 Hz (-6 dB cutoff frequency: 202.00 Hz)
-- Filter length: 999 samples (0.999 sec)
-
-</pre></div></div>
+<img alt="_images/FeatureEstimationDemo_18_1.png" src="_images/FeatureEstimationDemo_18_1.png" />
 </div>
+</div>
+<p>As visible, only grid points are active (channel data is projected unto them as shown in yellow) within the <em>max_dist</em> of every individual channel for the cortical and subcortical grid (as specified in the <code class="docutils literal notranslate"><span class="pre">nm_settings.json</span></code>).</p>
+<p>Next, the <strong>rereference</strong> and <strong>resample</strong> classes get instantiated, and an acquisition system is simulated by a <strong>generator</strong>:</p>
+</div>
+<div class="section" id="Feature-Estimation">
+<h2>Feature Estimation<a class="headerlink" href="#Feature-Estimation" title="Permalink to this headline">¶</a></h2>
+<p>Now the used <strong>feature</strong> and <strong>run_analysis</strong> classes are instantiated. Here FIR Filters and Kalman Filters are parametrized. During online feature estimation filters only have to be applied, instead of a repetitive calculatation, which saves computational time.</p>
 <p>Given the previously initialized generator, we can now receive a first data batch of 1 sec in shape (channels, samples):</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[61]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">ieeg_batch</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">gen</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span></span><span class="n">ieeg_batch</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">gen</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
+<p>This allows us to estimate the previously assigned features:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[62]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1171,7 +1235,7 @@ Designing a one-pass, zero-phase, non-causal bandpass filter:
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[62]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1179,14 +1243,14 @@ Designing a one-pass, zero-phase, non-causal bandpass filter:
 (12, 1375)
 </pre></div></div>
 </div>
-<p>This allows us to estimate the previously assigned features:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[63]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">if</span> <span class="n">ieeg_batch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="n">run_analysis_</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ieeg_batch</span><span class="p">)</span>
+<span></span><span class="c1">#for i in range(10):</span>
+<span class="k">if</span> <span class="n">ieeg_batch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ieeg_batch</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1195,261 +1259,32 @@ Designing a one-pass, zero-phase, non-causal bandpass filter:
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-1.6 seconds of data processed
-Last batch took: 0.18 seconds
+1.2 seconds of data processed
+Last batch took: 0.1 seconds
 </pre></div></div>
-</div>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[64]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">run_analysis_</span><span class="o">.</span><span class="n">feature_arr</span>
-</pre></div>
-</div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[64]:
-</pre></div>
-</div>
-<div class="output_area rendered_html docutils container">
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_activity_theta</th>
-      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_mobility_theta</th>
-      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_complexity_theta</th>
-      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_activity_alpha</th>
-      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_mobility_alpha</th>
-      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_complexity_alpha</th>
-      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_activity_low beta</th>
-      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_mobility_low beta</th>
-      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_complexity_low beta</th>
-      <th>LFP_STN_R_234-LFP_STN_R_567_bandpass_activity_high beta</th>
-      <th>...</th>
-      <th>ECOG_AT_SM_L_6-avgref_Sharpwave_Max_Trough_width</th>
-      <th>ECOG_AT_SM_L_6-avgref_Sharpwave_Max_Trough_prominence</th>
-      <th>ECOG_AT_SM_L_6-avgref_Sharpwave_Max_Trough_interval</th>
-      <th>ECOG_AT_SM_L_6-avgref_Sharpwave_Max_Trough_decay_time</th>
-      <th>ECOG_AT_SM_L_6-avgref_Sharpwave_Max_Trough_rise_time</th>
-      <th>ECOG_AT_SM_L_6-avgref_Sharpwave_Max_Trough_sharpness</th>
-      <th>ECOG_AT_SM_L_6-avgref_Sharpwave_Max_Trough_rise_steepness</th>
-      <th>ECOG_AT_SM_L_6-avgref_Sharpwave_Max_Trough_decay_steepness</th>
-      <th>ECOG_AT_SM_L_6-avgref_Sharpwave_Max_Trough_slope_ratio</th>
-      <th>time</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>...</td>
-      <td>0.00000</td>
-      <td>0.000000</td>
-      <td>0.0</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>0.000000</td>
-      <td>1000.0</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>-1.000000</td>
-      <td>-1.000000</td>
-      <td>-1.000000</td>
-      <td>1.000000</td>
-      <td>-1.000000</td>
-      <td>-1.000000</td>
-      <td>-1.000000</td>
-      <td>1.000000</td>
-      <td>-1.000000</td>
-      <td>-1.000000</td>
-      <td>...</td>
-      <td>NaN</td>
-      <td>1.000000</td>
-      <td>NaN</td>
-      <td>1.000000</td>
-      <td>1.000000</td>
-      <td>-1.000000</td>
-      <td>-1.000000</td>
-      <td>1.000000</td>
-      <td>-1.000000</td>
-      <td>1100.0</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>-1.413856</td>
-      <td>0.986026</td>
-      <td>1.411066</td>
-      <td>0.719298</td>
-      <td>-1.413113</td>
-      <td>1.002520</td>
-      <td>-1.002182</td>
-      <td>0.939468</td>
-      <td>1.407790</td>
-      <td>-1.375475</td>
-      <td>...</td>
-      <td>NaN</td>
-      <td>0.742469</td>
-      <td>NaN</td>
-      <td>-0.707107</td>
-      <td>-0.707107</td>
-      <td>0.438655</td>
-      <td>-0.288772</td>
-      <td>1.027999</td>
-      <td>-0.849363</td>
-      <td>1200.0</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>-1.133993</td>
-      <td>1.628242</td>
-      <td>-1.522077</td>
-      <td>0.867106</td>
-      <td>-1.000275</td>
-      <td>-0.947065</td>
-      <td>-0.823012</td>
-      <td>1.531718</td>
-      <td>0.160493</td>
-      <td>-1.519733</td>
-      <td>...</td>
-      <td>NaN</td>
-      <td>0.825928</td>
-      <td>NaN</td>
-      <td>-0.577350</td>
-      <td>-0.577350</td>
-      <td>0.578837</td>
-      <td>0.001586</td>
-      <td>1.134153</td>
-      <td>-0.937460</td>
-      <td>1300.0</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>-0.564420</td>
-      <td>1.496153</td>
-      <td>-1.568611</td>
-      <td>1.630299</td>
-      <td>-0.830257</td>
-      <td>-1.045311</td>
-      <td>-0.752502</td>
-      <td>1.376794</td>
-      <td>-0.327432</td>
-      <td>-1.099329</td>
-      <td>...</td>
-      <td>NaN</td>
-      <td>0.916122</td>
-      <td>NaN</td>
-      <td>-0.500000</td>
-      <td>-0.500000</td>
-      <td>0.717736</td>
-      <td>0.287253</td>
-      <td>1.217577</td>
-      <td>-1.027123</td>
-      <td>1400.0</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>-0.032050</td>
-      <td>0.917335</td>
-      <td>-0.947647</td>
-      <td>1.491794</td>
-      <td>-0.463283</td>
-      <td>-1.449514</td>
-      <td>-0.746026</td>
-      <td>1.142843</td>
-      <td>-0.476464</td>
-      <td>-0.895653</td>
-      <td>...</td>
-      <td>NaN</td>
-      <td>1.000204</td>
-      <td>NaN</td>
-      <td>-0.447214</td>
-      <td>-0.447214</td>
-      <td>0.842543</td>
-      <td>0.555343</td>
-      <td>1.278756</td>
-      <td>-1.104789</td>
-      <td>1500.0</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>1.794198</td>
-      <td>0.037151</td>
-      <td>-1.286162</td>
-      <td>1.157103</td>
-      <td>-1.207859</td>
-      <td>-1.193593</td>
-      <td>1.422738</td>
-      <td>-0.561030</td>
-      <td>1.380136</td>
-      <td>1.524448</td>
-      <td>...</td>
-      <td>-2.44949</td>
-      <td>-2.377112</td>
-      <td>NaN</td>
-      <td>2.445754</td>
-      <td>-2.448673</td>
-      <td>-2.358675</td>
-      <td>-2.405600</td>
-      <td>-2.408255</td>
-      <td>2.379510</td>
-      <td>1600.0</td>
-    </tr>
-  </tbody>
-</table>
-<p>7 rows × 1629 columns</p>
-</div></div>
 </div>
 <p>As seen above already 1629 features are calculated based on this data batch. For every analyzed data batch, a subsequent row is appended to the <a href="#id1"><span class="problematic" id="id2">run_analysis_</span></a>.feature_arr. Let’s show some features for a signle channel:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[65]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="n">ch</span> <span class="o">=</span> <span class="s1">&#39;ECOG_AT_SM_L_1&#39;</span>
-<span class="n">ch_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">f_</span> <span class="k">for</span> <span class="n">f_</span> <span class="ow">in</span> <span class="n">run_analysis_</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">f_</span><span class="p">]</span>
+<span class="n">ch_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">f_</span> <span class="k">for</span> <span class="n">f_</span> <span class="ow">in</span> <span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">f_</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[66]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">run_analysis_</span><span class="o">.</span><span class="n">feature_arr</span><span class="p">[</span><span class="n">ch_cols</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>
+<span></span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">feature_arr</span><span class="p">[</span><span class="n">ch_cols</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># upper run_analysis was called three times for consective data batches</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[66]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1474,184 +1309,390 @@ Last batch took: 0.18 seconds
       <th>0</th>
       <th>1</th>
       <th>2</th>
-      <th>3</th>
-      <th>4</th>
-      <th>5</th>
-      <th>6</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th>ECOG_AT_SM_L_1-avgref_bandpass_activity_theta</th>
       <td>0.0</td>
-      <td>1.0</td>
-      <td>-1.053859</td>
-      <td>-1.320893</td>
-      <td>-1.707613</td>
-      <td>-1.412793</td>
-      <td>-1.375319</td>
-    </tr>
-    <tr>
-      <th>ECOG_AT_SM_L_1-avgref_bandpass_mobility_theta</th>
-      <td>0.0</td>
-      <td>1.0</td>
-      <td>-0.636474</td>
-      <td>-1.729447</td>
-      <td>-1.689738</td>
-      <td>-1.865972</td>
-      <td>-0.103034</td>
-    </tr>
-    <tr>
-      <th>ECOG_AT_SM_L_1-avgref_bandpass_complexity_theta</th>
-      <td>0.0</td>
-      <td>1.0</td>
-      <td>1.378971</td>
-      <td>1.507552</td>
-      <td>1.774458</td>
-      <td>1.834773</td>
-      <td>0.517982</td>
+      <td>-1.0</td>
+      <td>-1.410518</td>
     </tr>
     <tr>
       <th>ECOG_AT_SM_L_1-avgref_bandpass_activity_alpha</th>
       <td>0.0</td>
       <td>-1.0</td>
-      <td>-1.250933</td>
-      <td>-0.990942</td>
-      <td>-1.491038</td>
-      <td>-1.133773</td>
-      <td>-0.926004</td>
+      <td>-1.234144</td>
     </tr>
     <tr>
-      <th>ECOG_AT_SM_L_1-avgref_bandpass_mobility_alpha</th>
+      <th>ECOG_AT_SM_L_1-avgref_bandpass_activity_low beta</th>
       <td>0.0</td>
       <td>-1.0</td>
-      <td>-1.076922</td>
-      <td>0.368802</td>
-      <td>1.763838</td>
-      <td>1.307799</td>
-      <td>-0.853319</td>
+      <td>-0.535153</td>
     </tr>
     <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
+      <th>ECOG_AT_SM_L_1-avgref_bandpass_activity_high beta</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-0.412425</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_bandpass_activity_low gamma</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.147745</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_bandpass_activity_high gamma</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.107875</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_bandpass_activity_HFA</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.119139</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_RawHjorth_Activity</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-1.330298</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_RawHjorth_Mobility</th>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>1.412174</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_RawHjorth_Complexity</th>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>-1.399995</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Trough_peak_left</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-0.227104</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Trough_peak_right</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.079498</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Trough_trough</th>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>0.708261</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Trough_width</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-1.023959</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Trough_prominence</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-0.445980</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Trough_interval</th>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>-1.306331</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Trough_decay_time</th>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>0.382921</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Trough_rise_time</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-1.400173</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Trough_sharpness</th>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>1.015719</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Trough_rise_steepness</th>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>1.015298</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Trough_decay_steepness</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-1.414116</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Trough_peak_left</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.378253</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Trough_peak_right</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.286942</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Trough_trough</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.278529</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Trough_width</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-0.760750</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Trough_prominence</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-0.458972</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Trough_interval</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-1.162476</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Trough_decay_time</th>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>1.176965</td>
     </tr>
     <tr>
       <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Trough_rise_time</th>
       <td>0.0</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>-2.449490</td>
+      <td>1.0</td>
+      <td>-1.278724</td>
     </tr>
     <tr>
       <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Trough_sharpness</th>
       <td>0.0</td>
-      <td>1.0</td>
-      <td>1.087625</td>
-      <td>1.192496</td>
-      <td>1.266637</td>
-      <td>1.317329</td>
-      <td>-2.275016</td>
+      <td>-1.0</td>
+      <td>1.390782</td>
     </tr>
     <tr>
       <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Trough_rise_steepness</th>
       <td>0.0</td>
-      <td>1.0</td>
-      <td>1.056160</td>
-      <td>1.162467</td>
-      <td>1.240359</td>
-      <td>1.294825</td>
-      <td>-2.294153</td>
+      <td>-1.0</td>
+      <td>1.223457</td>
     </tr>
     <tr>
       <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Trough_decay_steepness</th>
       <td>0.0</td>
-      <td>1.0</td>
-      <td>1.056160</td>
-      <td>1.162467</td>
-      <td>1.240359</td>
-      <td>1.294825</td>
-      <td>-2.372784</td>
+      <td>-1.0</td>
+      <td>-0.410029</td>
     </tr>
     <tr>
-      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Trough_slope_ratio</th>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Peak_peak_left</th>
       <td>0.0</td>
       <td>1.0</td>
-      <td>0.870741</td>
-      <td>0.922869</td>
-      <td>0.992129</td>
-      <td>1.057685</td>
-      <td>2.259754</td>
+      <td>-0.227104</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Peak_peak_right</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.079498</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Peak_trough</th>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>0.708261</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Peak_width</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-1.023959</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Peak_prominence</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-0.445980</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Peak_interval</th>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>-1.306331</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Peak_decay_time</th>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>0.382921</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Peak_rise_time</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-1.400173</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Peak_sharpness</th>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>1.015719</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Peak_rise_steepness</th>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>1.015298</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Mean_Peak_decay_steepness</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-1.414116</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Peak_peak_left</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>0.378253</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Peak_peak_right</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.286942</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Peak_trough</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.278529</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Peak_width</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-0.760750</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Peak_prominence</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-0.458972</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Peak_interval</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-1.162476</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Peak_decay_time</th>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>1.176965</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Peak_rise_time</th>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>-1.278724</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Peak_sharpness</th>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>1.390782</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Peak_rise_steepness</th>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>1.223457</td>
+    </tr>
+    <tr>
+      <th>ECOG_AT_SM_L_1-avgref_Sharpwave_Max_Peak_decay_steepness</th>
+      <td>0.0</td>
+      <td>-1.0</td>
+      <td>-0.410029</td>
     </tr>
   </tbody>
 </table>
-<p>148 rows × 7 columns</p>
 </div></div>
 </div>
 </div>
 <div class="section" id="Sharpwave-features">
 <h2>Sharpwave features<a class="headerlink" href="#Sharpwave-features" title="Permalink to this headline">¶</a></h2>
-<p>Now let’s investigate sharpwave features. First, data for a specific channel is bandpass filtered in a predefined range (here 5 - 80 Hz):</p>
+<p>Now let’s investigate sharpwave features. First, data for a specific channel is bandpass filtered in a predefined range (here 5 - 80 Hz).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[67]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">normalize_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;raw_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;normalization_time&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">fs</span><span class="p">)</span>
-<span class="n">raw_norm</span> <span class="o">=</span> <span class="n">normalization</span><span class="o">.</span><span class="n">normalize_raw</span><span class="p">(</span><span class="n">ieeg_batch</span><span class="p">,</span> <span class="n">normalize_samples</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span></span><span class="n">normalize_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;raw_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;normalization_time&quot;</span><span class="p">]</span> <span class="o">*</span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">fs</span><span class="p">)</span>
+<span class="n">raw_norm</span> <span class="o">=</span> <span class="n">nm_normalization</span><span class="o">.</span><span class="n">normalize_raw</span><span class="p">(</span><span class="n">ieeg_batch</span><span class="p">,</span> <span class="n">normalize_samples</span><span class="p">,</span> <span class="n">nm_BIDS</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <p>Then troughs and peaks are identified, subsequently different features are estimated.</p>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[120]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">run_analysis_</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;detect_troughs&quot;</span><span class="p">][</span><span class="s2">&quot;distance_troughs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span><span class="o">*</span><span class="mf">1.375</span>
-<span class="n">run_analysis_</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;detect_troughs&quot;</span><span class="p">][</span><span class="s2">&quot;distance_peaks&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.375</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[123]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">sw_features_</span> <span class="o">=</span> <span class="n">run_analysis_</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">get_sharpwave_features</span><span class="p">(</span><span class="n">features_</span><span class="o">=</span><span class="p">{},</span> <span class="n">data</span><span class="o">=</span><span class="n">raw_norm</span><span class="p">[</span><span class="mi">5</span><span class="p">,:],</span>\
-                                                          <span class="n">ch</span><span class="o">=</span><span class="n">run_analysis_</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;ch_names&quot;</span><span class="p">][</span><span class="mi">5</span><span class="p">])</span>
-
-<span class="n">filtered_data</span> <span class="o">=</span> <span class="o">-</span><span class="n">run_analysis_</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">filtered_data</span>  <span class="c1"># for trough analysis</span>
-<span class="n">trough_dist</span> <span class="o">=</span> <span class="n">run_analysis_</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;detect_troughs&quot;</span><span class="p">][</span><span class="s2">&quot;distance_troughs&quot;</span><span class="p">]</span>
-<span class="n">peak_dist</span> <span class="o">=</span> <span class="n">run_analysis_</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;detect_troughs&quot;</span><span class="p">][</span><span class="s2">&quot;distance_peaks&quot;</span><span class="p">]</span>
-
-<span class="n">peaks</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">find_peaks</span><span class="p">(</span><span class="n">filtered_data</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="n">peak_dist</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">troughs</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">find_peaks</span><span class="p">(</span><span class="o">-</span><span class="n">filtered_data</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="n">trough_dist</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-</pre></div>
-</div>
-</div>
 <p>In this example plot, the trough sharpness is visualized for the estimated data batch:</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[124]:
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[97]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">time_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">raw_norm</span><span class="p">[</span><span class="mi">5</span><span class="p">,:]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">1375</span>
+<span></span><span class="c1"># data is being filtered in get_sharpwave_features</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">raw_norm</span><span class="p">[</span><span class="n">ch_idx</span><span class="p">,:]</span>
+<span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">initialize_sw_features</span><span class="p">()</span>
+<span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">filtered_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">data</span><span class="p">,</span>
+                                                <span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">filter</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)</span>
+<span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">analyze_waveform</span><span class="p">()</span>
+<span class="n">trough_dist</span> <span class="o">=</span> <span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;detect_troughs&quot;</span><span class="p">][</span><span class="s2">&quot;distance_troughs&quot;</span><span class="p">]</span>
+<span class="n">peak_dist</span> <span class="o">=</span> <span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;detect_troughs&quot;</span><span class="p">][</span><span class="s2">&quot;distance_peaks&quot;</span><span class="p">]</span>
+
+<span class="n">peaks</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">find_peaks</span><span class="p">(</span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="n">peak_dist</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">troughs</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">find_peaks</span><span class="p">(</span><span class="o">-</span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="n">trough_dist</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[100]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">time_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">1375</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span><span class="mf">3.5</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">raw_norm</span><span class="p">[</span><span class="mi">5</span><span class="p">,:],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;original ECoG data&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">filtered_data</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;[5-80]Hz filtered data&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">peaks</span><span class="p">,</span> <span class="n">filtered_data</span><span class="p">[</span><span class="n">peaks</span><span class="p">],</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;peaks&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">troughs</span><span class="p">,</span> <span class="n">filtered_data</span><span class="p">[</span><span class="n">troughs</span><span class="p">],</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;troughs&quot;</span><span class="p">)</span>
-<span class="c1">#plt.bar(troughs[1:], run_analysis_.features.sw_features.sharpness, width=4, color=&quot;red&quot;,</span>
-<span class="c1">#       label=&quot;trough sharpness&quot;, alpha=0.5)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span><span class="mf">3.5</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;original ECoG data&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;[5-80]Hz filtered data&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">peaks</span><span class="p">,</span> <span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="n">peaks</span><span class="p">],</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;peaks&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">troughs</span><span class="p">,</span> <span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="n">troughs</span><span class="p">],</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;troughs&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">troughs</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">prominence</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+       <span class="n">label</span><span class="o">=</span><span class="s2">&quot;trough prominence&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
 <span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1375</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1375</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span><span class="o">/</span><span class="mi">1375</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time [s]&quot;</span><span class="p">)</span>
@@ -1662,33 +1703,41 @@ Last batch took: 0.18 seconds
 </div>
 </div>
 <div class="nboutput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[124]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[100]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;matplotlib.legend.Legend at 0x2bc3fc8c9d0&gt;
+&lt;matplotlib.legend.Legend at 0x2332feeb580&gt;
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Figure size 2700x1050 with 0 Axes&gt;
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="_images/FeatureEstimationDemo_36_1.png" src="_images/FeatureEstimationDemo_36_1.png" />
+<img alt="_images/FeatureEstimationDemo_34_2.png" src="_images/FeatureEstimationDemo_34_2.png" />
 </div>
 </div>
 <p>As seen above this sharpness characteristic is a useful feature for any decoding analysis, and might represent additional signal decoding characteristics. Since in one data batch a different number of peaks and troughs can be detected, the returning feature_arr included features of certain predefined operations on these sharpwave characteristics within this batch. Those are defined in the “estimator” key:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[73]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">run_analysis_</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sharpwave_analysis_settings&quot;</span><span class="p">]</span>
+<span></span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sharpwave_analysis_settings&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[73]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1704,20 +1753,20 @@ Last batch took: 0.18 seconds
   &#39;sharpness&#39;: True,
   &#39;rise_steepness&#39;: True,
   &#39;decay_steepness&#39;: True,
-  &#39;slope_ratio&#39;: True},
+  &#39;slope_ratio&#39;: False},
  &#39;filter_low_cutoff&#39;: 5,
- &#39;filter_high_cutoff&#39;: 90,
+ &#39;filter_high_cutoff&#39;: 80,
  &#39;detect_troughs&#39;: {&#39;estimate&#39;: True,
-  &#39;distance_troughs&#39;: 5,
-  &#39;distance_peaks&#39;: 1},
+  &#39;distance_troughs&#39;: 15,
+  &#39;distance_peaks&#39;: 15},
  &#39;detect_peaks&#39;: {&#39;estimate&#39;: True,
-  &#39;distance_troughs&#39;: 1,
-  &#39;distance_peaks&#39;: 5},
+  &#39;distance_troughs&#39;: 15,
+  &#39;distance_peaks&#39;: 15},
  &#39;estimator&#39;: {&#39;mean&#39;: True,
-  &#39;median&#39;: True,
+  &#39;median&#39;: False,
   &#39;max&#39;: True,
-  &#39;min&#39;: True,
-  &#39;var&#39;: True}}
+  &#39;min&#39;: False,
+  &#39;var&#39;: False}}
 </pre></div></div>
 </div>
 <p>E.g. in this example the median, max, min and variance of all sharpness features would be returned.</p>

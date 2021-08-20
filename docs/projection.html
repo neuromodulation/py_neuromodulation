@@ -99,7 +99,7 @@
 <li class="toctree-l2"><a class="reference internal" href="settings.html">settings.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="run_analysis.html">run_analysis.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="resample.html">resample.py</a></li>
-<li class="toctree-l2"><a class="reference internal" href="normalization.html">realtime_normalization.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="normalization.html">normalize_raw.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="rereference.html">rereference.py</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">projection.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="IO.html">IO.py</a></li>
@@ -202,62 +202,6 @@
 </style>
 <div class="section" id="projection-py">
 <h1>projection.py<a class="headerlink" href="#projection-py" title="Permalink to this headline">¶</a></h1>
-<dl class="py class">
-<dt id="projection.Projection">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">projection.</span></code><code class="sig-name descname"><span class="pre">Projection</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection.html#Projection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#projection.Projection" title="Permalink to this definition">¶</a></dt>
-<dd><p class="rubric">Methods</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#projection.Projection.calc_projection_matrix" title="projection.Projection.calc_projection_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_projection_matrix</span></code></a>()</p></td>
-<td><p>Calculates a projection matrix based on the used coordiniate arrays :returns: * <em>proj_matrix_cortex (np.array)</em> – cortical projection_matrix in shape [grid contacts, channel contact] defaults to None           * <em>proj_matrix_subcortex (np.array)</em> – subcortical rojection_matrix in shape [grid contacts, channel contact] defaults to None</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#projection.Projection.get_projected_cortex_subcortex_data" title="projection.Projection.get_projected_cortex_subcortex_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_projected_cortex_subcortex_data</span></code></a>([…])</p></td>
-<td><p>Project cortical and subcortical data to predefined projection matrices</p></td>
-</tr>
-</tbody>
-</table>
-<dl class="py method">
-<dt id="projection.Projection.calc_projection_matrix">
-<code class="sig-name descname"><span class="pre">calc_projection_matrix</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection.html#Projection.calc_projection_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#projection.Projection.calc_projection_matrix" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates a projection matrix based on the used coordiniate arrays
-:returns: * <em>proj_matrix_cortex (np.array)</em> – cortical projection_matrix in shape [grid contacts, channel contact] defaults to None</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><em>proj_matrix_subcortex (np.array)</em> – subcortical rojection_matrix in shape [grid contacts, channel contact] defaults to None</p></li>
-</ul>
-</div></blockquote>
-</dd></dl>
-
-<dl class="py method">
-<dt id="projection.Projection.get_projected_cortex_subcortex_data">
-<code class="sig-name descname"><span class="pre">get_projected_cortex_subcortex_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dat_cortex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dat_subcortex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/projection.html#Projection.get_projected_cortex_subcortex_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#projection.Projection.get_projected_cortex_subcortex_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Project cortical and subcortical data to predefined projection matrices</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><strong>dat_cortex</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>cortical features, by default None</p>
-</dd>
-<dt><strong>dat_subcortex</strong><span class="classifier">np.ndarray, optional</span></dt><dd><p>subcortical features, by default None</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt><strong>proj_cortex</strong><span class="classifier">np.ndarray</span></dt><dd><p>projected cortical features, by detault None</p>
-</dd>
-<dt><strong>proj_subcortex</strong><span class="classifier">np.ndarray</span></dt><dd><p>projected subcortical features, by detault None</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 
 

@@ -199,60 +199,8 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="module-filter">
-<span id="filter-py"></span><h1>filter.py<a class="headerlink" href="#module-filter" title="Permalink to this headline">¶</a></h1>
-<dl class="py function">
-<dt id="filter.apply_filter">
-<code class="sig-prename descclassname"><span class="pre">filter.</span></code><code class="sig-name descname"><span class="pre">apply_filter</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_bank</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/filter.html#apply_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#filter.apply_filter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply previously calculated (bandpass) filters to data.
-:param data: segment of data.
-:type data: array (n_samples, ) or (n_channels, n_samples)
-:param filter_bank: output of calc_band_filters.
-:type filter_bank: array</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>filtered</strong> – (n_chan, n_fbands, filter_len) array conatining the filtered signal
-at each freq band, where n_fbands is the number of filter bands used to
-decompose the signal</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>array</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="filter.calc_band_filters">
-<code class="sig-prename descclassname"><span class="pre">filter.</span></code><code class="sig-name descname"><span class="pre">calc_band_filters</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f_ranges</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sfreq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'999ms'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">l_trans_bandwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h_trans_bandwidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/filter.html#calc_band_filters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#filter.calc_band_filters" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate bandpass filters with adjustable length for given frequency
-ranges.
-This function returns for the given frequency band ranges the filter
-coefficients with length “filter_len”.
-Thus the filters can be sequentially used for band power estimation.
-:param f_ranges: frequency ranges.
-:type f_ranges: list of lists
-:param sfreq: sampling frequency.
-:type sfreq: float
-:param filter_length: length of the filter. Human readable (e.g.”1000ms” or “1s”).</p>
-<blockquote>
-<div><p>Default is “999ms”.</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>l_trans_bandwidth</strong> (<em>float</em><em>, </em><em>optional</em>) – Length of the lower transition band. The default is 4.</p></li>
-<li><p><strong>h_trans_bandwidth</strong> (<em>float</em><em>, </em><em>optional</em>) – Length of the higher transition band. The default is 4.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>filter_bank</strong> – filter coefficients</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>ndarray, shape(n_franges, filter length samples)</p>
-</dd>
-</dl>
-</dd></dl>
-
+<div class="section" id="filter-py">
+<h1>filter.py<a class="headerlink" href="#filter-py" title="Permalink to this headline">¶</a></h1>
 </div>
 
 

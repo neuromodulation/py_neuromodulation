@@ -202,46 +202,6 @@
 </style>
 <div class="section" id="rereference-py">
 <h1>rereference.py<a class="headerlink" href="#rereference-py" title="Permalink to this headline">¶</a></h1>
-<dl class="py class">
-<dt id="rereference.RT_rereference">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">rereference.</span></code><code class="sig-name descname"><span class="pre">RT_rereference</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/rereference.html#RT_rereference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rereference.RT_rereference" title="Permalink to this definition">¶</a></dt>
-<dd><p class="rubric">Methods</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#rereference.RT_rereference.rereference" title="rereference.RT_rereference.rereference"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rereference</span></code></a>(ieeg_batch)</p></td>
-<td><p>Rereference data according to the initialized RT_rereference class.</p></td>
-</tr>
-</tbody>
-</table>
-<dl class="py method">
-<dt id="rereference.RT_rereference.rereference">
-<code class="sig-name descname"><span class="pre">rereference</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ieeg_batch</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="reference internal" href="_modules/rereference.html#RT_rereference.rereference"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#rereference.RT_rereference.rereference" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rereference data according to the initialized RT_rereference class.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>ieeg_batch</strong> (<em>numpy ndarray</em>) – shape(n_channels, n_samples) - data to be rereferenced.</p>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>ValueError</strong> – rereferencing using undefined channel</p></li>
-<li><p><strong>ValueError</strong> – rereferencing according to same channel</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>rereferenced data</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>reref_data (numpy ndarray)</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 
 
