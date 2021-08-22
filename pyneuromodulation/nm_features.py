@@ -3,7 +3,8 @@ from numpy import arange, array, ceil, floor, where
 
 from mne.filter import notch_filter
 
-from pyneuromodulation import nm_bandpower, nm_filter, nm_hjorth_raw, nm_kalmanfilter, nm_sharpwaves, nm_coherence
+from pyneuromodulation import nm_bandpower, nm_filter, nm_hjorth_raw, nm_kalmanfilter, nm_sharpwaves, nm_coherence,\
+    nm_stft
 
 
 class Features:
@@ -30,6 +31,10 @@ class Features:
                     "bandpass_filter_settings"][
                         "frequency_ranges"].values()])).astype(int)
         print("Segment lengths (ms):", self.seglengths)
+        self.fband_names = ['theta', 'alpha', 'low beta', 'high beta', 'low gamma', 'high gamma', 'HFA']
+        self.f_ranges = [self.s["bandpass_filter_settings"]["frequency_ranges"][fband_name][0]
+                         for fband_name in self.fband_names]
+
         self.KF_dict = {}
 
         if s["methods"]["bandpass_filter"] is True:
@@ -145,6 +150,10 @@ class Features:
         if self.s["methods"]["sharpwave_analysis"]:
             features_ = self.sw_features.get_sharpwave_features(
                 features_, data[ch_idx, -self.new_dat_index:], ch)
+
+        if self.s["methods"]["stft"] is True:
+            features_ = nm_stft.get_stft_features(features_, self.fs, data[ch_idx, :], ch,
+                                                  self.f_ranges, self.fband_names)
 
         return features_
 

@@ -176,7 +176,7 @@ class FeatureReadWrapper:
         if feature_file is not None:
             self.feature_file = feature_file
         # Fist case: filter for bandpass activity features only
-        dat_ch = self.nm_reader.read_channel_data(ch_name, read_bp_activity_only=True)
+        dat_ch = self.nm_reader.read_channel_data(ch_name, ['bandpass', 'activity'])
 
         # estimating epochs, with shape (epochs,samples,channels,features)
         X_epoch, y_epoch = self.nm_reader.get_epochs_ch(epoch_len=4,
@@ -187,9 +187,17 @@ class FeatureReadWrapper:
             self.nm_reader.plot_corr_matrix(self.feature_file, feature_str_add="bandpass")
         print("plotting feature target averaged")
         self.nm_reader.plot_epochs_avg(self.feature_file, feature_str_add="bandpass")
+        
+        # plot STFT
+        dat_ch = self.nm_reader.read_channel_data(ch_name, ['stft'])  # regex needs to be list
+        # estimating epochs, with shape (epochs,samples,channels,features)
+        X_epoch, y_epoch = self.nm_reader.get_epochs_ch(epoch_len=4,
+                                                        sfreq=self.settings["sampling_rate_features"],
+                                                        threshold=0.1)
+        self.nm_reader.plot_epochs_avg(self.feature_file, feature_str_add='stft')
 
         # Second case: filter for sharpwave prominence features only
-        dat_ch = self.nm_reader.read_channel_data(ch_name, read_sharpwave_prominence_only=True)
+        dat_ch = self.nm_reader.read_channel_data(ch_name, ['Sharpwave', 'prominence'])
 
         # estimating epochs, with shape (epochs,samples,channels,features)
         X_epoch, y_epoch = self.nm_reader.get_epochs_ch(epoch_len=4,

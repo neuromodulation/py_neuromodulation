@@ -49,18 +49,31 @@ class NM_Reader:
                          feature_file + "_FEATURES.csv"), header=0)
         return self.features
 
-    def read_channel_data(self, ch_name, read_bp_activity_only=False,
-                          read_sharpwave_prominence_only=False) -> None:
+    def read_channel_data(self, ch_name, list_feature_keywords=None) -> None:
+        """Read specific features defined through string separatey keywords in list_feature_keywords
+
+        Parameters
+        ----------
+        ch_name : string
+            [description]
+        list_feature_keywords : list, by defeault None
+            keyword separated list of features, e.g. ['Sharpwave', 'prominence']
+
+        Returns
+        -------
+        pd.series
+            selected features
+        """
         self.ch_name = ch_name
         self.feature_ch_cols_all = [i for i in list(self.features.columns) if ch_name in i]
-        if read_bp_activity_only:
-            bp_ = [f for f in self.feature_ch_cols_all if all(
-                x in f for x in ('bandpass', 'activity'))]
-            self.feature_ch_cols = bp_[::-1]  # flip list s.t. theta band is lowest in subsequent plot
-        elif read_sharpwave_prominence_only is True:
+        if list_feature_keywords is not None:
             self.feature_ch_cols = [
-                f for f in self.feature_ch_cols_all if all(
-                    x in f for x in ('Sharpwave', 'prominence'))]
+                    f for f in self.feature_ch_cols_all if all(
+                        x in f for x in list_feature_keywords)]
+
+            if 'bandpass' in list_feature_keywords or 'stft' in list_feature_keywords:
+                # flip list s.t. theta band is lowest in subsequent plot
+                self.feature_ch_cols = self.feature_ch_cols[::-1]
         else:
             self.feature_ch_cols = self.feature_ch_cols_all
         self.feature_ch = self.features[self.feature_ch_cols]
