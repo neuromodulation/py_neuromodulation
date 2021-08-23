@@ -123,6 +123,20 @@ class Decoder:
             self.ch_ind_data[ch] = np.nan_to_num(np.array(self.features[[col for col in self.features.columns
                                                           if col.startswith(ch)]]))
 
+    def run_CV_all_channels_combined(self, TRAIN_VAL_SPLIT=True):
+
+        dat_combined = np.concatenate(list(self.ch_ind_data.values()), axis=1)
+        self.run_CV(dat_combined, self.label, TRAIN_VAL_SPLIT)
+        self.all_ch_pr = {}
+        self.all_ch_pr["score_train"] = self.score_train
+        self.all_ch_pr["score_test"] = self.score_test
+        self.all_ch_pr["y_test"] = self.y_test
+        self.all_ch_pr["y_train"] = self.y_train
+        self.all_ch_pr["y_test_pr"] = self.y_test_pr
+        self.all_ch_pr["y_train_pr"] = self.y_train_pr
+        self.all_ch_pr["X_train"] = self.X_train
+        self.all_ch_pr["X_test"] = self.X_test
+
     def run_CV_ind_channels(self, TRAIN_VAL_SPLIT=True):
         """run the CV for every specified channel
 

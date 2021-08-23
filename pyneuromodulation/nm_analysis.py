@@ -225,6 +225,7 @@ class FeatureReadWrapper:
             self.plot_features_per_channel(ch_name_ECOG, plt_corr_matr=False)
 
     def run_ML_model(self, feature_file=None, estimate_gridpoints=True, estimate_channels=True,
+                     estimate_all_channels_combined=False,
                      model=linear_model.LogisticRegression(class_weight="balanced"),
                      eval_method=metrics.balanced_accuracy_score,
                      cv_method=model_selection.KFold(n_splits=3, shuffle=False),
@@ -239,6 +240,8 @@ class FeatureReadWrapper:
             run ML analysis for grid points, by default True
         estimate_channels : bool, optional
             run ML analysis for ECoG strip channel, by default True
+        estimate_all_channels_combined : bool, optional
+            run ML analysis features of all channels concatenated, by default False
         model : sklearn model, optional
             ML model, needs to obtain fit and predict functions,
             by default linear_model.LogisticRegression(class_weight="balanced")
@@ -270,12 +273,16 @@ class FeatureReadWrapper:
         if estimate_channels:
             decoder.set_data_ind_channels()
             decoder.run_CV_ind_channels(TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT)
+        if estimate_all_channels_combined:
+            if estimate_channels is not True:
+                decoder.set_data_ind_channels()
+            decoder.run_CV_all_channels_combined(TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT)
 
         decoder.save(output_name)
 
     def read_ind_channel_results(self, performance_dict=dict(), subject_name=None,
                                  feature_file=None, DEFAULT_PERFORMANCE=0.5, read_grid_points=True,
-                                 read_channels=True, ML_model_name='LM'):
+                                 read_channels=True, read_all_combined=False, ML_model_name='LM'):
         """Save performances of a given patient into performance_dict
 
         Parameters
@@ -292,6 +299,8 @@ class FeatureReadWrapper:
             true if grid point performances are read, by default True
         read_channels : bool, optional
             true if channels performances are read, by default True
+        read_all_combined : bool, optional
+            true if all combined channel performances are read, by default False
         ML_model_name : str, optional
             machine learning model name, by default 'LM'
 
@@ -331,6 +340,10 @@ class FeatureReadWrapper:
                 coords = ML_res.settings["coord"][cortex_name]["positions"][idx_]
                 performance_dict[subject_name][ch]["coord"] = coords
                 performance_dict[subject_name][ch]["performance"] = np.mean(ML_res.ch_ind_pr[ch]["score_test"])
+
+        if read_all_combined:
+            performance_dict[subject_name]["all_ch_combined"] = {}
+            performance_dict[subject_name]["all_ch_combined"]["performance"] = np.mean(ML_res.all_ch_pr["score_test"])
 
         if read_grid_points:
             performance_dict[subject_name]["active_gridpoints"] = ML_res.active_gridpoints
