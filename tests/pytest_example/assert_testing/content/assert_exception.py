@@ -1,7 +1,3 @@
-#test for Timon
-
-
-
 
 def divide(denominator):
     try:
