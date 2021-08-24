@@ -152,7 +152,7 @@ class Features:
                 features_, data[ch_idx, -self.new_dat_index:], ch)
 
         if self.s["methods"]["stft"] is True:
-            features_ = nm_stft.get_stft_features(features_, self.fs, data[ch_idx, :], ch,
+            features_ = nm_stft.get_stft_features(features_, self.s, self.fs, data[ch_idx, :], self.KF_dict, ch,
                                                   self.f_ranges, self.fband_names)
 
         return features_

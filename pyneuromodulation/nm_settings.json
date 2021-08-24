@@ -1,6 +1,6 @@
 {
-    "BIDS_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Beijing",
-    "out_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\try_1708\\Beijing",
+    "BIDS_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Berlin_VoluntaryMovement",
+    "out_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\2408_NoNorm\\Berlin",
     "sampling_rate_features": 10,
     "methods": {
         "raw_resampling": true,
@@ -9,11 +9,12 @@
         "kalman_filter": true,
         "re_referencing": true,
         "notch_filter": true,
-        "bandpass_filter": true,
-        "raw_hjorth": true,
-        "sharpwave_analysis": true,
+        "bandpass_filter": false,
+        "stft" : true,
+        "raw_hjorth": false,
+        "sharpwave_analysis": false,
         "return_raw": false,
-        "project_cortex": true,
+        "project_cortex": false,
         "project_subcortex": false,
         "pdc": false,
         "dtf": false
@@ -36,9 +37,13 @@
         "sigma_w": 0.7,
         "sigma_v": 1,
         "frequency_bands": [
+            "theta",
+            "alpha",
+            "low beta",
+            "high beta",
             "low gamma",
             "high gamma",
-            "all gamma"
+            "HFA"
         ]
     },
     "bandpass_filter_settings": {
@@ -101,8 +106,8 @@
     },
     "sharpwave_analysis_settings": {
         "sharpwave_features": {
-            "peak_left": false,
-            "peak_right": false,
+            "peak_left": true,
+            "peak_right": true,
             "trough": true,
             "width": true,
             "prominence": true,
@@ -110,21 +115,21 @@
             "decay_time": true,
             "rise_time": true,
             "sharpness": true,
-            "rise_steepness": false,
-            "decay_steepness": false,
+            "rise_steepness": true,
+            "decay_steepness": true,
             "slope_ratio": false
         },
         "filter_low_cutoff": 5,
         "filter_high_cutoff": 80,
         "detect_troughs": {
             "estimate": true,
-            "distance_troughs": 5,
-            "distance_peaks": 1
+            "distance_troughs": 15,
+            "distance_peaks": 15
         },
         "detect_peaks": {
             "estimate": true,
-            "distance_troughs": 1,
-            "distance_peaks": 5
+            "distance_troughs": 15,
+            "distance_peaks": 15
         },
         "estimator": {
             "mean": true,
