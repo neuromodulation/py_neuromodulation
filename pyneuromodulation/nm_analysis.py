@@ -160,7 +160,9 @@ class FeatureReadWrapper:
         print("saved Figure to : " + str(PATH_SAVE))
 
     def plot_features_per_channel(self, ch_name,
-                                  plt_corr_matr=False, feature_file=None):
+                                  plt_corr_matr=False, plt_stft_features=True,
+                                  plt_bandfiltvar=False,
+                                  plt_sharpwave=False, feature_file=None):
         """
 
         Parameters
@@ -169,47 +171,56 @@ class FeatureReadWrapper:
             channel name, as referred in features.csv
         plt_corr_matr : bool, optional
             if True plot correlation matrix for sharpwave and bandpower features, by default False
+        plt_stft_features : bool, optional
+            if True plot stft movement averaged features, by default True
+        plt_bandfiltvar : bool, optional
+            if True plot bandpass filtered movement averaged features, by default False
+        plt_sharpwave : bool, optional
+            if True plot sharpwave movement averaged features, by default False
         feature_file : string, optional
             py_neuromodulation estimated feature file, by default None
         """
 
         if feature_file is not None:
             self.feature_file = feature_file
-        # Fist case: filter for bandpass activity features only
-        dat_ch = self.nm_reader.read_channel_data(ch_name, ['bandpass', 'activity'])
 
-        # estimating epochs, with shape (epochs,samples,channels,features)
-        X_epoch, y_epoch = self.nm_reader.get_epochs_ch(epoch_len=4,
-                                                        sfreq=self.settings["sampling_rate_features"],
-                                                        threshold=0.1)
-        if plt_corr_matr is True:
-            print("plotting feature covariance matrix")
-            self.nm_reader.plot_corr_matrix(self.feature_file, feature_str_add="bandpass")
-        print("plotting feature target averaged")
-        self.nm_reader.plot_epochs_avg(self.feature_file, feature_str_add="bandpass")
-        
-        # plot STFT
-        dat_ch = self.nm_reader.read_channel_data(ch_name, ['stft'])  # regex needs to be list
-        # estimating epochs, with shape (epochs,samples,channels,features)
-        X_epoch, y_epoch = self.nm_reader.get_epochs_ch(epoch_len=4,
-                                                        sfreq=self.settings["sampling_rate_features"],
-                                                        threshold=0.1)
-        self.nm_reader.plot_epochs_avg(self.feature_file, feature_str_add='stft')
+        if plt_bandfiltvar:
+            dat_ch = self.nm_reader.read_channel_data(ch_name, ['bandpass', 'activity'])
 
-        # Second case: filter for sharpwave prominence features only
-        dat_ch = self.nm_reader.read_channel_data(ch_name, ['Sharpwave', 'prominence'])
+            # estimating epochs, with shape (epochs,samples,channels,features)
+            X_epoch, y_epoch = self.nm_reader.get_epochs_ch(epoch_len=4,
+                                                            sfreq=self.settings["sampling_rate_features"],
+                                                            threshold=0.1)
+            print("plotting feature target averaged")
+            self.nm_reader.plot_epochs_avg(self.feature_file, feature_str_add="bandpass")
 
-        # estimating epochs, with shape (epochs,samples,channels,features)
-        X_epoch, y_epoch = self.nm_reader.get_epochs_ch(epoch_len=4,
-                                                        sfreq=self.settings["sampling_rate_features"],
-                                                        threshold=0.1)
-        if plt_corr_matr is True:
-            print("plotting feature covariance matrix")
-            self.nm_reader.plot_corr_matrix(self.feature_file,
-                                            feature_str_add="sharpwaveprominence")
-        print("plotting feature target averaged")
-        self.nm_reader.plot_epochs_avg(self.feature_file,
-                                       feature_str_add="sharpwaveprominence")
+            if plt_corr_matr is True:
+                print("plotting feature covariance matrix")
+                self.nm_reader.plot_corr_matrix(self.feature_file, feature_str_add="bandpass")
+
+        if plt_stft_features:
+            # plot STFT
+            dat_ch = self.nm_reader.read_channel_data(ch_name, ['stft'])  # regex needs to be list
+            # estimating epochs, with shape (epochs,samples,channels,features)
+            X_epoch, y_epoch = self.nm_reader.get_epochs_ch(epoch_len=4,
+                                                            sfreq=self.settings["sampling_rate_features"],
+                                                            threshold=0.1)
+            self.nm_reader.plot_epochs_avg(self.feature_file, feature_str_add='stft')
+
+        if plt_sharpwave:
+            dat_ch = self.nm_reader.read_channel_data(ch_name, ['Sharpwave', 'prominence'])
+
+            # estimating epochs, with shape (epochs,samples,channels,features)
+            X_epoch, y_epoch = self.nm_reader.get_epochs_ch(epoch_len=4,
+                                                            sfreq=self.settings["sampling_rate_features"],
+                                                            threshold=0.1)
+            if plt_corr_matr is True:
+                print("plotting feature covariance matrix")
+                self.nm_reader.plot_corr_matrix(self.feature_file,
+                                                feature_str_add="sharpwaveprominence")
+            print("plotting feature target averaged")
+            self.nm_reader.plot_epochs_avg(self.feature_file,
+                                           feature_str_add="sharpwaveprominence")
 
     def plot_features(self, ch_names_ECOG=None):
         """Wrapper that call plot_features_per_channel for every given ECoG channel
