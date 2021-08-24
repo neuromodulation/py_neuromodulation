@@ -4,7 +4,7 @@ import numpy as np
 from pathlib import Path
 from scipy import stats
 import multiprocessing
-from sklearn import linear_model
+from sklearn import linear_model, discriminant_analysis
 from sklearn import metrics
 from sklearn.base import clone
 from sklearn import model_selection
@@ -22,39 +22,79 @@ from pyneuromodulation import nm_decode, nm_start_BIDS, nm_settings, nm_analysis
 
 
 def multiprocess_pipeline_run_wrapper(PATH_RUN, ML_model_name="LM",
-                                      model=linear_model.LogisticRegression(class_weight="balanced")):
+                                      model=linear_model.LogisticRegression(class_weight="balanced"),
+                                      outpath=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\2408_Norm"):
 
     # This function assumes that the nm_settings.json are correct! In other files, e.g. nm_analysis the settings
     # are also read again
     if type(PATH_RUN) is bids.layout.models.BIDSFile:
         PATH_RUN = PATH_RUN.path
 
-    settings_wrapper = nm_settings.SettingsWrapper(settings_path=(r"C:\Users\ICN_admin\Documents\py_neuromodulation\
-                                                   pyneuromodulation\nm_settings.json"))
+    # set BIDS PATH and out path
+    # better option: feed the output and bids path as well as a param through the pool
+    if 'Berlin' in PATH_RUN:
+        PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Berlin_VoluntaryMovement"
+        PATH_OUT = os.path.join(outpath, 'Berlin')
+    elif 'Beijing' in PATH_RUN:
+        PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Beijing"
+        PATH_OUT = os.path.join(outpath, 'Beijing')
+    elif 'Pittsburgh' in PATH_RUN:
+        PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Pittsburgh"
+        PATH_OUT = os.path.join(outpath, 'Pittsburgh')
 
-    nm_BIDS = nm_start_BIDS.NM_BIDS(PATH_RUN, ECOG_ONLY=True)
+    nm_BIDS = nm_start_BIDS.NM_BIDS(PATH_RUN, ECOG_ONLY=True, PATH_BIDS=PATH_BIDS, PATH_OUT=PATH_OUT)
     nm_BIDS.run_bids()
 
-    feature_path = settings_wrapper.settings["out_path"]
+    feature_path = PATH_OUT
     feature_file = os.path.basename(PATH_RUN)[:-5]  # cut off ".vhdr"
 
     feature_wrapper = nm_analysis.FeatureReadWrapper(feature_path, feature_file,
-                                                     plt_cort_projection=True)
+                                                     plt_cort_projection=False)
     feature_wrapper.read_plotting_modules()
 
     feature_wrapper.plot_features()
-    feature_wrapper.run_ML_model(model=model, output_name=ML_model_name, TRAIN_VAL_SPLIT=False)
-    feature_wrapper.run_ML_model()
+    #model = discriminant_analysis.LinearDiscriminantAnalysis()
+    feature_wrapper.run_ML_model(model=model, output_name=ML_model_name, TRAIN_VAL_SPLIT=False,
+                                 estimate_channels=True, estimate_gridpoints=False,
+                                 estimate_all_channels_combined=False)
+
     performance_dict = {}
 
     # subject_name is different across cohorts
     subject_name = feature_wrapper.feature_file[4:10]
     performance_dict = feature_wrapper.read_ind_channel_results(performance_dict,
-                                                                subject_name)
+                                                                subject_name, read_grid_points=False)
 
     feature_wrapper.plot_subject_grid_ch_performance(subject_name,
                                                      performance_dict=performance_dict,
-                                                     plt_grid=True, output_name=ML_model_name)
+                                                     plt_grid=False, output_name=ML_model_name)
+
+
+def run_cohorts():
+
+    run_files_all = []
+    for cohort in ['Pittsburgh', 'Beijing', 'Berlin']:
+        if cohort == "Berlin":
+            PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Berlin_VoluntaryMovement"
+            layout = BIDSLayout(PATH_BIDS)
+            run_files_all.append(layout.get(extension='.vhdr'))
+        elif cohort == "Beijing":
+            PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Beijing"
+            layout = BIDSLayout(PATH_BIDS)
+            subjects = layout.get_subjects()
+            run_files = []
+            for sub in subjects:
+                if sub != "FOG013":
+                    run_files.append(layout.get(subject=sub, task='ButtonPress', extension='.vhdr')[0])
+            run_files_all.append(run_files)
+        elif cohort == "Pittsburgh":
+            PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Pittsburgh"
+            layout = BIDSLayout(PATH_BIDS)
+            run_files = layout.get(extension='.vhdr')
+            run_files_all.append(run_files)
+
+    pool = multiprocessing.Pool(processes=55)  # most on Ryzen CPU 2990WX is 63
+    pool.map(multiprocess_pipeline_run_wrapper, list(np.concatenate(run_files_all)))
 
 
 def run_cohort(cohort="Pittsburgh"):
@@ -92,7 +132,8 @@ def run_cohort(cohort="Pittsburgh"):
         if feature_file not in folders:
             run_files_left.append(run_file)
 
-    # multiprocess_pipeline_run_wrapper(run_files[0])
+
+    #multiprocess_pipeline_run_wrapper(run_files[0])
     pool = multiprocessing.Pool(processes=55)  # most on Ryzen CPU 2990WX is 63
     pool.map(multiprocess_pipeline_run_wrapper, run_files)
 
@@ -120,7 +161,9 @@ def read_cohort_results(feature_path, cohort, ML_model_name="LM"):
         # cut here s.t. the subject is the whole recording
         subject_name = feature_file[:-5]
         performance_dict = feature_wrapper.read_ind_channel_results(performance_dict,
-                                                                    subject_name, ML_model_name=ML_model_name)
+                                                                    subject_name, ML_model_name=ML_model_name,
+                                                                    read_grid_points=False, read_all_combined=True,
+                                                                    read_channels=True)
     np.save(ML_model_name+'_cohort_'+cohort+'.npy', performance_dict)
 
 
