@@ -161,7 +161,7 @@ class FeatureReadWrapper:
 
     def plot_features_per_channel(self, ch_name,
                                   plt_corr_matr=False, plt_stft_features=True,
-                                  plt_bandfiltvar=False,
+                                  plt_fft_features=False, plt_bandfiltvar=False,
                                   plt_sharpwave=False, feature_file=None):
         """
 
@@ -173,6 +173,8 @@ class FeatureReadWrapper:
             if True plot correlation matrix for sharpwave and bandpower features, by default False
         plt_stft_features : bool, optional
             if True plot stft movement averaged features, by default True
+        plt_fft_features : bool, optional
+            if True plot fft movement averaged features, by default True
         plt_bandfiltvar : bool, optional
             if True plot bandpass filtered movement averaged features, by default False
         plt_sharpwave : bool, optional
@@ -208,7 +210,7 @@ class FeatureReadWrapper:
             self.nm_reader.plot_epochs_avg(self.feature_file, feature_str_add='stft')
 
         if plt_sharpwave:
-            dat_ch = self.nm_reader.read_channel_data(ch_name, ['Sharpwave', 'prominence'])
+            dat_ch = self.nm_reader.read_channel_data(ch_name, ['Sharpwave'])
 
             # estimating epochs, with shape (epochs,samples,channels,features)
             X_epoch, y_epoch = self.nm_reader.get_epochs_ch(epoch_len=4,
@@ -217,10 +219,17 @@ class FeatureReadWrapper:
             if plt_corr_matr is True:
                 print("plotting feature covariance matrix")
                 self.nm_reader.plot_corr_matrix(self.feature_file,
-                                                feature_str_add="sharpwaveprominence")
+                                                feature_str_add="sharpwave")
             print("plotting feature target averaged")
             self.nm_reader.plot_epochs_avg(self.feature_file,
-                                           feature_str_add="sharpwaveprominence")
+                                           feature_str_add="sharpwave")
+        if plt_fft_features:
+            dat_ch = self.nm_reader.read_channel_data(ch_name, ['fft'])  # regex needs to be list
+            # estimating epochs, with shape (epochs,samples,channels,features)
+            X_epoch, y_epoch = self.nm_reader.get_epochs_ch(epoch_len=4,
+                                                            sfreq=self.settings["sampling_rate_features"],
+                                                            threshold=0.1)
+            self.nm_reader.plot_epochs_avg(self.feature_file, feature_str_add='fft')
 
     def plot_features(self, ch_names_ECOG=None):
         """Wrapper that call plot_features_per_channel for every given ECoG channel
@@ -233,7 +242,10 @@ class FeatureReadWrapper:
         if ch_names_ECOG is None:
             ch_names_ECOG = self.ch_names_ECOG
         for ch_name_ECOG in ch_names_ECOG:
-            self.plot_features_per_channel(ch_name_ECOG, plt_corr_matr=False)
+            self.plot_features_per_channel(ch_name_ECOG, plt_corr_matr=False,
+                                           plt_stft_features=False,
+                                           plt_sharpwave=False,
+                                           plt_fft_features=True)
 
     def run_ML_model(self, feature_file=None, estimate_gridpoints=True, estimate_channels=True,
                      estimate_all_channels_combined=False,
