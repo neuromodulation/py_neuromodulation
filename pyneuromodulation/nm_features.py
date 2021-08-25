@@ -4,7 +4,7 @@ from numpy import arange, array, ceil, floor, where
 from mne.filter import notch_filter
 
 from pyneuromodulation import nm_bandpower, nm_filter, nm_hjorth_raw, nm_kalmanfilter, nm_sharpwaves, nm_coherence,\
-    nm_stft
+    nm_stft, nm_fft
 
 
 class Features:
@@ -153,6 +153,10 @@ class Features:
 
         if self.s["methods"]["stft"] is True:
             features_ = nm_stft.get_stft_features(features_, self.s, self.fs, data[ch_idx, :], self.KF_dict, ch,
+                                                  self.f_ranges, self.fband_names)
+
+        if self.s["methods"]["fft"] is True:
+            features_ = nm_fft.get_fft_features(features_, self.s, self.fs, data[ch_idx, :], self.KF_dict, ch,
                                                   self.f_ranges, self.fband_names)
 
         return features_
