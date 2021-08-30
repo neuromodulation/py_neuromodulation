@@ -362,12 +362,15 @@ class FeatureReadWrapper:
                         if ch.startswith(i+'-')][0]
                 coords = ML_res.settings["coord"][cortex_name]["positions"][idx_]
                 performance_dict[subject_name][ch]["coord"] = coords
-                performance_dict[subject_name][ch]["performance"] = np.mean(ML_res.ch_ind_pr[ch]["score_test"])
-
+                performance_dict[subject_name][ch]["performance_test"] = np.mean(ML_res.ch_ind_pr[ch]["score_test"])
+                performance_dict[subject_name][ch]["performance_train"] = \
+                    np.mean(ML_res.ch_ind_pr[ch]["score_train"])
         if read_all_combined:
             performance_dict[subject_name]["all_ch_combined"] = {}
-            performance_dict[subject_name]["all_ch_combined"]["performance"] = np.mean(ML_res.all_ch_pr["score_test"])
-
+            performance_dict[subject_name]["all_ch_combined"]["performance_test"] = np.mean(ML_res.all_ch_pr["score_test"])
+            performance_dict[subject_name]["all_ch_combined"]["performance_train"] = \
+                np.mean(ML_res.all_ch_pr["score_train"])
+    
         if read_grid_points:
             performance_dict[subject_name]["active_gridpoints"] = ML_res.active_gridpoints
             for grid_point in range(len(ML_res.settings["grid_cortex"])):
