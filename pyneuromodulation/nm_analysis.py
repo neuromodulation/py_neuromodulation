@@ -252,7 +252,8 @@ class FeatureReadWrapper:
                      model=linear_model.LogisticRegression(class_weight="balanced"),
                      eval_method=metrics.balanced_accuracy_score,
                      cv_method=model_selection.KFold(n_splits=3, shuffle=False),
-                     output_name="LM", TRAIN_VAL_SPLIT=False):
+                     output_name="LM", TRAIN_VAL_SPLIT=False,
+                     save_coef=False):
         """machine learning model evaluation for ECoG strip channels and/or grid points
 
         Parameters
@@ -276,6 +277,8 @@ class FeatureReadWrapper:
             saving name, by default "LM"
         TRAIN_VAL_SPLIT : bool, optional
             data is split into further validation for early stopping, by default False
+        save_coef (boolean):
+            if true, save model._coef trained coefficients
         """
         if feature_file is not None:
             self.feature_file = feature_file
@@ -292,14 +295,14 @@ class FeatureReadWrapper:
 
         if estimate_gridpoints:
             decoder.set_data_grid_points()
-            decoder.run_CV_grid_points(TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT)
+            decoder.run_CV_grid_points(TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT, save_coef=save_coef)
         if estimate_channels:
             decoder.set_data_ind_channels()
-            decoder.run_CV_ind_channels(TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT)
+            decoder.run_CV_ind_channels(TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT,  save_coef=save_coef)
         if estimate_all_channels_combined:
             if estimate_channels is not True:
                 decoder.set_data_ind_channels()
-            decoder.run_CV_all_channels_combined(TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT)
+            decoder.run_CV_all_channels_combined(TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT, save_coef=save_coef)
 
         decoder.save(output_name)
 
@@ -365,12 +368,19 @@ class FeatureReadWrapper:
                 performance_dict[subject_name][ch]["performance_test"] = np.mean(ML_res.ch_ind_pr[ch]["score_test"])
                 performance_dict[subject_name][ch]["performance_train"] = \
                     np.mean(ML_res.ch_ind_pr[ch]["score_train"])
+                if len(ML_res.ch_ind_pr[ch]["coef"]) > 0:
+                    performance_dict[subject_name][ch]["coef"] = \
+                        np.concatenate(ML_res.ch_ind_pr[ch]["coef"]).mean(axis=0)
         if read_all_combined:
             performance_dict[subject_name]["all_ch_combined"] = {}
-            performance_dict[subject_name]["all_ch_combined"]["performance_test"] = np.mean(ML_res.all_ch_pr["score_test"])
+            performance_dict[subject_name]["all_ch_combined"]["performance_test"] = \
+                np.mean(ML_res.all_ch_pr["score_test"])
             performance_dict[subject_name]["all_ch_combined"]["performance_train"] = \
                 np.mean(ML_res.all_ch_pr["score_train"])
-    
+            if len(ML_res.all_ch_pr["coef"]) > 0:
+                performance_dict[subject_name]["all_ch_combined"]["coef"] = \
+                    np.concatenate(ML_res.all_ch_pr["coef"]).mean(axis=0)
+
         if read_grid_points:
             performance_dict[subject_name]["active_gridpoints"] = ML_res.active_gridpoints
             for grid_point in range(len(ML_res.settings["grid_cortex"])):
@@ -378,9 +388,15 @@ class FeatureReadWrapper:
                 performance_dict[subject_name]["grid_"+str(grid_point)]["coord"] = \
                     ML_res.settings["grid_cortex"][grid_point]
                 if grid_point in ML_res.active_gridpoints:
-                    performance_dict[subject_name]["grid_"+str(grid_point)]["performance"] = \
+                    performance_dict[subject_name]["grid_"+str(grid_point)]["performance_test"] = \
                         np.mean(ML_res.gridpoint_ind_pr[grid_point]["score_test"])
+                    performance_dict[subject_name]["grid_"+str(grid_point)]["performance_train"] = \
+                        np.mean(ML_res.gridpoint_ind_pr[grid_point]["score_train"])
+                    if len(ML_res.gridpoint_ind_pr[grid_point]["coef"]) > 0:
+                        performance_dict[subject_name]["grid_"+str(grid_point)]["coef"] = \
+                            np.concatenate(ML_res.gridpoint_ind_pr[grid_point]["coef"]).mean(axis=0)
                 else:
                     # set non interpolated grid point to default performance
-                    performance_dict[subject_name]["grid_"+str(grid_point)]["performance"] = DEFAULT_PERFORMANCE
+                    performance_dict[subject_name]["grid_"+str(grid_point)]["performance_test"] = DEFAULT_PERFORMANCE
+                    performance_dict[subject_name]["grid_"+str(grid_point)]["performance_train"] = DEFAULT_PERFORMANCE
         return performance_dict
