@@ -368,7 +368,7 @@ class FeatureReadWrapper:
                 performance_dict[subject_name][ch]["performance_test"] = np.mean(ML_res.ch_ind_pr[ch]["score_test"])
                 performance_dict[subject_name][ch]["performance_train"] = \
                     np.mean(ML_res.ch_ind_pr[ch]["score_train"])
-                if len(ML_res.ch_ind_pr[ch]["coef"]) > 0:
+                if "coef" in ML_res.ch_ind_pr[ch]::
                     performance_dict[subject_name][ch]["coef"] = \
                         np.concatenate(ML_res.ch_ind_pr[ch]["coef"]).mean(axis=0)
         if read_all_combined:
@@ -377,7 +377,7 @@ class FeatureReadWrapper:
                 np.mean(ML_res.all_ch_pr["score_test"])
             performance_dict[subject_name]["all_ch_combined"]["performance_train"] = \
                 np.mean(ML_res.all_ch_pr["score_train"])
-            if len(ML_res.all_ch_pr["coef"]) > 0:
+            if "coef" in ML_res.ch_ind_pr[ch]:
                 performance_dict[subject_name]["all_ch_combined"]["coef"] = \
                     np.concatenate(ML_res.all_ch_pr["coef"]).mean(axis=0)
 
@@ -392,7 +392,7 @@ class FeatureReadWrapper:
                         np.mean(ML_res.gridpoint_ind_pr[grid_point]["score_test"])
                     performance_dict[subject_name]["grid_"+str(grid_point)]["performance_train"] = \
                         np.mean(ML_res.gridpoint_ind_pr[grid_point]["score_train"])
-                    if len(ML_res.gridpoint_ind_pr[grid_point]["coef"]) > 0:
+                    if "coef" in ML_res.ch_ind_pr[ch]:
                         performance_dict[subject_name]["grid_"+str(grid_point)]["coef"] = \
                             np.concatenate(ML_res.gridpoint_ind_pr[grid_point]["coef"]).mean(axis=0)
                 else:
