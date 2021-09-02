@@ -469,13 +469,16 @@ def run_leave_one_patient_out_across_cohorts(feature_path=r"C:\Users\ICN_admin\D
         print('grid point: '+str(grid_point))
         for cohort in ["Pittsburgh", "Beijing", "Berlin"]:
             print('cohort: '+str(cohort))
-            performance_leave_one_patient_out[cohort] = {}
+            if cohort not in performance_leave_one_patient_out:
+                performance_leave_one_patient_out[cohort] = {}
 
             if cohort not in grid_point_all[grid_point]:
                 continue
             if len(list(grid_point_all[grid_point][cohort].keys())) <= 1:
                 continue  # cannot do leave one out prediction with a single subject
-            performance_leave_one_patient_out[cohort][grid_point] = {}
+            
+            if grid_point not in performance_leave_one_patient_out[cohort]:
+                performance_leave_one_patient_out[cohort][grid_point] = {}
 
             for subject_test in list(grid_point_all[grid_point][cohort].keys()):
                 X_test = []
@@ -558,13 +561,15 @@ def run_leave_nminus1_patient_out_across_cohorts(feature_path=r"C:\Users\ICN_adm
         print('grid point: '+str(grid_point))
         for cohort_train in ["Pittsburgh", "Beijing", "Berlin"]:
             print('cohort: '+str(cohort_train))
-            performance_leave_one_patient_out[cohort_train] = {}
+            if cohort_train not in performance_leave_one_patient_out:
+                performance_leave_one_patient_out[cohort_train] = {}
 
             if cohort_train not in grid_point_all[grid_point]:
                 continue
             if len(list(grid_point_all[grid_point][cohort_train].keys())) <= 1:
                 continue  # cannot do leave one out prediction with a single subject
-            performance_leave_one_patient_out[cohort_train][grid_point] = {}
+            if grid_point not in performance_leave_one_patient_out[cohort_train]:
+                performance_leave_one_patient_out[cohort_train][grid_point] = {}
 
             for subject_train in list(grid_point_all[grid_point][cohort_train].keys()):
                 X_train = []
@@ -596,8 +601,8 @@ def run_leave_nminus1_patient_out_across_cohorts(feature_path=r"C:\Users\ICN_adm
                             X_test = np.concatenate(X_test, axis=0)
                             y_test = np.concatenate(y_test, axis=0)
                         else:
-                            X_train = X_train[0]
-                            y_train = y_train[0]
+                            X_test = X_test[0]
+                            y_test = y_test[0]
 
                         model = clone(model_base)
                         # run here ML estimation
@@ -620,10 +625,11 @@ def run_leave_nminus1_patient_out_across_cohorts(feature_path=r"C:\Users\ICN_adm
                         y_te_pr = model.predict(X_test)
                         if subject_train not in performance_leave_one_patient_out[cohort_train][grid_point]:
                             performance_leave_one_patient_out[cohort_train][grid_point][subject_train] = {}
-                        if subject_test not in performance_leave_one_patient_out[cohort_train][grid_point][subject_train]:
+                        if cohort_test not in performance_leave_one_patient_out[cohort_train][grid_point][subject_train]:
+                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test] = {}
+                        if subject_test not in performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test]:
                             performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test] = {}
 
-                        performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test] = {}
                         performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["y_test"] = y_test
                         performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["y_test_pr"] = y_te_pr
                         performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["y_train"] = y_train
