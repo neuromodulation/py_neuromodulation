@@ -3,8 +3,8 @@ import os
 import numpy as np
 from pathlib import Path
 from scipy import stats
-import multiprocessing
-from sklearn import linear_model, discriminant_analysis
+from multiprocessing import Pool
+from sklearn import linear_model, discriminant_analysis, ensemble, svm
 from sklearn import metrics
 from sklearn.base import clone
 from sklearn import model_selection
@@ -16,6 +16,7 @@ from matplotlib import pyplot as plt
 import matplotlib
 import bids
 from bids import BIDSLayout
+from itertools import product
 
 from pyneuromodulation import nm_reader as NM_reader
 from pyneuromodulation import nm_decode, nm_start_BIDS, nm_settings, nm_analysis
@@ -23,7 +24,7 @@ from pyneuromodulation import nm_decode, nm_start_BIDS, nm_settings, nm_analysis
 
 def multiprocess_pipeline_run_wrapper(PATH_RUN, ML_model_name="LM",
                                       model=linear_model.LogisticRegression(class_weight="balanced"),
-                                      outpath=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\2408_Norm"):
+                                      outpath=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\0209_SharpWaveLimFeaturesSTFT_with_Grid"):
 
     # This function assumes that the nm_settings.json are correct! In other files, e.g. nm_analysis the settings
     # are also read again
@@ -43,7 +44,7 @@ def multiprocess_pipeline_run_wrapper(PATH_RUN, ML_model_name="LM",
         PATH_OUT = os.path.join(outpath, 'Pittsburgh')
 
     nm_BIDS = nm_start_BIDS.NM_BIDS(PATH_RUN, ECOG_ONLY=True, PATH_BIDS=PATH_BIDS, PATH_OUT=PATH_OUT)
-    nm_BIDS.run_bids()
+    #nm_BIDS.run_bids()
 
     feature_path = PATH_OUT
     feature_file = os.path.basename(PATH_RUN)[:-5]  # cut off ".vhdr"
@@ -52,28 +53,31 @@ def multiprocess_pipeline_run_wrapper(PATH_RUN, ML_model_name="LM",
                                                      plt_cort_projection=False)
     feature_wrapper.read_plotting_modules()
 
-    feature_wrapper.plot_features()
+    #feature_wrapper.plot_features()
     #model = discriminant_analysis.LinearDiscriminantAnalysis()
+    #model = xgboost.XGBClassifier(scale_pos_weight=10)  # balanced class weights
+    #model = ensemble.RandomForestClassifier(n_estimators=6, max_depth=6, class_weight='balanced')
+    #model = svm.SVC(class_weight="balanced")
     feature_wrapper.run_ML_model(model=model, output_name=ML_model_name, TRAIN_VAL_SPLIT=False,
-                                 estimate_channels=True, estimate_gridpoints=False,
-                                 estimate_all_channels_combined=False)
+                                 estimate_channels=True, estimate_gridpoints=True,
+                                 estimate_all_channels_combined=False, save_coef=True)
 
-    performance_dict = {}
+    #performance_dict = {}
 
     # subject_name is different across cohorts
-    subject_name = feature_wrapper.feature_file[4:10]
-    performance_dict = feature_wrapper.read_ind_channel_results(performance_dict,
-                                                                subject_name, read_grid_points=False)
+    #subject_name = feature_wrapper.feature_file[4:10]
+    #performance_dict = feature_wrapper.read_ind_channel_results(performance_dict,
+    #                                                            subject_name, read_grid_points=False)
 
-    feature_wrapper.plot_subject_grid_ch_performance(subject_name,
-                                                     performance_dict=performance_dict,
-                                                     plt_grid=False, output_name=ML_model_name)
+    #feature_wrapper.plot_subject_grid_ch_performance(subject_name,
+    #                                                 performance_dict=performance_dict,
+    #                                                 plt_grid=False, output_name=ML_model_name)
 
 
-def run_cohorts():
+def run_cohorts(feature_path, ML_model_name):
 
     run_files_all = []
-    for cohort in ['Pittsburgh', 'Beijing', 'Berlin']:
+    for cohort in ['Beijing', 'Pittsburgh', 'Berlin']:
         if cohort == "Berlin":
             PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Berlin_VoluntaryMovement"
             layout = BIDSLayout(PATH_BIDS)
@@ -93,8 +97,23 @@ def run_cohorts():
             run_files = layout.get(extension='.vhdr')
             run_files_all.append(run_files)
 
-    pool = multiprocessing.Pool(processes=55)  # most on Ryzen CPU 2990WX is 63
-    pool.map(multiprocess_pipeline_run_wrapper, list(np.concatenate(run_files_all)))
+    run_files_all = list(np.concatenate(run_files_all))
+
+    #for i in range(len(run_files_all)):
+    #multiprocess_pipeline_run_wrapper(run_files_all[i], ML_model_name,
+    #                                      linear_model.LogisticRegression(class_weight="balanced"),
+    #                                      feature_path)
+
+
+    #with Pool() as pool:
+    #    pool.map(multiprocess_pipeline_run_wrapper, list(product(list(np.concatenate(run_files_all)[:50]),
+    #                                                    [ML_model_name],
+    #                                                    [linear_model.LogisticRegression(class_weight="balanced")],
+    #                                                    [feature_path])))
+    
+    #multiprocess_pipeline_run_wrapper()
+    pool = Pool(processes=55)  # most on Ryzen CPU 2990WX is 63
+    pool.map(multiprocess_pipeline_run_wrapper, run_files_all)
 
 
 def run_cohort(cohort="Pittsburgh"):
@@ -162,12 +181,12 @@ def read_cohort_results(feature_path, cohort, ML_model_name="LM"):
         subject_name = feature_file[:-5]
         performance_dict = feature_wrapper.read_ind_channel_results(performance_dict,
                                                                     subject_name, ML_model_name=ML_model_name,
-                                                                    read_grid_points=False, read_all_combined=True,
+                                                                    read_grid_points=False, read_all_combined=False,
                                                                     read_channels=True)
     np.save(ML_model_name+'_cohort_'+cohort+'.npy', performance_dict)
 
 
-def cohort_wrapper_read_cohort(feature_path="C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\try_1708",
+def cohort_wrapper_read_cohort(feature_path="C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\0209_SharpWaveLimFeaturesSTFT_with_Grid",
                                ML_model_name="LM"):
     """Read results for multiple cohorts
 
@@ -243,8 +262,8 @@ def read_all_grid_points(grid_point_all, feature_path, feature_file, cohort):
     return grid_point_all
 
 
-def cohort_wrapper_read_all_grid_points(feature_path_cohorts=(r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\
-                                                              write_out\try_0408")):
+def cohort_wrapper_read_all_grid_points(feature_path_cohorts=\
+        r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\0209_SharpWaveLimFeaturesSTFT_with_Grid"):
     cohorts = ["Pittsburgh", "Beijing", "Berlin"]
     grid_point_all = {}
     for cohort in cohorts:
@@ -259,8 +278,7 @@ def cohort_wrapper_read_all_grid_points(feature_path_cohorts=(r"C:\Users\ICN_adm
     np.save('grid_point_all.npy', grid_point_all)
 
 
-def run_cohort_leave_one_patient_out_CV(feature_path=(r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\
-                                                      try_0408\Beijing"),
+def run_cohort_leave_one_patient_out_CV_within_cohort(feature_path=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408\Beijing",
                                         model_base=linear_model.LogisticRegression(class_weight="balanced"),
                                         ML_model_name="LM"):
 
@@ -344,12 +362,11 @@ def run_cohort_leave_one_patient_out_CV(feature_path=(r"C:\Users\ICN_admin\Docum
     feature_file = nm_reader.get_feature_list()[0]
     grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
     performance_leave_one_patient_out["grid_cortex"] = grid_cortex
-    np.save(ML_model_name+'_performance_leave_one_patient_out.npy', performance_leave_one_patient_out)
+    np.save(ML_model_name+'_performance_leave_one_patient_out_within_cohort.npy', performance_leave_one_patient_out)
     return performance_leave_one_patient_out
 
 
-def run_cohort_leave_one_cohort_out_CV(feature_path=(r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\
-                                                     try_0408\Beijing"),
+def run_cohort_leave_one_cohort_out_CV(feature_path=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408\Beijing",
                                        model_base=linear_model.LogisticRegression(class_weight="balanced"),
                                        ML_model_name="LM"):
     grid_point_all = np.load('grid_point_all.npy', allow_pickle='TRUE').item()
@@ -439,3 +456,186 @@ def run_cohort_leave_one_cohort_out_CV(feature_path=(r"C:\Users\ICN_admin\Docume
     grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
     performance_leave_one_cohort_out["grid_cortex"] = grid_cortex
     np.save(ML_model_name+'_performance_leave_one_cohort_out.npy', performance_leave_one_cohort_out)
+
+
+def run_leave_one_patient_out_across_cohorts(feature_path=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408\Beijing",
+                                        model_base=linear_model.LogisticRegression(class_weight="balanced"),
+                                        ML_model_name="LM"):
+
+    grid_point_all = np.load('grid_point_all.npy', allow_pickle='TRUE').item()
+    performance_leave_one_patient_out = {}
+
+    for grid_point in list(grid_point_all.keys()):
+        print('grid point: '+str(grid_point))
+        for cohort in ["Pittsburgh", "Beijing", "Berlin"]:
+            print('cohort: '+str(cohort))
+            performance_leave_one_patient_out[cohort] = {}
+
+            if cohort not in grid_point_all[grid_point]:
+                continue
+            if len(list(grid_point_all[grid_point][cohort].keys())) <= 1:
+                continue  # cannot do leave one out prediction with a single subject
+            performance_leave_one_patient_out[cohort][grid_point] = {}
+
+            for subject_test in list(grid_point_all[grid_point][cohort].keys()):
+                X_test = []
+                y_test = []
+                for run in list(grid_point_all[grid_point][cohort][subject_test].keys()):
+                    if grid_point_all[grid_point][cohort][subject_test][run]["lat"] != "CON":
+                        continue
+                    X_test.append(grid_point_all[grid_point][cohort][subject_test][run]["data"])
+                    y_test.append(grid_point_all[grid_point][cohort][subject_test][run]["label"])
+                if len(X_test) > 1:
+                    X_test = np.concatenate(X_test, axis=0)
+                    y_test = np.concatenate(y_test, axis=0)
+                else:
+                    X_test = X_test[0]
+                    y_test = y_test[0]
+                X_train = []
+                y_train = []
+                for cohort_inner in list(grid_point_all[grid_point].keys()):  # available cohorts for that grid point
+                    for subject_train in list(grid_point_all[grid_point][cohort_inner].keys()):
+                        if (subject_test == subject_train) and (cohort_inner == cohort):
+                            continue
+                        for run in list(grid_point_all[grid_point][cohort_inner][subject_train].keys()):
+                            if grid_point_all[grid_point][cohort_inner][subject_train][run]["lat"] != "CON":
+                                continue
+                            X_train.append(grid_point_all[grid_point][cohort_inner][subject_train][run]["data"])
+                            y_train.append(grid_point_all[grid_point][cohort_inner][subject_train][run]["label"])
+                if len(X_train) > 1:
+                    X_train = np.concatenate(X_train, axis=0)
+                    y_train = np.concatenate(y_train, axis=0)
+                else:
+                    X_train = X_train[0]
+                    y_train = y_train[0]
+
+                model = clone(model_base)
+                # run here ML estimation
+                if ML_model_name == "XGB":
+                    X_train, X_val, y_train, y_val = \
+                        model_selection.train_test_split(
+                            X_train, y_train, train_size=0.7, shuffle=False)
+                    classes_weights = class_weight.compute_sample_weight(
+                        class_weight='balanced', y=y_train)
+
+                    model.fit(
+                        X_train, y_train, eval_set=[(X_val, y_val)],
+                        early_stopping_rounds=7, sample_weight=classes_weights,
+                        verbose=False)
+                else:
+                    # LM
+                    model.fit(X_train, y_train)
+
+                y_tr_pr = model.predict(X_train)
+                y_te_pr = model.predict(X_test)
+                performance_leave_one_patient_out[cohort][grid_point][subject_test] = {}
+                performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_test"] = y_test
+                performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_test_pr"] = y_te_pr
+                performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_train"] = y_train
+                performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_train_pr"] = y_tr_pr
+                performance_leave_one_patient_out[cohort][grid_point][subject_test]["performance_test"] = \
+                    metrics.balanced_accuracy_score(y_test, y_te_pr)
+                performance_leave_one_patient_out[cohort][grid_point][subject_test]["performance_train"] = \
+                    metrics.balanced_accuracy_score(y_train, y_tr_pr)
+
+    # add the cortex grid for plotting
+    nm_reader = NM_reader.NM_Reader(feature_path)
+    feature_file = nm_reader.get_feature_list()[0]
+    grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
+    performance_leave_one_patient_out["grid_cortex"] = grid_cortex
+    np.save(ML_model_name+'_performance_leave_one_patient_out_across_cohorts.npy', performance_leave_one_patient_out)
+    #return performance_leave_one_patient_out
+
+
+def run_leave_nminus1_patient_out_across_cohorts(feature_path=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408\Beijing",
+                                        model_base=linear_model.LogisticRegression(class_weight="balanced"),
+                                        ML_model_name="LM"):
+
+    grid_point_all = np.load('grid_point_all.npy', allow_pickle='TRUE').item()
+    performance_leave_one_patient_out = {}
+
+    for grid_point in list(grid_point_all.keys()):
+        print('grid point: '+str(grid_point))
+        for cohort_train in ["Pittsburgh", "Beijing", "Berlin"]:
+            print('cohort: '+str(cohort_train))
+            performance_leave_one_patient_out[cohort_train] = {}
+
+            if cohort_train not in grid_point_all[grid_point]:
+                continue
+            if len(list(grid_point_all[grid_point][cohort_train].keys())) <= 1:
+                continue  # cannot do leave one out prediction with a single subject
+            performance_leave_one_patient_out[cohort_train][grid_point] = {}
+
+            for subject_train in list(grid_point_all[grid_point][cohort_train].keys()):
+                X_train = []
+                y_train = []
+                for run in list(grid_point_all[grid_point][cohort_train][subject_train].keys()):
+                    if grid_point_all[grid_point][cohort_train][subject_train][run]["lat"] != "CON":
+                        continue
+                    X_train.append(grid_point_all[grid_point][cohort_train][subject_train][run]["data"])
+                    y_train.append(grid_point_all[grid_point][cohort_train][subject_train][run]["label"])
+                if len(X_train) > 1:
+                    X_train = np.concatenate(X_train, axis=0)
+                    y_train = np.concatenate(y_train, axis=0)
+                else:
+                    X_train = X_train[0]
+                    y_train = y_train[0]
+
+                for cohort_test in list(grid_point_all[grid_point].keys()):
+                    for subject_test in list(grid_point_all[grid_point][cohort_test].keys()):
+                        if (subject_test == subject_train) and (cohort_test == cohort_train):
+                            continue
+                        X_test = []
+                        y_test = []
+                        for run in list(grid_point_all[grid_point][cohort_test][subject_test].keys()):
+                            if grid_point_all[grid_point][cohort_test][subject_test][run]["lat"] != "CON":
+                                continue
+                            X_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["data"])
+                            y_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["label"])
+                        if len(X_test) > 1:
+                            X_test = np.concatenate(X_test, axis=0)
+                            y_test = np.concatenate(y_test, axis=0)
+                        else:
+                            X_train = X_train[0]
+                            y_train = y_train[0]
+
+                        model = clone(model_base)
+                        # run here ML estimation
+                        if ML_model_name == "XGB":
+                            X_train, X_val, y_train, y_val = \
+                                model_selection.train_test_split(
+                                    X_train, y_train, train_size=0.7, shuffle=False)
+                            classes_weights = class_weight.compute_sample_weight(
+                                class_weight='balanced', y=y_train)
+
+                            model.fit(
+                                X_train, y_train, eval_set=[(X_val, y_val)],
+                                early_stopping_rounds=7, sample_weight=classes_weights,
+                                verbose=False)
+                        else:
+                            # LM
+                            model.fit(X_train, y_train)
+
+                        y_tr_pr = model.predict(X_train)
+                        y_te_pr = model.predict(X_test)
+                        if subject_train not in performance_leave_one_patient_out[cohort_train][grid_point]:
+                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train] = {}
+                        if subject_test not in performance_leave_one_patient_out[cohort_train][grid_point][subject_train]:
+                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test] = {}
+
+                        performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test] = {}
+                        performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["y_test"] = y_test
+                        performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["y_test_pr"] = y_te_pr
+                        performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["y_train"] = y_train
+                        performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["y_train_pr"] = y_tr_pr
+                        performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["performance_test"] = \
+                            metrics.balanced_accuracy_score(y_test, y_te_pr)
+                        performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["performance_train"] = \
+                            metrics.balanced_accuracy_score(y_train, y_tr_pr)
+
+    # add the cortex grid for plotting
+    nm_reader = NM_reader.NM_Reader(feature_path)
+    feature_file = nm_reader.get_feature_list()[0]
+    grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
+    performance_leave_one_patient_out["grid_cortex"] = grid_cortex
+    np.save(ML_model_name+'_performance_leave_nminus1_patient_out_across_cohorts.npy', performance_leave_one_patient_out)

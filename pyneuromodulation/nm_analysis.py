@@ -368,7 +368,7 @@ class FeatureReadWrapper:
                 performance_dict[subject_name][ch]["performance_test"] = np.mean(ML_res.ch_ind_pr[ch]["score_test"])
                 performance_dict[subject_name][ch]["performance_train"] = \
                     np.mean(ML_res.ch_ind_pr[ch]["score_train"])
-                if "coef" in ML_res.ch_ind_pr[ch]::
+                if "coef" in ML_res.ch_ind_pr[ch]:
                     performance_dict[subject_name][ch]["coef"] = \
                         np.concatenate(ML_res.ch_ind_pr[ch]["coef"]).mean(axis=0)
         if read_all_combined:
