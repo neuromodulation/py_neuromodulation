@@ -210,7 +210,7 @@ class Decoder:
             self.gridpoint_ind_pr[grid_point]["X_train"] = self.X_train
             self.gridpoint_ind_pr[grid_point]["X_test"] = self.X_test
             if save_coef:
-                self.all_ch_pr["coef"] = self.coef
+                self.gridpoint_ind_pr["coef"] = self.coef
 
     def run_CV(self, data=None, label=None, TRAIN_VAL_SPLIT=True, save_coef=False):
         """Evaluate model performance on the specified cross validation.
@@ -268,10 +268,10 @@ class Decoder:
                     continue
                 classes_weights = class_weight.compute_sample_weight(
                     class_weight='balanced', y=y_train)
-
+                
                 model_train.fit(
                     X_train, y_train, eval_set=[(X_val, y_val)],
-                    early_stopping_rounds=7, sample_weight=classes_weights,
+                    early_stopping_rounds=7, #sample_weight=classes_weights,
                     verbose=False)
 
             else:
