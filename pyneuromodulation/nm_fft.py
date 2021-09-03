@@ -29,7 +29,7 @@ def get_fft_features(features_, s, fs, data, KF_dict, ch, f_ranges, f_band_names
     data = data[-int(s["fft_settings"]["windowlength"]*fs/1000):]
 
     Z = np.abs(fft.rfft(data))
-    f = np.arange(0, int(fs/2)+1, 1)
+    f = np.arange(0, int(s["fft_settings"]["windowlength"]/2)+1, 1)
     for idx_fband, f_range in enumerate(f_ranges):
         fband = f_band_names[idx_fband]
         idx_range = np.where((f >= f_range[0]) & (f <= f_range[1]))[0]

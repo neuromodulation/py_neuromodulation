@@ -71,7 +71,7 @@ class NM_Reader:
                     f for f in self.feature_ch_cols_all if all(
                         x in f for x in list_feature_keywords)]
 
-            if 'bandpass' in list_feature_keywords or 'stft' in list_feature_keywords:
+            if ('bandpass' in list_feature_keywords) or ('stft' in list_feature_keywords) or ('fft' in list_feature_keywords):
                 # flip list s.t. theta band is lowest in subsequent plot
                 self.feature_ch_cols = self.feature_ch_cols[::-1]
         else:

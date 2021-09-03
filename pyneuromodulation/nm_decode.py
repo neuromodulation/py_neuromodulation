@@ -123,10 +123,10 @@ class Decoder:
             self.ch_ind_data[ch] = np.nan_to_num(np.array(self.features[[col for col in self.features.columns
                                                           if col.startswith(ch)]]))
 
-    def run_CV_all_channels_combined(self, TRAIN_VAL_SPLIT=True):
+    def run_CV_all_channels_combined(self, TRAIN_VAL_SPLIT=True, save_coef=False):
 
         dat_combined = np.concatenate(list(self.ch_ind_data.values()), axis=1)
-        self.run_CV(dat_combined, self.label, TRAIN_VAL_SPLIT)
+        self.run_CV(dat_combined, self.label, TRAIN_VAL_SPLIT, save_coef)
         self.all_ch_pr = {}
         self.all_ch_pr["score_train"] = self.score_train
         self.all_ch_pr["score_test"] = self.score_test
@@ -136,18 +136,22 @@ class Decoder:
         self.all_ch_pr["y_train_pr"] = self.y_train_pr
         self.all_ch_pr["X_train"] = self.X_train
         self.all_ch_pr["X_test"] = self.X_test
+        if save_coef:
+            self.all_ch_pr["coef"] = self.coef
 
-    def run_CV_ind_channels(self, TRAIN_VAL_SPLIT=True):
+    def run_CV_ind_channels(self, TRAIN_VAL_SPLIT=True, save_coef=False):
         """run the CV for every specified channel
 
         Parameters
         ----------
         TRAIN_VAL_SPLIT (boolean):
             if true split data into additinal validation, and run class weighted CV
+        save_coef (boolean):
+            if true, save model._coef trained coefficients
         """
         self.ch_ind_pr = {}
         for ch in self.used_chs:
-            self.run_CV(self.ch_ind_data[ch], self.label, TRAIN_VAL_SPLIT)
+            self.run_CV(self.ch_ind_data[ch], self.label, TRAIN_VAL_SPLIT, save_coef)
             self.ch_ind_pr[ch] = {}
             self.ch_ind_pr[ch]["score_train"] = self.score_train
             self.ch_ind_pr[ch]["score_test"] = self.score_test
@@ -157,6 +161,8 @@ class Decoder:
             self.ch_ind_pr[ch]["y_train_pr"] = self.y_train_pr
             self.ch_ind_pr[ch]["X_train"] = self.X_train
             self.ch_ind_pr[ch]["X_test"] = self.X_test
+            if save_coef:
+                self.ch_ind_pr[ch]["coef"] = self.coef
 
     def set_data_grid_points(self):
         """Read the run_analysis
@@ -181,17 +187,19 @@ class Decoder:
             # samples, features
             self.grid_point_ind_data[grid_point] = np.nan_to_num(self.run_analysis.proj_cortex_array[:, grid_point, :])
 
-    def run_CV_grid_points(self, TRAIN_VAL_SPLIT=True):
+    def run_CV_grid_points(self, TRAIN_VAL_SPLIT=True, save_coef=False):
         """run cross validation across grid points
 
         Parameters
         ----------
         XGB (boolean):
             if true split data into additinal validation, and run class weighted CV
+        save_coef (boolean):
+            if true, save model._coef trained coefficients
         """
         self.gridpoint_ind_pr = {}
         for grid_point in self.active_gridpoints:
-            self.run_CV(self.grid_point_ind_data[grid_point], self.label, TRAIN_VAL_SPLIT)
+            self.run_CV(self.grid_point_ind_data[grid_point], self.label, TRAIN_VAL_SPLIT, save_coef)
             self.gridpoint_ind_pr[grid_point] = {}
             self.gridpoint_ind_pr[grid_point]["score_train"] = self.score_train
             self.gridpoint_ind_pr[grid_point]["score_test"] = self.score_test
@@ -201,8 +209,10 @@ class Decoder:
             self.gridpoint_ind_pr[grid_point]["y_train_pr"] = self.y_train_pr
             self.gridpoint_ind_pr[grid_point]["X_train"] = self.X_train
             self.gridpoint_ind_pr[grid_point]["X_test"] = self.X_test
+            if save_coef:
+                self.gridpoint_ind_pr["coef"] = self.coef
 
-    def run_CV(self, data=None, label=None, TRAIN_VAL_SPLIT=True):
+    def run_CV(self, data=None, label=None, TRAIN_VAL_SPLIT=True, save_coef=False):
         """Evaluate model performance on the specified cross validation.
         If no data and label is specified, use whole feature class attributes.
 
@@ -214,6 +224,8 @@ class Decoder:
             label to train and test with shape samples, features
         XGB (boolean):
             if true split data into additinal validation, and run class weighted CV
+        save_coef (boolean):
+            if true, save model._coef trained coefficients
         Returns
         -------
         cv_res : float
@@ -235,6 +247,7 @@ class Decoder:
         self.y_train_pr = []
         self.X_test = []
         self.X_train = []
+        self.coef = []
 
         for train_index, test_index in self.cv_method.split(self.data):
 
@@ -255,15 +268,18 @@ class Decoder:
                     continue
                 classes_weights = class_weight.compute_sample_weight(
                     class_weight='balanced', y=y_train)
-
+                
                 model_train.fit(
                     X_train, y_train, eval_set=[(X_val, y_val)],
-                    early_stopping_rounds=7, sample_weight=classes_weights,
+                    early_stopping_rounds=7, #sample_weight=classes_weights,
                     verbose=False)
 
             else:
                 # LM
                 model_train.fit(X_train, y_train)
+
+            if save_coef:
+                self.coef.append(model_train.coef_)
 
             y_test_pr = model_train.predict(X_test)
             y_train_pr = model_train.predict(X_train)
