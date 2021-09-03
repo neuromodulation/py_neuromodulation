@@ -125,10 +125,10 @@ class FeatureReadWrapper:
         for ch in ch_:
             if 'grid' not in ch:
                 ecog_coords_strip.append(performance_dict[subject_name][ch]["coord"])
-                ecog_strip_performance.append(performance_dict[subject_name][ch]["performance"])
+                ecog_strip_performance.append(performance_dict[subject_name][ch]["performance_test"])
             elif plt_grid is True and 'grid_' in ch:
                 cortex_grid.append(performance_dict[subject_name][ch]["coord"])
-                grid_performance.append(performance_dict[subject_name][ch]["performance"])
+                grid_performance.append(performance_dict[subject_name][ch]["performance_test"])
 
         ecog_coords_strip = np.vstack(ecog_coords_strip).T
         if ecog_coords_strip[0, 0] > 0:  # it's on the right side GIVEN IT'S CONTRALATERAL
@@ -392,7 +392,7 @@ class FeatureReadWrapper:
                         np.mean(ML_res.gridpoint_ind_pr[grid_point]["score_test"])
                     performance_dict[subject_name]["grid_"+str(grid_point)]["performance_train"] = \
                         np.mean(ML_res.gridpoint_ind_pr[grid_point]["score_train"])
-                    if "coef" in ML_res.ch_ind_pr[ch]:
+                    if "coef" in ML_res.gridpoint_ind_pr[grid_point]:
                         performance_dict[subject_name]["grid_"+str(grid_point)]["coef"] = \
                             np.concatenate(ML_res.gridpoint_ind_pr[grid_point]["coef"]).mean(axis=0)
                 else:
