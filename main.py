@@ -1,6 +1,4 @@
-from operator import mod
-from examples import example_BIDS, cohort_wrapper
-import xgboost
+from examples import example_BIDS
 
 if __name__ == "__main__":
 
