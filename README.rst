@@ -2,7 +2,7 @@ py_neuromodulation
 ==================
 
 .. image:: https://mybinder.org/badge_logo.svg
- :target: https://hub.gke2.mybinder.org/user/neuromodulation-neuromodulation-cmxvkdws/lab
+ :target: https://mybinder.org/v2/gh/neuromodulation/py_neuromodulation/HEAD
 
 The py_neuromodulation toolbox allows for real time capable processing of multimodal electrophysiological data. The primary use is movement prediction for `adaptive deep brain stimulation <https://pubmed.ncbi.nlm.nih.gov/30607748/>`_.
 
