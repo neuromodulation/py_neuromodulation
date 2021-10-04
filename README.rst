@@ -1,6 +1,9 @@
 py_neuromodulation
 ==================
 
+.. image:: https://mybinder.org/badge_logo.svg
+ :target: https://hub.gke2.mybinder.org/user/neuromodulation-neuromodulation-cmxvkdws/lab
+
 The py_neuromodulation toolbox allows for real time capable processing of multimodal electrophysiological data. The primary use is movement prediction for `adaptive deep brain stimulation <https://pubmed.ncbi.nlm.nih.gov/30607748/>`_.
 
 Find the documentation here https://neuromodulation.github.io/py_neuromodulation/ for example usage and parametrization.
@@ -33,7 +36,3 @@ This will write write a feature_arr.csv file in the 'examples/data/derivatives' 
 
 For further documentatin view `ParametrizationDefinition <ParametrizationDefinition.html#>`_ for description of necessary parametrization files.
 `FeatureEstimationDemo <FeatureEstimationDemo.html#>`_ walks through an example feature estimation and explains sharpwave estimation.
-
-Link for starting the FallSchool Binder Repository:
-.. image:: https://mybinder.org/badge_logo.svg
- :target: https://hub.gke2.mybinder.org/user/neuromodulation-neuromodulation-cmxvkdws/lab
