@@ -34,5 +34,5 @@ To run feature estimation given the example BIDS data run in root directory.
 
 This will write a feature_arr.csv file in the 'examples/data/derivatives' folder.
 
-For further documentatin view `ParametrizationDefinition <ParametrizationDefinition.html#>`_ for description of necessary parametrization files.
+For further documentation view `ParametrizationDefinition <ParametrizationDefinition.html#>`_ for description of necessary parametrization files.
 `FeatureEstimationDemo <FeatureEstimationDemo.html#>`_ walks through an example feature estimation and explains sharpwave estimation.
