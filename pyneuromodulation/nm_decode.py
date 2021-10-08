@@ -5,7 +5,9 @@ from skopt import gp_minimize, Optimizer
 from sklearn.linear_model import ElasticNet
 from sklearn.base import clone
 from sklearn.utils import class_weight
-
+from scipy.ndimage import (binary_dilation,
+                           binary_erosion,
+                           label)
 import pandas as pd
 import os
 import json
@@ -187,6 +189,72 @@ class Decoder:
             # samples, features
             self.grid_point_ind_data[grid_point] = np.nan_to_num(self.run_analysis.proj_cortex_array[:, grid_point, :])
 
+    
+    def get_movement_grouped_array(self, prediction, threshold=0.5, min_consequent_count=5):
+        """Return given a 1D numpy array, an array of same size with grouped consective blocks
+
+        Parameters
+        ----------
+        prediction : np.array
+            numpy array of either predictions or labels, that is going to be grouped
+        threshold : float, optional
+            threshold to be applied to 'prediction', by default 0.5
+        min_consequent_count : int, optional
+            minimum required consective samples higher than 'threshold', by default 5
+
+        Returns
+        -------
+        labeled_array : np.array
+            grouped vector with incrementing number for movement blocks
+        labels_count : int
+            count of individual movement blocks
+        """
+        mask = prediction > threshold
+        structure = [True] * min_consequent_count  # used for erosion and dilation
+        eroded = binary_erosion(mask, structure)
+        dilated = binary_dilation(eroded, structure)
+        labeled_array, labels_count = label(dilated)
+        return labeled_array, labels_count
+        
+    def get_movement_detection_rate(self, y_label, prediction, threshold=0.5, min_consequent_count=3):
+        """Given a label and prediction, return the movement detection rate on the basis of 
+        movements classified in blocks of 'min_consequent_count'.
+
+        Parameters
+        ----------
+        y_label : [type]
+            [description]
+        prediction : [type]
+            [description]
+        threshold : float, optional
+            threshold to be applied to 'prediction', by default 0.5
+        min_consequent_count : int, optional
+            minimum required consective samples higher than 'threshold', by default 3
+
+        Returns
+        -------
+        mov_detection_rate : float
+            movement detection rate, where at least 'min_consequent_count' samples where high in prediction
+        fpr : np.array
+            sklearn.metrics false positive rate np.array
+        tpr : np.array
+            sklearn.metrics true positive rate np.array
+        """
+        pred_grouped, _ = self.get_movement_grouped_array(prediction, threshold, min_consequent_count)
+        y_grouped, labels_count = self.get_movement_grouped_array(y_label, threshold, min_consequent_count)
+        
+        hit_rate = np.zeros(labels_count)
+        pred_group_bin = np.array(pred_grouped>0)
+        for label_number in range(1, labels_count + 1):  # labeling starts from 1    
+            hit_rate[label_number-1] = np.sum(pred_group_bin[np.where(y_grouped == label_number)[0]])
+            
+        mov_detection_rate = np.where(hit_rate>0)[0].shape[0] / labels_count
+        
+        fpr, tpr, thresholds = metrics.roc_curve(y_label, prediction, pos_label=1)   
+        
+        return mov_detection_rate, fpr, tpr
+
+
     def run_CV_grid_points(self, TRAIN_VAL_SPLIT=True, save_coef=False):
         """run cross validation across grid points
 
@@ -212,7 +280,8 @@ class Decoder:
             if save_coef:
                 self.gridpoint_ind_pr["coef"] = self.coef
 
-    def run_CV(self, data=None, label=None, TRAIN_VAL_SPLIT=True, save_coef=False):
+    def run_CV(self, data=None, label=None, TRAIN_VAL_SPLIT=True, save_coef=False,
+               get_movement_detection_rate=True, threshold=0.5, min_consequent_count=3):
         """Evaluate model performance on the specified cross validation.
         If no data and label is specified, use whole feature class attributes.
 
@@ -226,6 +295,14 @@ class Decoder:
             if true split data into additinal validation, and run class weighted CV
         save_coef (boolean):
             if true, save model._coef trained coefficients
+        get_movement_detection_rate (boolean):
+            if true, save movement detection threshold, and false positive rate
+        threshold (float):
+            if get_movement_detection_rate is True, find given minimum 'threshold' respective 
+            consecutive movement blocks
+        min_consequent_count (int):
+            if get_movement_detection_rate is True, find given 'min_consequent_count' respective 
+            consecutive movement blocks with minimum size of 'min_consequent_count'
         Returns
         -------
         cv_res : float
@@ -248,6 +325,10 @@ class Decoder:
         self.X_test = []
         self.X_train = []
         self.coef = []
+        if get_movement_detection_rate is True:
+            self.mov_detection_rates = []
+            self.tprates = []
+            self.fprates = []
 
         for train_index, test_index in self.cv_method.split(self.data):
 
@@ -292,6 +373,15 @@ class Decoder:
                     sc_tr = 0
                 if sc_te < 0:
                     sc_te = 0
+
+            if get_movement_detection_rate is True:
+                mov_detection_rate, fpr, tpr = self.get_movement_detection_rate(y_test,
+                                                                                y_test_pr,
+                                                                                threshold,
+                                                                                min_consequent_count)
+                self.mov_detection_rates.append(mov_detection_rate)
+                self.tprates.append(tpr)
+                self.fprates.append(fpr)
 
             self.score_train.append(sc_tr)
             self.score_test.append(sc_te)
