@@ -28,8 +28,7 @@ def get_bandpower_features(
     -------
     features_
     """
-    for idx, f_band in enumerate(s["bandpass_filter_settings"][
-                                     "frequency_ranges"].keys()):
+    for idx, f_band in enumerate(s["frequency_ranges"].keys()):
         seglength = seglengths[idx]
         for bp_feature in [k for k, v in s["bandpass_filter_settings"][
                 "bandpower_features"].items() if v is True]:

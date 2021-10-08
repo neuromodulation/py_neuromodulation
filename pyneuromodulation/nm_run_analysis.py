@@ -46,8 +46,7 @@ class Run:
         self.fs = features.fs
         self.sample_add = int(self.fs / self.fs_new)
         self.verbose = verbose
-        self.offset = max([value[1] for value in settings[
-            "bandpass_filter_settings"]["frequency_ranges"].values()])  # ms
+        self.offset = max([value for value in settings["bandpass_filter_settings"]["segment_lengths"].values()])  # ms
 
         if settings["methods"]["project_cortex"] is True:
             self.idx_chs_ecog = []  # feature series indexes for dbs-lfp channels
