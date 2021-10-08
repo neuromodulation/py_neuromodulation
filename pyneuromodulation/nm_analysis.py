@@ -295,20 +295,24 @@ class FeatureReadWrapper:
 
         if estimate_gridpoints:
             decoder.set_data_grid_points()
-            decoder.run_CV_grid_points(TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT, save_coef=save_coef)
+            decoder.run_CV_grid_points(TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT, save_coef=save_coef,
+                                       get_movement_detection_rate=True)
         if estimate_channels:
             decoder.set_data_ind_channels()
-            decoder.run_CV_ind_channels(TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT,  save_coef=save_coef)
+            decoder.run_CV_ind_channels(TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT,  save_coef=save_coef,
+                                        get_movement_detection_rate=True)
         if estimate_all_channels_combined:
             if estimate_channels is not True:
                 decoder.set_data_ind_channels()
-            decoder.run_CV_all_channels_combined(TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT, save_coef=save_coef)
+            decoder.run_CV_all_channels_combined(TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT, save_coef=save_coef,
+                                                 get_movement_detection_rate=True)
 
         decoder.save(output_name)
 
     def read_ind_channel_results(self, performance_dict=dict(), subject_name=None,
                                  feature_file=None, DEFAULT_PERFORMANCE=0.5, read_grid_points=True,
-                                 read_channels=True, read_all_combined=False, ML_model_name='LM'):
+                                 read_channels=True, read_all_combined=False, ML_model_name='LM',
+                                 read_mov_detection_rates=False):
         """Save performances of a given patient into performance_dict
 
         Parameters
@@ -329,7 +333,8 @@ class FeatureReadWrapper:
             true if all combined channel performances are read, by default False
         ML_model_name : str, optional
             machine learning model name, by default 'LM'
-
+        read_mov_detection_rates : boolean, by defaulte False
+            if True, read movement detection rates, as well as fpr's and tpr's
         Returns
         -------
         dictionary
@@ -371,16 +376,42 @@ class FeatureReadWrapper:
                 if "coef" in ML_res.ch_ind_pr[ch]:
                     performance_dict[subject_name][ch]["coef"] = \
                         np.concatenate(ML_res.ch_ind_pr[ch]["coef"]).mean(axis=0)
+                if read_mov_detection_rates is True:
+                    performance_dict[subject_name][ch]["mov_detection_rate_test"] = \
+                        np.mean(ML_res.ch_ind_pr[ch]["mov_detection_rates_test"])
+                    performance_dict[subject_name][ch]["mov_detection_rate_train"] = \
+                        np.mean(ML_res.ch_ind_pr[ch]["mov_detection_rates_train"])
+                    performance_dict[subject_name][ch]["fprates_test"] = \
+                        np.mean(ML_res.ch_ind_pr[ch]["fprates_test"], axis=0)
+                    performance_dict[subject_name][ch]["fprates_train"] = \
+                        np.mean(ML_res.ch_ind_pr[ch]["fprates_train"], axis=0)
+                    performance_dict[subject_name][ch]["tprates_test"] = \
+                        np.mean(ML_res.ch_ind_pr[ch]["tprates_test"], axis=0)
+                    performance_dict[subject_name][ch]["tprates_train"] = \
+                        np.mean(ML_res.ch_ind_pr[ch]["tprates_train"], axis=0)
+
         if read_all_combined:
             performance_dict[subject_name]["all_ch_combined"] = {}
             performance_dict[subject_name]["all_ch_combined"]["performance_test"] = \
                 np.mean(ML_res.all_ch_pr["score_test"])
             performance_dict[subject_name]["all_ch_combined"]["performance_train"] = \
                 np.mean(ML_res.all_ch_pr["score_train"])
-            if "coef" in ML_res.ch_ind_pr[ch]:
+            if "coef" in ML_res.all_ch_pr[ch]:
                 performance_dict[subject_name]["all_ch_combined"]["coef"] = \
                     np.concatenate(ML_res.all_ch_pr["coef"]).mean(axis=0)
-
+            if read_mov_detection_rates is True:
+                performance_dict[subject_name]["all_ch_combined"]["mov_detection_rate_test"] = \
+                    np.mean(ML_res.all_ch_pr["all_ch_combined"]["mov_detection_rates_test"])
+                performance_dict[subject_name]["all_ch_combined"]["mov_detection_rate_train"] = \
+                    np.mean(ML_res.all_ch_pr["all_ch_combined"]["mov_detection_rates_train"])
+                performance_dict[subject_name]["all_ch_combined"]["fprates_test"] = \
+                    np.mean(ML_res.all_ch_pr["all_ch_combined"]["fprates_test"], axis=0)
+                performance_dict[subject_name]["all_ch_combined"]["fprates_train"] = \
+                    np.mean(ML_res.all_ch_pr["all_ch_combined"]["fprates_train"], axis=0)
+                performance_dict[subject_name]["all_ch_combined"]["tprates_test"] = \
+                    np.mean(ML_res.all_ch_pr["all_ch_combined"]["tprates_test"], axis=0)
+                performance_dict[subject_name]["all_ch_combined"]["tprates_train"] = \
+                    np.mean(ML_res.all_ch_pr["all_ch_combined"]["tprates_train"], axis=0)
         if read_grid_points:
             performance_dict[subject_name]["active_gridpoints"] = ML_res.active_gridpoints
             for grid_point in range(len(ML_res.settings["grid_cortex"])):
@@ -395,6 +426,19 @@ class FeatureReadWrapper:
                     if "coef" in ML_res.gridpoint_ind_pr[grid_point]:
                         performance_dict[subject_name]["grid_"+str(grid_point)]["coef"] = \
                             np.concatenate(ML_res.gridpoint_ind_pr[grid_point]["coef"]).mean(axis=0)
+                    if read_mov_detection_rates is True:
+                        performance_dict[subject_name]["grid_"+str(grid_point)]["mov_detection_rate_test"] = \
+                            np.mean(ML_res.gridpoint_ind_pr[grid_point]["mov_detection_rates_test"])
+                        performance_dict[subject_name]["grid_"+str(grid_point)]["mov_detection_rate_train"] = \
+                            np.mean(ML_res.gridpoint_ind_pr[grid_point]["mov_detection_rates_train"])
+                        performance_dict[subject_name]["grid_"+str(grid_point)]["fprates_test"] = \
+                            np.mean(ML_res.gridpoint_ind_pr[grid_point]["fprates_test"], axis=0)
+                        performance_dict[subject_name]["grid_"+str(grid_point)]["fprates_train"] = \
+                            np.mean(ML_res.gridpoint_ind_pr[grid_point]["fprates_train"], axis=0)
+                        performance_dict[subject_name]["grid_"+str(grid_point)]["tprates_test"] = \
+                            np.mean(ML_res.gridpoint_ind_pr[grid_point]["tprates_test"], axis=0)
+                        performance_dict[subject_name]["grid_"+str(grid_point)]["tprates_train"] = \
+                            np.mean(ML_res.gridpoint_ind_pr[grid_point]["tprates_train"], axis=0)
                 else:
                     # set non interpolated grid point to default performance
                     performance_dict[subject_name]["grid_"+str(grid_point)]["performance_test"] = DEFAULT_PERFORMANCE

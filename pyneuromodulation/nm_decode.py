@@ -125,7 +125,7 @@ class Decoder:
             self.ch_ind_data[ch] = np.nan_to_num(np.array(self.features[[col for col in self.features.columns
                                                           if col.startswith(ch)]]))
 
-    def run_CV_all_channels_combined(self, TRAIN_VAL_SPLIT=True, save_coef=False):
+    def run_CV_all_channels_combined(self, TRAIN_VAL_SPLIT=True, save_coef=False, get_movement_detection_rate=False):
 
         dat_combined = np.concatenate(list(self.ch_ind_data.values()), axis=1)
         self.run_CV(dat_combined, self.label, TRAIN_VAL_SPLIT, save_coef)
@@ -140,8 +140,15 @@ class Decoder:
         self.all_ch_pr["X_test"] = self.X_test
         if save_coef:
             self.all_ch_pr["coef"] = self.coef
+        if get_movement_detection_rate:
+            self.all_ch_pr["mov_detection_rates_test"] = self.mov_detection_rates_test
+            self.all_ch_pr["mov_detection_rates_train"] = self.mov_detection_rates_train
+            self.all_ch_pr["fprates_test"] = self.fprates_test
+            self.all_ch_pr["fprates_train"] = self.fprates_train
+            self.all_ch_pr["tprates_test"] = self.tprates_test
+            self.all_ch_pr["tprates_train"] = self.tprates_train
 
-    def run_CV_ind_channels(self, TRAIN_VAL_SPLIT=True, save_coef=False):
+    def run_CV_ind_channels(self, TRAIN_VAL_SPLIT=True, save_coef=False, get_movement_detection_rate=False):
         """run the CV for every specified channel
 
         Parameters
@@ -150,6 +157,8 @@ class Decoder:
             if true split data into additinal validation, and run class weighted CV
         save_coef (boolean):
             if true, save model._coef trained coefficients
+        get_movement_detection_rate (boolean):
+            save detection rate and tpr / fpr as well
         """
         self.ch_ind_pr = {}
         for ch in self.used_chs:
@@ -165,6 +174,47 @@ class Decoder:
             self.ch_ind_pr[ch]["X_test"] = self.X_test
             if save_coef:
                 self.ch_ind_pr[ch]["coef"] = self.coef
+            if get_movement_detection_rate:
+                self.ch_ind_pr[ch]["mov_detection_rates_test"] = self.mov_detection_rates_test
+                self.ch_ind_pr[ch]["mov_detection_rates_train"] = self.mov_detection_rates_train
+                self.ch_ind_pr[ch]["fprates_test"] = self.fprates_test
+                self.ch_ind_pr[ch]["fprates_train"] = self.fprates_train
+                self.ch_ind_pr[ch]["tprates_test"] = self.tprates_test
+                self.ch_ind_pr[ch]["tprates_train"] = self.tprates_train
+
+    def run_CV_grid_points(self, TRAIN_VAL_SPLIT=True, save_coef=False, get_movement_detection_rate=False):
+        """run cross validation across grid points
+
+        Parameters
+        ----------
+        XGB (boolean):
+            if true split data into additinal validation, and run class weighted CV
+        save_coef (boolean):
+            if true, save model._coef trained coefficients
+        get_movement_detection_rate (boolean):
+            save detection rate and tpr / fpr as well
+        """
+        self.gridpoint_ind_pr = {}
+        for grid_point in self.active_gridpoints:
+            self.run_CV(self.grid_point_ind_data[grid_point], self.label, TRAIN_VAL_SPLIT, save_coef)
+            self.gridpoint_ind_pr[grid_point] = {}
+            self.gridpoint_ind_pr[grid_point]["score_train"] = self.score_train
+            self.gridpoint_ind_pr[grid_point]["score_test"] = self.score_test
+            self.gridpoint_ind_pr[grid_point]["y_test"] = self.y_test
+            self.gridpoint_ind_pr[grid_point]["y_train"] = self.y_train
+            self.gridpoint_ind_pr[grid_point]["y_test_pr"] = self.y_test_pr
+            self.gridpoint_ind_pr[grid_point]["y_train_pr"] = self.y_train_pr
+            self.gridpoint_ind_pr[grid_point]["X_train"] = self.X_train
+            self.gridpoint_ind_pr[grid_point]["X_test"] = self.X_test
+            if save_coef:
+                self.gridpoint_ind_pr["coef"] = self.coef
+            if get_movement_detection_rate:
+                self.gridpoint_ind_pr[grid_point]["mov_detection_rates_test"] = self.mov_detection_rates_test
+                self.gridpoint_ind_pr[grid_point]["mov_detection_rates_train"] = self.mov_detection_rates_train
+                self.gridpoint_ind_pr[grid_point]["fprates_test"] = self.fprates_test
+                self.gridpoint_ind_pr[grid_point]["fprates_train"] = self.fprates_train
+                self.gridpoint_ind_pr[grid_point]["tprates_test"] = self.tprates_test
+                self.gridpoint_ind_pr[grid_point]["tprates_train"] = self.tprates_train
 
     def set_data_grid_points(self):
         """Read the run_analysis
@@ -254,32 +304,6 @@ class Decoder:
         
         return mov_detection_rate, fpr, tpr
 
-
-    def run_CV_grid_points(self, TRAIN_VAL_SPLIT=True, save_coef=False):
-        """run cross validation across grid points
-
-        Parameters
-        ----------
-        XGB (boolean):
-            if true split data into additinal validation, and run class weighted CV
-        save_coef (boolean):
-            if true, save model._coef trained coefficients
-        """
-        self.gridpoint_ind_pr = {}
-        for grid_point in self.active_gridpoints:
-            self.run_CV(self.grid_point_ind_data[grid_point], self.label, TRAIN_VAL_SPLIT, save_coef)
-            self.gridpoint_ind_pr[grid_point] = {}
-            self.gridpoint_ind_pr[grid_point]["score_train"] = self.score_train
-            self.gridpoint_ind_pr[grid_point]["score_test"] = self.score_test
-            self.gridpoint_ind_pr[grid_point]["y_test"] = self.y_test
-            self.gridpoint_ind_pr[grid_point]["y_train"] = self.y_train
-            self.gridpoint_ind_pr[grid_point]["y_test_pr"] = self.y_test_pr
-            self.gridpoint_ind_pr[grid_point]["y_train_pr"] = self.y_train_pr
-            self.gridpoint_ind_pr[grid_point]["X_train"] = self.X_train
-            self.gridpoint_ind_pr[grid_point]["X_test"] = self.X_test
-            if save_coef:
-                self.gridpoint_ind_pr["coef"] = self.coef
-
     def run_CV(self, data=None, label=None, TRAIN_VAL_SPLIT=True, save_coef=False,
                get_movement_detection_rate=True, threshold=0.5, min_consequent_count=3):
         """Evaluate model performance on the specified cross validation.
@@ -326,9 +350,12 @@ class Decoder:
         self.X_train = []
         self.coef = []
         if get_movement_detection_rate is True:
-            self.mov_detection_rates = []
-            self.tprates = []
-            self.fprates = []
+            self.mov_detection_rates_test = []
+            self.tprates_test = []
+            self.fprates_test = []
+            self.mov_detection_rates_train = []
+            self.tprates_train = []
+            self.fprates_train = []
 
         for train_index, test_index in self.cv_method.split(self.data):
 
@@ -379,9 +406,17 @@ class Decoder:
                                                                                 y_test_pr,
                                                                                 threshold,
                                                                                 min_consequent_count)
-                self.mov_detection_rates.append(mov_detection_rate)
-                self.tprates.append(tpr)
-                self.fprates.append(fpr)
+                self.mov_detection_rates_test.append(mov_detection_rate)
+                self.tprates_test.append(tpr)
+                self.fprates_test.append(fpr)
+
+                mov_detection_rate, fpr, tpr = self.get_movement_detection_rate(y_train,
+                                                                                y_train_pr,
+                                                                                threshold,
+                                                                                min_consequent_count)
+                self.mov_detection_rates_train.append(mov_detection_rate)
+                self.tprates_train.append(tpr)
+                self.fprates_train.append(fpr)
 
             self.score_train.append(sc_tr)
             self.score_test.append(sc_te)
