@@ -34,8 +34,11 @@ def get_bandpower_features(
         for bp_feature in [k for k, v in s["bandpass_filter_settings"][
                 "bandpower_features"].items() if v is True]:
             if bp_feature == "activity":
-                feature_calc = np_log(
-                    var(dat_filtered[ch_idx, idx, -seglength:]))
+                if s["bandpass_filter_settings"]["log_transform"]:
+                    feature_calc = np_log(
+                        var(dat_filtered[ch_idx, idx, -seglength:]))
+                else:
+                    feature_calc = var(dat_filtered[ch_idx, idx, -seglength:])
             elif bp_feature == "mobility":
                 deriv_variance = var(diff(dat_filtered[ch_idx, idx,
                                           -seglength:]))

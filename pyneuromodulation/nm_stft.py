@@ -26,7 +26,8 @@ def get_stft_features(features_, s, fs, data, KF_dict, ch, f_ranges, f_band_name
         list of frequency band names
     """
     # optimized for fs=1000
-    f, t, Zxx = signal.stft(data, fs=fs, window='hamming', nperseg=500,
+    f, t, Zxx = signal.stft(data, fs=fs, window='hamming',
+                            nperseg=int(s["stft_settings"]["windowlength"]),
                             boundary='even')
     Z = np.abs(Zxx)
     for idx_fband, f_range in enumerate(f_ranges):
@@ -34,6 +35,8 @@ def get_stft_features(features_, s, fs, data, KF_dict, ch, f_ranges, f_band_name
         idx_range = np.where((f >= f_range[0]) & (f <= f_range[1]))[0]
         feature_calc = np.mean(Z[idx_range, :])  # 1. dim: f, 2. dim: t
 
+        if s["stft_settings"]["log_transform"]:
+            feature_calc = np.log(feature_calc)
         if s["methods"]["kalman_filter"] is True:
             if fband in s["kalman_filter_settings"]["frequency_bands"]:
                 KF_name = '_'.join([ch, 'activity', fband])  # is for stft by default activity

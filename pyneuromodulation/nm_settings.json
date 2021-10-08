@@ -47,8 +47,13 @@
             "HFA"
         ]
     },
+    "stft_settings":{
+        "windowlength" : 500,
+        "log_transform" : true
+    },
     "fft_settings":{
-        "windowlength" : 1000
+        "windowlength" : 1000,
+        "log_tranform" : true
     },
     "bandpass_filter_settings": {
         "frequency_ranges": {
