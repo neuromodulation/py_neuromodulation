@@ -22,7 +22,8 @@ class Decoder:
                  model=linear_model.LinearRegression(),
                  eval_method=metrics.r2_score,
                  cv_method=model_selection.KFold(n_splits=3, shuffle=False),
-                 threshold_score=True) -> None:
+                 threshold_score=True,
+                 mov_detection_threshold=0.5) -> None:
         """Imitialize here a feature file for processing
         Read settings.json nm_channels.csv and features.csv
         Read target label
@@ -39,7 +40,10 @@ class Decoder:
             evaluation scoring method
         cv_method : sklearm model_selection method
         threshold_score : boolean
-            if True set lower threshold at zero (useful for r2)
+            if True set lower threshold at zero (useful for r2),
+        mov_detection_threshold : float
+            if get_movement_detection_rate is True, find given minimum 'threshold' respective 
+            consecutive movement blocks, by default 0.5
         """
 
         # for the bayesian opt. function the objective fct only uses a single parameter
@@ -116,6 +120,7 @@ class Decoder:
         self.eval_method = eval_method
         self.cv_method = cv_method
         self.threshold_score = threshold_score
+        self.mov_detection_threshold = mov_detection_threshold
 
     def set_data_ind_channels(self):
         """specified channel individual data
@@ -305,7 +310,7 @@ class Decoder:
         return mov_detection_rate, fpr, tpr
 
     def run_CV(self, data=None, label=None, TRAIN_VAL_SPLIT=True, save_coef=False,
-               get_movement_detection_rate=True, threshold=0.5, min_consequent_count=3):
+               get_movement_detection_rate=True, min_consequent_count=3):
         """Evaluate model performance on the specified cross validation.
         If no data and label is specified, use whole feature class attributes.
 
@@ -321,9 +326,6 @@ class Decoder:
             if true, save model._coef trained coefficients
         get_movement_detection_rate (boolean):
             if true, save movement detection threshold, and false positive rate
-        threshold (float):
-            if get_movement_detection_rate is True, find given minimum 'threshold' respective 
-            consecutive movement blocks
         min_consequent_count (int):
             if get_movement_detection_rate is True, find given 'min_consequent_count' respective 
             consecutive movement blocks with minimum size of 'min_consequent_count'
@@ -404,7 +406,7 @@ class Decoder:
             if get_movement_detection_rate is True:
                 mov_detection_rate, fpr, tpr = self.get_movement_detection_rate(y_test,
                                                                                 y_test_pr,
-                                                                                threshold,
+                                                                                self.mov_detection_threshold,
                                                                                 min_consequent_count)
                 self.mov_detection_rates_test.append(mov_detection_rate)
                 self.tprates_test.append(tpr)
@@ -412,7 +414,7 @@ class Decoder:
 
                 mov_detection_rate, fpr, tpr = self.get_movement_detection_rate(y_train,
                                                                                 y_train_pr,
-                                                                                threshold,
+                                                                                self.mov_detection_threshold,
                                                                                 min_consequent_count)
                 self.mov_detection_rates_train.append(mov_detection_rate)
                 self.tprates_train.append(tpr)
