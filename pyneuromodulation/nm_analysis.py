@@ -390,7 +390,7 @@ class FeatureReadWrapper:
 
         if read_all_combined:
             performance_dict[subject_name]["all_ch_combined"] = {}
-            write_CV_res_in_performance_dict(ML_res.all_ch_pr["all_ch_combined"],
+            write_CV_res_in_performance_dict(ML_res.all_ch_pr,
                                              performance_dict[subject_name]["all_ch_combined"],\
                                              read_mov_detection_rates=True)
 

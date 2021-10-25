@@ -162,8 +162,8 @@ class Decoder:
             usually an int specifying the grid_point or string, specifying the used channel, by default None
         """
         if contact_point is not None:
+            getattr(self, attr_name)[contact_point] = {}
             obj_set = getattr(self, attr_name)[contact_point]
-            obj_set = {}
         else:
             obj_set = getattr(self, attr_name)
 
@@ -178,8 +178,8 @@ class Decoder:
         if self.save_coef:
             obj_set["coef"] = self.coef
         if self.get_movement_detection_rate:
-            obj_set["mov_detection_rates_test"] = self.mov_detection_rates_test
-            obj_set["mov_detection_rates_train"] = self.mov_detection_rates_train
+            obj_set["mov_detection_rate_test"] = self.mov_detection_rates_test
+            obj_set["mov_detection_rate_train"] = self.mov_detection_rates_train
             obj_set["fprate_test"] = self.fprate_test
             obj_set["fprate_train"] = self.fprate_train
             obj_set["tprate_test"] = self.tprate_test
@@ -199,7 +199,7 @@ class Decoder:
 
         if feature_contacts == "grid_points":
             for grid_point in self.active_gridpoints:
-                self.run_CV(self.grid_point_ind_data[grid_point])
+                self.run_CV(self.grid_point_ind_data[grid_point], self.label)
                 self.set_CV_results('gridpoint_ind_pr', contact_point=grid_point)
         if feature_contacts == "ind_channels":
             for ch in self.used_chs:
@@ -259,7 +259,7 @@ class Decoder:
         labeled_array, labels_count = label(dilated)
         return labeled_array, labels_count
         
-    def get_movement_detection_rate(self, y_label, prediction, threshold=0.5, min_consequent_count=3):
+    def calc_movement_detection_rate(self, y_label, prediction, threshold=0.5, min_consequent_count=3):
         """Given a label and prediction, return the movement detection rate on the basis of 
         movements classified in blocks of 'min_consequent_count'.
 
@@ -305,7 +305,7 @@ class Decoder:
 
         return mov_detection_rate, fpr, tpr
 
-    def run_CV(self, data=None, label=None):
+    def run_CV(self, data=None, label=None, XGB=False):
         """Evaluate model performance on the specified cross validation.
         If no data and label is specified, use whole feature class attributes.
 
@@ -317,13 +317,6 @@ class Decoder:
             label to train and test with shape samples, features
         XGB (boolean):
             if true split data into additinal validation, and run class weighted CV
-        save_coef (boolean):
-            if true, save model._coef trained coefficients
-        get_movement_detection_rate (boolean):
-            if true, save movement detection threshold, and false positive rate
-        min_consequent_count (int):
-            if get_movement_detection_rate is True, find given 'min_consequent_count' respective 
-            consecutive movement blocks with minimum size of 'min_consequent_count'
         Returns
         -------
         cv_res : float
@@ -399,7 +392,7 @@ class Decoder:
                     sc_te = 0
 
             if self.get_movement_detection_rate is True:
-                mov_detection_rate, fpr, tpr = self.get_movement_detection_rate(y_test,
+                mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(y_test,
                                                                                 y_test_pr,
                                                                                 self.mov_detection_threshold,
                                                                                 self.min_consequent_count)
@@ -407,7 +400,7 @@ class Decoder:
                 self.tprate_test.append(tpr)
                 self.fprate_test.append(fpr)
 
-                mov_detection_rate, fpr, tpr = self.get_movement_detection_rate(y_train,
+                mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(y_train,
                                                                                 y_train_pr,
                                                                                 self.mov_detection_threshold,
                                                                                 self.min_consequent_count)
