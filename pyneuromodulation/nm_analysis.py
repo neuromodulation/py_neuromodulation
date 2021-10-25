@@ -381,14 +381,14 @@ class FeatureReadWrapper:
                         np.mean(ML_res.ch_ind_pr[ch]["mov_detection_rates_test"])
                     performance_dict[subject_name][ch]["mov_detection_rate_train"] = \
                         np.mean(ML_res.ch_ind_pr[ch]["mov_detection_rates_train"])
-                    performance_dict[subject_name][ch]["fprates_test"] = \
-                        np.mean(ML_res.ch_ind_pr[ch]["fprates_test"], axis=0)
-                    performance_dict[subject_name][ch]["fprates_train"] = \
-                        np.mean(ML_res.ch_ind_pr[ch]["fprates_train"], axis=0)
-                    performance_dict[subject_name][ch]["tprates_test"] = \
-                        np.mean(ML_res.ch_ind_pr[ch]["tprates_test"], axis=0)
-                    performance_dict[subject_name][ch]["tprates_train"] = \
-                        np.mean(ML_res.ch_ind_pr[ch]["tprates_train"], axis=0)
+                    performance_dict[subject_name][ch]["fprate_test"] = \
+                        np.mean(ML_res.ch_ind_pr[ch]["fprate_test"], axis=0)
+                    performance_dict[subject_name][ch]["fprate_train"] = \
+                        np.mean(ML_res.ch_ind_pr[ch]["fprate_train"], axis=0)
+                    performance_dict[subject_name][ch]["tprate_test"] = \
+                        np.mean(ML_res.ch_ind_pr[ch]["tprate_test"], axis=0)
+                    performance_dict[subject_name][ch]["tprate_train"] = \
+                        np.mean(ML_res.ch_ind_pr[ch]["tprate_train"], axis=0)
 
         if read_all_combined:
             performance_dict[subject_name]["all_ch_combined"] = {}
@@ -404,14 +404,14 @@ class FeatureReadWrapper:
                     np.mean(ML_res.all_ch_pr["all_ch_combined"]["mov_detection_rates_test"])
                 performance_dict[subject_name]["all_ch_combined"]["mov_detection_rate_train"] = \
                     np.mean(ML_res.all_ch_pr["all_ch_combined"]["mov_detection_rates_train"])
-                performance_dict[subject_name]["all_ch_combined"]["fprates_test"] = \
-                    np.mean(ML_res.all_ch_pr["all_ch_combined"]["fprates_test"], axis=0)
-                performance_dict[subject_name]["all_ch_combined"]["fprates_train"] = \
-                    np.mean(ML_res.all_ch_pr["all_ch_combined"]["fprates_train"], axis=0)
-                performance_dict[subject_name]["all_ch_combined"]["tprates_test"] = \
-                    np.mean(ML_res.all_ch_pr["all_ch_combined"]["tprates_test"], axis=0)
-                performance_dict[subject_name]["all_ch_combined"]["tprates_train"] = \
-                    np.mean(ML_res.all_ch_pr["all_ch_combined"]["tprates_train"], axis=0)
+                performance_dict[subject_name]["all_ch_combined"]["fprate_test"] = \
+                    np.mean(ML_res.all_ch_pr["all_ch_combined"]["fprate_test"], axis=0)
+                performance_dict[subject_name]["all_ch_combined"]["fprate_train"] = \
+                    np.mean(ML_res.all_ch_pr["all_ch_combined"]["fprate_train"], axis=0)
+                performance_dict[subject_name]["all_ch_combined"]["tprate_test"] = \
+                    np.mean(ML_res.all_ch_pr["all_ch_combined"]["tprate_test"], axis=0)
+                performance_dict[subject_name]["all_ch_combined"]["tprate_train"] = \
+                    np.mean(ML_res.all_ch_pr["all_ch_combined"]["tprate_train"], axis=0)
         if read_grid_points:
             performance_dict[subject_name]["active_gridpoints"] = ML_res.active_gridpoints
             for grid_point in range(len(ML_res.settings["grid_cortex"])):
@@ -431,14 +431,14 @@ class FeatureReadWrapper:
                             np.mean(ML_res.gridpoint_ind_pr[grid_point]["mov_detection_rates_test"])
                         performance_dict[subject_name]["grid_"+str(grid_point)]["mov_detection_rate_train"] = \
                             np.mean(ML_res.gridpoint_ind_pr[grid_point]["mov_detection_rates_train"])
-                        performance_dict[subject_name]["grid_"+str(grid_point)]["fprates_test"] = \
-                            np.mean(ML_res.gridpoint_ind_pr[grid_point]["fprates_test"], axis=0)
-                        performance_dict[subject_name]["grid_"+str(grid_point)]["fprates_train"] = \
-                            np.mean(ML_res.gridpoint_ind_pr[grid_point]["fprates_train"], axis=0)
-                        performance_dict[subject_name]["grid_"+str(grid_point)]["tprates_test"] = \
-                            np.mean(ML_res.gridpoint_ind_pr[grid_point]["tprates_test"], axis=0)
-                        performance_dict[subject_name]["grid_"+str(grid_point)]["tprates_train"] = \
-                            np.mean(ML_res.gridpoint_ind_pr[grid_point]["tprates_train"], axis=0)
+                        performance_dict[subject_name]["grid_"+str(grid_point)]["fprate_test"] = \
+                            np.mean(ML_res.gridpoint_ind_pr[grid_point]["fprate_test"], axis=0)
+                        performance_dict[subject_name]["grid_"+str(grid_point)]["fprate_train"] = \
+                            np.mean(ML_res.gridpoint_ind_pr[grid_point]["fprate_train"], axis=0)
+                        performance_dict[subject_name]["grid_"+str(grid_point)]["tprate_test"] = \
+                            np.mean(ML_res.gridpoint_ind_pr[grid_point]["tprate_test"], axis=0)
+                        performance_dict[subject_name]["grid_"+str(grid_point)]["tprate_train"] = \
+                            np.mean(ML_res.gridpoint_ind_pr[grid_point]["tprate_train"], axis=0)
                 else:
                     # set non interpolated grid point to default performance
                     performance_dict[subject_name]["grid_"+str(grid_point)]["performance_test"] = DEFAULT_PERFORMANCE

@@ -26,7 +26,7 @@ def run_example_BIDS():
     # plot features for ECoG channels
     feature_reader = nm_analysis.FeatureReadWrapper(feature_path=nm_BIDS.settings_wrapper.settings['out_path'],
                                                     plt_cort_projection=True)
-    #feature_reader.plot_features()
+    feature_reader.plot_features()
     model = linear_model.LogisticRegression(class_weight='balanced')
     feature_reader.run_ML_model(model=model)
 
