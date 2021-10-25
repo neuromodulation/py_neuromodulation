@@ -129,6 +129,7 @@
             "distance_troughs": 5,
             "distance_peaks": 10
         },
+        "max_of_trough_and_peak" : true,
         "estimator": {
             "mean": false,
             "median": false,
