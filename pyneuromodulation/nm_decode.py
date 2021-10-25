@@ -23,8 +23,12 @@ class Decoder:
                  eval_method=metrics.r2_score,
                  cv_method=model_selection.KFold(n_splits=3, shuffle=False),
                  threshold_score=True,
-                 mov_detection_threshold=0.5) -> None:
-        """Imitialize here a feature file for processing
+                 mov_detection_threshold=0.5,
+                 TRAIN_VAL_SPLIT=True,
+                 save_coef=False,
+                 get_movement_detection_rate=False,
+                 min_consequent_count=3) -> None:
+        """Initialize here a feature file for processing
         Read settings.json nm_channels.csv and features.csv
         Read target label
 
@@ -44,6 +48,15 @@ class Decoder:
         mov_detection_threshold : float
             if get_movement_detection_rate is True, find given minimum 'threshold' respective 
             consecutive movement blocks, by default 0.5
+        TRAIN_VAL_SPLIT (boolean):
+            if true split data into additinal validation, and run class weighted CV
+        save_coef (boolean):
+            if true, save model._coef trained coefficients
+        get_movement_detection_rate (boolean):
+            save detection rate and tpr / fpr as well
+        min_consequent_count (int):
+            if get_movement_detection_rate is True, find given 'min_consequent_count' respective 
+            consecutive movement blocks with minimum size of 'min_consequent_count'
         """
 
         # for the bayesian opt. function the objective fct only uses a single parameter
@@ -124,6 +137,10 @@ class Decoder:
         self.all_ch_pr = {}
         self.ch_ind_pr = {}
         self.gridpoint_ind_pr = {}
+        self.TRAIN_VAL_SPLIT = TRAIN_VAL_SPLIT
+        self.save_coef = save_coef
+        self.get_movement_detection_rate = get_movement_detection_rate
+        self.min_consequent_count = min_consequent_count
 
     def set_data_ind_channels(self):
         """specified channel individual data
@@ -133,95 +150,65 @@ class Decoder:
             self.ch_ind_data[ch] = np.nan_to_num(np.array(self.features[[col for col in self.features.columns
                                                           if col.startswith(ch)]]))
 
-    def run_CV_all_channels_combined(self, TRAIN_VAL_SPLIT=True, save_coef=False, get_movement_detection_rate=False):
-
-        dat_combined = np.concatenate(list(self.ch_ind_data.values()), axis=1)
-        self.run_CV(dat_combined, self.label, TRAIN_VAL_SPLIT, save_coef)
-        self.all_ch_pr["score_train"] = self.score_train
-        self.all_ch_pr["score_test"] = self.score_test
-        self.all_ch_pr["y_test"] = self.y_test
-        self.all_ch_pr["y_train"] = self.y_train
-        self.all_ch_pr["y_test_pr"] = self.y_test_pr
-        self.all_ch_pr["y_train_pr"] = self.y_train_pr
-        self.all_ch_pr["X_train"] = self.X_train
-        self.all_ch_pr["X_test"] = self.X_test
-        if save_coef:
-            self.all_ch_pr["coef"] = self.coef
-        if get_movement_detection_rate:
-            self.all_ch_pr["mov_detection_rates_test"] = self.mov_detection_rates_test
-            self.all_ch_pr["mov_detection_rates_train"] = self.mov_detection_rates_train
-            self.all_ch_pr["fprate_test"] = self.fprate_test
-            self.all_ch_pr["fprate_train"] = self.fprate_train
-            self.all_ch_pr["tprate_test"] = self.tprate_test
-            self.all_ch_pr["tprate_train"] = self.tprate_train
-
-    def run_CV_ind_channels(self, TRAIN_VAL_SPLIT=True, save_coef=False, get_movement_detection_rate=False):
-        """run the CV for every specified channel
+    def set_CV_results(self, attr_name, contact_point=None):
+        """set CV results in respectie nm_decode attributes
+        The reference is first stored in obj_set, and the used lateron
 
         Parameters
         ----------
-        TRAIN_VAL_SPLIT (boolean):
-            if true split data into additinal validation, and run class weighted CV
-        save_coef (boolean):
-            if true, save model._coef trained coefficients
-        get_movement_detection_rate (boolean):
-            save detection rate and tpr / fpr as well
+        attr_name : string
+            is either all_ch_pr, ch_ind_pr, gridpoint_ind_pr
+        contact_point : object, optional
+            usually an int specifying the grid_point or string, specifying the used channel, by default None
         """
+        if contact_point is not None:
+            obj_set = getattr(self, attr_name)[contact_point]
+            obj_set = {}
+        else:
+            obj_set = getattr(self, attr_name)
 
-        for ch in self.used_chs:
-            self.run_CV(self.ch_ind_data[ch], self.label, TRAIN_VAL_SPLIT, save_coef)
-            self.ch_ind_pr[ch] = {}
-            self.ch_ind_pr[ch]["score_train"] = self.score_train
-            self.ch_ind_pr[ch]["score_test"] = self.score_test
-            self.ch_ind_pr[ch]["y_test"] = self.y_test
-            self.ch_ind_pr[ch]["y_train"] = self.y_train
-            self.ch_ind_pr[ch]["y_test_pr"] = self.y_test_pr
-            self.ch_ind_pr[ch]["y_train_pr"] = self.y_train_pr
-            self.ch_ind_pr[ch]["X_train"] = self.X_train
-            self.ch_ind_pr[ch]["X_test"] = self.X_test
-            if save_coef:
-                self.ch_ind_pr[ch]["coef"] = self.coef
-            if get_movement_detection_rate:
-                self.ch_ind_pr[ch]["mov_detection_rates_test"] = self.mov_detection_rates_test
-                self.ch_ind_pr[ch]["mov_detection_rates_train"] = self.mov_detection_rates_train
-                self.ch_ind_pr[ch]["fprate_test"] = self.fprate_test
-                self.ch_ind_pr[ch]["fprate_train"] = self.fprate_train
-                self.ch_ind_pr[ch]["tprate_test"] = self.tprate_test
-                self.ch_ind_pr[ch]["tprate_train"] = self.tprate_train
+        obj_set["score_train"] = self.score_train
+        obj_set["score_test"] = self.score_test
+        obj_set["y_test"] = self.y_test
+        obj_set["y_train"] = self.y_train
+        obj_set["y_test_pr"] = self.y_test_pr
+        obj_set["y_train_pr"] = self.y_train_pr
+        obj_set["X_train"] = self.X_train
+        obj_set["X_test"] = self.X_test
+        if self.save_coef:
+            obj_set["coef"] = self.coef
+        if self.get_movement_detection_rate:
+            obj_set["mov_detection_rates_test"] = self.mov_detection_rates_test
+            obj_set["mov_detection_rates_train"] = self.mov_detection_rates_train
+            obj_set["fprate_test"] = self.fprate_test
+            obj_set["fprate_train"] = self.fprate_train
+            obj_set["tprate_test"] = self.tprate_test
+            obj_set["tprate_train"] = self.tprate_train
 
-    def run_CV_grid_points(self, TRAIN_VAL_SPLIT=True, save_coef=False, get_movement_detection_rate=False):
-        """run cross validation across grid points
+    def run_CV_caller(self, feature_contacts: str="ind_channels"):
+        """[summary]
 
         Parameters
         ----------
-        XGB (boolean):
-            if true split data into additinal validation, and run class weighted CV
-        save_coef (boolean):
-            if true, save model._coef trained coefficients
-        get_movement_detection_rate (boolean):
-            save detection rate and tpr / fpr as well
+        feature_contacts : str, optional
+            [description], by default "ind_channels"
         """
+        valid_feature_contacts = ["ind_channels", "all_channels_combined", "grid_points"]
+        if feature_contacts not in valid_feature_contacts:
+            raise ValueError(f"{feature_contacts} not in {valid_feature_contacts}")
 
-        for grid_point in self.active_gridpoints:
-            self.run_CV(self.grid_point_ind_data[grid_point], self.label, TRAIN_VAL_SPLIT, save_coef)
-            self.gridpoint_ind_pr[grid_point] = {}
-            self.gridpoint_ind_pr[grid_point]["score_train"] = self.score_train
-            self.gridpoint_ind_pr[grid_point]["score_test"] = self.score_test
-            self.gridpoint_ind_pr[grid_point]["y_test"] = self.y_test
-            self.gridpoint_ind_pr[grid_point]["y_train"] = self.y_train
-            self.gridpoint_ind_pr[grid_point]["y_test_pr"] = self.y_test_pr
-            self.gridpoint_ind_pr[grid_point]["y_train_pr"] = self.y_train_pr
-            self.gridpoint_ind_pr[grid_point]["X_train"] = self.X_train
-            self.gridpoint_ind_pr[grid_point]["X_test"] = self.X_test
-            if save_coef:
-                self.gridpoint_ind_pr["coef"] = self.coef
-            if get_movement_detection_rate:
-                self.gridpoint_ind_pr[grid_point]["mov_detection_rates_test"] = self.mov_detection_rates_test
-                self.gridpoint_ind_pr[grid_point]["mov_detection_rates_train"] = self.mov_detection_rates_train
-                self.gridpoint_ind_pr[grid_point]["fprate_train"] = self.fprate_train
-                self.gridpoint_ind_pr[grid_point]["fprate_test"] = self.fprate_test
-                self.gridpoint_ind_pr[grid_point]["tprate_test"] = self.tprate_test
-                self.gridpoint_ind_pr[grid_point]["tprate_train"] = self.tprate_train
+        if feature_contacts == "grid_points":
+            for grid_point in self.active_gridpoints:
+                self.run_CV(self.grid_point_ind_data[grid_point])
+                self.set_CV_results('gridpoint_ind_pr', contact_point=grid_point)
+        if feature_contacts == "ind_channels":
+            for ch in self.used_chs:
+                self.run_CV(self.ch_ind_data[ch], self.label)
+                self.set_CV_results('ch_ind_pr', contact_point=ch)
+        if feature_contacts == "all_channels_combined":
+            dat_combined = np.concatenate(list(self.ch_ind_data.values()), axis=1)
+            self.run_CV(dat_combined, self.label)
+            self.set_CV_results('all_ch_pr', contact_point=None)
 
     def set_data_grid_points(self):
         """Read the run_analysis
@@ -318,8 +305,7 @@ class Decoder:
 
         return mov_detection_rate, fpr, tpr
 
-    def run_CV(self, data=None, label=None, TRAIN_VAL_SPLIT=True, save_coef=False,
-               get_movement_detection_rate=True, min_consequent_count=3):
+    def run_CV(self, data=None, label=None):
         """Evaluate model performance on the specified cross validation.
         If no data and label is specified, use whole feature class attributes.
 
@@ -360,7 +346,7 @@ class Decoder:
         self.X_test = []
         self.X_train = []
         self.coef = []
-        if get_movement_detection_rate is True:
+        if self.get_movement_detection_rate is True:
             self.mov_detection_rates_test = []
             self.tprate_test = []
             self.fprate_test = []
@@ -379,7 +365,7 @@ class Decoder:
 
             # optionally split training data also into train and validation
             # for XGBOOST
-            if TRAIN_VAL_SPLIT:
+            if self.TRAIN_VAL_SPLIT:
                 X_train, X_val, y_train, y_val = \
                     model_selection.train_test_split(
                         X_train, y_train, train_size=0.7, shuffle=False)
@@ -397,7 +383,7 @@ class Decoder:
                 # LM
                 model_train.fit(X_train, y_train)
 
-            if save_coef:
+            if self.save_coef:
                 self.coef.append(model_train.coef_)
 
             y_test_pr = model_train.predict(X_test)
@@ -412,11 +398,11 @@ class Decoder:
                 if sc_te < 0:
                     sc_te = 0
 
-            if get_movement_detection_rate is True:
+            if self.get_movement_detection_rate is True:
                 mov_detection_rate, fpr, tpr = self.get_movement_detection_rate(y_test,
                                                                                 y_test_pr,
                                                                                 self.mov_detection_threshold,
-                                                                                min_consequent_count)
+                                                                                self.min_consequent_count)
                 self.mov_detection_rates_test.append(mov_detection_rate)
                 self.tprate_test.append(tpr)
                 self.fprate_test.append(fpr)
@@ -424,7 +410,7 @@ class Decoder:
                 mov_detection_rate, fpr, tpr = self.get_movement_detection_rate(y_train,
                                                                                 y_train_pr,
                                                                                 self.mov_detection_threshold,
-                                                                                min_consequent_count)
+                                                                                self.min_consequent_count)
                 self.mov_detection_rates_train.append(mov_detection_rate)
                 self.tprate_train.append(tpr)
                 self.fprate_train.append(fpr)
