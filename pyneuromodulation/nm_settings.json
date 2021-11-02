@@ -9,15 +9,9 @@
         "kalman_filter": true,
         "re_referencing": true,
         "notch_filter": true,
-<<<<<<< HEAD
         "bandpass_filter": false,
         "stft" : true,
         "fft" : false,
-=======
-        "bandpass_filter": true,
-        "stft" : true,
-        "fft" : true,
->>>>>>> ae7f97008287f946ed41a27a4c2d1ee45b01b36f
         "raw_hjorth": false,
         "sharpwave_analysis": true,
         "return_raw": true,
