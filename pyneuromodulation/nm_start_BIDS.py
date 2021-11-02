@@ -159,19 +159,11 @@ class NM_BIDS:
 
     def set_projection(self):
         # (if available) add coordinates to settings
-        if any(
-            (
-                self.settings_wrapper.settings["methods"]["project_cortex"],
-                self.settings_wrapper.settings["methods"]["project_subcortex"],
-            )
-        ):
-            if self.raw_arr.get_montage() is not None:
-                self.settings_wrapper.add_coord(
-                    self.raw_arr.copy(), self.PATH_GRIDS
-                )
-            self.projection = nm_projection.Projection(
-                self.settings_wrapper.settings
-            )
+        if self.raw_arr.get_montage() is not None:
+            self.settings_wrapper.add_coord(self.raw_arr.copy(), self.PATH_GRIDS)
+        if any((self.settings_wrapper.settings["methods"]["project_cortex"],
+                self.settings_wrapper.settings["methods"]["project_subcortex"])):
+            self.projection = nm_projection.Projection(self.settings_wrapper.settings)
         else:
             self.projection = None
 
