@@ -47,7 +47,7 @@ class CohortRunner:
         # set BIDS PATH and out path
         # better option: feed the output and bids path as well as a param through the pool
         if 'Berlin' in PATH_RUN:
-            PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Berlin_VoluntaryMovement"
+            PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Berlin"
             PATH_OUT = os.path.join(self.outpath, 'Berlin')
         elif 'Beijing' in PATH_RUN:
             PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Beijing"
@@ -57,7 +57,7 @@ class CohortRunner:
             PATH_OUT = os.path.join(self.outpath, 'Pittsburgh')
 
         nm_BIDS = nm_start_BIDS.NM_BIDS(PATH_RUN, ECOG_ONLY=True, PATH_BIDS=PATH_BIDS, PATH_OUT=PATH_OUT,
-                                        PATH_SETTINGS=self.PATH_SETTINGS)
+                                        PATH_SETTINGS=self.PATH_SETTINGS, LIMIT_DATA=True, LIMIT_HIGH=500000)
         nm_BIDS.run_bids()
 
         feature_path = PATH_OUT
@@ -67,7 +67,7 @@ class CohortRunner:
                                                         plt_cort_projection=False)
         feature_wrapper.read_plotting_modules()
 
-        #feature_wrapper.plot_features()
+        feature_wrapper.plot_features()
         #model = discriminant_analysis.LinearDiscriminantAnalysis()
         #model = xgboost.XGBClassifier(scale_pos_weight=10)  # balanced class weights
         #model = ensemble.RandomForestClassifier(n_estimators=6, max_depth=6, class_weight='balanced')
@@ -79,14 +79,14 @@ class CohortRunner:
 
         performance_dict = {}
 
-        # subject_name is different across cohorts
-        #ubject_name = feature_wrapper.feature_file[4:10]
-        #performance_dict = feature_wrapper.read_ind_channel_results(performance_dict,
-        #                                                            subject_name, read_grid_points=False)
+        subject_name = feature_wrapper.feature_file[4:10]
+        performance_dict = feature_wrapper.read_results(performance_dict,
+                                                        subject_name, read_grid_points=False,
+                                                        read_channels=True)
 
-        #feature_wrapper.plot_subject_grid_ch_performance(subject_name,
-        #                                                 performance_dict=performance_dict,
-        #                                                 plt_grid=False, output_name=ML_model_name)
+        feature_wrapper.plot_subject_grid_ch_performance(subject_name,
+                                                         performance_dict=performance_dict,
+                                                         plt_grid=False, output_name=self.ML_model_name)
 
 
     def run_cohorts(self):
@@ -126,7 +126,7 @@ class CohortRunner:
         #                                                    [linear_model.LogisticRegression(class_weight="balanced")],
         #                                                    [feature_path])))
         
-        #multiprocess_pipeline_run_wrapper()
+        self.multiprocess_pipeline_run_wrapper(run_files_all[90])
         pool = Pool(processes=55)  # most on Ryzen CPU 2990WX is 63
         pool.map(self.multiprocess_pipeline_run_wrapper, run_files_all)
 
@@ -140,7 +140,7 @@ class CohortRunner:
             name of available cohort, by default "Pittsburgh"
         """
         if cohort == "Berlin":
-            PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Berlin_VoluntaryMovement"
+            PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Berlin"
             layout = BIDSLayout(PATH_BIDS)
             run_files = layout.get(extension='.vhdr')
         elif cohort == "Beijing":

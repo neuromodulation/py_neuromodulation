@@ -95,7 +95,7 @@ class FeatureReadWrapper:
         self.z_stn = self.stn_surf['vertices'][::1, 2]
 
     def plot_subject_grid_ch_performance(self, subject_name=None, performance_dict=None,
-                                         plt_grid=False, output_name="LM"):
+                                         plt_grid=False, output_name="LM", show_plot=False):
         """plot subject specific performance for individual channeal and optional grid points
 
         Parameters
@@ -157,6 +157,8 @@ class FeatureReadWrapper:
         PATH_SAVE = os.path.join(self.feature_path, self.feature_file,
                                  output_name+'_grid_channel_performance.png')
         plt.savefig(PATH_SAVE, bbox_inches="tight")
+        if show_plot is False:
+            plt.close()
         print("saved Figure to : " + str(PATH_SAVE))
 
     def plot_features_per_channel(self, ch_name,
@@ -243,9 +245,9 @@ class FeatureReadWrapper:
             ch_names_ECOG = self.ch_names_ECOG
         for ch_name_ECOG in ch_names_ECOG:
             self.plot_features_per_channel(ch_name_ECOG, plt_corr_matr=False,
-                                           plt_stft_features=False,
+                                           plt_stft_features=True,
                                            plt_sharpwave=False,
-                                           plt_fft_features=True)
+                                           plt_fft_features=False)
 
     def run_ML_model(self, feature_file=None, estimate_gridpoints=True, estimate_channels=True,
                      estimate_all_channels_combined=False,
