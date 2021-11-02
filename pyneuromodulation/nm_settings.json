@@ -6,15 +6,15 @@
         "raw_resampling": true,
         "raw_normalization": false,
         "feature_normalization": true,
-        "kalman_filter": false,
+        "kalman_filter": true,
         "re_referencing": true,
         "notch_filter": true,
-        "bandpass_filter": false,
-        "stft" : false,
+        "bandpass_filter": true,
+        "stft" : true,
         "fft" : true,
         "raw_hjorth": false,
-        "sharpwave_analysis": false,
-        "return_raw": false,
+        "sharpwave_analysis": true,
+        "return_raw": true,
         "project_cortex": true,
         "project_subcortex": false,
         "pdc": false,
@@ -47,66 +47,60 @@
             "HFA"
         ]
     },
+    "stft_settings":{
+        "windowlength" : 500,
+        "log_transform" : true
+    },
     "fft_settings":{
-        "windowlength" : 1000
+        "windowlength" : 1000,
+        "log_transform" : true
+    },
+    "frequency_ranges": {
+        "theta": [
+            4,
+            8
+        ],
+        "alpha": [
+            8,
+            12
+        ],
+        "low beta": [
+            13,
+            20
+        ],
+        "high beta": [
+            20,
+            35
+        ],
+        "low gamma": [
+            60,
+            80
+        ],
+        "high gamma": [
+            90,
+            200
+        ],
+        "HFA": [
+            200,
+            400
+        ]
     },
     "bandpass_filter_settings": {
-        "frequency_ranges": {
-            "theta": [
-                [
-                    4,
-                    8
-                ],
-                1000
-            ],
-            "alpha": [
-                [
-                    8,
-                    12
-                ],
-                500
-            ],
-            "low beta": [
-                [
-                    13,
-                    20
-                ],
-                333
-            ],
-            "high beta": [
-                [
-                    20,
-                    35
-                ],
-                333
-            ],
-            "low gamma": [
-                [
-                    60,
-                    80
-                ],
-                100
-            ],
-            "high gamma": [
-                [
-                    90,
-                    200
-                ],
-                100
-            ],
-            "HFA": [
-                [
-                    200,
-                    400
-                ],
-                100
-            ]
+        "segment_lengths": {
+            "theta": 1000,
+            "alpha": 500,
+            "low beta": 333,
+            "high beta": 333,
+            "low gamma": 100,
+            "high gamma": 100,
+            "HFA": 100
         },
         "bandpower_features": {
             "activity": true,
             "mobility": false,
             "complexity": false
-        }
+        },
+        "log_transform" : true
     },
     "sharpwave_analysis_settings": {
         "sharpwave_features": {
@@ -135,6 +129,7 @@
             "distance_troughs": 5,
             "distance_peaks": 10
         },
+        "max_of_trough_and_peak" : true,
         "estimator": {
             "mean": false,
             "median": false,

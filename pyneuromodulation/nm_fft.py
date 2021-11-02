@@ -35,6 +35,9 @@ def get_fft_features(features_, s, fs, data, KF_dict, ch, f_ranges, f_band_names
         idx_range = np.where((f >= f_range[0]) & (f <= f_range[1]))[0]
         feature_calc = np.mean(Z[idx_range])
 
+        if s["fft_settings"]["log_transform"]:
+            feature_calc = np.log(feature_calc)
+
         if s["methods"]["kalman_filter"] is True:
             if fband in s["kalman_filter_settings"]["frequency_bands"]:
                 KF_name = '_'.join([ch, 'activity', fband])  # is for stft by default activity

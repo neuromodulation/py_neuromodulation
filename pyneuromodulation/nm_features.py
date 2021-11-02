@@ -26,26 +26,22 @@ class Features:
         else:
             self.fs = s["fs"]
         self.line_noise = s["line_noise"]
-        self.seglengths = floor(
-                self.fs / 1000 * array([value[1] for value in s[
-                    "bandpass_filter_settings"][
-                        "frequency_ranges"].values()])).astype(int)
-        print("Segment lengths (ms):", self.seglengths)
-        self.fband_names = ['theta', 'alpha', 'low beta', 'high beta', 'low gamma', 'high gamma', 'HFA']
-        self.f_ranges = [self.s["bandpass_filter_settings"]["frequency_ranges"][fband_name][0]
+        self.fband_names = [value for value in s["frequency_ranges"].keys()]
+        self.f_ranges = [self.s["frequency_ranges"][fband_name]
                          for fband_name in self.fband_names]
 
         self.KF_dict = {}
 
         if s["methods"]["bandpass_filter"] is True:
+            self.seglengths = floor(
+                self.fs / 1000 * array([value for value in s[
+                        "bandpass_filter_settings"]["segment_lengths"].values()])).astype(int)
             self.filter_fun = nm_filter.calc_band_filters(
-                f_ranges=[value[0] for value in s["bandpass_filter_settings"][
-                    "frequency_ranges"].values()], sfreq=self.fs,
+                f_ranges=self.f_ranges, sfreq=self.fs,
                 filter_length=self.fs - 1, verbose=self.verbose)
 
         if s["methods"]["kalman_filter"] is True:
-            for bp_feature in [k for k, v in s["bandpass_filter_settings"][
-                               "bandpower_features"].items() if v is True]:
+            for bp_feature in s["bandpass_filter_settings"]["bandpower_features"]:
                 for f_band in s["kalman_filter_settings"]["frequency_bands"]:
                     for channel in self.ch_names:
                         self.KF_dict['_'.join([channel, bp_feature, f_band])] \
@@ -106,7 +102,7 @@ class Features:
 
         if self.s["methods"]["pdc"] is True or self.s["methods"]["dtf"] is True:
             for filt_idx, filt in enumerate(
-                    self.s["bandpass_filter_settings"]["frequency_ranges"].keys()):
+                    self.s["frequency_ranges"].keys()):
                 features_ = self.est_connect(
                     features_, filt, dat_filtered[:, filt_idx, :])
 

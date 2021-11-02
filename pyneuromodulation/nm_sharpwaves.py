@@ -5,6 +5,7 @@ from numpy import median as np_median
 from numpy import var as np_var
 from numpy import min as np_min
 from numpy import max as np_max
+import numpy as np
 from scipy.signal import convolve, find_peaks
 from mne.filter import create_filter
 
@@ -43,6 +44,11 @@ class SharpwaveAnalyzer:
 
         # initialize attributes
         self.initialize_sw_features()
+        est_mask = np.array([1 if val is True else 0 for key, val in self.sw_settings["estimator"].items()],
+                            dtype='bool')
+
+        self.estimator_names = list(np.array(list(self.sw_settings["estimator"].keys()))[est_mask])
+        self.estimator_functions = [getattr(np, est_name) for est_name in self.estimator_names]
 
     def initialize_sw_features(self) -> None:
         """Resets used attributes to empty lists
@@ -107,45 +113,49 @@ class SharpwaveAnalyzer:
 
         # check settings if troughs and peaks are analyzed
 
-        for detect_troughs in [True, False]:
+        dict_ch_features = {}
+
+        for detect_troughs in [False, True]:
 
             if detect_troughs is False:
                 if self.sw_settings["detect_peaks"]["estimate"] is False:
                     continue
-                key_name = 'Peak'
+                key_name_pt = 'Peak'
                 # the detect_troughs loop start with peaks, s.t. data does not
                 # need to be flipped
 
             if detect_troughs is True:
                 if self.sw_settings["detect_troughs"]["estimate"] is False:
                     continue
-                key_name = 'Trough'
+                key_name_pt = 'Trough'
 
                 self.filtered_data = -self.filtered_data
 
             self.initialize_sw_features()  # reset sharpwave feature attriubtes to empty lists
             self.analyze_waveform()
 
-            if self.sw_settings["estimator"]["mean"] is True:
-                for feature_name in self.used_features:
-                    features_['_'.join([ch, 'Sharpwave', 'Mean', key_name, feature_name])] = \
-                        np_mean(getattr(self, feature_name)) if len(getattr(self, feature_name)) != 0 else 0
-            if self.sw_settings["estimator"]["var"] is True:
-                for feature_name in self.used_features:
-                    features_['_'.join([ch, 'Sharpwave', 'Var', key_name, feature_name])] = \
-                        np_var(getattr(self, feature_name)) if len(getattr(self, feature_name)) != 0 else 0
-            if self.sw_settings["estimator"]["median"] is True:
-                for feature_name in self.used_features:
-                    features_['_'.join([ch, 'Sharpwave', 'Median', key_name, feature_name])] = \
-                        np_median(getattr(self, feature_name)) if len(getattr(self, feature_name)) != 0 else 0
-            if self.sw_settings["estimator"]["min"] is True:
-                for feature_name in self.used_features:
-                    features_['_'.join([ch, 'Sharpwave', 'Min', key_name, feature_name])] = \
-                        np_min(getattr(self, feature_name)) if len(getattr(self, feature_name)) != 0 else 0
-            if self.sw_settings["estimator"]["max"] is True:
-                for feature_name in self.used_features:
-                    features_['_'.join([ch, 'Sharpwave', 'Max', key_name, feature_name])] = \
-                        np_max(getattr(self, feature_name)) if len(getattr(self, feature_name)) != 0 else 0
+            for est, est_fun in zip(self.estimator_names, self.estimator_functions):
+                if self.sw_settings["estimator"][est] is True:
+                    for feature_name in self.used_features:
+                        key_name = '_'.join([ch, 'Sharpwave', est.title(), feature_name])
+                        val = est_fun(getattr(self, feature_name)) if len(getattr(self, feature_name)) != 0 else 0
+
+                        if key_name not in dict_ch_features:
+                            dict_ch_features[key_name] = {}
+                        dict_ch_features[key_name][key_name_pt] = val
+
+        if self.sw_settings["max_of_trough_and_peak"]:
+            # apply between 'Trough' and 'Peak' the respective function again
+            # save only the 'est_fun' (e.g. max) between them
+            for key, value in dict_ch_features.items():
+                for est, est_fun in zip(self.estimator_names, self.estimator_functions):
+                    features_[key] = est_fun([list(value.values())[0], list(value.values())[1]])
+        else:
+            # otherwise, save all
+            # write all "flatted" key value pairs in features_
+            for key, value in dict_ch_features.items():
+                for key_sub, value_sub in dict_ch_features[key].items():
+                    features_[key+"_analyze_"+key_sub] = value_sub
 
         return features_
 

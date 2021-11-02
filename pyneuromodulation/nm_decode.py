@@ -5,7 +5,9 @@ from skopt import gp_minimize, Optimizer
 from sklearn.linear_model import ElasticNet
 from sklearn.base import clone
 from sklearn.utils import class_weight
-
+from scipy.ndimage import (binary_dilation,
+                           binary_erosion,
+                           label)
 import pandas as pd
 import os
 import json
@@ -20,8 +22,13 @@ class Decoder:
                  model=linear_model.LinearRegression(),
                  eval_method=metrics.r2_score,
                  cv_method=model_selection.KFold(n_splits=3, shuffle=False),
-                 threshold_score=True) -> None:
-        """Imitialize here a feature file for processing
+                 threshold_score=True,
+                 mov_detection_threshold=0.5,
+                 TRAIN_VAL_SPLIT=True,
+                 save_coef=False,
+                 get_movement_detection_rate=False,
+                 min_consequent_count=3) -> None:
+        """Initialize here a feature file for processing
         Read settings.json nm_channels.csv and features.csv
         Read target label
 
@@ -37,7 +44,19 @@ class Decoder:
             evaluation scoring method
         cv_method : sklearm model_selection method
         threshold_score : boolean
-            if True set lower threshold at zero (useful for r2)
+            if True set lower threshold at zero (useful for r2),
+        mov_detection_threshold : float
+            if get_movement_detection_rate is True, find given minimum 'threshold' respective 
+            consecutive movement blocks, by default 0.5
+        TRAIN_VAL_SPLIT (boolean):
+            if true split data into additinal validation, and run class weighted CV
+        save_coef (boolean):
+            if true, save model._coef trained coefficients
+        get_movement_detection_rate (boolean):
+            save detection rate and tpr / fpr as well
+        min_consequent_count (int):
+            if get_movement_detection_rate is True, find given 'min_consequent_count' respective 
+            consecutive movement blocks with minimum size of 'min_consequent_count'
         """
 
         # for the bayesian opt. function the objective fct only uses a single parameter
@@ -78,7 +97,8 @@ class Decoder:
                 else:
                     # search for "clean" or "squared" channel without laterality included
                     ch_without_lat = [t_ch for t_ch in list(self.nm_channels[self.nm_channels["target"] == 1]["name"])
-                                      if ("CLEAN" in t_ch) or ("squared" in t_ch)]
+                                      if ("CLEAN" in t_ch) or ("SQUARED_ROTAWHEEL" in t_ch) \
+                                      or ("SQUARED_EMG" in t_ch) or ("rota_squared") in t_ch]
                     if len(ch_without_lat) != 0:
                         self.target_ch = ch_without_lat[0]
                     else:
@@ -98,7 +118,8 @@ class Decoder:
                 else:
                     # search for "clean" or "squared" channel without laterality included
                     ch_without_lat = [t_ch for t_ch in list(self.nm_channels[self.nm_channels["target"] == 1]["name"])
-                                      if ("CLEAN" in t_ch) or ("squared" in t_ch)]
+                                      if ("CLEAN" in t_ch) or ("SQUARED_ROTAWHEEL" in t_ch) \
+                                      or ("SQUARED_EMG" in t_ch) or ("rota_squared") in t_ch]
                     if len(ch_without_lat) != 0:
                         self.target_ch = ch_without_lat[0]
                     else:
@@ -114,6 +135,14 @@ class Decoder:
         self.eval_method = eval_method
         self.cv_method = cv_method
         self.threshold_score = threshold_score
+        self.mov_detection_threshold = mov_detection_threshold
+        self.all_ch_pr = {}
+        self.ch_ind_pr = {}
+        self.gridpoint_ind_pr = {}
+        self.TRAIN_VAL_SPLIT = TRAIN_VAL_SPLIT
+        self.save_coef = save_coef
+        self.get_movement_detection_rate = get_movement_detection_rate
+        self.min_consequent_count = min_consequent_count
 
     def set_data_ind_channels(self):
         """specified channel individual data
@@ -123,46 +152,65 @@ class Decoder:
             self.ch_ind_data[ch] = np.nan_to_num(np.array(self.features[[col for col in self.features.columns
                                                           if col.startswith(ch)]]))
 
-    def run_CV_all_channels_combined(self, TRAIN_VAL_SPLIT=True, save_coef=False):
-
-        dat_combined = np.concatenate(list(self.ch_ind_data.values()), axis=1)
-        self.run_CV(dat_combined, self.label, TRAIN_VAL_SPLIT, save_coef)
-        self.all_ch_pr = {}
-        self.all_ch_pr["score_train"] = self.score_train
-        self.all_ch_pr["score_test"] = self.score_test
-        self.all_ch_pr["y_test"] = self.y_test
-        self.all_ch_pr["y_train"] = self.y_train
-        self.all_ch_pr["y_test_pr"] = self.y_test_pr
-        self.all_ch_pr["y_train_pr"] = self.y_train_pr
-        self.all_ch_pr["X_train"] = self.X_train
-        self.all_ch_pr["X_test"] = self.X_test
-        if save_coef:
-            self.all_ch_pr["coef"] = self.coef
-
-    def run_CV_ind_channels(self, TRAIN_VAL_SPLIT=True, save_coef=False):
-        """run the CV for every specified channel
+    def set_CV_results(self, attr_name, contact_point=None):
+        """set CV results in respectie nm_decode attributes
+        The reference is first stored in obj_set, and the used lateron
 
         Parameters
         ----------
-        TRAIN_VAL_SPLIT (boolean):
-            if true split data into additinal validation, and run class weighted CV
-        save_coef (boolean):
-            if true, save model._coef trained coefficients
+        attr_name : string
+            is either all_ch_pr, ch_ind_pr, gridpoint_ind_pr
+        contact_point : object, optional
+            usually an int specifying the grid_point or string, specifying the used channel, by default None
         """
-        self.ch_ind_pr = {}
-        for ch in self.used_chs:
-            self.run_CV(self.ch_ind_data[ch], self.label, TRAIN_VAL_SPLIT, save_coef)
-            self.ch_ind_pr[ch] = {}
-            self.ch_ind_pr[ch]["score_train"] = self.score_train
-            self.ch_ind_pr[ch]["score_test"] = self.score_test
-            self.ch_ind_pr[ch]["y_test"] = self.y_test
-            self.ch_ind_pr[ch]["y_train"] = self.y_train
-            self.ch_ind_pr[ch]["y_test_pr"] = self.y_test_pr
-            self.ch_ind_pr[ch]["y_train_pr"] = self.y_train_pr
-            self.ch_ind_pr[ch]["X_train"] = self.X_train
-            self.ch_ind_pr[ch]["X_test"] = self.X_test
-            if save_coef:
-                self.ch_ind_pr[ch]["coef"] = self.coef
+        if contact_point is not None:
+            getattr(self, attr_name)[contact_point] = {}
+            obj_set = getattr(self, attr_name)[contact_point]
+        else:
+            obj_set = getattr(self, attr_name)
+
+        obj_set["score_train"] = self.score_train
+        obj_set["score_test"] = self.score_test
+        obj_set["y_test"] = self.y_test
+        obj_set["y_train"] = self.y_train
+        obj_set["y_test_pr"] = self.y_test_pr
+        obj_set["y_train_pr"] = self.y_train_pr
+        obj_set["X_train"] = self.X_train
+        obj_set["X_test"] = self.X_test
+        if self.save_coef:
+            obj_set["coef"] = self.coef
+        if self.get_movement_detection_rate:
+            obj_set["mov_detection_rate_test"] = self.mov_detection_rates_test
+            obj_set["mov_detection_rate_train"] = self.mov_detection_rates_train
+            obj_set["fprate_test"] = self.fprate_test
+            obj_set["fprate_train"] = self.fprate_train
+            obj_set["tprate_test"] = self.tprate_test
+            obj_set["tprate_train"] = self.tprate_train
+
+    def run_CV_caller(self, feature_contacts: str="ind_channels"):
+        """[summary]
+
+        Parameters
+        ----------
+        feature_contacts : str, optional
+            [description], by default "ind_channels"
+        """
+        valid_feature_contacts = ["ind_channels", "all_channels_combined", "grid_points"]
+        if feature_contacts not in valid_feature_contacts:
+            raise ValueError(f"{feature_contacts} not in {valid_feature_contacts}")
+
+        if feature_contacts == "grid_points":
+            for grid_point in self.active_gridpoints:
+                self.run_CV(self.grid_point_ind_data[grid_point], self.label)
+                self.set_CV_results('gridpoint_ind_pr', contact_point=grid_point)
+        if feature_contacts == "ind_channels":
+            for ch in self.used_chs:
+                self.run_CV(self.ch_ind_data[ch], self.label)
+                self.set_CV_results('ch_ind_pr', contact_point=ch)
+        if feature_contacts == "all_channels_combined":
+            dat_combined = np.concatenate(list(self.ch_ind_data.values()), axis=1)
+            self.run_CV(dat_combined, self.label)
+            self.set_CV_results('all_ch_pr', contact_point=None)
 
     def set_data_grid_points(self):
         """Read the run_analysis
@@ -187,32 +235,79 @@ class Decoder:
             # samples, features
             self.grid_point_ind_data[grid_point] = np.nan_to_num(self.run_analysis.proj_cortex_array[:, grid_point, :])
 
-    def run_CV_grid_points(self, TRAIN_VAL_SPLIT=True, save_coef=False):
-        """run cross validation across grid points
+    def get_movement_grouped_array(self, prediction, threshold=0.5, min_consequent_count=5):
+        """Return given a 1D numpy array, an array of same size with grouped consective blocks
 
         Parameters
         ----------
-        XGB (boolean):
-            if true split data into additinal validation, and run class weighted CV
-        save_coef (boolean):
-            if true, save model._coef trained coefficients
-        """
-        self.gridpoint_ind_pr = {}
-        for grid_point in self.active_gridpoints:
-            self.run_CV(self.grid_point_ind_data[grid_point], self.label, TRAIN_VAL_SPLIT, save_coef)
-            self.gridpoint_ind_pr[grid_point] = {}
-            self.gridpoint_ind_pr[grid_point]["score_train"] = self.score_train
-            self.gridpoint_ind_pr[grid_point]["score_test"] = self.score_test
-            self.gridpoint_ind_pr[grid_point]["y_test"] = self.y_test
-            self.gridpoint_ind_pr[grid_point]["y_train"] = self.y_train
-            self.gridpoint_ind_pr[grid_point]["y_test_pr"] = self.y_test_pr
-            self.gridpoint_ind_pr[grid_point]["y_train_pr"] = self.y_train_pr
-            self.gridpoint_ind_pr[grid_point]["X_train"] = self.X_train
-            self.gridpoint_ind_pr[grid_point]["X_test"] = self.X_test
-            if save_coef:
-                self.gridpoint_ind_pr["coef"] = self.coef
+        prediction : np.array
+            numpy array of either predictions or labels, that is going to be grouped
+        threshold : float, optional
+            threshold to be applied to 'prediction', by default 0.5
+        min_consequent_count : int, optional
+            minimum required consective samples higher than 'threshold', by default 5
 
-    def run_CV(self, data=None, label=None, TRAIN_VAL_SPLIT=True, save_coef=False):
+        Returns
+        -------
+        labeled_array : np.array
+            grouped vector with incrementing number for movement blocks
+        labels_count : int
+            count of individual movement blocks
+        """
+        mask = prediction > threshold
+        structure = [True] * min_consequent_count  # used for erosion and dilation
+        eroded = binary_erosion(mask, structure)
+        dilated = binary_dilation(eroded, structure)
+        labeled_array, labels_count = label(dilated)
+        return labeled_array, labels_count
+        
+    def calc_movement_detection_rate(self, y_label, prediction, threshold=0.5, min_consequent_count=3):
+        """Given a label and prediction, return the movement detection rate on the basis of 
+        movements classified in blocks of 'min_consequent_count'.
+
+        Parameters
+        ----------
+        y_label : [type]
+            [description]
+        prediction : [type]
+            [description]
+        threshold : float, optional
+            threshold to be applied to 'prediction', by default 0.5
+        min_consequent_count : int, optional
+            minimum required consective samples higher than 'threshold', by default 3
+
+        Returns
+        -------
+        mov_detection_rate : float
+            movement detection rate, where at least 'min_consequent_count' samples where high in prediction
+        fpr : np.array
+            sklearn.metrics false positive rate np.array
+        tpr : np.array
+            sklearn.metrics true positive rate np.array
+        """
+        pred_grouped, _ = self.get_movement_grouped_array(prediction, threshold, min_consequent_count)
+        y_grouped, labels_count = self.get_movement_grouped_array(y_label, threshold, min_consequent_count)
+
+        hit_rate = np.zeros(labels_count)
+        pred_group_bin = np.array(pred_grouped>0)
+        for label_number in range(1, labels_count + 1):  # labeling starts from 1    
+            hit_rate[label_number-1] = np.sum(pred_group_bin[np.where(y_grouped == label_number)[0]])
+
+        mov_detection_rate = np.where(hit_rate>0)[0].shape[0] / labels_count
+
+        # calculating TPR and FPR: https://stackoverflow.com/a/40324184/5060208
+        CM = metrics.confusion_matrix(y_label, prediction)
+
+        TN = CM[0][0]
+        FN = CM[1][0]
+        TP = CM[1][1]
+        FP = CM[0][1]
+        fpr = FP / (FP + TN)
+        tpr = TP / (TP + FN)
+
+        return mov_detection_rate, fpr, tpr
+
+    def run_CV(self, data=None, label=None, XGB=False):
         """Evaluate model performance on the specified cross validation.
         If no data and label is specified, use whole feature class attributes.
 
@@ -224,8 +319,6 @@ class Decoder:
             label to train and test with shape samples, features
         XGB (boolean):
             if true split data into additinal validation, and run class weighted CV
-        save_coef (boolean):
-            if true, save model._coef trained coefficients
         Returns
         -------
         cv_res : float
@@ -248,6 +341,13 @@ class Decoder:
         self.X_test = []
         self.X_train = []
         self.coef = []
+        if self.get_movement_detection_rate is True:
+            self.mov_detection_rates_test = []
+            self.tprate_test = []
+            self.fprate_test = []
+            self.mov_detection_rates_train = []
+            self.tprate_train = []
+            self.fprate_train = []
 
         for train_index, test_index in self.cv_method.split(self.data):
 
@@ -260,7 +360,7 @@ class Decoder:
 
             # optionally split training data also into train and validation
             # for XGBOOST
-            if TRAIN_VAL_SPLIT:
+            if self.TRAIN_VAL_SPLIT:
                 X_train, X_val, y_train, y_val = \
                     model_selection.train_test_split(
                         X_train, y_train, train_size=0.7, shuffle=False)
@@ -278,7 +378,7 @@ class Decoder:
                 # LM
                 model_train.fit(X_train, y_train)
 
-            if save_coef:
+            if self.save_coef:
                 self.coef.append(model_train.coef_)
 
             y_test_pr = model_train.predict(X_test)
@@ -292,6 +392,23 @@ class Decoder:
                     sc_tr = 0
                 if sc_te < 0:
                     sc_te = 0
+
+            if self.get_movement_detection_rate is True:
+                mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(y_test,
+                                                                                y_test_pr,
+                                                                                self.mov_detection_threshold,
+                                                                                self.min_consequent_count)
+                self.mov_detection_rates_test.append(mov_detection_rate)
+                self.tprate_test.append(tpr)
+                self.fprate_test.append(fpr)
+
+                mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(y_train,
+                                                                                y_train_pr,
+                                                                                self.mov_detection_threshold,
+                                                                                self.min_consequent_count)
+                self.mov_detection_rates_train.append(mov_detection_rate)
+                self.tprate_train.append(tpr)
+                self.fprate_train.append(fpr)
 
             self.score_train.append(sc_tr)
             self.score_test.append(sc_te)

@@ -188,7 +188,7 @@ class NM_Reader:
         self.y_stn = self.stn_surf['vertices'][::1, 1]
         self.z_stn = self.stn_surf['vertices'][::1, 2]
 
-    def plot_cortical_projection(self):
+    def plot_cortical_projection(self, show_plot=False):
         """Plot MNI brain including selected MNI cortical projection grid + used strip ECoG electrodes
         """
 
@@ -220,10 +220,11 @@ class NM_Reader:
         PATH_save = os.path.join(self.feature_path, self.feature_file,
                                  "Cortical_Projection.png")
         plt.savefig(PATH_save, bbox_inches="tight")
-
+        if show_plot is False:
+            plt.close()
         print("cortical projection figure saved to: " + str(PATH_save))
 
-    def plot_corr_matrix(self, feature_file, feature_str_add=None):
+    def plot_corr_matrix(self, feature_file, feature_str_add=None, show_plot=False):
 
         feature_col_name = [i[len(self.ch_name)+1:] for i in list(self.feature_ch_cols) if self.ch_name in i]
         plt.figure(figsize=(7, 7))
@@ -242,10 +243,11 @@ class NM_Reader:
         # plt.xticks([])
         # plt.yticks([])
         plt.savefig(PATH_save, bbox_inches="tight")
-        # plt.show()
+        if show_plot is False:
+            plt.close()
         print("Correlation matrix figure saved to " + str(PATH_save))
 
-    def plot_epochs_avg(self, feature_file, feature_str_add=None):
+    def plot_epochs_avg(self, feature_file, feature_str_add=None, show_plot=False):
 
         # cut channel name of for axis + "_" for more dense plot
         feature_col_name = [i[len(self.ch_name)+1:] for i in list(self.feature_ch_cols) if self.ch_name in i]
@@ -280,5 +282,6 @@ class NM_Reader:
             PATH_save = os.path.join(self.feature_path, feature_file,
                                      "MOV_algined_features_ch_" + str(self.ch_name) + "_" + feature_str_add + ".png")
         plt.savefig(PATH_save, bbox_inches="tight")
-        # plt.show()
+        if show_plot is False:
+            plt.close()
         print("Feature epoch average figure saved to: " + str(PATH_save))
