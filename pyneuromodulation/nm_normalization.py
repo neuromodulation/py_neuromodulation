@@ -1,7 +1,7 @@
 from numpy import arange, mean, median, std
 
 
-def normalize_raw(raw_arr, normalize_samples, fs, method='mean', clip=False):
+def normalize_raw(raw_arr, normalize_samples, fs, method="mean", clip=False):
     """Normalize data with respect to the past number of `normalize_samples`.
 
     Parameters
@@ -33,7 +33,8 @@ def normalize_raw(raw_arr, normalize_samples, fs, method='mean', clip=False):
         n_idx = arange(0, raw_arr.shape[1], 1)
     else:
         n_idx = arange(
-            raw_arr.shape[1] - normalize_samples, raw_arr.shape[1], 1)
+            raw_arr.shape[1] - normalize_samples, raw_arr.shape[1], 1
+        )
 
     if method == "mean":
         mean_ = mean(raw_arr[:, n_idx], axis=1)
@@ -46,8 +47,10 @@ def normalize_raw(raw_arr, normalize_samples, fs, method='mean', clip=False):
         std_ = std(raw_arr[:, n_idx], axis=1)
         raw_norm = (raw_arr[:, -fs:].T - mean_) / std_.T
     else:
-        raise ValueError("Only `median`, `mean` and `zscore` are supported as "
-                         f"raw normalization methods. Got {method}.")
+        raise ValueError(
+            "Only `median`, `mean` and `zscore` are supported as "
+            f"raw normalization methods. Got {method}."
+        )
 
     if clip:
         if isinstance(clip, bool):
@@ -60,7 +63,8 @@ def normalize_raw(raw_arr, normalize_samples, fs, method='mean', clip=False):
 
 
 def normalize_features(
-        curr_, prev_, normalize_samples, method='mean', clip=False):
+    curr_, prev_, normalize_samples, method="mean", clip=False
+):
     """Normalize features with respect to the past number of normalize_samples.
 
     Parameters
@@ -96,18 +100,27 @@ def normalize_features(
     else:
         n_idx = arange(cnt_samples - normalize_samples, cnt_samples, 1)
 
-    if method == 'mean':
-        curr_ = (curr_ - prev_.iloc[n_idx].mean()) \
-                / prev_.iloc[n_idx].mean(ddof=0)
+    if method == "mean":
+        curr_ = (curr_ - prev_.iloc[n_idx].mean()) / prev_.iloc[n_idx].mean(
+            ddof=0
+        )
     elif method == "median":
-        curr_ = (curr_ - prev_.iloc[n_idx].median()) \
-                / prev_.iloc[n_idx].median(ddof=0)
-    elif method == 'zscore':
-        curr_ = (curr_ - prev_.iloc[n_idx].mean()) \
-                / prev_.iloc[n_idx].std(ddof=0)
+        curr_ = (curr_ - prev_.iloc[n_idx].median()) / prev_.iloc[
+            n_idx
+        ].median(ddof=0)
+    elif method == "zscore":
+        curr_ = (curr_ - prev_.iloc[n_idx].mean()) / prev_.iloc[n_idx].std(
+            ddof=0
+        )
+    elif method == "zscore-median":
+        curr_ = (curr_ - prev_.iloc[n_idx].median()) / prev_.iloc[n_idx].std(
+            ddof=0
+        )
     else:
-        raise ValueError("Only `median`, `mean` and `zscore` are supported as "
-                         f"feature normalization methods. Got {method}.")
+        raise ValueError(
+            "Only `median`, `mean`, `zscore` and `zscore-median` are supported as "
+            f"feature normalization methods. Got {method}."
+        )
 
     if clip:
         if isinstance(clip, bool):
