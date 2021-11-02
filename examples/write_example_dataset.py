@@ -29,12 +29,12 @@ def set_chtypes(vhdr_raw):
 
 if __name__ == "__main__":
     # define run file to read and write from
-    PATH_RUN = r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\Data\Berlin\sub-002\ses-EphysMedOff02\ieeg\sub-002_ses-EphysMedOff02_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg.vhdr"
+    PATH_RUN = r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\Data\Berlin_VoluntaryMovement\sub-002\ses-EphysMedOff02\ieeg\sub-002_ses-EphysMedOff02_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg.vhdr"
 
     entities = mne_bids.get_entities_from_fname(PATH_RUN)
     bids_path = mne_bids.BIDSPath(subject=entities["subject"], session=entities["session"], task=entities["task"],
                                   run=entities["run"], acquisition=entities["acquisition"], datatype="ieeg",
-                                  root='C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Berlin')
+                                  root=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\Data\Berlin_VoluntaryMovement")
     raw_arr = mne_bids.read_raw_bids(bids_path)
 
     # crop data

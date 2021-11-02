@@ -217,17 +217,12 @@ class SettingsWrapper:
                 "Frequency bands for Kalman filter must also be specified in " \
                 "bandpass_filter_settings."
         if s["methods"]["bandpass_filter"] is True:
-            assert (isinstance(s["bandpass_filter_settings"]["frequency_ranges"], dict))
-            assert (isinstance(value, list) for value in s[
-                "bandpass_filter_settings"]["frequency_ranges"].values())
-            assert (len(value) == 2 for value in s[
-                "bandpass_filter_settings"]["frequency_ranges"].values())
-            assert (isinstance(value[0], list) for value in s[
-                "bandpass_filter_settings"]["frequency_ranges"].values())
-            assert (len(value[0]) == 2 for value in s[
-                "bandpass_filter_settings"]["frequency_ranges"].values())
-            assert (isinstance(value[1], (float, int)) for value in s[
-                "bandpass_filter_settings"]["frequency_ranges"].values())
+            assert (isinstance(s["frequency_ranges"], dict))
+            assert (isinstance(value, list) for value in s["frequency_ranges"].values())
+            assert (len(value) == 2 for value in s["frequency_ranges"].values())
+            assert (isinstance(value[0], list) for value in s["frequency_ranges"].values())
+            assert (len(value[0]) == 2 for value in s["frequency_ranges"].values())
+            assert (isinstance(value[1], (float, int)) for value in s["frequency_ranges"].values())
             assert (isinstance(value, bool) for value in s[
                 "bandpass_filter_settings"]["bandpower_features"].values())
             assert (any(value is True for value in s["bandpass_filter_settings"][

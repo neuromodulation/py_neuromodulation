@@ -9,12 +9,21 @@
         "kalman_filter": false,
         "re_referencing": true,
         "notch_filter": true,
+<<<<<<< HEAD
         "bandpass_filter": false,
         "stft": true,
         "fft": false,
         "raw_hjorth": false,
         "sharpwave_analysis": false,
         "return_raw": false,
+=======
+        "bandpass_filter": true,
+        "stft": true,
+        "fft": true,
+        "raw_hjorth": false,
+        "sharpwave_analysis": true,
+        "return_raw": true,
+>>>>>>> ae7f97008287f946ed41a27a4c2d1ee45b01b36f
         "project_cortex": true,
         "project_subcortex": false,
         "pdc": false,
@@ -45,68 +54,68 @@
             "low gamma",
             "high gamma",
             "HFA"
+<<<<<<< HEAD
+=======
+        ]
+    },
+    "stft_settings": {
+        "windowlength": 500,
+        "log_transform": true
+    },
+    "fft_settings": {
+        "windowlength": 1000,
+        "log_transform": true
+    },
+    "frequency_ranges": {
+        "theta": [
+            4,
+            8
+        ],
+        "alpha": [
+            8,
+            12
+        ],
+        "low beta": [
+            13,
+            20
+        ],
+        "high beta": [
+            20,
+            35
+        ],
+        "low gamma": [
+            60,
+            80
+        ],
+        "high gamma": [
+            90,
+            200
+        ],
+        "HFA": [
+            200,
+            400
+>>>>>>> ae7f97008287f946ed41a27a4c2d1ee45b01b36f
         ]
     },
     "fft_settings": {
         "windowlength": 1000
     },
     "bandpass_filter_settings": {
-        "frequency_ranges": {
-            "theta": [
-                [
-                    4,
-                    8
-                ],
-                1000
-            ],
-            "alpha": [
-                [
-                    8,
-                    12
-                ],
-                500
-            ],
-            "low beta": [
-                [
-                    13,
-                    20
-                ],
-                333
-            ],
-            "high beta": [
-                [
-                    20,
-                    35
-                ],
-                333
-            ],
-            "low gamma": [
-                [
-                    60,
-                    80
-                ],
-                100
-            ],
-            "high gamma": [
-                [
-                    90,
-                    200
-                ],
-                100
-            ],
-            "HFA": [
-                [
-                    200,
-                    400
-                ],
-                100
-            ]
+        "segment_lengths": {
+            "theta": 1000,
+            "alpha": 500,
+            "low beta": 333,
+            "high beta": 333,
+            "low gamma": 100,
+            "high gamma": 100,
+            "HFA": 100
         },
         "bandpower_features": {
             "activity": true,
             "mobility": false,
             "complexity": false
-        }
+        },
+        "log_transform": true
     },
     "sharpwave_analysis_settings": {
         "sharpwave_features": {
@@ -135,6 +144,7 @@
             "distance_troughs": 5,
             "distance_peaks": 10
         },
+        "max_of_trough_and_peak": true,
         "estimator": {
             "mean": false,
             "median": false,
@@ -180,17 +190,17 @@
         "num_fft": "auto"
     },
     "ch_names": [
-        "LFP_STN_R_234-LFP_STN_R_567",
-        "LFP_STN_R_567-LFP_STN_R_234",
-        "LFP_BS_STN_L_1-LFP_STN_L_567",
-        "LFP_STN_L_234-LFP_BS_STN_L_1",
-        "LFP_STN_L_567-LFP_STN_L_234",
-        "ECOG_AT_SM_L_1-avgref",
-        "ECOG_AT_SM_L_2-avgref",
-        "ECOG_AT_SM_L_3-avgref",
-        "ECOG_AT_SM_L_4-avgref",
-        "ECOG_AT_SM_L_5-avgref",
-        "ECOG_AT_SM_L_6-avgref"
+        "LFP_R_234_STN_BS-LFP_R_567_STN_BS",
+        "LFP_R_567_STN_BS-LFP_R_234_STN_BS",
+        "LFP_L_1_STN_BS-LFP_L_567_STN_BS",
+        "LFP_L_234_STN_BS-LFP_L_1_STN_BS",
+        "LFP_L_567_STN_BS-LFP_L_234_STN_BS",
+        "ECOG_L_1_SMC_AT-avgref",
+        "ECOG_L_2_SMC_AT-avgref",
+        "ECOG_L_3_SMC_AT-avgref",
+        "ECOG_L_4_SMC_AT-avgref",
+        "ECOG_L_5_SMC_AT-avgref",
+        "ECOG_L_6_SMC_AT-avgref"
     ],
     "ch_types": [
         "seeg",
@@ -278,17 +288,17 @@
         ]
     ],
     "coord_names": [
-        "LFP_STN_R_234",
-        "LFP_STN_R_567",
-        "LFP_BS_STN_L_1",
-        "LFP_STN_L_234",
-        "LFP_STN_L_567",
-        "ECOG_AT_SM_L_1",
-        "ECOG_AT_SM_L_2",
-        "ECOG_AT_SM_L_3",
-        "ECOG_AT_SM_L_4",
-        "ECOG_AT_SM_L_5",
-        "ECOG_AT_SM_L_6"
+        "LFP_R_234_STN_BS",
+        "LFP_R_567_STN_BS",
+        "LFP_L_1_STN_BS",
+        "LFP_L_234_STN_BS",
+        "LFP_L_567_STN_BS",
+        "ECOG_L_1_SMC_AT",
+        "ECOG_L_2_SMC_AT",
+        "ECOG_L_3_SMC_AT",
+        "ECOG_L_4_SMC_AT",
+        "ECOG_L_5_SMC_AT",
+        "ECOG_L_6_SMC_AT"
     ],
     "coord": {
         "cortex_right": {
@@ -297,12 +307,12 @@
         },
         "cortex_left": {
             "ch_names": [
-                "ECOG_AT_SM_L_1",
-                "ECOG_AT_SM_L_2",
-                "ECOG_AT_SM_L_3",
-                "ECOG_AT_SM_L_4",
-                "ECOG_AT_SM_L_5",
-                "ECOG_AT_SM_L_6"
+                "ECOG_L_1_SMC_AT",
+                "ECOG_L_2_SMC_AT",
+                "ECOG_L_3_SMC_AT",
+                "ECOG_L_4_SMC_AT",
+                "ECOG_L_5_SMC_AT",
+                "ECOG_L_6_SMC_AT"
             ],
             "positions": [
                 [
@@ -339,8 +349,8 @@
         },
         "subcortex_right": {
             "ch_names": [
-                "LFP_STN_R_234",
-                "LFP_STN_R_567"
+                "LFP_R_234_STN_BS",
+                "LFP_R_567_STN_BS"
             ],
             "positions": [
                 [
@@ -357,9 +367,9 @@
         },
         "subcortex_left": {
             "ch_names": [
-                "LFP_BS_STN_L_1",
-                "LFP_STN_L_234",
-                "LFP_STN_L_567"
+                "LFP_L_1_STN_BS",
+                "LFP_L_234_STN_BS",
+                "LFP_L_567_STN_BS"
             ],
             "positions": [
                 [
