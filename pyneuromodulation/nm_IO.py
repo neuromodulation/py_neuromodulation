@@ -22,17 +22,24 @@ def read_BIDS_data(PATH_RUN, BIDS_PATH):
     """
     entities = mne_bids.get_entities_from_fname(PATH_RUN)
 
-    bids_path = mne_bids.BIDSPath(subject=entities["subject"],
-                                  session=entities["session"],
-                                  task=entities["task"],
-                                  run=entities["run"],
-                                  acquisition=entities["acquisition"],
-                                  datatype="ieeg", root=BIDS_PATH)
+    bids_path = mne_bids.BIDSPath(
+        subject=entities["subject"],
+        session=entities["session"],
+        task=entities["task"],
+        run=entities["run"],
+        acquisition=entities["acquisition"],
+        datatype="ieeg",
+        root=BIDS_PATH,
+    )
 
     raw_arr = mne_bids.read_raw_bids(bids_path)
 
-    return (raw_arr, raw_arr.get_data(), int(np.ceil(raw_arr.info["sfreq"])),
-            int(raw_arr.info["line_freq"]))
+    return (
+        raw_arr,
+        raw_arr.get_data(),
+        int(np.ceil(raw_arr.info["sfreq"])),
+        int(raw_arr.info["line_freq"]),
+    )
 
 
 def add_labels(df_, settings_wrapper, raw_arr_data):
@@ -60,15 +67,26 @@ def add_labels(df_, settings_wrapper, raw_arr_data):
         dat_ = raw_arr_data[ind_label, offset_start:]
         if dat_.ndim == 1:
             dat_ = np.expand_dims(dat_, axis=0)
-        label_downsampled = dat_[:, ::int(np.ceil(settings_wrapper.settings["fs"] /
-                                 settings_wrapper.settings["sampling_rate_features"]))]
+        label_downsampled = dat_[
+            :,
+            :: int(
+                np.ceil(
+                    settings_wrapper.settings["fs"]
+                    / settings_wrapper.settings["sampling_rate_features"]
+                )
+            ),
+        ]
 
         # and add to df
         if df_.shape[0] == label_downsampled.shape[1]:
-            for idx, label_ch in enumerate(settings_wrapper.nm_channels["name"][ind_label]):
+            for idx, label_ch in enumerate(
+                settings_wrapper.nm_channels["name"][ind_label]
+            ):
                 df_[label_ch] = label_downsampled[idx, :]
         else:
-            print("label dimensions don't match, saving downsampled label extra")
+            print(
+                "label dimensions don't match, saving downsampled label extra"
+            )
     else:
         print("no target specified")
 
@@ -76,7 +94,8 @@ def add_labels(df_, settings_wrapper, raw_arr_data):
 
 
 def save_features_and_settings(
-        df_, run_analysis, folder_name, settings_wrapper):
+    df_, run_analysis, folder_name, settings_wrapper
+):
     """save settings.json, nm_channels.csv and features.csv
 
     Parameters
@@ -93,44 +112,72 @@ def save_features_and_settings(
 
     # create out folder if doesn't exist
     if not os.path.exists(
-            os.path.join(settings_wrapper.settings["out_path"], folder_name)):
+        os.path.join(settings_wrapper.settings["out_path"], folder_name)
+    ):
         print("Creating output folder: " + str(folder_name))
         os.makedirs(
-            os.path.join(settings_wrapper.settings["out_path"], folder_name))
+            os.path.join(settings_wrapper.settings["out_path"], folder_name)
+        )
 
-    PATH_OUT = os.path.join(settings_wrapper.settings["out_path"], folder_name,
-                            folder_name + "_FEATURES.csv")
+    PATH_OUT = os.path.join(
+        settings_wrapper.settings["out_path"],
+        folder_name,
+        folder_name + "_FEATURES.csv",
+    )
     df_.to_csv(PATH_OUT)
     print("FEATURES.csv saved to " + str(PATH_OUT))
 
     # rewrite np arrays to lists for json format
-    if settings_wrapper.settings["coord"] is not None:
+    if "coord" in settings_wrapper.settings:
         settings_wrapper.settings["grid_cortex"] = np.array(
-            settings_wrapper.settings["grid_cortex"]).tolist()
+            settings_wrapper.settings["grid_cortex"]
+        ).tolist()
         settings_wrapper.settings["grid_subcortex"] = np.array(
-            settings_wrapper.settings["grid_subcortex"]).tolist()
-        settings_wrapper.settings["coord"]["cortex_right"]["positions"] = \
-            settings_wrapper.settings["coord"]["cortex_right"]["positions"].tolist()
-        settings_wrapper.settings["coord"]["cortex_left"]["positions"] = \
-            settings_wrapper.settings["coord"]["cortex_left"]["positions"].tolist()
-        settings_wrapper.settings["coord"]["subcortex_right"]["positions"] = \
-            settings_wrapper.settings["coord"]["subcortex_right"]["positions"].tolist()
-        settings_wrapper.settings["coord"]["subcortex_left"]["positions"] = \
-            settings_wrapper.settings["coord"]["subcortex_left"]["positions"].tolist()
+            settings_wrapper.settings["grid_subcortex"]
+        ).tolist()
+        settings_wrapper.settings["coord"]["cortex_right"][
+            "positions"
+        ] = settings_wrapper.settings["coord"]["cortex_right"][
+            "positions"
+        ].tolist()
+        settings_wrapper.settings["coord"]["cortex_left"][
+            "positions"
+        ] = settings_wrapper.settings["coord"]["cortex_left"][
+            "positions"
+        ].tolist()
+        settings_wrapper.settings["coord"]["subcortex_right"][
+            "positions"
+        ] = settings_wrapper.settings["coord"]["subcortex_right"][
+            "positions"
+        ].tolist()
+        settings_wrapper.settings["coord"]["subcortex_left"][
+            "positions"
+        ] = settings_wrapper.settings["coord"]["subcortex_left"][
+            "positions"
+        ].tolist()
 
-    PATH_OUT = os.path.join(settings_wrapper.settings["out_path"], folder_name,
-                            folder_name + '_SETTINGS.json')
-    with open(PATH_OUT, 'w') as f:
+    PATH_OUT = os.path.join(
+        settings_wrapper.settings["out_path"],
+        folder_name,
+        folder_name + "_SETTINGS.json",
+    )
+    with open(PATH_OUT, "w") as f:
         json.dump(settings_wrapper.settings, f, indent=4)
     print("settings.json saved to " + str(PATH_OUT))
 
-    PATH_OUT = os.path.join(settings_wrapper.settings["out_path"], folder_name,
-                            folder_name + "_nm_channels.csv")
+    PATH_OUT = os.path.join(
+        settings_wrapper.settings["out_path"],
+        folder_name,
+        folder_name + "_nm_channels.csv",
+    )
     settings_wrapper.nm_channels.to_csv(PATH_OUT)
     print("nm_channels.csv saved to " + str(PATH_OUT))
 
-    PATH_OUT = os.path.join(settings_wrapper.settings["out_path"], folder_name,
-                            folder_name + "_run_analysis.p")
-    with open(PATH_OUT, 'wb') as output:
+    PATH_OUT = os.path.join(
+        settings_wrapper.settings["out_path"],
+        folder_name,
+        folder_name + "_run_analysis.p",
+    )
+    with open(PATH_OUT, "wb") as output:
         cPickle.dump(run_analysis, output)
     print("run analysis.p saved to " + str(PATH_OUT))
