@@ -21,12 +21,12 @@ def run_example_BIDS():
     nm_BIDS = nm_start_BIDS.NM_BIDS(PATH_RUN, PATH_BIDS=os.path.abspath('examples\\data'),
                                     PATH_OUT=os.path.abspath(os.path.join('examples', 'data', 'derivatives')))
 
-    #nm_BIDS.run_bids()
+    nm_BIDS.run_bids()
 
     # plot features for ECoG channels
     feature_reader = nm_analysis.FeatureReadWrapper(feature_path=nm_BIDS.settings_wrapper.settings['out_path'],
                                                     plt_cort_projection=True)
-    #feature_reader.plot_features()
+    feature_reader.plot_features()
     model = linear_model.LogisticRegression(class_weight='balanced')
     feature_reader.run_ML_model(model=model, estimate_all_channels_combined=True)
 
