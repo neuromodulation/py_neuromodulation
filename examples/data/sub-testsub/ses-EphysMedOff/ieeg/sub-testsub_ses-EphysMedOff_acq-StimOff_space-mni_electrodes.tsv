@@ -5,8 +5,11 @@ ECOG_L_3_SMC_AT	-45.5	-5.5	60.5	n/a	n/a
 ECOG_L_4_SMC_AT	-44.5	4	57.5	n/a	n/a
 ECOG_L_5_SMC_AT	-42	14	53.5	n/a	n/a
 ECOG_L_6_SMC_AT	-39	22.5	49.5	n/a	n/a
-LFP_R_234_STN_BS	11.8	-15	-7.7	n/a	n/a
-LFP_R_567_STN_BS	12.39	-14.29	-5.9	n/a	n/a
+LFP_L_234_STN_BS	11.8	-15	-7.7	n/a	n/a
+LFP_L_567_STN_BS	12.39	-14.29	-5.9	n/a	n/a
 LFP_L_1_STN_BS	-11.3	-15.9	-9.9	n/a	n/a
 LFP_L_234_STN_BS	-11.8	-15	-7.7	n/a	n/a
 LFP_L_567_STN_BS	-12.39	-14.29	-5.9	n/a	n/a
+LFP_R_234_STN_BS	12.93	-13.41	-4.1	n/a	n/a
+LFP_R_567_STN_BS	13.4	-12.52	-2.2	n/a	n/a
+ANALOG_ROT_R_1	n/a	n/a	n/a	n/a	n/a

@@ -9,9 +9,9 @@
         "kalman_filter": true,
         "re_referencing": true,
         "notch_filter": true,
-        "bandpass_filter": true,
+        "bandpass_filter": false,
         "stft": true,
-        "fft": true,
+        "fft": false,
         "raw_hjorth": false,
         "sharpwave_analysis": true,
         "return_raw": true,
@@ -175,72 +175,47 @@
         "num_fft": "auto"
     },
     "ch_names": [
-        "LFP_R_234_STN_BS-LFP_R_567_STN_BS",
-        "LFP_R_567_STN_BS-LFP_R_234_STN_BS",
-        "LFP_L_1_STN_BS-LFP_L_567_STN_BS",
-        "LFP_L_234_STN_BS-LFP_L_1_STN_BS",
-        "LFP_L_567_STN_BS-LFP_L_234_STN_BS",
         "ECOG_L_1_SMC_AT-avgref",
         "ECOG_L_2_SMC_AT-avgref",
         "ECOG_L_3_SMC_AT-avgref",
         "ECOG_L_4_SMC_AT-avgref",
         "ECOG_L_5_SMC_AT-avgref",
-        "ECOG_L_6_SMC_AT-avgref"
+        "ECOG_L_6_SMC_AT-avgref",
+        "LFP_L_1_STN_BS-LFP_L_567_STN_BS",
+        "LFP_L_234_STN_BS-LFP_L_1_STN_BS",
+        "LFP_L_567_STN_BS-LFP_L_234_STN_BS",
+        "LFP_R_234_STN_BS-LFP_R_567_STN_BS",
+        "LFP_R_567_STN_BS-LFP_R_234_STN_BS"
     ],
     "ch_types": [
-        "seeg",
-        "seeg",
-        "seeg",
-        "seeg",
-        "seeg",
         "ecog",
         "ecog",
         "ecog",
         "ecog",
         "ecog",
-        "ecog"
+        "ecog",
+        "seeg",
+        "seeg",
+        "seeg",
+        "seeg",
+        "seeg"
     ],
     "feature_idx": [
-        0,
         1,
         2,
         3,
         4,
         5,
         6,
-        7,
         8,
         9,
-        10
+        10,
+        11,
+        12
     ],
     "fs": 1375,
     "line_noise": 50,
     "coord_list": [
-        [
-            0.011800000000000001,
-            -0.015,
-            -0.0077
-        ],
-        [
-            0.01239,
-            -0.014289999999999999,
-            -0.005900000000000001
-        ],
-        [
-            -0.011300000000000001,
-            -0.0159,
-            -0.0099
-        ],
-        [
-            -0.011800000000000001,
-            -0.015,
-            -0.0077
-        ],
-        [
-            -0.01239,
-            -0.014289999999999999,
-            -0.005900000000000001
-        ],
         [
             -0.047,
             -0.026,
@@ -270,20 +245,45 @@
             -0.039,
             0.0225,
             0.0495
+        ],
+        [
+            -0.011300000000000001,
+            -0.0159,
+            -0.0099
+        ],
+        [
+            -0.011800000000000001,
+            -0.015,
+            -0.0077
+        ],
+        [
+            -0.01239,
+            -0.014289999999999999,
+            -0.005900000000000001
+        ],
+        [
+            0.01293,
+            -0.01341,
+            -0.0040999999999999995
+        ],
+        [
+            0.0134,
+            -0.01252,
+            -0.0022
         ]
     ],
     "coord_names": [
-        "LFP_R_234_STN_BS",
-        "LFP_R_567_STN_BS",
-        "LFP_L_1_STN_BS",
-        "LFP_L_234_STN_BS",
-        "LFP_L_567_STN_BS",
         "ECOG_L_1_SMC_AT",
         "ECOG_L_2_SMC_AT",
         "ECOG_L_3_SMC_AT",
         "ECOG_L_4_SMC_AT",
         "ECOG_L_5_SMC_AT",
-        "ECOG_L_6_SMC_AT"
+        "ECOG_L_6_SMC_AT",
+        "LFP_L_1_STN_BS",
+        "LFP_L_234_STN_BS",
+        "LFP_L_567_STN_BS",
+        "LFP_R_234_STN_BS",
+        "LFP_R_567_STN_BS"
     ],
     "coord": {
         "cortex_right": {
@@ -339,14 +339,14 @@
             ],
             "positions": [
                 [
-                    11.8,
-                    -15.0,
-                    -7.7
+                    12.93,
+                    -13.41,
+                    -4.1
                 ],
                 [
-                    12.39,
-                    -14.29,
-                    -5.9
+                    13.4,
+                    -12.52,
+                    -2.2
                 ]
             ]
         },

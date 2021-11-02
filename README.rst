@@ -1,6 +1,8 @@
 py_neuromodulation
 ==================
 
+Click this button to run the "Tutorial ML with py_neuro" notebooks:
+
 .. image:: https://mybinder.org/badge_logo.svg
  :target: https://mybinder.org/v2/gh/neuromodulation/py_neuromodulation/HEAD
 
