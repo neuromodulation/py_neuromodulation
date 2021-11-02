@@ -6,12 +6,14 @@
         "raw_resampling": true,
         "raw_normalization": false,
         "feature_normalization": true,
-        "kalman_filter": true,
+        "kalman_filter": false,
         "re_referencing": true,
         "notch_filter": true,
-        "bandpass_filter": true,
-        "raw_hjorth": true,
-        "sharpwave_analysis": true,
+        "bandpass_filter": false,
+        "stft": true,
+        "fft": false,
+        "raw_hjorth": false,
+        "sharpwave_analysis": false,
         "return_raw": false,
         "project_cortex": true,
         "project_subcortex": false,
@@ -36,10 +38,17 @@
         "sigma_w": 0.7,
         "sigma_v": 1,
         "frequency_bands": [
+            "theta",
+            "alpha",
+            "low beta",
+            "high beta",
             "low gamma",
             "high gamma",
-            "all gamma"
+            "HFA"
         ]
+    },
+    "fft_settings": {
+        "windowlength": 1000
     },
     "bandpass_filter_settings": {
         "frequency_ranges": {
@@ -104,11 +113,11 @@
             "peak_left": false,
             "peak_right": false,
             "trough": true,
-            "width": true,
+            "width": false,
             "prominence": true,
-            "interval": true,
-            "decay_time": true,
-            "rise_time": true,
+            "interval": false,
+            "decay_time": false,
+            "rise_time": false,
             "sharpness": true,
             "rise_steepness": false,
             "decay_steepness": false,
@@ -118,16 +127,16 @@
         "filter_high_cutoff": 80,
         "detect_troughs": {
             "estimate": true,
-            "distance_troughs": 5,
-            "distance_peaks": 1
+            "distance_troughs": 10,
+            "distance_peaks": 5
         },
         "detect_peaks": {
             "estimate": true,
-            "distance_troughs": 1,
-            "distance_peaks": 5
+            "distance_troughs": 5,
+            "distance_peaks": 10
         },
         "estimator": {
-            "mean": true,
+            "mean": false,
             "median": false,
             "max": true,
             "min": false,
