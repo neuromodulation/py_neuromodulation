@@ -13,6 +13,6 @@
     "EOGChannelCount": 0,
     "ECGChannelCount": 0,
     "EMGChannelCount": 0,
-    "MiscChannelCount": 1,
+    "MiscChannelCount": 4,
     "TriggerChannelCount": 0
 }
