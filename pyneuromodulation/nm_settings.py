@@ -151,10 +151,10 @@ class SettingsWrapper:
             )
             if PATH_GRIDS is None:
                 self.settings["grid_cortex"] = pd.read_csv(
-                    r"pyneuromodulation/grid_cortex.tsv", sep="\t"
+                    Path(__file__).parent / "grid_cortex.tsv", sep="\t"
                 )  # left cortical grid
                 self.settings["grid_subcortex"] = pd.read_csv(
-                    r"pyneuromodulation/grid_subcortex.tsv", sep="\t"
+                    Path(__file__).parent / "grid_subcortex.tsv", sep="\t"
                 )  # left subcortical grid
             else:
                 self.settings["grid_cortex"] = pd.read_csv(
