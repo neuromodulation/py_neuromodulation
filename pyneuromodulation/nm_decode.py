@@ -98,7 +98,8 @@ class Decoder:
                     # search for "clean" or "squared" channel without laterality included
                     ch_without_lat = [t_ch for t_ch in list(self.nm_channels[self.nm_channels["target"] == 1]["name"])
                                       if ("CLEAN" in t_ch) or ("SQUARED_ROTAWHEEL" in t_ch) \
-                                      or ("SQUARED_EMG" in t_ch) or ("rota_squared") in t_ch]
+                                      or ("SQUARED_EMG" in t_ch) or ("rota_squared") in t_ch \
+                                      or ("SQUARED_ROTATION" in t_ch)]
                     if len(ch_without_lat) != 0:
                         self.target_ch = ch_without_lat[0]
                     else:
@@ -118,8 +119,9 @@ class Decoder:
                 else:
                     # search for "clean" or "squared" channel without laterality included
                     ch_without_lat = [t_ch for t_ch in list(self.nm_channels[self.nm_channels["target"] == 1]["name"])
-                                      if ("CLEAN" in t_ch) or ("SQUARED_ROTAWHEEL" in t_ch) \
-                                      or ("SQUARED_EMG" in t_ch) or ("rota_squared") in t_ch]
+                            if ("CLEAN" in t_ch) or ("SQUARED_ROTAWHEEL" in t_ch) \
+                            or ("SQUARED_EMG" in t_ch) or ("rota_squared" in t_ch) \
+                            or ("SQUARED_ROTATION" in t_ch)]
                     if len(ch_without_lat) != 0:
                         self.target_ch = ch_without_lat[0]
                     else:

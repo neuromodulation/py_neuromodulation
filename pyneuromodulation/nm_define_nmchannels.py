@@ -52,7 +52,8 @@ def set_nm_channels(ch_names, ch_types, reference='default', bads=None,
     if not (len(ch_names) == len(ch_types)):
         raise Exception("Sorry, no numbers below zero")
 
-    mov_substrs = ['analog', 'mov', 'rota_squared', 'squared_emg', 'squared_rotawheel']
+    mov_substrs = ['analog', 'mov', 'rota_squared', 'squared_emg', 'squared_rotawheel', \
+                   'squared_rotation']
     used_substrs = ['ecog', 'seeg']
     lfp_types = ['seeg', 'dbs', 'lfp']
 
