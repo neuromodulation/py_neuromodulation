@@ -9,7 +9,7 @@ from sklearn import metrics
 from sklearn.base import clone
 from sklearn import model_selection
 from sklearn.utils import class_weight
-import xgboost
+#import xgboost
 import _pickle as cPickle
 from scipy import io
 from matplotlib import pyplot as plt
@@ -57,7 +57,7 @@ class CohortRunner:
             PATH_OUT = os.path.join(self.outpath, 'Pittsburgh')
 
         nm_BIDS = nm_start_BIDS.NM_BIDS(PATH_RUN, ECOG_ONLY=True, PATH_BIDS=PATH_BIDS, PATH_OUT=PATH_OUT,
-                                        PATH_SETTINGS=self.PATH_SETTINGS, LIMIT_DATA=True, LIMIT_HIGH=500000)
+                                        PATH_SETTINGS=self.PATH_SETTINGS, LIMIT_DATA=False, LIMIT_HIGH=200000)
         nm_BIDS.run_bids()
 
         feature_path = PATH_OUT
@@ -126,8 +126,8 @@ class CohortRunner:
         #                                                    [linear_model.LogisticRegression(class_weight="balanced")],
         #                                                    [feature_path])))
         
-        self.multiprocess_pipeline_run_wrapper(run_files_all[90])
-        pool = Pool(processes=55)  # most on Ryzen CPU 2990WX is 63
+        #self.multiprocess_pipeline_run_wrapper(run_files_all[0])
+        pool = Pool(processes=45)  # most on Ryzen CPU 2990WX is 63
         pool.map(self.multiprocess_pipeline_run_wrapper, run_files_all)
 
 
@@ -168,7 +168,7 @@ class CohortRunner:
 
 
         #multiprocess_pipeline_run_wrapper(run_files[0])
-        pool = Pool(processes=55)  # most on Ryzen CPU 2990WX is 63
+        pool = Pool(processes=30)  # most on Ryzen CPU 2990WX is 63
         pool.map(self.multiprocess_pipeline_run_wrapper, run_files)
 
 

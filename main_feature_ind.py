@@ -20,7 +20,7 @@ if __name__ == "__main__":
             estimate_all_channels_combined=False,
             save_coef=False,
             outpath=os.path.join(PATH_OUT_BASE, "ind_ch_LM_NormFeature_Bandpass"), 
-            PATH_SETTINGS=os.path.join(PATH_SETTING_BASE, "nm_settings_BandPass_FeatureNorm_Fig2.json"))
+            PATH_SETTINGS=os.path.join(PATH_SETTING_BASE, "nm_settings_STFT_FeatureNorm_Fig2.json"))
     
     elif run_idx == 2:
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
             estimate_all_channels_combined=True,
             save_coef=False,
             outpath=os.path.join(PATH_OUT_BASE, "ch_comb_LM_NormFeature_Bandpass"),
-            PATH_SETTINGS=os.path.join(PATH_SETTING_BASE, "nm_settings_BandPass_FeatureNorm_Fig2.json"))
+            PATH_SETTINGS=os.path.join(PATH_SETTING_BASE, "nm_settings_STFT_FeatureNorm_Fig2.json"))
 
     cw.run_cohorts()
 
