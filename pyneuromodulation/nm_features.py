@@ -41,7 +41,7 @@ class Features:
                 filter_length=self.fs - 1, verbose=self.verbose)
 
         if s["methods"]["kalman_filter"] is True:
-            for bp_feature in s["bandpass_filter_settings"]["bandpower_features"]:
+            for bp_feature in s["frequency_ranges"]:
                 for f_band in s["kalman_filter_settings"]["frequency_bands"]:
                     for channel in self.ch_names:
                         self.KF_dict['_'.join([channel, bp_feature, f_band])] \
