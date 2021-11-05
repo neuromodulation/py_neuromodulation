@@ -40,7 +40,7 @@ def get_fft_features(features_, s, fs, data, KF_dict, ch, f_ranges, f_band_names
 
         if s["methods"]["kalman_filter"] is True:
             if fband in s["kalman_filter_settings"]["frequency_bands"]:
-                KF_name = '_'.join([ch, 'activity', fband])  # is for fft by default activity
+                KF_name = '_'.join([ch, fband])
                 KF_dict[KF_name].predict()
                 KF_dict[KF_name].update(feature_calc)
                 feature_calc = KF_dict[KF_name].x[0]  # filtered signal

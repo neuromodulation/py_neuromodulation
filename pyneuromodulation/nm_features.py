@@ -41,14 +41,13 @@ class Features:
                 filter_length=self.fs - 1, verbose=self.verbose)
 
         if s["methods"]["kalman_filter"] is True:
-            for bp_feature in s["frequency_ranges"]:
-                for f_band in s["kalman_filter_settings"]["frequency_bands"]:
-                    for channel in self.ch_names:
-                        self.KF_dict['_'.join([channel, bp_feature, f_band])] \
-                            = nm_kalmanfilter.define_KF(
-                            s["kalman_filter_settings"]["Tp"],
-                            s["kalman_filter_settings"]["sigma_w"],
-                            s["kalman_filter_settings"]["sigma_v"])
+            for f_band in s["kalman_filter_settings"]["frequency_bands"]:
+                for channel in self.ch_names:
+                    self.KF_dict['_'.join([channel, f_band])] \
+                        = nm_kalmanfilter.define_KF(
+                        s["kalman_filter_settings"]["Tp"],
+                        s["kalman_filter_settings"]["sigma_w"],
+                        s["kalman_filter_settings"]["sigma_v"])
 
         if s["methods"]["sharpwave_analysis"] is True:
             self.sw_features = nm_sharpwaves.SharpwaveAnalyzer(self.s["sharpwave_analysis_settings"],

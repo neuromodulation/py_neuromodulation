@@ -52,9 +52,9 @@ def get_bandpower_features(
                 dat_deriv_2_var = var(dat_deriv_2)
                 deriv_mobility = sqrt(dat_deriv_2_var / deriv_variance)
                 feature_calc = deriv_mobility / mobility
-            if s["methods"]["kalman_filter"] is True:
+            if (s["methods"]["kalman_filter"] is True) and (bp_feature == "activity"):
                 if f_band in s["kalman_filter_settings"]["frequency_bands"]:
-                    KF_name = '_'.join([ch, bp_feature, f_band])
+                    KF_name = '_'.join([ch, f_band])
                     KF_dict[KF_name].predict()
                     KF_dict[KF_name].update(feature_calc)
                     feature_calc = KF_dict[KF_name].x[0]  # filtered signal
