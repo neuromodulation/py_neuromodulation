@@ -6,6 +6,7 @@ from numpy import var as np_var
 from numpy import min as np_min
 from numpy import max as np_max
 import numpy as np
+from numpy.lib.histograms import _unsigned_subtract
 from scipy.signal import convolve, find_peaks
 from mne.filter import create_filter
 
@@ -55,6 +56,9 @@ class SharpwaveAnalyzer:
         """
         for feature_name in self.used_features:
             setattr(self, feature_name, list())
+        if "trough" not in self.used_features:
+            # trough attribute is still necessary, even if it is not specified in settings
+            self.trough = list()
         self.troughs_idx = list()
 
     def get_peaks_around(self, trough_ind, arr_ind_peaks, filtered_dat):
