@@ -45,10 +45,17 @@ class SharpwaveAnalyzer:
 
         # initialize attributes
         self.initialize_sw_features()
-        est_mask = np.array([1 if val is True else 0 for key, val in self.sw_settings["estimator"].items()],
-                            dtype='bool')
 
-        self.estimator_names = list(np.array(list(self.sw_settings["estimator"].keys()))[est_mask])
+        # initializing estimator functions, respecitive for all sharpwave features
+        fun_names = []
+        for used_feature in self.used_features:
+            for estimator, est_features in self.sw_settings["estimator"].items():
+                if est_features is not None:
+                    for est_feature in est_features:
+                        if used_feature == est_feature:
+                            fun_names.append(estimator)
+
+        self.estimator_names = fun_names
         self.estimator_functions = [getattr(np, est_name) for est_name in self.estimator_names]
 
     def initialize_sw_features(self) -> None:
@@ -138,22 +145,25 @@ class SharpwaveAnalyzer:
             self.initialize_sw_features()  # reset sharpwave feature attriubtes to empty lists
             self.analyze_waveform()
 
-            for est, est_fun in zip(self.estimator_names, self.estimator_functions):
-                if self.sw_settings["estimator"][est] is True:
-                    for feature_name in self.used_features:
-                        key_name = '_'.join([ch, 'Sharpwave', est.title(), feature_name])
-                        val = est_fun(getattr(self, feature_name)) if len(getattr(self, feature_name)) != 0 else 0
+            # this function needs to looks different; 
+            # for each feature take the respective fun.
+            for feature_idx, feature_name in enumerate(self.used_features):
+                key_name = '_'.join([ch, 'Sharpwave', self.estimator_names[feature_idx].title(), feature_name])
+                val = self.estimator_functions[feature_idx](getattr(self, feature_name)) \
+                    if len(getattr(self, feature_name)) != 0 else 0
+                if key_name not in dict_ch_features:
+                    dict_ch_features[key_name] = {}
+                dict_ch_features[key_name][key_name_pt] = val
 
-                        if key_name not in dict_ch_features:
-                            dict_ch_features[key_name] = {}
-                        dict_ch_features[key_name][key_name_pt] = val
-
-        if self.sw_settings["max_of_trough_and_peak"]:
+        if self.sw_settings["apply_estimator_between_peaks_and_troughs"]:
             # apply between 'Trough' and 'Peak' the respective function again
             # save only the 'est_fun' (e.g. max) between them
-            for key, value in dict_ch_features.items():
-                for est, est_fun in zip(self.estimator_names, self.estimator_functions):
-                    features_[key] = est_fun([list(value.values())[0], list(value.values())[1]])
+
+            for idx, key_name in enumerate(dict_ch_features):
+                # the key_name stays, since the estimator function stays between peaks and troughs
+                features_[key_name] = self.estimator_functions[idx]([list(dict_ch_features[key_name].values())[0],\
+                                              list(dict_ch_features[key_name].values())[1]])
+
         else:
             # otherwise, save all
             # write all "flatted" key value pairs in features_

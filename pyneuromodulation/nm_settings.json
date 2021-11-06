@@ -14,7 +14,7 @@
         "fft" : false,
         "raw_hjorth": false,
         "sharpwave_analysis": true,
-        "return_raw": true,
+        "return_raw": false,
         "project_cortex": true,
         "project_subcortex": false,
         "pdc": false,
@@ -106,10 +106,10 @@
         "sharpwave_features": {
             "peak_left": false,
             "peak_right": false,
-            "trough": true,
+            "trough": false,
             "width": false,
             "prominence": true,
-            "interval": false,
+            "interval": true,
             "decay_time": false,
             "rise_time": false,
             "sharpness": true,
@@ -129,14 +129,19 @@
             "distance_troughs": 5,
             "distance_peaks": 10
         },
-        "max_of_trough_and_peak" : true,
         "estimator": {
-            "mean": false,
-            "median": false,
-            "max": true,
-            "min": false,
-            "var": false
-        }
+            "mean": [
+                "interval"
+            ],
+            "median": null,
+            "max": [
+                "prominence",
+                "sharpness"
+            ],
+            "min": null,
+            "var": null
+        },
+        "apply_estimator_between_peaks_and_troughs" : true
     },
     "project_cortex_settings": {
         "max_dist": 20
