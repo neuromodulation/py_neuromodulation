@@ -291,8 +291,8 @@ class FeatureReadWrapper:
                                     eval_method=eval_method,
                                     cv_method=cv_method,
                                     threshold_score=True,
-                                    TRAIN_VAL_SPLIT=False,
-                                    save_coef=False,
+                                    TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT,
+                                    save_coef=save_coef,
                                     get_movement_detection_rate=True,
                                     min_consequent_count=3
                                     )
