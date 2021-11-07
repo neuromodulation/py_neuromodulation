@@ -23,8 +23,17 @@ from pyneuromodulation import nm_decode, nm_start_BIDS, nm_settings, nm_analysis
 
 class CohortRunner:
 
-    def __init__(self, ML_model_name="LM", model=linear_model.LogisticRegression(class_weight="balanced"),
-                 estimate_gridpoints=False, estimate_channels=True, estimate_all_channels_combined=False, save_coef=False,
+    def __init__(self, ML_model_name="LM",
+                 model=linear_model.LogisticRegression(class_weight="balanced"),
+                 estimate_gridpoints=False, 
+                 estimate_channels=True,
+                 estimate_all_channels_combined=False,
+                 save_coef=False,
+                 plot_features=False,
+                 plot_grid_performances=False,
+                 run_ML_model=True,
+                 run_bids=True,
+                 run_pool=True,
                  outpath=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\0209_SharpWaveLimFeaturesSTFT_with_Grid",
                  PATH_SETTINGS=r"C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\nm_settings.json") -> None:
         
@@ -36,6 +45,11 @@ class CohortRunner:
         self.estimate_channels = estimate_channels
         self.estimate_all_channels_combined = estimate_all_channels_combined
         self.save_coef = save_coef
+        self.plot_features = plot_features
+        self.plot_grid_performances = plot_grid_performances
+        self.run_ML_model = run_ML_model
+        self.run_bids = run_bids
+        self.run_pool = run_pool
 
     def multiprocess_pipeline_run_wrapper(self, PATH_RUN):
 
@@ -58,33 +72,38 @@ class CohortRunner:
 
         nm_BIDS = nm_start_BIDS.NM_BIDS(PATH_RUN, ECOG_ONLY=True, PATH_BIDS=PATH_BIDS, PATH_OUT=PATH_OUT,
                                         PATH_SETTINGS=self.PATH_SETTINGS, LIMIT_DATA=False, LIMIT_HIGH=200000)
-        nm_BIDS.run_bids()
+        if self.run_bids:
+            nm_BIDS.run_bids()
 
         feature_path = PATH_OUT
         feature_file = os.path.basename(PATH_RUN)[:-5]  # cut off ".vhdr"
 
         feature_wrapper = nm_analysis.FeatureReadWrapper(feature_path, feature_file,
                                                         plt_cort_projection=False)
-        feature_wrapper.read_plotting_modules()
-
-        feature_wrapper.plot_features()
+        
+        if self.plot_features:
+            feature_wrapper.read_plotting_modules()
+            feature_wrapper.plot_features()
+        
         #model = discriminant_analysis.LinearDiscriminantAnalysis()
         #model = xgboost.XGBClassifier(scale_pos_weight=10)  # balanced class weights
         #model = ensemble.RandomForestClassifier(n_estimators=6, max_depth=6, class_weight='balanced')
         #model = svm.SVC(class_weight="balanced")
-        feature_wrapper.run_ML_model(model=self.model, output_name=self.ML_model_name, TRAIN_VAL_SPLIT=False,
+        
+        if self.run_ML_model:
+            feature_wrapper.run_ML_model(model=self.model, output_name=self.ML_model_name, TRAIN_VAL_SPLIT=False,
                                     estimate_channels=self.estimate_channels, estimate_gridpoints=self.estimate_gridpoints,
                                     estimate_all_channels_combined=self.estimate_all_channels_combined,
                                     save_coef=self.save_coef)
 
-        performance_dict = {}
-
-        subject_name = feature_wrapper.feature_file[4:10]
-        performance_dict = feature_wrapper.read_results(performance_dict,
+        if self.plot_grid_performances:
+            performance_dict = {}
+            subject_name = feature_wrapper.feature_file[4:10]
+            performance_dict = feature_wrapper.read_results(performance_dict,
                                                         subject_name, read_grid_points=False,
                                                         read_channels=True)
 
-        feature_wrapper.plot_subject_grid_ch_performance(subject_name,
+            feature_wrapper.plot_subject_grid_ch_performance(subject_name,
                                                          performance_dict=performance_dict,
                                                          plt_grid=False, output_name=self.ML_model_name)
 
@@ -126,9 +145,13 @@ class CohortRunner:
         #                                                    [linear_model.LogisticRegression(class_weight="balanced")],
         #                                                    [feature_path])))
         
-        #self.multiprocess_pipeline_run_wrapper(run_files_all[0])
-        pool = Pool(processes=45)  # most on Ryzen CPU 2990WX is 63
-        pool.map(self.multiprocess_pipeline_run_wrapper, run_files_all)
+        if self.run_pool:
+            pool = Pool(processes=45)  # most on Ryzen CPU 2990WX is 63
+            pool.map(self.multiprocess_pipeline_run_wrapper, run_files_all)
+        else:
+            self.multiprocess_pipeline_run_wrapper(run_files_all[0])
+        
+
 
 
     def run_cohort(self, cohort="Pittsburgh"):
@@ -167,7 +190,7 @@ class CohortRunner:
                 run_files_left.append(run_file)
 
 
-        #multiprocess_pipeline_run_wrapper(run_files[0])
+        #self.multiprocess_pipeline_run_wrapper(run_files[0])
         pool = Pool(processes=30)  # most on Ryzen CPU 2990WX is 63
         pool.map(self.multiprocess_pipeline_run_wrapper, run_files)
 
@@ -194,15 +217,14 @@ class CohortRunner:
             subject_name = feature_file[feature_file.find("sub-"):feature_file.find("_ses")]
             # cut here s.t. the subject is the whole recording
             subject_name = feature_file[:-5]
-            performance_dict = feature_wrapper.read_ind_channel_results(performance_dict,
+            performance_dict = feature_wrapper.read_results(performance_dict,
                                                                         subject_name, ML_model_name=ML_model_name,
                                                                         read_grid_points=False, read_all_combined=False,
                                                                         read_channels=True)
         np.save(os.path.join(self.outpath, ML_model_name+'_cohort_'+cohort+'.npy'), performance_dict)
 
 
-    def cohort_wrapper_read_cohort(self, feature_path="C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\0209_SharpWaveLimFeaturesSTFT_with_Grid",
-                                ML_model_name="LM"):
+    def cohort_wrapper_read_cohort(self, ML_model_name="LM"):
         """Read results for multiple cohorts
 
         Parameters
@@ -214,7 +236,7 @@ class CohortRunner:
         """
         cohorts = ["Pittsburgh", "Beijing", "Berlin"]
         for cohort in cohorts:
-            self.read_cohort_results(os.path.join(feature_path, cohort), cohort, ML_model_name)
+            self.read_cohort_results(os.path.join(self.outpath, cohort), cohort, ML_model_name)
 
 
     def read_all_grid_points(self, grid_point_all, feature_path, feature_file, cohort):
