@@ -9,6 +9,9 @@ from sklearn import metrics
 from sklearn.base import clone
 from sklearn import model_selection
 from sklearn.utils import class_weight
+from scipy.ndimage import (binary_dilation,
+                           binary_erosion,
+                           label)
 #import xgboost
 import _pickle as cPickle
 from scipy import io
@@ -320,234 +323,213 @@ class CohortRunner:
 
         np.save(os.path.join(self.outpath, 'grid_point_all.npy'), grid_point_all)
 
+    def get_movement_grouped_array(self, prediction, threshold=0.5, min_consequent_count=5):
+        """Return given a 1D numpy array, an array of same size with grouped consective blocks
 
-def run_cohort_leave_one_patient_out_CV_within_cohort(feature_path=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408\Beijing",
-                                        model_base=linear_model.LogisticRegression(class_weight="balanced"),
-                                        ML_model_name="LM"):
+        Parameters
+        ----------
+        prediction : np.array
+            numpy array of either predictions or labels, that is going to be grouped
+        threshold : float, optional
+            threshold to be applied to 'prediction', by default 0.5
+        min_consequent_count : int, optional
+            minimum required consective samples higher than 'threshold', by default 5
 
-    grid_point_all = np.load('grid_point_all.npy', allow_pickle='TRUE').item()
-    performance_leave_one_patient_out = {}
+        Returns
+        -------
+        labeled_array : np.array
+            grouped vector with incrementing number for movement blocks
+        labels_count : int
+            count of individual movement blocks
+        """
+        mask = prediction > threshold
+        structure = [True] * min_consequent_count  # used for erosion and dilation
+        eroded = binary_erosion(mask, structure)
+        dilated = binary_dilation(eroded, structure)
+        labeled_array, labels_count = label(dilated)
+        return labeled_array, labels_count
+        
+    def calc_movement_detection_rate(self, y_label, prediction, threshold=0.5, min_consequent_count=3):
+        """Given a label and prediction, return the movement detection rate on the basis of 
+        movements classified in blocks of 'min_consequent_count'.
 
-    for cohort in ["Pittsburgh", "Beijing", "Berlin"]:
-        print('cohort: '+str(cohort))
-        performance_leave_one_patient_out[cohort] = {}
+        Parameters
+        ----------
+        y_label : [type]
+            [description]
+        prediction : [type]
+            [description]
+        threshold : float, optional
+            threshold to be applied to 'prediction', by default 0.5
+        min_consequent_count : int, optional
+            minimum required consective samples higher than 'threshold', by default 3
 
-        for grid_point in list(grid_point_all.keys()):
-            print('grid point: '+str(grid_point))
-            if cohort not in grid_point_all[grid_point]:
-                continue
-            if len(list(grid_point_all[grid_point][cohort].keys())) <= 1:
-                continue  # cannot do leave one out prediction with a single subject
-            performance_leave_one_patient_out[cohort][grid_point] = {}
+        Returns
+        -------
+        mov_detection_rate : float
+            movement detection rate, where at least 'min_consequent_count' samples where high in prediction
+        fpr : np.array
+            sklearn.metrics false positive rate np.array
+        tpr : np.array
+            sklearn.metrics true positive rate np.array
+        """
+        pred_grouped, _ = self.get_movement_grouped_array(prediction, threshold, min_consequent_count)
+        y_grouped, labels_count = self.get_movement_grouped_array(y_label, threshold, min_consequent_count)
 
-            for subject_test in list(grid_point_all[grid_point][cohort].keys()):
-                X_test = []
-                y_test = []
-                for run in list(grid_point_all[grid_point][cohort][subject_test].keys()):
-                    if grid_point_all[grid_point][cohort][subject_test][run]["lat"] != "CON":
-                        continue
-                    X_test.append(grid_point_all[grid_point][cohort][subject_test][run]["data"])
-                    y_test.append(grid_point_all[grid_point][cohort][subject_test][run]["label"])
-                if len(X_test) > 1:
-                    X_test = np.concatenate(X_test, axis=0)
-                    y_test = np.concatenate(y_test, axis=0)
-                else:
-                    X_test = X_test[0]
-                    y_test = y_test[0]
-                X_train = []
-                y_train = []
-                for subject_train in list(grid_point_all[grid_point][cohort].keys()):
-                    if subject_test == subject_train:
-                        continue
-                    for run in list(grid_point_all[grid_point][cohort][subject_train].keys()):
-                        if grid_point_all[grid_point][cohort][subject_train][run]["lat"] != "CON":
-                            continue
-                        X_train.append(grid_point_all[grid_point][cohort][subject_train][run]["data"])
-                        y_train.append(grid_point_all[grid_point][cohort][subject_train][run]["label"])
-                if len(X_train) > 1:
-                    X_train = np.concatenate(X_train, axis=0)
-                    y_train = np.concatenate(y_train, axis=0)
-                else:
-                    X_train = X_train[0]
-                    y_train = y_train[0]
+        hit_rate = np.zeros(labels_count)
+        pred_group_bin = np.array(pred_grouped>0)
+        for label_number in range(1, labels_count + 1):  # labeling starts from 1    
+            hit_rate[label_number-1] = np.sum(pred_group_bin[np.where(y_grouped == label_number)[0]])
 
-                model = clone(model_base)
-                # run here ML estimation
-                if ML_model_name == "XGB":
-                    X_train, X_val, y_train, y_val = \
-                        model_selection.train_test_split(
-                            X_train, y_train, train_size=0.7, shuffle=False)
-                    classes_weights = class_weight.compute_sample_weight(
-                        class_weight='balanced', y=y_train)
+        mov_detection_rate = np.where(hit_rate>0)[0].shape[0] / labels_count
 
-                    model.fit(
-                        X_train, y_train, eval_set=[(X_val, y_val)],
-                        early_stopping_rounds=7, sample_weight=classes_weights,
-                        verbose=False)
-                else:
-                    # LM
-                    model.fit(X_train, y_train)
+        # calculating TPR and FPR: https://stackoverflow.com/a/40324184/5060208
+        CM = metrics.confusion_matrix(y_label, prediction)
 
-                y_tr_pr = model.predict(X_train)
-                y_te_pr = model.predict(X_test)
-                performance_leave_one_patient_out[cohort][grid_point][subject_test] = {}
-                performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_test"] = y_test
-                performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_test_pr"] = y_te_pr
-                performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_train"] = y_train
-                performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_train_pr"] = y_tr_pr
-                performance_leave_one_patient_out[cohort][grid_point][subject_test]["performance_test"] = \
-                    metrics.balanced_accuracy_score(y_test, y_te_pr)
-                performance_leave_one_patient_out[cohort][grid_point][subject_test]["performance_train"] = \
-                    metrics.balanced_accuracy_score(y_train, y_tr_pr)
+        TN = CM[0][0]
+        FN = CM[1][0]
+        TP = CM[1][1]
+        FP = CM[0][1]
+        fpr = FP / (FP + TN)
+        tpr = TP / (TP + FN)
 
-    # add the cortex grid for plotting
-    nm_reader = NM_reader.NM_Reader(feature_path)
-    feature_file = nm_reader.get_feature_list()[0]
-    grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
-    performance_leave_one_patient_out["grid_cortex"] = grid_cortex
-    np.save(ML_model_name+'_performance_leave_one_patient_out_within_cohort.npy', performance_leave_one_patient_out)
-    return performance_leave_one_patient_out
+        return mov_detection_rate, fpr, tpr
 
+    def run_cohort_leave_one_patient_out_CV_within_cohort(self,
+            feature_path=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408\Beijing"):
 
-def run_cohort_leave_one_cohort_out_CV(feature_path=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408\Beijing",
-                                       model_base=linear_model.LogisticRegression(class_weight="balanced"),
-                                       ML_model_name="LM"):
-    grid_point_all = np.load('grid_point_all.npy', allow_pickle='TRUE').item()
-    performance_leave_one_cohort_out = {}
+        grid_point_all = np.load(os.path.join(feature_path, 'grid_point_all.npy'), allow_pickle='TRUE').item()
+        performance_leave_one_patient_out = {}
 
-    for cohort_test in ["Pittsburgh", "Beijing", "Berlin"]:
-        print('cohort: '+str(cohort_test))
-        if cohort_test not in performance_leave_one_cohort_out:
-            performance_leave_one_cohort_out[cohort_test] = {}
-
-        for grid_point in list(grid_point_all.keys()):
-            print('grid point: '+str(grid_point))
-            if cohort_test not in grid_point_all[grid_point]:
-                continue
-            if len(list(grid_point_all[grid_point].keys())) == 1:
-                continue  # cannot do leave one cohort prediction with a single cohort
-
-            X_train = []
-            y_train = []
-            for cohort_train in ["Pittsburgh", "Beijing", "Berlin"]:
-                if cohort_test == cohort_train:
-                    continue
-                if cohort_train not in grid_point_all[grid_point]:
-                    continue
-                for subject_test in list(grid_point_all[grid_point][cohort_train].keys()):
-                    for run in list(grid_point_all[grid_point][cohort_train][subject_test].keys()):
-                        if grid_point_all[grid_point][cohort_train][subject_test][run]["lat"] != "CON":
-                            continue
-                        X_train.append(grid_point_all[grid_point][cohort_train][subject_test][run]["data"])
-                        y_train.append(grid_point_all[grid_point][cohort_train][subject_test][run]["label"])
-            if len(X_train) > 1:
-                X_train = np.concatenate(X_train, axis=0)
-                y_train = np.concatenate(y_train, axis=0)
-            else:
-                X_train = X_train[0]
-                y_train = y_train[0]
-
-            # run here ML estimation
-            model = clone(model_base)
-            if ML_model_name == "XGB":
-                X_train, X_val, y_train, y_val = \
-                    model_selection.train_test_split(
-                        X_train, y_train, train_size=0.7, shuffle=False)
-                classes_weights = class_weight.compute_sample_weight(
-                    class_weight='balanced', y=y_train)
-
-                model.fit(
-                    X_train, y_train, eval_set=[(X_val, y_val)],
-                    early_stopping_rounds=7, sample_weight=classes_weights,
-                    verbose=False)
-
-            else:
-                # LM
-                model.fit(X_train, y_train)
-
-            performance_leave_one_cohort_out[cohort_test][grid_point] = {}
-            for subject_test in list(grid_point_all[grid_point][cohort_test].keys()):
-                X_test = []
-                y_test = []
-                for run in list(grid_point_all[grid_point][cohort_test][subject_test].keys()):
-                    if grid_point_all[grid_point][cohort_test][subject_test][run]["lat"] != "CON":
-                        continue
-                    X_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["data"])
-                    y_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["label"])
-                if len(X_test) > 1:
-                    X_test = np.concatenate(X_test, axis=0)
-                    y_test = np.concatenate(y_test, axis=0)
-                else:
-                    X_test = X_test[0]
-                    y_test = y_test[0]
-
-                y_tr_pr = model.predict(X_train)
-                y_te_pr = model.predict(X_test)
-                performance_leave_one_cohort_out[cohort_test][grid_point][subject_test] = {}
-                performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["y_test"] = y_test
-                performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["y_test_pr"] = y_te_pr
-                performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["y_train"] = y_train
-                performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["y_train_pr"] = y_tr_pr
-                performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["performance_test"] = \
-                    metrics.balanced_accuracy_score(y_test, y_te_pr)
-                performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["performance_train"] = \
-                    metrics.balanced_accuracy_score(y_train, y_tr_pr)
-
-    # add the cortex grid for plotting
-    nm_reader = NM_reader.NM_Reader(feature_path)
-    feature_file = nm_reader.get_feature_list()[0]
-    grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
-    performance_leave_one_cohort_out["grid_cortex"] = grid_cortex
-    np.save(ML_model_name+'_performance_leave_one_cohort_out.npy', performance_leave_one_cohort_out)
-
-
-def run_leave_one_patient_out_across_cohorts(feature_path=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408\Beijing",
-                                        model_base=linear_model.LogisticRegression(class_weight="balanced"),
-                                        ML_model_name="LM"):
-
-    grid_point_all = np.load('grid_point_all.npy', allow_pickle='TRUE').item()
-    performance_leave_one_patient_out = {}
-
-    for grid_point in list(grid_point_all.keys()):
-        print('grid point: '+str(grid_point))
         for cohort in ["Pittsburgh", "Beijing", "Berlin"]:
             print('cohort: '+str(cohort))
-            if cohort not in performance_leave_one_patient_out:
-                performance_leave_one_patient_out[cohort] = {}
+            performance_leave_one_patient_out[cohort] = {}
 
-            if cohort not in grid_point_all[grid_point]:
-                continue
-            if len(list(grid_point_all[grid_point][cohort].keys())) <= 1:
-                continue  # cannot do leave one out prediction with a single subject
-            
-            if grid_point not in performance_leave_one_patient_out[cohort]:
+            for grid_point in list(grid_point_all.keys()):
+                print('grid point: '+str(grid_point))
+                if cohort not in grid_point_all[grid_point]:
+                    continue
+                if len(list(grid_point_all[grid_point][cohort].keys())) <= 1:
+                    continue  # cannot do leave one out prediction with a single subject
                 performance_leave_one_patient_out[cohort][grid_point] = {}
 
-            for subject_test in list(grid_point_all[grid_point][cohort].keys()):
-                X_test = []
-                y_test = []
-                for run in list(grid_point_all[grid_point][cohort][subject_test].keys()):
-                    if grid_point_all[grid_point][cohort][subject_test][run]["lat"] != "CON":
-                        continue
-                    X_test.append(grid_point_all[grid_point][cohort][subject_test][run]["data"])
-                    y_test.append(grid_point_all[grid_point][cohort][subject_test][run]["label"])
-                if len(X_test) > 1:
-                    X_test = np.concatenate(X_test, axis=0)
-                    y_test = np.concatenate(y_test, axis=0)
-                else:
-                    X_test = X_test[0]
-                    y_test = y_test[0]
+                for subject_test in list(grid_point_all[grid_point][cohort].keys()):
+                    X_test = []
+                    y_test = []
+                    for run in list(grid_point_all[grid_point][cohort][subject_test].keys()):
+                        if grid_point_all[grid_point][cohort][subject_test][run]["lat"] != "CON":
+                            continue
+                        X_test.append(grid_point_all[grid_point][cohort][subject_test][run]["data"])
+                        y_test.append(grid_point_all[grid_point][cohort][subject_test][run]["label"])
+                    if len(X_test) > 1:
+                        X_test = np.concatenate(X_test, axis=0)
+                        y_test = np.concatenate(y_test, axis=0)
+                    else:
+                        X_test = X_test[0]
+                        y_test = y_test[0]
+                    X_train = []
+                    y_train = []
+                    for subject_train in list(grid_point_all[grid_point][cohort].keys()):
+                        if subject_test == subject_train:
+                            continue
+                        for run in list(grid_point_all[grid_point][cohort][subject_train].keys()):
+                            if grid_point_all[grid_point][cohort][subject_train][run]["lat"] != "CON":
+                                continue
+                            X_train.append(grid_point_all[grid_point][cohort][subject_train][run]["data"])
+                            y_train.append(grid_point_all[grid_point][cohort][subject_train][run]["label"])
+                    if len(X_train) > 1:
+                        X_train = np.concatenate(X_train, axis=0)
+                        y_train = np.concatenate(y_train, axis=0)
+                    else:
+                        X_train = X_train[0]
+                        y_train = y_train[0]
+
+                    model = clone(self.model)
+                    # run here ML estimation
+                    if self.ML_model_name == "XGB":
+                        X_train, X_val, y_train, y_val = \
+                            model_selection.train_test_split(
+                                X_train, y_train, train_size=0.7, shuffle=False)
+                        classes_weights = class_weight.compute_sample_weight(
+                            class_weight='balanced', y=y_train)
+
+                        model.fit(
+                            X_train, y_train, eval_set=[(X_val, y_val)],
+                            early_stopping_rounds=7, sample_weight=classes_weights,
+                            verbose=False)
+                    else:
+                        # LM
+                        model.fit(X_train, y_train)
+
+                    y_tr_pr = model.predict(X_train)
+                    y_te_pr = model.predict(X_test)
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test] = {}
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_test"] = y_test
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_test_pr"] = y_te_pr
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_train"] = y_train
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_train_pr"] = y_tr_pr
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["performance_test"] = \
+                        metrics.balanced_accuracy_score(y_test, y_te_pr)
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["performance_train"] = \
+                        metrics.balanced_accuracy_score(y_train, y_tr_pr)
+                    
+                    mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(y_test,
+                                                                                y_te_pr,
+                                                                                threshold=0.5,
+                                                                                min_consequent_count=3)
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["mov_detection_rate_test"] = mov_detection_rate
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["fpr_test"] = fpr
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["tpr_test"] = tpr
+                    
+                    mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(y_train,
+                                                                                y_tr_pr,
+                                                                                threshold=0.5,
+                                                                                min_consequent_count=3)
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["mov_detection_rate_train"] = mov_detection_rate
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["fpr_train"] = fpr
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["tpr_train"] = tpr
+
+
+        # add the cortex grid for plotting
+        nm_reader = NM_reader.NM_Reader(feature_path)
+        feature_file = nm_reader.get_feature_list()[0]
+        grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
+        performance_leave_one_patient_out["grid_cortex"] = grid_cortex
+        np.save(os.path.join(self.outpath, self.ML_model_name+'_performance_leave_one_patient_out_within_cohort.npy'),\
+            performance_leave_one_patient_out)
+        return performance_leave_one_patient_out
+
+
+    def run_cohort_leave_one_cohort_out_CV(self,
+        feature_path=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408\Beijing"):
+        grid_point_all = np.load(os.path.join(feature_path, 'grid_point_all.npy'), allow_pickle='TRUE').item()
+        performance_leave_one_cohort_out = {}
+
+        for cohort_test in ["Pittsburgh", "Beijing", "Berlin"]:
+            print('cohort: '+str(cohort_test))
+            if cohort_test not in performance_leave_one_cohort_out:
+                performance_leave_one_cohort_out[cohort_test] = {}
+
+            for grid_point in list(grid_point_all.keys()):
+                print('grid point: '+str(grid_point))
+                if cohort_test not in grid_point_all[grid_point]:
+                    continue
+                if len(list(grid_point_all[grid_point].keys())) == 1:
+                    continue  # cannot do leave one cohort prediction with a single cohort
+
                 X_train = []
                 y_train = []
-                for cohort_inner in list(grid_point_all[grid_point].keys()):  # available cohorts for that grid point
-                    for subject_train in list(grid_point_all[grid_point][cohort_inner].keys()):
-                        if (subject_test == subject_train) and (cohort_inner == cohort):
-                            continue
-                        for run in list(grid_point_all[grid_point][cohort_inner][subject_train].keys()):
-                            if grid_point_all[grid_point][cohort_inner][subject_train][run]["lat"] != "CON":
+                for cohort_train in ["Pittsburgh", "Beijing", "Berlin"]:
+                    if cohort_test == cohort_train:
+                        continue
+                    if cohort_train not in grid_point_all[grid_point]:
+                        continue
+                    for subject_test in list(grid_point_all[grid_point][cohort_train].keys()):
+                        for run in list(grid_point_all[grid_point][cohort_train][subject_test].keys()):
+                            if grid_point_all[grid_point][cohort_train][subject_test][run]["lat"] != "CON":
                                 continue
-                            X_train.append(grid_point_all[grid_point][cohort_inner][subject_train][run]["data"])
-                            y_train.append(grid_point_all[grid_point][cohort_inner][subject_train][run]["label"])
+                            X_train.append(grid_point_all[grid_point][cohort_train][subject_test][run]["data"])
+                            y_train.append(grid_point_all[grid_point][cohort_train][subject_test][run]["label"])
                 if len(X_train) > 1:
                     X_train = np.concatenate(X_train, axis=0)
                     y_train = np.concatenate(y_train, axis=0)
@@ -555,8 +537,8 @@ def run_leave_one_patient_out_across_cohorts(feature_path=r"C:\Users\ICN_admin\D
                     X_train = X_train[0]
                     y_train = y_train[0]
 
-                model = clone(model_base)
                 # run here ML estimation
+                model = clone(self.model)
                 if ML_model_name == "XGB":
                     X_train, X_val, y_train, y_val = \
                         model_selection.train_test_split(
@@ -568,123 +550,278 @@ def run_leave_one_patient_out_across_cohorts(feature_path=r"C:\Users\ICN_admin\D
                         X_train, y_train, eval_set=[(X_val, y_val)],
                         early_stopping_rounds=7, sample_weight=classes_weights,
                         verbose=False)
+
                 else:
                     # LM
                     model.fit(X_train, y_train)
 
-                y_tr_pr = model.predict(X_train)
-                y_te_pr = model.predict(X_test)
-                performance_leave_one_patient_out[cohort][grid_point][subject_test] = {}
-                performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_test"] = y_test
-                performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_test_pr"] = y_te_pr
-                performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_train"] = y_train
-                performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_train_pr"] = y_tr_pr
-                performance_leave_one_patient_out[cohort][grid_point][subject_test]["performance_test"] = \
-                    metrics.balanced_accuracy_score(y_test, y_te_pr)
-                performance_leave_one_patient_out[cohort][grid_point][subject_test]["performance_train"] = \
-                    metrics.balanced_accuracy_score(y_train, y_tr_pr)
-
-    # add the cortex grid for plotting
-    nm_reader = NM_reader.NM_Reader(feature_path)
-    feature_file = nm_reader.get_feature_list()[0]
-    grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
-    performance_leave_one_patient_out["grid_cortex"] = grid_cortex
-    np.save(ML_model_name+'_performance_leave_one_patient_out_across_cohorts.npy', performance_leave_one_patient_out)
-    #return performance_leave_one_patient_out
-
-
-def run_leave_nminus1_patient_out_across_cohorts(feature_path=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408\Beijing",
-                                        model_base=linear_model.LogisticRegression(class_weight="balanced"),
-                                        ML_model_name="LM"):
-
-    grid_point_all = np.load('grid_point_all.npy', allow_pickle='TRUE').item()
-    performance_leave_one_patient_out = {}
-
-    for grid_point in list(grid_point_all.keys()):
-        print('grid point: '+str(grid_point))
-        for cohort_train in ["Pittsburgh", "Beijing", "Berlin"]:
-            print('cohort: '+str(cohort_train))
-            if cohort_train not in performance_leave_one_patient_out:
-                performance_leave_one_patient_out[cohort_train] = {}
-
-            if cohort_train not in grid_point_all[grid_point]:
-                continue
-            if len(list(grid_point_all[grid_point][cohort_train].keys())) <= 1:
-                continue  # cannot do leave one out prediction with a single subject
-            if grid_point not in performance_leave_one_patient_out[cohort_train]:
-                performance_leave_one_patient_out[cohort_train][grid_point] = {}
-
-            for subject_train in list(grid_point_all[grid_point][cohort_train].keys()):
-                X_train = []
-                y_train = []
-                for run in list(grid_point_all[grid_point][cohort_train][subject_train].keys()):
-                    if grid_point_all[grid_point][cohort_train][subject_train][run]["lat"] != "CON":
-                        continue
-                    X_train.append(grid_point_all[grid_point][cohort_train][subject_train][run]["data"])
-                    y_train.append(grid_point_all[grid_point][cohort_train][subject_train][run]["label"])
-                if len(X_train) > 1:
-                    X_train = np.concatenate(X_train, axis=0)
-                    y_train = np.concatenate(y_train, axis=0)
-                else:
-                    X_train = X_train[0]
-                    y_train = y_train[0]
-
-                for cohort_test in list(grid_point_all[grid_point].keys()):
-                    for subject_test in list(grid_point_all[grid_point][cohort_test].keys()):
-                        if (subject_test == subject_train) and (cohort_test == cohort_train):
+                performance_leave_one_cohort_out[cohort_test][grid_point] = {}
+                for subject_test in list(grid_point_all[grid_point][cohort_test].keys()):
+                    X_test = []
+                    y_test = []
+                    for run in list(grid_point_all[grid_point][cohort_test][subject_test].keys()):
+                        if grid_point_all[grid_point][cohort_test][subject_test][run]["lat"] != "CON":
                             continue
-                        X_test = []
-                        y_test = []
-                        for run in list(grid_point_all[grid_point][cohort_test][subject_test].keys()):
-                            if grid_point_all[grid_point][cohort_test][subject_test][run]["lat"] != "CON":
+                        X_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["data"])
+                        y_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["label"])
+                    if len(X_test) > 1:
+                        X_test = np.concatenate(X_test, axis=0)
+                        y_test = np.concatenate(y_test, axis=0)
+                    else:
+                        X_test = X_test[0]
+                        y_test = y_test[0]
+
+                    y_tr_pr = model.predict(X_train)
+                    y_te_pr = model.predict(X_test)
+                    performance_leave_one_cohort_out[cohort_test][grid_point][subject_test] = {}
+                    performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["y_test"] = y_test
+                    performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["y_test_pr"] = y_te_pr
+                    performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["y_train"] = y_train
+                    performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["y_train_pr"] = y_tr_pr
+                    performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["performance_test"] = \
+                        metrics.balanced_accuracy_score(y_test, y_te_pr)
+                    performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["performance_train"] = \
+                        metrics.balanced_accuracy_score(y_train, y_tr_pr)
+                    
+                    mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(y_test,
+                                                                                y_te_pr,
+                                                                                threshold=0.5,
+                                                                                min_consequent_count=3)
+                    performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["mov_detection_rate_test"] = mov_detection_rate
+                    performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["fpr_test"] = fpr
+                    performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["tpr_test"] = tpr
+                    
+                    mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(y_train,
+                                                                                y_tr_pr,
+                                                                                threshold=0.5,
+                                                                                min_consequent_count=3)
+                    performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["mov_detection_rate_train"] = mov_detection_rate
+                    performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["fpr_train"] = fpr
+                    performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["tpr_train"] = tpr
+
+        # add the cortex grid for plotting
+        nm_reader = NM_reader.NM_Reader(feature_path)
+        feature_file = nm_reader.get_feature_list()[0]
+        grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
+        performance_leave_one_cohort_out["grid_cortex"] = grid_cortex
+        np.save(os.path.join(self.outpath, ML_model_name+'_performance_leave_one_cohort_out.npy'), performance_leave_one_cohort_out)
+
+
+    def run_leave_one_patient_out_across_cohorts(self, feature_path=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408\Beijing",
+                                            model_base=linear_model.LogisticRegression(class_weight="balanced"),
+                                            ML_model_name="LM"):
+
+        grid_point_all = np.load(os.path.join(feature_path, 'grid_point_all.npy'), allow_pickle='TRUE').item()
+        performance_leave_one_patient_out = {}
+
+        for grid_point in list(grid_point_all.keys()):
+            print('grid point: '+str(grid_point))
+            for cohort in ["Pittsburgh", "Beijing", "Berlin"]:
+                print('cohort: '+str(cohort))
+                if cohort not in performance_leave_one_patient_out:
+                    performance_leave_one_patient_out[cohort] = {}
+
+                if cohort not in grid_point_all[grid_point]:
+                    continue
+                if len(list(grid_point_all[grid_point][cohort].keys())) <= 1:
+                    continue  # cannot do leave one out prediction with a single subject
+                
+                if grid_point not in performance_leave_one_patient_out[cohort]:
+                    performance_leave_one_patient_out[cohort][grid_point] = {}
+
+                for subject_test in list(grid_point_all[grid_point][cohort].keys()):
+                    X_test = []
+                    y_test = []
+                    for run in list(grid_point_all[grid_point][cohort][subject_test].keys()):
+                        if grid_point_all[grid_point][cohort][subject_test][run]["lat"] != "CON":
+                            continue
+                        X_test.append(grid_point_all[grid_point][cohort][subject_test][run]["data"])
+                        y_test.append(grid_point_all[grid_point][cohort][subject_test][run]["label"])
+                    if len(X_test) > 1:
+                        X_test = np.concatenate(X_test, axis=0)
+                        y_test = np.concatenate(y_test, axis=0)
+                    else:
+                        X_test = X_test[0]
+                        y_test = y_test[0]
+                    X_train = []
+                    y_train = []
+                    for cohort_inner in list(grid_point_all[grid_point].keys()):  # available cohorts for that grid point
+                        for subject_train in list(grid_point_all[grid_point][cohort_inner].keys()):
+                            if (subject_test == subject_train) and (cohort_inner == cohort):
                                 continue
-                            X_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["data"])
-                            y_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["label"])
-                        if len(X_test) > 1:
-                            X_test = np.concatenate(X_test, axis=0)
-                            y_test = np.concatenate(y_test, axis=0)
-                        else:
-                            X_test = X_test[0]
-                            y_test = y_test[0]
+                            for run in list(grid_point_all[grid_point][cohort_inner][subject_train].keys()):
+                                if grid_point_all[grid_point][cohort_inner][subject_train][run]["lat"] != "CON":
+                                    continue
+                                X_train.append(grid_point_all[grid_point][cohort_inner][subject_train][run]["data"])
+                                y_train.append(grid_point_all[grid_point][cohort_inner][subject_train][run]["label"])
+                    if len(X_train) > 1:
+                        X_train = np.concatenate(X_train, axis=0)
+                        y_train = np.concatenate(y_train, axis=0)
+                    else:
+                        X_train = X_train[0]
+                        y_train = y_train[0]
 
-                        model = clone(model_base)
-                        # run here ML estimation
-                        if ML_model_name == "XGB":
-                            X_train, X_val, y_train, y_val = \
-                                model_selection.train_test_split(
-                                    X_train, y_train, train_size=0.7, shuffle=False)
-                            classes_weights = class_weight.compute_sample_weight(
-                                class_weight='balanced', y=y_train)
+                    model = clone(self.model)
+                    # run here ML estimation
+                    if self.ML_model_name == "XGB":
+                        X_train, X_val, y_train, y_val = \
+                            model_selection.train_test_split(
+                                X_train, y_train, train_size=0.7, shuffle=False)
+                        classes_weights = class_weight.compute_sample_weight(
+                            class_weight='balanced', y=y_train)
 
-                            model.fit(
-                                X_train, y_train, eval_set=[(X_val, y_val)],
-                                early_stopping_rounds=7, sample_weight=classes_weights,
-                                verbose=False)
-                        else:
-                            # LM
-                            model.fit(X_train, y_train)
+                        model.fit(
+                            X_train, y_train, eval_set=[(X_val, y_val)],
+                            early_stopping_rounds=7, sample_weight=classes_weights,
+                            verbose=False)
+                    else:
+                        # LM
+                        model.fit(X_train, y_train)
 
-                        y_tr_pr = model.predict(X_train)
-                        y_te_pr = model.predict(X_test)
-                        if subject_train not in performance_leave_one_patient_out[cohort_train][grid_point]:
-                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train] = {}
-                        if cohort_test not in performance_leave_one_patient_out[cohort_train][grid_point][subject_train]:
-                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test] = {}
-                        if subject_test not in performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test]:
-                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test] = {}
+                    y_tr_pr = model.predict(X_train)
+                    y_te_pr = model.predict(X_test)
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test] = {}
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_test"] = y_test
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_test_pr"] = y_te_pr
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_train"] = y_train
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["y_train_pr"] = y_tr_pr
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["performance_test"] = \
+                        metrics.balanced_accuracy_score(y_test, y_te_pr)
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["performance_train"] = \
+                        metrics.balanced_accuracy_score(y_train, y_tr_pr)
+                    
+                    mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(y_test,
+                                                                                y_te_pr,
+                                                                                threshold=0.5,
+                                                                                min_consequent_count=3)
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["mov_detection_rate_test"] = mov_detection_rate
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["fpr_test"] = fpr
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["tpr_test"] = tpr
+                    
+                    mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(y_train,
+                                                                                y_tr_pr,
+                                                                                threshold=0.5,
+                                                                                min_consequent_count=3)
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["mov_detection_rate_train"] = mov_detection_rate
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["fpr_train"] = fpr
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test]["tpr_train"] = tpr
 
-                        performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["y_test"] = y_test
-                        performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["y_test_pr"] = y_te_pr
-                        performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["y_train"] = y_train
-                        performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["y_train_pr"] = y_tr_pr
-                        performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["performance_test"] = \
-                            metrics.balanced_accuracy_score(y_test, y_te_pr)
-                        performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["performance_train"] = \
-                            metrics.balanced_accuracy_score(y_train, y_tr_pr)
+        # add the cortex grid for plotting
+        nm_reader = NM_reader.NM_Reader(feature_path)
+        feature_file = nm_reader.get_feature_list()[0]
+        grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
+        performance_leave_one_patient_out["grid_cortex"] = grid_cortex
+        np.save(os.path.join(self.outpath, ML_model_name+'_performance_leave_one_patient_out_across_cohorts.npy'), performance_leave_one_patient_out)
+        #return performance_leave_one_patient_out
 
-    # add the cortex grid for plotting
-    nm_reader = NM_reader.NM_Reader(feature_path)
-    feature_file = nm_reader.get_feature_list()[0]
-    grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
-    performance_leave_one_patient_out["grid_cortex"] = grid_cortex
-    np.save(ML_model_name+'_performance_leave_nminus1_patient_out_across_cohorts.npy', performance_leave_one_patient_out)
+
+    def run_leave_nminus1_patient_out_across_cohorts(self,
+        feature_path=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408\Beijing"):
+
+        grid_point_all = np.load(os.path.join(feature_path, 'grid_point_all.npy'), allow_pickle='TRUE').item()
+        performance_leave_one_patient_out = {}
+
+        for grid_point in list(grid_point_all.keys()):
+            print('grid point: '+str(grid_point))
+            for cohort_train in ["Pittsburgh", "Beijing", "Berlin"]:
+                print('cohort: '+str(cohort_train))
+                if cohort_train not in performance_leave_one_patient_out:
+                    performance_leave_one_patient_out[cohort_train] = {}
+
+                if cohort_train not in grid_point_all[grid_point]:
+                    continue
+                if len(list(grid_point_all[grid_point][cohort_train].keys())) <= 1:
+                    continue  # cannot do leave one out prediction with a single subject
+                if grid_point not in performance_leave_one_patient_out[cohort_train]:
+                    performance_leave_one_patient_out[cohort_train][grid_point] = {}
+
+                for subject_train in list(grid_point_all[grid_point][cohort_train].keys()):
+                    X_train = []
+                    y_train = []
+                    for run in list(grid_point_all[grid_point][cohort_train][subject_train].keys()):
+                        if grid_point_all[grid_point][cohort_train][subject_train][run]["lat"] != "CON":
+                            continue
+                        X_train.append(grid_point_all[grid_point][cohort_train][subject_train][run]["data"])
+                        y_train.append(grid_point_all[grid_point][cohort_train][subject_train][run]["label"])
+                    if len(X_train) > 1:
+                        X_train = np.concatenate(X_train, axis=0)
+                        y_train = np.concatenate(y_train, axis=0)
+                    else:
+                        X_train = X_train[0]
+                        y_train = y_train[0]
+
+                    for cohort_test in list(grid_point_all[grid_point].keys()):
+                        for subject_test in list(grid_point_all[grid_point][cohort_test].keys()):
+                            if (subject_test == subject_train) and (cohort_test == cohort_train):
+                                continue
+                            X_test = []
+                            y_test = []
+                            for run in list(grid_point_all[grid_point][cohort_test][subject_test].keys()):
+                                if grid_point_all[grid_point][cohort_test][subject_test][run]["lat"] != "CON":
+                                    continue
+                                X_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["data"])
+                                y_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["label"])
+                            if len(X_test) > 1:
+                                X_test = np.concatenate(X_test, axis=0)
+                                y_test = np.concatenate(y_test, axis=0)
+                            else:
+                                X_test = X_test[0]
+                                y_test = y_test[0]
+
+                            model = clone(self.model)
+                            # run here ML estimation
+                            if self.ML_model_name == "XGB":
+                                X_train, X_val, y_train, y_val = \
+                                    model_selection.train_test_split(
+                                        X_train, y_train, train_size=0.7, shuffle=False)
+                                classes_weights = class_weight.compute_sample_weight(
+                                    class_weight='balanced', y=y_train)
+
+                                model.fit(
+                                    X_train, y_train, eval_set=[(X_val, y_val)],
+                                    early_stopping_rounds=7, sample_weight=classes_weights,
+                                    verbose=False)
+                            else:
+                                # LM
+                                model.fit(X_train, y_train)
+
+                            y_tr_pr = model.predict(X_train)
+                            y_te_pr = model.predict(X_test)
+                            if subject_train not in performance_leave_one_patient_out[cohort_train][grid_point]:
+                                performance_leave_one_patient_out[cohort_train][grid_point][subject_train] = {}
+                            if cohort_test not in performance_leave_one_patient_out[cohort_train][grid_point][subject_train]:
+                                performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test] = {}
+                            if subject_test not in performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test]:
+                                performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test] = {}
+
+                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["y_test"] = y_test
+                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["y_test_pr"] = y_te_pr
+                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["y_train"] = y_train
+                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["y_train_pr"] = y_tr_pr
+                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["performance_test"] = \
+                                metrics.balanced_accuracy_score(y_test, y_te_pr)
+                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["performance_train"] = \
+                                metrics.balanced_accuracy_score(y_train, y_tr_pr)
+                            
+                            mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(y_test,
+                                                                                y_te_pr,
+                                                                                threshold=0.5,
+                                                                                min_consequent_count=3)
+                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["mov_detection_rate_test"] = mov_detection_rate
+                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["fpr_test"] = fpr
+                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["tpr_test"] = tpr
+                            
+                            mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(y_train,
+                                                                                        y_tr_pr,
+                                                                                        threshold=0.5,
+                                                                                        min_consequent_count=3)
+                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["mov_detection_rate_train"] = mov_detection_rate
+                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["fpr_train"] = fpr
+                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["tpr_train"] = tpr
+
+        # add the cortex grid for plotting
+        nm_reader = NM_reader.NM_Reader(feature_path)
+        feature_file = nm_reader.get_feature_list()[0]
+        grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
+        performance_leave_one_patient_out["grid_cortex"] = grid_cortex
+        np.save(os.path.join(self.outpath, ML_model_name+'_performance_leave_nminus1_patient_out_across_cohorts.npy'), performance_leave_one_patient_out)
