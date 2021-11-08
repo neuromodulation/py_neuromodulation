@@ -29,6 +29,7 @@ class CohortRunner:
                  estimate_channels=True,
                  estimate_all_channels_combined=False,
                  save_coef=False,
+                 TRAIN_VAL_SPLIT=False,
                  plot_features=False,
                  plot_grid_performances=False,
                  run_ML_model=True,
@@ -50,6 +51,7 @@ class CohortRunner:
         self.run_ML_model = run_ML_model
         self.run_bids = run_bids
         self.run_pool = run_pool
+        self.TRAIN_VAL_SPLIT = TRAIN_VAL_SPLIT
 
     def multiprocess_pipeline_run_wrapper(self, PATH_RUN):
 
@@ -70,15 +72,19 @@ class CohortRunner:
             PATH_BIDS = "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Pittsburgh"
             PATH_OUT = os.path.join(self.outpath, 'Pittsburgh')
 
-        nm_BIDS = nm_start_BIDS.NM_BIDS(PATH_RUN, ECOG_ONLY=True, PATH_BIDS=PATH_BIDS, PATH_OUT=PATH_OUT,
-                                        PATH_SETTINGS=self.PATH_SETTINGS, LIMIT_DATA=False, LIMIT_HIGH=200000)
         if self.run_bids:
+            nm_BIDS = nm_start_BIDS.NM_BIDS(PATH_RUN, ECOG_ONLY=True, PATH_BIDS=PATH_BIDS, PATH_OUT=PATH_OUT,
+                                        PATH_SETTINGS=self.PATH_SETTINGS, LIMIT_DATA=False, LIMIT_HIGH=200000)
             nm_BIDS.run_bids()
 
         feature_path = PATH_OUT
         feature_file = os.path.basename(PATH_RUN)[:-5]  # cut off ".vhdr"
 
-        feature_wrapper = nm_analysis.FeatureReadWrapper(feature_path, feature_file,
+        if self.plot_grid_performances:
+            feature_wrapper = nm_analysis.FeatureReadWrapper(feature_path, feature_file,
+                                                        plt_cort_projection=True)
+        else:
+            feature_wrapper = nm_analysis.FeatureReadWrapper(feature_path, feature_file,
                                                         plt_cort_projection=False)
         
         if self.plot_features:
@@ -91,7 +97,8 @@ class CohortRunner:
         #model = svm.SVC(class_weight="balanced")
         
         if self.run_ML_model:
-            feature_wrapper.run_ML_model(model=self.model, output_name=self.ML_model_name, TRAIN_VAL_SPLIT=False,
+            feature_wrapper.run_ML_model(model=self.model, output_name=self.ML_model_name,
+                                    TRAIN_VAL_SPLIT=self.TRAIN_VAL_SPLIT,
                                     estimate_channels=self.estimate_channels, estimate_gridpoints=self.estimate_gridpoints,
                                     estimate_all_channels_combined=self.estimate_all_channels_combined,
                                     save_coef=self.save_coef)
@@ -146,7 +153,7 @@ class CohortRunner:
         #                                                    [feature_path])))
         
         if self.run_pool:
-            pool = Pool(processes=45)  # most on Ryzen CPU 2990WX is 63
+            pool = Pool(processes=20)  # most on Ryzen CPU 2990WX is 63
             pool.map(self.multiprocess_pipeline_run_wrapper, run_files_all)
         else:
             self.multiprocess_pipeline_run_wrapper(run_files_all[0])
@@ -195,7 +202,7 @@ class CohortRunner:
         pool.map(self.multiprocess_pipeline_run_wrapper, run_files)
 
 
-    def read_cohort_results(self, feature_path, cohort, ML_model_name="LM"):
+    def read_cohort_results(self, feature_path, cohort):
         """Read for a given path (of potentially multiple estimated runs) performance results
 
         Parameters
@@ -218,11 +225,10 @@ class CohortRunner:
             # cut here s.t. the subject is the whole recording
             subject_name = feature_file[:-5]
             performance_dict = feature_wrapper.read_results(performance_dict,
-                                                                        subject_name, ML_model_name=ML_model_name,
+                                                                        subject_name, ML_model_name=self.ML_model_name,
                                                                         read_grid_points=False, read_all_combined=False,
                                                                         read_channels=True)
-        np.save(os.path.join(self.outpath, ML_model_name+'_cohort_'+cohort+'.npy'), performance_dict)
-
+        np.save(os.path.join(self.outpath, self.ML_model_name+'_cohort_'+cohort+'.npy'), performance_dict)
 
     def cohort_wrapper_read_cohort(self, ML_model_name="LM"):
         """Read results for multiple cohorts
@@ -236,7 +242,7 @@ class CohortRunner:
         """
         cohorts = ["Pittsburgh", "Beijing", "Berlin"]
         for cohort in cohorts:
-            self.read_cohort_results(os.path.join(self.outpath, cohort), cohort, ML_model_name)
+            self.read_cohort_results(os.path.join(self.outpath, cohort), cohort)
 
 
     def read_all_grid_points(self, grid_point_all, feature_path, feature_file, cohort):
