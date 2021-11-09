@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     # read coefficients in performance out
     
-    for run_idx in [20]: 
+    for run_idx in [18]: 
 
         if run_idx == 1:
             cw = cohort_wrapper.CohortRunner(ML_model_name="LM",
@@ -218,9 +218,11 @@ if __name__ == "__main__":
                 PATH_SETTINGS=os.path.join(PATH_SETTING_BASE, "nm_settings_STFT_SW_LIM.json"))
         
         elif run_idx == 18:
-
-            cw = cohort_wrapper.CohortRunner(ML_model_name="SVM",
-                model=svm.SVC(class_weight="balanced"),
+            
+            #ML_model_name = "SVM"
+            #model=svm.SVC(class_weight="balanced")
+            cw = cohort_wrapper.CohortRunner(ML_model_name="LDA",
+                model=discriminant_analysis.LinearDiscriminantAnalysis(solver="lsqr", shrinkage="auto"),
                 estimate_gridpoints=False,
                 estimate_channels=True,
                 estimate_all_channels_combined=False,
@@ -234,7 +236,7 @@ if __name__ == "__main__":
         
         elif run_idx == 19:
 
-            cw = cohort_wrapper.CohortRunner(ML_model_name="LM",
+            cw = cohort_wrapper.CohortRunner(ML_model_name="LDA",
                 model=linear_model.LogisticRegression(class_weight="balanced"),
                 estimate_gridpoints=True,
                 estimate_channels=True,
@@ -248,7 +250,7 @@ if __name__ == "__main__":
                 PATH_SETTINGS=os.path.join(PATH_SETTING_BASE, "nm_settings_STFT_SW_LIM_GRID.json"))
 
         if run_idx < 20:
-            #cw.run_cohorts()
+            cw.run_cohorts()
             cw.cohort_wrapper_read_cohort()
     
         if run_idx == 20:

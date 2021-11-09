@@ -1,4 +1,4 @@
-from sklearn import model_selection, metrics, linear_model
+from sklearn import model_selection, metrics, linear_model, discriminant_analysis
 from skopt.space import Real, Integer, Categorical
 from skopt.utils import use_named_args
 from skopt import gp_minimize, Optimizer
@@ -8,6 +8,7 @@ from sklearn.utils import class_weight
 from scipy.ndimage import (binary_dilation,
                            binary_erosion,
                            label)
+from imblearn.over_sampling import RandomOverSampler
 import pandas as pd
 import os
 import json
@@ -145,6 +146,9 @@ class Decoder:
         self.save_coef = save_coef
         self.get_movement_detection_rate = get_movement_detection_rate
         self.min_consequent_count = min_consequent_count
+
+        if type(self.model) is discriminant_analysis.LinearDiscriminantAnalysis:
+            self.ros = RandomOverSampler(random_state=0)
 
     def set_data_ind_channels(self):
         """specified channel individual data
@@ -377,7 +381,10 @@ class Decoder:
                     verbose=False)
 
             else:
-                # LM
+                # check for LDA; and apply rebalancing
+                if type(model_train) is discriminant_analysis.LinearDiscriminantAnalysis:
+                    X_train, y_train = self.ros.fit_resample(X_train, y_train)
+
                 model_train.fit(X_train, y_train)
 
             if self.save_coef:
