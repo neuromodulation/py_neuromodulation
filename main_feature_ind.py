@@ -12,8 +12,8 @@ if __name__ == "__main__":
     # 2 - Figure 2 A - ch - comb
 
     # read coefficients in performance out
-
-    for run_idx in [19]: 
+    
+    for run_idx in [20]: 
 
         if run_idx == 1:
             cw = cohort_wrapper.CohortRunner(ML_model_name="LM",
@@ -240,13 +240,56 @@ if __name__ == "__main__":
                 estimate_channels=True,
                 estimate_all_channels_combined=False,
                 save_coef=True,
-                run_bids=True,
-                run_pool=True,
+                run_bids=False,
+                run_pool=False,
                 run_ML_model=True,
                 TRAIN_VAL_SPLIT=False,
                 outpath=os.path.join(PATH_OUT_BASE, "ch_ind_LM_STFT_SW_LIM_WITHGRID"),
                 PATH_SETTINGS=os.path.join(PATH_SETTING_BASE, "nm_settings_STFT_SW_LIM_GRID.json"))
 
-        cw.run_cohorts()
-        cw.cohort_wrapper_read_cohort()
+        if run_idx < 20:
+            #cw.run_cohorts()
+            cw.cohort_wrapper_read_cohort()
     
+        if run_idx == 20:
+            
+            # read all grid points
+            cw = cohort_wrapper.CohortRunner(
+                outpath=os.path.join(PATH_OUT_BASE, "ch_ind_LM_STFT_SW_LIM_WITHGRID"))
+            #cw.cohort_wrapper_read_all_grid_points(
+            #    feature_path_cohorts=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\Data\write_out\ch_ind_LM_STFT_SW_LIM_WITHGRID"
+            #)
+            cw.cohort_wrapper_read_all_grid_points(read_gridpoints=False,\
+        feature_path_cohorts=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\Data\write_out\ch_ind_LM_STFT_SW_LIM_WITHGRID")
+        
+        if run_idx == 21:
+
+            cw = cohort_wrapper.CohortRunner(
+                outpath=os.path.join(PATH_OUT_BASE, "ch_ind_LM_STFT_SW_LIM_WITHGRID"))
+            cw.run_cohort_leave_one_patient_out_CV_within_cohort(
+                feature_path=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\Data\write_out\ch_ind_LM_STFT_SW_LIM_WITHGRID"
+            )
+
+        if run_idx == 22:
+
+            cw = cohort_wrapper.CohortRunner(
+                outpath=os.path.join(PATH_OUT_BASE, "ch_ind_LM_STFT_SW_LIM_WITHGRID"))
+            cw.run_cohort_leave_one_cohort_out_CV(
+                feature_path=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\Data\write_out\ch_ind_LM_STFT_SW_LIM_WITHGRID"
+            )
+    
+        if run_idx == 23:
+
+            cw = cohort_wrapper.CohortRunner(
+                outpath=os.path.join(PATH_OUT_BASE, "ch_ind_LM_STFT_SW_LIM_WITHGRID"))
+            cw.run_leave_one_patient_out_across_cohorts(
+                feature_path=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\Data\write_out\ch_ind_LM_STFT_SW_LIM_WITHGRID"
+            )
+        
+        if run_idx == 24:
+
+            cw = cohort_wrapper.CohortRunner(
+                outpath=os.path.join(PATH_OUT_BASE, "ch_ind_LM_STFT_SW_LIM_WITHGRID"))
+            cw.run_leave_nminus1_patient_out_across_cohorts(
+                feature_path=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\Data\write_out\ch_ind_LM_STFT_SW_LIM_WITHGRID"
+            )
