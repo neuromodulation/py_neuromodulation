@@ -200,7 +200,7 @@ class SettingsWrapper:
         """
         self.nm_channels_path = nm_channels_path
         self.nm_channels = (
-            pd.read_csv(self.nm_channels_path, sep="\t")
+            pd.read_csv(self.nm_channels_path)
             if self.nm_channels_path is not None
             and os.path.isfile(self.nm_channels_path)
             else nm_define_nmchannels.set_nm_channels(
