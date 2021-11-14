@@ -76,7 +76,8 @@ class Features:
         # notch filter data before feature estimation
         if self.s["methods"]["notch_filter"]:
             freqs = arange(
-                self.line_noise, 3 * self.line_noise, self.line_noise)
+                self.line_noise, int(floor(self.fs / self.line_noise)) * self.line_noise,
+                self.line_noise)
             data = notch_filter(
                 x=data, Fs=self.fs, trans_bandwidth=15, freqs=freqs,
                 fir_design='firwin', notch_widths=3,
