@@ -229,8 +229,9 @@ class CohortRunner:
             subject_name = feature_file[:-5]
             performance_dict = feature_wrapper.read_results(performance_dict,
                                                                         subject_name, ML_model_name=self.ML_model_name,
-                                                                        read_grid_points=False, read_all_combined=False,
-                                                                        read_channels=True)
+                                                                        read_grid_points=self.estimate_gridpoints,
+                                                                        read_all_combined=self.estimate_all_channels_combined,
+                                                                        read_channels=self.estimate_channels)
         np.save(os.path.join(self.outpath, self.ML_model_name+'_cohort_'+cohort+'.npy'), performance_dict)
 
     def cohort_wrapper_read_cohort(self, ML_model_name="LM"):
@@ -307,8 +308,67 @@ class CohortRunner:
             grid_point_all[grid_point][cohort][subject_name][feature_file]["lat"] = lat
         return grid_point_all
 
+    def read_all_channels(self, channel_all, feature_path, feature_file, cohort):
+        """Save for a given feature path all used grid point data. Necessary to run across patient and cohort analysis.
 
-    def cohort_wrapper_read_all_grid_points(self, feature_path_cohorts=\
+        Parameters
+        ----------
+        channel_all : dictionary
+            dictionary with data, label, label_name and feature_names for each channel
+        feature_path : string
+            path to feature files
+        feature_file : string
+            feature file
+        cohort : string
+            used for indecing of grid_point_all
+
+        Returns
+        -------
+        dictionary
+            grid_point_all
+        """
+        feature_wrapper = nm_analysis.FeatureReadWrapper(feature_path, feature_file,
+                                                        plt_cort_projection=False)
+        decoder = nm_decode.Decoder(feature_path=feature_path,
+                                    feature_file=feature_file)
+        decoder.label = feature_wrapper.nm_reader.label
+        decoder.target_ch = feature_wrapper.label_name
+        decoder.set_data_ind_channels()
+        subject_name = feature_file[feature_file.find("sub-")+4:feature_file.find("_ses")]
+        sess_name = feature_file[feature_file.find("ses-")+4:feature_file.find("_task")]
+        task_name = feature_file[feature_file.find("task-")+5:feature_file.find("_run")]
+        run_number = feature_file[feature_file.find("run-")+4:feature_file.find("_ieeg")]
+
+        for ch in list(decoder.ch_ind_data.keys()):
+            if cohort not in channel_all:
+                channel_all[cohort] = {}
+            if subject_name not in channel_all[cohort]:
+                channel_all[cohort][subject_name] = {}
+            if ch not in channel_all[cohort][subject_name]:
+                channel_all[cohort][subject_name][ch] = {}
+            channel_all[cohort][subject_name][ch][feature_file] = {}
+
+            channel_all[cohort][subject_name][ch][feature_file]["data"] = decoder.ch_ind_data[ch]
+            channel_all[cohort][subject_name][ch][feature_file]["feature_names"] = \
+                [ch_[len(ch)+1:] for ch_ in decoder.features.columns if ch in ch_]
+            channel_all[cohort][subject_name][ch][feature_file]["label"] = decoder.label
+            channel_all[cohort][subject_name][ch][feature_file]["label_name"] = decoder.target_ch
+
+            # check laterality
+            lat = "CON"  # Beijing is always contralateral
+            # Pittsburgh Subjects
+            if ("LEFT" in decoder.target_ch and "LEFT" in decoder.features.columns[1]) or \
+            ("RIGHT" in decoder.target_ch and "RIGHT" in decoder.features.columns[1]):
+                lat = "IPS"
+
+            # Berlin subjects
+            if ("_L_" in decoder.features.columns[1] and task_name == "SelfpacedRotationL") or \
+            ("_R_" in decoder.features.columns[1] and task_name == "SelfpacedRotationR"):
+                lat = "IPS"
+            channel_all[cohort][subject_name][ch][feature_file]["lat"] = lat
+        return channel_all
+
+    def cohort_wrapper_read_all_grid_points(self, read_gridpoints=True, feature_path_cohorts=\
             r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\0209_SharpWaveLimFeaturesSTFT_with_Grid"):
         cohorts = ["Pittsburgh", "Beijing", "Berlin"]
         grid_point_all = {}
@@ -319,9 +379,14 @@ class CohortRunner:
             feature_list = nm_reader.get_feature_list()
             for feature_file in feature_list:
                 print(feature_file)
-                grid_point_all = self.read_all_grid_points(grid_point_all, feature_path, feature_file, cohort)
-
-        np.save(os.path.join(self.outpath, 'grid_point_all.npy'), grid_point_all)
+                if read_gridpoints:
+                    grid_point_all = self.read_all_grid_points(grid_point_all, feature_path, feature_file, cohort)
+                else:
+                    grid_point_all = self.read_all_channels(grid_point_all, feature_path, feature_file, cohort)
+        if read_gridpoints:
+            np.save(os.path.join(self.outpath, 'grid_point_all.npy'), grid_point_all)
+        else:
+            np.save(os.path.join(self.outpath, 'channel_all.npy'), grid_point_all)
 
     def get_movement_grouped_array(self, prediction, threshold=0.5, min_consequent_count=5):
         """Return given a 1D numpy array, an array of same size with grouped consective blocks
@@ -491,7 +556,7 @@ class CohortRunner:
 
 
         # add the cortex grid for plotting
-        nm_reader = NM_reader.NM_Reader(feature_path)
+        nm_reader = NM_reader.NM_Reader(os.path.join(feature_path, 'Beijing'))
         feature_file = nm_reader.get_feature_list()[0]
         grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
         performance_leave_one_patient_out["grid_cortex"] = grid_cortex
@@ -539,7 +604,7 @@ class CohortRunner:
 
                 # run here ML estimation
                 model = clone(self.model)
-                if ML_model_name == "XGB":
+                if self.ML_model_name == "XGB":
                     X_train, X_val, y_train, y_val = \
                         model_selection.train_test_split(
                             X_train, y_train, train_size=0.7, shuffle=False)
@@ -600,16 +665,14 @@ class CohortRunner:
                     performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["tpr_train"] = tpr
 
         # add the cortex grid for plotting
-        nm_reader = NM_reader.NM_Reader(feature_path)
+        nm_reader = NM_reader.NM_Reader(os.path.join(feature_path, 'Beijing'))
         feature_file = nm_reader.get_feature_list()[0]
         grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
         performance_leave_one_cohort_out["grid_cortex"] = grid_cortex
-        np.save(os.path.join(self.outpath, ML_model_name+'_performance_leave_one_cohort_out.npy'), performance_leave_one_cohort_out)
+        np.save(os.path.join(self.outpath, self.ML_model_name+'_performance_leave_one_cohort_out.npy'), performance_leave_one_cohort_out)
 
 
-    def run_leave_one_patient_out_across_cohorts(self, feature_path=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408\Beijing",
-                                            model_base=linear_model.LogisticRegression(class_weight="balanced"),
-                                            ML_model_name="LM"):
+    def run_leave_one_patient_out_across_cohorts(self, feature_path=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408\Beijing"):
 
         grid_point_all = np.load(os.path.join(feature_path, 'grid_point_all.npy'), allow_pickle='TRUE').item()
         performance_leave_one_patient_out = {}
@@ -707,11 +770,11 @@ class CohortRunner:
                     performance_leave_one_patient_out[cohort][grid_point][subject_test]["tpr_train"] = tpr
 
         # add the cortex grid for plotting
-        nm_reader = NM_reader.NM_Reader(feature_path)
+        nm_reader = NM_reader.NM_Reader(os.path.join(feature_path, 'Beijing'))
         feature_file = nm_reader.get_feature_list()[0]
         grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
         performance_leave_one_patient_out["grid_cortex"] = grid_cortex
-        np.save(os.path.join(self.outpath, ML_model_name+'_performance_leave_one_patient_out_across_cohorts.npy'), performance_leave_one_patient_out)
+        np.save(os.path.join(self.outpath, self.ML_model_name+'_performance_leave_one_patient_out_across_cohorts.npy'), performance_leave_one_patient_out)
         #return performance_leave_one_patient_out
 
 
@@ -820,8 +883,8 @@ class CohortRunner:
                             performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test]["tpr_train"] = tpr
 
         # add the cortex grid for plotting
-        nm_reader = NM_reader.NM_Reader(feature_path)
+        nm_reader = NM_reader.NM_Reader(os.path.join(feature_path, 'Beijing'))
         feature_file = nm_reader.get_feature_list()[0]
         grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
         performance_leave_one_patient_out["grid_cortex"] = grid_cortex
-        np.save(os.path.join(self.outpath, ML_model_name+'_performance_leave_nminus1_patient_out_across_cohorts.npy'), performance_leave_one_patient_out)
+        np.save(os.path.join(self.outpath, self.ML_model_name+'_performance_leave_nminus1_patient_out_across_cohorts.npy'), performance_leave_one_patient_out)
