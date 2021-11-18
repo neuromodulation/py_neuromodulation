@@ -1,0 +1,9 @@
+name,rereference,used,target,type,status,new_name
+FP1,average,1,0,ecog,good,ECOG_1-avgref
+FP2,average,1,0,ecog,good,ECOG_2-avgref
+C3,average,1,0,ecog,good,ECOG_2-avgref
+C4,average,1,0,ecog,good,ECOG_2-avgref
+T5,average,1,0,ecog,good,ECOG_2-avgref
+T6,average,1,0,ecog,good,ECOG_2-avgref
+O1,average,1,0,ecog,good,ECOG_2-avgref
+O2,average,1,0,ecog,good,ECOG_2-avgref
