@@ -251,6 +251,8 @@ class NM_Reader:
 
         # cut channel name of for axis + "_" for more dense plot
         feature_col_name = [i[len(self.ch_name)+1:] for i in list(self.feature_ch_cols) if self.ch_name in i]
+        if "coh" in feature_str_add:
+            feature_col_name = self.feature_ch_cols
         plt.figure(figsize=(6, 6))
         plt.subplot(211)
         plt.imshow(zscore(np.mean(np.squeeze(self.X_epoch), axis=0), axis=0).T,
