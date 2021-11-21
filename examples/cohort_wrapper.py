@@ -37,6 +37,7 @@ class CohortRunner:
                  plot_grid_performances=False,
                  run_ML_model=True,
                  run_bids=True,
+                 ECOG_ONLY=True,
                  run_pool=True,
                  outpath=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\0209_SharpWaveLimFeaturesSTFT_with_Grid",
                  PATH_SETTINGS=r"C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\nm_settings.json") -> None:
@@ -54,6 +55,7 @@ class CohortRunner:
         self.run_ML_model = run_ML_model
         self.run_bids = run_bids
         self.run_pool = run_pool
+        self.ECOG_ONLY = ECOG_ONLY
         self.TRAIN_VAL_SPLIT = TRAIN_VAL_SPLIT
 
     def multiprocess_pipeline_run_wrapper(self, PATH_RUN):
@@ -76,7 +78,7 @@ class CohortRunner:
             PATH_OUT = os.path.join(self.outpath, 'Pittsburgh')
 
         if self.run_bids:
-            nm_BIDS = nm_start_BIDS.NM_BIDS(PATH_RUN, ECOG_ONLY=True, PATH_BIDS=PATH_BIDS, PATH_OUT=PATH_OUT,
+            nm_BIDS = nm_start_BIDS.NM_BIDS(PATH_RUN, ECOG_ONLY=self.ECOG_ONLY, PATH_BIDS=PATH_BIDS, PATH_OUT=PATH_OUT,
                                         PATH_SETTINGS=self.PATH_SETTINGS, LIMIT_DATA=False, LIMIT_HIGH=200000)
             nm_BIDS.run_bids()
 
