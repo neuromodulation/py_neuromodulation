@@ -51,10 +51,12 @@ def calcFeatures(queue_raw, queue_features):
 
 def sendFeatures(queue_features, ftc):
     
+    time_start = time.time()
     features_out = pd.DataFrame()
     FLAG_STOP = False
     while FLAG_STOP is False:
         features = queue_features.get()
+        features["time"] = time.time() - time_start
         if features is None:
             features_out.to_csv("reatime_features.csv")
             print("SAVED")
@@ -62,7 +64,12 @@ def sendFeatures(queue_features, ftc):
         else:
             features_out = features_out.append(features, ignore_index=True)
             print("length of features:" + str(len(features_out)))
-            ftc.putData(features)
+            H = ftc.getHeader()
+            # channel names are 1. data 2. ident 3. timestamp
+            # put at the end of the buffer the calculated features of the data channel
+            to_send = np.zeros([H.nSamples, H.nChannels])
+            to_send[-features.shape[0]:,0] = np.array(features)
+            ftc.putData(to_send)
 
 if __name__ == "__main__":
 
