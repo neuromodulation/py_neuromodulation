@@ -10,7 +10,7 @@
         "re_referencing": true,
         "notch_filter": true,
         "bandpass_filter": false,
-        "stft" : true,
+        "stft" : false,
         "fft" : false,
         "raw_hjorth": false,
         "sharpwave_analysis": false,
@@ -70,6 +70,18 @@
         "high beta": [
             20,
             35
+        ],
+        "low gamma": [
+            60,
+            80
+        ],
+        "high gamma": [
+            90,
+            200
+        ],
+        "HFA": [
+            200,
+            400
         ]
     },
     "bandpass_filter_settings": {
@@ -139,14 +151,19 @@
     "coherence" : {
         "channels" : [
             [
-                "LFP_L_1_STN_BS",
-                "ECOG_L_1_SMC_AT"
+                "STN_RIGHT_0",
+                "ECOG_RIGHT_3"
             ]
         ],
         "frequency_bands" : [
             [
+                "theta",
+                "alpha",
                 "low beta",
-                "high beta"
+                "high beta",
+                "low gamma",
+                "high gamma",
+                "HFA"
             ]
         ],
         "method" : [

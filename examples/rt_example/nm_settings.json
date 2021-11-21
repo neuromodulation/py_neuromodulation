@@ -10,14 +10,14 @@
         "re_referencing": true,
         "notch_filter": true,
         "bandpass_filter": false,
-        "stft" : true,
+        "stft" : false,
         "fft" : false,
         "raw_hjorth": false,
         "sharpwave_analysis": false,
         "return_raw": false,
         "project_cortex": false,
         "project_subcortex": false,
-        "coherence": false
+        "coherence": true
     },
     "raw_resampling_settings": {
         "resample_freq": 1000
@@ -70,6 +70,18 @@
         "high beta": [
             20,
             35
+        ],
+        "low gamma": [
+            60,
+            80
+        ],
+        "high gamma": [
+            90,
+            200
+        ],
+        "HFA": [
+            200,
+            400
         ]
     },
     "bandpass_filter_settings": {
@@ -139,20 +151,22 @@
     "coherence" : {
         "channels" : [
             [
-                "STN_L_1",
-                "ECOG_L_1"
+                "STN_1",
+                "ECOG_1"
             ]
         ],
         "frequency_bands" : [
             [
-                "low_beta",
-                "high_beta"
+                "theta",
+                "alpha",
+                "low beta",
+                "high beta"
             ]
         ],
         "method" : [
             {
                 "coh" : true,
-                "icoh" : false
+                "icoh" : true
             }
         ],
         "params" : [
