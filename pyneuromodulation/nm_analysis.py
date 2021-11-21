@@ -249,6 +249,19 @@ class FeatureReadWrapper:
                                            plt_sharpwave=False,
                                            plt_fft_features=False)
 
+    def plot_coherence(self):
+        self.nm_reader.ch_name = ""
+        self.nm_reader.feature_ch_cols = [i for i in list(self.nm_reader.features.columns) if i.startswith("coh")]
+        self.nm_reader.feature_ch_cols = self.nm_reader.feature_ch_cols[::-1]
+        self.nm_reader.feature_ch = self.nm_reader.features[self.nm_reader.feature_ch_cols]
+        
+        # estimating epochs, with shape (epochs,samples,channels,features)
+        X_epoch, y_epoch = self.nm_reader.get_epochs_ch(epoch_len=4,
+                                                        sfreq=self.settings["sampling_rate_features"],
+                                                        threshold=0.1)
+        print("plotting feature target averaged")
+        self.nm_reader.plot_epochs_avg(self.feature_file, feature_str_add="")
+
     def run_ML_model(self, feature_file=None, estimate_gridpoints=True, estimate_channels=True,
                      estimate_all_channels_combined=False,
                      model=linear_model.LogisticRegression(class_weight="balanced"),
