@@ -17,7 +17,7 @@ class RealTimePyNeuro():
             "rt_example", "nm_channels.csv")
 
         # set it here
-        self.fs = 250
+        self.fs = 128
         self.line_noise = 50
         
         self.resample = None
