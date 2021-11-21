@@ -1,24 +1,23 @@
 {
     "BIDS_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Berlin_VoluntaryMovement",
-    "out_path": "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\2408_NoNorm\\Berlin",
+    "out_path": "C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\examples\\rt_example",
     "sampling_rate_features": 10,
     "methods": {
-        "raw_resampling": true,
+        "raw_resampling": false,
         "raw_normalization": false,
         "feature_normalization": true,
-        "kalman_filter": true,
+        "kalman_filter": false,
         "re_referencing": true,
         "notch_filter": true,
         "bandpass_filter": false,
         "stft" : true,
         "fft" : false,
         "raw_hjorth": false,
-        "sharpwave_analysis": true,
+        "sharpwave_analysis": false,
         "return_raw": false,
-        "project_cortex": true,
+        "project_cortex": false,
         "project_subcortex": false,
-        "pdc": false,
-        "dtf": false
+        "coherence": true
     },
     "raw_resampling_settings": {
         "resample_freq": 1000
@@ -71,18 +70,6 @@
         "high beta": [
             20,
             35
-        ],
-        "low gamma": [
-            60,
-            80
-        ],
-        "high gamma": [
-            90,
-            200
-        ],
-        "HFA": [
-            200,
-            400
         ]
     },
     "bandpass_filter_settings": {
@@ -149,34 +136,29 @@
     "project_subcortex_settings": {
         "max_dist": 5
     },
-    "pdc_settings": {
-        "frequency_ranges": {
-            "all beta": [
-                "LFP_BS_STN_L_1",
-                "ECOG_AT_SM_L_1"
-            ],
-            "all gamma": [
-                "LFP_STN_L_234",
-                "ECOG_AT_SM_L_2"
+    "coherence" : {
+        "channels" : [
+            [
+                "LFP_L_1_STN_BS",
+                "ECOG_L_1_SMC_AT"
             ]
-        },
-        "model_order": "auto",
-        "max_order": 10,
-        "num_fft": "auto"
-    },
-    "dtf_settings": {
-        "frequency_ranges": {
-            "all beta": [
-                "LFP_BS_STN_L_1",
-                "ECOG_AT_SM_L_1"
-            ],
-            "all gamma": [
-                "LFP_STN_L_234",
-                "ECOG_AT_SM_L_2"
+        ],
+        "frequency_bands" : [
+            [
+                "low beta",
+                "high beta"
             ]
-        },
-        "model_order": "auto",
-        "max_order": 10,
-        "num_fft": "auto"
+        ],
+        "method" : [
+            {
+                "coh" : true,
+                "icoh" : true
+            }
+        ],
+        "params" : [
+            {
+                "window" : "hann"
+            }
+        ]
     }
 }

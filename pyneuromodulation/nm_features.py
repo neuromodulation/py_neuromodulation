@@ -52,6 +52,30 @@ class Features:
         if s["methods"]["sharpwave_analysis"] is True:
             self.sw_features = nm_sharpwaves.SharpwaveAnalyzer(self.s["sharpwave_analysis_settings"],
                                                                self.fs)
+        
+        if s["methods"]["coherence"] is True:
+            self.coherence_objects = []
+            for idx_coh in range(len(s["coherence"]["channels"])):
+                fband_names = s["coherence"]["frequency_bands"][idx_coh]
+                fband_specs = []
+                for band_name in fband_names:
+                    fband_specs.append(s["frequency_ranges"][band_name])
+
+                ch_1_name = s["coherence"]["channels"][idx_coh][0]
+                ch_1_name_reref = [ch for ch in self.ch_names if ch.startswith(ch_1_name)][0]
+                ch_1_idx = self.ch_names.index(ch_1_name_reref)
+
+                ch_2_name = s["coherence"]["channels"][idx_coh][1]
+                ch_2_name_reref = [ch for ch in self.ch_names if ch.startswith(ch_2_name)][0]
+                ch_2_idx = self.ch_names.index(ch_2_name_reref)
+
+                self.coherence_objects.append(
+                    nm_coherence.NM_Coherence(self.fs, self.s["coherence"]["params"][idx_coh]["window"],
+                        fband_specs, fband_names, ch_1_name, ch_2_name, ch_1_idx, ch_2_idx,
+                        s["coherence"]["method"][idx_coh]["coh"],
+                        s["coherence"]["method"][idx_coh]["icoh"])
+                )
+
         self.new_dat_index = int(self.fs / self.s["sampling_rate_features"])
 
     def estimate_features(self, data) -> dict:
@@ -100,11 +124,9 @@ class Features:
             ch = self.ch_names[ch_idx]
             features_ = self.est_ch(features_, ch_idx, ch, dat_filtered, data)
 
-        if self.s["methods"]["pdc"] is True or self.s["methods"]["dtf"] is True:
-            for filt_idx, filt in enumerate(
-                    self.s["frequency_ranges"].keys()):
-                features_ = self.est_connect(
-                    features_, filt, dat_filtered[:, filt_idx, :])
+        if self.s["methods"]["coherence"]:
+            for coh_obj in self.coherence_objects:
+                features_ = coh_obj.get_coh(features_, data[coh_obj.ch_1_idx, :], data[coh_obj.ch_2_idx, :])
 
         # return dict(features_) # this is necessary for multiprocessing approach
         return features_

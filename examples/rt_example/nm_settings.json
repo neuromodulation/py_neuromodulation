@@ -17,8 +17,7 @@
         "return_raw": false,
         "project_cortex": false,
         "project_subcortex": false,
-        "pdc": false,
-        "dtf": false
+        "coherence": false
     },
     "raw_resampling_settings": {
         "resample_freq": 1000
@@ -137,34 +136,29 @@
     "project_subcortex_settings": {
         "max_dist": 5
     },
-    "pdc_settings": {
-        "frequency_ranges": {
-            "all beta": [
-                "LFP_BS_STN_L_1",
-                "ECOG_AT_SM_L_1"
-            ],
-            "all gamma": [
-                "LFP_STN_L_234",
-                "ECOG_AT_SM_L_2"
+    "coherence" : {
+        "channels" : [
+            [
+                "STN_L_1",
+                "ECOG_L_1"
             ]
-        },
-        "model_order": "auto",
-        "max_order": 10,
-        "num_fft": "auto"
-    },
-    "dtf_settings": {
-        "frequency_ranges": {
-            "all beta": [
-                "LFP_BS_STN_L_1",
-                "ECOG_AT_SM_L_1"
-            ],
-            "all gamma": [
-                "LFP_STN_L_234",
-                "ECOG_AT_SM_L_2"
+        ],
+        "frequency_bands" : [
+            [
+                "low_beta",
+                "high_beta"
             ]
-        },
-        "model_order": "auto",
-        "max_order": 10,
-        "num_fft": "auto"
+        ],
+        "method" : [
+            {
+                "coh" : true,
+                "icoh" : false
+            }
+        ],
+        "params" : [
+            {
+                "window" : "hann"
+            }
+        ]
     }
 }
