@@ -9,6 +9,8 @@ import sys
 import os
 import signal
 
+IDENT_FEATURES = 21
+
 def getData(queue_raw, ftc):
 
     def on_press(key):
@@ -26,14 +28,18 @@ def getData(queue_raw, ftc):
         on_press=on_press,
         on_release=on_release)
     listener.start()
+    last_batch = 0
 
     while listener.is_alive() is True:
         # read new data
         print('Trying to read last sample...')
         #index = H.nSamples - 1
-        ieeg_batch = ftc.getData().T
-        ieeg_batch = ieeg_batch[-128:,:]  # take last 
-        queue_raw.put(ieeg_batch)
+        ieeg_batch = ftc.getData()
+        ieeg_batch = ieeg_batch[-128:, 1]  # take last, #1: data
+        # check if time stamp changed 
+        if np.array_equal(ieeg_batch, last_batch):
+            last_batch = ieeg_batch
+            queue_raw.put(ieeg_batch)
     ftc.disconnect()
 
 def calcFeatures(queue_raw, queue_features):
@@ -68,7 +74,7 @@ def sendFeatures(queue_features, ftc):
             # channel names are 1. data 2. ident 3. timestamp
             # put at the end of the buffer the calculated features of the data channel
             to_send = np.zeros([H.nSamples, H.nChannels])
-            to_send[-features.shape[0]:,0] = np.array(features)
+            to_send[-features.shape[0]:, IDENT_FEATURES] = np.array(features)
             ftc.putData(to_send)
 
 if __name__ == "__main__":
