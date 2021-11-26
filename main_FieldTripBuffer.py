@@ -1,5 +1,5 @@
 import multiprocessing
-from examples import example_RealTimeClient
+from pyneuromodulation import nm_RealTimeClientStream
 from pynput.keyboard import Key, Listener
 import time
 from pyneuromodulation import FieldTrip
@@ -43,7 +43,7 @@ def getData(queue_raw, ftc):
     ftc.disconnect()
 
 def calcFeatures(queue_raw, queue_features):
-    rt_estimator = example_RealTimeClient.RealTimePyNeuro()
+    rt_estimator = nm_RealTimeClientStream.RealTimePyNeuro()
     FLAG_STOP = False
     while FLAG_STOP is False:
         ieeg_batch = queue_raw.get()  # ch, samples
