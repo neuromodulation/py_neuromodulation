@@ -1,41 +1,187 @@
 from abc import ABC, abstractmethod
+import pathlib
 import numpy as np
 import pandas as pd
+import os
+import json
+from enum import Enum
+
+from pyneuromodulation import \
+    (nm_projection,
+    nm_rereference,
+    nm_run_analysis,
+    nm_features,
+    nm_resample,
+    nm_define_nmchannels,
+    nm_IO, nm_test_settings)
+
+class GRIDS(Enum):
+    CORTEX="cortex"
+    SUBCORTEX="subcortex"
 
 class PNStream(ABC):
 
-    @abstractmethod
-    def run(self, ieeg_batch: np.array) -> pd.Series:
-        pass
+    resample: nm_resample.Resample
+    features: nm_features.Features
+    run_analysis: nm_run_analysis.Run
+    rereference: nm_rereference.RT_rereference
+    projection: nm_projection.Projection
+    settings: dict
+    nm_channels: pd.DataFrame
+    coords: dict
+    fs: float
+    line_noise: float
+    VERBOSE: bool
+    PATH_SETTINGS: str
+    PATH_NM_CHANNELS: str = str()
+    PATH_OUT: str = str()
+    PATH_GRIDS: str = str()
+    df_features: pd.DataFrame = pd.DataFrame()
+    CH_NAMES_USED: list
+    CH_TYPES_USED: list
+    FEATURE_IDX: list
+    LABEL_IDX: list
+    grid_cortex: np.array
+    grid_subcortex: np.array
 
     @abstractmethod
-    def set_rereference(self) -> None:
-        pass
+    def __init__(self,
+        PATH_SETTINGS=os.path.join(pathlib.Path(__file__).parent.resolve(),\
+                                    "nm_settings.json"),
+        PATH_NM_CHANNELS:str = str(),
+        PATH_OUT:str = os.getcwd(),
+        PATH_GRIDS:str = pathlib.Path(__file__).parent.resolve(),
+        VERBOSE:bool = False) -> None:
+
+        self.PATH_SETTINGS = PATH_SETTINGS
+        self.PATH_NM_CHANNELS = PATH_NM_CHANNELS
+        self.PATH_OUT = PATH_OUT
+        self.VERBOSE = VERBOSE
+
+        self.settings = nm_IO.read_settings(self.PATH_SETTINGS)
+
+        if True in [self.settings["project_cortex"],
+                    self.settings["project_subcortex"]]:
+            self.grid_cortex, self.grid_subcortex = self.set_grids(
+                self.settings,
+                self.PATH_GRIDS,
+                GRIDS
+                )
 
     @abstractmethod
-    def set_resampling(self) -> None:
+    def add_coordinates(self) -> None:
+        """This method is implemented differently 
+           for BIDS and real time data anylsis
+        """
+        pass
+    
+    @abstractmethod
+    def run(self, ieeg_batch: np.array) -> None:
         pass
 
-    @abstractmethod
-    def set_features(self) -> None:
-        pass
+    def set_run(self):
 
-    @abstractmethod
-    def set_run(self) -> None:
-        pass
+        self.CH_NAMES_USED, self.CH_TYPES_USED, self.FEATURE_IDX, self.LABEL_IDX = \
+            self.set_ch_info(self.nm_channels)
 
-    @abstractmethod
+        self.set_features()
+
+        self.set_resampling()
+
+        self.set_rereference()
+
+        self.set_projection()
+
+        self.run_analysis = nm_run_analysis.Run(
+            self.features,
+            self.settings,
+            self.rereference,
+            self.projection,
+            self.resample,
+            self.VERBOSE
+        )
+
+    def set_features(self, settings:dict, VERBOSE:bool) -> None:
+        """initialize feature class from settings"""
+        self.features = nm_features.Features(
+            settings,
+            VERBOSE
+        )
+
     def set_fs(self, fs: int) -> None:
-        pass
+        self.fs = fs
 
-    @abstractmethod 
+    def set_rereference(self) -> None:
+        if self.settings["methods"]["re_referencing"] is True:
+            self.rereference = nm_rereference.RT_rereference(
+                self.nm_channels, split_data=False)
+        else:
+            self.rereference = None
+            # reset nm_channels from default values
+            self.nm_channels["rereference"] = None
+            self.nm_channels["new_name"] = self.nm_channels["name"]
+
+    def set_resampling(self) -> None:
+        if self.settings["methods"]["raw_resampling"] is True:
+            self.resample = nm_resample.Resample(self.settings)
+        else:
+            self.resample = None
+
     def set_linenoise(self, line_noise: int) -> None:
-        pass
+        self.line_noise = line_noise
+    
+    def set_grids(self, settings: dict(), PATH_GRIDS: str, GRID_TYPE: GRIDS):
+        if settings["project_cortex"] is True:
+            grid_cortex = nm_IO.read_grid(PATH_GRIDS, GRID_TYPE.CORTEX)
+        else:
+            grid_cortex = None
+        if settings["project_subcortex"] is True:
+            grid_subcortex = nm_IO.read_grid(PATH_GRIDS, GRID_TYPE.SUBCORTEX)
+        else:
+            grid_subcortex = None
+        return grid_cortex, grid_subcortex
 
-    @abstractmethod
-    def set_settings(self, PATH_SETTINGS: str) -> None:
-        pass
+    def set_projection(self):
+        if any((self.settings["methods"]["project_cortex"],
+                self.settings["methods"]["project_subcortex"])):
+            self.projection = nm_projection.Projection(self.settings)
+        else:
+            self.projection = None
 
-    @abstractmethod
-    def set_channels(self, PATH_CHANNELS: str) -> None:
-        pass
+    def get_ch_info(nm_channels: pd.DataFrame):
+        """Get used feature and label info from nm_channels"""
+
+        CH_NAMES_USED = nm_channels[nm_channels["used"] == 1]["new_name"].tolist()
+        CH_TYPES_USED = nm_channels[nm_channels["used"] == 1]["type"].tolist()
+        
+        # used channels for feature estimation
+        FEATURE_IDX = np.where(nm_channels["used"] &
+                               ~nm_channels["target"])[0].tolist()
+
+        # If multiple targets exist, select only the first
+        LABEL_IDX = np.where(nm_channels["target"] == 1)[0]
+
+        return CH_NAMES_USED, CH_TYPES_USED, FEATURE_IDX, LABEL_IDX
+
+    def get_nm_channels(self, PATH_NM_CHANNELS:str, **kwargs) -> None:
+
+        if PATH_NM_CHANNELS and os.path.isfile(PATH_NM_CHANNELS):
+            nm_channels = pd.read_csv(PATH_NM_CHANNELS)
+        elif None not in [kwargs.get('ch_names', None),
+                        kwargs.get('ch_types', None),
+                        kwargs.get('bads', None),
+                        kwargs.get('ECOG_ONLY', None)]:
+
+            nm_channels = nm_define_nmchannels.set_channels_by_bids(
+                ch_names=kwargs.get('ch_names'),
+                ch_types=kwargs.get('ch_types'),
+                bads=kwargs.get('bads'),
+                ECOG_ONLY=kwargs.get('ECOG_ONLY'))
+        self.nm_channels = nm_channels
+    
+    def set_sess_lat(self, coords):
+        if len(coords["cortex_left"]["positions"]) == 0:
+            sess_right = True
+        elif len(coords["cortex_right"]["positions"]) == 0:
+            sess_right = False
+        return sess_right

@@ -21,8 +21,8 @@ import bids
 from bids import BIDSLayout
 from itertools import product
 
-from pyneuromodulation import nm_reader as NM_reader
-from pyneuromodulation import nm_decode, nm_start_BIDS, nm_settings, nm_analysis
+from pyneuromodulation import nm_BidsStream, nm_reader as NM_reader
+from pyneuromodulation import nm_decode, nm_settings, nm_analysis
 
 class CohortRunner:
 
@@ -78,7 +78,7 @@ class CohortRunner:
             PATH_OUT = os.path.join(self.outpath, 'Pittsburgh')
 
         if self.run_bids:
-            nm_BIDS = nm_start_BIDS.NM_BIDS(PATH_RUN, ECOG_ONLY=self.ECOG_ONLY, PATH_BIDS=PATH_BIDS, PATH_OUT=PATH_OUT,
+            nm_BIDS = nm_BidsStream.NM_BIDS(PATH_RUN, ECOG_ONLY=self.ECOG_ONLY, PATH_BIDS=PATH_BIDS, PATH_OUT=PATH_OUT,
                                         PATH_SETTINGS=self.PATH_SETTINGS, LIMIT_DATA=False, LIMIT_HIGH=200000)
             nm_BIDS.run_bids()
 

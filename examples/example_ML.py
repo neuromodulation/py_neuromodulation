@@ -6,15 +6,12 @@ import argparse
 import os
 from pathlib import Path
 
-PATH_PYNEUROMODULATION = Path(__file__).absolute().parent.parent
-sys.path.append(os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation'))
-
-import nm_decode
+from pyneuromodulation import nm_decode
 from skopt.space import Real, Integer, Categorical
 
 def run_example_ML():
 
-    PATH_FEATURES = os.path.join(PATH_PYNEUROMODULATION, 'pyneuromodulation', 'tests', 'data', 'derivatives')
+    PATH_FEATURES = os.path.join('examples', 'data', 'derivatives')
     FEATURE_FILE = r"sub-testsub_ses-EphysMedOff_task-buttonpress_ieeg"
     print("estimation Feature file "+str(FEATURE_FILE))
     parser = argparse.ArgumentParser()

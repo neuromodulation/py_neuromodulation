@@ -3,7 +3,14 @@ import numpy as np
 import os
 import json
 import _pickle as cPickle
+import pandas as pd
+from pathlib import Path
 
+from pyneuromodulation import nm_define_nmchannels
+
+def read_settings(PATH_SETTINGS: str) -> None:
+    with open(PATH_SETTINGS, encoding="utf-8") as json_file:
+        return json.load(json_file)
 
 def read_BIDS_data(PATH_RUN, BIDS_PATH):
     """Given a run path and bids data path, read the respective data
@@ -41,6 +48,27 @@ def read_BIDS_data(PATH_RUN, BIDS_PATH):
         int(raw_arr.info["line_freq"]),
     )
 
+def read_grid(PATH_GRIDS: str, grid_str: str):
+    if not PATH_GRIDS:
+        grid = pd.read_csv(Path(__file__).parent / "grid_"+grid_str+".tsv", sep="\t") 
+    else:
+        grid = pd.read_csv(os.path.join(PATH_GRIDS, "grid_"+grid_str+".tsv"), sep="\t")
+    return grid
+
+def get_annotations(PATH_ANNOTATIONS:str, PATH_RUN:str, raw_arr:mne.io.RawArray):
+
+    try:
+        annot = mne.read_annotations(os.path.join(PATH_ANNOTATIONS,
+                                            os.path.basename(PATH_RUN)[:-5]+".txt"))
+        raw_arr.set_annotations(annot)
+
+        # annotations starting with "BAD" are omitted with reject_by_annotations 'omit' param
+        annot_data = raw_arr.get_data(reject_by_annotation='omit')
+    except FileNotFoundError:
+        print("Annotations file could not be found")
+        print("expected location: "+str(os.path.join(self.PATH_ANNOTATIONS,
+                                        os.path.basename(self.PATH_RUN)[:-5]+".txt")))
+    return annot, annot_data, raw_arr
 
 def add_labels(df_, settings_wrapper, raw_arr_data):
     """Given a constructed feature data frame, resample the target labels and add to dataframe

@@ -12,8 +12,7 @@ sys.path.append(os.path.join(Path(__file__).parent.parent, 'examples'))
 # https://stackoverflow.com/a/10253916/5060208
 # despite that pytest needs to be envoked by python: python -m pytest tests/
 
-from pyneuromodulation import nm_define_nmchannels, nm_generator, nm_rereference, nm_settings, \
-    nm_sharpwaves, nm_IO
+from pyneuromodulation import nm_define_nmchannels, nm_generator, nm_rereference, nm_sharpwaves, nm_IO, nm_test_settings
 from examples import example_BIDS
 
 
@@ -33,7 +32,7 @@ class TestWrapper:
         """
 
         # read and test settings first to obtain BIDS path
-        self.settings_wrapper = nm_settings.SettingsWrapper(
+        self.settings_wrapper = nm_test_settings.SettingsWrapper(
             settings_path=os.path.join(os.path.dirname(nm_define_nmchannels .__file__), 'nm_settings.json'))
 
         #self.settings_wrapper.settings['BIDS_path'] = os.path.join(os.path.dirname(example_BIDS.__file___), 'data')

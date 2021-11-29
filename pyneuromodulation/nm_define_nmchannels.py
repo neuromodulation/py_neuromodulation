@@ -1,8 +1,9 @@
-from numpy import arange, nan
-from pandas import DataFrame
+import numpy as np
+import pandas as pd
+import os
 
 
-def set_nm_channels(ch_names, ch_types, reference='default', bads=None,
+def set_channels_by_bids(self, ch_names, ch_types, reference='default', bads=None,
                     new_names='default', ECOG_ONLY=False):
     """Return dataframe with channel-specific settings.
 
@@ -53,22 +54,22 @@ def set_nm_channels(ch_names, ch_types, reference='default', bads=None,
         raise Exception("Sorry, no numbers below zero")
 
     mov_substrs = ['mov', 'rota_squared', 'squared_emg', 'squared_rotawheel', \
-                   'squared_rotation']
+                'squared_rotation']
     used_substrs = ['ecog', 'seeg']
     lfp_types = ['seeg', 'dbs', 'lfp']
 
-    df = DataFrame(nan, index=arange(len(list(ch_names))),
-                   columns=['name', 'rereference', 'used', 'target', 'type',
+    df = pd.DataFrame(np.nan, index=np.arange(len(list(ch_names))),
+                columns=['name', 'rereference', 'used', 'target', 'type',
                             'status', 'new_name'])
     df['name'] = ch_names
 
     df['used'] = [1 if any(used_substr.lower() in ch_name.lower()
-                           or used_substr.lower() in ch_type.lower()
-                           for used_substr in used_substrs)
-                  else 0 for ch_type, ch_name in zip(ch_types, ch_names)]
+                        or used_substr.lower() in ch_type.lower()
+                        for used_substr in used_substrs)
+                else 0 for ch_type, ch_name in zip(ch_types, ch_names)]
 
     df['target'] = [1 if any(mov_substr.lower() in ch_name.lower()
-                             for mov_substr in mov_substrs) else 0
+                            for mov_substr in mov_substrs) else 0
                     for ch_idx, ch_name in enumerate(ch_names)]
 
     # note: BIDS types are in caps, mne.io.RawArray types lower case
@@ -81,8 +82,8 @@ def set_nm_channels(ch_names, ch_types, reference='default', bads=None,
     if isinstance(reference, str):
         if not (reference in ['default', 'Default']):
             raise ValueError("`reference` must be either `default`, None or "
-                             "an iterable of new reference channel names. "
-                             f"Got: {reference}.")
+                            "an iterable of new reference channel names. "
+                            f"Got: {reference}.")
         ecog_chs = []
         lfp_chs = []
         other_chs = []
@@ -90,21 +91,21 @@ def set_nm_channels(ch_names, ch_types, reference='default', bads=None,
             if "ecog" in ch_type.lower() or "ecog" in ch_name.lower():
                 ecog_chs.append(ch_name)
             elif any(lfp_type.lower() in ch_type.lower()
-                     or lfp_type.lower() in ch_name.lower()
-                     for lfp_type in lfp_types):
+                    or lfp_type.lower() in ch_name.lower()
+                    for lfp_type in lfp_types):
                 lfp_chs.append(ch_name)
             else:
                 other_chs.append(ch_name)
         lfp_l = sorted(
             [lfp_ch for lfp_ch in lfp_chs if ('_l_' in lfp_ch.lower())
-             or ('_left_' in lfp_ch.lower())])
+            or ('_left_' in lfp_ch.lower())])
         lfp_r = sorted(
             [lfp_ch for lfp_ch in lfp_chs if ('_r_' in lfp_ch.lower())
-             or ('_right_' in lfp_ch.lower())])
+            or ('_right_' in lfp_ch.lower())])
         lfp_l_refs = [lfp_l[i - 1] if i > 0 else lfp_l[-1] for i in
-                      range(len(lfp_l))]
+                    range(len(lfp_l))]
         lfp_r_refs = [lfp_r[i - 1] if i > 0 else lfp_r[-1] for i in
-                      range(len(lfp_r))]
+                    range(len(lfp_r))]
         ref_idx = list(df.columns).index('rereference')
         for ecog_ch in ecog_chs:
             df.iloc[
@@ -127,8 +128,8 @@ def set_nm_channels(ch_names, ch_types, reference='default', bads=None,
         df.loc[:, 'rereference'] = 'None'
     else:
         raise ValueError("`reference` must be either `default`, None or "
-                         "an iterable of new reference channel names. "
-                         f"Got: {reference}.")
+                        "an iterable of new reference channel names. "
+                        f"Got: {reference}.")
 
     if bads is not None:
         if isinstance(bads, str):
@@ -143,8 +144,8 @@ def set_nm_channels(ch_names, ch_types, reference='default', bads=None,
     elif isinstance(new_names, str):
         if new_names.lower() != 'default':
             raise ValueError("`new_names` must be either `default`, None or "
-                             "an iterable of new channel names. Got: "
-                             f"{new_names}.")
+                            "an iterable of new channel names. Got: "
+                            f"{new_names}.")
         new_names = list()
         for name, ref in zip(df['name'], df['rereference']):
             if ref == 'None':
@@ -157,11 +158,11 @@ def set_nm_channels(ch_names, ch_types, reference='default', bads=None,
     elif hasattr(new_names, '__iter__'):
         if len(new_names) != len(ch_names):
             raise ValueError("`new_names` must have the same number of items"
-                             "as the original channel names.")
+                            "as the original channel names.")
         else:
             df['new_name'] = ch_names
     else:
         raise ValueError("`new_names` must be either `default`, None or "
-                         "an iterable of new channel names.Got: "
-                         f"{new_names}.")
+                        "an iterable of new channel names.Got: "
+                        f"{new_names}.")
     return df

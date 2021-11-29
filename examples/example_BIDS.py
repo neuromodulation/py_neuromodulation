@@ -6,7 +6,7 @@ import os
 import json
 from pathlib import Path
 from sklearn import linear_model
-from pyneuromodulation import nm_start_BIDS, nm_analysis
+from pyneuromodulation import nm_BidsStream, nm_analysis
 
 
 def run_example_BIDS():
@@ -18,7 +18,7 @@ def run_example_BIDS():
         "sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg.vhdr")
 
     # read default settings
-    nm_BIDS = nm_start_BIDS.NM_BIDS(PATH_RUN, PATH_BIDS=os.path.abspath('examples\\data'),
+    nm_BIDS = nm_BidsStream.NM_BIDS(PATH_RUN, PATH_BIDS=os.path.abspath('examples\\data'),
                                     PATH_OUT=os.path.abspath(os.path.join('examples', 'data', 'derivatives')))
 
     nm_BIDS.run_bids()
