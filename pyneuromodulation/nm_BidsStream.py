@@ -79,7 +79,7 @@ class BidsStream(nm_stream.PNStream):
 
         self.coord_list, self.coord_names = \
             self.get_bids_coord_list(self.raw_arr)
-        
+
         if self.coord_list is None and True in [self.settings["project_cortex"],
                                         self.settings["project_subcortex"]]:
             raise ValueError("no coordinates could be loaded from BIDS Dataset")
@@ -92,7 +92,7 @@ class BidsStream(nm_stream.PNStream):
         self.set_run()
 
     def run_bids(self):
-        self.call_run()
+        self.run()
         self.add_labels()
         self.save_features()
 

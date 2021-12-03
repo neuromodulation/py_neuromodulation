@@ -74,7 +74,7 @@ class PNStream(ABC):
            for BIDS and real time data anylsis
         """
         pass
-    
+
     @abstractmethod
     def run(self, ieeg_batch: np.array) -> None:
         pass
@@ -84,13 +84,15 @@ class PNStream(ABC):
         self.CH_NAMES_USED, self.CH_TYPES_USED, self.FEATURE_IDX, self.LABEL_IDX = \
             self.set_ch_info(self.nm_channels)
 
-        self.set_features()
+        self.features = self.set_features(self.settings, self.VERBOSE)
 
-        self.set_resampling()
+        self.resample = self.set_resampling(self.settings)
 
-        self.set_rereference()
+        self.rereference, self.nm_channels = self.set_rereference(
+            self.settings, self.nm_channels
+        )
 
-        self.set_projection()
+        self. projection = self.set_projection(self.settings)
 
         self.run_analysis = nm_run_analysis.Run(
             self.features,
@@ -103,7 +105,7 @@ class PNStream(ABC):
 
     def set_features(self, settings:dict, VERBOSE:bool) -> None:
         """initialize feature class from settings"""
-        self.features = nm_features.Features(
+        return nm_features.Features(
             settings,
             VERBOSE
         )
@@ -111,25 +113,27 @@ class PNStream(ABC):
     def set_fs(self, fs: int) -> None:
         self.fs = fs
 
-    def set_rereference(self) -> None:
-        if self.settings["methods"]["re_referencing"] is True:
-            self.rereference = nm_rereference.RT_rereference(
-                self.nm_channels, split_data=False)
+    def set_rereference(self, settings:dict, nm_channels:pd.DataFrame) -> None:
+        if settings["methods"]["re_referencing"] is True:
+            rereference = nm_rereference.RT_rereference(
+                nm_channels, split_data=False)
         else:
-            self.rereference = None
+            rereference = None
             # reset nm_channels from default values
-            self.nm_channels["rereference"] = None
-            self.nm_channels["new_name"] = self.nm_channels["name"]
+            nm_channels["rereference"] = None
+            nm_channels["new_name"] = nm_channels["name"]
+        return rereference, nm_channels
 
-    def set_resampling(self) -> None:
-        if self.settings["methods"]["raw_resampling"] is True:
-            self.resample = nm_resample.Resample(self.settings)
+    def set_resampling(self, settings:dict) -> None:
+        if settings["methods"]["raw_resampling"] is True:
+            resample = nm_resample.Resample(settings)
         else:
-            self.resample = None
+            resample = None
+        return resample
 
     def set_linenoise(self, line_noise: int) -> None:
         self.line_noise = line_noise
-    
+
     def set_grids(self, settings: dict(), PATH_GRIDS: str, GRID_TYPE: GRIDS):
         if settings["project_cortex"] is True:
             grid_cortex = nm_IO.read_grid(PATH_GRIDS, GRID_TYPE.CORTEX)
@@ -141,13 +145,13 @@ class PNStream(ABC):
             grid_subcortex = None
         return grid_cortex, grid_subcortex
 
-    def set_projection(self):
-        if any((self.settings["methods"]["project_cortex"],
-                self.settings["methods"]["project_subcortex"])):
-            self.projection = nm_projection.Projection(self.settings)
+    def set_projection(self, settings:dict):
+        if any((settings["methods"]["project_cortex"],
+                settings["methods"]["project_subcortex"])):
+            projection = nm_projection.Projection(settings)
         else:
-            self.projection = None
-
+            projection = None
+        return projection
     def get_ch_info(nm_channels: pd.DataFrame):
         """Get used feature and label info from nm_channels"""
 
