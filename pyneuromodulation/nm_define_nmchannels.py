@@ -3,7 +3,7 @@ import pandas as pd
 import os
 
 
-def set_channels_by_bids(self, ch_names, ch_types, reference='default', bads=None,
+def set_channels_by_bids(ch_names, ch_types, reference='default', bads=None,
                     new_names='default', ECOG_ONLY=False):
     """Return dataframe with channel-specific settings.
 

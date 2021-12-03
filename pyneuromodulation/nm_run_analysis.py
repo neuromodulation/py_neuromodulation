@@ -3,13 +3,18 @@ from numpy import concatenate, vstack, expand_dims
 from numpy import round as np_round
 from pandas import DataFrame, Series
 
-from pyneuromodulation import nm_normalization
+from pyneuromodulation import nm_features, nm_normalization, nm_projection, nm_rereference, nm_resample
 
 
 class Run:
 
-    def __init__(self, features, settings, reference=None, projection=None,
-                 resample=None, verbose=True) -> None:
+    def __init__(self, features: nm_features.Features,
+        settings: dict, reference:
+        nm_rereference.RT_rereference,
+        projection: nm_projection.Projection,
+        resample: nm_resample.Resample,
+        verbose: bool,
+        feature_idx: list) -> None:
         """Initialize run class
 
         Parameters
@@ -44,6 +49,7 @@ class Run:
         self.settings = settings
         self.fs_new = int(settings["sampling_rate_features"])
         self.fs = features.fs
+        self.feature_idx = feature_idx
         self.sample_add = int(self.fs / self.fs_new)
         self.verbose = verbose
         self.offset = max([value for value in settings["bandpass_filter_settings"]["segment_lengths"].values()])  # ms
@@ -91,7 +97,7 @@ class Run:
         if self.settings["methods"]["re_referencing"] is True:
             ieeg_batch = self.reference.rereference(ieeg_batch)
 
-        ieeg_batch = ieeg_batch[self.settings["feature_idx"], :]
+        ieeg_batch = ieeg_batch[self.feature_idx, :]
 
         # resample
         if self.settings["methods"]["raw_resampling"] is True:

@@ -3,7 +3,7 @@ from mne.filter import resample
 
 class Resample:
 
-    def __init__(self, settings) -> None:
+    def __init__(self, settings, fs) -> None:
         """
 
         Parameters
@@ -13,7 +13,7 @@ class Resample:
         """
 
         self.s = settings
-        self.fs = settings["fs"]
+        self.fs = fs
         self.fs_new = settings["raw_resampling_settings"]["resample_freq"]
         self.down = self.fs / self.fs_new
         self.up = 1.0

@@ -60,8 +60,8 @@ class PNStream(ABC):
 
         self.settings = nm_IO.read_settings(self.PATH_SETTINGS)
 
-        if True in [self.settings["project_cortex"],
-                    self.settings["project_subcortex"]]:
+        if True in [self.settings["methods"]["project_cortex"],
+                    self.settings["methods"]["project_subcortex"]]:
             self.grid_cortex, self.grid_subcortex = self.set_grids(
                 self.settings,
                 self.PATH_GRIDS,
@@ -82,11 +82,16 @@ class PNStream(ABC):
     def set_run(self):
 
         self.CH_NAMES_USED, self.CH_TYPES_USED, self.FEATURE_IDX, self.LABEL_IDX = \
-            self.set_ch_info(self.nm_channels)
+            self.get_ch_info(self.nm_channels)
 
-        self.features = self.set_features(self.settings, self.VERBOSE)
+        self.features = self.set_features(self.settings,
+            self.CH_NAMES_USED,
+            self.fs,
+            self.line_noise,
+            self.VERBOSE
+            )
 
-        self.resample = self.set_resampling(self.settings)
+        self.resample = self.set_resampling(self.settings, self.fs)
 
         self.rereference, self.nm_channels = self.set_rereference(
             self.settings, self.nm_channels
@@ -100,13 +105,21 @@ class PNStream(ABC):
             self.rereference,
             self.projection,
             self.resample,
-            self.VERBOSE
+            self.VERBOSE,
+            self.FEATURE_IDX
         )
 
-    def set_features(self, settings:dict, VERBOSE:bool) -> None:
+    def set_features(self, settings:dict,
+        CH_NAMES_USED: list,
+        fs: int,
+        line_noise: int,
+        VERBOSE:bool) -> None:
         """initialize feature class from settings"""
         return nm_features.Features(
             settings,
+            CH_NAMES_USED,
+            fs,
+            line_noise,
             VERBOSE
         )
 
@@ -124,9 +137,9 @@ class PNStream(ABC):
             nm_channels["new_name"] = nm_channels["name"]
         return rereference, nm_channels
 
-    def set_resampling(self, settings:dict) -> None:
+    def set_resampling(self, settings:dict, fs: int) -> None:
         if settings["methods"]["raw_resampling"] is True:
-            resample = nm_resample.Resample(settings)
+            resample = nm_resample.Resample(settings, fs)
         else:
             resample = None
         return resample
@@ -152,7 +165,8 @@ class PNStream(ABC):
         else:
             projection = None
         return projection
-    def get_ch_info(nm_channels: pd.DataFrame):
+
+    def get_ch_info(self, nm_channels: pd.DataFrame):
         """Get used feature and label info from nm_channels"""
 
         CH_NAMES_USED = nm_channels[nm_channels["used"] == 1]["new_name"].tolist()
@@ -181,7 +195,7 @@ class PNStream(ABC):
                 ch_types=kwargs.get('ch_types'),
                 bads=kwargs.get('bads'),
                 ECOG_ONLY=kwargs.get('ECOG_ONLY'))
-        self.nm_channels = nm_channels
+        return nm_channels
     
     def set_sess_lat(self, coords):
         if len(coords["cortex_left"]["positions"]) == 0:

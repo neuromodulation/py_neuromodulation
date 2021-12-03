@@ -6,6 +6,7 @@ import types
 from mne.io.array.array import RawArray
 import numpy as np
 import pandas as pd
+import pathlib
 
 from pyneuromodulation import nm_IO, nm_define_nmchannels, nm_projection, nm_generator, nm_rereference, \
     nm_run_analysis, nm_features, nm_resample, nm_stream, nm_test_settings
@@ -28,12 +29,13 @@ class BidsStream(nm_stream.PNStream):
 
 
     def __init__(self,
-        PATH_SETTINGS=...,
-        PATH_NM_CHANNELS=...,
-        PATH_OUT=...,
-        PATH_GRIDS: str = ...,
-        VERBOSE: bool = ...,
-        PATH_RUN:str = str(),
+        PATH_RUN,
+        PATH_SETTINGS: str = os.path.join(pathlib.Path(__file__).parent.resolve(),\
+                                    "nm_settings.json"),
+        PATH_NM_CHANNELS: str = str(),
+        PATH_OUT: str = os.getcwd(),
+        PATH_GRIDS: str = pathlib.Path(__file__).parent.resolve(),
+        VERBOSE: bool = False,
         PATH_ANNOTATIONS:str = str(),
         PATH_BIDS:str = str(),
         LIMIT_DATA:bool = False,
@@ -62,19 +64,20 @@ class BidsStream(nm_stream.PNStream):
 
         self.set_linenoise(line_noise)
 
-        self.set_nm_channels(PATH_NM_CHANNELS,
-                            ch_names=self.raw_arr.get_channel_types(),
+        self.nm_channels = self.get_nm_channels(PATH_NM_CHANNELS,
+                            ch_names=self.raw_arr.ch_names,
+                            ch_types=self.raw_arr.get_channel_types(),
                             bads=self.raw_arr.info["bads"],
                             ECOG_ONLY=ECOG_ONLY
                             )
 
-        if not self.PATH_ANNOTATIONS:
+        if self.PATH_ANNOTATIONS:
             self.annot, self.annot_data, self.raw_arr = nm_IO.get_annotations(
                                                 self.PATH_ANNOTATIONS,
                                                 self.PATH_RUN,
                                                 self.raw_arr
                                                 )
-        if self.LIMIT_DATA is True:
+        if self.LIMIT_DATA:
             self.raw_arr_data = self.raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
 
         self.coord_list, self.coord_names = \
@@ -87,7 +90,7 @@ class BidsStream(nm_stream.PNStream):
             self.coords = self.add_coordinates(self.coord_names, self.coord_list)
             self.sess_rigth = self.set_sess_lat(self.coords)
 
-        self.gen = nm_generator.ieeg_raw_generator(self.raw_arr_data, self.settings)
+        self.gen = nm_generator.ieeg_raw_generator(self.raw_arr_data, self.settings, self.fs)
 
         self.set_run()
 
@@ -154,29 +157,30 @@ class BidsStream(nm_stream.PNStream):
 
         coords = {}
 
+        def left_coord(val, coord_region):
+            if coord_region.split('_')[1] == "left":
+                return val < 0
+            else:
+                return val > 0
+
         for coord_region in [coord_loc+"_"+lat 
                              for coord_loc in ["cortex", "subcortex"] \
                              for lat in ["left", "right"]]:
 
             coords[coord_region] = {}
 
-            ch_type = "ECOG" if "cortex" in coord_region else "LFP"
+            ch_type = "ECOG" if "cortex" == coord_region.split("_")[0] else "LFP"
 
             coords[coord_region]["ch_names"] = [
-                coord_names[ch_idx]
-                for ch_idx, ch in enumerate(coord_list)
-                if (coord_list[ch_idx][0] > 0)
-                and (ch_type in coord_names[ch_idx])
+                coord_names[ch_idx] for ch_idx, ch in enumerate(coord_list)
+                    if left_coord(coord_list[ch_idx][0], coord_region) and (ch_type in coord_names[ch_idx])
             ]
 
             # multiply by 1000 to get m instead of mm
             coords[coord_region]["positions"] = (
-                1000 * np.array([
-                        ch
-                        for ch_idx, ch in enumerate(coord_list)
-                        if (coord_list[ch_idx][0] > 0)
-                        and (ch_type in coord_names[ch_idx])
-                    ]
+                1000 * np.array([ch for ch_idx, ch in enumerate(coord_list)
+                    if left_coord(coord_list[ch_idx][0], coord_region)
+                        and (ch_type in coord_names[ch_idx])]
                 )
             )
 

@@ -9,7 +9,7 @@ from pyneuromodulation import nm_bandpower, nm_filter, nm_hjorth_raw, nm_kalmanf
 
 class Features:
 
-    def __init__(self, s, verbose=None) -> None:
+    def __init__(self, s, ch_namees, fs, line_noise, verbose=None) -> None:
         """Initialize Feature module
 
         Parameters
@@ -20,12 +20,12 @@ class Features:
 
         self.s = s  # settings
         self.verbose = verbose
-        self.ch_names = list(s["ch_names"])
+        self.ch_names = ch_namees
         if s["methods"]["raw_resampling"] is True:
             self.fs = s["raw_resampling_settings"]["resample_freq"]
         else:
-            self.fs = s["fs"]
-        self.line_noise = s["line_noise"]
+            self.fs = fs
+        self.line_noise = line_noise
         self.fband_names = [value for value in s["frequency_ranges"].keys()]
         self.f_ranges = [self.s["frequency_ranges"][fband_name]
                          for fband_name in self.fband_names]
@@ -100,8 +100,7 @@ class Features:
         # notch filter data before feature estimation
         if self.s["methods"]["notch_filter"]:
             freqs = arange(
-                self.line_noise, int((floor(self.fs/2) / self.line_noise)) * self.line_noise\
-                    + self.line_noise,
+                self.line_noise, int((floor(self.fs/2) / self.line_noise)) * self.line_noise,
                 self.line_noise)
             data = notch_filter(
                 x=data, Fs=self.fs, trans_bandwidth=15, freqs=freqs,

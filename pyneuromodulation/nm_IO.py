@@ -1,4 +1,5 @@
 import mne_bids
+import mne
 import numpy as np
 import os
 import json
