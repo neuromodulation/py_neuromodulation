@@ -3,7 +3,6 @@ import pathlib
 import numpy as np
 import pandas as pd
 import os
-import json
 from enum import Enum
 
 from pyneuromodulation import \
@@ -16,6 +15,7 @@ from pyneuromodulation import \
     nm_IO, nm_test_settings)
 
 class GRIDS(Enum):
+    """Definition of possible projection grid types"""
     CORTEX="cortex"
     SUBCORTEX="subcortex"
 
@@ -97,7 +97,7 @@ class PNStream(ABC):
             self.settings, self.nm_channels
         )
 
-        self. projection = self.set_projection(self.settings)
+        self.projection = self.set_projection(self.settings)
 
         self.run_analysis = nm_run_analysis.Run(
             self.features,
@@ -148,11 +148,11 @@ class PNStream(ABC):
         self.line_noise = line_noise
 
     def set_grids(self, settings: dict(), PATH_GRIDS: str, GRID_TYPE: GRIDS):
-        if settings["project_cortex"] is True:
+        if settings["methods"]["project_cortex"] is True:
             grid_cortex = nm_IO.read_grid(PATH_GRIDS, GRID_TYPE.CORTEX)
         else:
             grid_cortex = None
-        if settings["project_subcortex"] is True:
+        if settings["methods"]["project_subcortex"] is True:
             grid_subcortex = nm_IO.read_grid(PATH_GRIDS, GRID_TYPE.SUBCORTEX)
         else:
             grid_subcortex = None
@@ -161,7 +161,8 @@ class PNStream(ABC):
     def set_projection(self, settings:dict):
         if any((settings["methods"]["project_cortex"],
                 settings["methods"]["project_subcortex"])):
-            projection = nm_projection.Projection(settings)
+            projection = nm_projection.Projection(settings, self.grid_cortex,
+                self.grid_subcortex, self.coords, plot_projection=True)
         else:
             projection = None
         return projection
@@ -171,7 +172,7 @@ class PNStream(ABC):
 
         CH_NAMES_USED = nm_channels[nm_channels["used"] == 1]["new_name"].tolist()
         CH_TYPES_USED = nm_channels[nm_channels["used"] == 1]["type"].tolist()
-        
+
         # used channels for feature estimation
         FEATURE_IDX = np.where(nm_channels["used"] &
                                ~nm_channels["target"])[0].tolist()
