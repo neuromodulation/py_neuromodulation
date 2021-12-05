@@ -4,10 +4,9 @@ import numpy as np
 import os
 import json
 import _pickle as cPickle
+from scipy import io
 import pandas as pd
 from pathlib import Path
-
-from pyneuromodulation import nm_define_nmchannels
 
 def read_settings(PATH_SETTINGS: str) -> None:
     with open(PATH_SETTINGS, encoding="utf-8") as json_file:
@@ -51,9 +50,10 @@ def read_BIDS_data(PATH_RUN, BIDS_PATH):
 
 def read_grid(PATH_GRIDS: str, grid_str: str):
     if not PATH_GRIDS:
-        grid = pd.read_csv(Path(__file__).parent / "grid_"+grid_str+".tsv", sep="\t") 
+        grid = pd.read_csv(os.path.join(Path(__file__).parent, 
+                "grid_"+grid_str.name.lower()+".tsv"), sep="\t")
     else:
-        grid = pd.read_csv(os.path.join(PATH_GRIDS, "grid_"+grid_str+".tsv"), sep="\t")
+        grid = pd.read_csv(os.path.join(PATH_GRIDS, "grid_"+grid_str.name.lower()+".tsv"), sep="\t")
     return grid
 
 def get_annotations(PATH_ANNOTATIONS:str, PATH_RUN:str, raw_arr:mne.io.RawArray):
@@ -67,9 +67,37 @@ def get_annotations(PATH_ANNOTATIONS:str, PATH_RUN:str, raw_arr:mne.io.RawArray)
         annot_data = raw_arr.get_data(reject_by_annotation='omit')
     except FileNotFoundError:
         print("Annotations file could not be found")
-        print("expected location: "+str(os.path.join(self.PATH_ANNOTATIONS,
-                                        os.path.basename(self.PATH_RUN)[:-5]+".txt")))
+        print("expected location: "+str(os.path.join(PATH_ANNOTATIONS,
+                                        os.path.basename(PATH_RUN)[:-5]+".txt")))
     return annot, annot_data, raw_arr
+
+def read_plot_modules(self,
+                        PATH_PLOT=os.path.join(
+                            Path(__file__).absolute().parent.parent,
+                            'plots')):
+    """Read required .mat files for plotting
+
+    Parameters
+    ----------
+    PATH_PLOT : regexp, optional
+        path to plotting files, by default
+    """
+
+    faces = io.loadmat(os.path.join(PATH_PLOT, 'faces.mat'))
+    vertices = io.loadmat(os.path.join(PATH_PLOT, 'Vertices.mat'))
+    grid = io.loadmat(os.path.join(PATH_PLOT, 'grid.mat'))['grid']
+    stn_surf = io.loadmat(os.path.join(PATH_PLOT, 'STN_surf.mat'))
+    x_ver = stn_surf['vertices'][::2, 0]
+    y_ver = stn_surf['vertices'][::2, 1]
+    x_ecog = vertices['Vertices'][::1, 0]
+    y_ecog = vertices['Vertices'][::1, 1]
+    z_ecog = vertices['Vertices'][::1, 2]
+    x_stn = stn_surf['vertices'][::1, 0]
+    y_stn = stn_surf['vertices'][::1, 1]
+    z_stn = stn_surf['vertices'][::1, 2]
+
+    return faces, vertices, grid, stn_surf, x_ver, y_ver, \
+        x_ecog, y_ecog, z_ecog, x_stn, y_stn, z_stn
 
 def add_labels(df_, settings_wrapper, raw_arr_data):
     """Given a constructed feature data frame, resample the target labels and add to dataframe
