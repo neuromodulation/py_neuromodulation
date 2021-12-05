@@ -71,8 +71,7 @@ def get_annotations(PATH_ANNOTATIONS:str, PATH_RUN:str, raw_arr:mne.io.RawArray)
                                         os.path.basename(PATH_RUN)[:-5]+".txt")))
     return annot, annot_data, raw_arr
 
-def read_plot_modules(self,
-                        PATH_PLOT=os.path.join(
+def read_plot_modules(PATH_PLOT=os.path.join(
                             Path(__file__).absolute().parent.parent,
                             'plots')):
     """Read required .mat files for plotting
@@ -119,7 +118,8 @@ def add_labels(df_, settings_wrapper, raw_arr_data):
     # resample_label
     ind_label = np.where(settings_wrapper.nm_channels["target"] == 1)[0]
     if ind_label.shape[0] != 0:
-        offset_time = max([value for value in settings_wrapper.settings["bandpass_filter_settings"]["segment_lengths"].values()])
+        offset_time = max([value for value in \
+                settings_wrapper.settings["bandpass_filter_settings"]["segment_lengths"].values()])
         offset_start = np.ceil(offset_time / 1000 * settings_wrapper.settings["fs"]).astype(int)
         dat_ = raw_arr_data[ind_label, offset_start:]
         if dat_.ndim == 1:

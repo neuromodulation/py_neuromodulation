@@ -1,8 +1,8 @@
-from matplotlib import pyplot as plt
-import scipy import io
+from scipy import io
 import os
 import numpy as np
 from pathlib import Path
+from matplotlib import pyplot as plt
 
 from pyneuromodulation import nm_IO
 
@@ -26,12 +26,12 @@ def plot_cortical_projection(
     axes.axes.set_aspect('equal', anchor='C')
 
     
-    _ = axes.scatter(cortex_grid[0, :],
-                            cortex_grid[1, :], c=grid_color,
+    _ = axes.scatter(cortex_grid[:, 0],
+                            cortex_grid[:, 1], c=grid_color,
                             s=30, alpha=0.8, cmap="viridis")
 
-    _ = axes.scatter(ecog_strip[0, :],
-                            ecog_strip[1, :], c=np.ones(ecog_strip.shape[1]),
+    _ = axes.scatter(ecog_strip[:, 0],
+                            ecog_strip[:, 1], c=np.ones(ecog_strip.shape[0]),
                             s=50, alpha=0.8, cmap="gray", marker="x")
     plt.axis('off')
 
@@ -47,13 +47,13 @@ def plot_grid_elec_3d(
 
     # Plot becomes slow
     # ax.scatter3D(self.x_ecog[::100], self.y_ecog[::100], self.z_ecog[::100], cmap='gray', s=100, alpha=0.4)
-    
-    _ = ax.scatter3D(cortex_grid[0, :],
-                            cortex_grid[1, :], cortex_grid[2, :], c=grid_color,
+
+    _ = ax.scatter3D(cortex_grid[:, 0],
+                            cortex_grid[:, 1], cortex_grid[:, 2], c=grid_color,
                             s=300, alpha=0.8, cmap="viridis")
 
-    _ = ax.scatter(ecog_strip[0, :],
-                            ecog_strip[1, :], ecog_strip[2, :], c=np.ones(ecog_strip.shape[1]),
+    _ = ax.scatter(ecog_strip[:, 0],
+                            ecog_strip[:, 1], ecog_strip[:, 2], c=np.ones(ecog_strip.shape[0]),
                             s=500, alpha=0.8, cmap="gray", marker="o")
 
 class NM_Plot():
@@ -82,13 +82,15 @@ class NM_Plot():
         """Plot grid plots color coded respectively of a projection matrix"""
 
         if self.proj_matrix_cortex is not None:
-            plot_cortical_projection(self.cortex_grid, self.ecog_strip, self.grid_color,
+            plot_cortical_projection(np.array(self.grid_cortex),
+                np.array(self.ecog_strip), self.grid_color,
                 self.sess_right, self.x_ecog, self.y_ecog)
         else:
             raise ValueError("no projection matrix supplied")
 
     def plot_grid_elec_3d(self):
         if self.proj_matrix_cortex is not None:
-            plot_grid_elec_3d(self.cortex_grid, self.ecog_strip, self.grid_color)
+            plot_grid_elec_3d(np.array(self.cortex_grid),
+                np.array(self.ecog_strip), self.grid_color)
         else:
             raise ValueError("no projection matrix supplied")

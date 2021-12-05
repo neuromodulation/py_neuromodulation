@@ -28,22 +28,18 @@ class Projection:
         elif len(self.coord["cortex_right"]["positions"]) == 0:
             self.sess_right = False
             self.ecog_strip = self.coord["cortex_left"]["positions"]
-        
+
         self.project_cortex = settings["methods"]["project_cortex"]
         self.project_subcortex = settings["methods"]["project_subcortex"]
- 
+
         self.proj_matrix_cortex, self.proj_matrix_subcortex = self.calc_projection_matrix()
 
         if plot_projection is True:
             nmplotter = nm_plots.NM_Plot(self.ecog_strip, self.grid_cortex, self.grid_subcortex,
                 self.sess_right, self.proj_matrix_cortex)
             nmplotter.plot_cortical_projection()
-        
+
     def calc_proj_matrix(self, max_dist, grid: np.array, coord_array: np.array):
-
-
-        if coord_array is None:  # this checks if there are cortex/subcortex channels in that run
-            return None
 
         channels = coord_array.shape[0]
         distance_matrix = np.zeros([grid.shape[1], channels])
@@ -92,7 +88,7 @@ class Projection:
                 self.subcortex_grid_right = np.array(subcortex_grid_right).T
             else:
                 self.subcortex_grid_right = None
-                
+
             grid_session = [self.cortex_grid_right, self.subcortex_grid_right]
             coord_array = [self.ecog_strip, self.coord["subcortex_right"]["positions"]]
 
@@ -104,7 +100,8 @@ class Projection:
             if self.project_subcortex:
                 self.subcortex_grid_left = np.array(self.grid_subcortex.T)
             else:
-                self.cortex_grid_left = None
+                self.subcortex_grid_left = None
+
             grid_session = [self.cortex_grid_left, self.subcortex_grid_left]
             coord_array = [self.ecog_strip, self.coord["subcortex_left"]["positions"]]
 
@@ -114,7 +111,7 @@ class Projection:
             elif loc_ == 1:  # subcortex
                 max_dist = self.max_dist_subcortex
 
-            if coord_array[loc_] is not None:
+            if grid_session[loc_] is not None:
                 proj_matrix_run[loc_] = self.calc_proj_matrix(max_dist, grid, coord_array[loc_])
 
         return proj_matrix_run[0], proj_matrix_run[1]  # cortex, subcortex
