@@ -43,6 +43,7 @@ class PNStream(ABC):
     LABEL_IDX: list
     grid_cortex: np.array
     grid_subcortex: np.array
+    sess_right: bool
 
     @abstractmethod
     def __init__(self,
@@ -51,7 +52,7 @@ class PNStream(ABC):
         PATH_NM_CHANNELS:str = str(),
         PATH_OUT:str = os.getcwd(),
         PATH_GRIDS:str = pathlib.Path(__file__).parent.resolve(),
-        VERBOSE:bool = False) -> None:
+        VERBOSE:bool = True) -> None:
 
         self.PATH_SETTINGS = PATH_SETTINGS
         self.PATH_NM_CHANNELS = PATH_NM_CHANNELS
@@ -98,6 +99,10 @@ class PNStream(ABC):
         )
 
         self.projection = self.set_projection(self.settings)
+        if self.projection is not None:
+            self.sess_right = self.set_sess_lat(self.coords)
+        else:
+            self.sess_right = None
 
         self.run_analysis = nm_run_analysis.Run(
             self.features,
@@ -105,6 +110,9 @@ class PNStream(ABC):
             self.rereference,
             self.projection,
             self.resample,
+            self.nm_channels,
+            self.coords,
+            self.sess_right,
             self.VERBOSE,
             self.FEATURE_IDX
         )
@@ -197,7 +205,7 @@ class PNStream(ABC):
                 bads=kwargs.get('bads'),
                 ECOG_ONLY=kwargs.get('ECOG_ONLY'))
         return nm_channels
-    
+
     def set_sess_lat(self, coords):
         if len(coords["cortex_left"]["positions"]) == 0:
             sess_right = True

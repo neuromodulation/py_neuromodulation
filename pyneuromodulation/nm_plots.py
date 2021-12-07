@@ -25,7 +25,6 @@ def plot_cortical_projection(
     axes.scatter(x_ecog, y_ecog, c="gray", s=0.001)
     axes.axes.set_aspect('equal', anchor='C')
 
-    
     _ = axes.scatter(cortex_grid[:, 0],
                             cortex_grid[:, 1], c=grid_color,
                             s=30, alpha=0.8, cmap="viridis")
@@ -40,7 +39,7 @@ def plot_grid_elec_3d(
     ecog_strip: np.array,
     grid_color: np.array
     ):
-    
+
     ax = plt.axes(projection='3d')
     # if self.sess_right is True:
     # self.cortex_grid[0,:] = self.cortex_grid[0,:]*-1

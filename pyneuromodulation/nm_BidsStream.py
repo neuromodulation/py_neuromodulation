@@ -35,12 +35,12 @@ class BidsStream(nm_stream.PNStream):
         PATH_NM_CHANNELS: str = str(),
         PATH_OUT: str = os.getcwd(),
         PATH_GRIDS: str = pathlib.Path(__file__).parent.resolve(),
-        VERBOSE: bool = False,
+        VERBOSE: bool = True,
         PATH_ANNOTATIONS:str = str(),
         PATH_BIDS:str = str(),
-        LIMIT_DATA:bool = False,
+        LIMIT_DATA:bool = True,
         LIMIT_LOW:int = 0,
-        LIMIT_HIGH:int = 25000,
+        LIMIT_HIGH:int = 10000,
         ECOG_ONLY:bool = False) -> None:
 
         super().__init__(PATH_SETTINGS=PATH_SETTINGS,
@@ -109,19 +109,24 @@ class BidsStream(nm_stream.PNStream):
                 break
 
     def add_labels(self):
-        """add resampled labels to feature dataframe
+        """add resampled labels to feature dataframe if there are target channels
         """
-        self.df_features = nm_IO.add_labels(
-            self.run_analysis.feature_arr, self.settings, self.raw_arr_data)
+        if self.nm_channels.target.sum() > 0: 
+            self.feature_arr = nm_IO.add_labels(
+                self.run_analysis.feature_arr, self.settings,
+                self.nm_channels, self.raw_arr_data, self.fs)
+        else:
+            self.feature_arr = self.run_analysis.feature_arr
 
     def save_features(self):
         """save settings.json, nm_channels.csv and features.csv
            and pickled run_analysis including projections
         """
-        self.run_analysis.feature_arr = self.df_features  # here the potential label stream is added
-        nm_IO.save_features_and_settings(df_=self.df_features, run_analysis=self.run_analysis,
-                                         folder_name=os.path.basename(self.PATH_RUN)[:-5],
-                                         settings=self.settings)
+        # here the potential label stream is added after labels have been added
+        self.run_analysis.feature_arr = self.df_features
+        nm_IO.save_features_and_settings(df_=self.df_features,
+            run_analysis=self.run_analysis,
+            folder_name=os.path.basename(self.PATH_RUN)[:-5],settings=self.settings)
 
     def get_bids_coord_list(self, raw_arr:mne.io.RawArray):
         if raw_arr.get_montage() is not None:

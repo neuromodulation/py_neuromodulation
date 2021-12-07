@@ -13,6 +13,9 @@ class Run:
         nm_rereference.RT_rereference,
         projection: nm_projection.Projection,
         resample: nm_resample.Resample,
+        nm_channels: DataFrame,
+        coords: dict,
+        sess_right: bool,
         verbose: bool,
         feature_idx: list) -> None:
         """Initialize run class
@@ -45,7 +48,10 @@ class Run:
         self.dat_subcortex = None
         self.reference = reference
         self.resample = resample
+        self.nm_channels = nm_channels
         self.projection = projection
+        self.coords = coords
+        self.sess_right = sess_right
         self.settings = settings
         self.fs_new = int(settings["sampling_rate_features"])
         self.fs = features.fs
@@ -58,14 +64,14 @@ class Run:
             self.idx_chs_ecog = []  # feature series indexes for dbs-lfp channels
             self.names_chs_ecog = []  # feature series name of ecog features
             self.ecog_channels = [
-                settings["ch_names"][ch_idx] for ch_idx, ch in enumerate(settings["ch_types"]) if ch == "ecog"]
+                self.nm_channels.name[ch_idx] for ch_idx, ch in enumerate(self.nm_channels.type) if ch == "ecog"]
         if settings["methods"]["project_subcortex"] is True:
             self.idx_chs_lfp = []  # feature series indexes for ecog channels
             self.names_chs_lfp = []  # feature series name of lfp features
             #  mind here that settings["coord"]["subcortex_left/right"] is based on the "LFP" substring in the channel
-            self.lfp_channels = settings["coord"]["subcortex_right"]["ch_names"] \
-                if settings["sess_right"] is True \
-                else settings["coord"]["subcortex_left"]["ch_names"]
+            self.lfp_channels = self.coords["subcortex_right"]["ch_names"] \
+                if self.sess_right is True \
+                else self.coords["subcortex_left"]["ch_names"]
 
         if settings["methods"]["raw_normalization"] is True:
             self.raw_normalize_samples = int(
@@ -165,9 +171,9 @@ class Run:
         if self.proj_cortex:
             for ecog_channel in self.ecog_channels:
                 self.idx_chs_ecog.append([ch_idx for ch_idx, ch in enumerate(feature_series.keys())
-                                          if ch.startswith(ecog_channel + '_')])
+                                          if ch.startswith(ecog_channel)])
                 self.names_chs_ecog.append([ch for _, ch in enumerate(feature_series.keys())
-                                            if ch.startswith(ecog_channel + '_')])
+                                            if ch.startswith(ecog_channel)])
             self.dat_cortex = vstack([feature_series.iloc[idx_ch].values for idx_ch in self.idx_chs_ecog])
 
         if self.proj_subcortex:
