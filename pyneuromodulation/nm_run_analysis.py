@@ -68,7 +68,7 @@ class Run:
         if settings["methods"]["project_subcortex"] is True:
             self.idx_chs_lfp = []  # feature series indexes for ecog channels
             self.names_chs_lfp = []  # feature series name of lfp features
-            #  mind here that settings["coord"]["subcortex_left/right"] is based on the "LFP" substring in the channel
+            #  mind here that coord["subcortex_left/right"] is based on the "LFP" substring in the channel
             self.lfp_channels = self.coords["subcortex_right"]["ch_names"] \
                 if self.sess_right is True \
                 else self.coords["subcortex_left"]["ch_names"]
@@ -85,8 +85,8 @@ class Run:
 
         self.cnt_samples = 0
 
-    def run(self, ieeg_batch):
-        """Given a new data batch, estimate features and store in object.
+    def process_data(self, ieeg_batch):
+        """Given a new data batch, estimate features and return them to the streamer
 
         Parameters
         ----------
@@ -98,6 +98,8 @@ class Run:
         None
         """
         start_time = time()
+
+        # TODO: Add here pipeline order, coming from nm_settings.json
 
         # re-reference
         if self.settings["methods"]["re_referencing"] is True:
@@ -129,7 +131,8 @@ class Run:
 
             if self.settings["methods"]["feature_normalization"] is True:
                 self.feature_arr_raw = DataFrame([feature_series], dtype=float)
-                feature_series.values[:] = 0.
+                feature_series.values[:] = 0.  # I don't know why this is coded here
+                # the features are basically overwritten...
 
             if any((self.proj_cortex, self.proj_subcortex)):
                 self.init_projection_run(feature_series)
@@ -153,7 +156,9 @@ class Run:
 
             if any((self.proj_cortex, self.proj_subcortex)):
                 self.next_projection_run(feature_series)
-
+            # add here the projected features also to the features_series
+            # data is coming from 
+            
             feature_series["time"] = self.cnt_samples * 1000 / self.fs  # ms
             self.feature_arr = self.feature_arr.append(
                 feature_series, ignore_index=True)

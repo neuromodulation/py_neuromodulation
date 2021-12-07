@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import pathlib
+import sklearn
 import numpy as np
 import pandas as pd
 import os
@@ -44,6 +45,8 @@ class PNStream(ABC):
     grid_cortex: np.array
     grid_subcortex: np.array
     sess_right: bool
+    feature_add: pd.DataFrame
+    model: sklearn.model
 
     @abstractmethod
     def __init__(self,
@@ -77,7 +80,26 @@ class PNStream(ABC):
         pass
 
     @abstractmethod
-    def run(self, ieeg_batch: np.array) -> None:
+    def get_data(self) -> np.array:
+        pass
+    
+    def run(self, predict: bool=True) -> None:
+        # Loop
+        while True:
+            data = self.get_data()
+            if data is None:
+                break
+            feature_series = self.run_analysis.process_data(data)
+            # concatenate data to feature_arr
+
+            if predict is True:
+                prediction = self.model.predict(feature_series)
+
+            # save f
+            
+
+    def load_model(self, model_path: str):
+        """Load sklearn model, that utilizes predict"""
         pass
 
     def set_run(self):
@@ -212,3 +234,24 @@ class PNStream(ABC):
         elif len(coords["cortex_right"]["positions"]) == 0:
             sess_right = False
         return sess_right
+    
+    def save_sidecar(self, folder_name: str):
+
+        sidecar = {
+            "fs" : self.fs,
+            "line_noise" : self.line_noise,
+            "coords" : self.coords
+        }
+
+        nm_IO.save_sidecar(sidecar, self.PATH_OUT, folder_name)
+
+    def save_settings(self, folder_name: str):
+        nm_IO.save_settings(self.settings, self.PATH_OUT, folder_name)
+    
+    def save_nm_channels(self, folder_name: str):
+        nm_IO.save_nmchannels(self.settings, self.PATH_OUT, folder_name)
+    
+    def save_features(self, folder_name: str):
+        # TODO: get the features inside the stream and concatenate them there
+        # Not inside run_analysis
+        nm_IO.save_features(self.run_analysis., self.PATH_OUT, folder_name)
