@@ -64,7 +64,7 @@ class BidsStream(nm_stream.PNStream):
 
         self.set_linenoise(line_noise)
 
-        self.nm_channels = self.get_nm_channels(PATH_NM_CHANNELS,
+        self.nm_channels = self._get_nm_channels(PATH_NM_CHANNELS,
                             ch_names=self.raw_arr.ch_names,
                             ch_types=self.raw_arr.get_channel_types(),
                             bads=self.raw_arr.info["bads"],
@@ -81,24 +81,24 @@ class BidsStream(nm_stream.PNStream):
             self.raw_arr_data = self.raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
 
         self.coord_list, self.coord_names = \
-            self.get_bids_coord_list(self.raw_arr)
+            self._get_bids_coord_list(self.raw_arr)
 
         if self.coord_list is None and True in [self.settings["project_cortex"],
                                         self.settings["project_subcortex"]]:
             raise ValueError("no coordinates could be loaded from BIDS Dataset")
         else:
-            self.coords = self.add_coordinates(self.coord_names, self.coord_list)
-            self.sess_rigth = self.set_sess_lat(self.coords)
+            self.coords = self._add_coordinates(self.coord_names, self.coord_list)
+            self.sess_rigth = self._set_sess_lat(self.coords)
 
         self.gen = nm_generator.ieeg_raw_generator(self.raw_arr_data, self.settings, self.fs)
 
-        self.set_run()
+        self._set_run()
 
     def run_bids(self):
 
         self.run()
 
-        self.add_labels()
+        self._add_labels()
 
         folder_name = os.path.basename(self.PATH_RUN)[:-5]
 
@@ -113,7 +113,7 @@ class BidsStream(nm_stream.PNStream):
     def get_data(self) -> np.array:
         return next(self.gen, None)
 
-    def add_labels(self):
+    def _add_labels(self):
         """add resampled labels to feature dataframe if there are target channels
         """
         if self.nm_channels.target.sum() > 0: 
@@ -123,7 +123,7 @@ class BidsStream(nm_stream.PNStream):
         else:
             pass
 
-    def get_bids_coord_list(self, raw_arr:mne.io.RawArray):
+    def _get_bids_coord_list(self, raw_arr:mne.io.RawArray):
         if raw_arr.get_montage() is not None:
             coord_list = np.array(
                 list(
@@ -145,7 +145,7 @@ class BidsStream(nm_stream.PNStream):
 
         return coord_list, coord_names
 
-    def add_coordinates(self, coord_names: list, coord_list: np.array):
+    def _add_coordinates(self, coord_names: list, coord_list: np.array):
         """set coordinate information to settings from RawArray
         The set coordinate positions are set as lists, since np.arrays cannot be saved in json
         Parameters

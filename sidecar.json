@@ -1,0 +1,90 @@
+{
+    "cortex_left": {
+        "ch_names": [
+            "ECOG_L_1_SMC_AT",
+            "ECOG_L_2_SMC_AT",
+            "ECOG_L_3_SMC_AT",
+            "ECOG_L_4_SMC_AT",
+            "ECOG_L_5_SMC_AT",
+            "ECOG_L_6_SMC_AT"
+        ],
+        "positions": [
+            [
+                -47.0,
+                -26.0,
+                65.0
+            ],
+            [
+                -46.0,
+                -15.5,
+                63.0
+            ],
+            [
+                -45.5,
+                -5.5,
+                60.5
+            ],
+            [
+                -44.5,
+                4.0,
+                57.5
+            ],
+            [
+                -42.0,
+                14.0,
+                53.5
+            ],
+            [
+                -39.0,
+                22.5,
+                49.5
+            ]
+        ]
+    },
+    "cortex_right": {
+        "ch_names": [],
+        "positions": []
+    },
+    "subcortex_left": {
+        "ch_names": [
+            "LFP_L_1_STN_BS",
+            "LFP_L_234_STN_BS",
+            "LFP_L_567_STN_BS"
+        ],
+        "positions": [
+            [
+                -11.3,
+                -15.9,
+                -9.9
+            ],
+            [
+                -11.8,
+                -15.0,
+                -7.7
+            ],
+            [
+                -12.39,
+                -14.29,
+                -5.9
+            ]
+        ]
+    },
+    "subcortex_right": {
+        "ch_names": [
+            "LFP_R_234_STN_BS",
+            "LFP_R_567_STN_BS"
+        ],
+        "positions": [
+            [
+                12.93,
+                -13.41,
+                -4.1
+            ],
+            [
+                13.4,
+                -12.52,
+                -2.2
+            ]
+        ]
+    }
+}

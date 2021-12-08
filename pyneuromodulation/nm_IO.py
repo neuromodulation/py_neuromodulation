@@ -167,11 +167,6 @@ def save_features_and_settings(
             os.path.join(out_path, folder_name)
         )
 
-    # TODO: add here the grid points to the features
-
-    # rewrite np arrays to lists for json format
-
-    # turn every array in coords to list
     dict_sidecar = {
         "fs" : fs,
         "coords" : coords,
@@ -182,42 +177,6 @@ def save_features_and_settings(
     save_features(df_features, out_path, folder_name)
     save_settings(settings, out_path, folder_name)
     save_nmchannels(nm_channels, out_path, folder_name)
-
-    #if coords not None:
-    #    dict_sidecar["coords"]["grid_cortex"] = np.array(coords["grid_cortex"]).tolist()
-    #    dict_sidecar["coords"]["grid_subcortex"] = np.array(coords["grid_subcortex"]).tolist()
-    #    dict_sidecar["coords"]["cortex"]
-
-
-    """
-    if "coord" in settings_wrapper.settings:
-        settings_wrapper.settings["grid_cortex"] = np.array(
-            settings_wrapper.settings["grid_cortex"]
-        ).tolist()
-        settings_wrapper.settings["grid_subcortex"] = np.array(
-            settings_wrapper.settings["grid_subcortex"]
-        ).tolist()
-        settings_wrapper.settings["coord"]["cortex_right"][
-            "positions"
-        ] = settings_wrapper.settings["coord"]["cortex_right"][
-            "positions"
-        ].tolist()
-        settings_wrapper.settings["coord"]["cortex_left"][
-            "positions"
-        ] = settings_wrapper.settings["coord"]["cortex_left"][
-            "positions"
-        ].tolist()
-        settings_wrapper.settings["coord"]["subcortex_right"][
-            "positions"
-        ] = settings_wrapper.settings["coord"]["subcortex_right"][
-            "positions"
-        ].tolist()
-        settings_wrapper.settings["coord"]["subcortex_left"][
-            "positions"
-        ] = settings_wrapper.settings["coord"]["subcortex_left"][
-            "positions"
-        ].tolist()
-    """
 
 def save_settings(settings: dict, PATH_OUT: str, folder_name: str = None):
     if folder_name is not None:

@@ -13,7 +13,8 @@ from pyneuromodulation import \
     nm_features,
     nm_resample,
     nm_define_nmchannels,
-    nm_IO, nm_test_settings)
+    nm_IO,
+    nm_plots)
 
 class GRIDS(Enum):
     """Definition of possible projection grid types"""
@@ -73,7 +74,7 @@ class PNStream(ABC):
                 )
 
     @abstractmethod
-    def add_coordinates(self) -> None:
+    def _add_coordinates(self) -> None:
         """This method is implemented differently 
            for BIDS and real time data anylsis
         """
@@ -106,27 +107,27 @@ class PNStream(ABC):
         """Load sklearn model, that utilizes predict"""
         pass
 
-    def set_run(self):
+    def _set_run(self):
 
         self.CH_NAMES_USED, self.CH_TYPES_USED, self.FEATURE_IDX, self.LABEL_IDX = \
-            self.get_ch_info(self.nm_channels)
+            self._get_ch_info(self.nm_channels)
 
-        self.features = self.set_features(self.settings,
+        self.features = self._set_features(self.settings,
             self.CH_NAMES_USED,
             self.fs,
             self.line_noise,
             self.VERBOSE
             )
 
-        self.resample = self.set_resampling(self.settings, self.fs)
+        self.resample = self._set_resampling(self.settings, self.fs)
 
-        self.rereference, self.nm_channels = self.set_rereference(
+        self.rereference, self.nm_channels = self._set_rereference(
             self.settings, self.nm_channels
         )
 
-        self.projection = self.set_projection(self.settings)
+        self.projection = self._set_projection(self.settings)
         if self.projection is not None:
-            self.sess_right = self.set_sess_lat(self.coords)
+            self.sess_right = self._set_sess_lat(self.coords)
         else:
             self.sess_right = None
 
@@ -143,7 +144,7 @@ class PNStream(ABC):
             self.FEATURE_IDX
         )
 
-    def set_features(self, settings:dict,
+    def _set_features(self, settings:dict,
         CH_NAMES_USED: list,
         fs: int,
         line_noise: int,
@@ -160,7 +161,7 @@ class PNStream(ABC):
     def set_fs(self, fs: int) -> None:
         self.fs = fs
 
-    def set_rereference(self, settings:dict, nm_channels:pd.DataFrame) -> None:
+    def _set_rereference(self, settings:dict, nm_channels:pd.DataFrame) -> None:
         if settings["methods"]["re_referencing"] is True:
             rereference = nm_rereference.RT_rereference(
                 nm_channels, split_data=False)
@@ -171,7 +172,7 @@ class PNStream(ABC):
             nm_channels["new_name"] = nm_channels["name"]
         return rereference, nm_channels
 
-    def set_resampling(self, settings:dict, fs: int) -> None:
+    def _set_resampling(self, settings:dict, fs: int) -> None:
         if settings["methods"]["raw_resampling"] is True:
             resample = nm_resample.Resample(settings, fs)
         else:
@@ -192,16 +193,16 @@ class PNStream(ABC):
             grid_subcortex = None
         return grid_cortex, grid_subcortex
 
-    def set_projection(self, settings:dict):
+    def _set_projection(self, settings:dict):
         if any((settings["methods"]["project_cortex"],
                 settings["methods"]["project_subcortex"])):
             projection = nm_projection.Projection(settings, self.grid_cortex,
-                self.grid_subcortex, self.coords, plot_projection=True)
+                self.grid_subcortex, self.coords, plot_projection=False)
         else:
             projection = None
         return projection
 
-    def get_ch_info(self, nm_channels: pd.DataFrame):
+    def _get_ch_info(self, nm_channels: pd.DataFrame):
         """Get used feature and label info from nm_channels"""
 
         CH_NAMES_USED = nm_channels[nm_channels["used"] == 1]["new_name"].tolist()
@@ -216,7 +217,7 @@ class PNStream(ABC):
 
         return CH_NAMES_USED, CH_TYPES_USED, FEATURE_IDX, LABEL_IDX
 
-    def get_nm_channels(self, PATH_NM_CHANNELS:str, **kwargs) -> None:
+    def _get_nm_channels(self, PATH_NM_CHANNELS:str, **kwargs) -> None:
 
         if PATH_NM_CHANNELS and os.path.isfile(PATH_NM_CHANNELS):
             nm_channels = pd.read_csv(PATH_NM_CHANNELS)
@@ -232,7 +233,7 @@ class PNStream(ABC):
                 ECOG_ONLY=kwargs.get('ECOG_ONLY'))
         return nm_channels
 
-    def set_sess_lat(self, coords):
+    def _set_sess_lat(self, coords):
         if len(coords["cortex_left"]["positions"]) == 0:
             sess_right = True
         elif len(coords["cortex_right"]["positions"]) == 0:
@@ -257,3 +258,10 @@ class PNStream(ABC):
     
     def save_features(self, folder_name: str):
         nm_IO.save_features(self.feature_arr, self.PATH_OUT, folder_name)
+
+    def plot_cortical_projection(self):
+        """plot projection of cortical grid electrodes on cortex"""
+        nmplotter = nm_plots.NM_Plot(ecog_strip=self.projection.ecog_strip,
+                grid_cortex=self.projection.grid_cortex,
+                sess_right=self.sess_right)
+        nmplotter.plot_cortical_projection()
