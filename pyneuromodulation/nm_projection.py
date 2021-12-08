@@ -33,6 +33,15 @@ class Projection:
         self.project_subcortex = settings["methods"]["project_subcortex"]
 
         self.proj_matrix_cortex, self.proj_matrix_subcortex = self.calc_projection_matrix()
+        
+        if self.project_cortex:
+            self.active_cortex_gridpoints = np.nonzero(
+                self.proj_matrix_cortex.sum(axis=1)
+            )[0]
+        if self.project_subcortex:
+            self.active_subcortex_gridpoints = np.nonzero(
+                self.proj_matrix_subcortex.sum(axis=1)
+            )[0]
 
         if plot_projection is True:
             nmplotter = nm_plots.NM_Plot(self.ecog_strip, self.grid_cortex, self.grid_subcortex,

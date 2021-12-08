@@ -141,7 +141,8 @@ def add_labels(df_, settings, nm_channels, raw_arr_data, fs, ):
 
 
 def save_features_and_settings(
-    df_, run_analysis, folder_name, out_path, coords,
+    df_features, run_analysis, folder_name, out_path, settings, nm_channels, coords, fs, line_noise,
+    
 ):
     """save settings.json, nm_channels.csv and features.csv
 
@@ -168,21 +169,19 @@ def save_features_and_settings(
 
     # TODO: add here the grid points to the features
 
-    PATH_OUT = os.path.join(
-        out_path,
-        folder_name,
-        folder_name + "_FEATURES.csv",
-    )
-    df_.to_csv(PATH_OUT)
-    print("FEATURES.csv saved to " + str(PATH_OUT))
-
     # rewrite np arrays to lists for json format
 
+    # turn every array in coords to list
     dict_sidecar = {
         "fs" : fs,
-        "coords" : {},
+        "coords" : coords,
         "line_noise" : line_noise
     }
+
+    save_sidecar(dict_sidecar, out_path, folder_name)
+    save_features(df_features, out_path, folder_name)
+    save_settings(settings, out_path, folder_name)
+    save_nmchannels(nm_channels, out_path, folder_name)
 
     #if coords not None:
     #    dict_sidecar["coords"]["grid_cortex"] = np.array(coords["grid_cortex"]).tolist()
@@ -190,6 +189,7 @@ def save_features_and_settings(
     #    dict_sidecar["coords"]["cortex"]
 
 
+    """
     if "coord" in settings_wrapper.settings:
         settings_wrapper.settings["grid_cortex"] = np.array(
             settings_wrapper.settings["grid_cortex"]
@@ -217,29 +217,38 @@ def save_features_and_settings(
         ] = settings_wrapper.settings["coord"]["subcortex_left"][
             "positions"
         ].tolist()
+    """
 
-    PATH_OUT = os.path.join(
-        out_path,
-        folder_name,
-        folder_name + "_SETTINGS.json",
-    )
+def save_settings(settings: dict, PATH_OUT: str, folder_name: str = None):
+    if folder_name is not None:
+        PATH_OUT = os.path.join(PATH_OUT, folder_name, folder_name + "_SETTINGS.json")
+
     with open(PATH_OUT, "w") as f:
-        json.dump(settings_wrapper.settings, f, indent=4)
+        json.dump(settings, f, indent=4)
     print("settings.json saved to " + str(PATH_OUT))
 
-    PATH_OUT = os.path.join(
-        out_path,
-        folder_name,
-        folder_name + "_nm_channels.csv",
-    )
-    settings_wrapper.nm_channels.to_csv(PATH_OUT)
+def save_nmchannels(nmchannels: pd.DataFrame, PATH_OUT: str, folder_name: str = None):
+    if folder_name is not None:
+        PATH_OUT = os.path.join(PATH_OUT, folder_name, folder_name + "_nm_channels.csv")
+    nmchannels.to_csv(PATH_OUT)
     print("nm_channels.csv saved to " + str(PATH_OUT))
 
-    PATH_OUT = os.path.join(
-        out_path,
-        folder_name,
-        folder_name + "_run_analysis.p",
-    )
-    with open(PATH_OUT, "wb") as output:
-        cPickle.dump(run_analysis, output)
-    print("run analysis.p saved to " + str(PATH_OUT))
+def save_features(df_features: pd.DataFrame, PATH_OUT: str, folder_name: str = None):
+    if folder_name is not None:
+        PATH_OUT = os.path.join(PATH_OUT, folder_name, folder_name + "_FEATURES.csv")
+    df_features.to_csv(PATH_OUT)
+    print("FEATURES.csv saved to " + str(PATH_OUT))
+
+def default_json_convert(obj):
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    raise TypeError('Not serializable')
+
+def save_sidecar(sidecar: dict, PATH_OUT: str, folder_name: str = None):
+
+    if folder_name is not None:
+        PATH_OUT = os.path.join(PATH_OUT, folder_name, folder_name + "_SIDECAR.json")
+
+    with open(PATH_OUT,'w') as f:
+        json.dump(sidecar, f, default=default_json_convert, indent=4, separators=(',', ': '))
+    print("sidecar.json saved to " + str(PATH_OUT))

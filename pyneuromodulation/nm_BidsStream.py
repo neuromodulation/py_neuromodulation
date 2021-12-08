@@ -95,38 +95,33 @@ class BidsStream(nm_stream.PNStream):
         self.set_run()
 
     def run_bids(self):
-        self.run()
-        self.add_labels()
-        self.save_features()
 
-    def run(self):
-        """Overwrites nm_stream abstract run method"""
-        while True:
-            ieeg_batch = next(self.gen, None)
-            if ieeg_batch is not None:
-                self.run_analysis.run(ieeg_batch)
-            else:
-                break
+        self.run()
+
+        self.add_labels()
+
+        folder_name = os.path.basename(self.PATH_RUN)[:-5]
+
+        self.save_sidecar(folder_name)
+
+        self.save_features(folder_name)
+
+        self.save_settings(folder_name)
+
+        self.save_nm_channels(folder_name)
+
+    def get_data(self) -> np.array:
+        return next(self.gen, None)
 
     def add_labels(self):
         """add resampled labels to feature dataframe if there are target channels
         """
         if self.nm_channels.target.sum() > 0: 
             self.feature_arr = nm_IO.add_labels(
-                self.run_analysis.feature_arr, self.settings,
+                self.feature_arr, self.settings,
                 self.nm_channels, self.raw_arr_data, self.fs)
         else:
-            self.feature_arr = self.run_analysis.feature_arr
-
-    def save_features(self):
-        """save settings.json, nm_channels.csv and features.csv
-           and pickled run_analysis including projections
-        """
-        # here the potential label stream is added after labels have been added
-        self.run_analysis.feature_arr = self.df_features
-        nm_IO.save_features_and_settings(df_=self.df_features,
-            run_analysis=self.run_analysis,
-            folder_name=os.path.basename(self.PATH_RUN)[:-5],settings=self.settings)
+            pass
 
     def get_bids_coord_list(self, raw_arr:mne.io.RawArray):
         if raw_arr.get_montage() is not None:

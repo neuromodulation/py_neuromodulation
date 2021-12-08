@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import pathlib
-import sklearn
+from sklearn import base
 import numpy as np
 import pandas as pd
 import os
@@ -46,7 +46,7 @@ class PNStream(ABC):
     grid_subcortex: np.array
     sess_right: bool
     feature_add: pd.DataFrame
-    model: sklearn.model
+    model: base.BaseEstimator
 
     @abstractmethod
     def __init__(self,
@@ -83,22 +83,26 @@ class PNStream(ABC):
     def get_data(self) -> np.array:
         pass
     
-    def run(self, predict: bool=True) -> None:
+    def run(self, predict: bool=False) -> None:
         # Loop
+        idx = 0
         while True:
             data = self.get_data()
             if data is None:
                 break
             feature_series = self.run_analysis.process_data(data)
             # concatenate data to feature_arr
+            if idx == 0:
+                self.feature_arr = pd.DataFrame([feature_series])
+                idx += 1
+            else:
+                self.feature_arr = self.feature_arr.append(
+                    feature_series, ignore_index=True)
 
             if predict is True:
                 prediction = self.model.predict(feature_series)
 
-            # save f
-            
-
-    def load_model(self, model_path: str):
+    def load_model(self, model: base.BaseEstimator):
         """Load sklearn model, that utilizes predict"""
         pass
 
@@ -249,9 +253,7 @@ class PNStream(ABC):
         nm_IO.save_settings(self.settings, self.PATH_OUT, folder_name)
     
     def save_nm_channels(self, folder_name: str):
-        nm_IO.save_nmchannels(self.settings, self.PATH_OUT, folder_name)
+        nm_IO.save_nmchannels(self.nm_channels, self.PATH_OUT, folder_name)
     
     def save_features(self, folder_name: str):
-        # TODO: get the features inside the stream and concatenate them there
-        # Not inside run_analysis
-        nm_IO.save_features(self.run_analysis., self.PATH_OUT, folder_name)
+        nm_IO.save_features(self.feature_arr, self.PATH_OUT, folder_name)
