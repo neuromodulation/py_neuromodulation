@@ -1,4 +1,5 @@
 import os
+from numpy.lib.npyio import save
 from scipy import io
 from matplotlib import pyplot as plt
 import numpy as np
@@ -7,92 +8,176 @@ from sklearn import linear_model
 from sklearn import metrics
 from sklearn import model_selection
 import _pickle as cPickle
+from typing import Optional
 
-from pyneuromodulation import nm_reader as NM_reader
-from pyneuromodulation import nm_decode
+from pyneuromodulation import nm_decode, nm_IO, nm_plots
 
+target_filter_str = {"CLEAN", "clean", "squared"}
+features_reverse_order_plotting = {"stft", "fft", "bandpass"}
 
 class FeatureReadWrapper:
 
-    def __init__(self, feature_path="C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\try_0408",
+    def __init__(self, feature_dir="C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\try_0408",
                  feature_file=None, plt_cort_projection=False,
                  read_features=True) -> None:
         """FeatureReadWrapper enables analysis methods on top of NM_reader and NM_Decoder
 
         Parameters
         ----------
-        feature_path : str, optional
+        feature_dir : str, optional
             Path to py_neuromodulation estimated feature runs, where each feature is a folder,
             by default "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\try_0408"
         feature_file : str, optional
-            specific feature run, if None it is set to the first feature folder in feature_path
+            specific feature run, if None it is set to the first feature folder in feature_dir
         plt_cort_projection : bool, optional
             if true, calls nm_reader plot_cortical_projection, by default False
         read_features : bool, optional
             if true, read features.csv filde and extract label, the label is assumed to be binary,
             by default True
         """
-        self.feature_path = feature_path
-        self.nm_reader = NM_reader.NM_Reader(feature_path)
-        self.feature_list = self.nm_reader.get_feature_list()
+        self.feature_dir = feature_dir
+        self.feature_list = nm_IO.get_feature_list(self.feature_dir)
         if feature_file is None:
             self.feature_file = self.feature_list[0]
         else:
             self.feature_file = feature_file
 
-        self.settings = self.nm_reader.read_settings(self.feature_file)
-        self.ch_names = self.settings["ch_names"]
+        self.settings = nm_IO.read_settings(self.feature_file)
+        self.sidecar = nm_IO.read_sidecar(self.feature_file)
+        self.fs = self.sidecar["sfreq"]
+        self.line_noise = self.sidecar["line_noise"]
+        self.nm_channels = nm_IO.read_nm_channels(self.feature_file)
+        self.feature_arr = nm_IO.read_features(self.feature_file)
+
+        self.ch_names = self.nm_channels.name
         self.ch_names_ECOG = [ch_name for ch_name in self.ch_names if "ECOG" in ch_name]
 
-        # read run_analysis
-        self.run_analyzer = self.nm_reader.read_run_analyzer()
+        # init plotter
+        self.nmplotter =  nm_plots.NM_Plot()
 
-        self.PATH_PLOT = os.path.abspath("plots")
-        self.nm_reader.read_plot_modules(self.PATH_PLOT)
-        self.read_plotting_modules()
+        """ KICK OUT
         if plt_cort_projection is True:
             self.nm_reader.plot_cortical_projection()
 
         _ = self.nm_reader.read_nm_channels(self.feature_file)
+        """
+        
+        self.label_name = self._get_target_ch()
 
-        target_names = list(self.nm_reader.nm_channels[self.nm_reader.nm_channels["target"] == 1]["name"])
-        target_clean = [target for target in target_names if ("clean" in target) or
-                        ("squared" in target) or ("CLEAN" in target)]
+    def _get_target_ch(self) -> str:
+        target_names = list(self.nm_channels[self.nm_channels["target"] == 1]["name"])
+        target_clean = [target_name for target_name in target_names \
+                                        for filter_str in target_filter_str \
+                                             if filter_str in target_name]
+
         if len(target_clean) == 0:
             target = target_names[0]
         else:
             for target_ in target_clean:
                 # try to select contralateral label
-                if self.settings["sess_right"] is True and "LEFT" in target_:
+                if self.sidecar["sess_right"] is True and "LEFT" in target_:
                     target = target_
                     continue
-                elif self.settings["sess_right"] is False and "RIGHT" in target_:
+                elif self.sidecar["sess_right"] is False and "RIGHT" in target_:
                     target = target_
                     continue
                 if target_ == target_clean[-1]:
                     target = target_clean[0]  # set label to last element
-        self.label_name = target
+        return target
+    
+    def _read_target_ch(self, binarize:bool = True, binarize_th:float = 0.3) -> None:
 
-        if read_features is True:
-            _ = self.nm_reader.read_features(self.feature_file)
-            self.nm_reader.label = np.nan_to_num(np.array(self.nm_reader.read_label(target))) > 0.3
+        self.label = np.nan_to_num(
+                np.array(
+                    self.feature_arr[self.label_namee]
+                )
+            )
+        if binarize:
+            self.label = self.label > binarize_th
 
-    def read_plotting_modules(self):
-        """read necessary mat files for cortex and STN
-        """
+    @staticmethod
+    def filter_features(feature_columns: list,
+        ch_name: str=None,
+        list_feature_keywords: list[str]=None):
+        """filters read features by ch_name and/or modality"""
 
-        self.faces = io.loadmat(os.path.join(self.PATH_PLOT, 'faces.mat'))
-        self.vertices = io.loadmat(os.path.join(self.PATH_PLOT, 'Vertices.mat'))
-        self.grid = io.loadmat(os.path.join(self.PATH_PLOT, 'grid.mat'))['grid']
-        self.stn_surf = io.loadmat(os.path.join(self.PATH_PLOT, 'STN_surf.mat'))
-        self.x_ver = self.stn_surf['vertices'][::2, 0]
-        self.y_ver = self.stn_surf['vertices'][::2, 1]
-        self.x_ecog = self.vertices['Vertices'][::1, 0]
-        self.y_ecog = self.vertices['Vertices'][::1, 1]
-        self.z_ecog = self.vertices['Vertices'][::1, 2]
-        self.x_stn = self.stn_surf['vertices'][::1, 0]
-        self.y_stn = self.stn_surf['vertices'][::1, 1]
-        self.z_stn = self.stn_surf['vertices'][::1, 2]
+        if ch_name is not None:
+            feature_select = [i for i in list(feature_columns) if ch_name in i]
+        else:
+            feature_select = feature_columns
+
+        if list_feature_keywords is not None:
+            feature_select = [
+                f
+                for f in feature_select
+                    if all(x in f for x in list_feature_keywords)
+            ]
+
+            if len([mod for mod in features_reverse_order_plotting if mod in list_feature_keywords])>0:
+                # flip list s.t. theta band is lowest in subsequent plot
+                feature_select = feature_select[::-1]
+
+        return feature_select # self.features[feature_select]
+
+
+    def set_target_ch(self, ch_name:str) -> None:
+        self.label = ch_name
+
+    def plot_cort_projection(self) -> None:
+        if self.sidecar["sess_right"]:
+            ecog_strip = np.array(
+                self.sidecar["coords"]["cortex_right"]["positions"]
+            )
+        else:
+            ecog_strip = np.array(
+                self.sidecar["coords"]["cortex_left"]["positions"]
+            )
+        self.nmplotter.plot_cortex(
+            grid_cortex=np.array(self.sidecar["grid_cortex"]),
+            ecog_strip=ecog_strip,
+            grid_color=np.array(
+                self.sidecar["proj_matrix_cortex"]
+            ).sum(axis=1)
+        )
+    
+    def plot_target_averaged_channel(self,
+        ch: str=None,
+        list_feature_keywords: Optional[list[str]]=None,
+        epoch_len: int=4,
+        threhshold: float=0.1):
+        
+        filtered_df = self.feature_arr[
+            self.filter_features(self.feature_arr.columns, ch, list_feature_keywords)
+        ]
+
+        data = np.expand_dims(
+            np.array(filtered_df), 
+            axis=1
+        )
+
+        X_epoch, y_epoch = self.get_epochs(
+            data,
+            self.label,
+            epoch_len=4,
+            sfreq=self.fs,
+            threshold=threhshold
+        )
+
+        nm_plots.plot_epochs_avg(
+            X_epoch=X_epoch,
+            y_epoch=y_epoch,
+            epoch_len=epoch_len,
+            sfreq=self.fs,
+            feature_str_add=list_feature_keywords.__str__,
+            ch_name=ch,
+            cut_ch_name_cols=True,
+            label_name=self.label_name,
+            normalize_data=True,
+            show_plot=True,
+            save=True,
+            OUT_PATH=self.feature_dir,
+            feature_file=self.feature_file
+        )
 
     def plot_subject_grid_ch_performance(self, subject_name=None, performance_dict=None,
                                          plt_grid=False, output_name="LM", show_plot=False):
@@ -154,7 +239,7 @@ class FeatureReadWrapper:
         cbar = fig.colorbar(pos_elec)
         cbar.set_label("Balanced Accuracy")
 
-        PATH_SAVE = os.path.join(self.feature_path, self.feature_file,
+        PATH_SAVE = os.path.join(self.feature_dir, self.feature_file,
                                  output_name+'_grid_channel_performance.png')
         plt.savefig(PATH_SAVE, bbox_inches="tight")
         if show_plot is False:
@@ -262,6 +347,44 @@ class FeatureReadWrapper:
         print("plotting feature target averaged")
         self.nm_reader.plot_epochs_avg(self.feature_file, feature_str_add="")
 
+    @staticmethod
+    def get_epochs(data, y_, epoch_len, sfreq, threshold=0):
+        """Return epoched data.
+
+        Parameters
+        ----------
+        data : np.ndarray
+            array of extracted features of shape (n_samples, n_channels, n_features)
+        y_ : np.ndarray
+            array of labels e.g. ones for movement and zeros for no movement or baseline corr. rotameter data
+        sfreq : int/float
+            sampling frequency of data
+        epoch_len : int
+            length of epoch in seconds
+        threshold : int/float
+            (Optional) threshold to be used for identifying events (default=0 for y_tr with only ones
+            and zeros)
+
+        Returns
+        -------
+        epoch_ np.ndarray
+            array of epoched ieeg data with shape (epochs,samples,channels,features)
+        y_arr np.ndarray
+            array of epoched event label data with shape (epochs,samples)
+        """
+
+        epoch_lim = int(epoch_len * sfreq)
+        ind_mov = np.where(np.diff(np.array(y_ > threshold) * 1) == 1)[0]
+        low_limit = ind_mov > epoch_lim / 2
+        up_limit = ind_mov < y_.shape[0] - epoch_lim / 2
+        ind_mov = ind_mov[low_limit & up_limit]
+        epoch_ = np.zeros([ind_mov.shape[0], epoch_lim, data.shape[1], data.shape[2]])
+        y_arr = np.zeros([ind_mov.shape[0], int(epoch_lim)])
+        for idx, i in enumerate(ind_mov):
+            epoch_[idx, :, :, :] = data[i - epoch_lim // 2:i + epoch_lim // 2, :, :]
+            y_arr[idx, :] = y_[i - epoch_lim // 2:i + epoch_lim // 2]
+        return epoch_, y_arr
+
     def run_ML_model(self, feature_file=None, estimate_gridpoints=True, estimate_channels=True,
                      estimate_all_channels_combined=False,
                      model=linear_model.LogisticRegression(class_weight="balanced"),
@@ -298,7 +421,7 @@ class FeatureReadWrapper:
         if feature_file is not None:
             self.feature_file = feature_file
 
-        decoder = nm_decode.Decoder(feature_path=self.feature_path,
+        decoder = nm_decode.Decoder(feature_dir=self.feature_dir,
                                     feature_file=self.feature_file,
                                     model=model,
                                     eval_method=eval_method,
@@ -361,7 +484,7 @@ class FeatureReadWrapper:
         if subject_name is None:
             subject_name = self.feature_file[self.feature_file.find('sub-'):self.feature_file.find('_ses')][4:]
 
-        PATH_ML_ = os.path.join(self.feature_path, self.feature_file,
+        PATH_ML_ = os.path.join(self.feature_dir, self.feature_file,
                                 self.feature_file + '_' + ML_model_name + '_ML_RES.p')
 
         # read ML results
