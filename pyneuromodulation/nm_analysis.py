@@ -1,5 +1,6 @@
 import os
 from numpy.lib.npyio import save
+import pandas as pd
 from scipy import io
 from matplotlib import pyplot as plt
 import numpy as np
@@ -15,39 +16,45 @@ from pyneuromodulation import nm_decode, nm_IO, nm_plots
 target_filter_str = {"CLEAN", "clean", "squared"}
 features_reverse_order_plotting = {"stft", "fft", "bandpass"}
 
-class FeatureReadWrapper:
+class Feature_Reader:
 
-    def __init__(self, feature_dir="C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\try_0408",
-                 feature_file=None, plt_cort_projection=False,
-                 read_features=True) -> None:
-        """FeatureReadWrapper enables analysis methods on top of NM_reader and NM_Decoder
+    def __init__(
+        self,
+        feature_dir:str,
+        feature_file:str
+        ) -> None:
+        """Feature_Reader enables analysis methods on top of NM_reader and NM_Decoder
 
         Parameters
         ----------
         feature_dir : str, optional
             Path to py_neuromodulation estimated feature runs, where each feature is a folder,
-            by default "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\write_out\\try_0408"
         feature_file : str, optional
             specific feature run, if None it is set to the first feature folder in feature_dir
-        plt_cort_projection : bool, optional
-            if true, calls nm_reader plot_cortical_projection, by default False
-        read_features : bool, optional
-            if true, read features.csv filde and extract label, the label is assumed to be binary,
-            by default True
         """
         self.feature_dir = feature_dir
-        self.feature_list = nm_IO.get_feature_list(self.feature_dir)
+        self.feature_list = nm_IO.get_run_list_indir(self.feature_dir)
         if feature_file is None:
             self.feature_file = self.feature_list[0]
         else:
             self.feature_file = feature_file
 
-        self.settings = nm_IO.read_settings(self.feature_file)
-        self.sidecar = nm_IO.read_sidecar(self.feature_file)
-        self.fs = self.sidecar["sfreq"]
+        PATH_READ_BASENAME = os.path.join(
+                self.feature_dir,
+                self.feature_file
+        )
+        PATH_READ_BASENAME = PATH_READ_BASENAME[:len(PATH_READ_BASENAME)-len(".vhdr")]
+
+        PATH_READ_FILE = os.path.join(PATH_READ_BASENAME,
+            self.feature_file[:-len(".vhdr")]
+        )
+
+        self.settings = nm_IO.read_settings(PATH_READ_FILE)
+        self.sidecar = nm_IO.read_sidecar(PATH_READ_FILE)
+        self.fs = self.sidecar["fs"]
         self.line_noise = self.sidecar["line_noise"]
-        self.nm_channels = nm_IO.read_nm_channels(self.feature_file)
-        self.feature_arr = nm_IO.read_features(self.feature_file)
+        self.nm_channels = nm_IO.read_nm_channels(PATH_READ_FILE)
+        self.feature_arr = nm_IO.read_features(PATH_READ_FILE)
 
         self.ch_names = self.nm_channels.name
         self.ch_names_ECOG = [ch_name for ch_name in self.ch_names if "ECOG" in ch_name]
@@ -55,20 +62,17 @@ class FeatureReadWrapper:
         # init plotter
         self.nmplotter =  nm_plots.NM_Plot()
 
-        """ KICK OUT
-        if plt_cort_projection is True:
-            self.nm_reader.plot_cortical_projection()
-
-        _ = self.nm_reader.read_nm_channels(self.feature_file)
-        """
-        
         self.label_name = self._get_target_ch()
+        self.label = self.read_target_ch(self.feature_arr,
+            self.label_name,
+            binarize=True,
+            binarize_th=0.3)
 
     def _get_target_ch(self) -> str:
         target_names = list(self.nm_channels[self.nm_channels["target"] == 1]["name"])
         target_clean = [target_name for target_name in target_names \
                                         for filter_str in target_filter_str \
-                                             if filter_str in target_name]
+                                             if filter_str.lower() in target_name.lower()]
 
         if len(target_clean) == 0:
             target = target_names[0]
@@ -85,21 +89,41 @@ class FeatureReadWrapper:
                     target = target_clean[0]  # set label to last element
         return target
     
-    def _read_target_ch(self, binarize:bool = True, binarize_th:float = 0.3) -> None:
+    @staticmethod
+    def read_target_ch(feature_arr:pd.DataFrame,
+        label_name:str,
+        binarize:bool = True,
+        binarize_th:float = 0.3) -> None:
 
-        self.label = np.nan_to_num(
+        label = np.nan_to_num(
                 np.array(
-                    self.feature_arr[self.label_namee]
+                    feature_arr[label_name]
                 )
             )
         if binarize:
-            self.label = self.label > binarize_th
+            label = label > binarize_th
+        return label
 
     @staticmethod
     def filter_features(feature_columns: list,
         ch_name: str=None,
-        list_feature_keywords: list[str]=None):
-        """filters read features by ch_name and/or modality"""
+        list_feature_keywords: list[str]=None) -> list:
+        """filters read features by ch_name and/or modality
+
+        Parameters
+        ----------
+        feature_columns : list
+            [description]
+        ch_name : str, optional
+            [description], by default None
+        list_feature_keywords : list[str], optional
+            list of feature strings that need to be in the columns, by default None
+
+        Returns
+        -------
+        list
+            column list that suffice the ch_name and list_feature_keywords
+        """
 
         if ch_name is not None:
             feature_select = [i for i in list(feature_columns) if ch_name in i]
@@ -110,14 +134,14 @@ class FeatureReadWrapper:
             feature_select = [
                 f
                 for f in feature_select
-                    if all(x in f for x in list_feature_keywords)
+                    if any(x in f for x in list_feature_keywords)
             ]
 
             if len([mod for mod in features_reverse_order_plotting if mod in list_feature_keywords])>0:
                 # flip list s.t. theta band is lowest in subsequent plot
                 feature_select = feature_select[::-1]
 
-        return feature_select # self.features[feature_select]
+        return feature_select
 
 
     def set_target_ch(self, ch_name:str) -> None:
@@ -139,19 +163,19 @@ class FeatureReadWrapper:
                 self.sidecar["proj_matrix_cortex"]
             ).sum(axis=1)
         )
-    
+
     def plot_target_averaged_channel(self,
         ch: str=None,
         list_feature_keywords: Optional[list[str]]=None,
         epoch_len: int=4,
         threhshold: float=0.1):
-        
+
         filtered_df = self.feature_arr[
             self.filter_features(self.feature_arr.columns, ch, list_feature_keywords)
         ]
 
         data = np.expand_dims(
-            np.array(filtered_df), 
+            np.array(filtered_df),
             axis=1
         )
 
@@ -159,7 +183,7 @@ class FeatureReadWrapper:
             data,
             self.label,
             epoch_len=4,
-            sfreq=self.fs,
+            sfreq=self.settings["sampling_rate_features"],
             threshold=threhshold
         )
 
@@ -167,10 +191,11 @@ class FeatureReadWrapper:
             X_epoch=X_epoch,
             y_epoch=y_epoch,
             epoch_len=epoch_len,
-            sfreq=self.fs,
-            feature_str_add=list_feature_keywords.__str__,
-            ch_name=ch,
+            sfreq=self.settings["sampling_rate_features"],
+            feature_names=list(filtered_df.columns),
+            feature_str_add="_".join(list_feature_keywords),
             cut_ch_name_cols=True,
+            ch_name=ch,
             label_name=self.label_name,
             normalize_data=True,
             show_plot=True,
@@ -251,7 +276,6 @@ class FeatureReadWrapper:
                                   plt_fft_features=False, plt_bandfiltvar=False,
                                   plt_sharpwave=False, feature_file=None):
         """
-
         Parameters
         ----------
         ch_name : string

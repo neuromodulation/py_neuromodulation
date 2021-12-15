@@ -38,7 +38,7 @@ class BidsStream(nm_stream.PNStream):
         VERBOSE: bool = True,
         PATH_ANNOTATIONS:str = str(),
         PATH_BIDS:str = str(),
-        LIMIT_DATA:bool = True,
+        LIMIT_DATA:bool = False,
         LIMIT_LOW:int = 0,
         LIMIT_HIGH:int = 10000,
         ECOG_ONLY:bool = False) -> None:

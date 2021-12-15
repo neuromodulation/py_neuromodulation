@@ -72,31 +72,22 @@ def get_plt_path(
         if feature_name is None:
             plt_path = os.path.join(
                 OUT_PATH,
-                feature_file,
-                str_plt_type,
-                "_ch_",
-                ch_name,
-                ".png"
+                feature_file[:-len(".vhdr")],
+                str_plt_type + "_ch_" + ch_name + ".png"
             )
         else:
             plt_path = os.path.join(
                 OUT_PATH,
-                feature_file,
-                str_plt_type,
-                "_ch_",
-                ch_name,
-                "_",
-                feature_name,
-                ".png"
+                feature_file[:-len(".vhdr")],
+                str_plt_type + "_ch_" \
+                     + ch_name + "_" + feature_name + ".png"
             )
     elif None not in (OUT_PATH, feature_file) and ch_name is None:
         plt_path = os.path.join(
                 OUT_PATH,
-                feature_file,
-                str_plt_type,
-                "_",
-                feature_name,
-                ".png"
+                feature_file[:-len(".vhdr")],
+                str_plt_type + "_ch_" \
+                     + feature_name + ".png"
             )
 
     else:
@@ -110,6 +101,7 @@ def plot_epochs_avg(
     epoch_len: int,
     sfreq: int,
     feature_names:list[str]=None,
+    feature_str_add: str=None,
     cut_ch_name_cols:bool = True,
     ch_name:str = None,
     label_name: str = None,
@@ -158,7 +150,7 @@ def plot_epochs_avg(
             feature_file,
             ch_name,
             str_plt_type="MOV_aligned_features",
-            feature_name=feature_names.__str__
+            feature_name=feature_str_add
         )
         plt.savefig(plt_path, bbox_inches="tight")
         print("Feature epoch average figure saved to: " + str(plt_path))

@@ -83,7 +83,7 @@ class PNStream(ABC):
     @abstractmethod
     def get_data(self) -> np.array:
         pass
-    
+
     def run(self, predict: bool=False) -> None:
         # Loop
         idx = 0
@@ -239,23 +239,33 @@ class PNStream(ABC):
         elif len(coords["cortex_right"]["positions"]) == 0:
             sess_right = False
         return sess_right
-    
+
     def save_sidecar(self, folder_name: str):
 
         sidecar = {
             "fs" : self.fs,
             "line_noise" : self.line_noise,
-            "coords" : self.coords
+            "coords" : self.coords,
+            "sess_right" : self.sess_right
         }
+
+        if self.settings["methods"]["project_cortex"]:
+            sidecar["grid_cortex"] = self.grid_cortex
+            sidecar["proj_matrix_cortex"] = \
+                self.projection.proj_matrix_cortex
+        if self.settings["methods"]["project_subcortex"]:
+            sidecar["grid_subcortex"] = self.grid_subcortex
+            sidecar["proj_matrix_subcortex"] = \
+                self.projection.proj_matrix_subcortex
 
         nm_IO.save_sidecar(sidecar, self.PATH_OUT, folder_name)
 
     def save_settings(self, folder_name: str):
         nm_IO.save_settings(self.settings, self.PATH_OUT, folder_name)
-    
+
     def save_nm_channels(self, folder_name: str):
         nm_IO.save_nmchannels(self.nm_channels, self.PATH_OUT, folder_name)
-    
+
     def save_features(self, folder_name: str):
         nm_IO.save_features(self.feature_arr, self.PATH_OUT, folder_name)
 

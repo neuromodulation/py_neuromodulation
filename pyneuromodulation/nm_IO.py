@@ -201,6 +201,8 @@ def save_features(df_features: pd.DataFrame, PATH_OUT: str, folder_name: str = N
 def default_json_convert(obj):
     if isinstance(obj, np.ndarray):
         return obj.tolist()
+    elif isinstance(obj, pd.DataFrame):
+        return obj.to_numpy().tolist()
     raise TypeError('Not serializable')
 
 def save_sidecar(sidecar: dict, PATH_OUT: str, folder_name: str = None):
@@ -211,3 +213,26 @@ def save_sidecar(sidecar: dict, PATH_OUT: str, folder_name: str = None):
     with open(PATH_OUT,'w') as f:
         json.dump(sidecar, f, default=default_json_convert, indent=4, separators=(',', ': '))
     print("sidecar.json saved to " + str(PATH_OUT))
+
+def read_sidecar(PATH: str) -> dict:
+    with open(PATH + "_SIDECAR.json") as f:
+        return json.load(f)
+
+def read_settings(PATH: str) -> dict:
+
+    with open(PATH if ".json" in PATH else PATH + "_SETTINGS.JSON") as f:
+        return json.load(f)
+
+def read_features(PATH: str) -> pd.DataFrame:
+    return pd.read_csv(PATH + "_FEATURES.CSV", index_col=0)
+
+def read_nm_channels(PATH: str) -> pd.DataFrame:
+    return pd.read_csv(PATH + "_nm_channels.csv", index_col=0)
+
+def get_run_list_indir(PATH: str) -> list[str]:
+    f_files = []
+    for dirpath, subdirs, files in os.walk(PATH):
+        for x in files:
+            if "FEATURES" in x:
+                f_files.append(os.path.basename(dirpath))
+    return f_files
