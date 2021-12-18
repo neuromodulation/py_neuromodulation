@@ -26,7 +26,7 @@ def run_example_BIDS():
                                        PATH_OUT=PATH_OUT,
                                        LIMIT_DATA=False)
 
-    #nm_BIDS.run_bids()
+    nm_BIDS.run_bids()
 
     # init analyzer
     feature_reader = nm_analysis.Feature_Reader(
@@ -62,8 +62,9 @@ def run_example_BIDS():
     )
 
     performances = feature_reader.run_ML_model(
-        estimate_channels=True,
-        estimate_gridpoints=True,
+        estimate_channels=False,
+        estimate_gridpoints=False,
+        estimate_all_channels_combined=True,
         save_results=True
     )
 
@@ -71,5 +72,3 @@ def run_example_BIDS():
     #                                               read_all_combined=False,
     #                                               read_mov_detection_rates=True)
     feature_reader.plot_subject_grid_ch_performance(performance_dict=performances, plt_grid=True)
-
-    print("hallo")

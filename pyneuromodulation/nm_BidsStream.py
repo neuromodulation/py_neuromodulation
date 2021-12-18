@@ -8,8 +8,7 @@ import numpy as np
 import pandas as pd
 import pathlib
 
-from pyneuromodulation import nm_IO, nm_define_nmchannels, nm_projection, nm_generator, nm_rereference, \
-    nm_run_analysis, nm_features, nm_resample, nm_stream, nm_test_settings
+from pyneuromodulation import nm_IO, nm_generator, nm_stream
 
 
 class BidsStream(nm_stream.PNStream):
@@ -90,7 +89,10 @@ class BidsStream(nm_stream.PNStream):
             self.coords = self._add_coordinates(self.coord_names, self.coord_list)
             self.sess_rigth = self._set_sess_lat(self.coords)
 
-        self.gen = nm_generator.ieeg_raw_generator(self.raw_arr_data, self.settings, self.fs)
+        self.gen = nm_generator.ieeg_raw_generator(
+            self.raw_arr_data,
+            self.settings,self.fs
+        )
 
         self._set_run()
 
@@ -147,7 +149,8 @@ class BidsStream(nm_stream.PNStream):
 
     def _add_coordinates(self, coord_names: list, coord_list: np.array):
         """set coordinate information to settings from RawArray
-        The set coordinate positions are set as lists, since np.arrays cannot be saved in json
+        The set coordinate positions are set as lists,
+        since np.arrays cannot be saved in json
         Parameters
         ----------
         raw_arr : mne.io.RawArray
@@ -173,7 +176,8 @@ class BidsStream(nm_stream.PNStream):
 
             coords[coord_region]["ch_names"] = [
                 coord_names[ch_idx] for ch_idx, ch in enumerate(coord_list)
-                    if left_coord(coord_list[ch_idx][0], coord_region) and (ch_type in coord_names[ch_idx])
+                    if left_coord(coord_list[ch_idx][0], coord_region) and 
+                        (ch_type in coord_names[ch_idx])
             ]
 
             # multiply by 1000 to get m instead of mm

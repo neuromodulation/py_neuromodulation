@@ -414,7 +414,7 @@ class Decoder:
                     self.mov_detection_threshold,
                     self.min_consequent_count
                 )
-                
+
                 self.mov_detection_rates_test.append(mov_detection_rate)
                 self.tprate_test.append(tpr)
                 self.fprate_test.append(fpr)

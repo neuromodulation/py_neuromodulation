@@ -88,9 +88,12 @@ class Feature_Reader:
 
     def _get_target_ch(self) -> str:
         target_names = list(self.nm_channels[self.nm_channels["target"] == 1]["name"])
-        target_clean = [target_name for target_name in target_names \
-                                        for filter_str in target_filter_str \
-                                             if filter_str.lower() in target_name.lower()]
+        target_clean = [
+            target_name
+            for target_name in target_names
+                for filter_str in target_filter_str
+                    if filter_str.lower() in target_name.lower()
+        ]
 
         if len(target_clean) == 0:
             target = target_names[0]
@@ -106,7 +109,7 @@ class Feature_Reader:
                 if target_ == target_clean[-1]:
                     target = target_clean[0]  # set label to last element
         return target
-    
+
     @staticmethod
     def read_target_ch(feature_arr:pd.DataFrame,
         label_name:str,
@@ -181,11 +184,35 @@ class Feature_Reader:
             ).sum(axis=1)
         )
 
+    def plot_features(self,
+        ch_names_ECOG=None,
+        list_feature_keywords:list[str]=["stft"],
+        epoch_len:int=4,
+        threshold:float=0.1):
+        """Wrapper that call plot_features_per_channel
+        for every given ECoG channel
+
+        Parameters
+        ----------
+        ch_names_ECOG : list, optional
+            list of ECoG channel to plot features for, by default None
+        """
+        
+        if ch_names_ECOG is None:
+            ch_names_ECOG = self.ch_names_ECOG
+        for ch_name_ECOG in ch_names_ECOG:
+            self.plot_target_averaged_channel(
+                ch=ch_name_ECOG,
+                list_feature_keywords=list_feature_keywords,
+                epoch_len=epoch_len,
+                threshold=threshold
+            )
+
     def plot_target_averaged_channel(self,
         ch: str=None,
         list_feature_keywords: Optional[list[str]]=None,
         epoch_len: int=4,
-        threhshold: float=0.1):
+        threshold: float=0.1):
 
         filtered_df = self.feature_arr[
             self.filter_features(self.feature_arr.columns, ch, list_feature_keywords)
@@ -201,7 +228,7 @@ class Feature_Reader:
             self.label,
             epoch_len=4,
             sfreq=self.settings["sampling_rate_features"],
-            threshold=threhshold
+            threshold=threshold
         )
 
         nm_plots.plot_epochs_avg(
@@ -221,20 +248,25 @@ class Feature_Reader:
             feature_file=self.feature_file
         )
 
-    def plot_subject_grid_ch_performance(self, subject_name=None, performance_dict=None,
-                                         plt_grid=False, output_name="LM", show_plot=False):
+    def plot_subject_grid_ch_performance(
+        self,
+        subject_name=None,
+        performance_dict=None,
+        plt_grid=False,
+        feature_str_add="performance_allch_allgrid"
+    ):
         """plot subject specific performance for individual channeal and optional grid points
 
         Parameters
         ----------
-        sub : string, optional
+        subject_name : string, optional
             used subject, by default None
         performance_dict : dict, optional
             [description], by default None
         plt_grid : bool, optional
             True to plot grid performances, by default False
-        output_name : string, optional
-            figure output_name, by default "LM"
+        feature_str_add : string, optional
+            figure output_name
         """
 
         ecog_strip_performance = []
@@ -243,138 +275,45 @@ class Feature_Reader:
         grid_performance = []
 
         if subject_name is None:
-            subject_name = self.feature_file[self.feature_file.find('sub-'):self.feature_file.find('_ses')][4:]
+            subject_name = self.feature_file[
+                self.feature_file.find('sub-'):self.feature_file.find('_ses')
+            ][4:]
 
         ch_ = list(performance_dict[subject_name].keys())
 
         for ch in ch_:
             if 'grid' not in ch:
-                ecog_coords_strip.append(performance_dict[subject_name][ch]["coord"])
-                ecog_strip_performance.append(performance_dict[subject_name][ch]["performance_test"])
+                ecog_coords_strip.append(
+                    performance_dict[subject_name][ch]["coord"]
+                )
+                ecog_strip_performance.append(
+                    performance_dict[subject_name][ch]["performance_test"]
+                )
             elif plt_grid is True and 'gridcortex_' in ch:
-                cortex_grid.append(performance_dict[subject_name][ch]["coord"])
-                grid_performance.append(performance_dict[subject_name][ch]["performance_test"])
+                cortex_grid.append(
+                    performance_dict[subject_name][ch]["coord"]
+                )
+                grid_performance.append(
+                    performance_dict[subject_name][ch]["performance_test"]
+                )
 
         if len(ecog_coords_strip) > 0:
             ecog_coords_strip = np.vstack(ecog_coords_strip)
-
-        #optimally handeled by nm_plots
-        #if ecog_coords_strip[0, 0] > 0:  # it's on the right side GIVEN IT'S CONTRALATERAL
-        #    ecog_coords_strip[0, :] *= -1
 
         self.nmplotter.plot_cortex(
             cortex_grid=np.array(self.sidecar["grid_cortex"]) 
                             if "grid_cortex" in self.sidecar else None,
             ecog_strip=ecog_coords_strip if len(ecog_coords_strip)>0 else None,
             grid_color=grid_performance if len(grid_performance)>0 else None,
-            strip_color=ecog_strip_performance if len(ecog_strip_performance)>0 else None,
+            strip_color=ecog_strip_performance
+                if len(ecog_strip_performance)>0 else None,
             sess_right=self.sidecar["sess_right"],
             save=True,
             OUT_PATH=self.feature_dir,
             feature_file=self.feature_file,
-            feature_str_add="performance_allch_allgrid",
+            feature_str_add=feature_str_add,
             show_plot=True
         )
-
-    def plot_features_per_channel(self, ch_name,
-                                  plt_corr_matr=False, plt_stft_features=True,
-                                  plt_fft_features=False, plt_bandfiltvar=False,
-                                  plt_sharpwave=False, feature_file=None):
-        """
-        Parameters
-        ----------
-        ch_name : string
-            channel name, as referred in features.csv
-        plt_corr_matr : bool, optional
-            if True plot correlation matrix for sharpwave and bandpower features, by default False
-        plt_stft_features : bool, optional
-            if True plot stft movement averaged features, by default True
-        plt_fft_features : bool, optional
-            if True plot fft movement averaged features, by default True
-        plt_bandfiltvar : bool, optional
-            if True plot bandpass filtered movement averaged features, by default False
-        plt_sharpwave : bool, optional
-            if True plot sharpwave movement averaged features, by default False
-        feature_file : string, optional
-            py_neuromodulation estimated feature file, by default None
-        """
-
-        if feature_file is not None:
-            self.feature_file = feature_file
-
-        if plt_bandfiltvar:
-            dat_ch = self.nm_reader.read_channel_data(ch_name, ['bandpass', 'activity'])
-
-            # estimating epochs, with shape (epochs,samples,channels,features)
-            X_epoch, y_epoch = self.nm_reader.get_epochs_ch(epoch_len=4,
-                                                            sfreq=self.settings["sampling_rate_features"],
-                                                            threshold=0.1)
-            print("plotting feature target averaged")
-            self.nm_reader.plot_epochs_avg(self.feature_file, feature_str_add="bandpass")
-
-            if plt_corr_matr is True:
-                print("plotting feature covariance matrix")
-                self.nm_reader.plot_corr_matrix(self.feature_file, feature_str_add="bandpass")
-
-        if plt_stft_features:
-            # plot STFT
-            dat_ch = self.nm_reader.read_channel_data(ch_name, ['stft'])  # regex needs to be list
-            # estimating epochs, with shape (epochs,samples,channels,features)
-            X_epoch, y_epoch = self.nm_reader.get_epochs_ch(epoch_len=4,
-                                                            sfreq=self.settings["sampling_rate_features"],
-                                                            threshold=0.1)
-            self.nm_reader.plot_epochs_avg(self.feature_file, feature_str_add='stft')
-
-        if plt_sharpwave:
-            dat_ch = self.nm_reader.read_channel_data(ch_name, ['Sharpwave'])
-
-            # estimating epochs, with shape (epochs,samples,channels,features)
-            X_epoch, y_epoch = self.nm_reader.get_epochs_ch(epoch_len=4,
-                                                            sfreq=self.settings["sampling_rate_features"],
-                                                            threshold=0.1)
-            if plt_corr_matr is True:
-                print("plotting feature covariance matrix")
-                self.nm_reader.plot_corr_matrix(self.feature_file,
-                                                feature_str_add="sharpwave")
-            print("plotting feature target averaged")
-            self.nm_reader.plot_epochs_avg(self.feature_file,
-                                           feature_str_add="sharpwave")
-        if plt_fft_features:
-            dat_ch = self.nm_reader.read_channel_data(ch_name, ['fft'])  # regex needs to be list
-            # estimating epochs, with shape (epochs,samples,channels,features)
-            X_epoch, y_epoch = self.nm_reader.get_epochs_ch(epoch_len=4,
-                                                            sfreq=self.settings["sampling_rate_features"],
-                                                            threshold=0.1)
-            self.nm_reader.plot_epochs_avg(self.feature_file, feature_str_add='fft')
-
-    def plot_features(self, ch_names_ECOG=None):
-        """Wrapper that call plot_features_per_channel for every given ECoG channel
-
-        Parameters
-        ----------
-        ch_names_ECOG : list, optional
-            list of ECoG channel to plot features for, by default None
-        """
-        if ch_names_ECOG is None:
-            ch_names_ECOG = self.ch_names_ECOG
-        for ch_name_ECOG in ch_names_ECOG:
-            self.plot_features_per_channel(ch_name_ECOG, plt_corr_matr=False,
-                                           plt_stft_features=True,
-                                           plt_sharpwave=False,
-                                           plt_fft_features=False)
-
-    def plot_coherence(self):
-        self.nm_reader.ch_name = ""
-        self.nm_reader.feature_ch_cols = [i for i in list(self.nm_reader.features.columns) if i.startswith("coh")]
-        self.nm_reader.feature_ch_cols = self.nm_reader.feature_ch_cols[::-1]
-        self.nm_reader.feature_ch = self.nm_reader.features[self.nm_reader.feature_ch_cols]
-        
-        # estimating epochs, with shape (epochs,samples,channels,features)
-        X_epoch, y_epoch = self.nm_reader.get_epochs_ch(epoch_len=4,
-                                                        sfreq=self.settings["sampling_rate_features"],
-                                                        threshold=0.1)
-        print("plotting feature target averaged")
-        self.nm_reader.plot_epochs_avg(self.feature_file, feature_str_add="")
 
     @staticmethod
     def get_epochs(data, y_, epoch_len, sfreq, threshold=0):
@@ -385,13 +324,15 @@ class Feature_Reader:
         data : np.ndarray
             array of extracted features of shape (n_samples, n_channels, n_features)
         y_ : np.ndarray
-            array of labels e.g. ones for movement and zeros for no movement or baseline corr. rotameter data
+            array of labels e.g. ones for movement and zeros for
+            no movement or baseline corr. rotameter data
         sfreq : int/float
             sampling frequency of data
         epoch_len : int
             length of epoch in seconds
         threshold : int/float
-            (Optional) threshold to be used for identifying events (default=0 for y_tr with only ones
+            (Optional) threshold to be used for identifying events
+            (default=0 for y_tr with only ones
             and zeros)
 
         Returns
@@ -403,15 +344,31 @@ class Feature_Reader:
         """
 
         epoch_lim = int(epoch_len * sfreq)
-        ind_mov = np.where(np.diff(np.array(y_ > threshold) * 1) == 1)[0]
+
+        ind_mov = np.where(
+            np.diff(np.array(y_ > threshold) * 1) == 1
+        )[0]
+
         low_limit = ind_mov > epoch_lim / 2
         up_limit = ind_mov < y_.shape[0] - epoch_lim / 2
+
         ind_mov = ind_mov[low_limit & up_limit]
-        epoch_ = np.zeros([ind_mov.shape[0], epoch_lim, data.shape[1], data.shape[2]])
+
+        epoch_ = np.zeros([ind_mov.shape[0],
+            epoch_lim,
+            data.shape[1],data.shape[2]]
+        )
+
         y_arr = np.zeros([ind_mov.shape[0], int(epoch_lim)])
+
         for idx, i in enumerate(ind_mov):
-            epoch_[idx, :, :, :] = data[i - epoch_lim // 2:i + epoch_lim // 2, :, :]
+
+            epoch_[idx, :, :, :] = data[
+                i - epoch_lim // 2:i + epoch_lim // 2, :, :
+            ]
+
             y_arr[idx, :] = y_[i - epoch_lim // 2:i + epoch_lim // 2]
+
         return epoch_, y_arr
 
     def set_decoder(self,
@@ -571,8 +528,12 @@ class Feature_Reader:
             if "coef" in obj_read:
                 obj_write["coef"] = np.concatenate(obj_read["coef"]).mean(axis=0)
             if read_mov_detection_rates:
-                obj_write["mov_detection_rate_test"] = np.mean(obj_read["mov_detection_rate_test"])
-                obj_write["mov_detection_rate_train"] = np.mean(obj_read["mov_detection_rate_train"])
+                obj_write["mov_detection_rate_test"] = np.mean(
+                    obj_read["mov_detection_rate_test"]
+                )
+                obj_write["mov_detection_rate_train"] = np.mean(
+                    obj_read["mov_detection_rate_train"]
+                )
                 obj_write["fprate_test"] = np.mean(obj_read["fprate_test"])
                 obj_write["fprate_train"] = np.mean(obj_read["fprate_train"])
                 obj_write["tprate_test"] = np.mean(obj_read["tprate_test"])
@@ -615,7 +576,7 @@ class Feature_Reader:
 
         if read_grid_points:
             performance_dict[subject_name]["active_gridpoints"] = ML_res.active_gridpoints
-            
+
             for project_settings, grid_type in zip(
                 ["project_cortex", "project_subcortex"],
                 ["gridcortex_", "gridsubcortex_"]
@@ -632,7 +593,9 @@ class Feature_Reader:
 
                     performance_dict[subject_name][gp_str] = {}
                     performance_dict[subject_name][gp_str]["coord"] = \
-                        self.sidecar["grid_"+project_settings.split("_")[1]][grid_point]
+                        self.sidecar[
+                            "grid_"+project_settings.split("_")[1]
+                        ][grid_point]
 
                     if gp_str in ML_res.active_gridpoints:
                         write_CV_res_in_performance_dict(

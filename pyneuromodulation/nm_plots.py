@@ -44,7 +44,6 @@ def plot_corr_matrix(
 
     if show_plot is False:
         plt.close()
-    
 
 def get_plt_path(
     OUT_PATH: str = None,
@@ -199,47 +198,11 @@ class NM_Plot():
             self.x_ecog, self.y_ecog, self.z_ecog, \
             self.x_stn, self.y_stn, self.z_stn = nm_IO.read_plot_modules()
 
-    def plot_cortical_projection(self):
-        """Plot grid plots color coded respectively of a projection matrix"""
-
-        if self.proj_matrix_cortex is not None:
-            plot_cortical_projection(
-                x_ecog=self.x_ecog,
-                y_ecog=self.y_ecog,
-                cortex_grid=np.array(self.grid_cortex),
-                grid_color=self.proj_matrix_cortex.sum(axis=1),
-                ecog_strip=np.array(self.ecog_strip),
-                sess_right=self.sess_right
-            )
-        else:
-            raise ValueError("no projection matrix supplied")
-
     def plot_grid_elec_3d(self):
         
         plot_grid_elec_3d(
             np.array(self.cortex_grid),
             np.array(self.ecog_strip)
-        )
-    
-    def plot_cortex(self,
-        grid_cortex: Optional[np.array]=None,
-        ecog_strip: Optional[np.array]=None,
-        grid_color:Optional[np.array]=None,
-        strip_color:Optional[np.array]=None,
-    ):
-        if grid_cortex is not None:
-            self.grid_cortex = grid_cortex
-        if ecog_strip is not None:
-            self.ecog_strip = ecog_strip
-        
-        plot_cortical_projection(
-            x_ecog=self.x_ecog,
-            y_ecog=self.y_ecog,
-            cortex_grid=np.array(self.grid_cortex),
-            grid_color=grid_color,
-            ecog_strip=np.array(self.ecog_strip),
-            strip_color=strip_color,
-            sess_right=self.sess_right
         )
 
     def plot_cortex(
