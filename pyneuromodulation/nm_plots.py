@@ -144,6 +144,7 @@ def plot_epochs_avg(
                 np.round(np.arange(-epoch_len / 2, epoch_len / 2, 1 / sfreq), 2), rotation=90)
     plt.xlabel("Time [s]")
     plt.tight_layout()
+
     if save:
         plt_path = get_plt_path(
             OUT_PATH,
@@ -156,41 +157,6 @@ def plot_epochs_avg(
         print("Feature epoch average figure saved to: " + str(plt_path))
     if show_plot is False:
         plt.close()
-
-def plot_cortical_projection(
-    x_ecog: np.array,
-    y_ecog: np.array,
-    cortex_grid: Optional[np.array] = None,
-    grid_color: Optional[np.array] = None,
-    ecog_strip: Optional[np.array] = None,
-    strip_color: Optional[np.array] = None,
-    sess_right: Optional[bool] = None
-    ):
-    """Plot MNI brain including selected MNI cortical projection grid + used strip ECoG electrodes
-    Colorcoded by grid_color
-    """
-
-    if sess_right is True:
-        cortex_grid[0, :] = cortex_grid[0, :]*-1
-    
-    _, axes = plt.subplots(1, 1, facecolor=(1, 1, 1), figsize=(14, 9))
-    axes.scatter(x_ecog, y_ecog, c="gray", s=0.001)
-    axes.axes.set_aspect('equal', anchor='C')
-
-    if cortex_grid is not None:
-
-        grid_color = np.ones(cortex_grid.shape[0]) if grid_color is None else grid_color
-
-        _ = axes.scatter(cortex_grid[:, 0],
-                                cortex_grid[:, 1], c=grid_color,
-                                s=30, alpha=0.8, cmap="viridis")
-    if ecog_strip is not None:
-        strip_color = np.ones(ecog_strip.shape[0]) if strip_color is None else strip_color
-
-        _ = axes.scatter(ecog_strip[:, 0],
-                            ecog_strip[:, 1], c=strip_color,
-                            s=50, alpha=0.8, cmap="gray", marker="x")
-    plt.axis('off')
 
 def plot_grid_elec_3d(
     cortex_grid: Optional[np.array]=None,
@@ -265,6 +231,7 @@ class NM_Plot():
             self.grid_cortex = grid_cortex
         if ecog_strip is not None:
             self.ecog_strip = ecog_strip
+        
         plot_cortical_projection(
             x_ecog=self.x_ecog,
             y_ecog=self.y_ecog,
@@ -274,3 +241,66 @@ class NM_Plot():
             strip_color=strip_color,
             sess_right=self.sess_right
         )
+
+    def plot_cortex(
+        self,
+        cortex_grid: Optional[np.array] = None,
+        grid_color: Optional[np.array] = None,
+        ecog_strip: Optional[np.array] = None,
+        strip_color: Optional[np.array] = None,
+        sess_right: Optional[bool] = None,
+        save: bool = False,
+        OUT_PATH: str = None,
+        feature_file: str=None,
+        feature_str_add : str=None,
+        show_plot:bool=True,
+        set_clim:bool=True
+        ):
+        """Plot MNI brain including selected MNI cortical projection grid + used strip ECoG electrodes
+        Colorcoded by grid_color
+        """
+
+        if cortex_grid is None:
+            cortex_grid = self.grid_cortex
+
+        if ecog_strip is None:
+            ecog_strip = self.ecog_strip
+
+        if sess_right is True:
+            cortex_grid[0, :] = cortex_grid[0, :]*-1
+
+        fig, axes = plt.subplots(1, 1, facecolor=(1, 1, 1), figsize=(14, 9))
+        axes.scatter(self.x_ecog, self.y_ecog, c="gray", s=0.01)
+        axes.axes.set_aspect('equal', anchor='C')
+
+        if cortex_grid is not None:
+
+            grid_color = np.ones(cortex_grid.shape[0]) if grid_color is None else grid_color
+
+            pos_ecog = axes.scatter(cortex_grid[:, 0],
+                                    cortex_grid[:, 1], c=grid_color,
+                                    s=150, alpha=0.8, cmap="viridis")
+        if ecog_strip is not None:
+            strip_color = np.ones(ecog_strip.shape[0]) if strip_color is None else strip_color
+
+            pos_ecog = axes.scatter(ecog_strip[:, 0],
+                                ecog_strip[:, 1], c=strip_color,
+                                s=400, alpha=0.8, cmap="viridis", marker="x")
+        plt.axis('off')
+        if set_clim:
+            pos_ecog.set_clim(0.5, 0.8)
+            cbar = fig.colorbar(pos_ecog)
+            cbar.set_label("Balanced Accuracy")
+
+        if save:
+            plt_path = get_plt_path(
+                OUT_PATH,
+                feature_file,
+                ch_name=None,
+                str_plt_type="PLOT_CORTEX",
+                feature_name=feature_str_add
+            )
+            plt.savefig(plt_path, bbox_inches="tight")
+            print("Feature epoch average figure saved to: " + str(plt_path))
+        if show_plot is False:
+            plt.close()

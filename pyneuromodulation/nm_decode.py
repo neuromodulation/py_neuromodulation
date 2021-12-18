@@ -1,4 +1,4 @@
-from sklearn import model_selection, metrics, linear_model, discriminant_analysis
+from sklearn import model_selection, metrics, linear_model, discriminant_analysis, base
 from skopt.space import Real, Integer, Categorical
 from skopt.utils import use_named_args
 from skopt import gp_minimize, Optimizer
@@ -6,8 +6,8 @@ from sklearn.linear_model import ElasticNet
 from sklearn.base import clone
 from sklearn.utils import class_weight
 from scipy.ndimage import (binary_dilation,
-                           binary_erosion,
-                           label)
+                           binary_erosion)
+from scipy.ndimage import label as label_ndimage
 from imblearn.over_sampling import RandomOverSampler
 import pandas as pd
 import os
@@ -19,7 +19,47 @@ import _pickle as cPickle
 
 class Decoder:
 
-    def __init__(self, feature_path, feature_file,
+    features: pd.DataFrame
+    label: np.array
+    model: base.BaseEstimator
+    cv_method: model_selection.BaseCrossValidator
+    threshold_score: bool
+    mov_detection_threshold: float
+    TRAIN_VAL_SPLIT: bool
+    save_coef: bool
+    get_movement_detection_rate: bool
+    min_consequent_count: int
+    ros: RandomOverSampler = None
+    data: np.array
+    ch_ind_data: dict
+    grid_point_ind_data: dict
+    active_gridpoints: list
+    feature_names: list[str]
+    ch_ind_results: dict = {}
+    gridpoint_ind_results: dict = {}
+    all_ch_results: dict = {}
+    score_train:list = []
+    score_test:list = []
+    y_test:list = []
+    y_train:list = []
+    y_test_pr:list = []
+    y_train_pr:list = []
+    X_test:list = []
+    X_train:list = []
+    coef:list = []
+    mov_detection_rates_test:list = []
+    tprate_test:list = []
+    fprate_test:list = []
+    mov_detection_rates_train:list = []
+    tprate_train:list = []
+    fprate_train:list = []
+
+
+    def __init__(self,
+                 features: pd.DataFrame,
+                 label: np.array,
+                 label_name: str,
+                 used_chs: list[str]=None,
                  model=linear_model.LinearRegression(),
                  eval_method=metrics.r2_score,
                  cv_method=model_selection.KFold(n_splits=3, shuffle=False),
@@ -35,10 +75,6 @@ class Decoder:
 
         Parameters
         ----------
-        feature_path : string
-            path to feature output folders
-        feature_file : string
-            specific feature folder
         model : machine learning model
             model that utilizes fit and predict functions
         eval_method : sklearn metrics
@@ -60,88 +96,19 @@ class Decoder:
             consecutive movement blocks with minimum size of 'min_consequent_count'
         """
 
-        # for the bayesian opt. function the objective fct only uses a single parameter
-        # coming from gp_miminimize
-        # therefore declare other parameters to global s.t. the function ca acess those
-
-        self.feature_path = feature_path
-        self.feature_file = feature_file
-        self.features = pd.read_csv(os.path.join(feature_path, feature_file,
-                                    feature_file + "_FEATURES.csv"), header=0)
-
-        self.nm_channels = pd.read_csv(os.path.join(self.feature_path, feature_file,
-                                       feature_file + "_nm_channels.csv"), header=0)
-        self.used_chs = list(self.nm_channels[(self.nm_channels["target"] == 0) &
-                             (self.nm_channels["used"] == 1)]["new_name"])
-
-        with open(os.path.join(self.feature_path, feature_file,
-                               feature_file + "_SETTINGS.json")) as f:
-            self.settings = json.load(f)
-        self.run_analysis = None
-
-        # for simplicity, choose here only first one
-        # lateron check laterality
-        # try to set contralateral, if not take the first
-        target_channels = list(self.nm_channels[self.nm_channels["target"] == 1]["name"])
-        if len(target_channels) == 1:
-            self.target_ch = target_channels[0]
-        elif self.settings["sess_right"] is True:
-            # check if contralateral left (optimal clean) channel exists
-            left_targets = [t_ch for t_ch in target_channels if "LEFT" in t_ch]
-            if len(left_targets) == 1:
-                self.target_ch = left_targets[0]
-            else:
-                CLEAN_LEFT = [t_ch for t_ch in left_targets if ("CLEAN" in t_ch) or
-                              ("squared" in t_ch)]
-                if len(CLEAN_LEFT) == 1:
-                    self.target_ch = CLEAN_LEFT[0]
-                else:
-                    # search for "clean" or "squared" channel without laterality included
-                    ch_without_lat = [t_ch for t_ch in list(self.nm_channels[self.nm_channels["target"] == 1]["name"])
-                                      if ("CLEAN" in t_ch) or ("SQUARED_ROTAWHEEL" in t_ch) \
-                                      or ("SQUARED_EMG" in t_ch) or ("rota_squared") in t_ch \
-                                      or ("SQUARED_ROTATION" in t_ch)]
-                    if len(ch_without_lat) != 0:
-                        self.target_ch = ch_without_lat[0]
-                    else:
-                        # take first target
-                        self.target_ch = self.nm_channels[self.nm_channels["target"] == 1]["name"].iloc[0]
-        else:
-            # left session
-            # check if contralateral right (optimal clean) channel exists
-            right_targets = [t_ch for t_ch in target_channels if "RIGHT" in t_ch]
-            if len(right_targets) == 1:
-                self.target_ch = right_targets[0]
-            else:
-                CLEAN_RIGHT = [t_ch for t_ch in right_targets if ("CLEAN" in t_ch) or
-                               ("squared" in t_ch)]
-                if len(CLEAN_RIGHT) == 1:
-                    self.target_ch = CLEAN_RIGHT[0]
-                else:
-                    # search for "clean" or "squared" channel without laterality included
-                    ch_without_lat = [t_ch for t_ch in list(self.nm_channels[self.nm_channels["target"] == 1]["name"])
-                            if ("CLEAN" in t_ch) or ("SQUARED_ROTAWHEEL" in t_ch) \
-                            or ("SQUARED_EMG" in t_ch) or ("rota_squared" in t_ch) \
-                            or ("SQUARED_ROTATION" in t_ch)]
-                    if len(ch_without_lat) != 0:
-                        self.target_ch = ch_without_lat[0]
-                    else:
-                        # take first target
-                        self.target_ch = self.nm_channels[self.nm_channels["target"] == 1]["name"].iloc[0]
-
-        # for classification dependin on the label, set to binary label
-        self.label = np.nan_to_num(np.array(self.features[self.target_ch])) > 0.3
+        self.features = features
+        self.label = label
+        self.label_name = label_name
         self.data = np.nan_to_num(np.array(self.features[[col for col in self.features.columns
-                                  if not (('time' in col) or (self.target_ch in col))]]))
+                                  if not (('time' in col) or (self.label_name in col))]]))
+
+        self.used_chs = used_chs
 
         self.model = model
         self.eval_method = eval_method
         self.cv_method = cv_method
         self.threshold_score = threshold_score
         self.mov_detection_threshold = mov_detection_threshold
-        self.all_ch_pr = {}
-        self.ch_ind_pr = {}
-        self.gridpoint_ind_pr = {}
         self.TRAIN_VAL_SPLIT = TRAIN_VAL_SPLIT
         self.save_coef = save_coef
         self.get_movement_detection_rate = get_movement_detection_rate
@@ -155,8 +122,13 @@ class Decoder:
         """
         self.ch_ind_data = {}
         for ch in self.used_chs:
-            self.ch_ind_data[ch] = np.nan_to_num(np.array(self.features[[col for col in self.features.columns
-                                                          if col.startswith(ch)]]))
+            self.ch_ind_data[ch] = np.nan_to_num(
+                np.array(
+                    self.features[
+                        [col for col in self.features.columns if col.startswith(ch)]
+                    ]
+                )
+            )
 
     def set_CV_results(self, attr_name, contact_point=None):
         """set CV results in respectie nm_decode attributes
@@ -165,9 +137,10 @@ class Decoder:
         Parameters
         ----------
         attr_name : string
-            is either all_ch_pr, ch_ind_pr, gridpoint_ind_pr
+            is either all_ch_results, ch_ind_results, gridpoint_ind_results
         contact_point : object, optional
-            usually an int specifying the grid_point or string, specifying the used channel, by default None
+            usually an int specifying the grid_point or string, specifying the used channel,
+            by default None
         """
         if contact_point is not None:
             getattr(self, attr_name)[contact_point] = {}
@@ -208,38 +181,64 @@ class Decoder:
         if feature_contacts == "grid_points":
             for grid_point in self.active_gridpoints:
                 self.run_CV(self.grid_point_ind_data[grid_point], self.label)
-                self.set_CV_results('gridpoint_ind_pr', contact_point=grid_point)
+                self.set_CV_results('gridpoint_ind_results', contact_point=grid_point)
+            return self.gridpoint_ind_results
+
         if feature_contacts == "ind_channels":
             for ch in self.used_chs:
                 self.run_CV(self.ch_ind_data[ch], self.label)
-                self.set_CV_results('ch_ind_pr', contact_point=ch)
+                self.set_CV_results('ch_ind_results', contact_point=ch)
+            return self.ch_ind_results
+
         if feature_contacts == "all_channels_combined":
             dat_combined = np.concatenate(list(self.ch_ind_data.values()), axis=1)
             self.run_CV(dat_combined, self.label)
-            self.set_CV_results('all_ch_pr', contact_point=None)
+            self.set_CV_results('all_ch_results', contact_point=None)
+            return self.all_ch_results
 
-    def set_data_grid_points(self):
+    def set_data_grid_points(self, cortex_only=False, subcortex_only=False):
         """Read the run_analysis
         Projected data has the shape (samples, grid points, features)
         """
 
-        PATH_ML_ = os.path.join(self.feature_path, self.feature_file, self.feature_file + "_run_analysis.p")
-        with open(PATH_ML_, 'rb') as input:  # Overwrites any existing file.
-            self.run_analysis = cPickle.load(input)
+        # activate_gridpoints stores cortex + subcortex data
+        self.active_gridpoints = np.unique(
+            [i.split('_')[0] + "_" + i.split('_')[1]
+            for i in self.features.columns 
+                if "grid" in i]
+        )
 
-        # get active grid points
-        self.active_gridpoints = np.where(np.sum(self.run_analysis.projection.proj_matrix_cortex, axis=1) != 0)[0]
+        if cortex_only:
+            self.active_gridpoints = [
+                i
+                for i in self.active_gridpoints 
+                if i.startswith("gridcortex")
+            ]
 
-        # set grid point feature names
-        ch = self.run_analysis.features.ch_names[0]
-        l_features = list(self.run_analysis.feature_arr.columns)
-        self.feature_names = [f[len(ch)+1:] for f in l_features if f.startswith(ch)]
+        if subcortex_only:
+            self.active_gridpoints = [
+                i
+                for i in self.active_gridpoints 
+                if i.startswith("gridsubcortex")
+            ]
 
-        # write data for every active grid point and run the cross validation
+        self.feature_names = [
+            i[len(self.active_gridpoints[0]+"_"):] 
+            for i in self.features.columns 
+                if self.active_gridpoints[0]+"_" in i
+        ]
+
         self.grid_point_ind_data = {}
-        for grid_point in self.active_gridpoints:
-            # samples, features
-            self.grid_point_ind_data[grid_point] = np.nan_to_num(self.run_analysis.proj_cortex_array[:, grid_point, :])
+
+        self.grid_point_ind_data = {
+            grid_point : np.nan_to_num(self.features[
+                    [i 
+                    for i in self.features.columns 
+                        if grid_point in i]
+                    ]
+            )
+            for grid_point in self.active_gridpoints
+        }
 
     def get_movement_grouped_array(self, prediction, threshold=0.5, min_consequent_count=5):
         """Return given a 1D numpy array, an array of same size with grouped consective blocks
@@ -264,9 +263,9 @@ class Decoder:
         structure = [True] * min_consequent_count  # used for erosion and dilation
         eroded = binary_erosion(mask, structure)
         dilated = binary_dilation(eroded, structure)
-        labeled_array, labels_count = label(dilated)
+        labeled_array, labels_count = label_ndimage(dilated)
         return labeled_array, labels_count
-        
+
     def calc_movement_detection_rate(self, y_label, prediction, threshold=0.5, min_consequent_count=3):
         """Given a label and prediction, return the movement detection rate on the basis of 
         movements classified in blocks of 'min_consequent_count'.
@@ -291,15 +290,21 @@ class Decoder:
         tpr : np.array
             sklearn.metrics true positive rate np.array
         """
+
         pred_grouped, _ = self.get_movement_grouped_array(prediction, threshold, min_consequent_count)
         y_grouped, labels_count = self.get_movement_grouped_array(y_label, threshold, min_consequent_count)
 
         hit_rate = np.zeros(labels_count)
         pred_group_bin = np.array(pred_grouped>0)
+
         for label_number in range(1, labels_count + 1):  # labeling starts from 1    
             hit_rate[label_number-1] = np.sum(pred_group_bin[np.where(y_grouped == label_number)[0]])
 
-        mov_detection_rate = np.where(hit_rate>0)[0].shape[0] / labels_count
+        try:
+            mov_detection_rate = np.where(hit_rate>0)[0].shape[0] / labels_count
+        except ZeroDivisionError:
+            print("no movements in label")
+            return 0, 0, 0
 
         # calculating TPR and FPR: https://stackoverflow.com/a/40324184/5060208
         CM = metrics.confusion_matrix(y_label, prediction)
@@ -312,32 +317,8 @@ class Decoder:
         tpr = TP / (TP + FN)
 
         return mov_detection_rate, fpr, tpr
-
-    def run_CV(self, data=None, label=None, XGB=False):
-        """Evaluate model performance on the specified cross validation.
-        If no data and label is specified, use whole feature class attributes.
-
-        Parameters
-        ----------
-        data (np.ndarray):
-            data to train and test with shape samples, features
-        label (np.ndarray):
-            label to train and test with shape samples, features
-        XGB (boolean):
-            if true split data into additinal validation, and run class weighted CV
-        Returns
-        -------
-        cv_res : float
-            mean cross validation result
-        """
-
-        if data is None:
-            print("use all channel data as features")
-            data = self.data
-            label = self.label
-
-        # if xgboost being used, might be necessary to set the params individually
-
+    
+    def init_cv_res(self) -> None:
         self.score_train = []
         self.score_test = []
         self.y_test = []
@@ -354,6 +335,30 @@ class Decoder:
             self.mov_detection_rates_train = []
             self.tprate_train = []
             self.fprate_train = []
+
+
+    def run_CV(self, data=None, label=None):
+        """Evaluate model performance on the specified cross validation.
+        If no data and label is specified, use whole feature class attributes.
+
+        Parameters
+        ----------
+        data (np.ndarray):
+            data to train and test with shape samples, features
+        label (np.ndarray):
+            label to train and test with shape samples, features
+        Returns
+        -------
+        cv_res : float
+            mean cross validation result
+        """
+
+        self.init_cv_res()
+
+        if data is None:
+            print("use all channel data as features")
+            data = self.data
+            label = self.label
 
         for train_index, test_index in self.cv_method.split(self.data):
 
@@ -403,18 +408,24 @@ class Decoder:
                     sc_te = 0
 
             if self.get_movement_detection_rate is True:
-                mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(y_test,
-                                                                                y_test_pr,
-                                                                                self.mov_detection_threshold,
-                                                                                self.min_consequent_count)
+                mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(
+                    y_test,
+                    y_test_pr,
+                    self.mov_detection_threshold,
+                    self.min_consequent_count
+                )
+                
                 self.mov_detection_rates_test.append(mov_detection_rate)
                 self.tprate_test.append(tpr)
                 self.fprate_test.append(fpr)
 
-                mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(y_train,
-                                                                                y_train_pr,
-                                                                                self.mov_detection_threshold,
-                                                                                self.min_consequent_count)
+                mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(
+                    y_train,
+                    y_train_pr,
+                    self.mov_detection_threshold,
+                    self.min_consequent_count
+                )
+
                 self.mov_detection_rates_train.append(mov_detection_rate)
                 self.tprate_train.append(tpr)
                 self.fprate_train.append(fpr)
@@ -495,18 +506,16 @@ class Decoder:
 
         self.model.fit(self.data, self.label)
 
-    def save(self, str_save_add=None) -> None:
-        """Saves decoder object to pickle
+    def save(self, feature_path: str, feature_file: str, str_save_add=None) -> None:
+        """Save decoder object to pickle
         """
 
-        # run_analysis does not need to be saved twice, since grid points are saved as well
-        if self.run_analysis is not None:
-            self.run_analysis = None
+        # why is the decoder not saved to a .json?
 
         if str_save_add is None:
-            PATH_OUT = os.path.join(self.feature_path, self.feature_file, self.feature_file + "_ML_RES.p")
+            PATH_OUT = os.path.join(feature_path, feature_file, feature_file + "_ML_RES.p")
         else:
-            PATH_OUT = os.path.join(self.feature_path, self.feature_file, self.feature_file +
+            PATH_OUT = os.path.join(feature_path, feature_file, feature_file +
                                     "_" + str_save_add + "_ML_RES.p")
 
         print("model being saved to: " + str(PATH_OUT))
