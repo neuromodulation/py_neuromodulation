@@ -3,7 +3,6 @@ import mne
 import numpy as np
 import os
 import json
-import _pickle as cPickle
 from scipy import io
 import pandas as pd
 from pathlib import Path

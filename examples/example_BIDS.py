@@ -1,10 +1,4 @@
-import multiprocessing
-import sys
-from bids import BIDSLayout
-from itertools import product
 import os
-import json
-from pathlib import Path
 from sklearn import linear_model, metrics, model_selection
 from pyneuromodulation import nm_BidsStream, nm_analysis
 
@@ -48,7 +42,7 @@ def run_example_BIDS():
         ch=ch_used,
         list_feature_keywords=[feature_used],
         epoch_len=4,
-        threhshold=0.5
+        threshold=0.5
     )
 
     model = linear_model.LogisticRegression(class_weight='balanced')

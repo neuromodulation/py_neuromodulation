@@ -1,10 +1,6 @@
 import os
-from numpy.lib.npyio import save
 import pandas as pd
-from scipy import io
-from matplotlib import pyplot as plt
 import numpy as np
-import bids
 from sklearn import linear_model, base, metrics, model_selection
 import _pickle as cPickle
 from typing import Optional
@@ -282,7 +278,7 @@ class Feature_Reader:
         ch_ = list(performance_dict[subject_name].keys())
 
         for ch in ch_:
-            if 'grid' not in ch:
+            if 'grid' not in ch and "combined" not in ch:
                 ecog_coords_strip.append(
                     performance_dict[subject_name][ch]["coord"]
                 )

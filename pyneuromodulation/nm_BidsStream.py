@@ -1,11 +1,6 @@
 import os
-from pathlib import Path
-from re import VERBOSE
 import mne
-import types
-from mne.io.array.array import RawArray
 import numpy as np
-import pandas as pd
 import pathlib
 
 from pyneuromodulation import nm_IO, nm_generator, nm_stream
@@ -103,6 +98,10 @@ class BidsStream(nm_stream.PNStream):
         self._add_labels()
 
         folder_name = os.path.basename(self.PATH_RUN)[:-5]
+
+        # create derivate folder_name output folder if doesn't exist
+        if os.path.exists(os.path.join(self.PATH_OUT, folder_name)) is False:
+            os.makedirs(os.path.join(self.PATH_OUT, folder_name))
 
         self.save_sidecar(folder_name)
 

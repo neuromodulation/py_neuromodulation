@@ -1,7 +1,6 @@
-from scipy import io, stats
+from scipy import stats
 import os
 import numpy as np
-from pathlib import Path
 from matplotlib import pyplot as plt
 from typing import Optional
 import seaborn as sns
