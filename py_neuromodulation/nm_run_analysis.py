@@ -111,8 +111,6 @@ class Run:
         """
         start_time = time()
 
-        # TODO: Add here pipeline order, coming from nm_settings.json
-
         # re-reference
         if self.settings["methods"]["re_referencing"] is True:
             ieeg_batch = self.reference.rereference(ieeg_batch)

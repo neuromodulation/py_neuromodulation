@@ -56,7 +56,7 @@ def calcFeatures(queue_raw, queue_features):
             queue_features.put(features)
 
 def sendFeatures(queue_features, ftc):
-    
+
     time_start = time.time()
     features_out = pd.DataFrame()
     FLAG_STOP = False
@@ -92,7 +92,7 @@ if __name__ == "__main__":
     if H is None:
         print('Failed to retrieve header!')
         sys.exit(1)
-    
+
     print(H)
     print(H.labels)
 

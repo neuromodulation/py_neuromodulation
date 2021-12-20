@@ -1,8 +1,9 @@
 import os
+import pathlib
 import mne
 import numpy as np
 import pandas as pd
-import pathlib
+
 
 from py_neuromodulation import nm_IO, nm_generator, nm_stream
 
@@ -100,20 +101,34 @@ class BidsStream(nm_stream.PNStream):
 
         folder_name = os.path.basename(self.PATH_RUN)[:-5]
 
-        # create derivate folder_name output folder if doesn't exist
-        if os.path.exists(os.path.join(self.PATH_OUT, folder_name)) is False:
-            os.makedirs(os.path.join(self.PATH_OUT, folder_name))
-
-        self.save_sidecar(folder_name)
-
-        self.save_features(folder_name)
-
-        self.save_settings(folder_name)
-
-        self.save_nm_channels(folder_name)
+        self.save_after_stream(folder_name)
 
     def get_data(self) -> np.array:
         return next(self.gen, None)
+    
+    def run(self, predict: bool=False) -> None:
+        """BIDS specific fun function
+        Does not need to run in parallel
+        """
+        # Loop
+        idx = 0
+        while True:
+            data = self.get_data()
+            if data is None:
+                break
+            feature_series = self.run_analysis.process_data(data)
+            feature_series = self._add_timestamp(feature_series, idx)
+
+            # concatenate data to feature_arr
+            if idx == 0:
+                self.feature_arr = pd.DataFrame([feature_series])
+                idx += 1
+            else:
+                self.feature_arr = self.feature_arr.append(
+                    feature_series, ignore_index=True)
+
+            if predict is True:
+                prediction = self.model.predict(feature_series)
 
     def _add_timestamp(self, feature_series: pd.Series, idx: int = None) -> pd.Series:
         """time stamp is added in ms
