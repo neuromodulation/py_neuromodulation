@@ -1,11 +1,7 @@
 import numpy as np
 import pandas as pd
-from scipy import io
-import os
-from matplotlib import pyplot as plt
-from pathlib import Path
 
-from pyneuromodulation import nm_plots
+from py_neuromodulation import nm_plots
 
 class Projection:
 

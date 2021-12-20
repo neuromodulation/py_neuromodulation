@@ -1,9 +1,7 @@
 # from multiprocessing import Process, Manager
-from numpy import arange, array, ceil, floor, where
+from numpy import array, ceil, floor, where
 
-from mne.filter import notch_filter
-
-from pyneuromodulation import nm_bandpower, nm_filter, nm_hjorth_raw, nm_kalmanfilter, nm_sharpwaves, nm_coherence,\
+from py_neuromodulation import nm_bandpower, nm_filter, nm_hjorth_raw, nm_kalmanfilter, nm_sharpwaves, nm_coherence,\
     nm_stft, nm_fft
 
 
@@ -93,31 +91,12 @@ class Features:
             channel_method_feature_(f_band)
         """
 
-        # manager = Manager()
-        # features_ = manager.dict() #features_ = {}
         features_ = dict()
-
-        # notch filter data before feature estimation
-        if self.s["methods"]["notch_filter"]:
-            freqs = arange(
-                self.line_noise, int((floor(self.fs/2) / self.line_noise)) * self.line_noise,
-                self.line_noise)
-            data = notch_filter(
-                x=data, Fs=self.fs, trans_bandwidth=15, freqs=freqs,
-                fir_design='firwin', notch_widths=3,
-                filter_length=data.shape[1]-1, verbose=False,)
 
         if self.s["methods"]["bandpass_filter"]:
             dat_filtered = nm_filter.apply_filter(data, self.filter_fun)  # shape (bands, time)
         else:
             dat_filtered = None
-
-        # multiprocessing approach
-        '''
-        job = [Process(target=self.est_ch, args=(features_, ch_idx, ch)) for ch_idx, ch in enumerate(self.ch_names)]
-        _ = [p.start() for p in job]
-        _ = [p.join() for p in job]
-        '''
 
         # sequential approach
         for ch_idx in range(len(self.ch_names)):
@@ -176,25 +155,5 @@ class Features:
         if self.s["methods"]["fft"] is True:
             features_ = nm_fft.get_fft_features(features_, self.s, self.fs, data[ch_idx, :], self.KF_dict, ch,
                                                   self.f_ranges, self.fband_names)
-
-        return features_
-
-    def est_connect(self, features_, filt, dat_filt) -> dict:
-
-        if self.s["methods"]["pdc"]:
-            if filt in self.s["pdc_settings"]["frequency_ranges"].keys():
-                chs = self.s["pdc_settings"]["frequency_ranges"][filt]
-                ch_idx = [self.ch_names.index(ch) for ch in chs]
-                dat_ = dat_filt[ch_idx]
-                features_ = nm_coherence.get_pdc(
-                    features_, self.s, dat_, filt, chs)
-
-        if self.s["methods"]["dtf"]:
-            if filt in self.s["dtf_settings"]["frequency_ranges"].keys():
-                chs = self.s["dtf_settings"]["frequency_ranges"][filt]
-                ch_idx = [self.ch_names.index(ch) for ch in chs]
-                dat_ = dat_filt[ch_idx]
-                features_ = nm_coherence.get_dtf(
-                    features_, self.s, dat_, filt, chs)
 
         return features_

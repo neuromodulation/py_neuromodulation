@@ -1,4 +1,4 @@
-from numpy import array, empty_like, mean, ndarray, where
+from numpy import empty_like, mean, ndarray, where
 from pandas import isnull
 
 

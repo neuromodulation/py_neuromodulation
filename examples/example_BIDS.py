@@ -1,6 +1,6 @@
 import os
 from sklearn import linear_model, metrics, model_selection
-from pyneuromodulation import nm_BidsStream, nm_analysis
+from py_neuromodulation import nm_BidsStream, nm_analysis
 
 
 def run_example_BIDS():

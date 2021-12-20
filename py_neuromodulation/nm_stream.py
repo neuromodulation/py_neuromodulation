@@ -6,7 +6,7 @@ import pandas as pd
 import os
 from enum import Enum
 
-from pyneuromodulation import \
+from py_neuromodulation import \
     (nm_projection,
     nm_rereference,
     nm_run_analysis,
@@ -82,9 +82,15 @@ class PNStream(ABC):
 
     @abstractmethod
     def get_data(self) -> np.array:
+        """Get new data batch from acquisition device or from BIDS"""
+        pass
+
+    @abstractmethod
+    def _add_timestamp(self, feature_series: pd.Series, idx:int=None) -> pd.Series:
         pass
 
     def run(self, predict: bool=False) -> None:
+
         # Loop
         idx = 0
         while True:
@@ -92,6 +98,8 @@ class PNStream(ABC):
             if data is None:
                 break
             feature_series = self.run_analysis.process_data(data)
+            feature_series = self._add_timestamp(feature_series, idx)
+
             # concatenate data to feature_arr
             if idx == 0:
                 self.feature_arr = pd.DataFrame([feature_series])

@@ -2,8 +2,9 @@ import os
 import pathlib
 import numpy as np
 import pandas as pd
+import time
 
-from pyneuromodulation import \
+from py_neuromodulation import \
     (nm_projection,
     nm_rereference,
     nm_run_analysis,
@@ -35,11 +36,11 @@ class RealTimePyNeuro(nm_stream.PNStream):
 
         self.set_run()
 
-    def run(self, ieeg_batch: np.array) -> pd.Series:
-        self.run_analysis.run(ieeg_batch)
-
-        # return last estimated data batch by run_analysis
-        self.df_features.append(self.run_analysis.feature_arr.iloc[-1, :])
+    def _add_timestamp(self, feature_series: pd.Series, idx: int = None) -> pd.Series:
+        
+        feature_series["time"] = time.time()  # UNIX Timestamp
+        
+        return feature_series
 
     def add_coordinates(self):
         """Lateron add here method for providing coordinates"""

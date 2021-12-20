@@ -5,7 +5,7 @@ from sklearn import linear_model, base, metrics, model_selection
 import _pickle as cPickle
 from typing import Optional
 
-from pyneuromodulation import nm_decode, nm_IO, nm_plots
+from py_neuromodulation import nm_decode, nm_IO, nm_plots
 
 target_filter_str = {
     "CLEAN",

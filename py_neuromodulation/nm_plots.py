@@ -6,7 +6,7 @@ from typing import Optional
 import seaborn as sns
 import pandas as pd
 
-from pyneuromodulation import nm_IO
+from py_neuromodulation import nm_IO
 
 def plot_corr_matrix(
     feature: pd.DataFrame,

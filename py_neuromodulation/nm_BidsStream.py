@@ -1,9 +1,10 @@
 import os
 import mne
 import numpy as np
+import pandas as pd
 import pathlib
 
-from pyneuromodulation import nm_IO, nm_generator, nm_stream
+from py_neuromodulation import nm_IO, nm_generator, nm_stream
 
 
 class BidsStream(nm_stream.PNStream):
@@ -113,6 +114,22 @@ class BidsStream(nm_stream.PNStream):
 
     def get_data(self) -> np.array:
         return next(self.gen, None)
+
+    def _add_timestamp(self, feature_series: pd.Series, idx: int = None) -> pd.Series:
+        """time stamp is added in ms
+        Due to normalization run_analysis needs to keep track of the counted samples
+        Those are accessed here for time conversion"""
+
+        if idx == 0:
+            feature_series["time"] = self.run_analysis.offset
+        else:
+            feature_series["time"] = self.run_analysis.cnt_samples * 1000 / self.fs
+
+        if self.VERBOSE:
+            print(str(np.round(feature_series["time"] / 1000, 2)) +
+                  ' seconds of data processed')
+
+        return feature_series
 
     def _add_labels(self):
         """add resampled labels to feature dataframe if there are target channels

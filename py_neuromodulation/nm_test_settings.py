@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from pyneuromodulation import nm_define_nmchannels
+from py_neuromodulation import nm_define_nmchannels
 
 def test_settings(self, verbose=True) -> None:
     """Test if settings are specified correctly in nm_settings.json
