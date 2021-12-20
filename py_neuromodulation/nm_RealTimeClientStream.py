@@ -58,7 +58,7 @@ class RealTimePyNeuro(nm_stream.PNStream):
         self.ftc = self.init_fieldtrip()
 
         self.init_processes()
-    
+
     @staticmethod
     def init_fieldtrip() -> FieldTrip.Client:
 
@@ -188,7 +188,6 @@ class RealTimePyNeuro(nm_stream.PNStream):
                         features,
                         ignore_index=True
                     )
-
 
                 print("length of features:" + str(len(self.feature_arr)))
                 H = ftc.getHeader()

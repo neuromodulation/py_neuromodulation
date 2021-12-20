@@ -15,7 +15,8 @@ from py_neuromodulation import \
     nm_resample,
     nm_define_nmchannels,
     nm_IO,
-    nm_plots)
+    nm_plots,
+    nm_test_settings)
 
 class GRIDS(Enum):
     """Definition of possible projection grid types"""
@@ -65,6 +66,7 @@ class PNStream(ABC):
         self.VERBOSE = VERBOSE
 
         self.settings = nm_IO.read_settings(self.PATH_SETTINGS)
+        nm_test_settings.test_settings(self.settings)
 
         if True in [self.settings["methods"]["project_cortex"],
                     self.settings["methods"]["project_subcortex"]]:
@@ -280,7 +282,6 @@ class PNStream(ABC):
         self.save_settings(folder_name)
 
         self.save_nm_channels(folder_name)
-
 
     def plot_cortical_projection(self):
         """plot projection of cortical grid electrodes on cortex"""

@@ -1,31 +1,19 @@
-import json
-import os
-from pathlib import Path
-import numpy as np
-import pandas as pd
 
-from py_neuromodulation import nm_define_nmchannels
-
-def test_settings(self, verbose=True) -> None:
+def test_settings(settings: dict, verbose=True) -> None:
     """Test if settings are specified correctly in nm_settings.json
 
     Parameters
     ----------
+    settings: dict
+        settings to tests
     verbose: boolean
         set to True if feedback is desired.
     Returns
     -------
     None
     """
-    if isinstance(self.settings, dict):
-        s = self.settings
-    else:
-        with open(self.settings_path, encoding="utf-8") as json_file:
-            s = json.load(json_file)
-        assert isinstance(s, dict)
+    s = settings
 
-    # assert (os.path.isdir(s["BIDS_path"]))
-    # assert (os.path.isdir(s["out_path"]))
     assert isinstance(s["sampling_rate_features"], (float, int))
     if s["methods"]["project_cortex"] is True:
         assert isinstance(
