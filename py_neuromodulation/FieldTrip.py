@@ -3,6 +3,8 @@ FieldTrip buffer (V1) client in pure Python
 (C) 2010 S. Klanke
 """
 
+# Obtained from https://github.com/fieldtrip/fieldtrip/blob/master/realtime/src/buffer/python/FieldTrip.py
+
 # We need socket, struct, and numpy
 import socket
 import struct

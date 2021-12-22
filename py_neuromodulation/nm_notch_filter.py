@@ -4,7 +4,7 @@ from numpy import arange, floor
 def notch_filter(data, fs, line_noise=50):
 
     freqs = arange(
-        line_noise, int((floor(fs/2) / line_noise)) * line_noise,
+        line_noise, int((floor(fs/2) / line_noise)) * line_noise + line_noise,
         line_noise)
 
     return mne_notchfilter(

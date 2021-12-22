@@ -4,9 +4,7 @@ import mne
 import numpy as np
 import pandas as pd
 
-
 from py_neuromodulation import nm_IO, nm_generator, nm_stream
-
 
 class BidsStream(nm_stream.PNStream):
 
@@ -93,7 +91,9 @@ class BidsStream(nm_stream.PNStream):
 
         self._set_run()
 
-    def run_bids(self):
+    def run_bids(self) -> None:
+        """process BIDS recording, add labels and save features after finish
+        """
 
         self.run()
 
@@ -105,7 +105,7 @@ class BidsStream(nm_stream.PNStream):
 
     def get_data(self) -> np.array:
         return next(self.gen, None)
-    
+
     def run(self, predict: bool=False) -> None:
         """BIDS specific fun function
         Does not need to run in parallel

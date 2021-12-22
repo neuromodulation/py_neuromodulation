@@ -6,7 +6,6 @@ from typing import MutableMapping
 import numpy as np
 import pandas as pd
 import time
-import FieldTrip
 from pynput.keyboard import Key, Listener
 
 from py_neuromodulation import \
@@ -22,7 +21,6 @@ class RealTimePyNeuro(nm_stream.PNStream):
 
     queue_raw:multiprocessing.Queue = multiprocessing.Queue(1)
     queue_features:multiprocessing.Queue = multiprocessing.Queue()
-    ftc:FieldTrip.Client = None
     filename: str
 
     def __init__(
@@ -55,30 +53,6 @@ class RealTimePyNeuro(nm_stream.PNStream):
 
         self._set_run()
 
-        self.ftc = self.init_fieldtrip()
-
-    @staticmethod
-    def init_fieldtrip() -> FieldTrip.Client:
-        """Initialize Fieldtrip client
-
-        Returns
-        -------
-        FieldTrip.Client
-        """
-        ftc = FieldTrip.Client()
-        # Python FieldTripBuffer https://www.fieldtriptoolbox.org/development/realtime/buffer_python/
-        ftc.connect('localhost', 1972)   # might throw IOError
-        H = ftc.getHeader()
-
-        if H is None:
-            print('Failed to retrieve header!')
-            sys.exit(1)
-
-        print(H)
-        print(H.labels)
-
-        return ftc
-
     def run(self) -> None:
         """Start get_data, calcFeatures and sendFeature processes
         """
@@ -87,7 +61,6 @@ class RealTimePyNeuro(nm_stream.PNStream):
                 target=self.get_data,
                 args=(
                     self.queue_raw,
-                    self.ftc,
                 )
             ),
             multiprocessing.Process(
@@ -100,7 +73,6 @@ class RealTimePyNeuro(nm_stream.PNStream):
                 target=self.sendFeatures,
                 args=(
                     self.queue_features,
-                    self.ftc,
                 )
             )
         ]
@@ -113,8 +85,7 @@ class RealTimePyNeuro(nm_stream.PNStream):
 
     def get_data(
         self,
-        queue_raw: multiprocessing.Queue,
-        ftc: FieldTrip.Client
+        queue_raw: multiprocessing.Queue
     ) -> np.array:
 
         def on_press(key):
@@ -138,13 +109,10 @@ class RealTimePyNeuro(nm_stream.PNStream):
             # read new data
             print('Trying to read last sample...')
             #index = H.nSamples - 1
-            ieeg_batch = ftc.getData()
-            ieeg_batch = ieeg_batch[-128:, 1]  # take last, #1: data
-            # check if time stamp changed 
-            if np.array_equal(ieeg_batch, last_batch):
-                last_batch = ieeg_batch
-                queue_raw.put(ieeg_batch)
-        ftc.disconnect()
+            ieeg_batch = np.random.random([2, 128])
+            #ieeg_batch = ieeg_batch[-128:, 1]  # take last, #1: data
+            
+            queue_raw.put(ieeg_batch)
 
     def calcFeatures(
         self,
@@ -167,8 +135,7 @@ class RealTimePyNeuro(nm_stream.PNStream):
 
     def sendFeatures(
         self,
-        queue_features: multiprocessing.Queue,
-        ftc: FieldTrip.Client
+        queue_features: multiprocessing.Queue
     ):
 
         idx = 0
@@ -192,12 +159,10 @@ class RealTimePyNeuro(nm_stream.PNStream):
                     )
 
                 print("length of features:" + str(len(self.feature_arr)))
-                H = ftc.getHeader()
                 # channel names are 1. data 2. ident 3. timestamp
                 # put at the end of the buffer the calculated features of the data channel
-                to_send = np.zeros([H.nSamples, H.nChannels])
-                to_send[-features.shape[0]:, IDENT_FEATURES] = np.array(features)
-                ftc.putData(to_send)
+                #to_send = np.zeros([H.nSamples, H.nChannels])
+                #to_send[-features.shape[0]:, IDENT_FEATURES] = np.array(features)
 
     def _add_timestamp(self, feature_series: pd.Series, idx: int = None) -> pd.Series:
 
@@ -205,6 +170,5 @@ class RealTimePyNeuro(nm_stream.PNStream):
 
         return feature_series
 
-    def _add_coordinates(self):
-        """Lateron add here method for providing coordinates"""
+    def _add_coordinates(self) -> None:
         pass

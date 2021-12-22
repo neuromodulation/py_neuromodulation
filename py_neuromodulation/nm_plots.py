@@ -170,7 +170,7 @@ def plot_grid_elec_3d(
         _ = ax.scatter3D(cortex_grid[:, 0],
                             cortex_grid[:, 1], cortex_grid[:, 2], c=grid_color,
                             s=300, alpha=0.8, cmap="viridis")
-    
+
     if ecog_strip is not None:
         strip_color = np.ones(ecog_strip.shape[0]) if strip_color is None else strip_color
         _ = ax.scatter(ecog_strip[:, 0],
