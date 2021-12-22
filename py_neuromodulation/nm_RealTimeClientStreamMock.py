@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import time
 from pynput.keyboard import Key, Listener
+import timeit
 
 from py_neuromodulation import \
     (nm_projection,
@@ -111,7 +112,7 @@ class RealTimePyNeuro(nm_stream.PNStream):
             #index = H.nSamples - 1
             ieeg_batch = np.random.random([2, 128])
             #ieeg_batch = ieeg_batch[-128:, 1]  # take last, #1: data
-            
+
             queue_raw.put(ieeg_batch)
 
     def calcFeatures(
@@ -129,6 +130,13 @@ class RealTimePyNeuro(nm_stream.PNStream):
             else:
                 feature_series = \
                     self.run_analysis.process_data(ieeg_batch)
+
+                #number_repeat = 1000
+                #val = timeit.timeit(
+                #    lambda: self.run_analysis.process_data(ieeg_batch),
+                #    number=number_repeat
+                #) / number_repeat
+
                 feature_series = self._add_timestamp(feature_series)
                 print("calc features")
                 queue_features.put(feature_series)

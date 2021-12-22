@@ -3,6 +3,7 @@ import pathlib
 import mne
 import numpy as np
 import pandas as pd
+import timeit
 
 from py_neuromodulation import nm_IO, nm_generator, nm_stream
 
@@ -82,7 +83,7 @@ class BidsStream(nm_stream.PNStream):
             raise ValueError("no coordinates could be loaded from BIDS Dataset")
         else:
             self.coords = self._add_coordinates(self.coord_names, self.coord_list)
-            self.sess_rigth = self._set_sess_lat(self.coords)
+            self.sess_rigth = self._get_sess_lat(self.coords)
 
         self.gen = nm_generator.ieeg_raw_generator(
             self.raw_arr_data,
@@ -117,6 +118,14 @@ class BidsStream(nm_stream.PNStream):
             if data is None:
                 break
             feature_series = self.run_analysis.process_data(data)
+
+            # Measuring timing
+            #number_repeat = 100
+            #val = timeit.timeit(
+            #    lambda: self.run_analysis.process_data(data),
+            #    number=number_repeat
+            #) / number_repeat
+
             feature_series = self._add_timestamp(feature_series, idx)
 
             # concatenate data to feature_arr

@@ -6,7 +6,7 @@ from typing import MutableMapping
 import numpy as np
 import pandas as pd
 import time
-import FieldTrip
+import timeit
 from pynput.keyboard import Key, Listener
 
 from py_neuromodulation import \
@@ -15,13 +15,15 @@ from py_neuromodulation import \
     nm_run_analysis,
     nm_features,
     nm_resample,
-    nm_stream, nm_test_settings)
+    nm_stream,
+    nm_test_settings,
+    FieldTrip)
 
 
 class RealTimePyNeuro(nm_stream.PNStream):
 
     queue_raw:multiprocessing.Queue = multiprocessing.Queue(1)
-    queue_features:multiprocessing.Queue = multiprocessing.Queue()
+    queue_features:multiprocessing.Queue = multiprocessing.Queue(1)
     ftc:FieldTrip.Client = None
     filename: str
 
@@ -139,10 +141,19 @@ class RealTimePyNeuro(nm_stream.PNStream):
             print('Trying to read last sample...')
             #index = H.nSamples - 1
             ieeg_batch = ftc.getData()
-            ieeg_batch = ieeg_batch[-128:, 1]  # take last, #1: data
+
+            #number_repeat = 10
+            #val = timeit.timeit(
+            #    lambda: ftc.getData(),
+            #    number=number_repeat
+            #) / number_repeat
+
+            ieeg_batch = ieeg_batch[-128:, :2].T  # take last, #1: data
             # check if time stamp changed 
-            if np.array_equal(ieeg_batch, last_batch):
+            if np.array_equal(ieeg_batch, last_batch) is False:
                 last_batch = ieeg_batch
+                queue_raw.put(ieeg_batch)
+            else:
                 queue_raw.put(ieeg_batch)
         ftc.disconnect()
 
@@ -196,8 +207,15 @@ class RealTimePyNeuro(nm_stream.PNStream):
                 # channel names are 1. data 2. ident 3. timestamp
                 # put at the end of the buffer the calculated features of the data channel
                 to_send = np.zeros([H.nSamples, H.nChannels])
-                to_send[-features.shape[0]:, IDENT_FEATURES] = np.array(features)
+                #to_send[-features.shape[0]:, IDENT_FEATURES] = np.array(features)
+                to_send[-features.shape[0]:, 1] = np.array(features)
                 ftc.putData(to_send)
+
+                #number_repeat = 10
+                #val = timeit.timeit(
+                #    lambda: ftc.putData(to_send),
+                #    number=number_repeat
+                #) / number_repeat
 
     def _add_timestamp(self, feature_series: pd.Series, idx: int = None) -> pd.Series:
 

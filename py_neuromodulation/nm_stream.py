@@ -71,7 +71,7 @@ class PNStream(ABC):
 
         if True in [self.settings["methods"]["project_cortex"],
                     self.settings["methods"]["project_subcortex"]]:
-            self.grid_cortex, self.grid_subcortex = self.set_grids(
+            self.grid_cortex, self.grid_subcortex = self.get_grids(
                 self.settings,
                 self.PATH_GRIDS,
                 GRIDS
@@ -135,7 +135,7 @@ class PNStream(ABC):
 
         self.projection = self._get_projection(self.settings)
         if self.projection is not None:
-            self.sess_right = self._set_sess_lat(self.coords)
+            self.sess_right = self._get_sess_lat(self.coords)
         else:
             self.sess_right = None
 

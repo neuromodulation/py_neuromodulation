@@ -8,7 +8,8 @@ from py_neuromodulation import (
     nm_normalization,
     nm_projection,
     nm_rereference,
-    nm_resample
+    nm_resample,
+    nm_eval_timing
 )
 
 
@@ -173,6 +174,9 @@ class Run:
         if self.verbose is True:
             print("Last batch took: " + str(np.round(time() - start_time, 2)) +
                   " seconds")
+
+        #if self.cnt_samples > 4000:
+        #    nm_eval_timing.NM_Timer(self)
 
         return feature_series
 
