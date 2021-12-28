@@ -21,7 +21,7 @@ class NM_Timer:
         features_ = {}
         ch_idx = 0
         fs = self.analyzer.fs
-        ch = "ECOG_L_1_SMC_AT"
+        ch_name = "ECOG_L_1_SMC_AT"
         N_CH_BEFORE_REREF = 15 # 2 
         N_CH_AFTER_REREF = 11 # 2
         data = np.random.random([N_CH_BEFORE_REREF, fs])
@@ -68,23 +68,25 @@ class NM_Timer:
                     number=number_repeat
             ) / number_repeat
 
-        feature_series = self.analyzer.feature_arr_raw.iloc[-1]
+        features_previous = self.analyzer.features_previous
+        features_current = self.analyzer.features_current.iloc[:features_previous.shape[1]]
 
         if self.analyzer.settings["methods"]["feature_normalization"]:
             dict_timings["time_feature_norm"] = timeit.timeit(
                 lambda: nm_normalization.normalize_features(
-                        feature_series, self.analyzer.feature_arr_raw,
-                        self.analyzer.feat_normalize_samples,
-                        self.analyzer.settings["feature_normalization_settings"][
+                        current=features_current.to_numpy(),
+                        previous=features_previous,
+                        normalize_samples=self.analyzer.feat_normalize_samples,
+                        method=self.analyzer.settings["feature_normalization_settings"][
                             "normalization_method"],
-                        self.analyzer.settings["feature_normalization_settings"][
+                        clip=self.analyzer.settings["feature_normalization_settings"][
                             "clip"]),
                     number=number_repeat
             ) / number_repeat
 
         if self.analyzer.settings["methods"]["project_cortex"]:
             dict_timings["time_projection"] = timeit.timeit(
-                lambda: self.analyzer.next_projection_run(feature_series),
+                lambda: self.analyzer.next_projection_run(features_current),
                     number=number_repeat
             ) / number_repeat
 
@@ -97,7 +99,7 @@ class NM_Timer:
         if self.analyzer.settings["methods"]["sharpwave_analysis"]:
             dict_timings["time_sw"] = timeit.timeit(
                 lambda: self.analyzer.features.sw_features.get_sharpwave_features(
-                    features_, data[ch_idx, -100:], ch),
+                    features_, data[ch_idx, -100:], ch_name),
                     number=number_repeat
             ) / number_repeat
 
@@ -109,7 +111,7 @@ class NM_Timer:
                     self.analyzer.features.fs,
                     data[ch_idx, :],
                     self.analyzer.features.KF_dict,
-                    ch,
+                    ch_name + "-avgref",
                     self.analyzer.features.f_ranges,
                     self.analyzer.features.fband_names),
                     number=number_repeat
@@ -123,7 +125,7 @@ class NM_Timer:
                     self.analyzer.features.fs,
                     data[ch_idx, :],
                     self.analyzer.features.KF_dict,
-                    ch,
+                    ch_name,
                     self.analyzer.features.f_ranges, self.analyzer.features.fband_names),
                     number=number_repeat
             ) / number_repeat
@@ -142,7 +144,7 @@ class NM_Timer:
                     seglengths,
                     dat_filtered,
                     self.analyzer.features.KF_dict,
-                    ch, ch_idx
+                    ch_name, ch_idx
                     ),
                     number=number_repeat
             ) / number_repeat
@@ -158,7 +160,8 @@ class NM_Timer:
                 number=number_repeat
             ) / number_repeat
 
+        print("Average duration per function:")
         for key, val in dict_timings.items():
             if key == "time_sw":
-                print("per channel:\n")
-            print(f"{key} : {np.round(val*1000, 2)}ms")
+                print("Duration per channel:")
+            print(f"  {key} : {np.round(val*1000, 2)}ms")

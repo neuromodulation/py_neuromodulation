@@ -1,4 +1,6 @@
-from numpy import arange, mean, median, std
+from typing import Optional
+
+import numpy as np
 
 
 def normalize_raw(raw_arr, normalize_samples, fs, method="mean", clip=False):
@@ -30,21 +32,21 @@ def normalize_raw(raw_arr, normalize_samples, fs, method="mean", clip=False):
         returned  if norm_type is not 'mean', 'median' or 'zscore'
     """
     if raw_arr.shape[1] < normalize_samples:
-        n_idx = arange(0, raw_arr.shape[1], 1)
+        n_idx = np.arange(0, raw_arr.shape[1], 1)
     else:
-        n_idx = arange(
+        n_idx = np.arange(
             raw_arr.shape[1] - normalize_samples, raw_arr.shape[1], 1
         )
 
     if method == "mean":
-        mean_ = mean(raw_arr[:, n_idx], axis=1)
+        mean_ = np.mean(raw_arr[:, n_idx], axis=1)
         raw_norm = (raw_arr[:, -fs:].T - mean_) / mean_.T
     elif method == "median":
-        median_ = median(raw_arr[:, n_idx], axis=1)
+        median_ = np.median(raw_arr[:, n_idx], axis=1)
         raw_norm = (raw_arr[:, -fs:].T - median_) / median_.T
     elif method == "zscore":
-        mean_ = mean(raw_arr[:, n_idx], axis=1)
-        std_ = std(raw_arr[:, n_idx], axis=1)
+        mean_ = np.mean(raw_arr[:, n_idx], axis=1)
+        std_ = np.std(raw_arr[:, n_idx], axis=1)
         raw_norm = (raw_arr[:, -fs:].T - mean_) / std_.T
     else:
         raise ValueError(
@@ -63,17 +65,20 @@ def normalize_raw(raw_arr, normalize_samples, fs, method="mean", clip=False):
 
 
 def normalize_features(
-    curr_, prev_, normalize_samples, method="mean", clip=False
-):
+    current: np.ndarray,
+    previous: Optional[np.ndarray],
+    normalize_samples: int,
+    method: str = "mean",
+    clip: bool = False,
+) -> tuple[np.ndarray, np.ndarray]:
     """Normalize features with respect to the past number of normalize_samples.
 
     Parameters
     ----------
-    curr_ : pandas.Series
-        series of current features to normalize.
-    prev_ : pandas.DataFrame
-        data frame of all previous features, not normalized. These are used for
-        normalization of the current features.
+    current : numpy array
+        current features to normalize.
+    previous : numpy array or None
+        previous features, not normalized. Used for normalization of current features.
     normalize_samples : int
         number of past samples considered for normalization
     method : str | default is 'mean'
@@ -86,36 +91,32 @@ def normalize_features(
 
     Returns
     -------
-    curr_ : pandas.Series
-        series of normalized current features
+    current : numpy array
+        normalized current features
+    previous : numpy array
+        previous features, not normalized.
 
     Raises
     ------
     ValueError
         returned  if method is not 'mean', 'median' or 'zscore'
     """
-    cnt_samples = len(prev_)
-    if cnt_samples < normalize_samples:
-        n_idx = arange(0, cnt_samples, 1)
-    else:
-        n_idx = arange(cnt_samples - normalize_samples, cnt_samples, 1)
+    if previous is None:
+        return np.zeros_like(current), current
+    sample_count = len(previous)
+    idx = max(0, sample_count - normalize_samples)
+    previous = np.vstack((previous, current))[idx:]
 
     if method == "mean":
-        curr_ = (curr_ - prev_.iloc[n_idx].mean()) / prev_.iloc[n_idx].mean(
-            ddof=0
-        )
+        current = (current - previous.mean()) / previous.mean(ddof=0)
     elif method == "median":
-        curr_ = (curr_ - prev_.iloc[n_idx].median()) / prev_.iloc[
-            n_idx
-        ].median(ddof=0)
+        current = (current - previous.median()) / previous.median(ddof=0)
     elif method == "zscore":
-        curr_ = (curr_ - prev_.iloc[n_idx].mean()) / prev_.iloc[n_idx].std(
-            ddof=0
+        current = (current - np.mean(previous, axis=0)) / np.std(
+            previous, axis=0
         )
     elif method == "zscore-median":
-        curr_ = (curr_ - prev_.iloc[n_idx].median()) / prev_.iloc[n_idx].std(
-            ddof=0
-        )
+        current = (current - previous.median()) / previous.std(ddof=0)
     else:
         raise ValueError(
             "Only `median`, `mean`, `zscore` and `zscore-median` are supported as "
@@ -127,6 +128,6 @@ def normalize_features(
             clip = 3.0
         else:
             float(clip)
-        curr_.clip(lower=-clip, upper=clip, inplace=True)
+        current = current.clip(min=-clip, max=clip)
 
-    return curr_
+    return current, previous
