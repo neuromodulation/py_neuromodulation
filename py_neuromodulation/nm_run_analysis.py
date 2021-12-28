@@ -188,8 +188,8 @@ class Run:
                 + " seconds"
             )
 
-        if self.cnt_samples > 4000:
-            nm_eval_timing.NM_Timer(self)
+        # if self.cnt_samples > 4000:
+        #     nm_eval_timing.NM_Timer(self)
 
         return self.features_current
 
