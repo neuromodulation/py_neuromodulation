@@ -1,19 +1,28 @@
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 
 
-def normalize_raw(raw_arr, normalize_samples, fs, method="mean", clip=False):
+def normalize_raw(
+    current: np.ndarray,
+    previous: Optional[np.ndarray],
+    normalize_samples: int,
+    sample_add: int,
+    method: str = "mean",
+    clip: bool = False,
+) -> tuple[np.ndarray, np.ndarray]:
     """Normalize data with respect to the past number of `normalize_samples`.
 
     Parameters
     ----------
-    raw_arr : ndarray
-        input array, shape (channels, time)
+    current : numpy array
+        current raw data to normalize.
+    previous : numpy array or None
+        previous raw data, not normalized. Used for normalization of current data.
     normalize_samples : int
         number of past samples considered for normalization
-    fs : int
-        sampling frequency
+    sample_add : int
+        number of samples to add to previous
     method : str | default is 'mean'
         data is normalized via subtraction of the 'mean' or 'median' and
         subsequent division by the 'mean' or 'median'. For z-scoring enter
@@ -23,45 +32,34 @@ def normalize_raw(raw_arr, normalize_samples, fs, method="mean", clip=False):
 
     Returns
     -------
-    raw_norm : ndarray
+    current_norm : numpy array
         normalized array
+    previous : numpy array
+        previous features, not normalized.
 
     Raises
     ------
     ValueError
         returned  if norm_type is not 'mean', 'median' or 'zscore'
     """
-    if raw_arr.shape[1] < normalize_samples:
-        n_idx = np.arange(0, raw_arr.shape[1], 1)
+    current = current.T
+    if previous is None:
+        previous = current
     else:
-        n_idx = np.arange(
-            raw_arr.shape[1] - normalize_samples, raw_arr.shape[1], 1
+        previous = np.vstack((previous, current[-sample_add:]))
+        previous = _transform_previous(
+            previous=previous, normalize_samples=normalize_samples
         )
 
-    if method == "mean":
-        mean_ = np.mean(raw_arr[:, n_idx], axis=1)
-        raw_norm = (raw_arr[:, -fs:].T - mean_) / mean_.T
-    elif method == "median":
-        median_ = np.median(raw_arr[:, n_idx], axis=1)
-        raw_norm = (raw_arr[:, -fs:].T - median_) / median_.T
-    elif method == "zscore":
-        mean_ = np.mean(raw_arr[:, n_idx], axis=1)
-        std_ = np.std(raw_arr[:, n_idx], axis=1)
-        raw_norm = (raw_arr[:, -fs:].T - mean_) / std_.T
-    else:
-        raise ValueError(
-            "Only `median`, `mean` and `zscore` are supported as "
-            f"raw normalization methods. Got {method}."
-        )
+    current, previous = _normalize_and_clip(
+        current=current,
+        previous=previous,
+        method=method,
+        clip=clip,
+        description="feature",
+    )
 
-    if clip:
-        if isinstance(clip, bool):
-            clip = 3.0
-        else:
-            float(clip)
-        raw_norm = raw_norm.clip(min=-clip, max=clip, dtype=float)
-
-    return raw_norm.T
+    return current.T, previous
 
 
 def normalize_features(
@@ -103,31 +101,68 @@ def normalize_features(
     """
     if previous is None:
         return np.zeros_like(current), current
+
+    previous = np.vstack((previous, current))
+    previous = _transform_previous(
+        previous=previous, normalize_samples=normalize_samples
+    )
+
+    current, previous = _normalize_and_clip(
+        current=current,
+        previous=previous,
+        method=method,
+        clip=clip,
+        description="feature",
+    )
+
+    return current, previous
+
+
+def _transform_previous(
+    previous: np.ndarray, normalize_samples: int
+) -> np.ndarray:
+    """Crop previous data to reduce memory usage given normalization sample count."""
     sample_count = len(previous)
     idx = max(0, sample_count - normalize_samples)
-    previous = np.vstack((previous, current))[idx:]
+    return previous[idx:]
 
+
+def _normalize_and_clip(
+    current: np.ndarray,
+    previous: np.ndarray,
+    method: str,
+    clip: Union[int, float, bool],
+    description: str,
+) -> np.ndarray:
+    """Normalize data."""
     if method == "mean":
-        current = (current - previous.mean()) / previous.mean(ddof=0)
+        mean = previous.mean(axis=0)
+        current = (current - mean) / mean
     elif method == "median":
-        current = (current - previous.median()) / previous.median(ddof=0)
+        median = np.median(previous, axis=0)
+        current = (current - median) / median
     elif method == "zscore":
-        current = (current - np.mean(previous, axis=0)) / np.std(
-            previous, axis=0
-        )
+        mean = previous.mean(axis=0)
+        current = (current - previous.mean(axis=0)) / previous.std(axis=0)
     elif method == "zscore-median":
-        current = (current - previous.median()) / previous.std(ddof=0)
+        current = (current - np.median(previous, axis=0)) / previous.std(
+            axis=0
+        )
     else:
         raise ValueError(
             "Only `median`, `mean`, `zscore` and `zscore-median` are supported as "
-            f"feature normalization methods. Got {method}."
+            f"{description} normalization methods. Got {method}."
         )
 
     if clip:
-        if isinstance(clip, bool):
-            clip = 3.0
-        else:
-            float(clip)
-        current = current.clip(min=-clip, max=clip)
-
+        current = _clip(data=current, clip=clip)
     return current, previous
+
+
+def _clip(data: np.ndarray, clip: Union[bool, int, float]) -> np.ndarray:
+    """Clip data."""
+    if clip is True:
+        clip = 3.0  # default value
+    else:
+        clip = float(clip)
+    return data.clip(min=-clip, max=clip)

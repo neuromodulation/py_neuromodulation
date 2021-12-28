@@ -67,7 +67,6 @@ class Run:
         self.line_noise = features.line_noise
         self.feature_idx = feature_idx
         self.sample_add = int(self.fs / self.fs_new)
-        print(self.sample_add)
         self.verbose = verbose
         self.offset = max(
             [
@@ -141,20 +140,19 @@ class Run:
 
         # normalize raw data
         if self.settings["methods"]["raw_normalization"] is True:
-            if self.cnt_samples == 0:
-                self.raw_arr = ieeg_batch
-            else:
-                self.raw_arr = np.concatenate(
-                    (self.raw_arr, ieeg_batch[:, -self.sample_add:]), axis=1)
-            ieeg_batch = nm_normalization.normalize_raw(
-                self.raw_arr, self.raw_normalize_samples, self.fs,
-                self.settings["raw_normalization_settings"]["normalization_method"],
-                self.settings["raw_normalization_settings"]["clip"])
+            ieeg_batch, self.raw_arr = nm_normalization.normalize_raw(
+                current=ieeg_batch, 
+                previous=self.raw_arr,
+                normalize_samples=self.raw_normalize_samples,
+                sample_add=self.sample_add,
+                method=self.settings["raw_normalization_settings"]["normalization_method"],
+                clip=self.settings["raw_normalization_settings"]["clip"])
 
         self.features_current = pd.Series(
             self.features.estimate_features(ieeg_batch), dtype=float
         )
 
+        # normalize features
         if self.settings["methods"]["feature_normalization"]:
             (
                 self.features_current.iloc[:],

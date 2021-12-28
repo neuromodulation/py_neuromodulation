@@ -58,13 +58,14 @@ class NM_Timer:
         if self.analyzer.settings["methods"]["raw_normalization"]:
             dict_timings["time_norm_raw"] = timeit.timeit(
                 lambda: nm_normalization.normalize_raw(
-                    data,
-                    int(
+                    current=data,
+                    previous=data.T,
+                    normalize_samples=int(
                     self.analyzer.settings["raw_normalization_settings"]["normalization_time"] * self.analyzer.fs
                     ),
-                    self.analyzer.fs,
-                    self.analyzer.settings["raw_normalization_settings"]["normalization_method"],
-                    self.analyzer.settings["raw_normalization_settings"]["clip"]),
+                    sample_add=int(self.analyzer.fs / self.analyzer.fs_new),
+                    method=self.analyzer.settings["raw_normalization_settings"]["normalization_method"],
+                    clip=self.analyzer.settings["raw_normalization_settings"]["clip"]),
                     number=number_repeat
             ) / number_repeat
 
