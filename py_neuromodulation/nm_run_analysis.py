@@ -15,9 +15,6 @@ from py_neuromodulation import (
 
 class Run:
 
-    def __init__(self, features: nm_features.Features,
-        settings: dict, reference:
-        nm_rereference.RT_rereference,
     def __init__(
         self,
         features: nm_features.Features,
