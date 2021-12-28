@@ -147,7 +147,7 @@ class BidsStream(nm_stream.PNStream):
         if idx == 0:
             feature_series["time"] = self.run_analysis.offset
         else:
-            feature_series["time"] = self.run_analysis.cnt_samples * 1000 / self.fs
+            feature_series["time"] = self.run_analysis.cnt_samples * 1000 / self.run_analysis.fs
 
         if self.VERBOSE:
             print(str(np.round(feature_series["time"] / 1000, 2)) +
