@@ -148,17 +148,17 @@ class Run:
                 method=self.settings["raw_normalization_settings"]["normalization_method"],
                 clip=self.settings["raw_normalization_settings"]["clip"])
 
-        self.features_current = pd.Series(
-            self.features.estimate_features(ieeg_batch), dtype=float
-        )
-
+        # calculate features
+        features_dict = self.features.estimate_features(ieeg_batch)
+        features_values = np.array(list(features_dict.values()), dtype=float)
+    
         # normalize features
         if self.settings["methods"]["feature_normalization"]:
             (
-                self.features_current.iloc[:],
+                features_values,
                 self.features_previous,
             ) = nm_normalization.normalize_features(
-                current=self.features_current.to_numpy(),
+                current=features_values,
                 previous=self.features_previous,
                 normalize_samples=self.feat_normalize_samples,
                 method=self.settings["feature_normalization_settings"][
@@ -167,12 +167,14 @@ class Run:
                 clip=self.settings["feature_normalization_settings"]["clip"],
             )
 
+        self.features_current = pd.Series(data=features_values, index=features_dict.keys(), dtype=float
+        )
+
         if self.cnt_samples == 0:
             self.cnt_samples += int(self.fs)
 
             if any((self.proj_cortex_bool, self.proj_subcortex_bool)):
                 self.features_current = self.init_projection_run(self.features_current)
-
         else:
             self.cnt_samples += self.sample_add
 
