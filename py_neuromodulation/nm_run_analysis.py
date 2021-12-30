@@ -9,12 +9,11 @@ from py_neuromodulation import (
     nm_projection,
     nm_rereference,
     nm_resample,
-    nm_eval_timing
+    nm_eval_timing,
 )
 
 
 class Run:
-
     def __init__(
         self,
         features: nm_features.Features,
@@ -22,9 +21,6 @@ class Run:
         reference: nm_rereference.RT_rereference,
         projection: nm_projection.Projection,
         resample: nm_resample.Resample,
-        nm_channels: pd.DataFrame,
-        coords: dict,
-        sess_right: bool,
         verbose: bool,
         feature_idx: list,
     ) -> None:
@@ -51,16 +47,12 @@ class Run:
         self.features_previous = None
         self.features_current = None
         self.raw_arr = None
-        self.proj_cortex_bool:bool = settings["methods"]["project_cortex"]
-        self.proj_subcortex_bool:bool = settings["methods"]["project_subcortex"]
-        self.dat_cortex: np.array = None
-        self.dat_subcortex: np.array = None
         self.reference = reference
         self.resample = resample
-        self.nm_channels = nm_channels
         self.projection = projection
-        self.coords = coords
-        self.sess_right = sess_right
+        self.project: bool = any(
+            (self.projection.project_cortex, self.projection.project_subcortex)
+        )
         self.settings = settings
         self.fs_new = int(settings["sampling_rate_features"])
         self.fs = features.fs
@@ -71,24 +63,11 @@ class Run:
         self.offset = max(
             [
                 value
-                for value in settings["bandpass_filter_settings"]["segment_lengths"].values()
+                for value in settings["bandpass_filter_settings"][
+                    "segment_lengths"
+                ].values()
             ]
         )  # ms
-
-        if settings["methods"]["project_cortex"] is True:
-            self.idx_chs_ecog = []  # feature series indexes for dbs/lfp channels
-            self.names_chs_ecog = []  # feature series name of ecog features
-            self.ecog_channels = [
-                self.nm_channels.new_name[ch_idx]
-                for ch_idx, ch in enumerate(self.nm_channels.type) if ch == "ecog"
-            ]
-        if settings["methods"]["project_subcortex"] is True:
-            self.idx_chs_lfp = []  # feature series indexes for ecog channels
-            self.names_chs_lfp = []  # feature series name of lfp features
-            #  mind here that coord["subcortex_left/right"] is based on the "LFP" substring in the channel
-            self.lfp_channels = self.coords["subcortex_right"]["ch_names"] \
-                if self.sess_right is True \
-                else self.coords["subcortex_left"]["ch_names"]
 
         if settings["methods"]["raw_normalization"] is True:
             self.raw_normalize_samples = int(
@@ -133,25 +112,26 @@ class Run:
         # notch filter
         if self.settings["methods"]["notch_filter"] is True:
             ieeg_batch = nm_notch_filter.notch_filter(
-                ieeg_batch,
-                self.fs,
-                self.line_noise
+                ieeg_batch, self.fs, self.line_noise
             )
 
         # normalize raw data
         if self.settings["methods"]["raw_normalization"] is True:
             ieeg_batch, self.raw_arr = nm_normalization.normalize_raw(
-                current=ieeg_batch, 
+                current=ieeg_batch,
                 previous=self.raw_arr,
                 normalize_samples=self.raw_normalize_samples,
                 sample_add=self.sample_add,
-                method=self.settings["raw_normalization_settings"]["normalization_method"],
-                clip=self.settings["raw_normalization_settings"]["clip"])
+                method=self.settings["raw_normalization_settings"][
+                    "normalization_method"
+                ],
+                clip=self.settings["raw_normalization_settings"]["clip"],
+            )
 
         # calculate features
         features_dict = self.features.estimate_features(ieeg_batch)
         features_values = np.array(list(features_dict.values()), dtype=float)
-    
+
         # normalize features
         if self.settings["methods"]["feature_normalization"]:
             (
@@ -167,19 +147,21 @@ class Run:
                 clip=self.settings["feature_normalization_settings"]["clip"],
             )
 
-        self.features_current = pd.Series(data=features_values, index=features_dict.keys(), dtype=float
+        self.features_current = pd.Series(
+            data=features_values, index=features_dict.keys(), dtype=float
         )
 
+        # project features to grid
+        if self.project:
+            self.features_current = self.projection.project_features(
+                self.features_current
+            )
+
+        # add sample counts
         if self.cnt_samples == 0:
             self.cnt_samples += int(self.fs)
-
-            if any((self.proj_cortex_bool, self.proj_subcortex_bool)):
-                self.features_current = self.init_projection_run(self.features_current)
         else:
             self.cnt_samples += self.sample_add
-
-            if any((self.proj_cortex_bool, self.proj_subcortex_bool)):
-                self.features_current = self.next_projection_run(self.features_current)
 
         if self.verbose is True:
             print(
@@ -192,95 +174,3 @@ class Run:
         #     nm_eval_timing.NM_Timer(self)
 
         return self.features_current
-
-    def init_projection_run(self, feature_series):
-        """Initialize indexes for respective channels 
-        in feature series computed by nm_features.py
-        """
-
-        #  here it is assumed that only one hemisphere is recorded at a time!
-        if self.proj_cortex_bool:
-            for ecog_channel in self.ecog_channels:
-                self.idx_chs_ecog.append(
-                    [
-                        ch_idx
-                        for ch_idx, ch in enumerate(feature_series.keys())
-                        if ch.startswith(ecog_channel)
-                    ]
-                )
-                self.names_chs_ecog.append(
-                    [
-                        ch
-                        for _, ch in enumerate(feature_series.keys())
-                        if ch.startswith(ecog_channel)
-                    ]
-                )
-
-        if self.proj_subcortex_bool:
-            # for lfp_channels select here only the ones from the correct hemisphere!
-            for lfp_channel in self.lfp_channels:
-                self.idx_chs_lfp.append(
-                    [
-                        ch_idx
-                        for ch_idx, ch in enumerate(feature_series.keys())
-                            if ch.startswith(lfp_channel)
-                    ]
-                )
-                self.names_chs_lfp.append(
-                    [
-                        ch
-                        for _, ch in enumerate(feature_series.keys())
-                            if ch.startswith(lfp_channel)
-                    ]
-                )
-        
-        # get feature_names; given by ECoG sequency of features
-        self.feature_names = [feature_name[len(self.ecog_channels[0])+1:] \
-                              for feature_name in self.names_chs_ecog[0]]
-
-        return self.next_projection_run(feature_series)
-
-    def next_projection_run(self, feature_series: pd.Series):
-        """Project data, given idx_chs_ecog/stn"""
-
-        if self.proj_cortex_bool:
-            self.dat_cortex = np.vstack(
-                [feature_series.iloc[idx_ch].values for idx_ch in
-                 self.idx_chs_ecog])
-        if self.proj_subcortex_bool:
-            self.dat_subcortex = np.vstack(
-                [feature_series.iloc[idx_ch].values for idx_ch in
-                 self.idx_chs_lfp])
-
-        # project data
-        proj_cortex_array, proj_subcortex_array = \
-            self.projection.get_projected_cortex_subcortex_data(
-                self.dat_cortex,
-                self.dat_subcortex
-            )
-
-        # proj_cortex_array has shape grid_points x feature_number
-        if self.proj_cortex_bool:
-            feature_series = feature_series.append(
-                pd.Series(
-                    {
-                        "gridcortex_" + str(act_grid_point) + "_" + feature_name :
-                        proj_cortex_array[act_grid_point, feature_idx] 
-                            for feature_idx, feature_name in enumerate(self.feature_names) 
-                            for act_grid_point in self.projection.active_cortex_gridpoints
-                    }
-                )
-            )
-        if self.proj_subcortex_bool:
-            feature_series = feature_series.append(
-                pd.Series(
-                    {
-                        "gridsubcortex_" + str(act_grid_point) + "_" + feature_name :
-                        proj_subcortex_array[act_grid_point, feature_idx] 
-                            for feature_idx, feature_name in enumerate(self.feature_names) 
-                            for act_grid_point in self.projection.active_subcortex_gridpoints
-                    }
-                )
-            )
-
-        return feature_series
