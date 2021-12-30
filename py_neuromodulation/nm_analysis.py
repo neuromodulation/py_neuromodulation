@@ -173,7 +173,7 @@ class Feature_Reader:
                 self.sidecar["coords"]["cortex_left"]["positions"]
             )
         self.nmplotter.plot_cortex(
-            cortex_grid=np.array(self.sidecar["grid_cortex"]),
+            grid_cortex=np.array(self.sidecar["grid_cortex"]),
             ecog_strip=ecog_strip,
             grid_color=np.array(
                 self.sidecar["proj_matrix_cortex"]
@@ -297,7 +297,7 @@ class Feature_Reader:
             ecog_coords_strip = np.vstack(ecog_coords_strip)
 
         self.nmplotter.plot_cortex(
-            cortex_grid=np.array(self.sidecar["grid_cortex"]) 
+            grid_cortex=np.array(self.sidecar["grid_cortex"]) 
                             if "grid_cortex" in self.sidecar else None,
             ecog_strip=ecog_coords_strip if len(ecog_coords_strip)>0 else None,
             grid_color=grid_performance if len(grid_performance)>0 else None,

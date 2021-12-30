@@ -62,13 +62,13 @@ class Projection:
 
         if plot_projection is True:
             nmplotter = nm_plots.NM_Plot(
-                self.ecog_strip,
-                self.grid_cortex,
-                self.grid_subcortex,
-                self.sess_right,
-                self.proj_matrix_cortex,
+                ecog_strip=self.ecog_strip,
+                grid_cortex=self.grid_cortex.to_numpy(),
+                grid_subcortex=self.grid_subcortex.to_numpy(),
+                sess_right=self.sess_right,
+                proj_matrix_cortex=self.proj_matrix_cortex,
             )
-            nmplotter.plot_cortical_projection()
+            nmplotter.plot_cortex()
 
     def calc_proj_matrix(
         self, max_dist: Union[int, float], grid: np.array, coord_array: np.array
