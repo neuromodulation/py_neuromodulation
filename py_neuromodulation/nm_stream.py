@@ -133,7 +133,7 @@ class PNStream(ABC):
             self.settings, self.nm_channels
         )
 
-        self.projection = self._get_projection(self.settings)
+        self.projection = self._get_projection(self.settings, self.nm_channels)
         if self.projection is not None:
             self.sess_right = self._get_sess_lat(self.coords)
         else:
@@ -145,9 +145,6 @@ class PNStream(ABC):
             self.rereference,
             self.projection,
             self.resample,
-            self.nm_channels,
-            self.coords,
-            self.sess_right,
             self.VERBOSE,
             self.FEATURE_IDX
         )
@@ -251,13 +248,23 @@ class PNStream(ABC):
             grid_subcortex = None
         return grid_cortex, grid_subcortex
 
-    def _get_projection(self, settings:dict) -> nm_projection.Projection:
+    def _get_projection(
+        self, 
+        settings: dict, 
+        nm_channels: pd.DataFrame
+        ) -> nm_projection.Projection:
         """Return projection of used coordinated and grids"""
 
         if any((settings["methods"]["project_cortex"],
                 settings["methods"]["project_subcortex"])):
-            projection = nm_projection.Projection(settings, self.grid_cortex,
-                self.grid_subcortex, self.coords, plot_projection=False)
+            projection = nm_projection.Projection(
+                settings=settings, 
+                grid_cortex=self.grid_cortex,
+                grid_subcortex=self.grid_subcortex, 
+                coords=self.coords, 
+                nm_channels=nm_channels, 
+                plot_projection=False
+                )
         else:
             projection = None
         return projection

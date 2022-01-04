@@ -87,7 +87,7 @@ class NM_Timer:
 
         if self.analyzer.settings["methods"]["project_cortex"]:
             dict_timings["time_projection"] = timeit.timeit(
-                lambda: self.analyzer.next_projection_run(features_current),
+                lambda: self.analyzer.projection.project_features(features_current),
                     number=number_repeat
             ) / number_repeat
 

@@ -200,47 +200,47 @@ class NM_Plot():
     def plot_grid_elec_3d(self):
         
         plot_grid_elec_3d(
-            np.array(self.cortex_grid),
+            np.array(self.grid_cortex),
             np.array(self.ecog_strip)
         )
 
     def plot_cortex(
         self,
-        cortex_grid: Optional[np.array] = None,
-        grid_color: Optional[np.array] = None,
-        ecog_strip: Optional[np.array] = None,
-        strip_color: Optional[np.array] = None,
+        grid_cortex: Optional[np.ndarray] = None,
+        grid_color: Optional[np.ndarray] = None,
+        ecog_strip: Optional[np.ndarray] = None,
+        strip_color: Optional[np.ndarray] = None,
         sess_right: Optional[bool] = None,
         save: bool = False,
         OUT_PATH: str = None,
-        feature_file: str=None,
-        feature_str_add : str=None,
-        show_plot:bool=True,
-        set_clim:bool=True
+        feature_file: str = None,
+        feature_str_add: str = None,
+        show_plot: bool = True,
+        set_clim: bool = True
         ):
         """Plot MNI brain including selected MNI cortical projection grid + used strip ECoG electrodes
         Colorcoded by grid_color
         """
 
-        if cortex_grid is None:
-            cortex_grid = self.grid_cortex
+        if grid_cortex is None:
+            grid_cortex = self.grid_cortex
 
         if ecog_strip is None:
             ecog_strip = self.ecog_strip
 
         if sess_right is True:
-            cortex_grid[0, :] = cortex_grid[0, :]*-1
+            grid_cortex[0, :] = grid_cortex[0, :]*-1
 
         fig, axes = plt.subplots(1, 1, facecolor=(1, 1, 1), figsize=(14, 9))
         axes.scatter(self.x_ecog, self.y_ecog, c="gray", s=0.01)
         axes.axes.set_aspect('equal', anchor='C')
 
-        if cortex_grid is not None:
+        if grid_cortex is not None:
 
-            grid_color = np.ones(cortex_grid.shape[0]) if grid_color is None else grid_color
+            grid_color = np.ones(grid_cortex.shape[0]) if grid_color is None else grid_color
 
-            pos_ecog = axes.scatter(cortex_grid[:, 0],
-                                    cortex_grid[:, 1], c=grid_color,
+            pos_ecog = axes.scatter(grid_cortex[:, 0],
+                                    grid_cortex[:, 1], c=grid_color,
                                     s=150, alpha=0.8, cmap="viridis")
         if ecog_strip is not None:
             strip_color = np.ones(ecog_strip.shape[0]) if strip_color is None else strip_color
