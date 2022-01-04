@@ -236,20 +236,19 @@ class Projection:
         if not self.initialized:
             self.init_projection_run(feature_series=feature_series)
 
-        if self.project_cortex:
-            dat_cortex = np.vstack(
-                [
-                    feature_series.iloc[idx_ch].values
-                    for idx_ch in self.idx_chs_ecog
-                ]
-            )
-        if self.project_subcortex:
-            dat_subcortex = np.vstack(
-                [
-                    feature_series.iloc[idx_ch].values
-                    for idx_ch in self.idx_chs_lfp
-                ]
-            )
+        dat_cortex = np.vstack(
+            [
+                feature_series.iloc[idx_ch].values
+                for idx_ch in self.idx_chs_ecog
+            ]
+        ) if self.project_cortex else None
+
+        dat_subcortex = np.vstack(
+            [
+                feature_series.iloc[idx_ch].values
+                for idx_ch in self.idx_chs_lfp
+            ]
+        ) if self.project_subcortex else None
 
         # project data
         (
