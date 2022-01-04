@@ -163,6 +163,6 @@ class NM_Timer:
 
         print("Average duration per function:")
         for key, val in dict_timings.items():
-            if key == "time_sw":
-                print("Duration per channel:")
             print(f"  {key} : {np.round(val*1000, 2)}ms")
+
+        print("fft, sw, bandpass, coherence and stft are timings for an individual channel")
