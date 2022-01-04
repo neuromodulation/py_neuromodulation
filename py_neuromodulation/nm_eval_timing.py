@@ -47,10 +47,8 @@ class NM_Timer:
 
         if self.analyzer.settings["methods"]["notch_filter"]:
             dict_timings["time_notchfilter"] = timeit.timeit(
-                lambda: nm_notch_filter.notch_filter(
-                    data,
-                    self.analyzer.fs,
-                    self.analyzer.line_noise
+                lambda: self.analyzer.notch_filter.filter_data(
+                    data
                 ),
                 number=number_repeat
             ) / number_repeat
