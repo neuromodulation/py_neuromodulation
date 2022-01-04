@@ -1,5 +1,5 @@
 # from multiprocessing import Process, Manager
-from numpy import array, ceil, floor, where
+from numpy import array, floor
 
 from py_neuromodulation import nm_bandpower, nm_filter, nm_hjorth_raw, nm_kalmanfilter, nm_sharpwaves, nm_coherence,\
     nm_stft, nm_fft
@@ -7,7 +7,7 @@ from py_neuromodulation import nm_bandpower, nm_filter, nm_hjorth_raw, nm_kalman
 
 class Features:
 
-    def __init__(self, s, ch_namees, fs, line_noise, verbose=None) -> None:
+    def __init__(self, s, ch_names, fs, line_noise, verbose=None) -> None:
         """Initialize Feature module
 
         Parameters
@@ -18,7 +18,7 @@ class Features:
 
         self.s = s  # settings
         self.verbose = verbose
-        self.ch_names = ch_namees
+        self.ch_names = ch_names
         if s["methods"]["raw_resampling"] is True:
             self.fs = s["raw_resampling_settings"]["resample_freq"]
         else:
