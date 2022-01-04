@@ -1,14 +1,20 @@
 from typing import Optional, Union
 
 import numpy as np
+from enum import Enum
 
+class NORM_METHODS(Enum):
+    MEAN = "mean"
+    MEDIAN = "median"
+    ZSCORE = "zscore"
+    ZSCORE_MEDIAN = "zscore-median"
 
 def normalize_raw(
     current: np.ndarray,
     previous: Optional[np.ndarray],
     normalize_samples: int,
     sample_add: int,
-    method: str = "mean",
+    method: str = NORM_METHODS.MEAN.value,
     clip: bool = False,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Normalize data with respect to the past number of `normalize_samples`.
@@ -66,7 +72,7 @@ def normalize_features(
     current: np.ndarray,
     previous: Optional[np.ndarray],
     normalize_samples: int,
-    method: str = "mean",
+    method: str = NORM_METHODS.MEAN.value,
     clip: bool = False,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Normalize features with respect to the past number of normalize_samples.
@@ -135,22 +141,22 @@ def _normalize_and_clip(
     description: str,
 ) -> np.ndarray:
     """Normalize data."""
-    if method == "mean":
+    if method == NORM_METHODS.MEAN.value:
         mean = previous.mean(axis=0)
         current = (current - mean) / mean
-    elif method == "median":
+    elif method == NORM_METHODS.MEDIAN.value:
         median = np.median(previous, axis=0)
         current = (current - median) / median
-    elif method == "zscore":
+    elif method == NORM_METHODS.ZSCORE.value:
         mean = previous.mean(axis=0)
         current = (current - previous.mean(axis=0)) / previous.std(axis=0)
-    elif method == "zscore-median":
+    elif method == NORM_METHODS.ZSCORE_MEDIAN.value:
         current = (current - np.median(previous, axis=0)) / previous.std(
             axis=0
         )
     else:
         raise ValueError(
-            "Only `median`, `mean`, `zscore` and `zscore-median` are supported as "
+            f"Only {[e.value for e in NORM_METHODS]} are supported as "
             f"{description} normalization methods. Got {method}."
         )
 
