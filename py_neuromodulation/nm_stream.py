@@ -18,6 +18,8 @@ from py_neuromodulation import \
     nm_IO,
     nm_plots,
     nm_test_settings)
+from py_neuromodulation import nm_notch_filter
+from py_neuromodulation.nm_notch_filter import notch_filter
 
 class GRIDS(Enum):
     """Definition of possible projection grid types"""
@@ -30,6 +32,7 @@ class PNStream(ABC):
     features: nm_features.Features
     run_analysis: nm_run_analysis.Run
     rereference: nm_rereference.RT_rereference
+    notch_filter : nm_notch_filter.NotchFilter
     projection: nm_projection.Projection
     settings: dict
     nm_channels: pd.DataFrame
@@ -133,6 +136,15 @@ class PNStream(ABC):
             self.settings, self.nm_channels
         )
 
+        self.notch_filter = self._set_notch_filer(
+            settings = self.settings,
+            fs = self.fs
+                 if self.settings["methods"]["raw_resampling"] is False
+                 else
+                    self.settings["raw_resampling_settings"]["resample_freq"],
+            line_noise = self.line_noise
+        )
+
         self.projection = self._get_projection(self.settings, self.nm_channels)
         if self.projection is not None:
             self.sess_right = self._get_sess_lat(self.coords)
@@ -140,13 +152,14 @@ class PNStream(ABC):
             self.sess_right = None
 
         self.run_analysis = nm_run_analysis.Run(
-            self.features,
-            self.settings,
-            self.rereference,
-            self.projection,
-            self.resample,
-            self.VERBOSE,
-            self.FEATURE_IDX
+            features=self.features,
+            settings=self.settings,
+            reference=self.rereference,
+            projection=self.projection,
+            resample=self.resample,
+            notch_filter=self.notch_filter,
+            verbose=self.VERBOSE,
+            feature_idx=self.FEATURE_IDX
         )
 
     def _set_features(self, settings:dict,
@@ -213,6 +226,25 @@ class PNStream(ABC):
         else:
             resample = None
         return resample
+
+    def _set_notch_filer(self,
+        settings : dict,
+        fs : int,
+        line_noise : int,
+        notch_widths : int = 3,
+        trans_bandwidth : int = 15
+    ) -> nm_notch_filter.NotchFilter:
+
+        if settings["methods"]["notch_filter"] is True:
+            notch_filter = nm_notch_filter.NotchFilter(
+                fs=fs,
+                line_noise=line_noise,
+                notch_widths=notch_widths,
+                trans_bandwidth=trans_bandwidth
+            )
+        else:
+            notch_filter = None
+        return notch_filter
 
     def set_linenoise(self, line_noise: int) -> None:
         self.line_noise = line_noise

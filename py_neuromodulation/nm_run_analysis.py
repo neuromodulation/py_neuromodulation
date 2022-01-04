@@ -21,6 +21,7 @@ class Run:
         reference: nm_rereference.RT_rereference,
         projection: nm_projection.Projection,
         resample: nm_resample.Resample,
+        notch_filter : nm_notch_filter.NotchFilter,
         verbose: bool,
         feature_idx: list,
     ) -> None:
@@ -38,6 +39,8 @@ class Run:
             projection object (needs to be initialized beforehand), by default None
         resample : resample.py object
             Resample object (needs to be initialized beforehand), by default None
+        notch_filter : nm_notch_filter.NotchFilter,
+            Notch Filter object, needs to be instantiated beforehand
         verbose : boolean
             if True, print out signal processed and computation time
         """
@@ -49,6 +52,7 @@ class Run:
         self.raw_arr = None
         self.reference = reference
         self.resample = resample
+        self.notch_filter = notch_filter
         self.projection = projection
         self.project: bool = any(
             (self.projection.project_cortex, self.projection.project_subcortex)
@@ -111,9 +115,10 @@ class Run:
 
         # notch filter
         if self.settings["methods"]["notch_filter"] is True:
-            ieeg_batch = nm_notch_filter.notch_filter(
-                ieeg_batch, self.fs, self.line_noise
-            )
+            #ieeg_batch = nm_notch_filter.notch_filter(
+            #    ieeg_batch, self.fs, self.line_noise
+            #)
+            ieeg_batch = self.notch_filter.filter_data(ieeg_batch)
 
         # normalize raw data
         if self.settings["methods"]["raw_normalization"] is True:
@@ -170,7 +175,7 @@ class Run:
                 + " seconds"
             )
 
-        # if self.cnt_samples > 4000:
-        #     nm_eval_timing.NM_Timer(self)
+        if self.cnt_samples > 4000:
+            nm_eval_timing.NM_Timer(self)
 
         return self.features_current
