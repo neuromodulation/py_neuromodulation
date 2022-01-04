@@ -15,16 +15,19 @@ from py_neuromodulation import (
 
 class Run:
 
-    def __init__(self, features: nm_features.Features,
-        settings: dict, reference:
-        nm_rereference.RT_rereference,
+    def __init__(
+        self,
+        features: nm_features.Features,
+        settings: dict,
+        reference: nm_rereference.RT_rereference,
         projection: nm_projection.Projection,
         resample: nm_resample.Resample,
         nm_channels: pd.DataFrame,
         coords: dict,
         sess_right: bool,
         verbose: bool,
-        feature_idx: list) -> None:
+        feature_idx: list,
+    ) -> None:
         """Initialize run class
 
         Parameters
@@ -44,8 +47,9 @@ class Run:
         """
 
         self.features = features
-        self.feature_arr = None
-        self.feature_arr_raw = None
+        self.feature_names = None
+        self.features_previous = None
+        self.features_current = None
         self.raw_arr = None
         self.proj_cortex_bool:bool = settings["methods"]["project_cortex"]
         self.proj_subcortex_bool:bool = settings["methods"]["project_subcortex"]
@@ -88,12 +92,16 @@ class Run:
 
         if settings["methods"]["raw_normalization"] is True:
             self.raw_normalize_samples = int(
-                settings["raw_normalization_settings"]["normalization_time"] * self.fs
+                settings["raw_normalization_settings"]["normalization_time"]
+                * self.fs
             )
 
         if settings["methods"]["feature_normalization"] is True:
             self.feat_normalize_samples = int(
-                settings["feature_normalization_settings"]["normalization_time"] * self.fs_new
+                settings["feature_normalization_settings"][
+                    "normalization_time"
+                ]
+                * self.fs_new
             )
 
         self.cnt_samples = 0
@@ -132,53 +140,58 @@ class Run:
 
         # normalize raw data
         if self.settings["methods"]["raw_normalization"] is True:
-            if self.cnt_samples == 0:
-                self.raw_arr = ieeg_batch
-            else:
-                self.raw_arr = np.concatenate(
-                    (self.raw_arr, ieeg_batch[:, -self.sample_add:]), axis=1)
-            ieeg_batch = nm_normalization.normalize_raw(
-                self.raw_arr, self.raw_normalize_samples, self.fs,
-                self.settings["raw_normalization_settings"]["normalization_method"],
-                self.settings["raw_normalization_settings"]["clip"])
+            ieeg_batch, self.raw_arr = nm_normalization.normalize_raw(
+                current=ieeg_batch, 
+                previous=self.raw_arr,
+                normalize_samples=self.raw_normalize_samples,
+                sample_add=self.sample_add,
+                method=self.settings["raw_normalization_settings"]["normalization_method"],
+                clip=self.settings["raw_normalization_settings"]["clip"])
 
-        feature_series = pd.Series(self.features.estimate_features(ieeg_batch),
-                                dtype=float)
+        # calculate features
+        features_dict = self.features.estimate_features(ieeg_batch)
+        features_values = np.array(list(features_dict.values()), dtype=float)
+    
+        # normalize features
+        if self.settings["methods"]["feature_normalization"]:
+            (
+                features_values,
+                self.features_previous,
+            ) = nm_normalization.normalize_features(
+                current=features_values,
+                previous=self.features_previous,
+                normalize_samples=self.feat_normalize_samples,
+                method=self.settings["feature_normalization_settings"][
+                    "normalization_method"
+                ],
+                clip=self.settings["feature_normalization_settings"]["clip"],
+            )
+
+        self.features_current = pd.Series(data=features_values, index=features_dict.keys(), dtype=float
+        )
 
         if self.cnt_samples == 0:
             self.cnt_samples += int(self.fs)
 
-            if self.settings["methods"]["feature_normalization"] is True:
-                self.feature_arr_raw = pd.DataFrame([feature_series], dtype=float)
-
-            if any((self.proj_cortex_bool, self.proj_cortex_bool)):
-                feature_series = self.init_projection_run(feature_series)
-
+            if any((self.proj_cortex_bool, self.proj_subcortex_bool)):
+                self.features_current = self.init_projection_run(self.features_current)
         else:
             self.cnt_samples += self.sample_add
 
-            if self.settings["methods"]["feature_normalization"]:
-                self.feature_arr_raw = self.feature_arr_raw.append(
-                    feature_series, ignore_index=True)
-                feature_series = nm_normalization.normalize_features(
-                    feature_series, self.feature_arr_raw,
-                    self.feat_normalize_samples,
-                    self.settings["feature_normalization_settings"][
-                        "normalization_method"],
-                    self.settings["feature_normalization_settings"][
-                        "clip"])
-
-            if any((self.proj_cortex_bool, self.proj_cortex_bool)):
-                feature_series = self.next_projection_run(feature_series)
+            if any((self.proj_cortex_bool, self.proj_subcortex_bool)):
+                self.features_current = self.next_projection_run(self.features_current)
 
         if self.verbose is True:
-            print("Last batch took: " + str(np.round(time() - start_time, 2)) +
-                  " seconds")
+            print(
+                "Last batch took: "
+                + str(np.round(time() - start_time, 2))
+                + " seconds"
+            )
 
-        #if self.cnt_samples > 4000:
-        #    nm_eval_timing.NM_Timer(self)
+        # if self.cnt_samples > 4000:
+        #     nm_eval_timing.NM_Timer(self)
 
-        return feature_series
+        return self.features_current
 
     def init_projection_run(self, feature_series):
         """Initialize indexes for respective channels 
