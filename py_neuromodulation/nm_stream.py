@@ -19,7 +19,6 @@ from py_neuromodulation import \
     nm_plots,
     nm_test_settings)
 from py_neuromodulation import nm_notch_filter
-from py_neuromodulation.nm_notch_filter import notch_filter
 
 class GRIDS(Enum):
     """Definition of possible projection grid types"""
