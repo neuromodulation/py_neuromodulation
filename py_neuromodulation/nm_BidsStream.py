@@ -147,6 +147,7 @@ class BidsStream(nm_stream.PNStream):
         if idx == 0:
             feature_series["time"] = self.run_analysis.offset
         else:
+            # sampling frequency is taken here from run_analysis, since resampling might change it
             feature_series["time"] = self.run_analysis.cnt_samples * 1000 / self.run_analysis.fs
 
         if self.VERBOSE:
