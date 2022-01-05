@@ -1,4 +1,5 @@
 import os
+from re import VERBOSE
 import pandas as pd
 import numpy as np
 from sklearn import linear_model, base, metrics, model_selection
@@ -370,6 +371,7 @@ class Feature_Reader:
     def set_decoder(self,
         decoder:nm_decode.Decoder = None,
         TRAIN_VAL_SPLIT=False,
+        RUN_BAY_OPT=False,
         save_coef=False,
         model:base.BaseEstimator = linear_model.LogisticRegression,
         eval_method=metrics.r2_score,
@@ -377,7 +379,9 @@ class Feature_Reader:
             model_selection.KFold(n_splits=3, shuffle=False),
         get_movement_detection_rate:bool=False,
         min_consequent_count=3,
-        threshold_score=True
+        threshold_score=True,
+        bay_opt_param_space: list = [],
+        VERBOSE=False
         ):
         if decoder is not None:
             self.decoder = decoder
@@ -393,9 +397,12 @@ class Feature_Reader:
                 cv_method=cv_method,
                 threshold_score=threshold_score,
                 TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT,
+                RUN_BAY_OPT=RUN_BAY_OPT,
                 save_coef=save_coef,
                 get_movement_detection_rate=get_movement_detection_rate,
-                min_consequent_count=min_consequent_count
+                min_consequent_count=min_consequent_count,
+                bay_opt_param_space=bay_opt_param_space,
+                VERBOSE=VERBOSE
             )
 
     def run_ML_model(self,

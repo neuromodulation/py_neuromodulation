@@ -1,3 +1,4 @@
+from numpy.core.overrides import verify_matching_signatures
 from sklearn import model_selection, metrics, linear_model, discriminant_analysis, base
 from skopt.space import Real, Integer, Categorical
 from skopt.utils import use_named_args
@@ -13,23 +14,25 @@ import pandas as pd
 import os
 import json
 import numpy as np
-import xgboost as xgb
+import xgboost
 import _pickle as cPickle
 
 
 class Decoder:
 
     features: pd.DataFrame
-    label: np.array
+    label: np.ndarray
     model: base.BaseEstimator
     cv_method: model_selection.BaseCrossValidator
     threshold_score: bool
     mov_detection_threshold: float
     TRAIN_VAL_SPLIT: bool
+    RUN_BAY_OPT: bool
     save_coef: bool
     get_movement_detection_rate: bool
     min_consequent_count: int
     ros: RandomOverSampler = None
+    bay_opt_param_space: list = []
     data: np.array
     ch_ind_data: dict
     grid_point_ind_data: dict
@@ -53,22 +56,26 @@ class Decoder:
     mov_detection_rates_train:list = []
     tprate_train:list = []
     fprate_train:list = []
-
+    best_bay_opt_params:list = []
+    VERBOSE : bool = False
 
     def __init__(self,
                  features: pd.DataFrame,
-                 label: np.array,
+                 label: np.ndarray,
                  label_name: str,
                  used_chs: list[str]=None,
                  model=linear_model.LinearRegression(),
                  eval_method=metrics.r2_score,
                  cv_method=model_selection.KFold(n_splits=3, shuffle=False),
                  threshold_score=True,
-                 mov_detection_threshold=0.5,
-                 TRAIN_VAL_SPLIT=True,
-                 save_coef=False,
-                 get_movement_detection_rate=False,
-                 min_consequent_count=3) -> None:
+                 mov_detection_threshold:float =0.5,
+                 TRAIN_VAL_SPLIT: bool=True,
+                 RUN_BAY_OPT: bool=False,
+                 save_coef:bool =False,
+                 get_movement_detection_rate:bool =False,
+                 min_consequent_count:int =3,
+                 bay_opt_param_space: list = [],
+                 VERBOSE: bool = False) -> None:
         """Initialize here a feature file for processing
         Read settings.json nm_channels.csv and features.csv
         Read target label
@@ -110,9 +117,12 @@ class Decoder:
         self.threshold_score = threshold_score
         self.mov_detection_threshold = mov_detection_threshold
         self.TRAIN_VAL_SPLIT = TRAIN_VAL_SPLIT
+        self.RUN_BAY_OPT = RUN_BAY_OPT
         self.save_coef = save_coef
         self.get_movement_detection_rate = get_movement_detection_rate
         self.min_consequent_count = min_consequent_count
+        self.bay_opt_param_space = bay_opt_param_space
+        self.VERBOSE = VERBOSE
 
         if type(self.model) is discriminant_analysis.LinearDiscriminantAnalysis:
             self.ros = RandomOverSampler(random_state=0)
@@ -335,7 +345,8 @@ class Decoder:
             self.mov_detection_rates_train = []
             self.tprate_train = []
             self.fprate_train = []
-
+        if self.RUN_BAY_OPT is True:
+            self.best_bay_opt_params = []
 
     def run_CV(self, data=None, label=None):
         """Evaluate model performance on the specified cross validation.
@@ -369,28 +380,59 @@ class Decoder:
             if y_train.sum() == 0:  # only one class present
                 continue
 
+            if self.RUN_BAY_OPT is True:
+
+                X_train_bo, X_test_bo, y_train_bo, y_test_bo = \
+                    model_selection.train_test_split(
+                        X_train, y_train, train_size=0.7, shuffle=False)
+
+                if y_train_bo.sum() == 0 or y_test_bo.sum() == 0:
+                    print("could not start Bay. Opt. with no labels > 0")
+                    continue
+
+                params_bo = self.run_Bay_Opt(
+                    X_train_bo,
+                    y_train_bo,
+                    X_test_bo,
+                    y_test_bo,
+                    rounds=10
+                )
+
+                # set bay. opt. obtained best params to model
+                params_bo_dict = {}
+                for i in range(len(params_bo)):
+                    setattr(
+                        model_train,
+                        self.bay_opt_param_space[i].name,
+                        params_bo[i]
+                    )
+                    params_bo_dict[self.bay_opt_param_space[i].name] = params_bo[i]
+                self.best_bay_opt_params.append(params_bo_dict)
+
             # optionally split training data also into train and validation
-            # for XGBOOST
-            if self.TRAIN_VAL_SPLIT:
+            if self.TRAIN_VAL_SPLIT is True:
                 X_train, X_val, y_train, y_val = \
                     model_selection.train_test_split(
                         X_train, y_train, train_size=0.7, shuffle=False)
                 if y_train.sum() == 0:
                     continue
-                classes_weights = class_weight.compute_sample_weight(
-                    class_weight='balanced', y=y_train)
-                
+
+                #classes_weights = class_weight.compute_sample_weight(
+                #    class_weight='balanced', y=y_train)
+
                 model_train.fit(
                     X_train, y_train, eval_set=[(X_val, y_val)],
                     early_stopping_rounds=7, #sample_weight=classes_weights,
-                    verbose=False)
-
+                    verbose=self.VERBOSE, eval_metric="logloss")
             else:
                 # check for LDA; and apply rebalancing
                 if type(model_train) is discriminant_analysis.LinearDiscriminantAnalysis:
                     X_train, y_train = self.ros.fit_resample(X_train, y_train)
 
-                model_train.fit(X_train, y_train)
+                if type(model_train) is xgboost.sklearn.XGBClassifier:
+                    model_train.fit(X_train, y_train, eval_metric="logloss")  # to avoid warning
+                else:
+                    model_train.fit(X_train, y_train)
 
             if self.save_coef:
                 self.coef.append(model_train.coef_)
@@ -441,7 +483,47 @@ class Decoder:
 
         return np.mean(self.score_test)
 
-    def run_Bay_Opt(self, space, rounds=10, base_estimator="GP", acq_func="EI",
+    def run_Bay_Opt(self, X_train, y_train, X_test, y_test,
+        rounds=10,
+        base_estimator="GP",
+        acq_func="EI",
+        acq_optimizer="sampling",
+        initial_point_generator="lhs"
+    ):
+
+        def get_f_val(model_bo):
+            if type(model_bo) is xgboost.sklearn.XGBClassifier:
+                # for avoiding xgboost warning
+                model_bo.fit(X_train, y_train, eval_metric="logloss")
+            else:
+                model_bo.fit(X_train, y_train)
+            return self.eval_method(y_test, model_bo.predict(X_test))
+
+        opt = Optimizer(
+            self.bay_opt_param_space,
+            base_estimator=base_estimator,
+            acq_func=acq_func,
+            acq_optimizer=acq_optimizer,
+            initial_point_generator=initial_point_generator
+        )
+        for _ in range(rounds):
+            next_x = opt.ask()
+            # set model values
+            model_bo = clone(self.model)
+            for i in range(len(next_x)):
+                setattr(model_bo, self.bay_opt_param_space[i].name, next_x[i])
+            f_val = get_f_val(model_bo)
+            res = opt.tell(next_x, f_val)
+            if self.VERBOSE:
+                print(f_val)
+
+        # res is here automatically appended by skopt
+        self.best_metric = res.fun
+        self.best_params = res.x
+
+        return res.x
+
+    def run_Bay_Opt_old(self, space, rounds=10, base_estimator="GP", acq_func="EI",
                     acq_optimizer="sampling", initial_point_generator="lhs"):
         """Run skopt bayesian optimization
         skopt.Optimizer:
