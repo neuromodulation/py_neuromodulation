@@ -174,11 +174,12 @@ class Feature_Reader:
                 self.sidecar["coords"]["cortex_left"]["positions"]
             )
         self.nmplotter.plot_cortex(
-            grid_cortex=np.array(self.sidecar["grid_cortex"]),
+            grid_cortex=np.array(self.sidecar["grid_cortex"]) if "grid_cortex" in self.sidecar \
+                else None,
             ecog_strip=ecog_strip,
             grid_color=np.array(
                 self.sidecar["proj_matrix_cortex"]
-            ).sum(axis=1)
+            ).sum(axis=1) if "grid_cortex" in self.sidecar else None
         )
 
     def plot_features(self,
