@@ -205,17 +205,24 @@ def default_json_convert(obj):
     raise TypeError('Not serializable')
 
 def save_sidecar(sidecar: dict, PATH_OUT: str, folder_name: str = None):
-
-    if folder_name is not None:
-        PATH_OUT = os.path.join(PATH_OUT, folder_name, folder_name + "_SIDECAR.json")
-
-    with open(PATH_OUT,'w') as f:
-        json.dump(sidecar, f, default=default_json_convert, indent=4, separators=(',', ': '))
-    print("sidecar.json saved to " + str(PATH_OUT))
+    save_general_dict(sidecar, PATH_OUT, "_SIDECAR.json", folder_name)
 
 def read_sidecar(PATH: str) -> dict:
     with open(PATH + "_SIDECAR.json") as f:
         return json.load(f)
+
+def save_general_dict(
+    dict_: dict,
+    PATH_OUT: str,
+    str_add: str,
+    folder_name: str=None
+):
+    if folder_name is not None:
+        PATH_OUT = os.path.join(PATH_OUT, folder_name, folder_name + str_add)
+
+    with open(PATH_OUT,'w') as f:
+        json.dump(dict_, f, default=default_json_convert, indent=4, separators=(',', ': '))
+    print(f"{str_add} saved to " + str(PATH_OUT))
 
 def read_settings(PATH: str) -> dict:
 
