@@ -53,10 +53,9 @@ class Run:
         self.reference = reference
         self.resample = resample
         self.notch_filter = notch_filter
-        self.projection = projection
-        self.project: bool = any(
-            (self.projection.project_cortex, self.projection.project_subcortex)
-        )
+        self.projection = projection 
+        self.project: bool = False if projection is None else \
+            any(self.projection.project_cortex, self.projection.project_subcortex)
         self.settings = settings
         self.fs_new = int(settings["sampling_rate_features"])
         self.fs = features.fs
