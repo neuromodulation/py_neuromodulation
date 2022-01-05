@@ -31,6 +31,8 @@ class Decoder:
     save_coef: bool
     get_movement_detection_rate: bool
     min_consequent_count: int
+    STACK_FEATURES_N_SAMPLES: bool
+    time_stack_n_samples: int
     ros: RandomOverSampler = None
     bay_opt_param_space: list = []
     data: np.array
@@ -59,6 +61,9 @@ class Decoder:
     best_bay_opt_params:list = []
     VERBOSE : bool = False
 
+    class ClassMissingException(Exception):
+        print("only one class present")
+
     def __init__(self,
                  features: pd.DataFrame,
                  label: np.ndarray,
@@ -71,6 +76,8 @@ class Decoder:
                  mov_detection_threshold:float =0.5,
                  TRAIN_VAL_SPLIT: bool=True,
                  RUN_BAY_OPT: bool=False,
+                 STACK_FEATURES_N_SAMPLES: bool=True,
+                 time_stack_n_samples: int = 5,
                  save_coef:bool =False,
                  get_movement_detection_rate:bool =False,
                  min_consequent_count:int =3,
@@ -121,6 +128,8 @@ class Decoder:
         self.save_coef = save_coef
         self.get_movement_detection_rate = get_movement_detection_rate
         self.min_consequent_count = min_consequent_count
+        self.STACK_FEATURES_N_SAMPLES = STACK_FEATURES_N_SAMPLES
+        self.time_stack_n_samples = time_stack_n_samples
         self.bay_opt_param_space = bay_opt_param_space
         self.VERBOSE = VERBOSE
 
@@ -348,6 +357,83 @@ class Decoder:
         if self.RUN_BAY_OPT is True:
             self.best_bay_opt_params = []
 
+    @staticmethod
+    def append_previous_n_samples(X: np.ndarray, y: np.ndarray, n: int = 5):
+        """
+        stack feature vector for n samples
+        """
+        time_arr = np.zeros([X.shape[0]-n, int(n*X.shape[1])])
+        for time_idx, time_ in enumerate(np.arange(n, X.shape[0])):
+            for time_point in range(n):
+                time_arr[time_idx, time_point*X.shape[1]:(time_point+1)*X.shape[1]] = \
+                    X[time_-time_point,:]
+        return time_arr, y[n:]
+
+    @staticmethod
+    def append_samples_val(X_train, y_train, X_val, y_val, n):
+
+        X_train, y_train = Decoder.append_previous_n_samples(
+            X_train,
+            y_train,
+            n=n
+        )
+        X_val, y_val = Decoder.append_previous_n_samples(
+            X_val,
+            y_val,
+            n=n
+        )
+        return X_train, y_train, X_val, y_val
+    
+    def _fit_model(self, model, X_train, y_train):
+
+        if self.TRAIN_VAL_SPLIT is True:
+            X_train, X_val, y_train, y_val = \
+                model_selection.train_test_split(
+                    X_train, y_train, train_size=0.7, shuffle=False)
+
+            if y_train.sum() == 0 or y_val.sum(0) == 0:
+                raise Decoder.ClassMissingException
+
+            if self.STACK_FEATURES_N_SAMPLES is True:
+                X_train, y_train, X_val, y_val = \
+                    Decoder.append_samples_val(
+                        X_train, y_train, X_val, y_val, self.time_stack_n_samples
+                )
+
+            if type(model) is xgboost.sklearn.XGBClassifier:
+                classes_weights = class_weight.compute_sample_weight(
+                    class_weight='balanced',
+                    y=y_train
+                )
+
+                model.fit(
+                    X_train, y_train, eval_set=[(X_val, y_val)],
+                    early_stopping_rounds=7, sample_weight=classes_weights,
+                    verbose=self.VERBOSE, eval_metric="logloss")
+            else:
+                # might be necessary to adapt for other classifiers
+                model.fit(
+                    X_train, y_train, eval_set=[(X_val, y_val)])
+        else:
+
+            if self.STACK_FEATURES_N_SAMPLES is True:
+                X_train, y_train = Decoder.append_previous_n_samples(
+                    X_train,
+                    y_train,
+                    n=self.time_stack_n_samples
+                )
+
+            # check for LDA; and apply rebalancing
+            if type(model) is discriminant_analysis.LinearDiscriminantAnalysis:
+                X_train, y_train = self.ros.fit_resample(X_train, y_train)
+
+            if type(model) is xgboost.sklearn.XGBClassifier:
+                model.fit(X_train, y_train, eval_metric="logloss")  # to avoid warning
+            else:
+                model.fit(X_train, y_train)
+
+        return model
+
     def run_CV(self, data=None, label=None):
         """Evaluate model performance on the specified cross validation.
         If no data and label is specified, use whole feature class attributes.
@@ -377,7 +463,7 @@ class Decoder:
             X_train, y_train = data[train_index, :], label[train_index]
             X_test, y_test = data[test_index], label[test_index]
 
-            if y_train.sum() == 0:  # only one class present
+            if y_train.sum() == 0 or y_test.sum() == 0:  # only one class present
                 continue
 
             if self.RUN_BAY_OPT is True:
@@ -409,30 +495,11 @@ class Decoder:
                     params_bo_dict[self.bay_opt_param_space[i].name] = params_bo[i]
                 self.best_bay_opt_params.append(params_bo_dict)
 
-            # optionally split training data also into train and validation
-            if self.TRAIN_VAL_SPLIT is True:
-                X_train, X_val, y_train, y_val = \
-                    model_selection.train_test_split(
-                        X_train, y_train, train_size=0.7, shuffle=False)
-                if y_train.sum() == 0:
-                    continue
-
-                #classes_weights = class_weight.compute_sample_weight(
-                #    class_weight='balanced', y=y_train)
-
-                model_train.fit(
-                    X_train, y_train, eval_set=[(X_val, y_val)],
-                    early_stopping_rounds=7, #sample_weight=classes_weights,
-                    verbose=self.VERBOSE, eval_metric="logloss")
-            else:
-                # check for LDA; and apply rebalancing
-                if type(model_train) is discriminant_analysis.LinearDiscriminantAnalysis:
-                    X_train, y_train = self.ros.fit_resample(X_train, y_train)
-
-                if type(model_train) is xgboost.sklearn.XGBClassifier:
-                    model_train.fit(X_train, y_train, eval_metric="logloss")  # to avoid warning
-                else:
-                    model_train.fit(X_train, y_train)
+            # fit model
+            try:
+                model_train = self._fit_model(model_train, X_train, y_train)
+            except Decoder.ClassMissingException:
+                continue
 
             if self.save_coef:
                 self.coef.append(model_train.coef_)
@@ -527,11 +594,12 @@ class Decoder:
         """
 
         def get_f_val(model_bo):
-            if type(model_bo) is xgboost.sklearn.XGBClassifier:
-                # for avoiding xgboost warning
-                model_bo.fit(X_train, y_train, eval_metric="logloss")
-            else:
-                model_bo.fit(X_train, y_train)
+
+            try:
+                model_bo = self._fit_model(model_bo, X_train, y_train)
+            except Decoder.ClassMissingException:
+                pass
+
             return self.eval_method(y_test, model_bo.predict(X_test))
 
         opt = Optimizer(
