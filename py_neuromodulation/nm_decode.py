@@ -483,13 +483,48 @@ class Decoder:
 
         return np.mean(self.score_test)
 
-    def run_Bay_Opt(self, X_train, y_train, X_test, y_test,
+    def run_Bay_Opt(self,
+        X_train,
+        y_train,
+        X_test,
+        y_test,
         rounds=10,
         base_estimator="GP",
         acq_func="EI",
         acq_optimizer="sampling",
         initial_point_generator="lhs"
     ):
+        """Run skopt bayesian optimization
+        skopt.Optimizer:
+        https://scikit-optimize.github.io/stable/modules/generated/skopt.Optimizer.html#skopt.Optimizer
+
+        example:
+        https://scikit-optimize.github.io/stable/auto_examples/ask-and-tell.html#sphx-glr-auto-examples-ask-and-tell-py
+
+        Special attention needs to be made with the run_CV output,
+        some metrics are minimized (MAE), some are maximized (r^2)
+
+        Parameters
+        ----------
+        X_train: np.ndarray
+        y_train: np.ndarray
+        X_test: np.ndarray
+        y_test: np.ndarray
+        rounds : int, optional
+            optimizing rounds, by default 10
+        base_estimator : str, optional
+            surrogate model, used as optimization function instead of cross validation, by default "GP"
+        acq_func : str, optional
+            function to minimize over the posterior distribution, by default "EI"
+        acq_optimizer : str, optional
+            method to minimize the acquisition function, by default "sampling"
+        initial_point_generator : str, optional
+            sets a initial point generator, by default "lhs"
+
+        Returns
+        -------
+        skopt result parameters
+        """
 
         def get_f_val(model_bo):
             if type(model_bo) is xgboost.sklearn.XGBClassifier:
@@ -518,75 +553,7 @@ class Decoder:
                 print(f_val)
 
         # res is here automatically appended by skopt
-        self.best_metric = res.fun
-        self.best_params = res.x
-
         return res.x
-
-    def run_Bay_Opt_old(self, space, rounds=10, base_estimator="GP", acq_func="EI",
-                    acq_optimizer="sampling", initial_point_generator="lhs"):
-        """Run skopt bayesian optimization
-        skopt.Optimizer:
-        https://scikit-optimize.github.io/stable/modules/generated/skopt.Optimizer.html#skopt.Optimizer
-
-        example:
-        https://scikit-optimize.github.io/stable/auto_examples/ask-and-tell.html#sphx-glr-auto-examples-ask-and-tell-py
-
-        Special attention needs to be made with the run_CV output,
-        some metrics are minimized (MAE), some are maximized (r^2)
-
-        Parameters
-        ----------
-        space : skopt hyperparameter space definition
-        rounds : int, optional
-            optimizing rounds, by default 10
-        base_estimator : str, optional
-            surrogate model, used as optimization function instead of cross validation, by default "GP"
-        acq_func : str, optional
-            function to minimize over the posterior distribution, by default "EI"
-        acq_optimizer : str, optional
-            method to minimize the acquisition function, by default "sampling"
-        initial_point_generator : str, optional
-            sets a initial point generator, by default "lhs"
-
-        Returns
-        -------
-        skopt result
-        """
-
-        self.space = space
-
-        opt = Optimizer(self.space, base_estimator=base_estimator, acq_func=acq_func,
-                        acq_optimizer=acq_optimizer,
-                        initial_point_generator=initial_point_generator)
-        for _ in range(rounds):
-            next_x = opt.ask()
-            # set model values
-            for i in range(len(next_x)):
-                setattr(self.model, self.space[i].name, next_x[i])
-            f_val = self.run_CV()
-            res = opt.tell(next_x, f_val)
-            print(f_val)
-
-        # res is here automatically appended by skopt
-        self.best_metric = res.fun
-        self.best_params = res.x
-        return res
-
-    def train_final_model(self, bayes_opt=True) -> None:
-        """Train final model on all data
-
-        Parameters
-        ----------
-        bayes_opt : boolean
-            if True get best bayesian optimization parameters and train model with the
-            according parameters
-        """
-        if bayes_opt is True:
-            for i in range(len(self.best_params)):
-                setattr(self.model, self.space[i].name, self.best_params[i])
-
-        self.model.fit(self.data, self.label)
 
     def save(self, feature_path: str, feature_file: str, str_save_add=None) -> None:
         """Save decoder object to pickle
