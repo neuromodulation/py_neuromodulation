@@ -1,4 +1,5 @@
 import os
+from re import VERBOSE
 import pandas as pd
 import numpy as np
 from sklearn import linear_model, base, metrics, model_selection
@@ -173,11 +174,12 @@ class Feature_Reader:
                 self.sidecar["coords"]["cortex_left"]["positions"]
             )
         self.nmplotter.plot_cortex(
-            grid_cortex=np.array(self.sidecar["grid_cortex"]),
+            grid_cortex=np.array(self.sidecar["grid_cortex"]) if "grid_cortex" in self.sidecar \
+                else None,
             ecog_strip=ecog_strip,
             grid_color=np.array(
                 self.sidecar["proj_matrix_cortex"]
-            ).sum(axis=1)
+            ).sum(axis=1) if "grid_cortex" in self.sidecar else None
         )
 
     def plot_features(self,
@@ -370,6 +372,7 @@ class Feature_Reader:
     def set_decoder(self,
         decoder:nm_decode.Decoder = None,
         TRAIN_VAL_SPLIT=False,
+        RUN_BAY_OPT=False,
         save_coef=False,
         model:base.BaseEstimator = linear_model.LogisticRegression,
         eval_method=metrics.r2_score,
@@ -377,7 +380,11 @@ class Feature_Reader:
             model_selection.KFold(n_splits=3, shuffle=False),
         get_movement_detection_rate:bool=False,
         min_consequent_count=3,
-        threshold_score=True
+        threshold_score=True,
+        bay_opt_param_space: list = [],
+        STACK_FEATURES_N_SAMPLES=False,
+        time_stack_n_samples=5,
+        VERBOSE=False
         ):
         if decoder is not None:
             self.decoder = decoder
@@ -393,9 +400,14 @@ class Feature_Reader:
                 cv_method=cv_method,
                 threshold_score=threshold_score,
                 TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT,
+                RUN_BAY_OPT=RUN_BAY_OPT,
                 save_coef=save_coef,
                 get_movement_detection_rate=get_movement_detection_rate,
-                min_consequent_count=min_consequent_count
+                min_consequent_count=min_consequent_count,
+                bay_opt_param_space=bay_opt_param_space,
+                STACK_FEATURES_N_SAMPLES=STACK_FEATURES_N_SAMPLES,
+                time_stack_n_samples=time_stack_n_samples,
+                VERBOSE=VERBOSE
             )
 
     def run_ML_model(self,
@@ -458,7 +470,8 @@ class Feature_Reader:
             read_all_combined=estimate_all_channels_combined,
             read_channels=estimate_channels,
             ML_model_name=output_name,
-            read_mov_detection_rates=self.decoder.get_movement_detection_rate
+            read_mov_detection_rates=self.decoder.get_movement_detection_rate,
+            read_bay_opt_params=self.decoder.RUN_BAY_OPT
         )
 
     def read_results(self,
@@ -469,8 +482,14 @@ class Feature_Reader:
         read_channels:bool=True,
         read_all_combined:bool=False,
         ML_model_name:str='LM',
-        read_mov_detection_rates:bool=False):
-        """Save performances of a given patient into performance_dict
+        read_mov_detection_rates:bool=False,
+        read_bay_opt_params:bool=False,
+        save_results:bool = False,
+        PATH_OUT:str = None,
+        folder_name:str = None,
+        str_add:str = None
+    ):
+        """Save performances of a given patient into performance_dict from saved nm_decoder
 
         Parameters
         ----------
@@ -517,8 +536,18 @@ class Feature_Reader:
 
         def write_CV_res_in_performance_dict(
             obj_read, obj_write,
-            read_mov_detection_rates=read_mov_detection_rates
+            read_mov_detection_rates=read_mov_detection_rates,
+            read_bay_opt_params=False
         ):
+            def transform_list_of_dicts_into_dict_of_lists(l_):
+                dict_out = {}
+                for key_, _ in l_[0].items():
+                    key_l = []
+                    for dict_ in l_:
+                        key_l.append(dict_[key_])
+                    dict_out[key_] = key_l
+                return dict_out
+
             obj_write["performance_test"] = np.mean(obj_read["score_test"])
             obj_write["performance_train"] = np.mean(obj_read["score_train"])
             if "coef" in obj_read:
@@ -534,6 +563,13 @@ class Feature_Reader:
                 obj_write["fprate_train"] = np.mean(obj_read["fprate_train"])
                 obj_write["tprate_test"] = np.mean(obj_read["tprate_test"])
                 obj_write["tprate_train"] = np.mean(obj_read["tprate_train"])
+
+            if read_bay_opt_params is True:
+                # transform dict into keys for json saving
+                dict_to_save = transform_list_of_dicts_into_dict_of_lists(
+                            obj_read["best_bay_opt_params"]
+                )
+                obj_write["bay_opt_best_params"] = dict_to_save
 
         if read_channels:
 
@@ -559,7 +595,8 @@ class Feature_Reader:
                 write_CV_res_in_performance_dict(
                     ML_res.ch_ind_results[ch],
                     performance_dict[subject_name][ch],
-                    read_mov_detection_rates=read_mov_detection_rates
+                    read_mov_detection_rates=read_mov_detection_rates,
+                    read_bay_opt_params=read_bay_opt_params
                 )
 
         if read_all_combined:
@@ -567,7 +604,8 @@ class Feature_Reader:
             write_CV_res_in_performance_dict(
                 ML_res.all_ch_results,
                 performance_dict[subject_name]["all_ch_combined"],\
-                read_mov_detection_rates=read_mov_detection_rates
+                read_mov_detection_rates=read_mov_detection_rates,
+                read_bay_opt_params=read_bay_opt_params
             )
 
         if read_grid_points:
@@ -597,7 +635,8 @@ class Feature_Reader:
                         write_CV_res_in_performance_dict(
                             ML_res.gridpoint_ind_results[gp_str],
                             performance_dict[subject_name][gp_str],
-                            read_mov_detection_rates=read_mov_detection_rates
+                            read_mov_detection_rates=read_mov_detection_rates,
+                            read_bay_opt_params=read_bay_opt_params
                         )
                     else:
                         # set non interpolated grid point to default performance
@@ -606,4 +645,11 @@ class Feature_Reader:
                         performance_dict[subject_name][gp_str]["performance_train"] = \
                             DEFAULT_PERFORMANCE
 
+        if save_results:
+            nm_IO.save_general_dict(
+                dict_=performance_dict,
+                PATH_OUT=PATH_OUT,
+                str_add=str_add,
+                folder_name=folder_name
+            )
         return performance_dict

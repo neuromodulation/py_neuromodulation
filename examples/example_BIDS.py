@@ -1,5 +1,7 @@
 import os
 from sklearn import linear_model, metrics, model_selection
+from skopt import space as skopt_space
+import xgboost
 from py_neuromodulation import nm_BidsStream, nm_analysis
 
 
@@ -18,9 +20,10 @@ def run_example_BIDS():
     nm_BIDS = nm_BidsStream.BidsStream(PATH_RUN=PATH_RUN,
                                        PATH_BIDS=PATH_BIDS,
                                        PATH_OUT=PATH_OUT,
-                                       LIMIT_DATA=False)
+                                       LIMIT_DATA=False,
+                                       VERBOSE=True)
 
-    nm_BIDS.run_bids()
+    #nm_BIDS.run_bids()
 
     # init analyzer
     feature_reader = nm_analysis.Feature_Reader(
@@ -45,22 +48,34 @@ def run_example_BIDS():
         threshold=0.5
     )
 
-    model = linear_model.LogisticRegression(class_weight='balanced')
+    #model = linear_model.LogisticRegression(class_weight='balanced')
+    model = xgboost.XGBClassifier(use_label_encoder=False)
+
+    bay_opt_param_space = [
+        skopt_space.Integer(1, 100, name='max_depth'),
+        skopt_space.Real(10**-5, 10**0, "log-uniform", name='learning_rate'),
+        skopt_space.Real(10**0, 10**1, "uniform", name="gamma")
+    ]
 
     feature_reader.set_decoder(
         model = model,
         eval_method=metrics.balanced_accuracy_score,
-        cv_method=model_selection.KFold(n_splits=3, shuffle=True),
+        cv_method=model_selection.ShuffleSplit(n_splits=1, test_size=0.3),# model_selection.KFold(n_splits=3, shuffle=True),
         get_movement_detection_rate=True,
-        min_consequent_count=2
+        min_consequent_count=2,
+        TRAIN_VAL_SPLIT=False,
+        RUN_BAY_OPT=True,
+        bay_opt_param_space=bay_opt_param_space
     )
 
     performances = feature_reader.run_ML_model(
-        estimate_channels=False,
-        estimate_gridpoints=False,
+        estimate_channels=True,
+        estimate_gridpoints=True,
         estimate_all_channels_combined=True,
         save_results=True
     )
+
+    # run here Bay. Opt.
 
     #performance_dict = feature_reader.read_results(read_grid_points=True, read_channels=True,
     #                                               read_all_combined=False,
