@@ -202,6 +202,10 @@ def default_json_convert(obj):
         return obj.tolist()
     elif isinstance(obj, pd.DataFrame):
         return obj.to_numpy().tolist()
+    elif isinstance(obj, np.integer):
+            return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
     raise TypeError('Not serializable')
 
 def save_sidecar(sidecar: dict, PATH_OUT: str, folder_name: str = None):
