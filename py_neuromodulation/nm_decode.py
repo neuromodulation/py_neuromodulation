@@ -184,6 +184,8 @@ class Decoder:
             obj_set["fprate_train"] = self.fprate_train
             obj_set["tprate_test"] = self.tprate_test
             obj_set["tprate_train"] = self.tprate_train
+        if self.RUN_BAY_OPT is True:
+            obj_set["best_bay_opt_params"] = self.best_bay_opt_params
 
     def run_CV_caller(self, feature_contacts: str="ind_channels"):
         """[summary]
@@ -383,7 +385,7 @@ class Decoder:
             n=n
         )
         return X_train, y_train, X_val, y_val
-    
+
     def _fit_model(self, model, X_train, y_train):
 
         if self.TRAIN_VAL_SPLIT is True:
@@ -393,12 +395,6 @@ class Decoder:
 
             if y_train.sum() == 0 or y_val.sum(0) == 0:
                 raise Decoder.ClassMissingException
-
-            if self.STACK_FEATURES_N_SAMPLES is True:
-                X_train, y_train, X_val, y_val = \
-                    Decoder.append_samples_val(
-                        X_train, y_train, X_val, y_val, self.time_stack_n_samples
-                )
 
             if type(model) is xgboost.sklearn.XGBClassifier:
                 classes_weights = class_weight.compute_sample_weight(
@@ -416,13 +412,6 @@ class Decoder:
                     X_train, y_train, eval_set=[(X_val, y_val)])
         else:
 
-            if self.STACK_FEATURES_N_SAMPLES is True:
-                X_train, y_train = Decoder.append_previous_n_samples(
-                    X_train,
-                    y_train,
-                    n=self.time_stack_n_samples
-                )
-
             # check for LDA; and apply rebalancing
             if type(model) is discriminant_analysis.LinearDiscriminantAnalysis:
                 X_train, y_train = self.ros.fit_resample(X_train, y_train)
@@ -433,6 +422,35 @@ class Decoder:
                 model.fit(X_train, y_train)
 
         return model
+    
+    def _set_movement_detection_rates(
+        self,
+        y_test: np.ndarray,
+        y_test_pr: np.ndarray,
+        y_train: np.ndarray,
+        y_train_pr: np.ndarray
+    ):
+        mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(
+            y_test,
+            y_test_pr,
+            self.mov_detection_threshold,
+            self.min_consequent_count
+        )
+
+        self.mov_detection_rates_test.append(mov_detection_rate)
+        self.tprate_test.append(tpr)
+        self.fprate_test.append(fpr)
+
+        mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(
+            y_train,
+            y_train_pr,
+            self.mov_detection_threshold,
+            self.min_consequent_count
+        )
+
+        self.mov_detection_rates_train.append(mov_detection_rate)
+        self.tprate_train.append(tpr)
+        self.fprate_train.append(fpr)
 
     def run_CV(self, data=None, label=None):
         """Evaluate model performance on the specified cross validation.
@@ -462,6 +480,15 @@ class Decoder:
             model_train = clone(self.model)
             X_train, y_train = data[train_index, :], label[train_index]
             X_test, y_test = data[test_index], label[test_index]
+
+            if self.STACK_FEATURES_N_SAMPLES is True:
+                X_train, y_train, X_test, y_test = Decoder.append_samples_val(
+                    X_train, 
+                    y_train, 
+                    X_test, 
+                    y_test,
+                    n=self.time_stack_n_samples
+                )
 
             if y_train.sum() == 0 or y_test.sum() == 0:  # only one class present
                 continue
@@ -517,27 +544,12 @@ class Decoder:
                     sc_te = 0
 
             if self.get_movement_detection_rate is True:
-                mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(
+                self._set_movement_detection_rates(
                     y_test,
                     y_test_pr,
-                    self.mov_detection_threshold,
-                    self.min_consequent_count
-                )
-
-                self.mov_detection_rates_test.append(mov_detection_rate)
-                self.tprate_test.append(tpr)
-                self.fprate_test.append(fpr)
-
-                mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(
                     y_train,
-                    y_train_pr,
-                    self.mov_detection_threshold,
-                    self.min_consequent_count
+                    y_train_pr
                 )
-
-                self.mov_detection_rates_train.append(mov_detection_rate)
-                self.tprate_train.append(tpr)
-                self.fprate_train.append(fpr)
 
             self.score_train.append(sc_tr)
             self.score_test.append(sc_te)
@@ -555,7 +567,7 @@ class Decoder:
         y_train,
         X_test,
         y_test,
-        rounds=10,
+        rounds=30,
         base_estimator="GP",
         acq_func="EI",
         acq_optimizer="sampling",
@@ -609,6 +621,7 @@ class Decoder:
             acq_optimizer=acq_optimizer,
             initial_point_generator=initial_point_generator
         )
+
         for _ in range(rounds):
             next_x = opt.ask()
             # set model values
