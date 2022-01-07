@@ -17,7 +17,7 @@ For running this toolbox first create a new virtual conda environment:
 
 .. code-block::
 
-    conda env create --file=env.yml --user
+    conda env create --file=env.yml
 
 
 The main modules include running real time enabled feature preprocessing based on `iEEG BIDS <https://www.nature.com/articles/s41597-019-0105-7>`_ data.
