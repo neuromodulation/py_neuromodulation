@@ -23,7 +23,7 @@ def run_example_BIDS():
                                        LIMIT_DATA=False,
                                        VERBOSE=True)
 
-    #nm_BIDS.run_bids()
+    nm_BIDS.run_bids()
 
     # init analyzer
     feature_reader = nm_analysis.Feature_Reader(
