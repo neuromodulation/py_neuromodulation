@@ -19,6 +19,13 @@ For running this toolbox first create a new virtual conda environment:
 
     conda env create --file=env.yml
 
+And enable it:
+.. code-block::
+    conda activate pyneuromodulation_test
+
+Optionally the ipython kernel can be specified to installed for the pyneuromodulation_test conda environment:
+.. code-block::
+    ipython kernel install --user --name=pyneuromodulation_test
 
 The main modules include running real time enabled feature preprocessing based on `iEEG BIDS <https://www.nature.com/articles/s41597-019-0105-7>`_ data.
 
