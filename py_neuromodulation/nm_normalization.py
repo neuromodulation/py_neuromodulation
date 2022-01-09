@@ -186,3 +186,4 @@ def _clip(data: np.ndarray, clip: Union[bool, int, float]) -> np.ndarray:
         clip = 3.0  # default value
     else:
         clip = float(clip)
+    return data.clip(min=-clip, max=clip)
