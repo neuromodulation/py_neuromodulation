@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import os
 from enum import Enum
-from typing import Tuple
+from typing import Tuple, Union
 
 from py_neuromodulation import \
     (nm_projection,
@@ -36,7 +36,7 @@ class PNStream(ABC):
     settings: dict
     nm_channels: pd.DataFrame
     coords: dict = {}
-    fs: float
+    fs: Union[int, float]
     line_noise: float
     VERBOSE: bool
     PATH_SETTINGS: str
@@ -135,7 +135,7 @@ class PNStream(ABC):
             self.settings, self.nm_channels
         )
 
-        self.notch_filter = self._set_notch_filer(
+        self.notch_filter = self._set_notch_filter(
             settings = self.settings,
             fs = self.fs
                  if self.settings["methods"]["raw_resampling"] is False
@@ -163,7 +163,7 @@ class PNStream(ABC):
 
     def _set_features(self, settings:dict,
         CH_NAMES_USED: list,
-        fs: int,
+        fs: Union[int, float],
         line_noise: int,
         VERBOSE:bool) -> None:
         """initialize feature class from settings"""
@@ -175,7 +175,7 @@ class PNStream(ABC):
             VERBOSE
         )
 
-    def set_fs(self, fs: int) -> None:
+    def set_fs(self, fs: Union[int, float]) -> None:
         self.fs = fs
 
     def _set_rereference(
@@ -208,7 +208,7 @@ class PNStream(ABC):
             nm_channels["new_name"] = nm_channels["name"]
         return rereference, nm_channels
 
-    def _set_resampling(self, settings:dict, fs: int) -> nm_resample.Resample:
+    def _set_resampling(self, settings:dict, fs: Union[int, float]) -> nm_resample.Resample:
         """Initialize Resampling
 
         Parameters
@@ -226,9 +226,9 @@ class PNStream(ABC):
             resample = None
         return resample
 
-    def _set_notch_filer(self,
+    def _set_notch_filter(self,
         settings : dict,
-        fs : int,
+        fs : Union[int, float],
         line_noise : int,
         notch_widths : int = 3,
         trans_bandwidth : int = 15
@@ -352,8 +352,10 @@ class PNStream(ABC):
         PATH_OUT and subfolder 'folder_name'"""
 
         sidecar = {
-            "fs" : self.fs,
+            "original_fs" : self.fs,
+            "fs" : self.run_analysis.fs,
             "line_noise" : self.line_noise,
+            "ch_names": self.features.ch_names,
             "coords" : self.coords,
             "sess_right" : self.sess_right
         }

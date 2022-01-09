@@ -43,7 +43,7 @@ def read_BIDS_data(PATH_RUN, BIDS_PATH):
     return (
         raw_arr,
         raw_arr.get_data(),
-        int(np.ceil(raw_arr.info["sfreq"])),
+        raw_arr.info["sfreq"],
         int(raw_arr.info["line_freq"]),
     )
 
