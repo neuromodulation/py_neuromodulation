@@ -1,19 +1,21 @@
 import os
+from pathlib import Path
 from re import VERBOSE
-import pandas as pd
-import numpy as np
-from sklearn import linear_model, base, metrics, model_selection
-import _pickle as cPickle
 from typing import Optional
+
+import _pickle as cPickle
+import numpy as np
+import pandas as pd
+from sklearn import base, linear_model, metrics, model_selection
 
 from py_neuromodulation import nm_decode, nm_IO, nm_plots
 
 target_filter_str = {
     "CLEAN",
-    "SQUARED_ROTAWHEEL"
     "SQUARED_EMG",
-    "rota_squared",
+    "SQUARED_ROTAWHEEL",
     "SQUARED_ROTATION"
+    "rota_squared",
 }
 features_reverse_order_plotting = {"stft", "fft", "bandpass"}
 
@@ -51,15 +53,10 @@ class Feature_Reader:
             self.feature_file = self.feature_list[0]
         else:
             self.feature_file = feature_file
-
-        PATH_READ_BASENAME = os.path.join(
-                self.feature_dir,
-                self.feature_file
-        )
-        PATH_READ_BASENAME = PATH_READ_BASENAME[:len(PATH_READ_BASENAME)-len(".vhdr")]
-
-        PATH_READ_FILE = os.path.join(PATH_READ_BASENAME,
-            self.feature_file[:-len(".vhdr")]
+            
+        FILE_BASENAME = Path(self.feature_file).stem
+        PATH_READ_FILE = str(
+            Path(self.feature_dir, FILE_BASENAME, FILE_BASENAME)
         )
 
         self.settings = nm_IO.read_settings(PATH_READ_FILE)
