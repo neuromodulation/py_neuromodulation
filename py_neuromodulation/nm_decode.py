@@ -62,7 +62,16 @@ class Decoder:
     VERBOSE : bool = False
 
     class ClassMissingException(Exception):
-        print("only one class present")
+        def __init__(
+            self, 
+            message="Only one class present.",
+        ) -> None:
+            self.message = message
+            super().__init__(self.message)
+
+        def __str__(self):
+            return self.message
+            
 
     def __init__(self,
                  features: pd.DataFrame,
