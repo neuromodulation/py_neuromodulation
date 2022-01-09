@@ -239,7 +239,7 @@ def read_features(PATH: str) -> pd.DataFrame:
 def read_nm_channels(PATH: str) -> pd.DataFrame:
     return pd.read_csv(PATH + "_nm_channels.csv", index_col=0)
 
-def get_run_list_indir(PATH: str) -> list[str]:
+def get_run_list_indir(PATH: str) -> list:
     f_files = []
     for dirpath, subdirs, files in os.walk(PATH):
         for x in files:
