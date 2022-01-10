@@ -27,9 +27,8 @@ class RealTimePyNeuro(nm_stream.PNStream):
     ftc:FieldTrip.Client = None
     filename: str
     esc_key_received : bool = False
-    multiprocess : bool = False
     use_FieldTripClient : bool = True
-    feature_count_idx : int = 0 
+    feature_count_idx : int = 0
 
     def __init__(
         self,
@@ -41,7 +40,6 @@ class RealTimePyNeuro(nm_stream.PNStream):
         VERBOSE: bool = True,
         fs: int = 128,
         line_noise: int = 50,
-        multiprocess : bool = False,
         use_FieldTripClient : bool = True
     ) -> None:
 
@@ -54,7 +52,6 @@ class RealTimePyNeuro(nm_stream.PNStream):
         self.set_fs(fs)
         self.set_linenoise(line_noise)
         self.filename = filename
-        self.multiprocess = multiprocess
         self.use_FieldTripClient = use_FieldTripClient
 
         self.nm_channels = self._get_nm_channels(
@@ -81,7 +78,6 @@ class RealTimePyNeuro(nm_stream.PNStream):
     @staticmethod
     def init_fieldtrip() -> FieldTrip.Client:
         """Initialize Fieldtrip client
-
         Returns
         -------
         FieldTrip.Client
@@ -103,57 +99,6 @@ class RealTimePyNeuro(nm_stream.PNStream):
     def run(self) -> None:
         """Start get_data, calcFeatures and sendFeature processes
         """
-
-        if self.multiprocess is True:
-            processes = [
-                multiprocessing.Process(
-                    target=self.get_data,
-                    args=(
-                        self.queue_raw,
-                        self.ftc,
-                    )
-                ),
-                multiprocessing.Process(
-                    target=self.calcFeatures, args=(
-                        self.queue_raw,
-                        self.queue_features,
-                    )
-                ),
-                multiprocessing.Process(
-                    target=self.sendFeatures,
-                    args=(
-                        self.queue_features,
-                        self.ftc
-                    )
-                )
-            ]
-
-            for p in processes:
-                p.start()
-
-            for p in processes:
-                p.join()
-        else:
-            self.run_single_process()
-
-    def get_data_FieldTripClient(self):
-        return self.ftc.getData()
-
-    def send_data_FieldTripClient(self, features: pd.Series):
-
-        H = self.ftc.getHeader()
-        # channel names are 1. data 2. ident 3. timestamp
-        # put at the end of the buffer the calculated features of the data channel
-        to_send = np.zeros([H.nSamples, H.nChannels])
-        to_send[-features.shape[0]:, 1] = np.array(features)
-
-        self.ftc.putData(to_send)
-
-    def disconnect_FieldTripClient(self):
-        self.ftc.disconnect()
-
-    def run_single_process(self):
-
         last_batch = 0
 
         while self.listener.is_alive() is True:
@@ -174,6 +119,22 @@ class RealTimePyNeuro(nm_stream.PNStream):
                     self._sendFeatures(feature_series)
 
         self.disconnect()
+
+    def get_data_FieldTripClient(self):
+        return self.ftc.getData()
+
+    def send_data_FieldTripClient(self, features: pd.Series):
+
+        H = self.ftc.getHeader()
+        # channel names are 1. data 2. ident 3. timestamp
+        # put at the end of the buffer the calculated features of the data channel
+        to_send = np.zeros([H.nSamples, H.nChannels])
+        to_send[-features.shape[0]:, 1] = np.array(features)
+
+        self.ftc.putData(to_send)
+
+    def disconnect_FieldTripClient(self):
+        self.ftc.disconnect()
 
     def init_keyboard_listener(
         self,
@@ -270,7 +231,7 @@ class RealTimePyNeuro(nm_stream.PNStream):
 
             print("length of features:" + str(len(self.feature_arr)))
 
-            #self.send_data_client(features)
+            self.send_data_client(features)
         return False
 
     def sendFeatures(

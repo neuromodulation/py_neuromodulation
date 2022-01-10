@@ -7,7 +7,7 @@
         "raw_normalization": false,
         "feature_normalization": true,
         "kalman_filter": false,
-        "re_referencing": true,
+        "re_referencing": false,
         "notch_filter": true,
         "bandpass_filter": false,
         "stft" : false,
