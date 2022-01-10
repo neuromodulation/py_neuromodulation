@@ -4,13 +4,10 @@ import numpy as np
 from numpy.testing import assert_array_equal
 from pathlib import Path
 
-sys.path.append(os.path.join(Path(__file__).parent.parent, 'pyneuromodulation'))
-sys.path.append(os.path.join(Path(__file__).parent.parent, 'examples'))
-# https://stackoverflow.com/a/10253916/5060208
-# despite that pytest needs to be envoked by python: python -m pytest tests/
-
 from py_neuromodulation import nm_BidsStream
 
+# https://stackoverflow.com/a/10253916/5060208
+# despite that pytest needs to be envoked by python: python -m pytest tests/
 
 class TestWrapper:
 
