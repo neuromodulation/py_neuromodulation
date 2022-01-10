@@ -12,7 +12,8 @@ if __name__ == "__main__":
         PATH_SETTINGS=os.path.abspath("examples/rt_example/nm_settings.json"),
         PATH_NM_CHANNELS=os.path.abspath("examples/rt_example/nm_channels.csv"),
         PATH_OUT=os.path.abspath("examples/rt_example"),
-        VERBOSE=False
+        VERBOSE=False,
+        multiprocess=True
     )
 
     stream.run()
