@@ -208,7 +208,7 @@ class RealTimePyNeuro(nm_stream.PNStream):
                 to_send = np.zeros([H.nSamples, H.nChannels])
                 #to_send[-features.shape[0]:, IDENT_FEATURES] = np.array(features)
                 to_send[-features.shape[0]:, 1] = np.array(features)
-                ftc.putData(to_send)
+                #ftc.putData(to_send)
 
                 #number_repeat = 10
                 #val = timeit.timeit(

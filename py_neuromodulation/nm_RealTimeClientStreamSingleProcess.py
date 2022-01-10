@@ -73,7 +73,7 @@ class RealTimePyNeuro(nm_stream.PNStream):
             self.send_data_client = None
             self.disconnect = None
         
-        self.init_keyboard_listener(set_queue=False, queue_raw=None)
+        self.init_keyboard_listener()
 
     @staticmethod
     def init_fieldtrip() -> FieldTrip.Client:
@@ -137,9 +137,7 @@ class RealTimePyNeuro(nm_stream.PNStream):
         self.ftc.disconnect()
 
     def init_keyboard_listener(
-        self,
-        set_queue : bool = True,
-        queue_raw : multiprocessing.Queue = None
+        self
     ):
 
         def on_press(key):
@@ -150,69 +148,15 @@ class RealTimePyNeuro(nm_stream.PNStream):
             if key == Key.esc:
                 # Stop listener
                 print("reiceived stop key pressed")
-                if set_queue is True:
-                    queue_raw.put(None)
-                else:
-                    self.esc_key_received = True
+                self.esc_key_received = True
+                # terminate session and save feature arr
+                self._sendFeatures(None)
                 return False
 
         self.listener = Listener(
             on_press=on_press,
             on_release=on_release)
         self.listener.start()
-
-    def get_data(
-        self,
-        queue_raw: multiprocessing.Queue,
-        ftc: FieldTrip.Client
-    ) -> np.array:
-    
-        self.init_keyboard_listener(
-            set_queue=True,
-            queue_raw=queue_raw
-        )
-
-        last_batch = 0
-
-        while self.listener.is_alive() is True:
-            # read new data
-            print('Trying to read last sample...')
-            #index = H.nSamples - 1
-            ieeg_batch = ftc.getData()
-
-            #number_repeat = 10
-            #val = timeit.timeit(
-            #    lambda: ftc.getData(),
-            #    number=number_repeat
-            #) / number_repeat
-
-            ieeg_batch = ieeg_batch[-128:, :2].T  # take last, #1: data
-            # check if time stamp changed 
-            if np.array_equal(ieeg_batch, last_batch) is False:
-                last_batch = ieeg_batch
-                queue_raw.put(ieeg_batch)
-            else:
-                queue_raw.put(ieeg_batch)
-        ftc.disconnect()
-
-    def calcFeatures(
-        self,
-        queue_raw: multiprocessing.Queue,
-        queue_features: multiprocessing.Queue
-    ):
-
-        FLAG_STOP = False
-        while FLAG_STOP is False:
-            ieeg_batch = queue_raw.get()  # ch, samples
-            if ieeg_batch is None:
-                queue_features.put(None)
-                FLAG_STOP = True
-            else:
-                feature_series = \
-                    self.run_analysis.process_data(ieeg_batch)
-                feature_series = self._add_timestamp(feature_series)
-                print("calc features")
-                queue_features.put(feature_series)
     
     def _sendFeatures(self, features: pd.Series):
         if features is None:
@@ -234,18 +178,6 @@ class RealTimePyNeuro(nm_stream.PNStream):
             self.send_data_client(features)
         return False
 
-    def sendFeatures(
-        self,
-        queue_features: multiprocessing.Queue
-    ):
-
-        self.feature_count_idx = 0
-        FLAG_STOP = False
-        while FLAG_STOP is False:
-            features = queue_features.get()
-            if self._sendFeatures(features) is True:
-                FLAG_STOP = True
-
     def _add_timestamp(self, feature_series: pd.Series, idx: int = None) -> pd.Series:
 
         feature_series["time"] = time.time()  # UNIX Timestamp
@@ -254,4 +186,7 @@ class RealTimePyNeuro(nm_stream.PNStream):
 
     def _add_coordinates(self):
         """Lateron add here method for providing coordinates"""
+        pass
+
+    def get_data(self) -> np.array:
         pass
