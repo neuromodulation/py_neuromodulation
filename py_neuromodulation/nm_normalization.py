@@ -1,5 +1,5 @@
-from typing import Optional, Union
-
+from typing import NoReturn, Optional, Union
+from sklearn import preprocessing
 import numpy as np
 from enum import Enum
 
@@ -8,6 +8,11 @@ class NORM_METHODS(Enum):
     MEDIAN = "median"
     ZSCORE = "zscore"
     ZSCORE_MEDIAN = "zscore-median"
+    QUANTILE = "quantile"
+    POWER = "power"
+    ROBUST = "robust"
+    MINMAX = "minmax"
+
 
 def normalize_raw(
     current: np.ndarray,
@@ -18,7 +23,6 @@ def normalize_raw(
     clip: bool = False,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Normalize data with respect to the past number of `normalize_samples`.
-
     Parameters
     ----------
     current : numpy array
@@ -35,14 +39,12 @@ def normalize_raw(
         'zscore'.
     clip : int | float, optional
         value at which to clip after normalization
-
     Returns
     -------
     current_norm : numpy array
         normalized array
     previous : numpy array
         previous features, not normalized.
-
     Raises
     ------
     ValueError
@@ -76,7 +78,6 @@ def normalize_features(
     clip: bool = False,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Normalize features with respect to the past number of normalize_samples.
-
     Parameters
     ----------
     current : numpy array
@@ -92,14 +93,12 @@ def normalize_features(
     clip : int | float, optional
         value at which to clip on the lower and upper end after normalization.
         Useful for artifact rejection and handling of outliers.
-
     Returns
     -------
     current : numpy array
         normalized current features
     previous : numpy array
         previous features, not normalized.
-
     Raises
     ------
     ValueError
@@ -154,6 +153,22 @@ def _normalize_and_clip(
         current = (current - np.median(previous, axis=0)) / previous.std(
             axis=0
         )
+    elif method == NORM_METHODS.QUANTILE.value:
+        current = preprocessing.QuantileTransformer(n_quantiles=300).fit(
+            previous
+        ).transform(np.expand_dims(current, axis=0))[0, :]
+    elif method == NORM_METHODS.ROBUST.value:
+        current = preprocessing.RobustScaler().fit(
+            previous
+        ).transform(np.expand_dims(current, axis=0))[0, :]
+    elif method == NORM_METHODS.MINMAX.value:
+        current = preprocessing.MinMaxScaler().fit(
+            previous
+        ).transform(np.expand_dims(current, axis=0))[0, :]
+    elif method == NORM_METHODS.POWER.value:
+        current = preprocessing.PowerTransformer().fit(
+            previous
+        ).transform(np.expand_dims(current, axis=0))[0, :]
     else:
         raise ValueError(
             f"Only {[e.value for e in NORM_METHODS]} are supported as "
