@@ -53,7 +53,7 @@ class Feature_Reader:
             self.feature_file = self.feature_list[0]
         else:
             self.feature_file = feature_file
-            
+
         FILE_BASENAME = Path(self.feature_file).stem
         PATH_READ_FILE = str(
             Path(self.feature_dir, FILE_BASENAME, FILE_BASENAME)
@@ -381,6 +381,7 @@ class Feature_Reader:
         bay_opt_param_space: list = [],
         STACK_FEATURES_N_SAMPLES=False,
         time_stack_n_samples=5,
+        use_nested_cv=False,
         VERBOSE=False
         ):
         if decoder is not None:
@@ -404,7 +405,8 @@ class Feature_Reader:
                 bay_opt_param_space=bay_opt_param_space,
                 STACK_FEATURES_N_SAMPLES=STACK_FEATURES_N_SAMPLES,
                 time_stack_n_samples=time_stack_n_samples,
-                VERBOSE=VERBOSE
+                VERBOSE=VERBOSE,
+                use_nested_cv=use_nested_cv
             )
 
     def run_ML_model(self,
@@ -550,11 +552,11 @@ class Feature_Reader:
             if "coef" in obj_read:
                 obj_write["coef"] = np.concatenate(obj_read["coef"]).mean(axis=0)
             if read_mov_detection_rates:
-                obj_write["mov_detection_rate_test"] = np.mean(
-                    obj_read["mov_detection_rate_test"]
+                obj_write["mov_detection_rates_test"] = np.mean(
+                    obj_read["mov_detection_rates_test"]
                 )
-                obj_write["mov_detection_rate_train"] = np.mean(
-                    obj_read["mov_detection_rate_train"]
+                obj_write["mov_detection_rates_train"] = np.mean(
+                    obj_read["mov_detection_rates_train"]
                 )
                 obj_write["fprate_test"] = np.mean(obj_read["fprate_test"])
                 obj_write["fprate_train"] = np.mean(obj_read["fprate_train"])
