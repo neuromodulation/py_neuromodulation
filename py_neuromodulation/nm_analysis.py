@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from re import VERBOSE
+import re
 from typing import Optional
 
 import _pickle as cPickle
@@ -547,28 +548,53 @@ class Feature_Reader:
                     dict_out[key_] = key_l
                 return dict_out
 
-            obj_write["performance_test"] = np.mean(obj_read["score_test"])
-            obj_write["performance_train"] = np.mean(obj_read["score_train"])
-            if "coef" in obj_read:
-                obj_write["coef"] = np.concatenate(obj_read["coef"]).mean(axis=0)
-            if read_mov_detection_rates:
-                obj_write["mov_detection_rates_test"] = np.mean(
-                    obj_read["mov_detection_rates_test"]
-                )
-                obj_write["mov_detection_rates_train"] = np.mean(
-                    obj_read["mov_detection_rates_train"]
-                )
-                obj_write["fprate_test"] = np.mean(obj_read["fprate_test"])
-                obj_write["fprate_train"] = np.mean(obj_read["fprate_train"])
-                obj_write["tprate_test"] = np.mean(obj_read["tprate_test"])
-                obj_write["tprate_train"] = np.mean(obj_read["tprate_train"])
+            def read_ML_performances(obj_read, obj_write, set_inner_CV_res : bool = False):
 
-            if read_bay_opt_params is True:
-                # transform dict into keys for json saving
-                dict_to_save = transform_list_of_dicts_into_dict_of_lists(
-                            obj_read["best_bay_opt_params"]
-                )
-                obj_write["bay_opt_best_params"] = dict_to_save
+                def set_score(key_set : str, key_get : str, take_mean : bool = True, val=None):
+                    if set_inner_CV_res is True:
+                        key_set = "InnerCV_" + key_set
+                        key_get = "InnerCV_" + key_get
+                    if take_mean is True:
+                        val = np.mean(obj_read[key_get])
+                    obj_write[key_set] = val
+
+                set_score(key_set="performance_test", key_get="score_test", take_mean=True)
+                set_score(key_set="performance_train", key_get="score_train", take_mean=True)
+
+                if "coef" in obj_read:
+                    set_score(key_set="coef", key_get=None, take_mean=False,
+                        val = np.concatenate(obj_read["coef"]).mean(axis=0)
+                    )
+
+                if read_mov_detection_rates:
+                    set_score(
+                        key_set="mov_detection_rates_test",
+                        key_get="mov_detection_rates_test",
+                        take_mean=True
+                    )
+                    set_score(
+                        key_set="mov_detection_rates_train",
+                        key_get="mov_detection_rates_train",
+                        take_mean=True
+                    )
+                    set_score(key_set="fprate_test", key_get="fprate_test", take_mean=True)
+                    set_score(key_set="fprate_train", key_get="fprate_train", take_mean=True)
+                    set_score(key_set="tprate_test", key_get="tprate_test", take_mean=True)
+                    set_score(key_set="tprate_train", key_get="tprate_train", take_mean=True)
+
+                if read_bay_opt_params is True:
+                    # transform dict into keys for json saving
+                    dict_to_save = transform_list_of_dicts_into_dict_of_lists(
+                                obj_read["best_bay_opt_params"]
+                    )
+                    set_score(key_set="bay_opt_best_params", key_get=None, take_mean=False,
+                        val = dict_to_save
+                    )
+
+            read_ML_performances(obj_read, obj_write)
+
+            if len([key_ for key_ in obj_read.keys() if "InnerCV_" in key_]) > 0:
+                read_ML_performances(obj_read, obj_write, set_inner_CV_res=True)
 
         if read_channels:
 
