@@ -21,6 +21,8 @@ install:
   # Replace dep1 dep2 ... with your dependencies
   - conda env create --file=env.yml
   - conda activate pn_env
+  - conda develop . 
+
 # command to run tests
 script:
   - pytest tests/
