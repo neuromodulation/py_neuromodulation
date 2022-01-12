@@ -26,7 +26,7 @@ class TestWrapper:
 
         RUN_NAME = "sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg.vhdr"
         PATH_RUN = os.path.join(
-            os.path.abspath('examples\\data'),
+            os.path.abspath(os.path.join('examples', 'data')),
             'sub-testsub',
             'ses-EphysMedOff',
             'ieeg',
@@ -93,6 +93,6 @@ class TestWrapper:
             )
 
 
-def test_run():
+def test_rereference():
     test_wrapper = TestWrapper()
     test_wrapper.test_rereference()
