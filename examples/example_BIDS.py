@@ -60,12 +60,14 @@ def run_example_BIDS():
     feature_reader.set_decoder(
         model = model,
         eval_method=metrics.balanced_accuracy_score,
-        cv_method=model_selection.ShuffleSplit(n_splits=1, test_size=0.3),# model_selection.KFold(n_splits=3, shuffle=True),
+        #cv_method=model_selection.KFold(n_splits=3, shuffle=True),
+        cv_method="NonShuffledTrainTestSplit",
         get_movement_detection_rate=True,
         min_consequent_count=2,
         TRAIN_VAL_SPLIT=False,
-        RUN_BAY_OPT=True,
-        bay_opt_param_space=bay_opt_param_space
+        RUN_BAY_OPT=False,
+        bay_opt_param_space=bay_opt_param_space,
+        use_nested_cv=True
     )
 
     performances = feature_reader.run_ML_model(

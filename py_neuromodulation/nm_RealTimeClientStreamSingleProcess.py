@@ -104,13 +104,13 @@ class RealTimePyNeuro(nm_stream.PNStream):
         while self.listener.is_alive() is True:
             ieeg_batch = self.get_data_client()
             ieeg_batch = ieeg_batch[-128:, :2]  # take last, #1: data
+            ieeg_batch = np.random.random([128, 2]).T  # channels, samples
             # check if time stamp changed 
             if np.array_equal(ieeg_batch, last_batch) is False:
 
                 last_batch = ieeg_batch
 
-                feature_series = \
-                    self.run_analysis.process_data(ieeg_batch)
+                feature_series = self.run_analysis.process_data(ieeg_batch)
                 feature_series = self._add_timestamp(feature_series)
 
                 if self.esc_key_received is True:
@@ -174,8 +174,11 @@ class RealTimePyNeuro(nm_stream.PNStream):
                 )
 
             print("length of features:" + str(len(self.feature_arr)))
+            try:
+                self.send_data_client(features)
+            except IOError:
+                print("IOError writing data back to Client")
 
-            self.send_data_client(features)
         return False
 
     def _add_timestamp(self, feature_series: pd.Series, idx: int = None) -> pd.Series:
