@@ -1,6 +1,9 @@
 py_neuromodulation
 ==================
 
+.. image:: https://app.travis-ci.com/neuromodulation/py_neuromodulation.svg?branch=main
+    :target: https://app.travis-ci.com/neuromodulation/py_neuromodulation
+
 Click this button to run the "Tutorial ML with py_neuro" notebooks:
 
 .. image:: https://mybinder.org/badge_logo.svg
