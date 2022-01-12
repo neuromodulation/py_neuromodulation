@@ -1,0 +1,11 @@
+language: python
+python:
+  - "3.9"
+# command to install dependencies
+install:
+  - conda env create --file=env.yml
+  - conda activate pn_env
+# command to run tests
+script:
+  - pytest tests/
+  
