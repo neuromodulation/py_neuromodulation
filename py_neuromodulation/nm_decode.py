@@ -1,4 +1,5 @@
 from numpy.core.overrides import verify_matching_signatures
+from scipy.sparse import csc
 from sklearn import model_selection, metrics, linear_model, discriminant_analysis, base
 from skopt.space import Real, Integer, Categorical
 from skopt.utils import use_named_args
@@ -15,8 +16,34 @@ import os
 import json
 import numpy as np
 import xgboost
+from typing import Type
 import _pickle as cPickle
 
+class CV_res:
+    def __init__(
+        self,
+        get_movement_detection_rate: bool = False,
+        RUN_BAY_OPT : bool = False
+    ) -> None:
+
+        self.score_train = []
+        self.score_test = []
+        self.y_test = []
+        self.y_train = []
+        self.y_test_pr = []
+        self.y_train_pr = []
+        self.X_test = []
+        self.X_train = []
+        self.coef = []
+        if get_movement_detection_rate is True:
+            self.mov_detection_rates_test = []
+            self.tprate_test = []
+            self.fprate_test = []
+            self.mov_detection_rates_train = []
+            self.tprate_train = []
+            self.fprate_train = []
+        if RUN_BAY_OPT is True:
+            self.best_bay_opt_params = []
 
 class Decoder:
 
@@ -24,6 +51,7 @@ class Decoder:
     label: np.ndarray
     model: base.BaseEstimator
     cv_method: model_selection.BaseCrossValidator
+    use_nested_cv : bool
     threshold_score: bool
     mov_detection_threshold: float
     TRAIN_VAL_SPLIT: bool
@@ -63,7 +91,7 @@ class Decoder:
 
     class ClassMissingException(Exception):
         def __init__(
-            self, 
+            self,
             message="Only one class present.",
         ) -> None:
             self.message = message
@@ -71,7 +99,6 @@ class Decoder:
 
         def __str__(self):
             return self.message
-            
 
     def __init__(self,
                  features: pd.DataFrame,
@@ -81,6 +108,7 @@ class Decoder:
                  model=linear_model.LinearRegression(),
                  eval_method=metrics.r2_score,
                  cv_method=model_selection.KFold(n_splits=3, shuffle=False),
+                 use_nested_cv : bool = False,
                  threshold_score=True,
                  mov_detection_threshold:float =0.5,
                  TRAIN_VAL_SPLIT: bool=True,
@@ -130,6 +158,7 @@ class Decoder:
         self.model = model
         self.eval_method = eval_method
         self.cv_method = cv_method
+        self.use_nested_cv = use_nested_cv
         self.threshold_score = threshold_score
         self.mov_detection_threshold = mov_detection_threshold
         self.TRAIN_VAL_SPLIT = TRAIN_VAL_SPLIT
@@ -175,34 +204,49 @@ class Decoder:
             obj_set = getattr(self, attr_name)[contact_point]
         else:
             obj_set = getattr(self, attr_name)
+        
+        def set_scores(cv_res: Type[CV_res], set_inner_CV_res : bool = False):
 
-        obj_set["score_train"] = self.score_train
-        obj_set["score_test"] = self.score_test
-        obj_set["y_test"] = self.y_test
-        obj_set["y_train"] = self.y_train
-        obj_set["y_test_pr"] = self.y_test_pr
-        obj_set["y_train_pr"] = self.y_train_pr
-        obj_set["X_train"] = self.X_train
-        obj_set["X_test"] = self.X_test
-        if self.save_coef:
-            obj_set["coef"] = self.coef
-        if self.get_movement_detection_rate:
-            obj_set["mov_detection_rate_test"] = self.mov_detection_rates_test
-            obj_set["mov_detection_rate_train"] = self.mov_detection_rates_train
-            obj_set["fprate_test"] = self.fprate_test
-            obj_set["fprate_train"] = self.fprate_train
-            obj_set["tprate_test"] = self.tprate_test
-            obj_set["tprate_train"] = self.tprate_train
-        if self.RUN_BAY_OPT is True:
-            obj_set["best_bay_opt_params"] = self.best_bay_opt_params
+            def set_score(key_ : str, val):
+                if set_inner_CV_res is True:
+                    key_ = "InnerCV_" + key_
+                obj_set[key_] = val
+
+            set_score("score_train", cv_res.score_train)
+            set_score("score_test", cv_res.score_test)
+            set_score("y_test", cv_res.y_test)
+            set_score("y_train", cv_res.y_train)
+            set_score("y_test_pr", cv_res.y_test_pr)
+            set_score("y_train_pr", cv_res.y_train_pr)
+            set_score("X_train", cv_res.X_train)
+            set_score("X_test", cv_res.X_test)
+
+            if self.save_coef:
+                set_score("coef", cv_res.coef)
+            if self.get_movement_detection_rate:
+                set_score("mov_detection_rates_test", cv_res.mov_detection_rates_test)
+                set_score("mov_detection_rates_train", cv_res.mov_detection_rates_train)
+                set_score("fprate_test", cv_res.fprate_test)
+                set_score("fprate_train", cv_res.fprate_train)
+                set_score("tprate_test", cv_res.tprate_test)
+                set_score("tprate_train", cv_res.tprate_train)
+
+            if self.RUN_BAY_OPT is True:
+                set_score("best_bay_opt_params", cv_res.best_bay_opt_params)
+            return obj_set
+
+        obj_set = set_scores(self.cv_res)
+
+        if self.use_nested_cv is True:
+            obj_set = set_scores(self.cv_res_inner, set_inner_CV_res=True)
 
     def run_CV_caller(self, feature_contacts: str="ind_channels"):
-        """[summary]
+        """Wrapper that call for all channels / grid points / combined channels the CV function
 
         Parameters
         ----------
         feature_contacts : str, optional
-            [description], by default "ind_channels"
+            "grid_points", "ind_channels" or "all_channels_combined" , by default "ind_channels"
         """
         valid_feature_contacts = ["ind_channels", "all_channels_combined", "grid_points"]
         if feature_contacts not in valid_feature_contacts:
@@ -347,26 +391,12 @@ class Decoder:
         tpr = TP / (TP + FN)
 
         return mov_detection_rate, fpr, tpr
-    
+
     def init_cv_res(self) -> None:
-        self.score_train = []
-        self.score_test = []
-        self.y_test = []
-        self.y_train = []
-        self.y_test_pr = []
-        self.y_train_pr = []
-        self.X_test = []
-        self.X_train = []
-        self.coef = []
-        if self.get_movement_detection_rate is True:
-            self.mov_detection_rates_test = []
-            self.tprate_test = []
-            self.fprate_test = []
-            self.mov_detection_rates_train = []
-            self.tprate_train = []
-            self.fprate_train = []
-        if self.RUN_BAY_OPT is True:
-            self.best_bay_opt_params = []
+        return CV_res(
+            self.get_movement_detection_rate,
+            self.RUN_BAY_OPT
+        )
 
     @staticmethod
     def append_previous_n_samples(X: np.ndarray, y: np.ndarray, n: int = 5):
@@ -395,7 +425,7 @@ class Decoder:
         )
         return X_train, y_train, X_val, y_val
 
-    def _fit_model(self, model, X_train, y_train):
+    def fit_model(self, model, X_train, y_train):
 
         if self.TRAIN_VAL_SPLIT is True:
             X_train, X_val, y_train, y_val = \
@@ -431,14 +461,60 @@ class Decoder:
                 model.fit(X_train, y_train)
 
         return model
-    
+
+    def eval_model(
+        self,
+        model_train,
+        X_train,
+        X_test,
+        y_train,
+        y_test,
+        cv_res : Type[CV_res]
+    ) -> Type[CV_res]:
+
+        if self.save_coef:
+            cv_res.coef.append(model_train.coef_)
+
+        y_test_pr = model_train.predict(X_test)
+        y_train_pr = model_train.predict(X_train)
+
+        sc_te = self.eval_method(y_test, y_test_pr)
+        sc_tr = self.eval_method(y_train, y_train_pr)
+
+        if self.threshold_score is True:
+            if sc_tr < 0:
+                sc_tr = 0
+            if sc_te < 0:
+                sc_te = 0
+
+        if self.get_movement_detection_rate is True:
+            self._set_movement_detection_rates(
+                y_test,
+                y_test_pr,
+                y_train,
+                y_train_pr,
+                cv_res
+            )
+
+        cv_res.score_train.append(sc_tr)
+        cv_res.score_test.append(sc_te)
+        cv_res.X_train.append(X_train)
+        cv_res.X_test.append(X_test)
+        cv_res.y_train.append(y_train)
+        cv_res.y_test.append(y_test)
+        cv_res.y_train_pr.append(y_train_pr)
+        cv_res.y_test_pr.append(y_test_pr)
+        return cv_res
+
     def _set_movement_detection_rates(
         self,
         y_test: np.ndarray,
         y_test_pr: np.ndarray,
         y_train: np.ndarray,
-        y_train_pr: np.ndarray
-    ):
+        y_train_pr: np.ndarray,
+        cv_res : Type[CV_res],
+    ) -> Type[CV_res]:
+
         mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(
             y_test,
             y_test_pr,
@@ -446,9 +522,9 @@ class Decoder:
             self.min_consequent_count
         )
 
-        self.mov_detection_rates_test.append(mov_detection_rate)
-        self.tprate_test.append(tpr)
-        self.fprate_test.append(fpr)
+        cv_res.mov_detection_rates_test.append(mov_detection_rate)
+        cv_res.tprate_test.append(tpr)
+        cv_res.fprate_test.append(fpr)
 
         mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(
             y_train,
@@ -457,11 +533,13 @@ class Decoder:
             self.min_consequent_count
         )
 
-        self.mov_detection_rates_train.append(mov_detection_rate)
-        self.tprate_train.append(tpr)
-        self.fprate_train.append(fpr)
+        cv_res.mov_detection_rates_train.append(mov_detection_rate)
+        cv_res.tprate_train.append(tpr)
+        cv_res.fprate_train.append(fpr)
 
-    def run_CV(self, data=None, label=None):
+        return cv_res
+
+    def run_CV(self, data, label):
         """Evaluate model performance on the specified cross validation.
         If no data and label is specified, use whole feature class attributes.
 
@@ -471,105 +549,132 @@ class Decoder:
             data to train and test with shape samples, features
         label (np.ndarray):
             label to train and test with shape samples, features
-        Returns
-        -------
-        cv_res : float
-            mean cross validation result
         """
 
-        self.init_cv_res()
-
-        if data is None:
-            print("use all channel data as features")
-            data = self.data
-            label = self.label
-
-        for train_index, test_index in self.cv_method.split(self.data):
+        def wrapper_model_train(
+            data,
+            label,
+            train_index,
+            test_index,
+            cv_res: Type[CV_res]
+        ) -> Type[CV_res]:
 
             model_train = clone(self.model)
             X_train, y_train = data[train_index, :], label[train_index]
             X_test, y_test = data[test_index], label[test_index]
-
+            y_test[0] = 1
+            y_train[0] = 1
             if self.STACK_FEATURES_N_SAMPLES is True:
                 X_train, y_train, X_test, y_test = Decoder.append_samples_val(
-                    X_train, 
-                    y_train, 
-                    X_test, 
+                    X_train,
+                    y_train,
+                    X_test,
                     y_test,
                     n=self.time_stack_n_samples
                 )
 
             if y_train.sum() == 0 or y_test.sum() == 0:  # only one class present
-                continue
+                raise Decoder.ClassMissingException
 
             if self.RUN_BAY_OPT is True:
-
-                X_train_bo, X_test_bo, y_train_bo, y_test_bo = \
-                    model_selection.train_test_split(
-                        X_train, y_train, train_size=0.7, shuffle=False)
-
-                if y_train_bo.sum() == 0 or y_test_bo.sum() == 0:
-                    print("could not start Bay. Opt. with no labels > 0")
-                    continue
-
-                params_bo = self.run_Bay_Opt(
-                    X_train_bo,
-                    y_train_bo,
-                    X_test_bo,
-                    y_test_bo,
-                    rounds=10
-                )
-
-                # set bay. opt. obtained best params to model
-                params_bo_dict = {}
-                for i in range(len(params_bo)):
-                    setattr(
-                        model_train,
-                        self.bay_opt_param_space[i].name,
-                        params_bo[i]
-                    )
-                    params_bo_dict[self.bay_opt_param_space[i].name] = params_bo[i]
-                self.best_bay_opt_params.append(params_bo_dict)
+                model_train = self.bay_opt_wrapper(model_train, X_train, y_train)
 
             # fit model
+            model_train = self.fit_model(model_train, X_train, y_train)
+
+            self.eval_model(model_train, X_train, X_test, y_train, y_test, cv_res)
+
+            return cv_res
+        
+        def split_data(data):
+            if self.cv_method == "NonShuffledTrainTestSplit":
+                # unfortunately lot of overhead since a non shuffle index base split 
+                # is not supported in sklearn
+                cv_single_tr_te_split =  model_selection.check_cv(
+                    cv=[
+                        model_selection.train_test_split(
+                            np.arange(data.shape[0]),
+                            test_size=0.3,
+                            shuffle=False
+                        )
+                    ]
+                )
+                for train_index, test_index in cv_single_tr_te_split.split():
+                    yield train_index, test_index
+            else:
+                for train_index, test_index in self.cv_method.split(data):
+                    yield train_index, test_index
+
+        cv_res = self.init_cv_res()
+
+        if self.use_nested_cv is True:
+            cv_res_inner = self.init_cv_res()
+        
+        for train_index, test_index in split_data(data):
             try:
-                model_train = self._fit_model(model_train, X_train, y_train)
+                cv_res = wrapper_model_train(
+                    data,
+                    label,
+                    train_index,
+                    test_index,
+                    cv_res
+                )
             except Decoder.ClassMissingException:
                 continue
 
-            if self.save_coef:
-                self.coef.append(model_train.coef_)
+            if self.use_nested_cv is True:
+                data_inner = data[train_index]
+                label_inner = label[train_index]
+                for train_index_inner, test_index_inner in split_data(data_inner):
+                    try:
+                        cv_res_inner = wrapper_model_train(
+                            data_inner,
+                            label_inner,
+                            train_index_inner,
+                            test_index_inner,
+                            cv_res_inner
+                        )
+                    except Decoder.ClassMissingException:
+                        continue
 
-            y_test_pr = model_train.predict(X_test)
-            y_train_pr = model_train.predict(X_train)
+        self.cv_res = cv_res
+        if self.use_nested_cv is True:
+            self.cv_res_inner = cv_res_inner
 
-            sc_te = self.eval_method(y_test, y_test_pr)
-            sc_tr = self.eval_method(y_train, y_train_pr)
+    def bay_opt_wrapper(self, model_train, X_train, y_train):
+        """Run bayesian optimization and test best params to model_train
+        Save best params into self.best_bay_opt_params
+        """
 
-            if self.threshold_score is True:
-                if sc_tr < 0:
-                    sc_tr = 0
-                if sc_te < 0:
-                    sc_te = 0
+        X_train_bo, X_test_bo, y_train_bo, y_test_bo = \
+            model_selection.train_test_split(
+                X_train, y_train, train_size=0.7, shuffle=False)
 
-            if self.get_movement_detection_rate is True:
-                self._set_movement_detection_rates(
-                    y_test,
-                    y_test_pr,
-                    y_train,
-                    y_train_pr
-                )
+        if y_train_bo.sum() == 0 or y_test_bo.sum() == 0:
+            print("could not start Bay. Opt. with no labels > 0")
+            raise Decoder.ClassMissingException
 
-            self.score_train.append(sc_tr)
-            self.score_test.append(sc_te)
-            self.X_train.append(X_train)
-            self.X_test.append(X_test)
-            self.y_train.append(y_train)
-            self.y_test.append(y_test)
-            self.y_train_pr.append(y_train_pr)
-            self.y_test_pr.append(y_test_pr)
+        params_bo = self.run_Bay_Opt(
+            X_train_bo,
+            y_train_bo,
+            X_test_bo,
+            y_test_bo,
+            rounds=10
+        )
 
-        return np.mean(self.score_test)
+        # set bay. opt. obtained best params to model
+        params_bo_dict = {}
+        for i in range(len(params_bo)):
+            setattr(
+                model_train,
+                self.bay_opt_param_space[i].name,
+                params_bo[i]
+            )
+            params_bo_dict[self.bay_opt_param_space[i].name] = params_bo[i]
+
+        self.best_bay_opt_params.append(params_bo_dict)
+
+        return model_train
 
     def run_Bay_Opt(self,
         X_train,
@@ -617,7 +722,7 @@ class Decoder:
         def get_f_val(model_bo):
 
             try:
-                model_bo = self._fit_model(model_bo, X_train, y_train)
+                model_bo = self.fit_model(model_bo, X_train, y_train)
             except Decoder.ClassMissingException:
                 pass
 
