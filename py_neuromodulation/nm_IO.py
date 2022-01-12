@@ -234,7 +234,7 @@ def read_settings(PATH: str) -> dict:
         return json.load(f)
 
 def read_features(PATH: str) -> pd.DataFrame:
-    return pd.read_csv(PATH + "_FEATURES.CSV", index_col=0)
+    return pd.read_csv(PATH + "_FEATURES.csv", index_col=0)
 
 def read_nm_channels(PATH: str) -> pd.DataFrame:
     return pd.read_csv(PATH + "_nm_channels.csv", index_col=0)
