@@ -11,9 +11,9 @@ def run_example_BIDS():
 
     RUN_NAME = "sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg.vhdr"
     PATH_RUN = os.path.join(
-        os.path.abspath('examples\\data'), 'sub-testsub', 'ses-EphysMedOff', 'ieeg',
+        os.path.abspath(os.path.join('examples','data')), 'sub-testsub', 'ses-EphysMedOff', 'ieeg',
         RUN_NAME)
-    PATH_BIDS = os.path.abspath('examples\\data')
+    PATH_BIDS = os.path.abspath(os.path.join('examples','data'))
     PATH_OUT = os.path.abspath(os.path.join('examples', 'data', 'derivatives'))
 
     # read default settings

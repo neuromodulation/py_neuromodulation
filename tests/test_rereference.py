@@ -32,7 +32,7 @@ class TestWrapper:
             'ieeg',
             RUN_NAME
         )
-        PATH_BIDS = os.path.abspath('examples\\data')
+        PATH_BIDS = os.path.abspath(os.path.join('examples', 'data'))
         PATH_OUT = os.path.abspath(os.path.join('examples', 'data', 'derivatives'))
 
         # read default settings
