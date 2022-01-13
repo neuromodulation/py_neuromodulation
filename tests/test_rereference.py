@@ -47,6 +47,8 @@ class TestWrapper:
 
         self.ieeg_batch = self.nm_BIDS.get_data()
 
+        self.nm_BIDS._set_run()
+
     def test_rereference(self):
         """
         Args:

@@ -1,6 +1,10 @@
+import pandas as pd
 from py_neuromodulation import nm_normalization
 
-def test_settings(settings: dict, verbose=True) -> None:
+def test_settings(
+    settings : dict,
+    nm_channel : pd.DataFrame,
+    verbose=True,) -> None:
     """Test if settings are specified correctly in nm_settings.json
     Parameters
     ----------
@@ -124,6 +128,17 @@ def test_settings(settings: dict, verbose=True) -> None:
             s["sharpwave_analysis_settings"]["filter_high_cutoff"]
             > s["sharpwave_analysis_settings"]["filter_low_cutoff"]
         )
+
+    if s["methods"]["coherence"] is True:
+        assert (
+            ch_coh in nm_channel.name for ch_coh in s["coherence"]["channels"]
+        )
+
+        assert (
+            f_band_coh in s["frequency_ranges"]
+            for f_band_coh in s["coherence"]["frequency_bands"]
+        )
+
     if verbose:
         print("No Error occurred when testing the settings.")
     return

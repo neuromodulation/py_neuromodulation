@@ -8,6 +8,8 @@ import pandas as pd
 import time
 import timeit
 from pynput.keyboard import Key, Listener
+import pylsl
+#  clone TMSI-Python-Interface from here: https://gitlab.com/tmsi/tmsi-python-interface
 
 from py_neuromodulation import \
     (nm_projection,
@@ -60,23 +62,23 @@ class RealTimePyNeuro(nm_stream.PNStream):
 
         # leave out coordinate setting for now
 
-        self._set_run()
-
         if self.use_FieldTripClient is True:
-            self.ftc = self.init_fieldtrip()
+            self.ftc = self.init_fieldtrip(1972)
+            self.ftc_send = self.init_fieldtrip(1987)
             self.get_data_client = self.get_data_FieldTripClient
             self.send_data_client = self.send_data_FieldTripClient
             self.disconnect = self.disconnect_FieldTripClient
         else:
             # use LSL
-            self.get_data_client = None
-            self.send_data_client = None
-            self.disconnect = None
-        
+            self.lsl_client = self.init_lsl(wait_max=10, buffer_size=1000)
+            self.get_data_client = self.get_data_lsl
+            self.send_data_client = self.send_data_lsl
+            self.disconnect = self.disconnect_lsl
+
         self.init_keyboard_listener()
 
     @staticmethod
-    def init_fieldtrip() -> FieldTrip.Client:
+    def init_fieldtrip(PORT: int = 1972) -> FieldTrip.Client:
         """Initialize Fieldtrip client
         Returns
         -------
@@ -84,7 +86,7 @@ class RealTimePyNeuro(nm_stream.PNStream):
         """
         ftc = FieldTrip.Client()
         # Python FieldTripBuffer https://www.fieldtriptoolbox.org/development/realtime/buffer_python/
-        ftc.connect('localhost', 1972)   # might throw IOError
+        ftc.connect('localhost', port=PORT)   # might throw IOError
         H = ftc.getHeader()
 
         if H is None:
@@ -95,16 +97,26 @@ class RealTimePyNeuro(nm_stream.PNStream):
         print(H.labels)
 
         return ftc
+    
+    @staticmethod
+    def init_lsl(wait_max : int = 10, buffer_size : int = 1000) -> pylsl:
+
+        streams = pylsl.resolve_streams(wait_time=min(0.1, wait_max))
+        print("Stream found")
+        return pylsl.StreamInlet(info=streams[0], max_buflen=buffer_size)
 
     def run(self) -> None:
         """Start get_data, calcFeatures and sendFeature processes
         """
+
+        self._set_run()
+
         last_batch = 0
 
         while self.listener.is_alive() is True:
             ieeg_batch = self.get_data_client()
             ieeg_batch = ieeg_batch[-128:, :2]  # take last, #1: data
-            ieeg_batch = np.random.random([128, 2]).T  # channels, samples
+            #ieeg_batch = np.random.random([128, 2]).T  # channels, samples
             # check if time stamp changed 
             if np.array_equal(ieeg_batch, last_batch) is False:
 
@@ -120,18 +132,36 @@ class RealTimePyNeuro(nm_stream.PNStream):
 
         self.disconnect()
 
+    def get_data_lsl(self, max_samples: int = 1000, timeout : int = 5):
+        samples, _ = self.lsl_client.pull_chunk(
+            max_samples=max_samples,
+            timeout=timeout
+        )
+        return np.vstack(samples).T
+
+    def send_data_lsl(self, features: pd.Series):
+        """Not tested yet
+        Check https://github.com/mne-tools/mne-realtime/blob/main/mne_realtime/mock_lsl_stream.py
+        for reference implementation
+        """
+
+        info = pylsl.StreamInfo(name='py_nm', type=None,
+                                channel_count=None,
+                                nominal_srate=None,
+                                channel_format='float32', source_id=None)
+        outlet = pylsl.StreamOutlet(info)
+        outlet.push_sample(features.to_numpy())
+
+    def disconnect_lsl(self):
+        self.lsl_client.close_stream()
+
     def get_data_FieldTripClient(self):
         return self.ftc.getData()
 
     def send_data_FieldTripClient(self, features: pd.Series):
 
-        H = self.ftc.getHeader()
-        # channel names are 1. data 2. ident 3. timestamp
-        # put at the end of the buffer the calculated features of the data channel
-        to_send = np.zeros([H.nSamples, H.nChannels])
-        to_send[-features.shape[0]:, 1] = np.array(features)
-
-        self.ftc.putData(to_send)
+        # H = self.ftc_send.getHeader()  # retrieving header is not necessary for sending
+        self.ftc_send.putData(np.expand_dims(np.array(features), axis=0))
 
     def disconnect_FieldTripClient(self):
         self.ftc.disconnect()
