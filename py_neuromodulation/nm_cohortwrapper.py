@@ -3,6 +3,7 @@ import os
 import numpy as np
 from pathlib import Path
 from scipy import stats
+import pandas as pd
 from multiprocessing import Pool
 from sklearn import linear_model, discriminant_analysis, ensemble, svm
 from sklearn import metrics
@@ -21,11 +22,13 @@ import bids
 from bids import BIDSLayout
 from itertools import product
 
+import py_neuromodulation
 from py_neuromodulation import (
     nm_decode,
     nm_start_BIDS,
     nm_analysis,
-    nm_BidsStream
+    nm_BidsStream,
+    nm_IO
 )
 
 class CohortRunner:
@@ -256,10 +259,13 @@ class CohortRunner:
                 grid_point_all[grid_point][cohort][subject_name] = {}
             grid_point_all[grid_point][cohort][subject_name][feature_file] = {}
 
-            grid_point_all[grid_point][cohort][subject_name][feature_file]["data"] = decoder.grid_point_ind_data[grid_point]
-            grid_point_all[grid_point][cohort][subject_name][feature_file]["feature_names"] = decoder.feature_names
+            grid_point_all[grid_point][cohort][subject_name][feature_file]["data"] = \
+                decoder.grid_point_ind_data[grid_point]
+            grid_point_all[grid_point][cohort][subject_name][feature_file]["feature_names"] = \
+                decoder.feature_names
             grid_point_all[grid_point][cohort][subject_name][feature_file]["label"] = decoder.label
-            grid_point_all[grid_point][cohort][subject_name][feature_file]["label_name"] = decoder.target_ch
+            grid_point_all[grid_point][cohort][subject_name][feature_file]["label_name"] = \
+                decoder.target_ch
 
             # check laterality
             lat = "CON"  # Beijing is always contralateral
@@ -342,8 +348,7 @@ class CohortRunner:
         for cohort in cohorts:
             print("COHORT: "+cohort)
             feature_path = os.path.join(feature_path_cohorts, cohort)
-            nm_reader = NM_reader.NM_Reader(feature_path)
-            feature_list = nm_reader.get_feature_list()
+            feature_list = nm_IO.get_run_list_indir(feature_path)
             for feature_file in feature_list:
                 print(feature_file)
                 if read_gridpoints:
@@ -519,9 +524,9 @@ class CohortRunner:
 
 
         # add the cortex grid for plotting
-        nm_reader = NM_reader.NM_Reader(os.path.join(feature_path, 'Beijing'))
-        feature_file = nm_reader.get_feature_list()[0]
-        grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
+        grid_cortex = pd.read_csv(
+            os.path.join(py_neuromodulation.__path__[0], 'grid_cortex.tsv'), sep='\t'
+        ).to_numpy()
         performance_leave_one_patient_out["grid_cortex"] = grid_cortex
         np.save(os.path.join(self.outpath, self.ML_model_name+'_performance_leave_one_patient_out_within_cohort.npy'),\
             performance_leave_one_patient_out)
@@ -627,9 +632,9 @@ class CohortRunner:
                     performance_leave_one_cohort_out[cohort_test][grid_point][subject_test]["tpr_train"] = tpr
 
         # add the cortex grid for plotting
-        nm_reader = NM_reader.NM_Reader(os.path.join(feature_path, 'Beijing'))
-        feature_file = nm_reader.get_feature_list()[0]
-        grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
+        grid_cortex = pd.read_csv(
+            os.path.join(py_neuromodulation.__path__[0], 'grid_cortex.tsv'), sep='\t'
+        ).to_numpy()
         performance_leave_one_cohort_out["grid_cortex"] = grid_cortex
         np.save(os.path.join(self.outpath, self.ML_model_name+'_performance_leave_one_cohort_out.npy'), performance_leave_one_cohort_out)
 
@@ -731,9 +736,9 @@ class CohortRunner:
                     performance_leave_one_patient_out[cohort][grid_point][subject_test]["tpr_train"] = tpr
 
         # add the cortex grid for plotting
-        nm_reader = NM_reader.NM_Reader(os.path.join(feature_path, 'Beijing'))
-        feature_file = nm_reader.get_feature_list()[0]
-        grid_cortex = np.array(nm_reader.read_settings(feature_file)["grid_cortex"])
+        grid_cortex = pd.read_csv(
+            os.path.join(py_neuromodulation.__path__[0], 'grid_cortex.tsv'), sep='\t'
+        ).to_numpy()
         performance_leave_one_patient_out["grid_cortex"] = grid_cortex
         np.save(os.path.join(self.outpath, self.ML_model_name+'_performance_leave_one_patient_out_across_cohorts.npy'), performance_leave_one_patient_out)
         #return performance_leave_one_patient_out
