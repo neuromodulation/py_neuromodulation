@@ -75,7 +75,7 @@ class RealTimePyNeuro(nm_stream.PNStream):
             self.lsl_client = self.init_lsl(wait_max=10, buffer_size=1000)
             self.get_data_client = self.get_data_lsl
             self.send_data_client = self.send_data_lsl
-            self.disconnect = None
+            self.disconnect = self.disconnect_lsl
         
         self.init_keyboard_listener()
 
