@@ -63,7 +63,8 @@ class RealTimePyNeuro(nm_stream.PNStream):
         self._set_run()
 
         if self.use_FieldTripClient is True:
-            self.ftc = self.init_fieldtrip()
+            self.ftc = self.init_fieldtrip(1972)
+            self.ftc_send = self.init_fieldtrip(1987)
             self.get_data_client = self.get_data_FieldTripClient
             self.send_data_client = self.send_data_FieldTripClient
             self.disconnect = self.disconnect_FieldTripClient
@@ -76,7 +77,7 @@ class RealTimePyNeuro(nm_stream.PNStream):
         self.init_keyboard_listener()
 
     @staticmethod
-    def init_fieldtrip() -> FieldTrip.Client:
+    def init_fieldtrip(PORT: int = 1972) -> FieldTrip.Client:
         """Initialize Fieldtrip client
         Returns
         -------
@@ -84,7 +85,7 @@ class RealTimePyNeuro(nm_stream.PNStream):
         """
         ftc = FieldTrip.Client()
         # Python FieldTripBuffer https://www.fieldtriptoolbox.org/development/realtime/buffer_python/
-        ftc.connect('localhost', 1972)   # might throw IOError
+        ftc.connect('localhost', port=PORT)   # might throw IOError
         H = ftc.getHeader()
 
         if H is None:
@@ -104,7 +105,7 @@ class RealTimePyNeuro(nm_stream.PNStream):
         while self.listener.is_alive() is True:
             ieeg_batch = self.get_data_client()
             ieeg_batch = ieeg_batch[-128:, :2]  # take last, #1: data
-            ieeg_batch = np.random.random([128, 2]).T  # channels, samples
+            #ieeg_batch = np.random.random([128, 2]).T  # channels, samples
             # check if time stamp changed 
             if np.array_equal(ieeg_batch, last_batch) is False:
 
@@ -125,13 +126,13 @@ class RealTimePyNeuro(nm_stream.PNStream):
 
     def send_data_FieldTripClient(self, features: pd.Series):
 
-        H = self.ftc.getHeader()
+        H = self.ftc_send.getHeader()
         # channel names are 1. data 2. ident 3. timestamp
         # put at the end of the buffer the calculated features of the data channel
-        to_send = np.zeros([H.nSamples, H.nChannels])
-        to_send[-features.shape[0]:, 1] = np.array(features)
+        #to_send = np.zeros([H.nSamples, H.nChannels])
+        #to_send[-features.shape[0]:, 1] = np.array(features)
 
-        self.ftc.putData(to_send)
+        self.ftc_send.putData(to_send)
 
     def disconnect_FieldTripClient(self):
         self.ftc.disconnect()
