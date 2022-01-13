@@ -90,11 +90,13 @@ class BidsStream(nm_stream.PNStream):
             self.settings,self.fs
         )
 
-        self._set_run()
-
     def run_bids(self) -> None:
         """process BIDS recording, add labels and save features after finish
         """
+
+        # init features, projection etc. here
+        # settings, nm_channels might have been changed by the user in e.g. the ipynb
+        self._set_run()
 
         self.run()
 

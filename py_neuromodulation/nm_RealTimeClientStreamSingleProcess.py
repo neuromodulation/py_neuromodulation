@@ -62,8 +62,6 @@ class RealTimePyNeuro(nm_stream.PNStream):
 
         # leave out coordinate setting for now
 
-        self._set_run()
-
         if self.use_FieldTripClient is True:
             self.ftc = self.init_fieldtrip(1972)
             self.ftc_send = self.init_fieldtrip(1987)
@@ -76,7 +74,7 @@ class RealTimePyNeuro(nm_stream.PNStream):
             self.get_data_client = self.get_data_lsl
             self.send_data_client = self.send_data_lsl
             self.disconnect = self.disconnect_lsl
-        
+
         self.init_keyboard_listener()
 
     @staticmethod
@@ -110,6 +108,9 @@ class RealTimePyNeuro(nm_stream.PNStream):
     def run(self) -> None:
         """Start get_data, calcFeatures and sendFeature processes
         """
+
+        self._set_run()
+
         last_batch = 0
 
         while self.listener.is_alive() is True:
