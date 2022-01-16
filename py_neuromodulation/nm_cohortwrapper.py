@@ -1,3 +1,4 @@
+from re import VERBOSE
 import sys
 import os
 import numpy as np
@@ -25,7 +26,6 @@ from itertools import product
 import py_neuromodulation
 from py_neuromodulation import (
     nm_decode,
-    nm_start_BIDS,
     nm_analysis,
     nm_BidsStream,
     nm_IO
@@ -38,6 +38,7 @@ class CohortRunner:
         cohorts:dict = None,
         ML_model_name="LM",
         model=linear_model.LogisticRegression(class_weight="balanced"),
+        eval_method=metrics.balanced_accuracy_score,
         estimate_gridpoints=False, 
         estimate_channels=True,
         estimate_all_channels_combined=False,
@@ -49,6 +50,11 @@ class CohortRunner:
         run_bids=True,
         ECOG_ONLY=True,
         run_pool=True,
+        VERBOSE=False,
+        LIMIT_DATA=False,
+        RUN_BAY_OPT=False,
+        cv_method=model_selection.KFold(n_splits=3, shuffle=False),
+        use_nested_cv=True,
         outpath=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\0209_SharpWaveLimFeaturesSTFT_with_Grid",
         PATH_SETTINGS=r"C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\nm_settings.json"
     ) -> None:
@@ -69,25 +75,31 @@ class CohortRunner:
         self.ECOG_ONLY = ECOG_ONLY
         self.TRAIN_VAL_SPLIT = TRAIN_VAL_SPLIT
         self.cohorts = cohorts
+        self.VERBOSE = VERBOSE
+        self.LIMIT_DATA = LIMIT_DATA
+        self.eval_method = eval_method
+        self.cv_method = cv_method
+        self.use_nested_cv = use_nested_cv
+        self.RUN_BAY_OPT = RUN_BAY_OPT
+        self.TRAIN_VAL_SPLIT = TRAIN_VAL_SPLIT
+        self.model = model
 
-        # put this in main
-        if self.cohorts is None:
-            self.cohorts = {
-                "Berlin" : "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Berlin",
-                "Pittsburgh" : "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Pittsburgh",
-                "Beijing" : "C:\\Users\\ICN_admin\\Documents\\Decoding_Toolbox\\Data\\Beijing"
-            }
 
         self.grid_cortex = pd.read_csv(
             os.path.join(py_neuromodulation.__path__[0], 'grid_cortex.tsv'), sep='\t'
         ).to_numpy()
-
-        self.decoder = nm_decode.Decoder(
-            model=model,
-            TRAIN_VAL_SPLIT=TRAIN_VAL_SPLIT,
+    
+    def init_decoder(self) -> nm_decode.Decoder:
+        return nm_decode.Decoder(
+            model=self.model,
+            TRAIN_VAL_SPLIT=self.TRAIN_VAL_SPLIT,
             STACK_FEATURES_N_SAMPLES=True,
             get_movement_detection_rate=True,
-            RUN_BAY_OPT=False
+            eval_method=self.eval_method,
+            VERBOSE=self.VERBOSE,
+            cv_method=self.cv_method,
+            use_nested_cv=self.use_nested_cv,
+            RUN_BAY_OPT=self.RUN_BAY_OPT
         )
 
     def multiprocess_pipeline_run_wrapper(self, PATH_RUN):
@@ -105,17 +117,16 @@ class CohortRunner:
                 break
 
         if self.run_bids:
-            nm_BIDS = nm_BidsStream.BidsStream(PATH_RUN=PATH_RUN,
-                                       PATH_BIDS=PATH_BIDS,
-                                       PATH_OUT=PATH_OUT,
-                                       LIMIT_DATA=False)
-
-            nm_BIDS = nm_start_BIDS.NM_BIDS(
-                PATH_RUN,
-                ECOG_ONLY=self.ECOG_ONLY,
+            nm_BIDS = nm_BidsStream.BidsStream(
+                PATH_RUN=PATH_RUN,
                 PATH_BIDS=PATH_BIDS,
                 PATH_OUT=PATH_OUT,
-                PATH_SETTINGS=self.PATH_SETTINGS
+                LIMIT_DATA=self.LIMIT_DATA,
+                LIMIT_HIGH=200000,
+                LIMIT_LOW=0,
+                ECOG_ONLY=self.ECOG_ONLY,
+                PATH_SETTINGS=self.PATH_SETTINGS,
+                VERBOSE=self.VERBOSE
             )
 
             nm_BIDS.run_bids()
@@ -152,15 +163,14 @@ class CohortRunner:
         #model = svm.SVC(class_weight="balanced")
 
         if self.run_ML_model:
-            model = linear_model.LogisticRegression(class_weight='balanced')
-            feature_reader.set_decoder(
-                model = model,
-                eval_method=metrics.balanced_accuracy_score,
-                cv_method=model_selection.KFold(n_splits=3, shuffle=True),
-                get_movement_detection_rate=True,
-                min_consequent_count=2,
-                use_nested_cv=True,
-                TRAIN_VAL_SPLIT=self.TRAIN_VAL_SPLIT
+            # set decoder for this specific run (using the feature_reader features)
+            feature_reader.decoder = self.init_decoder()
+
+            feature_reader.decoder.set_data(
+                features=feature_reader.feature_arr,
+                label=feature_reader.label,
+                label_name=feature_reader.label_name,
+                used_chs=feature_reader.used_chs
             )
 
             performances = feature_reader.run_ML_model(
@@ -186,10 +196,12 @@ class CohortRunner:
         run_files_all = list(np.concatenate(run_files_all))
 
         if self.run_pool:
-            pool = Pool(processes=20)  # most on Ryzen CPU 2990WX is 63
+            pool = Pool(processes=50)
             pool.map(self.multiprocess_pipeline_run_wrapper, run_files_all)
         else:
-            self.multiprocess_pipeline_run_wrapper(run_files_all[0])
+            #self.multiprocess_pipeline_run_wrapper(run_files_all[11])
+            for run_file in run_files_all[:12]:
+                self.multiprocess_pipeline_run_wrapper(run_file)
 
     def read_cohort_results(self, feature_path, cohort):
         """Read for a given path (of potentially multiple estimated runs) performance results
@@ -202,25 +214,32 @@ class CohortRunner:
         ML_model_name : string
             model name, by default "LM"
         """
+
+        # Here the runs are overwritten!
         folders_path = [x[0] for x in os.walk(feature_path)]
         feature_paths = [os.path.basename(x) for x in folders_path[1:]]
-        performance_dict = {}
+        performance_out = {}
 
         for feature_file in feature_paths:
-            feature_reader = nm_analysis.FeatureReadWrapper(
+            feature_reader = nm_analysis.Feature_Reader(
                 feature_dir=feature_path,
                 feature_file=feature_file
             )
 
-            performance_dict = feature_reader.read_results(
+            performance_run = feature_reader.read_results(
                 read_grid_points=self.estimate_gridpoints,
                 read_channels=self.estimate_channels,
                 read_all_combined=self.estimate_all_channels_combined,
                 read_mov_detection_rates=True
             )
 
+            sub = feature_file[feature_file.find('sub-'):feature_file.find('_ses')][4:]
+            if sub not in performance_out:
+                performance_out[sub] = {}
+            performance_out[sub][feature_file] = performance_run[sub]  # get saved in performance_run
+
         np.save(os.path.join(self.outpath, self.ML_model_name+'_cohort_'+cohort+'.npy'),
-            performance_dict
+            performance_out
         )
 
     def cohort_wrapper_read_cohort(self):
@@ -388,6 +407,12 @@ class CohortRunner:
                         y_train = y_train[0]
 
                     # run here ML estimation
+                    self.decoder = self.init_decoder()
+                    model = self.decoder.wrapper_model_train(
+                        X_train=X_train,
+                        y_train=y_train,
+                        return_fitted_model_only=True
+                    )
                     # use initialized decoder
                     try:
                         cv_res = self.eval_model(X_train, y_train, X_test, y_test)
@@ -439,6 +464,7 @@ class CohortRunner:
                     y_train = y_train[0]
 
                 # run here ML estimation
+                self.decoder = self.init_decoder()
                 model = self.decoder.wrapper_model_train(
                     X_train=X_train,
                     y_train=y_train,
@@ -530,6 +556,7 @@ class CohortRunner:
                         X_train = X_train[0]
                         y_train = y_train[0]
 
+                    self.decoder = self.init_decoder()
                     try:
                         cv_res = self.eval_model(X_train, y_train, X_test, y_test)
                     except nm_decode.Decoder.ClassMissingException:
@@ -601,6 +628,7 @@ class CohortRunner:
                                 X_test = X_test[0]
                                 y_test = y_test[0]
 
+                            self.decoder = self.init_decoder()
                             try:
                                 cv_res = self.eval_model(X_train, y_train, X_test, y_test)
                             except nm_decode.Decoder.ClassMissingException:
