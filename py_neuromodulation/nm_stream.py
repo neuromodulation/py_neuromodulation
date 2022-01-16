@@ -146,7 +146,9 @@ class PNStream(ABC):
         )
 
         self.projection = self._get_projection(self.settings, self.nm_channels)
-        if self.projection is not None:
+        if self.projection is not None or \
+            len(self.coords["cortex_left"]["positions"]) or \
+            len(self.coords["cortex_right"]["positions"]):
             self.sess_right = self._get_sess_lat(self.coords)
         else:
             self.sess_right = None
