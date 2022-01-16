@@ -195,7 +195,7 @@ class Feature_Reader:
         ch_names_ECOG : list, optional
             list of ECoG channel to plot features for, by default None
         """
-        
+
         if ch_names_ECOG is None:
             ch_names_ECOG = self.ch_names_ECOG
         for ch_name_ECOG in ch_names_ECOG:
