@@ -69,7 +69,6 @@ class PNStream(ABC):
         self.VERBOSE = VERBOSE
 
         self.settings = nm_IO.read_settings(self.PATH_SETTINGS)
-        nm_test_settings.test_settings(self.settings)
 
         if True in [self.settings["methods"]["project_cortex"],
                     self.settings["methods"]["project_subcortex"]]:
@@ -118,6 +117,8 @@ class PNStream(ABC):
     def _set_run(self):
         """Initialize preprocessing, and feature estimation modules
         """
+
+        nm_test_settings.test_settings(self.settings, self.nm_channels)
 
         self.CH_NAMES_USED, self.CH_TYPES_USED, self.FEATURE_IDX, self.LABEL_IDX = \
             self._get_ch_info(self.nm_channels)

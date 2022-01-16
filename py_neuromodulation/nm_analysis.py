@@ -70,7 +70,9 @@ class Feature_Reader:
         self.ch_names = self.nm_channels.new_name
         self.used_chs = list(self.nm_channels[(self.nm_channels["target"] == 0) &
                         (self.nm_channels["used"] == 1)]["new_name"])
-        self.ch_names_ECOG = [ch_name for ch_name in self.ch_names if "ECOG" in ch_name]
+        self.ch_names_ECOG = self.nm_channels.query(
+            '(type=="ecog") and (used == 1) and (status=="good")'
+        ).new_name.to_list()
 
         # init plotter
         self.nmplotter =  nm_plots.NM_Plot()
@@ -461,7 +463,8 @@ class Feature_Reader:
         if save_results:
             self.decoder.save(
                 self.feature_dir,
-                self.feature_file[:-len(".vhdr")],
+                self.feature_file[:-len(".vhdr")]
+                    if ".vhdr" in self.feature_file else self.feature_file,
                 output_name
             )
 

@@ -204,7 +204,7 @@ class Decoder:
             obj_set = getattr(self, attr_name)[contact_point]
         else:
             obj_set = getattr(self, attr_name)
-        
+
         def set_scores(cv_res: Type[CV_res], set_inner_CV_res : bool = False):
 
             def set_score(key_ : str, val):
@@ -365,14 +365,24 @@ class Decoder:
             sklearn.metrics true positive rate np.array
         """
 
-        pred_grouped, _ = self.get_movement_grouped_array(prediction, threshold, min_consequent_count)
-        y_grouped, labels_count = self.get_movement_grouped_array(y_label, threshold, min_consequent_count)
+        pred_grouped, _ = self.get_movement_grouped_array(
+            prediction,
+            threshold,
+            min_consequent_count
+        )
+        y_grouped, labels_count = self.get_movement_grouped_array(
+            y_label,
+            threshold,
+            min_consequent_count
+        )
 
         hit_rate = np.zeros(labels_count)
         pred_group_bin = np.array(pred_grouped>0)
 
         for label_number in range(1, labels_count + 1):  # labeling starts from 1    
-            hit_rate[label_number-1] = np.sum(pred_group_bin[np.where(y_grouped == label_number)[0]])
+            hit_rate[label_number-1] = np.sum(
+                pred_group_bin[np.where(y_grouped == label_number)[0]]
+            )
 
         try:
             mov_detection_rate = np.where(hit_rate>0)[0].shape[0] / labels_count
@@ -538,6 +548,55 @@ class Decoder:
         cv_res.fprate_train.append(fpr)
 
         return cv_res
+    
+    def wrapper_model_train(
+        self,
+        X_train,
+        y_train,
+        X_test = None,
+        y_test = None,
+        cv_res: Type[CV_res] = CV_res(),
+        return_fitted_model_only : bool = False
+    ):
+
+        model_train = clone(self.model)
+        if self.STACK_FEATURES_N_SAMPLES is True:
+            if X_train is None:
+                X_train, y_train = Decoder.append_previous_n_samples(
+                    X_train, y_train, self.time_stack_n_samples_
+                )
+            else:
+                X_train, y_train, X_test, y_test = Decoder.append_samples_val(
+                    X_train,
+                    y_train,
+                    X_test,
+                    y_test,
+                    n=self.time_stack_n_samples
+                )
+            
+
+        if y_train.sum() == 0 or y_test.sum() == 0:  # only one class present
+            raise Decoder.ClassMissingException
+
+        if self.RUN_BAY_OPT is True:
+            model_train = self.bay_opt_wrapper(model_train, X_train, y_train)
+
+        # fit model
+        model_train = self.fit_model(model_train, X_train, y_train)
+
+        if return_fitted_model_only is True:
+            return model_train
+
+        cv_res = self.eval_model(
+            model_train,
+            X_train,
+            X_test,
+            y_train,
+            y_test,
+            cv_res
+        )
+
+        return cv_res
 
     def run_CV(self, data, label):
         """Evaluate model performance on the specified cross validation.
@@ -551,41 +610,6 @@ class Decoder:
             label to train and test with shape samples, features
         """
 
-        def wrapper_model_train(
-            data,
-            label,
-            train_index,
-            test_index,
-            cv_res: Type[CV_res]
-        ) -> Type[CV_res]:
-
-            model_train = clone(self.model)
-            X_train, y_train = data[train_index, :], label[train_index]
-            X_test, y_test = data[test_index], label[test_index]
-            y_test[0] = 1
-            y_train[0] = 1
-            if self.STACK_FEATURES_N_SAMPLES is True:
-                X_train, y_train, X_test, y_test = Decoder.append_samples_val(
-                    X_train,
-                    y_train,
-                    X_test,
-                    y_test,
-                    n=self.time_stack_n_samples
-                )
-
-            if y_train.sum() == 0 or y_test.sum() == 0:  # only one class present
-                raise Decoder.ClassMissingException
-
-            if self.RUN_BAY_OPT is True:
-                model_train = self.bay_opt_wrapper(model_train, X_train, y_train)
-
-            # fit model
-            model_train = self.fit_model(model_train, X_train, y_train)
-
-            self.eval_model(model_train, X_train, X_test, y_train, y_test, cv_res)
-
-            return cv_res
-        
         def split_data(data):
             if self.cv_method == "NonShuffledTrainTestSplit":
                 # unfortunately lot of overhead since a non shuffle index base split 
@@ -609,14 +633,16 @@ class Decoder:
 
         if self.use_nested_cv is True:
             cv_res_inner = self.init_cv_res()
-        
+
         for train_index, test_index in split_data(data):
+            X_train, y_train = data[train_index, :], label[train_index]
+            X_test, y_test = data[test_index], label[test_index]
             try:
-                cv_res = wrapper_model_train(
-                    data,
-                    label,
-                    train_index,
-                    test_index,
+                cv_res = self.wrapper_model_train(
+                    X_train,
+                    y_train,
+                    X_test,
+                    y_test,
                     cv_res
                 )
             except Decoder.ClassMissingException:
@@ -626,12 +652,16 @@ class Decoder:
                 data_inner = data[train_index]
                 label_inner = label[train_index]
                 for train_index_inner, test_index_inner in split_data(data_inner):
+                    X_train_inner = data_inner[train_index_inner, :]
+                    y_train_inner = label_inner[train_index_inner]
+                    X_test_inner = data_inner[test_index_inner]
+                    y_test_inner = label_inner[test_index_inner]
                     try:
-                        cv_res_inner = wrapper_model_train(
-                            data_inner,
-                            label_inner,
-                            train_index_inner,
-                            test_index_inner,
+                        cv_res_inner = self.wrapper_model_train(
+                            X_train_inner,
+                            y_train_inner,
+                            X_test_inner,
+                            y_test_inner,
                             cv_res_inner
                         )
                     except Decoder.ClassMissingException:

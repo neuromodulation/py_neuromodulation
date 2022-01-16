@@ -54,7 +54,7 @@ def set_channels_by_bids(ch_names, ch_types, reference='default', bads=None,
         raise Exception("Sorry, no numbers below zero")
 
     mov_substrs = ['mov', 'rota_squared', 'squared_emg', 'squared_rotawheel', \
-                'squared_rotation']
+                'squared_rotation', 'SQUARED_INTERPOLATED_EMG']
     used_substrs = ['ecog', 'seeg']
     lfp_types = ['seeg', 'dbs', 'lfp']
 
