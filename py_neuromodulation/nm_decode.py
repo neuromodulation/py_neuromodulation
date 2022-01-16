@@ -80,7 +80,7 @@ class Decoder:
             super().__init__(self.message)
 
         def __str__(self):
-            return self.message
+            print(self.message)
 
     def __init__(self,
                  features: pd.DataFrame = None,
