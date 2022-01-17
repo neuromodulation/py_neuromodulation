@@ -7,6 +7,7 @@ mne_bids>=0.9
 numpy>=1.21.2
 pandas>=1.2.2
 nibabel
+numba
 pip
 pybids>=0.12.4
 scikit_learn>=0.24.2
