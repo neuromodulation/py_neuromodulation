@@ -37,7 +37,7 @@ class TestWrapper:
 
 def test_RMAP():
     test_wrapper = TestWrapper()
-    PATH_FPs = r"CC:\Users\ICN_admin\OneDrive - Charité - Universitätsmedizin Berlin\Connectomics\DecodingToolbox_BerlinPittsburgh_Beijing\functional_connectivity"
+    PATH_FPs = r"C:\Users\ICN_admin\OneDrive - Charité - Universitätsmedizin Berlin\Connectomics\DecodingToolbox_BerlinPittsburgh_Beijing\functional_connectivity"
     if os.path.isdir(PATH_FPs):
 
         test_wrapper.test_fp_load(
