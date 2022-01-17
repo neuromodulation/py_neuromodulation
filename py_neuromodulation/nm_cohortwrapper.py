@@ -22,6 +22,7 @@ import matplotlib
 import bids
 from bids import BIDSLayout
 from itertools import product
+import nibabel as nib
 
 import py_neuromodulation
 from py_neuromodulation import (
