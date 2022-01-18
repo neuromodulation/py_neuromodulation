@@ -405,7 +405,7 @@ class PNStream(ABC):
             self._set_run()
 
         nmplotter = nm_plots.NM_Plot(
-            ecog_strip=self.projection.ecog_strip,
-            grid_cortex=self.projection.grid_cortex,
+            ecog_strip=self.projection.ecog_strip if self.projection is not None else None,
+            grid_cortex=self.projection.grid_cortex if self.projection is not None else None,
             sess_right=self.sess_right)
         nmplotter.plot_cortex(set_clim=False)
