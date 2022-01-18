@@ -400,7 +400,12 @@ class PNStream(ABC):
 
     def plot_cortical_projection(self):
         """plot projection of cortical grid electrodes on cortex"""
-        nmplotter = nm_plots.NM_Plot(ecog_strip=self.projection.ecog_strip,
-                grid_cortex=self.projection.grid_cortex,
-                sess_right=self.sess_right)
-        nmplotter.plot_cortex()
+
+        if hasattr(self, 'features') is False:
+            self._set_run()
+
+        nmplotter = nm_plots.NM_Plot(
+            ecog_strip=self.projection.ecog_strip,
+            grid_cortex=self.projection.grid_cortex,
+            sess_right=self.sess_right)
+        nmplotter.plot_cortex(set_clim=False)
