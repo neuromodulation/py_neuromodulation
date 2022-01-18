@@ -52,7 +52,7 @@ def normalize_raw(
     """
     current = current.T
     if previous is None:
-        previous = current
+        return current.T, current
     else:
         previous = np.vstack((previous, current[-sample_add:]))
         previous = _transform_previous(
@@ -105,7 +105,7 @@ def normalize_features(
         returned  if method is not 'mean', 'median' or 'zscore'
     """
     if previous is None:
-        return np.zeros_like(current), current
+        return current, current
 
     previous = np.vstack((previous, current))
     previous = _transform_previous(
