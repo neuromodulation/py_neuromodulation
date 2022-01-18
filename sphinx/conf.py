@@ -45,7 +45,7 @@ extensions = [
     'nbsphinx',
     'recommonmark'
 ]
-source_suffix = ['.rst', '.md', '.ipynb']
+source_suffix = ['.rst', '.md']  # , '.ipynb'
 autosummary_generate = True
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
