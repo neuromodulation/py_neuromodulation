@@ -129,8 +129,8 @@ class Decoder:
             consecutive movement blocks with minimum size of 'min_consequent_count'
         """
 
-        if None not in [features, label_name]:
-            self.set_data(features, label_name, label, used_chs)
+        if any(e is not None for e in [features, label_name]):
+            self.set_data(features, label, label_name, used_chs)
 
         self.model = model
         self.eval_method = eval_method
