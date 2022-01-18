@@ -223,7 +223,10 @@ class NM_Plot():
         """
 
         if grid_cortex is None:
-            grid_cortex = self.grid_cortex
+            if type(self.grid_cortex) is pd.DataFrame:
+                grid_cortex = np.array(self.grid_cortex)
+            else:
+                grid_cortex = self.grid_cortex
 
         if ecog_strip is None:
             ecog_strip = self.ecog_strip

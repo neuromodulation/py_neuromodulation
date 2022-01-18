@@ -179,7 +179,8 @@ class Feature_Reader:
             ecog_strip=ecog_strip,
             grid_color=np.array(
                 self.sidecar["proj_matrix_cortex"]
-            ).sum(axis=1) if "grid_cortex" in self.sidecar else None
+            ).sum(axis=1) if "grid_cortex" in self.sidecar else None,
+            set_clim=False
         )
 
     def plot_features(self,
