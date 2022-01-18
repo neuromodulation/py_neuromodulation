@@ -1,5 +1,5 @@
-features.py
+nm_features.py
 =============
 
-.. autoclass:: features.Features
+.. autoclass:: nm_features.Features
       :members:

@@ -1,5 +1,5 @@
-kalmanfilter.py
+nm_kalmanfilter.py
 =============
 
-.. automodule:: kalmanfilter
+.. automodule:: nm_kalmanfilter
       :members:

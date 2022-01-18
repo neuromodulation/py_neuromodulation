@@ -11,6 +11,7 @@ numba
 numpydoc
 sphinx
 pip
+sphinx_rtd_theme
 pybids>=0.12.4
 scikit_learn>=0.24.2
 scikit_optimize>=0.8.1

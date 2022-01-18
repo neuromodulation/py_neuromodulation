@@ -1,5 +1,5 @@
 normalize_raw.py
 =============
 
-.. automodule:: normalize_raw
+.. automodule:: nm_normalization
       :members:

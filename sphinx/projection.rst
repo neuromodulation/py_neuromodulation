@@ -1,5 +1,5 @@
-projection.py
+nm_projection.py
 =============
 
-.. autoclass:: projection.Projection
+.. autoclass:: nm_projection.Projection
       :members:

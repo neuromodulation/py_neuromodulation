@@ -1,5 +1,5 @@
-sharpwaves.py
+nm_sharpwaves.py
 =============
 
-.. autoclass:: sharpwaves.SharpwaveAnalyzer
+.. autoclass:: nm_sharpwaves.SharpwaveAnalyzer
       :members:

@@ -5,7 +5,10 @@ Parametrization
    :maxdepth: 4
 
    settings
-   run_analysis
+   nm_stream
+   nm_BidsStream
+   nm_RealTimeClientStreamSingleProcess
+   nm_analysis
    resample
    normalization
    rereference

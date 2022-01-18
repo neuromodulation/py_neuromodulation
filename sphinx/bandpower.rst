@@ -1,5 +1,5 @@
 bandpower.py
 =============
 
-.. automodule:: bandpower
+.. automodule:: nm_bandpower
       :members:

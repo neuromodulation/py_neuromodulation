@@ -1,5 +1,5 @@
-rereference.py
+nm_rereference.py
 =============
 
-.. autoclass:: rereference.RT_rereference
+.. autoclass:: nm_rereference.RT_rereference
       :members:

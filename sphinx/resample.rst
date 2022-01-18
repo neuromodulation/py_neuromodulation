@@ -1,5 +1,5 @@
-resample.py
+nm_resample.py
 =============
 
-.. autoclass:: resample.Resample
+.. autoclass:: nm_resample.Resample
       :members:

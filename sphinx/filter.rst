@@ -1,5 +1,5 @@
-filter.py
+nm_filter.py
 =============
 
-.. automodule:: filter
+.. automodule:: nm_filter
       :members:

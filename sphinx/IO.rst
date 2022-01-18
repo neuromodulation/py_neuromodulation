@@ -1,5 +1,5 @@
-IO.py
+nm_IO.py
 =============
 
-.. automodule:: IO
+.. automodule:: nm_IO
       :members:

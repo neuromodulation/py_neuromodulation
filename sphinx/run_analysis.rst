@@ -1,5 +1,5 @@
-run_analysis.py
+nm_run_analysis.py
 =============
 
-.. autoclass:: run_analysis.Run
+.. autoclass:: nm_run_analysis.Run
       :members:
