@@ -15,6 +15,7 @@ import pandas as pd
 import os
 import json
 import numpy as np
+from numba import jit
 import xgboost
 from typing import Type
 import _pickle as cPickle
@@ -411,11 +412,14 @@ class Decoder:
         )
 
     @staticmethod
+    @jit(nopython=True)
     def append_previous_n_samples(X: np.ndarray, y: np.ndarray, n: int = 5):
         """
         stack feature vector for n samples
         """
-        time_arr = np.zeros([X.shape[0]-n, int(n*X.shape[1])])
+        TIME_DIM = X.shape[0]-n
+        FEATURE_DIM = int(n*X.shape[1])
+        time_arr = np.empty((TIME_DIM, FEATURE_DIM))
         for time_idx, time_ in enumerate(np.arange(n, X.shape[0])):
             for time_point in range(n):
                 time_arr[time_idx, time_point*X.shape[1]:(time_point+1)*X.shape[1]] = \
@@ -578,7 +582,7 @@ class Decoder:
                     n=self.time_stack_n_samples
                 )
 
-        if y_train.sum() == 0 or y_test.sum() == 0:  # only one class present
+        if y_train.sum() == 0 or (y_test is not None and y_test.sum() == 0):  # only one class present
             raise Decoder.ClassMissingException
 
         if self.RUN_BAY_OPT is True:
