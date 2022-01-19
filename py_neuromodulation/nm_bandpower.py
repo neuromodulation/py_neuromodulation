@@ -3,7 +3,14 @@ from numpy import log as np_log
 
 
 def get_bandpower_features(
-        features_, s, seglengths, dat_filtered, KF_dict, ch, ch_idx):
+        features_,
+        s,
+        seglengths,
+        dat_filtered,
+        KF_dict,
+        ch,
+        ch_idx
+    ):
     """Calculate features derived from bandpass filtered signal.
 
     Parameters
@@ -26,7 +33,7 @@ def get_bandpower_features(
 
     Returns
     -------
-    features_
+    features_ : dict
     """
     for idx, f_band in enumerate(s["frequency_ranges"].keys()):
         seglength = seglengths[idx]
