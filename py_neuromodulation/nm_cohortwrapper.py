@@ -275,14 +275,17 @@ class CohortRunner:
         dictionary
             ch_all
         """
-        feature_wrapper = nm_analysis.FeatureReadWrapper(
+        feature_wrapper = nm_analysis.Feature_Reader(
             feature_dir=feature_path,
             feature_file=feature_file
         )
-        decoder = nm_decode.Decoder(feature_path=feature_path,
-                                    feature_file=feature_file)
-        decoder.label = feature_wrapper.nm_reader.label
-        decoder.target_ch = feature_wrapper.label_name
+        decoder = nm_decode.Decoder()
+        decoder.set_data(
+            feature_wrapper.feature_arr,
+            feature_wrapper.label,
+            feature_wrapper.label_name,
+            feature_wrapper.used_chs
+        )
         subject_name = feature_file[feature_file.find("sub-")+4:feature_file.find("_ses")]
         sess_name = feature_file[feature_file.find("ses-")+4:feature_file.find("_task")]
         task_name = feature_file[feature_file.find("task-")+5:feature_file.find("_run")]
@@ -308,13 +311,13 @@ class CohortRunner:
             channel_all[cohort][subject_name][ch][feature_file]["feature_names"] = \
                 [ch_[len(ch)+1:] for ch_ in decoder.features.columns if ch in ch_]
             channel_all[cohort][subject_name][ch][feature_file]["label"] = decoder.label
-            channel_all[cohort][subject_name][ch][feature_file]["label_name"] = decoder.target_ch
+            channel_all[cohort][subject_name][ch][feature_file]["label_name"] = decoder.label_name
 
             # check laterality
             lat = "CON"  # Beijing is always contralateral
             # Pittsburgh Subjects
-            if ("LEFT" in decoder.target_ch and "LEFT" in decoder.features.columns[1]) or \
-            ("RIGHT" in decoder.target_ch and "RIGHT" in decoder.features.columns[1]):
+            if ("LEFT" in decoder.label_name and "LEFT" in decoder.features.columns[1]) or \
+            ("RIGHT" in decoder.label_name and "RIGHT" in decoder.features.columns[1]):
                 lat = "IPS"
 
             # Berlin subjects
@@ -324,17 +327,19 @@ class CohortRunner:
             channel_all[cohort][subject_name][ch][feature_file]["lat"] = lat
         return channel_all
 
-    def cohort_wrapper_read_all_grid_points(self, read_channels=True, feature_path_cohorts=\
-            r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\0209_SharpWaveLimFeaturesSTFT_with_Grid"):
+    def cohort_wrapper_read_all_grid_points(
+        self,
+        read_channels=True
+    ):
         cohorts = self.cohorts.keys()
         grid_point_all = {}
         for cohort in cohorts:
             print("COHORT: "+cohort)
-            feature_path = os.path.join(feature_path_cohorts, cohort)
+            feature_path = os.path.join(self.outpath, cohort)
             feature_list = nm_IO.get_run_list_indir(feature_path)
             for feature_file in feature_list:
                 print(feature_file)
-                grid_point_all = self.read_all_grid_points(
+                grid_point_all = self.read_all_channels(
                     grid_point_all,
                     feature_path,
                     feature_file,
@@ -356,7 +361,6 @@ class CohortRunner:
             y_test,
             cv_res=nm_decode.CV_res()
         )
-
 
     def run_cohort_leave_one_patient_out_CV_within_cohort(self,
             feature_path=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\try_0408\Beijing"):
@@ -521,7 +525,7 @@ class CohortRunner:
                     continue
                 if len(list(grid_point_all[grid_point][cohort].keys())) <= 1:
                     continue  # cannot do leave one out prediction with a single subject
-                
+
                 if grid_point not in performance_leave_one_patient_out[cohort]:
                     performance_leave_one_patient_out[cohort][grid_point] = {}
 

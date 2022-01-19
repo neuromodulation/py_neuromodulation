@@ -37,6 +37,8 @@ class Projection:
         self.feature_names: Optional[list] = None
         self.initialized: bool = False
 
+        self.remove_not_used_ch_from_coords()
+
         if len(self.coords["cortex_left"]["positions"]) == 0:
             self.sess_right = True
             self.ecog_strip = self.coords["cortex_right"]["positions"]
@@ -70,6 +72,20 @@ class Projection:
             )
             nmplotter.plot_cortex()
 
+    def remove_not_used_ch_from_coords(self):
+        ch_not_used = self.nm_channels.query('(used==0) or (status=="bad")').name
+        if len(ch_not_used) > 0:
+            for ch in ch_not_used:
+                for key_ in self.coords:
+                    for idx, ch_coords in enumerate(self.coords[key_]["ch_names"]):
+                        if ch.startswith(ch_coords):
+                            # delete index
+                            self.coords[key_]["positions"] = np.delete(
+                                self.coords[key_]["positions"],
+                                idx,
+                                axis=0
+                            )
+                            self.coords[key_]["ch_names"].remove(ch)
     def calc_proj_matrix(
         self, max_dist: Union[int, float], grid: np.array, coord_array: np.array
     ) -> np.ndarray:
@@ -164,18 +180,14 @@ class Projection:
     def _initialize_channels(self) -> None:
         """Initialize channel settings."""
         if self.project_cortex:
-            self.ecog_channels = [
-                self.nm_channels.new_name[ch_idx]
-                for ch_idx, ch in enumerate(self.nm_channels.type)
-                if ch == "ecog"
-            ]
+            self.ecog_channels = self.nm_channels.query(
+            '(type=="ecog") and (used == 1) and (status=="good")'
+        ).new_name.to_list()
+
         if self.project_subcortex:
-            #  mind here that coord["subcortex_left/right"] is based on the "LFP" substring in the channel
-            self.lfp_channels = (
-                self.coords["subcortex_right"]["ch_names"]
-                if self.sess_right is True
-                else self.coords["subcortex_left"]["ch_names"]
-            )
+            self.lfp_channels = self.nm_channels.query(
+            '(type=="lfp" or type=="seeg" or type=="dbs") and (used == 1) and (status=="good")'
+        ).new_name.to_list()
 
     def init_projection_run(self, feature_series: pd.Series) -> pd.Series:
         """Initialize indexes for respective channels in feature series computed by nm_features.py
