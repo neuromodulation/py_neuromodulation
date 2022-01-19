@@ -1,6 +1,3 @@
-.. py_neuromodulation documentation master file, created by
-   sphinx-quickstart on Sun Apr 18 11:04:51 2021.
-
 Welcome to py_neuromodulation's documentation!
 ==============================================
 
@@ -10,14 +7,15 @@ Welcome to py_neuromodulation's documentation!
    setup
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Examples
 
+   example_BIDS
    ParametrizationDefinition
    FeatureEstimationDemo
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Code
 
    outline_parametrization

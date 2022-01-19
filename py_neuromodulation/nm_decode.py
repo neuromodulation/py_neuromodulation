@@ -62,32 +62,14 @@ class Decoder:
     STACK_FEATURES_N_SAMPLES: bool
     time_stack_n_samples: int
     ros: RandomOverSampler = None
-    bay_opt_param_space: list = []
-    data: np.array
-    ch_ind_data: dict
-    grid_point_ind_data: dict
-    active_gridpoints: list
-    feature_names: list[str]
-    ch_ind_results: dict = {}
-    gridpoint_ind_results: dict = {}
-    all_ch_results: dict = {}
-    score_train:list = []
-    score_test:list = []
-    y_test:list = []
-    y_train:list = []
-    y_test_pr:list = []
-    y_train_pr:list = []
-    X_test:list = []
-    X_train:list = []
-    coef:list = []
-    mov_detection_rates_test:list = []
-    tprate_test:list = []
-    fprate_test:list = []
-    mov_detection_rates_train:list = []
-    tprate_train:list = []
-    fprate_train:list = []
-    best_bay_opt_params:list = []
     VERBOSE : bool = False
+    ch_ind_data : dict = {}
+    grid_point_ind_data : dict = {}
+    active_gridpoints : list = []
+    feature_names : list = []
+    ch_ind_results : dict = {}
+    gridpoint_ind_results : dict = {}
+    all_ch_results : dict = {}
 
     class ClassMissingException(Exception):
         def __init__(
@@ -98,12 +80,12 @@ class Decoder:
             super().__init__(self.message)
 
         def __str__(self):
-            return self.message
+            print(self.message)
 
     def __init__(self,
-                 features: pd.DataFrame,
-                 label: np.ndarray,
-                 label_name: str,
+                 features: pd.DataFrame = None,
+                 label: np.ndarray = None,
+                 label_name: str = None,
                  used_chs: list[str]=None,
                  model=linear_model.LinearRegression(),
                  eval_method=metrics.r2_score,
@@ -147,13 +129,8 @@ class Decoder:
             consecutive movement blocks with minimum size of 'min_consequent_count'
         """
 
-        self.features = features
-        self.label = label
-        self.label_name = label_name
-        self.data = np.nan_to_num(np.array(self.features[[col for col in self.features.columns
-                                  if not (('time' in col) or (self.label_name in col))]]))
-
-        self.used_chs = used_chs
+        if any(e is not None for e in [features, label_name]):
+            self.set_data(features, label, label_name, used_chs)
 
         self.model = model
         self.eval_method = eval_method
@@ -171,8 +148,33 @@ class Decoder:
         self.bay_opt_param_space = bay_opt_param_space
         self.VERBOSE = VERBOSE
 
+        self.ch_ind_data = {}
+        self.grid_point_ind_data = {}
+        self.active_gridpoints= []
+        self.feature_names = []
+        self.ch_ind_results = {}
+        self.gridpoint_ind_results = {}
+        self.all_ch_results = {}
+
         if type(self.model) is discriminant_analysis.LinearDiscriminantAnalysis:
             self.ros = RandomOverSampler(random_state=0)
+
+    def set_data(self, features, label, label_name, used_chs):
+
+        self.features = features
+        self.label = label
+        self.label_name = label_name
+        self.data = np.nan_to_num(
+                np.array(
+                    self.features[
+                        [
+                            col for col in self.features.columns
+                            if not (('time' in col) or (self.label_name in col))
+                        ]
+                    ]
+                )
+            )
+        self.used_chs = used_chs
 
     def set_data_ind_channels(self):
         """specified channel individual data

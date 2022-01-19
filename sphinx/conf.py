@@ -12,8 +12,10 @@ import os
 print("CURRENT WORKING DIRECTORY")
 print(os.getcwd())
 print('adding path')
-sys.path.insert(0, r'C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation')
+sys.path.insert(0, r'C:\Users\ICN_admin\Documents\py_neuromodulation\py_neuromodulation')
 print(sys.path)
+
+#import py_neuromodulation
 
 # At top on conf.py (with other import statements)
 import recommonmark
@@ -43,7 +45,7 @@ extensions = [
     'nbsphinx',
     'recommonmark'
 ]
-source_suffix = ['.rst', '.md', '.ipynb']
+source_suffix = ['.rst', '.md']  # , '.ipynb'
 autosummary_generate = True
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']

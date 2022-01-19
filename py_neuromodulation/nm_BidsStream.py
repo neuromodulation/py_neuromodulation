@@ -83,7 +83,7 @@ class BidsStream(nm_stream.PNStream):
             raise ValueError("no coordinates could be loaded from BIDS Dataset")
         else:
             self.coords = self._add_coordinates(self.coord_names, self.coord_list)
-            self.sess_rigth = self._get_sess_lat(self.coords)
+            self.sess_right = self._get_sess_lat(self.coords)
 
         self.gen = nm_generator.ieeg_raw_generator(
             self.raw_arr_data,

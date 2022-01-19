@@ -146,7 +146,9 @@ class PNStream(ABC):
         )
 
         self.projection = self._get_projection(self.settings, self.nm_channels)
-        if self.projection is not None:
+        if self.projection is not None or \
+            len(self.coords["cortex_left"]["positions"]) or \
+            len(self.coords["cortex_right"]["positions"]):
             self.sess_right = self._get_sess_lat(self.coords)
         else:
             self.sess_right = None
@@ -398,7 +400,12 @@ class PNStream(ABC):
 
     def plot_cortical_projection(self):
         """plot projection of cortical grid electrodes on cortex"""
-        nmplotter = nm_plots.NM_Plot(ecog_strip=self.projection.ecog_strip,
-                grid_cortex=self.projection.grid_cortex,
-                sess_right=self.sess_right)
-        nmplotter.plot_cortex()
+
+        if hasattr(self, 'features') is False:
+            self._set_run()
+
+        nmplotter = nm_plots.NM_Plot(
+            ecog_strip=self.projection.ecog_strip if self.projection is not None else None,
+            grid_cortex=self.projection.grid_cortex if self.projection is not None else None,
+            sess_right=self.sess_right)
+        nmplotter.plot_cortex(set_clim=False)

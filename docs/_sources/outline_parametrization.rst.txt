@@ -4,10 +4,11 @@ Parametrization
 .. toctree::
    :maxdepth: 4
 
-   settings
-   run_analysis
-   resample
-   normalization
-   rereference
-   projection
-   IO
+   nm_stream
+   nm_BidsStream
+   nm_RealTimeClientStreamSingleProcess
+   nm_resample
+   nm_normalization
+   nm_rereference
+   nm_projection
+   nm_IO

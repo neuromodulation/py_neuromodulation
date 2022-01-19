@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nm_normalization &mdash; py_neuromodulation  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> py_neuromodulation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup.html">Setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../example_BIDS.html">Example BIDS Demo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ParametrizationDefinition.html">ParametrizationDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FeatureEstimationDemo.html">FeatureEstimationDemo</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Code</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../outline_parametrization.html">Parametrization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../outline_featureestimation.html">Feature Estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../outline_analysis.html">Analysis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">py_neuromodulation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Module code</a> &raquo;</li>
+      <li>nm_normalization</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nm_normalization</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">preprocessing</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+
+<div class="viewcode-block" id="NORM_METHODS"><a class="viewcode-back" href="../nm_normalization.html#nm_normalization.NORM_METHODS">[docs]</a><span class="k">class</span> <span class="nc">NORM_METHODS</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">MEAN</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span>
+    <span class="n">MEDIAN</span> <span class="o">=</span> <span class="s2">&quot;median&quot;</span>
+    <span class="n">ZSCORE</span> <span class="o">=</span> <span class="s2">&quot;zscore&quot;</span>
+    <span class="n">ZSCORE_MEDIAN</span> <span class="o">=</span> <span class="s2">&quot;zscore-median&quot;</span>
+    <span class="n">QUANTILE</span> <span class="o">=</span> <span class="s2">&quot;quantile&quot;</span>
+    <span class="n">POWER</span> <span class="o">=</span> <span class="s2">&quot;power&quot;</span>
+    <span class="n">ROBUST</span> <span class="o">=</span> <span class="s2">&quot;robust&quot;</span>
+    <span class="n">MINMAX</span> <span class="o">=</span> <span class="s2">&quot;minmax&quot;</span></div>
+
+
+<div class="viewcode-block" id="normalize_raw"><a class="viewcode-back" href="../nm_normalization.html#nm_normalization.normalize_raw">[docs]</a><span class="k">def</span> <span class="nf">normalize_raw</span><span class="p">(</span>
+    <span class="n">current</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">previous</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">normalize_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">sample_add</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">NORM_METHODS</span><span class="o">.</span><span class="n">MEAN</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">clip</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Normalize data with respect to the past number of `normalize_samples`.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    current : numpy array</span>
+<span class="sd">        current raw data to normalize.</span>
+<span class="sd">    previous : numpy array or None</span>
+<span class="sd">        previous raw data, not normalized. Used for normalization of current data.</span>
+<span class="sd">    normalize_samples : int</span>
+<span class="sd">        number of past samples considered for normalization</span>
+<span class="sd">    sample_add : int</span>
+<span class="sd">        number of samples to add to previous</span>
+<span class="sd">    method : str | default is &#39;mean&#39;</span>
+<span class="sd">        data is normalized via subtraction of the &#39;mean&#39; or &#39;median&#39; and</span>
+<span class="sd">        subsequent division by the &#39;mean&#39; or &#39;median&#39;. For z-scoring enter</span>
+<span class="sd">        &#39;zscore&#39;.</span>
+<span class="sd">    clip : int | float, optional</span>
+<span class="sd">        value at which to clip after normalization</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    current_norm : numpy array</span>
+<span class="sd">        normalized array</span>
+<span class="sd">    previous : numpy array</span>
+<span class="sd">        previous features, not normalized.</span>
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        returned  if norm_type is not &#39;mean&#39;, &#39;median&#39; or &#39;zscore&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">if</span> <span class="n">previous</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">current</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">current</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">previous</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">previous</span><span class="p">,</span> <span class="n">current</span><span class="p">[</span><span class="o">-</span><span class="n">sample_add</span><span class="p">:]))</span>
+        <span class="n">previous</span> <span class="o">=</span> <span class="n">_transform_previous</span><span class="p">(</span>
+            <span class="n">previous</span><span class="o">=</span><span class="n">previous</span><span class="p">,</span> <span class="n">normalize_samples</span><span class="o">=</span><span class="n">normalize_samples</span>
+        <span class="p">)</span>
+
+    <span class="n">current</span><span class="p">,</span> <span class="n">previous</span> <span class="o">=</span> <span class="n">_normalize_and_clip</span><span class="p">(</span>
+        <span class="n">current</span><span class="o">=</span><span class="n">current</span><span class="p">,</span>
+        <span class="n">previous</span><span class="o">=</span><span class="n">previous</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+        <span class="n">clip</span><span class="o">=</span><span class="n">clip</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;feature&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">current</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">previous</span></div>
+
+
+<div class="viewcode-block" id="normalize_features"><a class="viewcode-back" href="../nm_normalization.html#nm_normalization.normalize_features">[docs]</a><span class="k">def</span> <span class="nf">normalize_features</span><span class="p">(</span>
+    <span class="n">current</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">previous</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">normalize_samples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">NORM_METHODS</span><span class="o">.</span><span class="n">MEAN</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+    <span class="n">clip</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Normalize features with respect to the past number of normalize_samples.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    current : numpy array</span>
+<span class="sd">        current features to normalize.</span>
+<span class="sd">    previous : numpy array or None</span>
+<span class="sd">        previous features, not normalized. Used for normalization of current features.</span>
+<span class="sd">    normalize_samples : int</span>
+<span class="sd">        number of past samples considered for normalization</span>
+<span class="sd">    method : str | default is &#39;mean&#39;</span>
+<span class="sd">        data is normalized via subtraction of the &#39;mean&#39; or &#39;median&#39; and</span>
+<span class="sd">        subsequent division by the &#39;mean&#39; or &#39;median&#39;. For z-scoring enter</span>
+<span class="sd">        &#39;zscore&#39;.</span>
+<span class="sd">    clip : int | float, optional</span>
+<span class="sd">        value at which to clip on the lower and upper end after normalization.</span>
+<span class="sd">        Useful for artifact rejection and handling of outliers.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    current : numpy array</span>
+<span class="sd">        normalized current features</span>
+<span class="sd">    previous : numpy array</span>
+<span class="sd">        previous features, not normalized.</span>
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        returned  if method is not &#39;mean&#39;, &#39;median&#39; or &#39;zscore&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">previous</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">current</span><span class="p">,</span> <span class="n">current</span>
+
+    <span class="n">previous</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">previous</span><span class="p">,</span> <span class="n">current</span><span class="p">))</span>
+    <span class="n">previous</span> <span class="o">=</span> <span class="n">_transform_previous</span><span class="p">(</span>
+        <span class="n">previous</span><span class="o">=</span><span class="n">previous</span><span class="p">,</span> <span class="n">normalize_samples</span><span class="o">=</span><span class="n">normalize_samples</span>
+    <span class="p">)</span>
+
+    <span class="n">current</span><span class="p">,</span> <span class="n">previous</span> <span class="o">=</span> <span class="n">_normalize_and_clip</span><span class="p">(</span>
+        <span class="n">current</span><span class="o">=</span><span class="n">current</span><span class="p">,</span>
+        <span class="n">previous</span><span class="o">=</span><span class="n">previous</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+        <span class="n">clip</span><span class="o">=</span><span class="n">clip</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;feature&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">current</span><span class="p">,</span> <span class="n">previous</span></div>
+
+
+<span class="k">def</span> <span class="nf">_transform_previous</span><span class="p">(</span>
+    <span class="n">previous</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">normalize_samples</span><span class="p">:</span> <span class="nb">int</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Crop previous data to reduce memory usage given normalization sample count.&quot;&quot;&quot;</span>
+    <span class="n">sample_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">previous</span><span class="p">)</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sample_count</span> <span class="o">-</span> <span class="n">normalize_samples</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">previous</span><span class="p">[</span><span class="n">idx</span><span class="p">:]</span>
+
+
+<span class="k">def</span> <span class="nf">_normalize_and_clip</span><span class="p">(</span>
+    <span class="n">current</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">previous</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">clip</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">],</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Normalize data.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="n">NORM_METHODS</span><span class="o">.</span><span class="n">MEAN</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">previous</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="p">(</span><span class="n">current</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">mean</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="n">NORM_METHODS</span><span class="o">.</span><span class="n">MEDIAN</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="n">median</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">previous</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="p">(</span><span class="n">current</span> <span class="o">-</span> <span class="n">median</span><span class="p">)</span> <span class="o">/</span> <span class="n">median</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="n">NORM_METHODS</span><span class="o">.</span><span class="n">ZSCORE</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">previous</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="p">(</span><span class="n">current</span> <span class="o">-</span> <span class="n">previous</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="n">previous</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="n">NORM_METHODS</span><span class="o">.</span><span class="n">ZSCORE_MEDIAN</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="p">(</span><span class="n">current</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">previous</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="n">previous</span><span class="o">.</span><span class="n">std</span><span class="p">(</span>
+            <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="n">NORM_METHODS</span><span class="o">.</span><span class="n">QUANTILE</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">preprocessing</span><span class="o">.</span><span class="n">QuantileTransformer</span><span class="p">(</span><span class="n">n_quantiles</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+            <span class="n">previous</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="n">NORM_METHODS</span><span class="o">.</span><span class="n">ROBUST</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">preprocessing</span><span class="o">.</span><span class="n">RobustScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+            <span class="n">previous</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="n">NORM_METHODS</span><span class="o">.</span><span class="n">MINMAX</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">preprocessing</span><span class="o">.</span><span class="n">MinMaxScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+            <span class="n">previous</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="n">NORM_METHODS</span><span class="o">.</span><span class="n">POWER</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">preprocessing</span><span class="o">.</span><span class="n">PowerTransformer</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+            <span class="n">previous</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Only </span><span class="si">{</span><span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">NORM_METHODS</span><span class="p">]</span><span class="si">}</span><span class="s2"> are supported as &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s2"> normalization methods. Got </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">clip</span><span class="p">:</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">_clip</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">current</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="n">clip</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">current</span><span class="p">,</span> <span class="n">previous</span>
+
+
+<span class="k">def</span> <span class="nf">_clip</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">clip</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Clip data.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">clip</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">clip</span> <span class="o">=</span> <span class="mf">3.0</span>  <span class="c1"># default value</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">clip</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">clip</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="nb">min</span><span class="o">=-</span><span class="n">clip</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">clip</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Timon Merk.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
