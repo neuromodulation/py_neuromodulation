@@ -311,7 +311,7 @@ class Decoder:
             grid_point : np.nan_to_num(self.features[
                     [i 
                     for i in self.features.columns 
-                        if grid_point in i]
+                        if grid_point + "_" in i]
                     ]
             )
             for grid_point in self.active_gridpoints
