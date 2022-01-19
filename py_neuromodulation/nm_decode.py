@@ -563,11 +563,7 @@ class Decoder:
 
         model_train = clone(self.model)
         if self.STACK_FEATURES_N_SAMPLES is True:
-            if X_train is None:
-                X_train, y_train = Decoder.append_previous_n_samples(
-                    X_train, y_train, self.time_stack_n_samples_
-                )
-            else:
+            if X_test is not None:
                 X_train, y_train, X_test, y_test = Decoder.append_samples_val(
                     X_train,
                     y_train,
@@ -575,7 +571,12 @@ class Decoder:
                     y_test,
                     n=self.time_stack_n_samples
                 )
-            
+            else:
+                X_train, y_train = Decoder.append_previous_n_samples(
+                    X_train,
+                    y_train,
+                    n=self.time_stack_n_samples
+                )
 
         if y_train.sum() == 0 or y_test.sum() == 0:  # only one class present
             raise Decoder.ClassMissingException
