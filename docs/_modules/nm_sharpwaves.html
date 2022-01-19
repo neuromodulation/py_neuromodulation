@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nm_sharpwaves &mdash; py_neuromodulation  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> py_neuromodulation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup.html">Setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../example_BIDS.html">Example BIDS Demo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ParametrizationDefinition.html">ParametrizationDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FeatureEstimationDemo.html">FeatureEstimationDemo</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Code</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../outline_parametrization.html">Parametrization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../outline_featureestimation.html">Feature Estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../outline_analysis.html">Analysis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">py_neuromodulation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Module code</a> &raquo;</li>
+      <li>nm_sharpwaves</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nm_sharpwaves</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">argsort</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="nb">max</span><span class="p">,</span> <span class="n">where</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="nb">abs</span> <span class="k">as</span> <span class="n">np_abs</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">mean</span> <span class="k">as</span> <span class="n">np_mean</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">median</span> <span class="k">as</span> <span class="n">np_median</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">var</span> <span class="k">as</span> <span class="n">np_var</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="nb">min</span> <span class="k">as</span> <span class="n">np_min</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="nb">max</span> <span class="k">as</span> <span class="n">np_max</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.lib.histograms</span> <span class="kn">import</span> <span class="n">_unsigned_subtract</span>
+<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">convolve</span><span class="p">,</span> <span class="n">find_peaks</span>
+<span class="kn">from</span> <span class="nn">mne.filter</span> <span class="kn">import</span> <span class="n">create_filter</span>
+
+
+<span class="k">class</span> <span class="nc">NoValidTroughException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="SharpwaveAnalyzer"><a class="viewcode-back" href="../nm_sharpwaves.html#nm_sharpwaves.SharpwaveAnalyzer">[docs]</a><span class="k">class</span> <span class="nc">SharpwaveAnalyzer</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sw_settings</span><span class="p">,</span> <span class="n">sfreq</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        sw_settings : dict</span>
+<span class="sd">            Sharpwave settings from settings.json</span>
+<span class="sd">        sfreq : float</span>
+<span class="sd">            data sampling frequency</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span> <span class="o">=</span> <span class="n">sw_settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span> <span class="o">=</span> <span class="n">sfreq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filter</span> <span class="o">=</span> \
+            <span class="n">create_filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">sfreq</span><span class="p">,</span>
+                          <span class="n">l_freq</span><span class="o">=</span><span class="n">sw_settings</span><span class="p">[</span><span class="s1">&#39;filter_low_cutoff&#39;</span><span class="p">],</span>
+                          <span class="n">h_freq</span><span class="o">=</span><span class="n">sw_settings</span><span class="p">[</span><span class="s1">&#39;filter_high_cutoff&#39;</span><span class="p">],</span>
+                          <span class="n">fir_design</span><span class="o">=</span><span class="s1">&#39;firwin&#39;</span><span class="p">,</span> <span class="n">l_trans_bandwidth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                          <span class="n">h_trans_bandwidth</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">filter_length</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">sfreq</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;ms&#39;</span><span class="p">,</span>
+                          <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># initialize used features</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">used_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;sharpwave_features&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">used_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">feature_name</span><span class="p">)</span>
+
+        <span class="c1"># initialize attributes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize_sw_features</span><span class="p">()</span>
+
+        <span class="c1"># initializing estimator functions, respecitive for all sharpwave features</span>
+        <span class="n">fun_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">used_feature</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">used_features</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">est_features</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;estimator&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">est_features</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">est_feature</span> <span class="ow">in</span> <span class="n">est_features</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">used_feature</span> <span class="o">==</span> <span class="n">est_feature</span><span class="p">:</span>
+                            <span class="n">fun_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator_names</span> <span class="o">=</span> <span class="n">fun_names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator_functions</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">np</span><span class="p">,</span> <span class="n">est_name</span><span class="p">)</span> <span class="k">for</span> <span class="n">est_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_names</span><span class="p">]</span>
+
+<div class="viewcode-block" id="SharpwaveAnalyzer.initialize_sw_features"><a class="viewcode-back" href="../nm_sharpwaves.html#nm_sharpwaves.SharpwaveAnalyzer.initialize_sw_features">[docs]</a>    <span class="k">def</span> <span class="nf">initialize_sw_features</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Resets used attributes to empty lists</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">feature_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">used_features</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="nb">list</span><span class="p">())</span>
+        <span class="k">if</span> <span class="s2">&quot;trough&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">used_features</span><span class="p">:</span>
+            <span class="c1"># trough attribute is still necessary, even if it is not specified in settings</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trough</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">troughs_idx</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SharpwaveAnalyzer.get_peaks_around"><a class="viewcode-back" href="../nm_sharpwaves.html#nm_sharpwaves.SharpwaveAnalyzer.get_peaks_around">[docs]</a>    <span class="k">def</span> <span class="nf">get_peaks_around</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trough_ind</span><span class="p">,</span> <span class="n">arr_ind_peaks</span><span class="p">,</span> <span class="n">filtered_dat</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Find the closest peaks to the right and left side a given trough.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        trough_ind (int): index of trough</span>
+<span class="sd">        arr_ind_peaks (np.ndarray): array of peak indices</span>
+<span class="sd">        filtered_dat (np.ndarray): raw data batch</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            NoValidTroughException: Returned if no adjacent peak can be found</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        peak_left_idx (np.ndarray): index of left peak</span>
+<span class="sd">        peak_right_idx (np.ndarray): index of right peak</span>
+<span class="sd">        peak_left_val (np.ndarray): value of left peak</span>
+<span class="sd">        peak_right_val (np.ndarray): value of righ peak</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">ind_greater</span> <span class="o">=</span> <span class="n">where</span><span class="p">(</span><span class="n">arr_ind_peaks</span> <span class="o">&gt;</span> <span class="n">trough_ind</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">ind_greater</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NoValidTroughException</span><span class="p">(</span><span class="s2">&quot;No valid trough&quot;</span><span class="p">)</span>
+        <span class="n">val_ind_greater</span> <span class="o">=</span> <span class="n">arr_ind_peaks</span><span class="p">[</span><span class="n">ind_greater</span><span class="p">]</span>
+        <span class="n">peak_right_idx</span> <span class="o">=</span> <span class="n">arr_ind_peaks</span><span class="p">[</span><span class="n">ind_greater</span><span class="p">[</span><span class="n">argsort</span><span class="p">(</span><span class="n">val_ind_greater</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]]</span>
+
+        <span class="n">ind_smaller</span> <span class="o">=</span> <span class="n">where</span><span class="p">(</span><span class="n">arr_ind_peaks</span> <span class="o">&lt;</span> <span class="n">trough_ind</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">ind_smaller</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NoValidTroughException</span><span class="p">(</span><span class="s2">&quot;No valid trough&quot;</span><span class="p">)</span>
+
+        <span class="n">val_ind_smaller</span> <span class="o">=</span> <span class="n">arr_ind_peaks</span><span class="p">[</span><span class="n">ind_smaller</span><span class="p">]</span>
+        <span class="n">peak_left_idx</span> <span class="o">=</span> \
+            <span class="n">arr_ind_peaks</span><span class="p">[</span><span class="n">ind_smaller</span><span class="p">[</span><span class="n">argsort</span><span class="p">(</span><span class="n">val_ind_smaller</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]]</span>
+
+        <span class="k">return</span> <span class="n">peak_left_idx</span><span class="p">,</span> <span class="n">peak_right_idx</span><span class="p">,</span> <span class="n">filtered_dat</span><span class="p">[</span><span class="n">peak_left_idx</span><span class="p">],</span> \
+            <span class="n">filtered_dat</span><span class="p">[</span><span class="n">peak_right_idx</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="SharpwaveAnalyzer.get_sharpwave_features"><a class="viewcode-back" href="../nm_sharpwaves.html#nm_sharpwaves.SharpwaveAnalyzer.get_sharpwave_features">[docs]</a>    <span class="k">def</span> <span class="nf">get_sharpwave_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features_</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ch</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Given a new data batch, the peaks, troughs and sharpwave features</span>
+<span class="sd">        are estimated. Importantly only new data is being analyzed here. In</span>
+<span class="sd">        steps of 1/settings[&quot;sampling_rate_features] are analyzed and returned.</span>
+<span class="sd">        Data is assumed to be notch filtered and bandpass filtered beforehand.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        features_ (dict): Features.py estimated features</span>
+<span class="sd">        data (np.ndarray): 1d single channel data batch</span>
+<span class="sd">        ch (string): channel name</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        features_ (dict): set features for Features.py object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span> <span class="o">=</span> <span class="n">convolve</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;same&#39;</span><span class="p">)</span>
+
+        <span class="c1"># check settings if troughs and peaks are analyzed</span>
+
+        <span class="n">dict_ch_features</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">detect_troughs</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">]:</span>
+
+            <span class="k">if</span> <span class="n">detect_troughs</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;detect_peaks&quot;</span><span class="p">][</span><span class="s2">&quot;estimate&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">key_name_pt</span> <span class="o">=</span> <span class="s1">&#39;Peak&#39;</span>
+                <span class="c1"># the detect_troughs loop start with peaks, s.t. data does not</span>
+                <span class="c1"># need to be flipped</span>
+
+            <span class="k">if</span> <span class="n">detect_troughs</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;detect_troughs&quot;</span><span class="p">][</span><span class="s2">&quot;estimate&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">key_name_pt</span> <span class="o">=</span> <span class="s1">&#39;Trough&#39;</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">initialize_sw_features</span><span class="p">()</span>  <span class="c1"># reset sharpwave feature attriubtes to empty lists</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analyze_waveform</span><span class="p">()</span>
+
+            <span class="c1"># this function needs to looks different; </span>
+            <span class="c1"># for each feature take the respective fun.</span>
+            <span class="k">for</span> <span class="n">feature_idx</span><span class="p">,</span> <span class="n">feature_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">used_features</span><span class="p">):</span>
+                <span class="n">key_name</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">ch</span><span class="p">,</span> <span class="s1">&#39;Sharpwave&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_names</span><span class="p">[</span><span class="n">feature_idx</span><span class="p">]</span><span class="o">.</span><span class="n">title</span><span class="p">(),</span> <span class="n">feature_name</span><span class="p">])</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_functions</span><span class="p">[</span><span class="n">feature_idx</span><span class="p">](</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">))</span> \
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+                <span class="k">if</span> <span class="n">key_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dict_ch_features</span><span class="p">:</span>
+                    <span class="n">dict_ch_features</span><span class="p">[</span><span class="n">key_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">dict_ch_features</span><span class="p">[</span><span class="n">key_name</span><span class="p">][</span><span class="n">key_name_pt</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;apply_estimator_between_peaks_and_troughs&quot;</span><span class="p">]:</span>
+            <span class="c1"># apply between &#39;Trough&#39; and &#39;Peak&#39; the respective function again</span>
+            <span class="c1"># save only the &#39;est_fun&#39; (e.g. max) between them</span>
+
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">key_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dict_ch_features</span><span class="p">):</span>
+                <span class="c1"># the key_name stays, since the estimator function stays between peaks and troughs</span>
+                <span class="n">features_</span><span class="p">[</span><span class="n">key_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_functions</span><span class="p">[</span><span class="n">idx</span><span class="p">]([</span><span class="nb">list</span><span class="p">(</span><span class="n">dict_ch_features</span><span class="p">[</span><span class="n">key_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">],</span>\
+                                              <span class="nb">list</span><span class="p">(</span><span class="n">dict_ch_features</span><span class="p">[</span><span class="n">key_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">1</span><span class="p">]])</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># otherwise, save all</span>
+            <span class="c1"># write all &quot;flatted&quot; key value pairs in features_</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dict_ch_features</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">key_sub</span><span class="p">,</span> <span class="n">value_sub</span> <span class="ow">in</span> <span class="n">dict_ch_features</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">features_</span><span class="p">[</span><span class="n">key</span><span class="o">+</span><span class="s2">&quot;_analyze_&quot;</span><span class="o">+</span><span class="n">key_sub</span><span class="p">]</span> <span class="o">=</span> <span class="n">value_sub</span>
+
+        <span class="k">return</span> <span class="n">features_</span></div>
+
+<div class="viewcode-block" id="SharpwaveAnalyzer.analyze_waveform"><a class="viewcode-back" href="../nm_sharpwaves.html#nm_sharpwaves.SharpwaveAnalyzer.analyze_waveform">[docs]</a>    <span class="k">def</span> <span class="nf">analyze_waveform</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Given the scipy.signal.find_peaks  trough/peak distance</span>
+<span class="sd">        settings specified sharpwave features are estimated.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            NoValidTroughException: Return if no adjacent peak can be found</span>
+<span class="sd">            NoValidTroughException: Return if no adjacent peak can be found</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">peaks</span> <span class="o">=</span> <span class="n">find_peaks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;detect_troughs&quot;</span><span class="p">][</span><span class="s2">&quot;distance_peaks&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">troughs</span> <span class="o">=</span> <span class="n">find_peaks</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;detect_troughs&quot;</span><span class="p">][</span><span class="s2">&quot;distance_troughs&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">trough_idx</span> <span class="ow">in</span> <span class="n">troughs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">peak_idx_left</span><span class="p">,</span> <span class="n">peak_idx_right</span><span class="p">,</span> <span class="n">peak_left</span><span class="p">,</span> <span class="n">peak_right</span> <span class="o">=</span> \
+                    <span class="bp">self</span><span class="o">.</span><span class="n">get_peaks_around</span><span class="p">(</span><span class="n">trough_idx</span><span class="p">,</span> <span class="n">peaks</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">NoValidTroughException</span><span class="p">:</span>
+                <span class="c1"># in this case there are no adjacent two peaks around this trough</span>
+                <span class="c1"># str(e) could print the exception error message</span>
+                <span class="c1"># print(str(e))</span>
+                <span class="k">continue</span>
+
+            <span class="n">trough</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="n">trough_idx</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trough</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trough</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">troughs_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trough_idx</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;sharpwave_features&quot;</span><span class="p">][</span><span class="s2">&quot;interval&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">troughs_idx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="c1"># take the last identified trough idx</span>
+                    <span class="c1"># corresponds here to second last trough_idx</span>
+
+                    <span class="n">interval</span> <span class="o">=</span> <span class="p">(</span><span class="n">trough_idx</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">troughs_idx</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> \
+                                <span class="p">(</span><span class="mi">1000</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># set first interval to zero</span>
+                    <span class="n">interval</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;sharpwave_features&quot;</span><span class="p">][</span><span class="s2">&quot;peak_left&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">peak_left</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peak_left</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;sharpwave_features&quot;</span><span class="p">][</span><span class="s2">&quot;peak_right&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">peak_right</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peak_right</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;sharpwave_features&quot;</span><span class="p">][</span><span class="s2">&quot;sharpness&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="c1"># check if sharpness can be calculated</span>
+                <span class="c1"># trough_idx 5 ms need to be consistent</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">trough_idx</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="mi">5</span><span class="o">*</span><span class="p">(</span><span class="mi">1000</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> \
+                   <span class="p">(</span><span class="n">trough_idx</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="mi">5</span><span class="o">*</span><span class="p">(</span><span class="mi">1000</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span><span class="p">))</span> <span class="o">&gt;=</span>
+                   <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                    <span class="k">continue</span>
+
+                <span class="n">sharpness</span> <span class="o">=</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="n">trough_idx</span><span class="p">]</span> <span class="o">-</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="n">trough_idx</span><span class="o">-</span><span class="nb">int</span><span class="p">(</span><span class="mi">5</span><span class="o">*</span><span class="p">(</span><span class="mi">1000</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span><span class="p">))])</span> <span class="o">+</span>
+                             <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="n">trough_idx</span><span class="p">]</span> <span class="o">-</span>
+                              <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="n">trough_idx</span><span class="o">+</span><span class="nb">int</span><span class="p">(</span><span class="mi">5</span><span class="o">*</span><span class="p">(</span><span class="mi">1000</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span><span class="p">))]))</span> <span class="o">/</span> <span class="mi">2</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">sharpness</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sharpness</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;sharpwave_features&quot;</span><span class="p">][</span><span class="s2">&quot;rise_steepness&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="c1"># steepness is calculated as the first derivative</span>
+                <span class="c1"># from peak/trough to trough/peak</span>
+                <span class="c1"># here  + 1 due to python syntax, s.t. the last element is included</span>
+                <span class="n">rise_steepness</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="n">peak_idx_left</span><span class="p">:</span> <span class="n">trough_idx</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rise_steepness</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rise_steepness</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;sharpwave_features&quot;</span><span class="p">][</span><span class="s2">&quot;decay_steepness&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">decay_steepness</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="n">trough_idx</span><span class="p">:</span> <span class="n">peak_idx_right</span><span class="o">+</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">decay_steepness</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">decay_steepness</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;sharpwave_features&quot;</span><span class="p">][</span><span class="s2">&quot;rise_steepness&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> \
+               <span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;sharpwave_features&quot;</span><span class="p">][</span><span class="s2">&quot;decay_steepness&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">and</span> \
+               <span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;sharpwave_features&quot;</span><span class="p">][</span><span class="s2">&quot;slope_ratio&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">slope_ratio</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rise_steepness</span> <span class="o">-</span> <span class="n">decay_steepness</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;sharpwave_features&quot;</span><span class="p">][</span><span class="s2">&quot;prominence&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">prominence</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np_abs</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">peak_right</span> <span class="o">+</span> <span class="n">peak_left</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">[</span><span class="n">trough_idx</span><span class="p">]))</span>  <span class="c1"># mV</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;sharpwave_features&quot;</span><span class="p">][</span><span class="s2">&quot;decay_time&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">decay_time</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">peak_idx_left</span> <span class="o">-</span> <span class="n">trough_idx</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1000</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span><span class="p">))</span>  <span class="c1"># ms</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;sharpwave_features&quot;</span><span class="p">][</span><span class="s2">&quot;rise_time&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rise_time</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">peak_idx_right</span> <span class="o">-</span> <span class="n">trough_idx</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1000</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span><span class="p">))</span>  <span class="c1"># ms</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sw_settings</span><span class="p">[</span><span class="s2">&quot;sharpwave_features&quot;</span><span class="p">][</span><span class="s2">&quot;width&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peak_idx_right</span> <span class="o">-</span> <span class="n">peak_idx_left</span><span class="p">)</span>  <span class="c1"># ms</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Timon Merk.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

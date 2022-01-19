@@ -1,4 +1,4 @@
-py_neuromodulation
+Setup
 ==================
 
 .. image:: https://app.travis-ci.com/neuromodulation/py_neuromodulation.svg?branch=main
@@ -13,8 +13,6 @@ The py_neuromodulation toolbox allows for real time capable processing of multim
 
 Find the documentation here https://neuromodulation.github.io/py_neuromodulation/ for example usage and parametrization.
 
-Setup
-=====
 
 For running this toolbox first create a new virtual conda environment:
 
