@@ -15,6 +15,7 @@ import pandas as pd
 import os
 import json
 import numpy as np
+from numba import jit
 import xgboost
 from typing import Type
 import _pickle as cPickle
@@ -310,7 +311,7 @@ class Decoder:
             grid_point : np.nan_to_num(self.features[
                     [i 
                     for i in self.features.columns 
-                        if grid_point in i]
+                        if grid_point + "_" in i]
                     ]
             )
             for grid_point in self.active_gridpoints
@@ -411,11 +412,14 @@ class Decoder:
         )
 
     @staticmethod
+    @jit(nopython=True)
     def append_previous_n_samples(X: np.ndarray, y: np.ndarray, n: int = 5):
         """
         stack feature vector for n samples
         """
-        time_arr = np.zeros([X.shape[0]-n, int(n*X.shape[1])])
+        TIME_DIM = X.shape[0]-n
+        FEATURE_DIM = int(n*X.shape[1])
+        time_arr = np.empty((TIME_DIM, FEATURE_DIM))
         for time_idx, time_ in enumerate(np.arange(n, X.shape[0])):
             for time_point in range(n):
                 time_arr[time_idx, time_point*X.shape[1]:(time_point+1)*X.shape[1]] = \
@@ -481,8 +485,20 @@ class Decoder:
         X_test,
         y_train,
         y_test,
-        cv_res : Type[CV_res]
+        cv_res : Type[CV_res],
+        save_data=True,
+        append_samples=False
     ) -> Type[CV_res]:
+
+
+        if append_samples is True:
+            X_train, y_train, X_test, y_test = self.append_samples_val(
+                X_train,
+                y_train,
+                X_test,
+                y_test,
+                self.time_stack_n_samples
+            )
 
         if self.save_coef:
             cv_res.coef.append(model_train.coef_)
@@ -510,8 +526,9 @@ class Decoder:
 
         cv_res.score_train.append(sc_tr)
         cv_res.score_test.append(sc_te)
-        cv_res.X_train.append(X_train)
-        cv_res.X_test.append(X_test)
+        if save_data is True:
+            cv_res.X_train.append(X_train)
+            cv_res.X_test.append(X_test)
         cv_res.y_train.append(y_train)
         cv_res.y_test.append(y_test)
         cv_res.y_train_pr.append(y_train_pr)
@@ -558,16 +575,13 @@ class Decoder:
         X_test = None,
         y_test = None,
         cv_res: Type[CV_res] = CV_res(),
-        return_fitted_model_only : bool = False
+        return_fitted_model_only : bool = False,
+        save_data=True
     ):
 
         model_train = clone(self.model)
         if self.STACK_FEATURES_N_SAMPLES is True:
-            if X_train is None:
-                X_train, y_train = Decoder.append_previous_n_samples(
-                    X_train, y_train, self.time_stack_n_samples_
-                )
-            else:
+            if X_test is not None:
                 X_train, y_train, X_test, y_test = Decoder.append_samples_val(
                     X_train,
                     y_train,
@@ -575,9 +589,14 @@ class Decoder:
                     y_test,
                     n=self.time_stack_n_samples
                 )
-            
+            else:
+                X_train, y_train = Decoder.append_previous_n_samples(
+                    X_train,
+                    y_train,
+                    n=self.time_stack_n_samples
+                )
 
-        if y_train.sum() == 0 or y_test.sum() == 0:  # only one class present
+        if y_train.sum() == 0 or (y_test is not None and y_test.sum() == 0):  # only one class present
             raise Decoder.ClassMissingException
 
         if self.RUN_BAY_OPT is True:
@@ -595,7 +614,8 @@ class Decoder:
             X_test,
             y_train,
             y_test,
-            cv_res
+            cv_res,
+            save_data
         )
 
         return cv_res

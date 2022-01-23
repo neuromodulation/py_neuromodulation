@@ -37,14 +37,23 @@ class Projection:
         self.feature_names: Optional[list] = None
         self.initialized: bool = False
 
-        self.remove_not_used_ch_from_coords()
+        self.remove_not_used_ch_from_coords()  # remove beforehand non used channels from coords
 
         if len(self.coords["cortex_left"]["positions"]) == 0:
             self.sess_right = True
             self.ecog_strip = self.coords["cortex_right"]["positions"]
+            self.ecog_strip_names = self.coords["cortex_right"]["ch_names"]
         elif len(self.coords["cortex_right"]["positions"]) == 0:
             self.sess_right = False
             self.ecog_strip = self.coords["cortex_left"]["positions"]
+            self.ecog_strip_names = self.coords["cortex_left"]["ch_names"]
+
+        if self.sess_right is True and len(self.coords["subcortex_right"]["positions"]) > 0:
+            self.lfp_elec = self.coords["subcortex_right"]["positions"]
+            self.lfp_elec_names = self.coords["subcortex_right"]["ch_names"]
+        elif self.sess_right is False and len(self.coords["subcortex_left"]["positions"]) > 0:
+            self.lfp_elec = self.coords["subcortex_left"]["positions"]
+            self.lfp_elec_names = self.coords["subcortex_left"]["ch_names"]
 
         self._initialize_channels()
 
@@ -143,10 +152,6 @@ class Projection:
                 self.subcortex_grid_right = None
 
             grid_session = [self.cortex_grid_right, self.subcortex_grid_right]
-            coord_array = [
-                self.ecog_strip,
-                self.coords["subcortex_right"]["positions"],
-            ]
 
         else:
             if self.project_cortex:
@@ -159,10 +164,11 @@ class Projection:
                 self.subcortex_grid_left = None
 
             grid_session = [self.cortex_grid_left, self.subcortex_grid_left]
-            coord_array = [
-                self.ecog_strip,
-                self.coords["subcortex_left"]["positions"],
-            ]
+
+        coord_array = [
+            self.ecog_strip,
+            self.lfp_elec,
+        ]
 
         for loc_, grid in enumerate(grid_session):
             if loc_ == 0:  # cortex
@@ -178,16 +184,36 @@ class Projection:
         return proj_matrix_run[0], proj_matrix_run[1]  # cortex, subcortex
 
     def _initialize_channels(self) -> None:
-        """Initialize channel settings."""
+        """Initialize channel names via nm_channel new_name column"""
         if self.project_cortex:
             self.ecog_channels = self.nm_channels.query(
             '(type=="ecog") and (used == 1) and (status=="good")'
-        ).new_name.to_list()
+            ).name.to_list()
+
+            chs_ecog = self.ecog_channels.copy()
+            for ecog_channel in chs_ecog:
+                if ecog_channel not in self.ecog_strip_names:
+                    self.ecog_channels.remove(ecog_channel)
+            # write ecog_channels to be new_name
+            self.ecog_channels = list(
+                self.nm_channels.query('name == @self.ecog_channels').new_name
+            )
 
         if self.project_subcortex:
             self.lfp_channels = self.nm_channels.query(
-            '(type=="lfp" or type=="seeg" or type=="dbs") and (used == 1) and (status=="good")'
-        ).new_name.to_list()
+            '(type=="lfp" or type=="seeg" or type=="dbs") \
+              and (used == 1) and (status=="good")'
+            ).name.to_list()
+            # project only channels that are in the coords
+            # this also deletes channels of the other hemisphere
+            chs_lfp = self.lfp_channels.copy()
+            for lfp_channel in chs_lfp:
+                if lfp_channel not in self.lfp_elec_names:
+                    self.lfp_channels.remove(lfp_channel)
+            # write lfp_channels to be new_name
+            self.lfp_channels = list(
+                self.nm_channels.query('name == @self.lfp_channels').new_name
+            )
 
     def init_projection_run(self, feature_series: pd.Series) -> pd.Series:
         """Initialize indexes for respective channels in feature series computed by nm_features.py
