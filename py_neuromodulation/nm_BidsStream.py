@@ -81,7 +81,7 @@ class BidsStream(nm_stream.PNStream):
         if self.coord_list is None and True in [self.settings["project_cortex"],
                                         self.settings["project_subcortex"]]:
             raise ValueError("no coordinates could be loaded from BIDS Dataset")
-        else:
+        elif self.coord_list is not None:
             self.coords = self._add_coordinates(self.coord_names, self.coord_list)
             self.sess_right = self._get_sess_lat(self.coords)
 
