@@ -485,8 +485,20 @@ class Decoder:
         X_test,
         y_train,
         y_test,
-        cv_res : Type[CV_res]
+        cv_res : Type[CV_res],
+        save_data=True,
+        append_samples=False
     ) -> Type[CV_res]:
+
+
+        if append_samples is True:
+            X_train, y_train, X_test, y_test = self.append_samples_val(
+                X_train,
+                y_train,
+                X_test,
+                y_test,
+                self.time_stack_n_samples
+            )
 
         if self.save_coef:
             cv_res.coef.append(model_train.coef_)
@@ -514,8 +526,9 @@ class Decoder:
 
         cv_res.score_train.append(sc_tr)
         cv_res.score_test.append(sc_te)
-        cv_res.X_train.append(X_train)
-        cv_res.X_test.append(X_test)
+        if save_data is True:
+            cv_res.X_train.append(X_train)
+            cv_res.X_test.append(X_test)
         cv_res.y_train.append(y_train)
         cv_res.y_test.append(y_test)
         cv_res.y_train_pr.append(y_train_pr)
@@ -562,7 +575,8 @@ class Decoder:
         X_test = None,
         y_test = None,
         cv_res: Type[CV_res] = CV_res(),
-        return_fitted_model_only : bool = False
+        return_fitted_model_only : bool = False,
+        save_data=True
     ):
 
         model_train = clone(self.model)
@@ -600,7 +614,8 @@ class Decoder:
             X_test,
             y_train,
             y_test,
-            cv_res
+            cv_res,
+            save_data
         )
 
         return cv_res
