@@ -19,7 +19,7 @@ class TestWrapper:
         str_to_keep,
         keep,
     ):
-         l_fps = self.RMAPTest.get_fingerprints_from_path_with_cond(
+         l_fps_names, l_fps = self.RMAPTest.get_fingerprints_from_path_with_cond(
              path_dir,
              str_to_omit,
              str_to_keep,

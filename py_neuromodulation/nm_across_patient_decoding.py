@@ -1,3 +1,4 @@
+from operator import sub
 from black import out
 import numpy as np
 import os
@@ -66,6 +67,63 @@ class AcrossPatientRunner:
             y_test,
             cv_res=nm_decode.CV_res()
         )
+
+    @staticmethod
+    def get_data_sub_ch(channel_all, cohort, sub, ch):
+
+        X_train = []
+        y_train = []
+
+        for f in channel_all[cohort][sub][ch].keys():
+            X_train.append(channel_all[cohort][sub][ch][f]["data"])
+            y_train.append(channel_all[cohort][sub][ch][f]["label"])
+        if len(X_train) > 1:
+            X_train = np.concatenate(X_train, axis=0)
+            y_train = np.concatenate(y_train, axis=0)
+        else:
+            X_train = X_train[0]
+            y_train = y_train[0]
+        
+        return X_train, y_train
+
+
+    def leave_one_patient_out_RMAP(self):
+        p_ = {}
+        for cohort_test in self.cohorts:
+            if cohort_test not in p_: p_[cohort_test] = {}
+            for sub_test in self.ch_all[cohort_test].keys():
+                if sub_test not in p_: p_[cohort_test][sub_test] = {}
+                for rec_test in self.ch_all[cohort_test][sub_test].keys():
+                    if rec_test not in p_[cohort_test][sub_test]:
+                        p_[cohort_test][sub_test][rec_test] = {}
+                    for ch_test in rec_test:
+
+                        cohort_train, sub_train, ch_train = \
+                            nm_RMAP.get_highest_corr_sub_ch(cohort_test, sub_test, ch_test)
+                        X_train, y_train = self.get_data_sub_ch(
+                            self.ch_all, cohort_train, sub_train, ch_train
+                        )
+                        X_test, y_test = self.get_data_sub_ch(
+                            self.ch_all, cohort_test, sub_test, ch_test
+                        )
+
+                        self.init_decoder()
+
+                        model = self.decoder.wrapper_model_train(
+                            X_train=X_train,
+                            y_train=y_train,
+                            return_fitted_model_only=True
+                        )
+                        cv_res = self.decoder.eval_model(
+                            model,
+                            X_train,
+                            X_test,
+                            y_train,
+                            y_test,
+                            cv_res = nm_decode.CV_res()
+                        )
+                        p_[sub_test]: p_[cohort_test][sub_test][rec_test] = cv_res
+
 
     def run_cohort_leave_one_patient_out_CV_within_cohort(self):
 
@@ -266,7 +324,7 @@ class AcrossPatientRunner:
                         cv_res = self.eval_model(X_train, y_train, X_test, y_test)
                     except nm_decode.Decoder.ClassMissingException:
                         continue
-    
+
                     performance_leave_one_patient_out[cohort][grid_point][subject_test] = cv_res
 
         performance_leave_one_patient_out["grid_cortex"] = self.grid_cortex
