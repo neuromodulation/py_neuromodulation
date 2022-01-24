@@ -83,3 +83,4 @@ def run_example_BIDS():
     #                                               read_all_combined=False,
     #                                               read_mov_detection_rates=True)
     feature_reader.plot_subject_grid_ch_performance(performance_dict=performances, plt_grid=True)
+    
