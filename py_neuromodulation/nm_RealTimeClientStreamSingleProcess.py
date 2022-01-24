@@ -8,7 +8,7 @@ import pandas as pd
 import time
 import timeit
 from pynput.keyboard import Key, Listener
-import pylsl
+#import pylsl
 #  clone TMSI-Python-Interface from here: https://gitlab.com/tmsi/tmsi-python-interface
 
 from py_neuromodulation import \
@@ -99,11 +99,12 @@ class RealTimePyNeuro(nm_stream.PNStream):
         return ftc
     
     @staticmethod
-    def init_lsl(wait_max : int = 10, buffer_size : int = 1000) -> pylsl:
+    def init_lsl(wait_max : int = 10, buffer_size : int = 1000):
 
-        streams = pylsl.resolve_streams(wait_time=min(0.1, wait_max))
-        print("Stream found")
-        return pylsl.StreamInlet(info=streams[0], max_buflen=buffer_size)
+        #streams = pylsl.resolve_streams(wait_time=min(0.1, wait_max))
+        #print("Stream found")
+        #return pylsl.StreamInlet(info=streams[0], max_buflen=buffer_size)
+        ...
 
     def run(self) -> None:
         """Start get_data, calcFeatures and sendFeature processes
@@ -133,11 +134,12 @@ class RealTimePyNeuro(nm_stream.PNStream):
         self.disconnect()
 
     def get_data_lsl(self, max_samples: int = 1000, timeout : int = 5):
-        samples, _ = self.lsl_client.pull_chunk(
-            max_samples=max_samples,
-            timeout=timeout
-        )
-        return np.vstack(samples).T
+        #samples, _ = self.lsl_client.pull_chunk(
+        #    max_samples=max_samples,
+        #    timeout=timeout
+        #)
+        #return np.vstack(samples).T
+        ...
 
     def send_data_lsl(self, features: pd.Series):
         """Not tested yet
@@ -145,12 +147,13 @@ class RealTimePyNeuro(nm_stream.PNStream):
         for reference implementation
         """
 
-        info = pylsl.StreamInfo(name='py_nm', type=None,
-                                channel_count=None,
-                                nominal_srate=None,
-                                channel_format='float32', source_id=None)
-        outlet = pylsl.StreamOutlet(info)
-        outlet.push_sample(features.to_numpy())
+        #info = pylsl.StreamInfo(name='py_nm', type=None,
+        #                        channel_count=None,
+        #                        nominal_srate=None,
+        #                        channel_format='float32', source_id=None)
+        #outlet = pylsl.StreamOutlet(info)
+        #outlet.push_sample(features.to_numpy())
+        ...
 
     def disconnect_lsl(self):
         self.lsl_client.close_stream()
@@ -161,7 +164,8 @@ class RealTimePyNeuro(nm_stream.PNStream):
     def send_data_FieldTripClient(self, features: pd.Series):
 
         # H = self.ftc_send.getHeader()  # retrieving header is not necessary for sending
-        self.ftc_send.putData(np.expand_dims(np.array(features), axis=0))
+        self.ftc_send.putData(np.random.random([1,2]))
+        #self.ftc_send.putData(np.expand_dims(np.array(features), axis=0))
 
     def disconnect_FieldTripClient(self):
         self.ftc.disconnect()

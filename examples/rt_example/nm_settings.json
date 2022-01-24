@@ -157,15 +157,12 @@
         ],
         "frequency_bands" : [
             [
-                "theta",
-                "alpha",
-                "low beta",
                 "high beta"
             ]
         ],
         "method" : [
             {
-                "coh" : true,
+                "coh" : false,
                 "icoh" : true
             }
         ],
