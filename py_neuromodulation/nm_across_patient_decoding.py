@@ -1,77 +1,349 @@
-import enum
-import nibabel as nib
+from black import out
 import numpy as np
 import os
-from numba import jit
+import pandas as pd
+from sklearn import metrics, linear_model, model_selection
 
-class ConnectivityChannelSelector:
-    
-    def __init__(self) -> None:
-        pass
+import py_neuromodulation
+from py_neuromodulation import nm_decode, nm_RMAP
 
-    @staticmethod
-    def load_fingerprint(path_nii) -> None:
-        """Return flattened Nifti fingerprint"""
-        epi_img = nib.load(path_nii)
-        fp = epi_img.get_fdata()
-        return fp
 
-    def get_fingerprints_from_path_with_cond(
+class AcrossPatientRunner:
+
+    def __init__(
         self,
-        path_dir: str,
-        str_to_omit : str = None,
-        str_to_keep : str = None,
-        keep: bool = True,
-    ):
+        outpath : str,
+        model=linear_model.LogisticRegression(class_weight="balanced"),
+        TRAIN_VAL_SPLIT=False,
+        eval_method=metrics.balanced_accuracy_score,
+        cv_method=model_selection.KFold(n_splits=3, shuffle=False),
+        VERBOSE=False,
+        use_nested_cv=True,
+        RUN_BAY_OPT=False,
+        ML_model_name="LM",
+        cohorts:dict = None
+        ) -> None:
 
-        if keep:
-            l_fps = list(
-                filter(
-                    lambda k: '_AvgR_Fz.nii' in k and str_to_keep in k,
-                        os.listdir(path_dir)
-                )
-            )
-        else:
-            l_fps = list(
-                filter(
-                    lambda k: '_AvgR_Fz.nii' in k and str_to_omit not in k,
-                        os.listdir(path_dir)
-                )
-            )
-        return [
-            self.load_fingerprint(
-                os.path.join(path_dir, f)
-             ) for f in l_fps
-        ]
+        self.outpath = outpath
+        self.model = model
+        self.TRAIN_VAL_SPLIT = TRAIN_VAL_SPLIT
+        self.use_nested_cv = use_nested_cv
+        self.RUN_BAY_OPT = RUN_BAY_OPT
+        self.VERBOSE = VERBOSE
+        self.eval_method = eval_method
+        self.ML_model_name = ML_model_name
+        self.cv_method = cv_method
+        self.cohorts = cohorts
+
+        self.grid_cortex = pd.read_csv(
+            os.path.join(
+                py_neuromodulation.__path__[0],
+                'grid_cortex.tsv'
+            ),
+            sep='\t'
+        ).to_numpy()
+
+    def init_decoder(self) -> nm_decode.Decoder:
+
+        return nm_decode.Decoder(
+            model=self.model,
+            TRAIN_VAL_SPLIT=self.TRAIN_VAL_SPLIT,
+            STACK_FEATURES_N_SAMPLES=True,
+            get_movement_detection_rate=True,
+            eval_method=self.eval_method,
+            VERBOSE=self.VERBOSE,
+            cv_method=self.cv_method,
+            use_nested_cv=self.use_nested_cv,
+            RUN_BAY_OPT=self.RUN_BAY_OPT
+        )
+
+    def eval_model(self, X_train, y_train, X_test, y_test):
+
+        return self.decoder.wrapper_model_train(
+            X_train,
+            y_train,
+            X_test,
+            y_test,
+            cv_res=nm_decode.CV_res()
+        )
+
+    def run_cohort_leave_one_patient_out_CV_within_cohort(self):
+
+        grid_point_all = np.load(os.path.join(self.outpath, 'grid_point_all.npy'), allow_pickle='TRUE').item()
+        performance_leave_one_patient_out = {}
+
+        for cohort in self.cohorts:
+            print('cohort: '+str(cohort))
+            performance_leave_one_patient_out[cohort] = {}
+
+            for grid_point in list(grid_point_all.keys()):
+                print('grid point: '+str(grid_point))
+                if cohort not in grid_point_all[grid_point]:
+                    continue
+                if len(list(grid_point_all[grid_point][cohort].keys())) <= 1:
+                    continue  # cannot do leave one out prediction with a single subject
+                performance_leave_one_patient_out[cohort][grid_point] = {}
+
+                for subject_test in list(grid_point_all[grid_point][cohort].keys()):
+                    X_test = []
+                    y_test = []
+                    for run in list(grid_point_all[grid_point][cohort][subject_test].keys()):
+                        if grid_point_all[grid_point][cohort][subject_test][run]["lat"] != "CON":
+                            continue
+                        X_test.append(grid_point_all[grid_point][cohort][subject_test][run]["data"])
+                        y_test.append(grid_point_all[grid_point][cohort][subject_test][run]["label"])
+                    if len(X_test) > 1:
+                        X_test = np.concatenate(X_test, axis=0)
+                        y_test = np.concatenate(y_test, axis=0)
+                    else:
+                        X_test = X_test[0]
+                        y_test = y_test[0]
+                    X_train = []
+                    y_train = []
+                    for subject_train in list(grid_point_all[grid_point][cohort].keys()):
+                        if subject_test == subject_train:
+                            continue
+                        for run in list(grid_point_all[grid_point][cohort][subject_train].keys()):
+                            if grid_point_all[grid_point][cohort][subject_train][run]["lat"] != "CON":
+                                continue
+                            X_train.append(grid_point_all[grid_point][cohort][subject_train][run]["data"])
+                            y_train.append(grid_point_all[grid_point][cohort][subject_train][run]["label"])
+                    if len(X_train) > 1:
+                        X_train = np.concatenate(X_train, axis=0)
+                        y_train = np.concatenate(y_train, axis=0)
+                    else:
+                        X_train = X_train[0]
+                        y_train = y_train[0]
+
+                    # run here ML estimation
+                    self.decoder = self.init_decoder()
+                    model = self.decoder.wrapper_model_train(
+                        X_train=X_train,
+                        y_train=y_train,
+                        return_fitted_model_only=True
+                    )
+                    # use initialized decoder
+                    try:
+                        cv_res = self.eval_model(X_train, y_train, X_test, y_test)
+                    except nm_decode.Decoder.ClassMissingException:
+                        continue
     
-    def save_Nii(fp, name="img.nii", reshape=True):
-        if reshape:
-            fp = np.reshape((91, 109, 91), order="F")
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test] = cv_res
 
-        xform = np.eye(4) * 2
-        img = nib.nifti1.Nifti1Image(fp, xform)
+        performance_leave_one_patient_out["grid_cortex"] = self.grid_cortex
+        np.save(os.path.join(self.outpath, self.ML_model_name+'_performance_leave_one_patient_out_within_cohort.npy'),\
+            performance_leave_one_patient_out)
+        return performance_leave_one_patient_out
 
-        nib.save(img, name)
+    def run_cohort_leave_one_cohort_out_CV(self):
+        grid_point_all = np.load(os.path.join(self.outpath, 'grid_point_all.npy'), allow_pickle='TRUE').item()
+        performance_leave_one_cohort_out = {}
 
-    @staticmethod
-    @jit(nopython=True)
-    def calculate_RMap(fp, performances):
-        # The RMap also needs performances; for every fingerprint / channel
-        # Save the corresponding performance
-        # for every voxel; correlate it with performances
+        for cohort_test in self.cohorts:
+            print('cohort: '+str(cohort_test))
+            if cohort_test not in performance_leave_one_cohort_out:
+                performance_leave_one_cohort_out[cohort_test] = {}
 
-        arr = fp[0].flatten()
-        NUM_VOXELS = arr.shape[0]
-        LEN_FPS = len(fp)
-        fp_arr = np.empty((NUM_VOXELS, LEN_FPS))
-        for fp_idx, fp_ in enumerate(fp):
-            fp_arr[:, fp_idx] = fp_.flatten()
-        
-        RMAP = np.zeros(NUM_VOXELS)
-        for voxel in range(NUM_VOXELS):
-            RMAP[voxel] = np.corrcoef(
-                    fp_arr[voxel, :],
-                    performances
-                )[0][1]
+            for grid_point in list(grid_point_all.keys()):
+                print('grid point: '+str(grid_point))
+                if cohort_test not in grid_point_all[grid_point]:
+                    continue
+                if len(list(grid_point_all[grid_point].keys())) == 1:
+                    continue  # cannot do leave one cohort prediction with a single cohort
 
-        return RMAP
+                X_train = []
+                y_train = []
+                for cohort_train in self.cohorts:
+                    if cohort_test == cohort_train:
+                        continue
+                    if cohort_train not in grid_point_all[grid_point]:
+                        continue
+                    for subject_test in list(grid_point_all[grid_point][cohort_train].keys()):
+                        for run in list(grid_point_all[grid_point][cohort_train][subject_test].keys()):
+                            if grid_point_all[grid_point][cohort_train][subject_test][run]["lat"] != "CON":
+                                continue
+                            X_train.append(grid_point_all[grid_point][cohort_train][subject_test][run]["data"])
+                            y_train.append(grid_point_all[grid_point][cohort_train][subject_test][run]["label"])
+                if len(X_train) > 1:
+                    X_train = np.concatenate(X_train, axis=0)
+                    y_train = np.concatenate(y_train, axis=0)
+                else:
+                    X_train = X_train[0]
+                    y_train = y_train[0]
+
+                # run here ML estimation
+                self.decoder = self.init_decoder()
+                model = self.decoder.wrapper_model_train(
+                    X_train=X_train,
+                    y_train=y_train,
+                    return_fitted_model_only=True
+                )
+
+                performance_leave_one_cohort_out[cohort_test][grid_point] = {}
+                for subject_test in list(grid_point_all[grid_point][cohort_test].keys()):
+                    X_test = []
+                    y_test = []
+                    for run in list(grid_point_all[grid_point][cohort_test][subject_test].keys()):
+                        if grid_point_all[grid_point][cohort_test][subject_test][run]["lat"] != "CON":
+                            continue
+                        X_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["data"])
+                        y_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["label"])
+                    if len(X_test) > 1:
+                        X_test = np.concatenate(X_test, axis=0)
+                        y_test = np.concatenate(y_test, axis=0)
+                    else:
+                        X_test = X_test[0]
+                        y_test = y_test[0]
+
+                    cv_res = self.decoder.eval_model(
+                        model,
+                        X_train,
+                        X_test,
+                        y_train,
+                        y_test,
+                        cv_res = nm_decode.CV_res()
+                    )
+
+                    performance_leave_one_cohort_out[cohort_test][grid_point][subject_test] = cv_res
+
+        performance_leave_one_cohort_out["grid_cortex"] = self.grid_cortex
+        np.save(os.path.join(self.outpath, self.ML_model_name+'_performance_leave_one_cohort_out.npy'), performance_leave_one_cohort_out)
+
+    def run_leave_one_patient_out_across_cohorts(self):
+
+        grid_point_all = np.load(os.path.join(self.outpath, 'grid_point_all.npy'), allow_pickle='TRUE').item()
+        performance_leave_one_patient_out = {}
+
+        for grid_point in list(grid_point_all.keys()):
+            print('grid point: '+str(grid_point))
+            for cohort in self.cohorts:
+                print('cohort: '+str(cohort))
+                if cohort not in performance_leave_one_patient_out:
+                    performance_leave_one_patient_out[cohort] = {}
+
+                if cohort not in grid_point_all[grid_point]:
+                    continue
+                if len(list(grid_point_all[grid_point][cohort].keys())) <= 1:
+                    continue  # cannot do leave one out prediction with a single subject
+
+                if grid_point not in performance_leave_one_patient_out[cohort]:
+                    performance_leave_one_patient_out[cohort][grid_point] = {}
+
+                for subject_test in list(grid_point_all[grid_point][cohort].keys()):
+                    X_test = []
+                    y_test = []
+                    for run in list(grid_point_all[grid_point][cohort][subject_test].keys()):
+                        if grid_point_all[grid_point][cohort][subject_test][run]["lat"] != "CON":
+                            continue
+                        X_test.append(grid_point_all[grid_point][cohort][subject_test][run]["data"])
+                        y_test.append(grid_point_all[grid_point][cohort][subject_test][run]["label"])
+                    if len(X_test) > 1:
+                        X_test = np.concatenate(X_test, axis=0)
+                        y_test = np.concatenate(y_test, axis=0)
+                    else:
+                        X_test = X_test[0]
+                        y_test = y_test[0]
+                    X_train = []
+                    y_train = []
+                    for cohort_inner in list(grid_point_all[grid_point].keys()):  # available cohorts for that grid point
+                        for subject_train in list(grid_point_all[grid_point][cohort_inner].keys()):
+                            if (subject_test == subject_train) and (cohort_inner == cohort):
+                                continue
+                            for run in list(grid_point_all[grid_point][cohort_inner][subject_train].keys()):
+                                if grid_point_all[grid_point][cohort_inner][subject_train][run]["lat"] != "CON":
+                                    continue
+                                X_train.append(grid_point_all[grid_point][cohort_inner][subject_train][run]["data"])
+                                y_train.append(grid_point_all[grid_point][cohort_inner][subject_train][run]["label"])
+                    if len(X_train) > 1:
+                        X_train = np.concatenate(X_train, axis=0)
+                        y_train = np.concatenate(y_train, axis=0)
+                    else:
+                        X_train = X_train[0]
+                        y_train = y_train[0]
+
+                    self.decoder = self.init_decoder()
+                    try:
+                        cv_res = self.eval_model(X_train, y_train, X_test, y_test)
+                    except nm_decode.Decoder.ClassMissingException:
+                        continue
+    
+                    performance_leave_one_patient_out[cohort][grid_point][subject_test] = cv_res
+
+        performance_leave_one_patient_out["grid_cortex"] = self.grid_cortex
+        np.save(
+            os.path.join(
+                self.outpath,
+                self.ML_model_name+'_performance_leave_one_patient_out_across_cohorts.npy'
+            ),
+            performance_leave_one_patient_out
+        )
+
+    def run_leave_nminus1_patient_out_across_cohorts(self):
+
+        grid_point_all = np.load(os.path.join(self.outpath, 'grid_point_all.npy'), allow_pickle='TRUE').item()
+        performance_leave_one_patient_out = {}
+
+        for grid_point in list(grid_point_all.keys()):
+            print('grid point: '+str(grid_point))
+            for cohort_train in self.cohorts:
+                print('cohort: '+str(cohort_train))
+                if cohort_train not in performance_leave_one_patient_out:
+                    performance_leave_one_patient_out[cohort_train] = {}
+
+                if cohort_train not in grid_point_all[grid_point]:
+                    continue
+                if len(list(grid_point_all[grid_point][cohort_train].keys())) <= 1:
+                    continue  # cannot do leave one out prediction with a single subject
+                if grid_point not in performance_leave_one_patient_out[cohort_train]:
+                    performance_leave_one_patient_out[cohort_train][grid_point] = {}
+
+                for subject_train in list(grid_point_all[grid_point][cohort_train].keys()):
+                    X_train = []
+                    y_train = []
+                    for run in list(grid_point_all[grid_point][cohort_train][subject_train].keys()):
+                        if grid_point_all[grid_point][cohort_train][subject_train][run]["lat"] != "CON":
+                            continue
+                        X_train.append(grid_point_all[grid_point][cohort_train][subject_train][run]["data"])
+                        y_train.append(grid_point_all[grid_point][cohort_train][subject_train][run]["label"])
+                    if len(X_train) > 1:
+                        X_train = np.concatenate(X_train, axis=0)
+                        y_train = np.concatenate(y_train, axis=0)
+                    else:
+                        X_train = X_train[0]
+                        y_train = y_train[0]
+
+                    for cohort_test in list(grid_point_all[grid_point].keys()):
+                        for subject_test in list(grid_point_all[grid_point][cohort_test].keys()):
+                            if (subject_test == subject_train) and (cohort_test == cohort_train):
+                                continue
+                            X_test = []
+                            y_test = []
+                            for run in list(grid_point_all[grid_point][cohort_test][subject_test].keys()):
+                                if grid_point_all[grid_point][cohort_test][subject_test][run]["lat"] != "CON":
+                                    continue
+                                X_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["data"])
+                                y_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["label"])
+                            if len(X_test) > 1:
+                                X_test = np.concatenate(X_test, axis=0)
+                                y_test = np.concatenate(y_test, axis=0)
+                            else:
+                                X_test = X_test[0]
+                                y_test = y_test[0]
+
+                            self.decoder = self.init_decoder()
+                            try:
+                                cv_res = self.eval_model(X_train, y_train, X_test, y_test)
+                            except nm_decode.Decoder.ClassMissingException:
+                                continue
+
+                            if subject_train not in performance_leave_one_patient_out[cohort_train][grid_point]:
+                                performance_leave_one_patient_out[cohort_train][grid_point][subject_train] = {}
+                            if cohort_test not in performance_leave_one_patient_out[cohort_train][grid_point][subject_train]:
+                                performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test] = {}
+                            if subject_test not in performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test]:
+                                performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test] = {}
+
+                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test] = cv_res
+
+        performance_leave_one_patient_out["grid_cortex"] = self.grid_cortex
+        np.save(os.path.join(self.outpath, self.ML_model_name+'_performance_leave_nminus1_patient_out_across_cohorts.npy'), performance_leave_one_patient_out)

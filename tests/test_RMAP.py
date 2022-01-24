@@ -1,12 +1,12 @@
 import numpy as np
 import os
 
-from py_neuromodulation import nm_across_patient_decoding as RMAP_Wrapper
+from py_neuromodulation import nm_RMAP
 
 class TestWrapper:
 
     def __init__(self) -> None:
-        self.RMAPTest = RMAP_Wrapper.ConnectivityChannelSelector()
+        self.RMAPTest = nm_RMAP.RMAPChannelSelector()
 
     def test_fp_load(self, path_dir):
         fp = self.RMAPTest.load_fingerprint(path_dir)
