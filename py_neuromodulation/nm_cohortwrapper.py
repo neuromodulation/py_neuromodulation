@@ -351,3 +351,29 @@ class CohortRunner:
             np.save(os.path.join(self.outpath, 'channel_all.npy'), grid_point_all)
         else:
             np.save(os.path.join(self.outpath, 'grid_point_all.npy'), grid_point_all)
+
+    @staticmethod
+    def rewrite_grid_point_all(d, outpath):
+
+        # from channel_all[cohort][subject_name][ch][feature_file]
+
+        # to grid_point_all[grid_point][cohort][subject_test][run]
+
+        p = {}
+        for cohort in d.keys():
+            for sub in d[cohort].keys():
+                for gp in d[cohort][sub].keys():
+                    for f in d[cohort][sub][gp].keys():
+                        if gp not in p.keys():
+                            p[gp] = {}
+                        if cohort not in p[gp].keys():
+                            p[gp][cohort] = {}
+                        if sub not in p[gp][cohort].keys():
+                            p[gp][cohort][sub] = {}
+                        if f not in p[gp][cohort][sub].keys():
+                            p[gp][cohort][sub][f] = {}
+                        for key_ in d[cohort][sub][gp][f].keys():
+                            p[gp][cohort][sub][f][key_] = d[cohort][sub][gp][f][key_]
+
+        np.save(os.path.join(outpath, 'grid_point_all_re.npy'), p)
+
