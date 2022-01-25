@@ -81,8 +81,7 @@ class RMAPChannelSelector:
         cohort_test : str,
         sub_test : str,
         ch_test : str,
-        cohorts_train : list,
-        subs_train : list,
+        cohorts_train : dict,
         path_dir : str = r"C:\Users\ICN_admin\OneDrive - Charité - Universitätsmedizin Berlin\Connectomics\DecodingToolbox_BerlinPittsburgh_Beijing\functional_connectivity"
     ):
 
@@ -90,12 +89,12 @@ class RMAPChannelSelector:
             path_dir=path_dir,
             str_to_keep=f"{cohort_test}_{sub_test}_ROI_{ch_test}",
             keep=True
-        )[0]
+        )[1][0].flatten()  # index 1 for getting the array, 0 for the list fp that was found
 
         fp_pairs = []
 
-        for cohort in cohorts_train:
-            for sub in subs_train:
+        for cohort in cohorts_train.keys():
+            for sub in cohorts_train[cohort]:
                 fps_name, fps = self.get_fingerprints_from_path_with_cond(
                     path_dir=path_dir,
                     str_to_keep=f"{cohort}_{sub}_ROI",
@@ -109,9 +108,9 @@ class RMAPChannelSelector:
                             cohort,
                             sub,
                             ch,
-                            np.corrcoef(fp_test, fp)[0,1]
+                            np.corrcoef(fp_test, fp.flatten())[0,1]
                         ]
                     )
 
-        idx_max = np.argmax(np.array(fp_pairs), axis=3)
+        idx_max = np.argmax(np.array(fp_pairs)[:,3])
         return fp_pairs[idx_max][0:3]

@@ -44,6 +44,13 @@ class AcrossPatientRunner:
             sep='\t'
         ).to_numpy()
 
+        self.RMAPSelector = nm_RMAP.RMAPChannelSelector()
+
+        self.ch_all = np.load(
+            os.path.join(self.outpath, "channel_all.npy"),
+            allow_pickle='TRUE'
+        ).item()
+
     def init_decoder(self) -> nm_decode.Decoder:
 
         return nm_decode.Decoder(
@@ -86,6 +93,29 @@ class AcrossPatientRunner:
         
         return X_train, y_train
 
+    def get_patients_train_dict(
+        self,
+        sub_test,
+        cohort_test,
+        val_approach : str
+    ):
+        cohorts_train = {}
+        for cohort in self.cohorts:
+            if val_approach == "leave_1_cohort_out" and cohort == cohort_test:
+                continue
+            if val_approach == "leave_1_sub_out_within_coh" and \
+                cohort != cohort_test:
+                continue
+            cohorts_train[cohort] = []
+            for sub in self.ch_all[cohort]:
+                if val_approach == "leave_1_sub_out_within_coh" and \
+                    sub == sub_test and cohort == cohort_test:
+                    continue
+                if val_approach == "leave_1_sub_out_across_coh" and \
+                    sub == sub_test:
+                    continue
+                cohorts_train[cohort].append(sub)
+        return cohorts_train
 
     def leave_one_patient_out_RMAP(self):
         p_ = {}
@@ -93,36 +123,58 @@ class AcrossPatientRunner:
             if cohort_test not in p_: p_[cohort_test] = {}
             for sub_test in self.ch_all[cohort_test].keys():
                 if sub_test not in p_: p_[cohort_test][sub_test] = {}
-                for rec_test in self.ch_all[cohort_test][sub_test].keys():
-                    if rec_test not in p_[cohort_test][sub_test]:
-                        p_[cohort_test][sub_test][rec_test] = {}
-                    for ch_test in rec_test:
+                for ch_test in self.ch_all[cohort_test][sub_test].keys():
+                    if ch_test not in p_[cohort_test][sub_test]:
+                        p_[cohort_test][sub_test][ch_test] = {}
+                    #for rec_test in self.ch_all[cohort_test][sub_test][ch_test].keys():
+                    #    if rec_test not in p_[cohort_test][sub_test][ch_test]:
+                    #        p_[cohort_test][sub_test][ch_test][rec_test] = {}
+                    #for ch_test in rec_test:
+                        
+                    cohorts_train = self.get_patients_train_dict(
+                        sub_test,
+                        cohort_test,
+                        val_approach="leave_1_cohort_out"
+                    )
 
-                        cohort_train, sub_train, ch_train = \
-                            nm_RMAP.get_highest_corr_sub_ch(cohort_test, sub_test, ch_test)
-                        X_train, y_train = self.get_data_sub_ch(
-                            self.ch_all, cohort_train, sub_train, ch_train
-                        )
-                        X_test, y_test = self.get_data_sub_ch(
-                            self.ch_all, cohort_test, sub_test, ch_test
-                        )
+                    cohort_train, sub_train, ch_train = \
+                        self.RMAPSelector.get_highest_corr_sub_ch(
+                            cohort_test,
+                            sub_test,
+                            ch_test,
+                            cohorts_train,
+                            path_dir=r"C:\Users\ICN_admin\OneDrive - Charité - Universitätsmedizin Berlin\Connectomics\DecodingToolbox_BerlinPittsburgh_Beijing\functional_connectivity"
+                    )
 
-                        self.init_decoder()
+                    X_train, y_train = self.get_data_sub_ch(
+                        self.ch_all, cohort_train, sub_train, ch_train
+                    )
+                    X_test, y_test = self.get_data_sub_ch(
+                        self.ch_all, cohort_test, sub_test, ch_test
+                    )
 
-                        model = self.decoder.wrapper_model_train(
-                            X_train=X_train,
-                            y_train=y_train,
-                            return_fitted_model_only=True
-                        )
-                        cv_res = self.decoder.eval_model(
-                            model,
-                            X_train,
-                            X_test,
-                            y_train,
-                            y_test,
-                            cv_res = nm_decode.CV_res()
-                        )
-                        p_[sub_test]: p_[cohort_test][sub_test][rec_test] = cv_res
+                    self.decoder = self.init_decoder()
+
+                    model = self.decoder.wrapper_model_train(
+                        X_train=X_train,
+                        y_train=y_train,
+                        return_fitted_model_only=True
+                    )
+                    cv_res = self.decoder.eval_model(
+                        model,
+                        X_train,
+                        X_test,
+                        y_train,
+                        y_test,
+                        cv_res = nm_decode.CV_res(
+                            get_movement_detection_rate=True
+                        ),
+                        save_data=False,
+                        append_samples = True
+                    )
+                    p_[cohort_test][sub_test][ch_test] = cv_res
+        np.save(os.path.join(self.outpath, self.ML_model_name+'_performance_leave_one_cohort_out_RMAP.npy'),\
+            p_)
 
 
     def run_cohort_leave_one_patient_out_CV_within_cohort(self):
