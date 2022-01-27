@@ -176,7 +176,6 @@ class AcrossPatientRunner:
         np.save(os.path.join(self.outpath, self.ML_model_name+'_performance_leave_one_cohort_out_RMAP.npy'),\
             p_)
 
-
     def run_cohort_leave_one_patient_out_CV_within_cohort(self):
 
         grid_point_all = np.load(os.path.join(self.outpath, 'grid_point_all.npy'), allow_pickle='TRUE').item()
@@ -237,7 +236,7 @@ class AcrossPatientRunner:
                         cv_res = self.eval_model(X_train, y_train, X_test, y_test)
                     except nm_decode.Decoder.ClassMissingException:
                         continue
-    
+
                     performance_leave_one_patient_out[cohort][grid_point][subject_test] = cv_res
 
         performance_leave_one_patient_out["grid_cortex"] = self.grid_cortex

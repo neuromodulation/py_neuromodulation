@@ -66,7 +66,7 @@ class RMAPChannelSelector:
         fp_arr = np.empty((NUM_VOXELS, LEN_FPS))
         for fp_idx, fp_ in enumerate(fp):
             fp_arr[:, fp_idx] = fp_.flatten()
-        
+
         RMAP = np.zeros(NUM_VOXELS)
         for voxel in range(NUM_VOXELS):
             RMAP[voxel] = np.corrcoef(
@@ -75,7 +75,14 @@ class RMAPChannelSelector:
                 )[0][1]
 
         return RMAP
-    
+
+    @staticmethod
+    @jit(nopython=True)
+    def get_corr_numba(fp_test, fp):
+        fp_flattened = fp.flatten()
+        val = np.corrcoef(fp_test, fp_flattened)[0,1]
+        return val
+
     def get_highest_corr_sub_ch(
         self,
         cohort_test : str,
@@ -103,12 +110,13 @@ class RMAPChannelSelector:
 
                 for fp, fp_name in zip(fps, fps_name):
                     ch = fp_name[fp_name.find("ROI")+4:fp_name.find("func")-1]
+                    corr_val = self.get_corr_numba(fp_test, fp)
                     fp_pairs.append(
                         [
                             cohort,
                             sub,
                             ch,
-                            np.corrcoef(fp_test, fp.flatten())[0,1]
+                            corr_val
                         ]
                     )
 
