@@ -2,21 +2,22 @@
     "out_path": "C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\examples\\rt_example",
     "sampling_rate_features": 10,
     "methods": {
-        "raw_resampling": false,
-        "raw_normalization": false,
+        "raw_resampling": true,
+        "raw_normalization": true,
         "feature_normalization": true,
         "kalman_filter": false,
         "re_referencing": true,
         "notch_filter": true,
         "bandpass_filter": false,
         "stft" : false,
-        "fft" : false,
-        "raw_hjorth": false,
-        "sharpwave_analysis": false,
+        "fft" : true,
+        "raw_hjorth": true,
+        "sharpwave_analysis": true,
         "return_raw": false,
-        "project_cortex": false,
+        "project_cortex": true,
         "project_subcortex": false,
-        "coherence": true
+        "coherence": false,
+        "fooof" : true
     },
     "raw_resampling_settings": {
         "resample_freq": 1000
@@ -170,5 +171,29 @@
                 "window" : "hann"
             }
         ]
+    },
+    "fooof" : {
+        "aperiodic" : {
+            "exponent" : true,
+            "offset" : true
+        },
+        "periodic" : {
+            "center_frequency" : true,
+            "band_width" : true,
+            "height_over_ap" : true
+        },
+        "windowlength" : 1000,
+        "peak_width_limits" : [
+            0.5,
+            12
+        ],
+        "max_n_peaks" : 3,
+        "min_peak_height" : 0,
+        "peak_threshold" : 2,
+        "freq_range" : [
+            2,
+            40
+        ],
+        "knee" : true
     }
 }

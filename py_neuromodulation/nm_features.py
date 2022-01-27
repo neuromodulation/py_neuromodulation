@@ -1,8 +1,17 @@
 # from multiprocessing import Process, Manager
 from numpy import array, floor
 
-from py_neuromodulation import nm_bandpower, nm_filter, nm_hjorth_raw, nm_kalmanfilter, nm_sharpwaves, nm_coherence,\
-    nm_stft, nm_fft
+from py_neuromodulation import (
+    nm_bandpower,
+    nm_filter,
+    nm_hjorth_raw,
+    nm_kalmanfilter,
+    nm_sharpwaves,
+    nm_coherence,
+    nm_stft,
+    nm_fft,
+    nm_fooof
+)
 
 
 class Features:
@@ -73,6 +82,10 @@ class Features:
                         s["coherence"]["method"][idx_coh]["coh"],
                         s["coherence"]["method"][idx_coh]["icoh"])
                 )
+        if self.s["methods"]["fooof"] is True:
+            self.fooof_object = nm_fooof.SpectrumAnalyzer(
+                self.s["fooof"], self.fs, self.verbose
+            )
 
         self.new_dat_index = int(self.fs / self.s["sampling_rate_features"])
 
@@ -156,4 +169,8 @@ class Features:
             features_ = nm_fft.get_fft_features(features_, self.s, self.fs, data[ch_idx, :], self.KF_dict, ch,
                                                   self.f_ranges, self.fband_names)
 
+        if self.s["methods"]["fooof"] is True:
+            features_ = self.fooof_object.get_fooof_params(
+                features_, data[ch_idx, :], ch
+            )
         return features_

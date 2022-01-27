@@ -21,6 +21,7 @@ dependencies:
   - nibabel
   - numba
   - numpydoc
+  - fooof
   - sphinx
   - recommonmark
   - nbsphinx
