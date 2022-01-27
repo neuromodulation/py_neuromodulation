@@ -22,7 +22,7 @@ class NotchFilter:
         self.fs = fs
         self.freqs = freqs
 
-        filter_length = fs - 1
+        filter_length = int(fs - 1)
 
         # Code is copied from filter.py notch_filter
         if freqs is not None:
