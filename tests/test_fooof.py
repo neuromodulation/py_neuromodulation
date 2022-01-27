@@ -48,7 +48,7 @@ class TestWrapper:
         self.ieeg_batch = self.nm_BIDS.get_data()
 
         self.nm_BIDS._set_run()
-    
+
     def test_fooof_features(self):
         data = self.nm_BIDS.get_data()
         feature_series = self.nm_BIDS.run_analysis.process_data(data)

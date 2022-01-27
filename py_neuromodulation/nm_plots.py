@@ -115,9 +115,12 @@ def plot_epochs_avg(
         feature_names = [i[len(ch_name)+1:] for i in list(feature_names) if ch_name in i]
 
     if normalize_data:
-        X_epoch_mean = stats.zscore(np.mean(np.squeeze(X_epoch), axis=0), axis=0).T
+        X_epoch_mean = stats.zscore(np.nanmean(np.squeeze(X_epoch), axis=0), axis=0).T
     else:
-        X_epoch_mean = np.mean(np.squeeze(X_epoch), axis=0).T
+        X_epoch_mean = np.nanmean(np.squeeze(X_epoch), axis=0).T
+
+    if len(X_epoch_mean.shape) == 1:
+        X_epoch_mean = np.expand_dims(X_epoch_mean, axis=0)
 
     plt.figure(figsize=(6, 6))
     plt.subplot(211)

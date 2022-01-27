@@ -54,19 +54,22 @@ class SpectrumAnalyzer:
             features_[f"{ch}_fooof_a_exp"] = self.fm.get_params(
                 'aperiodic_params',
                 'exponent'
-            )
+            ) if self.fm.fooofed_spectrum_ is not None else None
 
         if self.settings_fooof["aperiodic"]["offset"]:
             features_[f"{ch}_fooof_a_offset"] = self.fm.get_params(
                 'aperiodic_params',
                 'offset'
-            )
+            ) if self.fm.fooofed_spectrum_ is not None else None
 
-        peaks_bw = self.fm.get_params('peak_params', 'BW')
-        peaks_cf = self.fm.get_params('peak_params', 'CF')
-        peaks_pw = self.fm.get_params('peak_params', 'PW')
+        peaks_bw = self.fm.get_params('peak_params', 'BW') \
+            if self.fm.fooofed_spectrum_ is not None else None
+        peaks_cf = self.fm.get_params('peak_params', 'CF') \
+            if self.fm.fooofed_spectrum_ is not None else None
+        peaks_pw = self.fm.get_params('peak_params', 'PW') \
+            if self.fm.fooofed_spectrum_ is not None else None
 
-        if type(peaks_bw) is np.float64:
+        if type(peaks_bw) is np.float64 or peaks_bw is None:
             peaks_bw = [peaks_bw]
             peaks_cf = [peaks_cf]
             peaks_pw = [peaks_pw]
