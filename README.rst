@@ -4,7 +4,7 @@ py_neuromodulation
 .. image:: https://app.travis-ci.com/neuromodulation/py_neuromodulation.svg?branch=main
     :target: https://app.travis-ci.com/neuromodulation/py_neuromodulation
 
-Click this button to run the "Tutorial ML with py_neuro" notebooks:
+Click this button to run the "example_BIDS.ipynb":
 
 .. image:: https://mybinder.org/badge_logo.svg
  :target: https://mybinder.org/v2/gh/neuromodulation/py_neuromodulation/HEAD
@@ -20,7 +20,7 @@ For running this toolbox first create a new virtual conda environment:
 
 .. code-block::
 
-    conda env create --file=env.yml
+    conda env create --file=environment.yml
 
 And enable it:
 

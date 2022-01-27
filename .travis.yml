@@ -19,7 +19,7 @@ install:
   - conda info -a
 
   # Replace dep1 dep2 ... with your dependencies
-  - conda env create --file=env.yml
+  - conda env create --file=environment.yml
   - conda activate pn_env
   - python -m pip install .
 
