@@ -55,7 +55,9 @@ class BidsStream(nm_stream.PNStream):
         self.raw_arr, self.raw_arr_data, fs, line_noise = nm_IO.read_BIDS_data(
             self.PATH_RUN, self.PATH_BIDS)
 
-        self.set_fs(fs)
+        #self.set_fs(fs)
+
+        self.set_fs(128)
 
         self.set_linenoise(line_noise)
 

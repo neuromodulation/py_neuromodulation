@@ -2,19 +2,19 @@
     "out_path": "C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\examples\\rt_example",
     "sampling_rate_features": 10,
     "methods": {
-        "raw_resampling": true,
+        "raw_resampling": false,
         "raw_normalization": false,
         "feature_normalization": true,
-        "kalman_filter": true,
+        "kalman_filter": false,
         "re_referencing": true,
         "notch_filter": true,
         "bandpass_filter": false,
-        "stft" : true,
+        "stft" : false,
         "fft" : false,
-        "raw_hjorth": true,
-        "sharpwave_analysis": true,
-        "return_raw": true,
-        "project_cortex": true,
+        "raw_hjorth": false,
+        "sharpwave_analysis": false,
+        "return_raw": false,
+        "project_cortex": false,
         "project_subcortex": false,
         "coherence": true
     },
@@ -156,13 +156,7 @@
         ],
         "frequency_bands" : [
             [
-                "theta",
-                "alpha",
-                "low beta",
-                "high beta",
-                "low gamma",
-                "high gamma",
-                "HFA"
+                "high beta"
             ]
         ],
         "method" : [
