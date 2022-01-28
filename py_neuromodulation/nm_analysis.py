@@ -211,7 +211,8 @@ class Feature_Reader:
         ch: str=None,
         list_feature_keywords: Optional[list[str]]=None,
         epoch_len: int=4,
-        threshold: float=0.1):
+        threshold: float=0.1,
+        normalize_data : bool = True):
 
         filtered_df = self.feature_arr[
             self.filter_features(self.feature_arr.columns, ch, list_feature_keywords)
@@ -240,7 +241,7 @@ class Feature_Reader:
             cut_ch_name_cols=True,
             ch_name=ch,
             label_name=self.label_name,
-            normalize_data=True,
+            normalize_data=normalize_data,
             show_plot=True,
             save=True,
             OUT_PATH=self.feature_dir,

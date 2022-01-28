@@ -21,7 +21,7 @@ def run_example_BIDS():
                                        PATH_BIDS=PATH_BIDS,
                                        PATH_OUT=PATH_OUT,
                                        LIMIT_DATA=False,
-                                       VERBOSE=True)
+                                       VERBOSE=False)
 
     nm_BIDS.run_bids()
 
