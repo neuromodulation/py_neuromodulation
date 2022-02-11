@@ -13,6 +13,7 @@ def set_channels_by_bids(
     bads: Optional[list[str]] = None,
     new_names: Union[str, list[str]] = "default",
     ecog_only: bool = False,
+    used_types: Optional[list[str]] = ["ecog", "dbs", "seeg"],
 ):
     """Return dataframe with channel-specific settings in nm_channels format.
 
@@ -53,6 +54,9 @@ def set_channels_by_bids(
             given, it should be in the same order as `ch_names`.
         ECOG_ONLY : boolean, default: False
             if True, set only 'ecog' channel type to used
+        used_types : list of str | None, default : ["ecog", "dbs", "seeg"]
+            data channel types to be used. Set to `None` to use no channel
+            types.
 
     Returns
     -------
@@ -72,7 +76,6 @@ def set_channels_by_bids(
         "squared_rotation",
         "squared_interpolated_emg",
     ]
-    used_keywords = ["ecog", "seeg"]
 
     df = pd.DataFrame(
         data=None,
@@ -88,16 +91,17 @@ def set_channels_by_bids(
     )
     df["name"] = ch_names
 
-    df["used"] = [
-        1
-        if any(
-            keyword.lower() in ch_name.lower()
-            or keyword.lower() in ch_type.lower()
-            for keyword in used_keywords
-        )
-        else 0
-        for ch_type, ch_name in zip(ch_types, ch_names)
-    ]
+    if used_types:
+        df["used"] = [
+            1
+            if any(
+                keyword.lower() == ch_type.lower() for keyword in used_types
+            )
+            else 0
+            for ch_type in ch_types
+        ]
+    else:
+        df["used"] = 0
 
     df["target"] = [
         1
