@@ -1,14 +1,24 @@
-import numpy as np
+"""Module for handling nm_channels."""
+from typing import Optional, Union
+
 import pandas as pd
-import os
+
+_LFP_TYPES = ["seeg", "dbs", "lfp"]  # must be lower-case
 
 
-def set_channels_by_bids(ch_names, ch_types, reference='default', bads=None,
-                    new_names='default', ECOG_ONLY=False):
-    """Return dataframe with channel-specific settings.
+def set_channels_by_bids(
+    ch_names: list[str],
+    ch_types: list[str],
+    reference="default",
+    bads: Optional[list[str]] = None,
+    new_names: Union[str, list[str]] = "default",
+    ecog_only: bool = False,
+    used_types: Optional[list[str]] = ["ecog", "dbs", "seeg"],
+):
+    """Return dataframe with channel-specific settings in nm_channels format.
 
-    Return an nm_channels dataframe with the columns: "name", "rereference", "used",
-    "target", "type"]. "name" is set to ch_names, "rereference" can be
+    Return an nm_channels dataframe with the columns: "name", "rereference",
+    "used", "target", "type"]. "name" is set to ch_names, "rereference" can be
     specified individually. "used" is set to 1 for all channels containing
     "ECOG", "SEEG", "LFP" or "DBS", else to 0. "target" is set to 1 for all
     channels containing "TTL", "ANALOG", "MOV" and "ROTA", else to 0.
@@ -32,7 +42,7 @@ def set_channels_by_bids(ch_names, ch_types, reference='default', bads=None,
             the adjacent lower channel, split by left and right hemisphere.
             For this, the channel names must contain the substring "_L_" and/or
             "_R_" (lower or upper case). CAVE: Adjacent channels will be
-            determined using the sorted() function.
+            determined using the sort() function.
         bads :  str | list of str, default: None
             channels that should be marked as bad and not be used for
             average re-referencing etc.
@@ -44,125 +54,187 @@ def set_channels_by_bids(ch_names, ch_types, reference='default', bads=None,
             given, it should be in the same order as `ch_names`.
         ECOG_ONLY : boolean, default: False
             if True, set only 'ecog' channel type to used
+        used_types : list of str | None, default : ["ecog", "dbs", "seeg"]
+            data channel types to be used. Set to `None` to use no channel
+            types.
 
     Returns
     -------
         df: DataFrame in nm_channels format
     """
-
     if not (len(ch_names) == len(ch_types)):
-        raise Exception("Sorry, no numbers below zero")
+        raise ValueError(
+            "Number of `ch_names` and `ch_types` must match."
+            f"Got: {len(ch_names)} `ch_names` and {len(ch_types)} `ch_types`."
+        )
 
-    mov_substrs = ['mov', 'rota_squared', 'squared_emg', 'squared_rotawheel', \
-                'squared_rotation', 'SQUARED_INTERPOLATED_EMG']
-    used_substrs = ['ecog', 'seeg']
-    lfp_types = ['seeg', 'dbs', 'lfp']
+    target_keywords = [
+        "mov",
+        "rota_squared",
+        "squared_emg",
+        "squared_rotawheel",
+        "squared_rotation",
+        "squared_interpolated_emg",
+    ]
 
-    df = pd.DataFrame(np.nan, index=np.arange(len(list(ch_names))),
-                columns=['name', 'rereference', 'used', 'target', 'type',
-                            'status', 'new_name'])
-    df['name'] = ch_names
+    df = pd.DataFrame(
+        data=None,
+        columns=[
+            "name",
+            "rereference",
+            "used",
+            "target",
+            "type",
+            "status",
+            "new_name",
+        ],
+    )
+    df["name"] = ch_names
 
-    df['used'] = [1 if any(used_substr.lower() in ch_name.lower()
-                        or used_substr.lower() in ch_type.lower()
-                        for used_substr in used_substrs)
-                else 0 for ch_type, ch_name in zip(ch_types, ch_names)]
+    if used_types:
+        df["used"] = [
+            1
+            if any(
+                keyword.lower() == ch_type.lower() for keyword in used_types
+            )
+            else 0
+            for ch_type in ch_types
+        ]
+    else:
+        df["used"] = 0
 
-    df['target'] = [1 if any(mov_substr.lower() in ch_name.lower()
-                            for mov_substr in mov_substrs) else 0
-                    for ch_idx, ch_name in enumerate(ch_names)]
+    df["target"] = [
+        1
+        if any(
+            keyword.lower() in ch_name.lower() for keyword in target_keywords
+        )
+        else 0
+        for ch_name in ch_names
+    ]
 
     # note: BIDS types are in caps, mne.io.RawArray types lower case
-    # s.t. 'type' will be in lower case here
-    df['type'] = ch_types
+    # so that 'type' will be in lower case here
+    df["type"] = ch_types
 
-    if ECOG_ONLY is True:
+    if ecog_only:
         df.loc[(df["type"] == "seeg") | (df["type"] == "dbs"), "used"] = 0
 
     if isinstance(reference, str):
-        if not (reference in ['default', 'Default']):
-            raise ValueError("`reference` must be either `default`, None or "
-                            "an iterable of new reference channel names. "
-                            f"Got: {reference}.")
-        ecog_chs = []
-        lfp_chs = []
-        other_chs = []
-        for ch_name, ch_type in zip(ch_names, ch_types):
-            if "ecog" in ch_type.lower() or "ecog" in ch_name.lower():
-                ecog_chs.append(ch_name)
-            elif any(lfp_type.lower() in ch_type.lower()
-                    or lfp_type.lower() in ch_name.lower()
-                    for lfp_type in lfp_types):
-                lfp_chs.append(ch_name)
-            else:
-                other_chs.append(ch_name)
-        lfp_l = sorted(
-            [lfp_ch for lfp_ch in lfp_chs if ('_l_' in lfp_ch.lower())
-            or ('_left_' in lfp_ch.lower())])
-        lfp_r = sorted(
-            [lfp_ch for lfp_ch in lfp_chs if ('_r_' in lfp_ch.lower())
-            or ('_right_' in lfp_ch.lower())])
-        lfp_l_refs = [lfp_l[i - 1] if i > 0 else lfp_l[-1] for i in
-                    range(len(lfp_l))]
-        lfp_r_refs = [lfp_r[i - 1] if i > 0 else lfp_r[-1] for i in
-                    range(len(lfp_r))]
-        ref_idx = list(df.columns).index('rereference')
-        for ecog_ch in ecog_chs:
-            df.iloc[
-                df[df['name'] == ecog_ch].index[0], ref_idx] = 'average'
-        for i, lfp in enumerate(lfp_l):
-            df.iloc[
-                df[df['name'] == lfp].index[0], ref_idx] = lfp_l_refs[i]
-        for i, lfp in enumerate(lfp_r):
-            df.iloc[
-                df[df['name'] == lfp].index[0], ref_idx] = lfp_r_refs[i]
-        for other_ch in other_chs:
-            df.iloc[df[df['name'] == other_ch].index[0], ref_idx] = 'None'
-    elif hasattr(reference, '__iter__'):
-        if len(reference) != len(ch_names):
+        if reference.lower() == "default":
+            df = _get_default_references(
+                df=df, ch_names=ch_names, ch_types=ch_types
+            )
+        else:
             raise ValueError(
-                "`new_names` must have the same number of items as the "
-                "original channel names.")
-        df['reference'] = reference
-    elif not reference:
-        df.loc[:, 'rereference'] = 'None'
-    else:
-        raise ValueError("`reference` must be either `default`, None or "
-                        "an iterable of new reference channel names. "
-                        f"Got: {reference}.")
+                "`reference` must be either `default`, `None` or "
+                "an iterable of new reference channel names. "
+                f"Got: {reference}."
+            )
 
-    if bads is not None:
+    elif isinstance(reference, list):
+        if len(ch_names) != len(reference):
+            raise ValueError(
+                "Number of `ch_names` and `reference` must match."
+                f"Got: {len(ch_names)} `ch_names` and {len(reference)}"
+                " `references`."
+            )
+        df["reference"] = reference
+    elif not reference:
+        df.loc[:, "rereference"] = "None"
+    else:
+        raise ValueError(
+            "`reference` must be either `default`, None or "
+            "an iterable of new reference channel names. "
+            f"Got: {reference}."
+        )
+
+    if bads:
         if isinstance(bads, str):
             bads = [bads]
-        df['status'] = ['bad' if ch in bads else 'good' for ch in ch_names]
-        df.loc[df['status'] == 'bad', 'used'] = 0  # setting bad channels to not being used
+        df["status"] = ["bad" if ch in bads else "good" for ch in ch_names]
+        df.loc[
+            df["status"] == "bad", "used"
+        ] = 0  # setting bad channels to not being used
     else:
-        df['status'] = 'good'
+        df["status"] = "good"
 
     if not new_names:
-        df['new_name'] = ch_names
+        df["new_name"] = ch_names
     elif isinstance(new_names, str):
-        if new_names.lower() != 'default':
-            raise ValueError("`new_names` must be either `default`, None or "
-                            "an iterable of new channel names. Got: "
-                            f"{new_names}.")
-        new_names = list()
-        for name, ref in zip(df['name'], df['rereference']):
-            if ref == 'None':
+        if new_names.lower() != "default":
+            raise ValueError(
+                "`new_names` must be either `default`, None or "
+                "an iterable of new channel names. Got: "
+                f"{new_names}."
+            )
+        new_names = []
+        for name, ref in zip(df["name"], df["rereference"]):
+            if ref == "None":
                 new_names.append(name)
-            elif ref == 'average':
-                new_names.append(name + '-avgref')
+            elif ref == "average":
+                new_names.append(name + "-avgref")
             else:
-                new_names.append(name + '-' + ref)
-        df['new_name'] = new_names
-    elif hasattr(new_names, '__iter__'):
+                new_names.append(name + "-" + ref)
+        df["new_name"] = new_names
+    elif hasattr(new_names, "__iter__"):
         if len(new_names) != len(ch_names):
-            raise ValueError("`new_names` must have the same number of items"
-                            "as the original channel names.")
+            raise ValueError(
+                "Number of `ch_names` and `new_names` must match."
+                f"Got: {len(ch_names)} `ch_names` and {len(new_names)}"
+                " `new_names`."
+            )
         else:
-            df['new_name'] = ch_names
+            df["new_name"] = ch_names
     else:
-        raise ValueError("`new_names` must be either `default`, None or "
-                        "an iterable of new channel names.Got: "
-                        f"{new_names}.")
+        raise ValueError(
+            "`new_names` must be either `default`, None or "
+            f"an iterable of new channel names. Got: {new_names}."
+        )
+    return df
+
+
+def _get_default_references(
+    df: pd.DataFrame, ch_names: list[str], ch_types: list[str]
+) -> pd.DataFrame:
+    """Add references with default settings (ECOG CAR, LFP bipolar)."""
+    ecog_chs = []
+    lfp_chs = []
+    other_chs = []
+    for ch_name, ch_type in zip(ch_names, ch_types):
+        if "ecog" in ch_type.lower() or "ecog" in ch_name.lower():
+            ecog_chs.append(ch_name)
+        elif any(
+            lfp_type in ch_type.lower() or lfp_type in ch_name.lower()
+            for lfp_type in _LFP_TYPES
+        ):
+            lfp_chs.append(ch_name)
+        else:
+            other_chs.append(ch_name)
+    lfp_l = [
+        lfp_ch
+        for lfp_ch in lfp_chs
+        if ("_l_" in lfp_ch.lower()) or ("_left_" in lfp_ch.lower())
+    ]
+    lfp_l.sort()
+    lfp_r = [
+        lfp_ch
+        for lfp_ch in lfp_chs
+        if ("_r_" in lfp_ch.lower()) or ("_right_" in lfp_ch.lower())
+    ]
+    lfp_r.sort()
+    lfp_l_refs = [
+        lfp_l[i - 1] if i > 0 else lfp_l[-1] for i, _ in enumerate(lfp_l)
+    ]
+    lfp_r_refs = [
+        lfp_r[i - 1] if i > 0 else lfp_r[-1] for i, _ in enumerate(lfp_r)
+    ]
+    ref_idx = list(df.columns).index("rereference")
+    for ecog_ch in ecog_chs:
+        df.iloc[df[df["name"] == ecog_ch].index[0], ref_idx] = "average"
+    for i, lfp in enumerate(lfp_l):
+        df.iloc[df[df["name"] == lfp].index[0], ref_idx] = lfp_l_refs[i]
+    for i, lfp in enumerate(lfp_r):
+        df.iloc[df[df["name"] == lfp].index[0], ref_idx] = lfp_r_refs[i]
+    for other_ch in other_chs:
+        df.iloc[df[df["name"] == other_ch].index[0], ref_idx] = "None"
     return df

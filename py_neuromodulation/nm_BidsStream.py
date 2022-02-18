@@ -16,7 +16,7 @@ class BidsStream(nm_stream.PNStream):
     LIMIT_DATA: bool
     LIMIT_LOW: int
     LIMIT_HIGH: int
-    ECOG_ONLY: bool
+    used_types: bool
     raw_arr: mne.io.RawArray
     raw_arr_data: np.array
     annot: mne.Annotations
@@ -36,7 +36,7 @@ class BidsStream(nm_stream.PNStream):
         LIMIT_DATA:bool = False,
         LIMIT_LOW:int = 0,
         LIMIT_HIGH:int = 10000,
-        ECOG_ONLY:bool = False) -> None:
+        used_types:list = ["ecog"]) -> None:
 
         super().__init__(PATH_SETTINGS=PATH_SETTINGS,
             PATH_NM_CHANNELS=PATH_NM_CHANNELS,
@@ -47,7 +47,7 @@ class BidsStream(nm_stream.PNStream):
         self.PATH_RUN = PATH_RUN
         self.PATH_ANNOTATIONS = PATH_ANNOTATIONS
         self.PATH_BIDS = PATH_BIDS
-        self.ECOG_ONLY = ECOG_ONLY
+        self.used_types = used_types
         self.LIMIT_DATA = LIMIT_DATA
         self.LIMIT_LOW = LIMIT_LOW
         self.LIMIT_HIGH = LIMIT_HIGH
@@ -63,7 +63,7 @@ class BidsStream(nm_stream.PNStream):
                             ch_names=self.raw_arr.ch_names,
                             ch_types=self.raw_arr.get_channel_types(),
                             bads=self.raw_arr.info["bads"],
-                            ECOG_ONLY=ECOG_ONLY
+                            used_types=used_types
                             )
 
         if self.PATH_ANNOTATIONS:
