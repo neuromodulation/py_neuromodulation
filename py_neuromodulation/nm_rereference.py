@@ -73,7 +73,7 @@ class RT_rereference:
         for ch_idx in self.channels_used:
             ref_idx = self.ref_map[ch_idx]
             ref_data = ieeg_batch[ref_idx, :]
-            new_data_ch = ieeg_batch[ch_idx, :] - np.mean(ref_data)
+            new_data_ch = ieeg_batch[ch_idx, :] - np.mean(ref_data, axis=0)
             new_data.append(new_data_ch)
 
         reref_data = np.empty_like(ieeg_batch)
