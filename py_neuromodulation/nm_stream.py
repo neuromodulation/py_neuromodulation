@@ -329,20 +329,20 @@ class PNStream(ABC):
         ch_names (list),
         ch_types (list),
         bads (list)
-        ECOG_Only (bool)"""
+        used_types (list)"""
 
         if PATH_NM_CHANNELS and os.path.isfile(PATH_NM_CHANNELS):
             nm_channels = pd.read_csv(PATH_NM_CHANNELS)
         elif None not in [kwargs.get('ch_names', None),
                         kwargs.get('ch_types', None),
                         kwargs.get('bads', None),
-                        kwargs.get('ECOG_ONLY', None)]:
+                        kwargs.get('used_types', None)]:
 
             nm_channels = nm_define_nmchannels.set_channels_by_bids(
                 ch_names=kwargs.get('ch_names'),
                 ch_types=kwargs.get('ch_types'),
                 bads=kwargs.get('bads'),
-                ECOG_ONLY=kwargs.get('ECOG_ONLY'))
+                used_types=kwargs.get('used_types'))
         return nm_channels
 
     @staticmethod
