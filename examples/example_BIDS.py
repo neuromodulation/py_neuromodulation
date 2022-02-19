@@ -21,7 +21,10 @@ def run_example_BIDS():
                                        PATH_BIDS=PATH_BIDS,
                                        PATH_OUT=PATH_OUT,
                                        LIMIT_DATA=False,
-                                       VERBOSE=False)
+                                       VERBOSE=True,
+                                       target_keywords=("SQUARED_ROTATION",),
+                                       used_types=("ecog", "seeg")
+    )
 
     nm_BIDS.run_bids()
 
@@ -72,7 +75,7 @@ def run_example_BIDS():
 
     performances = feature_reader.run_ML_model(
         estimate_channels=True,
-        estimate_gridpoints=True,
+        estimate_gridpoints=False,
         estimate_all_channels_combined=True,
         save_results=True
     )
