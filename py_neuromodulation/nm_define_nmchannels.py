@@ -1,27 +1,29 @@
 """Module for handling nm_channels."""
-from typing import Optional, Union
+from typing import Iterable, Optional, Union
 
 import pandas as pd
+
 
 _LFP_TYPES = ["seeg", "dbs", "lfp"]  # must be lower-case
 
 
-def set_channels_by_bids(
+def set_channels(
     ch_names: list[str],
     ch_types: list[str],
-    reference="default",
+    reference: Union[list, str] = "default",
     bads: Optional[list[str]] = None,
     new_names: Union[str, list[str]] = "default",
     ecog_only: bool = False,
-    used_types: Optional[list[str]] = ["ecog", "dbs", "seeg"],
+    used_types: Optional[Iterable[str]] = ("ecog", "dbs", "seeg"),
+    target_keywords: Optional[Iterable[str]] = ("mov", "squared", "label"),
 ):
     """Return dataframe with channel-specific settings in nm_channels format.
 
     Return an nm_channels dataframe with the columns: "name", "rereference",
-    "used", "target", "type"]. "name" is set to ch_names, "rereference" can be
-    specified individually. "used" is set to 1 for all channels containing
-    "ECOG", "SEEG", "LFP" or "DBS", else to 0. "target" is set to 1 for all
-    channels containing "TTL", "ANALOG", "MOV" and "ROTA", else to 0.
+    "used", "target", "type", "status", "new_name"]. "name" is set to ch_names,
+    "rereference" can be specified individually. "used" is set to 1 for all 
+    channel types specified in `used_types`, else to 0. "target" is set to 1 
+    for all channels containing any of the `target_keywords`, else to 0.
 
     Possible channel types:
     https://github.com/mne-tools/mne-python/blob/6ae3b22033c745cce5cd5de9b92da54c13c36484/doc/_includes/channel_types.rst
@@ -29,12 +31,10 @@ def set_channels_by_bids(
     Arguments
     ---------
         ch_names : list
-            list of channel names. Should each contain one of the keywords
-            (lower or upper case): "ECOG", "LFP", "DBS", "SEEG", "TTL",
-            "ANALOG", "ROTA" or "MOV".
+            list of channel names.
         ch_types : list
             list of channel types. Should optimally be of the types: "ECOG",
-            "DBS" or "SEEG". "LFP" is also accepted.
+            "DBS" or "SEEG".
         reference : str | list of str | None, default: 'default'
             re-referencing scheme. Default is "default". This sets ECOG channel
             references to "average" and creates a bipolar referencing scheme
@@ -54,10 +54,12 @@ def set_channels_by_bids(
             given, it should be in the same order as `ch_names`.
         ECOG_ONLY : boolean, default: False
             if True, set only 'ecog' channel type to used
-        used_types : list of str | None, default : ["ecog", "dbs", "seeg"]
+        used_types : iterable of str | None, default : ("ecog", "dbs", "seeg")
             data channel types to be used. Set to `None` to use no channel
             types.
-
+        target_keywords : iterable of str | None, default : ("ecog", "dbs", "seeg")
+            keywords for target channels
+.
     Returns
     -------
         df: DataFrame in nm_channels format
@@ -67,15 +69,6 @@ def set_channels_by_bids(
             "Number of `ch_names` and `ch_types` must match."
             f"Got: {len(ch_names)} `ch_names` and {len(ch_types)} `ch_types`."
         )
-
-    target_keywords = [
-        "mov",
-        "rota_squared",
-        "squared_emg",
-        "squared_rotawheel",
-        "squared_rotation",
-        "squared_interpolated_emg",
-    ]
 
     df = pd.DataFrame(
         data=None,
@@ -92,25 +85,28 @@ def set_channels_by_bids(
     df["name"] = ch_names
 
     if used_types:
-        df["used"] = [
-            1
+        used_list = []
+        for ch_type in ch_types:
             if any(
-                keyword.lower() == ch_type.lower() for keyword in used_types
-            )
-            else 0
-            for ch_type in ch_types
-        ]
+                use_type.lower() == ch_type.lower() for use_type in used_types
+            ):
+                used_list.append(1)
+            else:
+                used_list.append(0)
+        df["used"] = used_list
     else:
         df["used"] = 0
 
-    df["target"] = [
-        1
-        if any(
-            keyword.lower() in ch_name.lower() for keyword in target_keywords
-        )
-        else 0
-        for ch_name in ch_names
-    ]
+    if target_keywords:
+        targets = []
+        for ch_name in ch_names:
+            if any(kw.lower() in ch_name.lower() for kw in target_keywords):
+                targets.append(1)
+            else:
+                targets.append(0)
+        df["target"] = targets
+    else:
+        df["target"] = 0
 
     # note: BIDS types are in caps, mne.io.RawArray types lower case
     # so that 'type' will be in lower case here
@@ -180,15 +176,15 @@ def set_channels_by_bids(
         if len(new_names) != len(ch_names):
             raise ValueError(
                 "Number of `ch_names` and `new_names` must match."
-                f"Got: {len(ch_names)} `ch_names` and {len(new_names)}"
+                f" Got: {len(ch_names)} `ch_names` and {len(new_names)}"
                 " `new_names`."
             )
         else:
             df["new_name"] = ch_names
     else:
         raise ValueError(
-            "`new_names` must be either `default`, None or "
-            f"an iterable of new channel names. Got: {new_names}."
+            "`new_names` must be either `default`, None or"
+            f" an iterable of new channel names. Got: {new_names}."
         )
     return df
 
