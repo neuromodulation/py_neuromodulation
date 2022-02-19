@@ -1,9 +1,10 @@
-from numpy import empty_like, mean, ndarray, where
+"""Re-referencing Module."""
+import numpy as np
 import pandas as pd
 
 
 class RT_rereference:
-    def __init__(self, df: pd.DataFrame, split_data: bool = False) -> None:
+    def __init__(self, df: pd.DataFrame) -> None:
         """Initialize real-time rereference information.
 
         Parameters
@@ -11,30 +12,52 @@ class RT_rereference:
         df : Pandas DataFrame
             Dataframe containing information about rereferencing, as
             specified in nm_channels.csv.
-        split_data : bool, default: False
-            If set to True, the rereferenced data will be returned split
-            into cortex and subcortex. Defaults to False.
+
+
+        Raises:
+            ValueError: rereferencing using undefined channel
+            ValueError: rereferencing according to same channel
         """
+        (self.channels_used,) = np.where((df.used == 1))
+        (self.channels_not_used,) = np.where((df.used != 1))
 
-        self.ch_names = list(df["name"])
-        self.refs = df["rereference"]
-        self.cortex_used = where((df.type == "ecog") & (df.used == 1))[0]
-        self.cortex_good = where((df.type == "ecog") & (df.status == "good"))[
-            0
-        ]
-        self.subcortex_used = where(
-            df.type.isin(("seeg", "dbs", "lfp")) & (df.used == 1)
-        )[0]
-        self.subcortex_good = where(
-            df.type.isin(("seeg", "dbs", "lfp")) & (df.status == "good")
-        )[0]
-        self.to_ref_idx = where(
-            ~df.type.isin(("seeg", "dbs", "lfp", "ecog")) | (df.used == 0)
-        )
+        ch_names = df["name"].tolist()
+        ch_types = df.type
+        refs = df["rereference"]
 
-        self.split_data = split_data
+        type_map = {}
+        for ch_type in df.type.unique():
+            type_map[ch_type] = np.where(
+                (ch_types == ch_type) & (df.status == "good")
+            )[0]
 
-    def rereference(self, ieeg_batch: ndarray) -> ndarray:
+        self.ref_map = {}
+        for ch_idx in self.channels_used:
+            ref = refs[ch_idx]
+            if ref.lower() == "none" or pd.isnull(ref):
+                ref_idx = None
+            elif ref == "average":
+                ch_type = ch_types[ch_idx]
+                ref_idx = type_map[ch_type][type_map[ch_type] != ch_idx]
+            else:
+                ref_idx = []
+                ref_channels = ref.split("&")
+                for ref_chan in ref_channels:
+                    if ref_chan not in ch_names:
+                        raise ValueError(
+                            "One or more of the reference channels are not"
+                            " part of the recording channels. First missing"
+                            f" channel: {ref_chan}."
+                        )
+                    if ref_chan == ch_names[ch_idx]:
+                        raise ValueError(
+                            "You cannot rereference to the same channel."
+                            f" Channel: {ref_chan}."
+                        )
+                    ref_idx.append(ch_names.index(ref_chan))
+            self.ref_map[ch_idx] = ref_idx
+
+    def rereference(self, ieeg_batch: np.ndarray) -> np.ndarray:
 
         """Rereference data according to the initialized RT_rereference class.
 
@@ -42,70 +65,21 @@ class RT_rereference:
             ieeg_batch (numpy ndarray) :
                 shape(n_channels, n_samples) - data to be rereferenced.
 
-        Raises:
-            ValueError: rereferencing using undefined channel
-            ValueError: rereferencing according to same channel
-
         Returns:
             reref_data (numpy ndarray): rereferenced data
         """
 
-        data_subcortex = ieeg_batch[self.subcortex_used]
-        new_data_subcortex = empty_like(data_subcortex)
-        for i, idx in enumerate(self.subcortex_used):
-            elec_channel = self.subcortex_used == idx
-            ch = data_subcortex[elec_channel, :]
-            if self.refs[idx] in ["none", "None"] or pd.isnull(self.refs[idx]):
-                new_data_subcortex[i] = ch
-            elif self.refs[idx] == "average":
-                av = mean(
-                    data_subcortex[self.subcortex_good != idx, :], axis=0
-                )
-                new_data_subcortex[i] = ch - av
-            else:
-                index = []
-                ref_channels = self.refs[idx].split("&")
-                for j in range(len(ref_channels)):
-                    if ref_channels[j] not in self.ch_names:
-                        raise ValueError(
-                            "One or more of the reference channels are not "
-                            "part of the recording channels."
-                        )
-                    index.append(self.ch_names.index(ref_channels[j]))
-                new_data_subcortex[i] = ch - mean(ieeg_batch[index, :], axis=0)
+        new_data = []
+        for ch_idx in self.channels_used:
+            ref_idx = self.ref_map[ch_idx]
+            ref_data = ieeg_batch[ref_idx, :]
+            new_data_ch = ieeg_batch[ch_idx, :] - np.mean(ref_data, axis=0)
+            new_data.append(new_data_ch)
 
-        data_cortex = ieeg_batch[self.cortex_used]
-        new_data_cortex = empty_like(data_cortex)
-        for i, idx in enumerate(self.cortex_used):
-            elec_channel = self.cortex_used == idx
-            ch = data_cortex[elec_channel, :]
-            if self.refs[idx] == "none" or pd.isnull(self.refs[idx]):
-                new_data_cortex[i] = ch
-            elif self.refs[idx] == "average":
-                av = mean(data_cortex[self.cortex_good != idx, :], axis=0)
-                new_data_cortex[i] = ch - av
-            else:
-                index = []
-                ref_channels = self.refs[idx].split("+")
-                for j in range(len(ref_channels)):
-                    if ref_channels[j] not in self.ch_names:
-                        raise ValueError(
-                            "One or more of the reference "
-                            "channels are not part of the "
-                            "recorded channels."
-                        )
-                    if ref_channels[j] == self.ch_names[idx]:
-                        raise ValueError(
-                            "You cannot rereference to the same channel."
-                        )
-                    index.append(self.ch_names.index(ref_channels[j]))
-                new_data_cortex[i] = ch - mean(ieeg_batch[index, :], axis=0)
+        reref_data = np.empty_like(ieeg_batch)
+        reref_data[self.channels_used, :] = np.vstack(new_data)
+        reref_data[self.channels_not_used, :] = ieeg_batch[
+            self.channels_not_used
+        ]
 
-        if self.split_data:
-            return new_data_cortex, new_data_subcortex
-        else:
-            reref_data = empty_like(ieeg_batch)
-            reref_data[self.subcortex_used, :] = new_data_subcortex
-            reref_data[self.cortex_used, :] = new_data_cortex
-            reref_data[self.to_ref_idx] = ieeg_batch[self.to_ref_idx]
-            return reref_data
+        return reref_data

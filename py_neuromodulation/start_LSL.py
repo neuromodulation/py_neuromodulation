@@ -67,7 +67,7 @@ if __name__ == "__main__":
     
          # initialize rereferencing
         if settings_wrapper.settings["methods"]["re_referencing"] is True:
-            rereference_ = rereference.RT_rereference(settings_wrapper.df_M1, split_data=False)
+            rereference_ = rereference.RT_rereference(settings_wrapper.df_M1)
         else:
             rereference_ = None
         

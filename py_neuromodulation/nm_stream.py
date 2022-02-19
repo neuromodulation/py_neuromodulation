@@ -206,7 +206,7 @@ class PNStream(ABC):
         """
         if settings["methods"]["re_referencing"] is True:
             rereference = nm_rereference.RT_rereference(
-                nm_channels, split_data=False)
+                nm_channels)
         else:
             rereference = None
             # reset nm_channels from default values
