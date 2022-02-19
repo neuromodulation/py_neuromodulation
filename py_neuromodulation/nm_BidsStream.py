@@ -1,3 +1,4 @@
+from typing import Optional, Iterable
 import os
 import pathlib
 import mne
@@ -36,7 +37,8 @@ class BidsStream(nm_stream.PNStream):
         LIMIT_DATA:bool = False,
         LIMIT_LOW:int = 0,
         LIMIT_HIGH:int = 10000,
-        used_types:list = ["ecog"]) -> None:
+        used_types: Optional[Iterable[str]] = ("ecog", "dbs", "seeg"),
+        target_keywords: Optional[Iterable[str]] = ("mov", "squared", "label")) -> None:
 
         super().__init__(PATH_SETTINGS=PATH_SETTINGS,
             PATH_NM_CHANNELS=PATH_NM_CHANNELS,
@@ -63,7 +65,8 @@ class BidsStream(nm_stream.PNStream):
                             ch_names=self.raw_arr.ch_names,
                             ch_types=self.raw_arr.get_channel_types(),
                             bads=self.raw_arr.info["bads"],
-                            used_types=used_types
+                            used_types=used_types,
+                            target_keywords=target_keywords
                             )
 
         if self.PATH_ANNOTATIONS:

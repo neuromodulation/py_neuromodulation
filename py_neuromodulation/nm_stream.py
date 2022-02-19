@@ -342,7 +342,9 @@ class PNStream(ABC):
                 ch_names=kwargs.get('ch_names'),
                 ch_types=kwargs.get('ch_types'),
                 bads=kwargs.get('bads'),
-                used_types=kwargs.get('used_types'))
+                used_types=kwargs.get('used_types'),
+                target_keywords=kwargs.get('target_keywords')
+            )
         return nm_channels
 
     @staticmethod
