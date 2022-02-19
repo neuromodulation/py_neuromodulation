@@ -102,7 +102,9 @@ class Decoder:
                  get_movement_detection_rate:bool =False,
                  min_consequent_count:int =3,
                  bay_opt_param_space: list = [],
-                 VERBOSE: bool = False) -> None:
+                 VERBOSE: bool = False,
+                 fs: int = None
+        ) -> None:
         """Initialize here a feature file for processing
         Read settings.json nm_channels.csv and features.csv
         Read target label
@@ -142,6 +144,7 @@ class Decoder:
         self.TRAIN_VAL_SPLIT = TRAIN_VAL_SPLIT
         self.RUN_BAY_OPT = RUN_BAY_OPT
         self.save_coef = save_coef
+        self.fs = fs
         self.get_movement_detection_rate = get_movement_detection_rate
         self.min_consequent_count = min_consequent_count
         self.STACK_FEATURES_N_SAMPLES = STACK_FEATURES_N_SAMPLES
@@ -634,19 +637,42 @@ class Decoder:
 
         def split_data(data):
             if self.cv_method == "NonShuffledTrainTestSplit":
-                # unfortunately lot of overhead since a non shuffle index base split 
-                # is not supported in sklearn
-                cv_single_tr_te_split =  model_selection.check_cv(
-                    cv=[
-                        model_selection.train_test_split(
-                            np.arange(data.shape[0]),
-                            test_size=0.3,
-                            shuffle=False
-                        )
-                    ]
-                )
-                for train_index, test_index in cv_single_tr_te_split.split():
+            
+                # 1. step
+                N_samples = data.shape[0]
+                test_area_points = (N_samples - self.fs * 10) - (self.fs * 10)
+                test_points = int(N_samples * 0.3)
+
+                if test_area_points > test_points:
+                    # place training set in the middle between outer 10s
+                    # starting off at random point
+                    start_index = np.random.randint(
+                        int(self.fs * 10),
+                        N_samples - self.fs * 10 - test_points
+                    )
+                    test_index = np.arange(start_index, start_index + test_points)
+                    train_index = np.concatenate(
+                        (
+                            np.arange(0, start_index),
+                            np.arange(start_index + test_points, N_samples)
+                        ), axis=0
+                    ).flatten()
                     yield train_index, test_index
+                else:
+                    # perform simple train test split
+                    # unfortunately lot of overhead since a non shuffle index base split 
+                    # is not supported in sklearn
+                    cv_single_tr_te_split =  model_selection.check_cv(
+                        cv=[
+                            model_selection.train_test_split(
+                                np.arange(data.shape[0]),
+                                test_size=0.3,
+                                shuffle=False
+                            )
+                        ]
+                    )
+                    for train_index, test_index in cv_single_tr_te_split.split():
+                        yield train_index, test_index
             else:
                 for train_index, test_index in self.cv_method.split(data):
                     yield train_index, test_index
