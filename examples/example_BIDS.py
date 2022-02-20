@@ -2,7 +2,7 @@ import os
 from sklearn import linear_model, metrics, model_selection
 from skopt import space as skopt_space
 import xgboost
-from py_neuromodulation import nm_BidsStream, nm_analysis
+from py_neuromodulation import nm_BidsStream, nm_analysis, nm_decode
 
 
 def run_example_BIDS():
@@ -26,7 +26,7 @@ def run_example_BIDS():
                                        used_types=("ecog", "seeg")
     )
 
-    nm_BIDS.run_bids()
+    #nm_BIDS.run_bids()
 
     # init analyzer
     feature_reader = nm_analysis.Feature_Reader(
@@ -35,7 +35,7 @@ def run_example_BIDS():
     )
 
     # plot cortical signal
-    feature_reader.plot_cort_projection()
+    #feature_reader.plot_cort_projection()
 
     # plot for a single channel 
     ch_used = feature_reader.nm_channels.query(
@@ -44,12 +44,12 @@ def run_example_BIDS():
 
     feature_used = "stft"  if feature_reader.settings["methods"]["stft"] else "fft"
 
-    feature_reader.plot_target_averaged_channel(
-        ch=ch_used,
-        list_feature_keywords=[feature_used],
-        epoch_len=4,
-        threshold=0.5
-    )
+    #feature_reader.plot_target_averaged_channel(
+    #    ch=ch_used,
+    #    list_feature_keywords=[feature_used],
+    #    epoch_len=4,
+    #    threshold=0.5
+    #)
 
     #model = linear_model.LogisticRegression(class_weight='balanced')
     model = xgboost.XGBClassifier(use_label_encoder=False)
@@ -60,7 +60,11 @@ def run_example_BIDS():
         skopt_space.Real(10**0, 10**1, "uniform", name="gamma")
     ]
 
-    feature_reader.set_decoder(
+    feature_reader.decoder = nm_decode.Decoder(
+        features=feature_reader.feature_arr,
+        label=feature_reader.label,
+        label_name=feature_reader.label_name,
+        used_chs=feature_reader.used_chs,
         model = model,
         eval_method=metrics.balanced_accuracy_score,
         #cv_method=model_selection.KFold(n_splits=3, shuffle=True),
@@ -70,7 +74,8 @@ def run_example_BIDS():
         TRAIN_VAL_SPLIT=False,
         RUN_BAY_OPT=False,
         bay_opt_param_space=bay_opt_param_space,
-        use_nested_cv=True
+        use_nested_cv=True,
+        fs=feature_reader.settings["sampling_rate_features"]
     )
 
     performances = feature_reader.run_ML_model(
