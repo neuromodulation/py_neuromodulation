@@ -638,14 +638,13 @@ class Decoder:
         def split_data(data):
             if self.cv_method == "NonShuffledTrainTestSplit":
             
-                # 1. step
+                # set outer 10s set to train index
+                # test index is thus in the middle starting at random number
                 N_samples = data.shape[0]
                 test_area_points = (N_samples - self.fs * 10) - (self.fs * 10)
                 test_points = int(N_samples * 0.3)
 
                 if test_area_points > test_points:
-                    # place training set in the middle between outer 10s
-                    # starting off at random point
                     start_index = np.random.randint(
                         int(self.fs * 10),
                         N_samples - self.fs * 10 - test_points
@@ -660,8 +659,6 @@ class Decoder:
                     yield train_index, test_index
                 else:
                     # perform simple train test split
-                    # unfortunately lot of overhead since a non shuffle index base split 
-                    # is not supported in sklearn
                     cv_single_tr_te_split =  model_selection.check_cv(
                         cv=[
                             model_selection.train_test_split(
