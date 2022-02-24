@@ -98,3 +98,5 @@ class TestWrapper:
 def test_rereference():
     test_wrapper = TestWrapper()
     test_wrapper.test_rereference()
+
+test_rereference()
