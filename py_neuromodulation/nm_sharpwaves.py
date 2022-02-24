@@ -16,7 +16,6 @@ class NoValidTroughException(Exception):
 
 
 class SharpwaveAnalyzer:
-
     def __init__(self, sw_settings, sfreq) -> None:
         """
         Parameters
@@ -29,13 +28,17 @@ class SharpwaveAnalyzer:
 
         self.sw_settings = sw_settings
         self.sfreq = sfreq
-        self.filter = \
-            create_filter(None, sfreq,
-                          l_freq=sw_settings['filter_low_cutoff'],
-                          h_freq=sw_settings['filter_high_cutoff'],
-                          fir_design='firwin', l_trans_bandwidth=4,
-                          h_trans_bandwidth=4, filter_length=str(sfreq)+'ms',
-                          verbose=False)
+        self.filter = create_filter(
+            None,
+            sfreq,
+            l_freq=sw_settings["filter_low_cutoff"],
+            h_freq=sw_settings["filter_high_cutoff"],
+            fir_design="firwin",
+            l_trans_bandwidth=4,
+            h_trans_bandwidth=4,
+            filter_length=str(sfreq) + "ms",
+            verbose=False,
+        )
 
         # initialize used features
         self.used_features = list()
@@ -56,11 +59,12 @@ class SharpwaveAnalyzer:
                             fun_names.append(estimator)
 
         self.estimator_names = fun_names
-        self.estimator_functions = [getattr(np, est_name) for est_name in self.estimator_names]
+        self.estimator_functions = [
+            getattr(np, est_name) for est_name in self.estimator_names
+        ]
 
     def initialize_sw_features(self) -> None:
-        """Resets used attributes to empty lists
-        """
+        """Resets used attributes to empty lists"""
         for feature_name in self.used_features:
             setattr(self, feature_name, list())
         if "trough" not in self.used_features:
@@ -69,7 +73,7 @@ class SharpwaveAnalyzer:
         self.troughs_idx = list()
 
     def get_peaks_around(self, trough_ind, arr_ind_peaks, filtered_dat):
-        """ Find the closest peaks to the right and left side a given trough.
+        """Find the closest peaks to the right and left side a given trough.
 
         Parameters
         ----------
@@ -99,14 +103,17 @@ class SharpwaveAnalyzer:
             raise NoValidTroughException("No valid trough")
 
         val_ind_smaller = arr_ind_peaks[ind_smaller]
-        peak_left_idx = \
-            arr_ind_peaks[ind_smaller[argsort(val_ind_smaller)[-1]]]
+        peak_left_idx = arr_ind_peaks[ind_smaller[argsort(val_ind_smaller)[-1]]]
 
-        return peak_left_idx, peak_right_idx, filtered_dat[peak_left_idx], \
-            filtered_dat[peak_right_idx]
+        return (
+            peak_left_idx,
+            peak_right_idx,
+            filtered_dat[peak_left_idx],
+            filtered_dat[peak_right_idx],
+        )
 
     def get_sharpwave_features(self, features_, data, ch):
-        """ Given a new data batch, the peaks, troughs and sharpwave features
+        """Given a new data batch, the peaks, troughs and sharpwave features
         are estimated. Importantly only new data is being analyzed here. In
         steps of 1/settings["sampling_rate_features] are analyzed and returned.
         Data is assumed to be notch filtered and bandpass filtered beforehand.
@@ -120,7 +127,7 @@ class SharpwaveAnalyzer:
         -------
         features_ (dict): set features for Features.py object
         """
-        self.filtered_data = convolve(data, self.filter, mode='same')
+        self.filtered_data = convolve(data, self.filter, mode="same")
 
         # check settings if troughs and peaks are analyzed
 
@@ -131,26 +138,36 @@ class SharpwaveAnalyzer:
             if detect_troughs is False:
                 if self.sw_settings["detect_peaks"]["estimate"] is False:
                     continue
-                key_name_pt = 'Peak'
+                key_name_pt = "Peak"
                 # the detect_troughs loop start with peaks, s.t. data does not
                 # need to be flipped
 
             if detect_troughs is True:
                 if self.sw_settings["detect_troughs"]["estimate"] is False:
                     continue
-                key_name_pt = 'Trough'
+                key_name_pt = "Trough"
 
                 self.filtered_data = -self.filtered_data
 
             self.initialize_sw_features()  # reset sharpwave feature attriubtes to empty lists
             self.analyze_waveform()
 
-            # this function needs to looks different; 
+            # this function needs to looks different;
             # for each feature take the respective fun.
             for feature_idx, feature_name in enumerate(self.used_features):
-                key_name = '_'.join([ch, 'Sharpwave', self.estimator_names[feature_idx].title(), feature_name])
-                val = self.estimator_functions[feature_idx](getattr(self, feature_name)) \
-                    if len(getattr(self, feature_name)) != 0 else 0
+                key_name = "_".join(
+                    [
+                        ch,
+                        "Sharpwave",
+                        self.estimator_names[feature_idx].title(),
+                        feature_name,
+                    ]
+                )
+                val = (
+                    self.estimator_functions[feature_idx](getattr(self, feature_name))
+                    if len(getattr(self, feature_name)) != 0
+                    else 0
+                )
                 if key_name not in dict_ch_features:
                     dict_ch_features[key_name] = {}
                 dict_ch_features[key_name][key_name_pt] = val
@@ -161,20 +178,24 @@ class SharpwaveAnalyzer:
 
             for idx, key_name in enumerate(dict_ch_features):
                 # the key_name stays, since the estimator function stays between peaks and troughs
-                features_[key_name] = self.estimator_functions[idx]([list(dict_ch_features[key_name].values())[0],\
-                                              list(dict_ch_features[key_name].values())[1]])
+                features_[key_name] = self.estimator_functions[idx](
+                    [
+                        list(dict_ch_features[key_name].values())[0],
+                        list(dict_ch_features[key_name].values())[1],
+                    ]
+                )
 
         else:
             # otherwise, save all
             # write all "flatted" key value pairs in features_
             for key, value in dict_ch_features.items():
                 for key_sub, value_sub in dict_ch_features[key].items():
-                    features_[key+"_analyze_"+key_sub] = value_sub
+                    features_[key + "_analyze_" + key_sub] = value_sub
 
         return features_
 
     def analyze_waveform(self) -> None:
-        """ Given the scipy.signal.find_peaks  trough/peak distance
+        """Given the scipy.signal.find_peaks  trough/peak distance
         settings specified sharpwave features are estimated.
 
         Parameters
@@ -186,13 +207,23 @@ class SharpwaveAnalyzer:
 
         """
 
-        peaks = find_peaks(self.filtered_data, distance=self.sw_settings["detect_troughs"]["distance_peaks"])[0]
-        troughs = find_peaks(-self.filtered_data, distance=self.sw_settings["detect_troughs"]["distance_troughs"])[0]
+        peaks = find_peaks(
+            self.filtered_data,
+            distance=self.sw_settings["detect_troughs"]["distance_peaks"],
+        )[0]
+        troughs = find_peaks(
+            -self.filtered_data,
+            distance=self.sw_settings["detect_troughs"]["distance_troughs"],
+        )[0]
 
         for trough_idx in troughs:
             try:
-                peak_idx_left, peak_idx_right, peak_left, peak_right = \
-                    self.get_peaks_around(trough_idx, peaks, self.filtered_data)
+                (
+                    peak_idx_left,
+                    peak_idx_right,
+                    peak_left,
+                    peak_right,
+                ) = self.get_peaks_around(trough_idx, peaks, self.filtered_data)
             except NoValidTroughException:
                 # in this case there are no adjacent two peaks around this trough
                 # str(e) could print the exception error message
@@ -208,8 +239,7 @@ class SharpwaveAnalyzer:
                     # take the last identified trough idx
                     # corresponds here to second last trough_idx
 
-                    interval = (trough_idx - self.troughs_idx[-2]) * \
-                                (1000/self.sfreq)
+                    interval = (trough_idx - self.troughs_idx[-2]) * (1000 / self.sfreq)
                 else:
                     # set first interval to zero
                     interval = 0
@@ -224,15 +254,22 @@ class SharpwaveAnalyzer:
             if self.sw_settings["sharpwave_features"]["sharpness"] is True:
                 # check if sharpness can be calculated
                 # trough_idx 5 ms need to be consistent
-                if (trough_idx - int(5*(1000/self.sfreq)) <= 0) or \
-                   (trough_idx + int(5*(1000/self.sfreq)) >=
-                   self.filtered_data.shape[0]):
+                if (trough_idx - int(5 * (1000 / self.sfreq)) <= 0) or (
+                    trough_idx + int(5 * (1000 / self.sfreq))
+                    >= self.filtered_data.shape[0]
+                ):
                     continue
 
-                sharpness = ((self.filtered_data[trough_idx] -
-                             self.filtered_data[trough_idx-int(5*(1000/self.sfreq))]) +
-                             (self.filtered_data[trough_idx] -
-                              self.filtered_data[trough_idx+int(5*(1000/self.sfreq))])) / 2
+                sharpness = (
+                    (
+                        self.filtered_data[trough_idx]
+                        - self.filtered_data[trough_idx - int(5 * (1000 / self.sfreq))]
+                    )
+                    + (
+                        self.filtered_data[trough_idx]
+                        - self.filtered_data[trough_idx + int(5 * (1000 / self.sfreq))]
+                    )
+                ) / 2
 
                 self.sharpness.append(sharpness)
 
@@ -240,27 +277,40 @@ class SharpwaveAnalyzer:
                 # steepness is calculated as the first derivative
                 # from peak/trough to trough/peak
                 # here  + 1 due to python syntax, s.t. the last element is included
-                rise_steepness = max(diff(self.filtered_data[peak_idx_left: trough_idx+1]))
+                rise_steepness = max(
+                    diff(self.filtered_data[peak_idx_left : trough_idx + 1])
+                )
                 self.rise_steepness.append(rise_steepness)
 
             if self.sw_settings["sharpwave_features"]["decay_steepness"] is True:
-                decay_steepness = max(diff(self.filtered_data[trough_idx: peak_idx_right+1]))
+                decay_steepness = max(
+                    diff(self.filtered_data[trough_idx : peak_idx_right + 1])
+                )
                 self.decay_steepness.append(decay_steepness)
 
-            if self.sw_settings["sharpwave_features"]["rise_steepness"] is True and \
-               self.sw_settings["sharpwave_features"]["decay_steepness"] is True and \
-               self.sw_settings["sharpwave_features"]["slope_ratio"] is True:
+            if (
+                self.sw_settings["sharpwave_features"]["rise_steepness"] is True
+                and self.sw_settings["sharpwave_features"]["decay_steepness"] is True
+                and self.sw_settings["sharpwave_features"]["slope_ratio"] is True
+            ):
                 self.slope_ratio.append(rise_steepness - decay_steepness)
 
             if self.sw_settings["sharpwave_features"]["prominence"] is True:
-                self.prominence.append(np_abs(
-                    (peak_right + peak_left) / 2 - self.filtered_data[trough_idx]))  # mV
+                self.prominence.append(
+                    np_abs(
+                        (peak_right + peak_left) / 2 - self.filtered_data[trough_idx]
+                    )
+                )  # mV
 
             if self.sw_settings["sharpwave_features"]["decay_time"] is True:
-                self.decay_time.append((peak_idx_left - trough_idx) * (1000/self.sfreq))  # ms
+                self.decay_time.append(
+                    (peak_idx_left - trough_idx) * (1000 / self.sfreq)
+                )  # ms
 
             if self.sw_settings["sharpwave_features"]["rise_time"] is True:
-                self.rise_time.append((peak_idx_right - trough_idx) * (1000/self.sfreq))  # ms
+                self.rise_time.append(
+                    (peak_idx_right - trough_idx) * (1000 / self.sfreq)
+                )  # ms
 
             if self.sw_settings["sharpwave_features"]["width"] is True:
                 self.width.append(peak_idx_right - peak_idx_left)  # ms

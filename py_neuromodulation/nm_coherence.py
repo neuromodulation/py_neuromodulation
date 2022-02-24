@@ -23,9 +23,9 @@ class NM_Coherence:
         pass
 
     def get_coh(self, features_, x, y):
-        self.f, self.Pxx = signal.welch(x, self.fs, self.window)
-        self.Pyy = signal.welch(y, self.fs, self.window)[1]
-        self.Pxy = signal.csd(x, y, self.fs, self.window)[1]
+        self.f, self.Pxx = signal.welch(x, self.fs, self.window, nperseg=128)
+        self.Pyy = signal.welch(y, self.fs, self.window, nperseg=128)[1]
+        self.Pxy = signal.csd(x, y, self.fs, self.window, nperseg=128)[1]
         
         if self.coh is True:
             self.coh_val = np.abs(self.Pxy**2)/(self.Pxx*self.Pyy)
