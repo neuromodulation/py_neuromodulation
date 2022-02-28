@@ -8,8 +8,8 @@ import os
 from enum import Enum
 from typing import Tuple, Union
 
-from py_neuromodulation import \
-    (nm_projection,
+from py_neuromodulation import (
+    nm_projection,
     nm_rereference,
     nm_run_analysis,
     nm_features,
@@ -17,13 +17,17 @@ from py_neuromodulation import \
     nm_define_nmchannels,
     nm_IO,
     nm_plots,
-    nm_test_settings)
+    nm_test_settings,
+)
 from py_neuromodulation import nm_notch_filter
+
 
 class GRIDS(Enum):
     """Definition of possible projection grid types"""
-    CORTEX="cortex"
-    SUBCORTEX="subcortex"
+
+    CORTEX = "cortex"
+    SUBCORTEX = "subcortex"
+
 
 class PNStream(ABC):
 
@@ -31,7 +35,7 @@ class PNStream(ABC):
     features: nm_features.Features
     run_analysis: nm_run_analysis.Run
     rereference: nm_rereference.RT_rereference
-    notch_filter : nm_notch_filter.NotchFilter
+    notch_filter: nm_notch_filter.NotchFilter
     projection: nm_projection.Projection
     settings: dict
     nm_channels: pd.DataFrame
@@ -55,13 +59,16 @@ class PNStream(ABC):
     model: base.BaseEstimator
 
     @abstractmethod
-    def __init__(self,
-        PATH_SETTINGS=os.path.join(pathlib.Path(__file__).parent.resolve(),\
-                                    "nm_settings.json"),
-        PATH_NM_CHANNELS:str = str(),
-        PATH_OUT:str = os.getcwd(),
-        PATH_GRIDS:str = pathlib.Path(__file__).parent.resolve(),
-        VERBOSE:bool = True) -> None:
+    def __init__(
+        self,
+        PATH_SETTINGS=os.path.join(
+            pathlib.Path(__file__).parent.resolve(), "nm_settings.json"
+        ),
+        PATH_NM_CHANNELS: str = str(),
+        PATH_OUT: str = os.getcwd(),
+        PATH_GRIDS: str = pathlib.Path(__file__).parent.resolve(),
+        VERBOSE: bool = True,
+    ) -> None:
 
         self.PATH_SETTINGS = PATH_SETTINGS
         self.PATH_NM_CHANNELS = PATH_NM_CHANNELS
@@ -70,13 +77,13 @@ class PNStream(ABC):
 
         self.settings = nm_IO.read_settings(self.PATH_SETTINGS)
 
-        if True in [self.settings["methods"]["project_cortex"],
-                    self.settings["methods"]["project_subcortex"]]:
+        if True in [
+            self.settings["methods"]["project_cortex"],
+            self.settings["methods"]["project_subcortex"],
+        ]:
             self.grid_cortex, self.grid_subcortex = self.get_grids(
-                self.settings,
-                self.PATH_GRIDS,
-                GRIDS
-                )
+                self.settings, self.PATH_GRIDS, GRIDS
+            )
 
     @abstractmethod
     def _add_coordinates(self) -> None:
@@ -87,12 +94,16 @@ class PNStream(ABC):
         pass
 
     @abstractmethod
-    def get_data(self, ) -> np.array:
+    def get_data(
+        self,
+    ) -> np.array:
         """Get new data batch from acquisition device or from BIDS"""
         pass
-    
+
     @abstractmethod
-    def run(self, ):
+    def run(
+        self,
+    ):
         """In this function data is first acquied iteratively
         1. self.get_data()
         2. data processing is called:
@@ -103,7 +114,7 @@ class PNStream(ABC):
         pass
 
     @abstractmethod
-    def _add_timestamp(self, feature_series: pd.Series, idx:int=None) -> pd.Series:
+    def _add_timestamp(self, feature_series: pd.Series, idx: int = None) -> pd.Series:
         """Add to feature_series "time" keyword
         For Bids specify with fs_features, for real time analysis with current time stamp
         """
@@ -111,24 +122,24 @@ class PNStream(ABC):
 
     def load_model(self, model_name: str):
         """Load sklearn model, that utilizes predict"""
-        with open(model_name, 'rb') as fid:
+        with open(model_name, "rb") as fid:
             self.model = cPickle.load(fid)
 
     def _set_run(self):
-        """Initialize preprocessing, and feature estimation modules
-        """
+        """Initialize preprocessing, and feature estimation modules"""
 
         nm_test_settings.test_settings(self.settings, self.nm_channels)
 
-        self.CH_NAMES_USED, self.CH_TYPES_USED, self.FEATURE_IDX, self.LABEL_IDX = \
-            self._get_ch_info(self.nm_channels)
-
-        self.features = self._set_features(self.settings,
+        (
             self.CH_NAMES_USED,
-            self.fs,
-            self.line_noise,
-            self.VERBOSE
-            )
+            self.CH_TYPES_USED,
+            self.FEATURE_IDX,
+            self.LABEL_IDX,
+        ) = self._get_ch_info(self.nm_channels)
+
+        self.features = self._set_features(
+            self.settings, self.CH_NAMES_USED, self.fs, self.line_noise, self.VERBOSE
+        )
 
         self.resample = self._set_resampling(self.settings, self.fs)
 
@@ -137,19 +148,20 @@ class PNStream(ABC):
         )
 
         self.notch_filter = self._set_notch_filter(
-            settings = self.settings,
-            fs = self.fs
-                 if self.settings["methods"]["raw_resampling"] is False
-                 else
-                    self.settings["raw_resampling_settings"]["resample_freq"],
-            line_noise = self.line_noise
+            settings=self.settings,
+            fs=self.fs
+            if self.settings["methods"]["raw_resampling"] is False
+            else self.settings["raw_resampling_settings"]["resample_freq"],
+            line_noise=self.line_noise,
         )
 
         self.projection = self._get_projection(self.settings, self.nm_channels)
         if "cortex_left" in self.coords or "cortex_right" in self.coords:
-            if self.projection is not None or \
-                len(self.coords["cortex_left"]["positions"]) or \
-                len(self.coords["cortex_right"]["positions"]):
+            if (
+                self.projection is not None
+                or len(self.coords["cortex_left"]["positions"])
+                or len(self.coords["cortex_right"]["positions"])
+            ):
                 self.sess_right = self._get_sess_lat(self.coords)
             else:
                 self.sess_right = None
@@ -164,30 +176,25 @@ class PNStream(ABC):
             resample=self.resample,
             notch_filter=self.notch_filter,
             verbose=self.VERBOSE,
-            feature_idx=self.FEATURE_IDX
+            feature_idx=self.FEATURE_IDX,
         )
 
-    def _set_features(self, settings:dict,
+    def _set_features(
+        self,
+        settings: dict,
         CH_NAMES_USED: list,
         fs: Union[int, float],
         line_noise: int,
-        VERBOSE:bool) -> None:
+        VERBOSE: bool,
+    ) -> None:
         """initialize feature class from settings"""
-        return nm_features.Features(
-            settings,
-            CH_NAMES_USED,
-            fs,
-            line_noise,
-            VERBOSE
-        )
+        return nm_features.Features(settings, CH_NAMES_USED, fs, line_noise, VERBOSE)
 
     def set_fs(self, fs: Union[int, float]) -> None:
         self.fs = fs
 
     def _set_rereference(
-        self,
-        settings:dict,
-        nm_channels:pd.DataFrame
+        self, settings: dict, nm_channels: pd.DataFrame
     ) -> tuple[nm_rereference.RT_rereference, pd.DataFrame]:
         """Initialize nm_rereference and update nm_channels
         nm_channels are updated if no rereferencing is specified
@@ -205,8 +212,7 @@ class PNStream(ABC):
             nm_rereference object, updated nm_channels DataFrame
         """
         if settings["methods"]["re_referencing"] is True:
-            rereference = nm_rereference.RT_rereference(
-                nm_channels)
+            rereference = nm_rereference.RT_rereference(nm_channels)
         else:
             rereference = None
             # reset nm_channels from default values
@@ -214,7 +220,9 @@ class PNStream(ABC):
             nm_channels["new_name"] = nm_channels["name"]
         return rereference, nm_channels
 
-    def _set_resampling(self, settings:dict, fs: Union[int, float]) -> nm_resample.Resample:
+    def _set_resampling(
+        self, settings: dict, fs: Union[int, float]
+    ) -> nm_resample.Resample:
         """Initialize Resampling
 
         Parameters
@@ -232,12 +240,13 @@ class PNStream(ABC):
             resample = None
         return resample
 
-    def _set_notch_filter(self,
-        settings : dict,
-        fs : Union[int, float],
-        line_noise : int,
-        notch_widths : int = 3,
-        trans_bandwidth : int = 15
+    def _set_notch_filter(
+        self,
+        settings: dict,
+        fs: Union[int, float],
+        line_noise: int,
+        notch_widths: int = 3,
+        trans_bandwidth: int = 15,
     ) -> nm_notch_filter.NotchFilter:
 
         if settings["methods"]["notch_filter"] is True:
@@ -245,7 +254,7 @@ class PNStream(ABC):
                 fs=fs,
                 line_noise=line_noise,
                 notch_widths=notch_widths,
-                trans_bandwidth=trans_bandwidth
+                trans_bandwidth=trans_bandwidth,
             )
         else:
             notch_filter = None
@@ -255,11 +264,7 @@ class PNStream(ABC):
         self.line_noise = line_noise
 
     @staticmethod
-    def get_grids(
-        settings: dict(),
-        PATH_GRIDS: str,
-        GRID_TYPE: GRIDS
-        ) -> Tuple:
+    def get_grids(settings: dict(), PATH_GRIDS: str, GRID_TYPE: GRIDS) -> Tuple:
         """Read settings specified grids
 
         Parameters
@@ -286,22 +291,24 @@ class PNStream(ABC):
         return grid_cortex, grid_subcortex
 
     def _get_projection(
-        self, 
-        settings: dict, 
-        nm_channels: pd.DataFrame
-        ) -> nm_projection.Projection:
+        self, settings: dict, nm_channels: pd.DataFrame
+    ) -> nm_projection.Projection:
         """Return projection of used coordinated and grids"""
 
-        if any((settings["methods"]["project_cortex"],
-                settings["methods"]["project_subcortex"])):
+        if any(
+            (
+                settings["methods"]["project_cortex"],
+                settings["methods"]["project_subcortex"],
+            )
+        ):
             projection = nm_projection.Projection(
-                settings=settings, 
+                settings=settings,
                 grid_cortex=self.grid_cortex,
-                grid_subcortex=self.grid_subcortex, 
-                coords=self.coords, 
-                nm_channels=nm_channels, 
-                plot_projection=False
-                )
+                grid_subcortex=self.grid_subcortex,
+                coords=self.coords,
+                nm_channels=nm_channels,
+                plot_projection=False,
+            )
         else:
             projection = None
         return projection
@@ -314,8 +321,7 @@ class PNStream(ABC):
         CH_TYPES_USED = nm_channels[nm_channels["used"] == 1]["type"].tolist()
 
         # used channels for feature estimation
-        FEATURE_IDX = np.where(nm_channels["used"] &
-                               ~nm_channels["target"])[0].tolist()
+        FEATURE_IDX = np.where(nm_channels["used"] & ~nm_channels["target"])[0].tolist()
 
         # If multiple targets exist, select only the first
         LABEL_IDX = np.where(nm_channels["target"] == 1)[0]
@@ -323,27 +329,32 @@ class PNStream(ABC):
         return CH_NAMES_USED, CH_TYPES_USED, FEATURE_IDX, LABEL_IDX
 
     @staticmethod
-    def _get_nm_channels(PATH_NM_CHANNELS:str, **kwargs) -> None:
+    def _get_nm_channels(PATH_NM_CHANNELS: str, **kwargs) -> None:
         """Read nm_channels from path or specify via BIDS arguments.
         Nexessary parameters are then
         ch_names (list),
         ch_types (list),
         bads (list)
-        used_types (list)"""
+        used_types (list)
+        target_keywords (list)
+        """
 
         if PATH_NM_CHANNELS and os.path.isfile(PATH_NM_CHANNELS):
             nm_channels = pd.read_csv(PATH_NM_CHANNELS)
-        elif None not in [kwargs.get('ch_names', None),
-                        kwargs.get('ch_types', None),
-                        kwargs.get('bads', None),
-                        kwargs.get('used_types', None)]:
+        elif None not in [
+            kwargs.get("ch_names", None),
+            kwargs.get("ch_types", None),
+            kwargs.get("bads", None),
+            kwargs.get("used_types", None),
+            kwargs.get("target_keywords", None),
+        ]:
 
             nm_channels = nm_define_nmchannels.set_channels(
-                ch_names=kwargs.get('ch_names'),
-                ch_types=kwargs.get('ch_types'),
-                bads=kwargs.get('bads'),
-                used_types=kwargs.get('used_types'),
-                target_keywords=kwargs.get('target_keywords')
+                ch_names=kwargs.get("ch_names"),
+                ch_types=kwargs.get("ch_types"),
+                bads=kwargs.get("bads"),
+                used_types=kwargs.get("used_types"),
+                target_keywords=kwargs.get("target_keywords"),
             )
         return nm_channels
 
@@ -360,22 +371,20 @@ class PNStream(ABC):
         PATH_OUT and subfolder 'folder_name'"""
 
         sidecar = {
-            "original_fs" : self.fs,
-            "fs" : self.run_analysis.fs,
-            "line_noise" : self.line_noise,
+            "original_fs": self.fs,
+            "fs": self.run_analysis.fs,
+            "line_noise": self.line_noise,
             "ch_names": self.features.ch_names,
-            "coords" : self.coords,
-            "sess_right" : self.sess_right
+            "coords": self.coords,
+            "sess_right": self.sess_right,
         }
 
         if self.settings["methods"]["project_cortex"]:
             sidecar["grid_cortex"] = self.grid_cortex
-            sidecar["proj_matrix_cortex"] = \
-                self.projection.proj_matrix_cortex
+            sidecar["proj_matrix_cortex"] = self.projection.proj_matrix_cortex
         if self.settings["methods"]["project_subcortex"]:
             sidecar["grid_subcortex"] = self.grid_subcortex
-            sidecar["proj_matrix_subcortex"] = \
-                self.projection.proj_matrix_subcortex
+            sidecar["proj_matrix_subcortex"] = self.projection.proj_matrix_subcortex
 
         nm_IO.save_sidecar(sidecar, self.PATH_OUT, folder_name)
 
@@ -388,7 +397,7 @@ class PNStream(ABC):
     def save_features(self, folder_name: str):
         nm_IO.save_features(self.feature_arr, self.PATH_OUT, folder_name)
 
-    def save_after_stream(self, folder_name:str) -> None:
+    def save_after_stream(self, folder_name: str) -> None:
         """Save features, settings, nm_channels and sidecar after run"""
 
         # create derivate folder_name output folder if doesn't exist
@@ -406,11 +415,16 @@ class PNStream(ABC):
     def plot_cortical_projection(self):
         """plot projection of cortical grid electrodes on cortex"""
 
-        if hasattr(self, 'features') is False:
+        if hasattr(self, "features") is False:
             self._set_run()
 
         nmplotter = nm_plots.NM_Plot(
-            ecog_strip=self.projection.ecog_strip if self.projection is not None else None,
-            grid_cortex=self.projection.grid_cortex if self.projection is not None else None,
-            sess_right=self.sess_right)
+            ecog_strip=self.projection.ecog_strip
+            if self.projection is not None
+            else None,
+            grid_cortex=self.projection.grid_cortex
+            if self.projection is not None
+            else None,
+            sess_right=self.sess_right,
+        )
         nmplotter.plot_cortex(set_clim=False)
