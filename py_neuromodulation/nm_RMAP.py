@@ -10,10 +10,10 @@ class RMAPChannelSelector:
     def __init__(self) -> None:
         pass
 
-    @staticmethod
-    def load_fingerprint(path_nii) -> None:
+    def load_fingerprint(self, path_nii) -> None:
         """Return Nifti fingerprint"""
         epi_img = nib.load(path_nii)
+        self.affine = epi_img.affine
         fp = epi_img.get_fdata()
         return fp
 
@@ -47,18 +47,31 @@ class RMAPChannelSelector:
         return l_fps, [self.load_fingerprint(os.path.join(path_dir, f)) for f in l_fps]
 
     @staticmethod
-    def save_Nii(fp, name="img.nii", reshape=True):
+    def save_Nii(
+        fp: np.array, affine: np.array, name: str = "img.nii", reshape: bool = True
+    ):
+
         if reshape:
             fp = np.reshape(fp, (91, 109, 91), order="F")
 
-        xform = np.eye(4) * 2
-        img = nib.nifti1.Nifti1Image(fp, xform)
+        img = nib.nifti1.Nifti1Image(fp, affine=affine)
 
         nib.save(img, name)
 
+    def get_RMAP(self, X: np.array, y: np.array):
+        r = (
+            len(y) * np.sum(X * y[None, :], axis=-1) - (np.sum(X, axis=-1) * np.sum(y))
+        ) / (
+            np.sqrt(
+                (len(y) * np.sum(X ** 2, axis=-1) - np.sum(X, axis=-1) ** 2)
+                * (len(y) * np.sum(y ** 2) - np.sum(y) ** 2)
+            )
+        )
+        return r
+
     @staticmethod
     @jit(nopython=True)
-    def calculate_RMap(fp, performances):
+    def calculate_RMap_numba(fp, performances):
         # The RMap also needs performances; for every fingerprint / channel
         # Save the corresponding performance
         # for every voxel; correlate it with performances

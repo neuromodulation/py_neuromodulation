@@ -2,6 +2,7 @@ import os
 import pickle
 
 import numpy as np
+import nibabel as nib
 import pandas as pd
 
 from py_neuromodulation import nm_RMAP
@@ -40,9 +41,9 @@ if __name__ == "__main__":
     LOAD_FPS = True
 
     if LOAD_FPS:
-        with open("fp_dict.p", "rb") as handle:
+        with open(os.path.join("scripts", "fp_dict.p"), "rb") as handle:
             fp_dict = pickle.load(handle)
-        with open("per_all.p", "rb") as handle:
+        with open(os.path.join("scripts", "per_all.p"), "rb") as handle:
             per_all = pickle.load(handle)
     else:
         fp_names_all, fps_all = rmap_selector.load_all_fingerprints(PATH_FPS)
@@ -57,27 +58,25 @@ if __name__ == "__main__":
     ONE_RMAP = True
     COMPUTE_RMAP = True
 
-    if ONE_RMAP:
+    if COMPUTE_RMAP:
         fp_names_all, fps_all = rmap_selector.load_all_fingerprints(PATH_FPS)
         fp_dict = {k: v for k, v in zip(fp_names_all, fps_all)}
         per_all = get_per_for_fp(fp_names_all)
-        fps_RMAP = [np.nan_to_num(v) for k, v in fp_dict.items()]
+        fps_RMAP = np.array([np.nan_to_num(v.flatten()) for k, v in fp_dict.items()])
 
-        # RMAP can be calculated as a pandas df
-        # takes same time, at least as long
-        FPs_stacked = pd.DataFrame(np.array([f.flatten() for f in fps_RMAP]))
-        y_s = pd.Series(per_all)
+        RMAP = rmap_selector.get_RMAP(fps_RMAP.T, np.array(list(per_all.values())))
 
-        RMAP = FPs_stacked.corrwith(y_s)
-
-        RMAP = rmap_selector.calculate_RMap(
-            fps_RMAP, np.nan_to_num(list(per_all.values()))
-        )
         RMAP = np.nan_to_num(RMAP)
         np.save("RMAP.npy", RMAP)
-        rmap_selector.save_Nii(RMAP, "RMAP.nii", reshape=True)
 
-        RMAP = np.load("RMAP.npy")
+        # load example fingerprint to retrieve affine transform
+        img = nib.load(
+            r"C:\Users\ICN_admin\OneDrive - Charité - Universitätsmedizin Berlin\Connectomics\DecodingToolbox_BerlinPittsburgh_Beijing\functional_connectivity\Beijing_FOG006_ROI_ECOG_R_1_SM_HH-avgref_func_seed_AvgR_Fz.nii"
+        )
+
+        rmap_selector.save_Nii(RMAP, img.affine, "RMAP.nii", reshape=True)
+
+    RMAP = np.load(os.path.join("scripts", "RMAP.npy"))
 
     ch_sel = {}
     for cohort in ["Beijing", "Berlin", "Pittsburgh"]:
