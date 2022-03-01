@@ -34,8 +34,8 @@ class SharpwaveAnalyzer:
             l_freq=sw_settings["filter_low_cutoff"],
             h_freq=sw_settings["filter_high_cutoff"],
             fir_design="firwin",
-            l_trans_bandwidth=4,
-            h_trans_bandwidth=4,
+            l_trans_bandwidth=5,
+            h_trans_bandwidth=5,
             filter_length=str(sfreq) + "ms",
             verbose=False,
         )
