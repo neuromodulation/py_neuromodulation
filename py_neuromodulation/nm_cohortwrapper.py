@@ -11,9 +11,7 @@ from sklearn import metrics
 from sklearn.base import clone
 from sklearn import model_selection
 from sklearn.utils import class_weight
-from scipy.ndimage import (binary_dilation,
-                           binary_erosion,
-                           label)
+from scipy.ndimage import binary_dilation, binary_erosion, label
 import xgboost
 import _pickle as cPickle
 from scipy import io
@@ -25,22 +23,17 @@ from itertools import product
 import nibabel as nib
 
 import py_neuromodulation
-from py_neuromodulation import (
-    nm_decode,
-    nm_analysis,
-    nm_BidsStream,
-    nm_IO
-)
+from py_neuromodulation import nm_decode, nm_analysis, nm_BidsStream, nm_IO
+
 
 class CohortRunner:
-
     def __init__(
         self,
-        cohorts:dict = None,
+        cohorts: dict = None,
         ML_model_name="LM",
         model=linear_model.LogisticRegression(class_weight="balanced"),
         eval_method=metrics.balanced_accuracy_score,
-        estimate_gridpoints=False, 
+        estimate_gridpoints=False,
         estimate_channels=True,
         estimate_all_channels_combined=False,
         save_coef=False,
@@ -49,15 +42,19 @@ class CohortRunner:
         plot_grid_performances=False,
         run_ML_model=True,
         run_bids=True,
-        ECOG_ONLY=True,
+        binarize_label=True,
+        used_types=("ecog", "dbs", "seeg"),
+        target_keywords=("mov", "squared", "label"),
+        get_movement_detection_rate=False,
         run_pool=True,
         VERBOSE=False,
         LIMIT_DATA=False,
         RUN_BAY_OPT=False,
+        STACK_FEATURES_N_SAMPLES=True,
         cv_method=model_selection.KFold(n_splits=3, shuffle=False),
         use_nested_cv=True,
         outpath=r"C:\Users\ICN_admin\Documents\Decoding_Toolbox\write_out\0209_SharpWaveLimFeaturesSTFT_with_Grid",
-        PATH_SETTINGS=r"C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\nm_settings.json"
+        PATH_SETTINGS=r"C:\Users\ICN_admin\Documents\py_neuromodulation\pyneuromodulation\nm_settings.json",
     ) -> None:
 
         self.ML_model_name = ML_model_name
@@ -73,7 +70,6 @@ class CohortRunner:
         self.run_ML_model = run_ML_model
         self.run_bids = run_bids
         self.run_pool = run_pool
-        self.ECOG_ONLY = ECOG_ONLY
         self.TRAIN_VAL_SPLIT = TRAIN_VAL_SPLIT
         self.cohorts = cohorts
         self.VERBOSE = VERBOSE
@@ -83,24 +79,27 @@ class CohortRunner:
         self.use_nested_cv = use_nested_cv
         self.RUN_BAY_OPT = RUN_BAY_OPT
         self.TRAIN_VAL_SPLIT = TRAIN_VAL_SPLIT
+        self.STACK_FEATURES_N_SAMPLES = STACK_FEATURES_N_SAMPLES
         self.model = model
-
-
+        self.binarize_label = binarize_label
+        self.used_types = used_types
+        self.target_keywords = target_keywords
+        self.get_movement_detection_rate = get_movement_detection_rate
         self.grid_cortex = pd.read_csv(
-            os.path.join(py_neuromodulation.__path__[0], 'grid_cortex.tsv'), sep='\t'
+            os.path.join(py_neuromodulation.__path__[0], "grid_cortex.tsv"), sep="\t"
         ).to_numpy()
-    
+
     def init_decoder(self) -> nm_decode.Decoder:
         return nm_decode.Decoder(
             model=self.model,
             TRAIN_VAL_SPLIT=self.TRAIN_VAL_SPLIT,
-            STACK_FEATURES_N_SAMPLES=True,
-            get_movement_detection_rate=True,
+            STACK_FEATURES_N_SAMPLES=self.STACK_FEATURES_N_SAMPLES,
+            get_movement_detection_rate=self.get_movement_detection_rate,
             eval_method=self.eval_method,
             VERBOSE=self.VERBOSE,
             cv_method=self.cv_method,
             use_nested_cv=self.use_nested_cv,
-            RUN_BAY_OPT=self.RUN_BAY_OPT
+            RUN_BAY_OPT=self.RUN_BAY_OPT,
         )
 
     def multiprocess_pipeline_run_wrapper(self, PATH_RUN):
@@ -125,9 +124,10 @@ class CohortRunner:
                 LIMIT_DATA=self.LIMIT_DATA,
                 LIMIT_HIGH=200000,
                 LIMIT_LOW=0,
-                ECOG_ONLY=self.ECOG_ONLY,
+                target_keywords=self.target_keywords,
+                used_types=self.used_types,
                 PATH_SETTINGS=self.PATH_SETTINGS,
-                VERBOSE=self.VERBOSE
+                VERBOSE=self.VERBOSE,
             )
 
             nm_BIDS.run_bids()
@@ -135,8 +135,9 @@ class CohortRunner:
         feature_file = os.path.basename(PATH_RUN)[:-5]  # cut off ".vhdr"
 
         feature_reader = nm_analysis.Feature_Reader(
-                feature_dir=PATH_OUT,
-                feature_file=feature_file
+            feature_dir=PATH_OUT,
+            feature_file=feature_file,
+            binarize_label=self.binarize_label,
         )
 
         if self.plot_grid_performances:
@@ -155,13 +156,13 @@ class CohortRunner:
                     ch=ch_used,
                     list_feature_keywords=[feature_used],
                     epoch_len=4,
-                    threshold=0.5
+                    threshold=0.5,
                 )
 
-        #model = discriminant_analysis.LinearDiscriminantAnalysis()
-        #model = xgboost.XGBClassifier(scale_pos_weight=10)  # balanced class weights
-        #model = ensemble.RandomForestClassifier(n_estimators=6, max_depth=6, class_weight='balanced')
-        #model = svm.SVC(class_weight="balanced")
+        # model = discriminant_analysis.LinearDiscriminantAnalysis()
+        # model = xgboost.XGBClassifier(scale_pos_weight=10)  # balanced class weights
+        # model = ensemble.RandomForestClassifier(n_estimators=6, max_depth=6, class_weight='balanced')
+        # model = svm.SVC(class_weight="balanced")
 
         if self.run_ML_model:
             # set decoder for this specific run (using the feature_reader features)
@@ -171,20 +172,19 @@ class CohortRunner:
                 features=feature_reader.feature_arr,
                 label=feature_reader.label,
                 label_name=feature_reader.label_name,
-                used_chs=feature_reader.used_chs
+                used_chs=feature_reader.used_chs,
             )
 
             performances = feature_reader.run_ML_model(
                 estimate_channels=self.estimate_channels,
                 estimate_gridpoints=self.estimate_gridpoints,
                 estimate_all_channels_combined=self.estimate_all_channels_combined,
-                save_results=True
+                save_results=True,
             )
 
         if self.plot_grid_performances:
             feature_reader.plot_subject_grid_ch_performance(
-                performance_dict=performances,
-                plt_grid=True
+                performance_dict=performances, plt_grid=True
             )
 
     def run_cohorts(self):
@@ -192,7 +192,7 @@ class CohortRunner:
         run_files_all = []
         for _, PATH_COHORT in self.cohorts.items():
             layout = BIDSLayout(PATH_COHORT)
-            run_files_all.append(layout.get(extension='.vhdr'))
+            run_files_all.append(layout.get(extension=".vhdr"))
 
         run_files_all = list(np.concatenate(run_files_all))
 
@@ -200,7 +200,7 @@ class CohortRunner:
             pool = Pool(processes=50)
             pool.map(self.multiprocess_pipeline_run_wrapper, run_files_all)
         else:
-            #self.multiprocess_pipeline_run_wrapper(run_files_all[11])
+            # self.multiprocess_pipeline_run_wrapper(run_files_all[11])
             for run_file in run_files_all[:12]:
                 self.multiprocess_pipeline_run_wrapper(run_file)
 
@@ -223,24 +223,30 @@ class CohortRunner:
 
         for feature_file in feature_paths:
             feature_reader = nm_analysis.Feature_Reader(
-                feature_dir=feature_path,
-                feature_file=feature_file
+                feature_dir=feature_path, feature_file=feature_file
             )
 
             performance_run = feature_reader.read_results(
                 read_grid_points=self.estimate_gridpoints,
                 read_channels=self.estimate_channels,
                 read_all_combined=self.estimate_all_channels_combined,
-                read_mov_detection_rates=True
+                read_mov_detection_rates=True,
             )
 
-            sub = feature_file[feature_file.find('sub-'):feature_file.find('_ses')][4:]
+            sub = feature_file[feature_file.find("sub-") : feature_file.find("_ses")][
+                4:
+            ]
             if sub not in performance_out:
                 performance_out[sub] = {}
-            performance_out[sub][feature_file] = performance_run[sub]  # get saved in performance_run
+            performance_out[sub][feature_file] = performance_run[
+                sub
+            ]  # get saved in performance_run
 
-        np.save(os.path.join(self.outpath, self.ML_model_name+'_cohort_'+cohort+'.npy'),
-            performance_out
+        np.save(
+            os.path.join(
+                self.outpath, self.ML_model_name + "_cohort_" + cohort + ".npy"
+            ),
+            performance_out,
         )
 
     def cohort_wrapper_read_cohort(self):
@@ -255,7 +261,7 @@ class CohortRunner:
         feature_path,
         feature_file,
         cohort,
-        read_channels : bool = True
+        read_channels: bool = True,
     ):
         """Save for a given feature path all used grid point data. Necessary to run across patient and cohort analysis.
         Parameters
@@ -276,20 +282,27 @@ class CohortRunner:
             ch_all
         """
         feature_wrapper = nm_analysis.Feature_Reader(
-            feature_dir=feature_path,
-            feature_file=feature_file
+            feature_dir=feature_path, feature_file=feature_file
         )
         decoder = nm_decode.Decoder()
         decoder.set_data(
             feature_wrapper.feature_arr,
             feature_wrapper.label,
             feature_wrapper.label_name,
-            feature_wrapper.used_chs
+            feature_wrapper.used_chs,
         )
-        subject_name = feature_file[feature_file.find("sub-")+4:feature_file.find("_ses")]
-        sess_name = feature_file[feature_file.find("ses-")+4:feature_file.find("_task")]
-        task_name = feature_file[feature_file.find("task-")+5:feature_file.find("_run")]
-        run_number = feature_file[feature_file.find("run-")+4:feature_file.find("_ieeg")]
+        subject_name = feature_file[
+            feature_file.find("sub-") + 4 : feature_file.find("_ses")
+        ]
+        sess_name = feature_file[
+            feature_file.find("ses-") + 4 : feature_file.find("_task")
+        ]
+        task_name = feature_file[
+            feature_file.find("task-") + 5 : feature_file.find("_run")
+        ]
+        run_number = feature_file[
+            feature_file.find("run-") + 4 : feature_file.find("_ieeg")
+        ]
 
         if read_channels is True:
             decoder.set_data_ind_channels()
@@ -307,34 +320,44 @@ class CohortRunner:
                 channel_all[cohort][subject_name][ch] = {}
             channel_all[cohort][subject_name][ch][feature_file] = {}
 
-            channel_all[cohort][subject_name][ch][feature_file]["data"] = data_to_read[ch]
-            channel_all[cohort][subject_name][ch][feature_file]["feature_names"] = \
-                [ch_[len(ch)+1:] for ch_ in decoder.features.columns if ch in ch_]
+            channel_all[cohort][subject_name][ch][feature_file]["data"] = data_to_read[
+                ch
+            ]
+            channel_all[cohort][subject_name][ch][feature_file]["feature_names"] = [
+                ch_[len(ch) + 1 :] for ch_ in decoder.features.columns if ch in ch_
+            ]
             channel_all[cohort][subject_name][ch][feature_file]["label"] = decoder.label
-            channel_all[cohort][subject_name][ch][feature_file]["label_name"] = decoder.label_name
+            channel_all[cohort][subject_name][ch][feature_file][
+                "label_name"
+            ] = decoder.label_name
 
             # check laterality
             lat = "CON"  # Beijing is always contralateral
             # Pittsburgh Subjects
-            if ("LEFT" in decoder.label_name and "LEFT" in decoder.features.columns[1]) or \
-            ("RIGHT" in decoder.label_name and "RIGHT" in decoder.features.columns[1]):
+            if (
+                "LEFT" in decoder.label_name and "LEFT" in decoder.features.columns[1]
+            ) or (
+                "RIGHT" in decoder.label_name and "RIGHT" in decoder.features.columns[1]
+            ):
                 lat = "IPS"
 
             # Berlin subjects
-            if ("_L_" in decoder.features.columns[1] and task_name == "SelfpacedRotationL") or \
-            ("_R_" in decoder.features.columns[1] and task_name == "SelfpacedRotationR"):
+            if (
+                "_L_" in decoder.features.columns[1]
+                and task_name == "SelfpacedRotationL"
+            ) or (
+                "_R_" in decoder.features.columns[1]
+                and task_name == "SelfpacedRotationR"
+            ):
                 lat = "IPS"
             channel_all[cohort][subject_name][ch][feature_file]["lat"] = lat
         return channel_all
 
-    def cohort_wrapper_read_all_grid_points(
-        self,
-        read_channels=True
-    ):
+    def cohort_wrapper_read_all_grid_points(self, read_channels=True):
         cohorts = self.cohorts.keys()
         grid_point_all = {}
         for cohort in cohorts:
-            print("COHORT: "+cohort)
+            print("COHORT: " + cohort)
             feature_path = os.path.join(self.outpath, cohort)
             feature_list = nm_IO.get_run_list_indir(feature_path)
             for feature_file in feature_list:
@@ -344,13 +367,13 @@ class CohortRunner:
                     feature_path,
                     feature_file,
                     cohort,
-                    read_channels=read_channels
+                    read_channels=read_channels,
                 )
 
         if read_channels is True:
-            np.save(os.path.join(self.outpath, 'channel_all.npy'), grid_point_all)
+            np.save(os.path.join(self.outpath, "channel_all.npy"), grid_point_all)
         else:
-            np.save(os.path.join(self.outpath, 'grid_point_all.npy'), grid_point_all)
+            np.save(os.path.join(self.outpath, "grid_point_all.npy"), grid_point_all)
 
     @staticmethod
     def rewrite_grid_point_all(d, outpath):
@@ -375,5 +398,4 @@ class CohortRunner:
                         for key_ in d[cohort][sub][gp][f].keys():
                             p[gp][cohort][sub][f][key_] = d[cohort][sub][gp][f][key_]
 
-        np.save(os.path.join(outpath, 'grid_point_all_re.npy'), p)
-
+        np.save(os.path.join(outpath, "grid_point_all_re.npy"), p)

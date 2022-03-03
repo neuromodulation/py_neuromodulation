@@ -37,7 +37,8 @@ class Feature_Reader:
     def __init__(
         self,
         feature_dir:str,
-        feature_file:str
+        feature_file:str,
+        binarize_label : bool = True
         ) -> None:
         """Feature_Reader enables analysis methods on top of NM_reader and NM_Decoder
 
@@ -80,7 +81,7 @@ class Feature_Reader:
         self.label_name = self._get_target_ch()
         self.label = self.read_target_ch(self.feature_arr,
             self.label_name,
-            binarize=True,
+            binarize=binarize_label,
             binarize_th=0.3)
 
     def _get_target_ch(self) -> str:
