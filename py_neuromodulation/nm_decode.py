@@ -1,5 +1,3 @@
-from numpy.core.overrides import verify_matching_signatures
-from scipy.sparse import csc
 from sklearn import model_selection, metrics, linear_model, discriminant_analysis, base
 from skopt.space import Real, Integer, Categorical
 from skopt.utils import use_named_args
@@ -188,11 +186,7 @@ class Decoder:
             self.ch_ind_data[ch] = np.nan_to_num(
                 np.array(
                     self.features[
-                        [
-                            col
-                            for col in self.features.columns
-                            if col.startswith(ch)
-                        ]
+                        [col for col in self.features.columns if col.startswith(ch)]
                     ]
                 )
             )
