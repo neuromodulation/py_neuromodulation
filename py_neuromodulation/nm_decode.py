@@ -188,7 +188,11 @@ class Decoder:
             self.ch_ind_data[ch] = np.nan_to_num(
                 np.array(
                     self.features[
-                        [col for col in self.features.columns if col.startswith(ch)]
+                        [
+                            col
+                            for col in self.features.columns
+                            if col.startswith(ch)
+                        ]
                     ]
                 )
             )

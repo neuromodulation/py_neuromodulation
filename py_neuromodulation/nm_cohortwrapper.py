@@ -180,6 +180,7 @@ class CohortRunner:
                 estimate_gridpoints=self.estimate_gridpoints,
                 estimate_all_channels_combined=self.estimate_all_channels_combined,
                 save_results=True,
+                output_name="XGBNOMP"
             )
 
         if self.plot_grid_performances:
