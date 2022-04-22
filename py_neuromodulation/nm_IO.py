@@ -13,13 +13,14 @@ def read_settings(PATH_SETTINGS: str) -> None:
         return json.load(json_file)
 
 
-def read_BIDS_data(PATH_RUN, BIDS_PATH):
+def read_BIDS_data(PATH_RUN, BIDS_PATH, datatype: str = "ieeg"):
     """Given a run path and bids data path, read the respective data
 
     Parameters
     ----------
     PATH_RUN : string
     BIDS_PATH : string
+    datatype : string
 
     Returns
     -------
@@ -36,7 +37,7 @@ def read_BIDS_data(PATH_RUN, BIDS_PATH):
         task=entities["task"],
         run=entities["run"],
         acquisition=entities["acquisition"],
-        datatype="ieeg",
+        datatype=datatype,
         root=BIDS_PATH,
     )
 
@@ -86,7 +87,9 @@ def get_annotations(PATH_ANNOTATIONS: str, PATH_RUN: str, raw_arr: mne.io.RawArr
     return annot, annot_data, raw_arr
 
 
-def read_plot_modules(PATH_PLOT=os.path.join(Path(__file__).absolute().parent, "plots")):
+def read_plot_modules(
+    PATH_PLOT=os.path.join(Path(__file__).absolute().parent, "plots")
+):
     """Read required .mat files for plotting
 
     Parameters

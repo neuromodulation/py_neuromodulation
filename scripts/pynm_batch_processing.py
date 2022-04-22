@@ -24,11 +24,9 @@ def main():
     for method in list(epoch_stream.settings["methods"].keys()):
         epoch_stream.settings["methods"][method] = False
 
-    epoch_stream.settings["methods"]["feature_normalization"] = True
-    epoch_stream.settings["methods"]["re_referencing"] = True
-    epoch_stream.settings["methods"]["notch_filter"] = True
-    epoch_stream.settings["methods"]["fft"] = True
+    epoch_stream.settings["methods"]["fft"] = False
     epoch_stream.settings["methods"]["sharpwave_analysis"] = True
+    epoch_stream.settings["methods"]["fooof"] = False
 
     epoch_stream.run()
 
