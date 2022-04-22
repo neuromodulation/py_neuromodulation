@@ -9,15 +9,15 @@
         "re_referencing": true,
         "notch_filter": true,
         "bandpass_filter": false,
-        "stft" : false,
-        "fft" : true,
+        "stft": false,
+        "fft": true,
         "raw_hjorth": true,
-        "sharpwave_analysis": true,
+        "sharpwave_analysis": false,
         "return_raw": true,
-        "project_cortex": true,
+        "project_cortex": false,
         "project_subcortex": false,
-        "coherence": true,
-        "fooof" : true
+        "coherence": false,
+        "fooof": false
     },
     "raw_resampling_settings": {
         "resample_freq": 1000
@@ -46,13 +46,13 @@
             "HFA"
         ]
     },
-    "stft_settings":{
-        "windowlength" : 500,
-        "log_transform" : true
+    "stft_settings": {
+        "windowlength": 500,
+        "log_transform": true
     },
-    "fft_settings":{
-        "windowlength" : 1000,
-        "log_transform" : true
+    "fft_settings": {
+        "windowlength": 1000,
+        "log_transform": true
     },
     "frequency_ranges": {
         "theta": [
@@ -99,7 +99,7 @@
             "mobility": false,
             "complexity": false
         },
-        "log_transform" : true
+        "log_transform": true
     },
     "sharpwave_analysis_settings": {
         "sharpwave_features": {
@@ -140,7 +140,7 @@
             "min": null,
             "var": null
         },
-        "apply_estimator_between_peaks_and_troughs" : true
+        "apply_estimator_between_peaks_and_troughs": true
     },
     "project_cortex_settings": {
         "max_dist": 20
@@ -148,52 +148,52 @@
     "project_subcortex_settings": {
         "max_dist": 5
     },
-    "coherence" : {
-        "channels" : [
+    "coherence": {
+        "channels": [
             [
                 "LFP_L_1_STN_BS",
                 "ECOG_L_4_SMC_AT"
             ]
         ],
-        "frequency_bands" : [
+        "frequency_bands": [
             [
                 "high beta"
             ]
         ],
-        "method" : [
+        "method": [
             {
-                "coh" : true,
-                "icoh" : true
+                "coh": true,
+                "icoh": true
             }
         ],
-        "params" : [
+        "params": [
             {
-                "window" : "hann"
+                "window": "hann"
             }
         ]
     },
-    "fooof" : {
-        "aperiodic" : {
-            "exponent" : true,
-            "offset" : true
+    "fooof": {
+        "aperiodic": {
+            "exponent": true,
+            "offset": true
         },
-        "periodic" : {
-            "center_frequency" : true,
-            "band_width" : true,
-            "height_over_ap" : true
+        "periodic": {
+            "center_frequency": true,
+            "band_width": true,
+            "height_over_ap": true
         },
-        "windowlength" : 1000,
-        "peak_width_limits" : [
+        "windowlength": 800,
+        "peak_width_limits": [
             0.5,
             12
         ],
-        "max_n_peaks" : 3,
-        "min_peak_height" : 0,
-        "peak_threshold" : 2,
-        "freq_range" : [
+        "max_n_peaks": 3,
+        "min_peak_height": 0,
+        "peak_threshold": 2,
+        "freq_range": [
             2,
             40
         ],
-        "knee" : true
+        "knee": true
     }
 }

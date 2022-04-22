@@ -5,18 +5,19 @@
         "raw_resampling": true,
         "raw_normalization": false,
         "feature_normalization": true,
-        "kalman_filter": true,
+        "kalman_filter": false,
         "re_referencing": true,
         "notch_filter": true,
         "bandpass_filter": false,
-        "stft": true,
-        "fft": false,
+        "stft": false,
+        "fft": true,
         "raw_hjorth": true,
-        "sharpwave_analysis": true,
+        "sharpwave_analysis": false,
         "return_raw": true,
-        "project_cortex": true,
-        "project_subcortex": true,
-        "coherence": true
+        "project_cortex": false,
+        "project_subcortex": false,
+        "coherence": false,
+        "fooof": false
     },
     "raw_resampling_settings": {
         "resample_freq": 1000
@@ -156,13 +157,7 @@
         ],
         "frequency_bands": [
             [
-                "theta",
-                "alpha",
-                "low beta",
-                "high beta",
-                "low gamma",
-                "high gamma",
-                "HFA"
+                "high beta"
             ]
         ],
         "method": [
@@ -176,5 +171,29 @@
                 "window": "hann"
             }
         ]
+    },
+    "fooof": {
+        "aperiodic": {
+            "exponent": true,
+            "offset": true
+        },
+        "periodic": {
+            "center_frequency": true,
+            "band_width": true,
+            "height_over_ap": true
+        },
+        "windowlength": 800,
+        "peak_width_limits": [
+            0.5,
+            12
+        ],
+        "max_n_peaks": 3,
+        "min_peak_height": 0,
+        "peak_threshold": 2,
+        "freq_range": [
+            2,
+            40
+        ],
+        "knee": true
     }
 }

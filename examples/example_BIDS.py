@@ -8,7 +8,6 @@ from py_neuromodulation import nm_BidsStream, nm_analysis, nm_decode
 def run_example_BIDS():
     """run the example BIDS path in pyneuromodulation/tests/data"""
 
-    # RUN_NAME = "sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg.vhdr"
     RUN_NAME = "sub-testsub_ses-EphysMedOff_task-buttonpress_run-0"
     PATH_RUN = os.path.join(
         os.path.abspath(os.path.join("examples", "data")),
