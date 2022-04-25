@@ -153,14 +153,8 @@ def add_labels(
     # resample_label
     ind_label = np.where(nm_channels.target == 1)[0]
     if ind_label.shape[0] != 0:
-        offset_time = max(
-            [
-                value
-                for value in settings["bandpass_filter_settings"][
-                    "segment_lengths_ms"
-                ].values()
-            ]
-        )
+        offset_time = settings["segment_length_features_ms"]
+
         offset_start = np.ceil(offset_time / 1000 * fs).astype(int)
         dat_ = raw_arr_data[ind_label, offset_start:]
         if dat_.ndim == 1:
