@@ -337,17 +337,24 @@ class PNStream(ABC):
         bads (list)
         used_types (list)
         target_keywords (list)
+        reference (list)
         """
 
         if PATH_NM_CHANNELS and os.path.isfile(PATH_NM_CHANNELS):
             nm_channels = pd.read_csv(PATH_NM_CHANNELS)
-        elif None not in [
-            kwargs.get("ch_names", None),
-            kwargs.get("ch_types", None),
-            kwargs.get("bads", None),
-            kwargs.get("used_types", None),
-            kwargs.get("target_keywords", None),
-        ]:
+        elif (
+            len(
+                [
+                    1
+                    for l in [
+                        kwargs.get("ch_names", None),
+                        kwargs.get("ch_types", None),
+                    ]
+                    if len(l) == 0
+                ]
+            )
+            == 0
+        ):
 
             nm_channels = nm_define_nmchannels.set_channels(
                 ch_names=kwargs.get("ch_names"),
@@ -355,6 +362,7 @@ class PNStream(ABC):
                 bads=kwargs.get("bads"),
                 used_types=kwargs.get("used_types"),
                 target_keywords=kwargs.get("target_keywords"),
+                reference=kwargs.get("reference"),
             )
         return nm_channels
 
