@@ -227,7 +227,7 @@ class Feature_Reader:
         X_epoch, y_epoch = self.get_epochs(
             data,
             self.label,
-            epoch_len=4,
+            epoch_len=epoch_len,
             sfreq=self.settings["sampling_rate_features"],
             threshold=threshold
         )
