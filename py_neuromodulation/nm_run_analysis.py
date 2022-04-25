@@ -21,7 +21,7 @@ class Run:
         reference: nm_rereference.RT_rereference,
         projection: nm_projection.Projection,
         resample: nm_resample.Resample,
-        notch_filter : nm_notch_filter.NotchFilter,
+        notch_filter: nm_notch_filter.NotchFilter,
         verbose: bool,
         feature_idx: list,
     ) -> None:
@@ -53,11 +53,16 @@ class Run:
         self.reference = reference
         self.resample = resample
         self.notch_filter = notch_filter
-        self.projection = projection 
-        self.project: bool = False if projection is None else \
-            any((self.projection.project_cortex, self.projection.project_subcortex))
+        self.projection = projection
+        self.project: bool = (
+            False
+            if projection is None
+            else any(
+                (self.projection.project_cortex, self.projection.project_subcortex)
+            )
+        )
         self.settings = settings
-        self.fs_new = int(settings["sampling_rate_features"])
+        self.fs_new = int(settings["sampling_rate_features_hz"])
         self.fs = features.fs
         self.line_noise = features.line_noise
         self.feature_idx = feature_idx
@@ -67,22 +72,19 @@ class Run:
             [
                 value
                 for value in settings["bandpass_filter_settings"][
-                    "segment_lengths"
+                    "segment_lengths_ms"
                 ].values()
             ]
         )  # ms
 
         if settings["methods"]["raw_normalization"] is True:
             self.raw_normalize_samples = int(
-                settings["raw_normalization_settings"]["normalization_time"]
-                * self.fs
+                settings["raw_normalization_settings"]["normalization_time_s"] * self.fs
             )
 
         if settings["methods"]["feature_normalization"] is True:
             self.feat_normalize_samples = int(
-                settings["feature_normalization_settings"][
-                    "normalization_time"
-                ]
+                settings["feature_normalization_settings"]["normalization_time_s"]
                 * self.fs_new
             )
 
@@ -114,9 +116,9 @@ class Run:
 
         # notch filter
         if self.settings["methods"]["notch_filter"] is True:
-            #ieeg_batch = nm_notch_filter.notch_filter(
+            # ieeg_batch = nm_notch_filter.notch_filter(
             #    ieeg_batch, self.fs, self.line_noise
-            #)
+            # )
             ieeg_batch = self.notch_filter.filter_data(ieeg_batch)
 
         # normalize raw data
@@ -169,9 +171,7 @@ class Run:
 
         if self.verbose is True:
             print(
-                "Last batch took: "
-                + str(np.round(time() - start_time, 2))
-                + " seconds"
+                "Last batch took: " + str(np.round(time() - start_time, 2)) + " seconds"
             )
 
         # if self.cnt_samples > 4000:

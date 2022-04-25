@@ -14,7 +14,7 @@ class Resample:
 
         self.s = settings
         self.fs = fs
-        self.fs_new = settings["raw_resampling_settings"]["resample_freq"]
+        self.fs_new = settings["raw_resampling_settings"]["resample_freq_hz"]
         self.down = self.fs / self.fs_new
         self.up = 1.0
 

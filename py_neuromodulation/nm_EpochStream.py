@@ -19,11 +19,27 @@ class EpochStream(py_nm.nm_stream.PNStream):
         """
         self.data = np.load(path_epoch)
 
-    def get_data(
+    def get_data_gen_all_data(
         self,
     ) -> np.array:
+        """This data generator returns one epoch at a time.
+        Data will thus be analyzed in steps of the epoch size
+
+        Returns
+        -------
+        np.array
+            _description_
+
+        Yields
+        ------
+        Iterator[np.array]
+            _description_
+        """
         for n_batch in range(self.data.shape[0]):
             yield self.data[n_batch, :, :]
+
+    def get_data_gen_epoch(self) -> np.array:
+        self.settings["sampling_rate_features_hz"]
 
     def run(
         self,

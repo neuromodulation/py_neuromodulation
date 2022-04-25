@@ -13,7 +13,7 @@ class SpectrumAnalyzer:
 
         self.fs = fs
         self.settings_fooof = settings_fooof
-        self.freq_range = settings_fooof["freq_range"]
+        self.freq_range = settings_fooof["freq_range_hz"]
         self.ap_mode = 'knee' if settings_fooof['knee'] else 'fixed'
         self.max_n_peaks = settings_fooof["max_n_peaks"]
 
@@ -27,10 +27,10 @@ class SpectrumAnalyzer:
         )
 
         self.num_samples = int(
-            settings_fooof["windowlength"]*fs/1000
+            settings_fooof["windowlength_ms"]*fs/1000
         )
 
-        self.f_vec = np.arange(0, int(settings_fooof["windowlength"]/2) + 1, 1)
+        self.f_vec = np.arange(0, int(settings_fooof["windowlength_ms"]/2) + 1, 1)
 
     def _get_spectrum(self, data: np.array):
         """return absolute value fft spectrum"""

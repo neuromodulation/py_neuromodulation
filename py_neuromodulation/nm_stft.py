@@ -27,7 +27,7 @@ def get_stft_features(features_, s, fs, data, KF_dict, ch, f_ranges, f_band_name
     """
     # optimized for fs=1000
     f, t, Zxx = signal.stft(data, fs=fs, window='hamming',
-                            nperseg=int(s["stft_settings"]["windowlength"]),
+                            nperseg=int(s["stft_settings"]["windowlength_ms"]),
                             boundary='even')
     Z = np.abs(Zxx)
     for idx_fband, f_range in enumerate(f_ranges):

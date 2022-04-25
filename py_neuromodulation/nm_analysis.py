@@ -15,10 +15,10 @@ target_filter_str = {
     "CLEAN",
     "SQUARED_EMG",
     "SQUARED_ROTAWHEEL",
-    "SQUARED_ROTATION"
-    "rota_squared",
+    "SQUARED_ROTATION" "rota_squared",
 }
 features_reverse_order_plotting = {"stft", "fft", "bandpass"}
+
 
 class Feature_Reader:
 
@@ -32,14 +32,11 @@ class Feature_Reader:
     feature_arr: pd.DataFrame
     ch_names: list[str]
     ch_names_ECOG: list[str]
-    decoder: nm_decode.Decoder=None
+    decoder: nm_decode.Decoder = None
 
     def __init__(
-        self,
-        feature_dir:str,
-        feature_file:str,
-        binarize_label : bool = True
-        ) -> None:
+        self, feature_dir: str, feature_file: str, binarize_label: bool = True
+    ) -> None:
         """Feature_Reader enables analysis methods on top of NM_reader and NM_Decoder
 
         Parameters
@@ -57,9 +54,7 @@ class Feature_Reader:
             self.feature_file = feature_file
 
         FILE_BASENAME = Path(self.feature_file).stem
-        PATH_READ_FILE = str(
-            Path(self.feature_dir, FILE_BASENAME, FILE_BASENAME)
-        )
+        PATH_READ_FILE = str(Path(self.feature_dir, FILE_BASENAME, FILE_BASENAME))
 
         self.settings = nm_IO.read_settings(PATH_READ_FILE)
         self.sidecar = nm_IO.read_sidecar(PATH_READ_FILE)
@@ -69,28 +64,30 @@ class Feature_Reader:
         self.feature_arr = nm_IO.read_features(PATH_READ_FILE)
 
         self.ch_names = self.nm_channels.new_name
-        self.used_chs = list(self.nm_channels[(self.nm_channels["target"] == 0) &
-                        (self.nm_channels["used"] == 1)]["new_name"])
+        self.used_chs = list(
+            self.nm_channels[
+                (self.nm_channels["target"] == 0) & (self.nm_channels["used"] == 1)
+            ]["new_name"]
+        )
         self.ch_names_ECOG = self.nm_channels.query(
             '(type=="ecog") and (used == 1) and (status=="good")'
         ).new_name.to_list()
 
         # init plotter
-        self.nmplotter =  nm_plots.NM_Plot()
+        self.nmplotter = nm_plots.NM_Plot()
 
         self.label_name = self._get_target_ch()
-        self.label = self.read_target_ch(self.feature_arr,
-            self.label_name,
-            binarize=binarize_label,
-            binarize_th=0.3)
+        self.label = self.read_target_ch(
+            self.feature_arr, self.label_name, binarize=binarize_label, binarize_th=0.3
+        )
 
     def _get_target_ch(self) -> str:
         target_names = list(self.nm_channels[self.nm_channels["target"] == 1]["name"])
         target_clean = [
             target_name
             for target_name in target_names
-                for filter_str in target_filter_str
-                    if filter_str.lower() in target_name.lower()
+            for filter_str in target_filter_str
+            if filter_str.lower() in target_name.lower()
         ]
 
         if len(target_clean) == 0:
@@ -109,24 +106,24 @@ class Feature_Reader:
         return target
 
     @staticmethod
-    def read_target_ch(feature_arr:pd.DataFrame,
-        label_name:str,
-        binarize:bool = True,
-        binarize_th:float = 0.3) -> None:
+    def read_target_ch(
+        feature_arr: pd.DataFrame,
+        label_name: str,
+        binarize: bool = True,
+        binarize_th: float = 0.3,
+    ) -> None:
 
-        label = np.nan_to_num(
-                np.array(
-                    feature_arr[label_name]
-                )
-            )
+        label = np.nan_to_num(np.array(feature_arr[label_name]))
         if binarize:
             label = label > binarize_th
         return label
 
     @staticmethod
-    def filter_features(feature_columns: list,
-        ch_name: str=None,
-        list_feature_keywords: list[str]=None) -> list:
+    def filter_features(
+        feature_columns: list,
+        ch_name: str = None,
+        list_feature_keywords: list[str] = None,
+    ) -> list:
         """filters read features by ch_name and/or modality
 
         Parameters
@@ -151,44 +148,50 @@ class Feature_Reader:
 
         if list_feature_keywords is not None:
             feature_select = [
-                f
-                for f in feature_select
-                    if any(x in f for x in list_feature_keywords)
+                f for f in feature_select if any(x in f for x in list_feature_keywords)
             ]
 
-            if len([mod for mod in features_reverse_order_plotting if mod in list_feature_keywords])>0:
+            if (
+                len(
+                    [
+                        mod
+                        for mod in features_reverse_order_plotting
+                        if mod in list_feature_keywords
+                    ]
+                )
+                > 0
+            ):
                 # flip list s.t. theta band is lowest in subsequent plot
                 feature_select = feature_select[::-1]
 
         return feature_select
 
-    def set_target_ch(self, ch_name:str) -> None:
+    def set_target_ch(self, ch_name: str) -> None:
         self.label = ch_name
 
     def plot_cort_projection(self) -> None:
         if self.sidecar["sess_right"]:
-            ecog_strip = np.array(
-                self.sidecar["coords"]["cortex_right"]["positions"]
-            )
+            ecog_strip = np.array(self.sidecar["coords"]["cortex_right"]["positions"])
         else:
-            ecog_strip = np.array(
-                self.sidecar["coords"]["cortex_left"]["positions"]
-            )
+            ecog_strip = np.array(self.sidecar["coords"]["cortex_left"]["positions"])
         self.nmplotter.plot_cortex(
-            grid_cortex=np.array(self.sidecar["grid_cortex"]) if "grid_cortex" in self.sidecar \
-                else None,
+            grid_cortex=np.array(self.sidecar["grid_cortex"])
+            if "grid_cortex" in self.sidecar
+            else None,
             ecog_strip=ecog_strip,
-            grid_color=np.array(
-                self.sidecar["proj_matrix_cortex"]
-            ).sum(axis=1) if "grid_cortex" in self.sidecar else None,
-            set_clim=False
+            grid_color=np.array(self.sidecar["proj_matrix_cortex"]).sum(axis=1)
+            if "grid_cortex" in self.sidecar
+            else None,
+            set_clim=False,
         )
 
-    def plot_features(self,
+    def plot_features(
+        self,
         ch_names_ECOG=None,
-        list_feature_keywords:list[str]=["stft"],
-        epoch_len:int=4,
-        threshold:float=0.1):
+        list_feature_keywords: list[str] = ["stft"],
+        epoch_len: int = 4,
+        threshold: float = 0.1,
+    ):
         """Wrapper that call plot_features_per_channel
         for every given ECoG channel
 
@@ -205,38 +208,37 @@ class Feature_Reader:
                 ch=ch_name_ECOG,
                 list_feature_keywords=list_feature_keywords,
                 epoch_len=epoch_len,
-                threshold=threshold
+                threshold=threshold,
             )
 
-    def plot_target_averaged_channel(self,
-        ch: str=None,
-        list_feature_keywords: Optional[list[str]]=None,
-        epoch_len: int=4,
-        threshold: float=0.1,
-        normalize_data : bool = True):
+    def plot_target_averaged_channel(
+        self,
+        ch: str = None,
+        list_feature_keywords: Optional[list[str]] = None,
+        epoch_len: int = 4,
+        threshold: float = 0.1,
+        normalize_data: bool = True,
+    ):
 
         filtered_df = self.feature_arr[
             self.filter_features(self.feature_arr.columns, ch, list_feature_keywords)
         ]
 
-        data = np.expand_dims(
-            np.array(filtered_df),
-            axis=1
-        )
+        data = np.expand_dims(np.array(filtered_df), axis=1)
 
         X_epoch, y_epoch = self.get_epochs(
             data,
             self.label,
             epoch_len=epoch_len,
-            sfreq=self.settings["sampling_rate_features"],
-            threshold=threshold
+            sfreq=self.settings["sampling_rate_features_hz"],
+            threshold=threshold,
         )
 
         nm_plots.plot_epochs_avg(
             X_epoch=X_epoch,
             y_epoch=y_epoch,
             epoch_len=epoch_len,
-            sfreq=self.settings["sampling_rate_features"],
+            sfreq=self.settings["sampling_rate_features_hz"],
             feature_names=list(filtered_df.columns),
             feature_str_add="_".join(list_feature_keywords),
             cut_ch_name_cols=True,
@@ -246,7 +248,7 @@ class Feature_Reader:
             show_plot=True,
             save=True,
             OUT_PATH=self.feature_dir,
-            feature_file=self.feature_file
+            feature_file=self.feature_file,
         )
 
     def plot_subject_grid_ch_performance(
@@ -254,7 +256,7 @@ class Feature_Reader:
         subject_name=None,
         performance_dict=None,
         plt_grid=False,
-        feature_str_add="performance_allch_allgrid"
+        feature_str_add="performance_allch_allgrid",
     ):
         """plot subject specific performance for individual channeal and optional grid points
 
@@ -277,23 +279,19 @@ class Feature_Reader:
 
         if subject_name is None:
             subject_name = self.feature_file[
-                self.feature_file.find('sub-'):self.feature_file.find('_ses')
+                self.feature_file.find("sub-") : self.feature_file.find("_ses")
             ][4:]
 
         ch_ = list(performance_dict[subject_name].keys())
 
         for ch in ch_:
-            if 'grid' not in ch and "combined" not in ch:
-                ecog_coords_strip.append(
-                    performance_dict[subject_name][ch]["coord"]
-                )
+            if "grid" not in ch and "combined" not in ch:
+                ecog_coords_strip.append(performance_dict[subject_name][ch]["coord"])
                 ecog_strip_performance.append(
                     performance_dict[subject_name][ch]["performance_test"]
                 )
-            elif plt_grid is True and 'gridcortex_' in ch:
-                cortex_grid.append(
-                    performance_dict[subject_name][ch]["coord"]
-                )
+            elif plt_grid is True and "gridcortex_" in ch:
+                cortex_grid.append(performance_dict[subject_name][ch]["coord"])
                 grid_performance.append(
                     performance_dict[subject_name][ch]["performance_test"]
                 )
@@ -302,18 +300,20 @@ class Feature_Reader:
             ecog_coords_strip = np.vstack(ecog_coords_strip)
 
         self.nmplotter.plot_cortex(
-            grid_cortex=np.array(self.sidecar["grid_cortex"]) 
-                            if "grid_cortex" in self.sidecar else None,
-            ecog_strip=ecog_coords_strip if len(ecog_coords_strip)>0 else None,
-            grid_color=grid_performance if len(grid_performance)>0 else None,
+            grid_cortex=np.array(self.sidecar["grid_cortex"])
+            if "grid_cortex" in self.sidecar
+            else None,
+            ecog_strip=ecog_coords_strip if len(ecog_coords_strip) > 0 else None,
+            grid_color=grid_performance if len(grid_performance) > 0 else None,
             strip_color=ecog_strip_performance
-                if len(ecog_strip_performance)>0 else None,
+            if len(ecog_strip_performance) > 0
+            else None,
             sess_right=self.sidecar["sess_right"],
             save=True,
             OUT_PATH=self.feature_dir,
             feature_file=self.feature_file,
             feature_str_add=feature_str_add,
-            show_plot=True
+            show_plot=True,
         )
 
     @staticmethod
@@ -346,50 +346,45 @@ class Feature_Reader:
 
         epoch_lim = int(epoch_len * sfreq)
 
-        ind_mov = np.where(
-            np.diff(np.array(y_ > threshold) * 1) == 1
-        )[0]
+        ind_mov = np.where(np.diff(np.array(y_ > threshold) * 1) == 1)[0]
 
         low_limit = ind_mov > epoch_lim / 2
         up_limit = ind_mov < y_.shape[0] - epoch_lim / 2
 
         ind_mov = ind_mov[low_limit & up_limit]
 
-        epoch_ = np.zeros([ind_mov.shape[0],
-            epoch_lim,
-            data.shape[1],data.shape[2]]
-        )
+        epoch_ = np.zeros([ind_mov.shape[0], epoch_lim, data.shape[1], data.shape[2]])
 
         y_arr = np.zeros([ind_mov.shape[0], int(epoch_lim)])
 
         for idx, i in enumerate(ind_mov):
 
-            epoch_[idx, :, :, :] = data[
-                i - epoch_lim // 2:i + epoch_lim // 2, :, :
-            ]
+            epoch_[idx, :, :, :] = data[i - epoch_lim // 2 : i + epoch_lim // 2, :, :]
 
-            y_arr[idx, :] = y_[i - epoch_lim // 2:i + epoch_lim // 2]
+            y_arr[idx, :] = y_[i - epoch_lim // 2 : i + epoch_lim // 2]
 
         return epoch_, y_arr
 
-    def set_decoder(self,
-        decoder:nm_decode.Decoder = None,
+    def set_decoder(
+        self,
+        decoder: nm_decode.Decoder = None,
         TRAIN_VAL_SPLIT=False,
         RUN_BAY_OPT=False,
         save_coef=False,
-        model:base.BaseEstimator = linear_model.LogisticRegression,
+        model: base.BaseEstimator = linear_model.LogisticRegression,
         eval_method=metrics.r2_score,
-        cv_method:model_selection.BaseCrossValidator=\
-            model_selection.KFold(n_splits=3, shuffle=False),
-        get_movement_detection_rate:bool=False,
+        cv_method: model_selection.BaseCrossValidator = model_selection.KFold(
+            n_splits=3, shuffle=False
+        ),
+        get_movement_detection_rate: bool = False,
         min_consequent_count=3,
         threshold_score=True,
         bay_opt_param_space: list = [],
         STACK_FEATURES_N_SAMPLES=False,
         time_stack_n_samples=5,
         use_nested_cv=False,
-        VERBOSE=False
-        ):
+        VERBOSE=False,
+    ):
         if decoder is not None:
             self.decoder = decoder
         else:
@@ -412,17 +407,18 @@ class Feature_Reader:
                 STACK_FEATURES_N_SAMPLES=STACK_FEATURES_N_SAMPLES,
                 time_stack_n_samples=time_stack_n_samples,
                 VERBOSE=VERBOSE,
-                use_nested_cv=use_nested_cv
+                use_nested_cv=use_nested_cv,
             )
 
-    def run_ML_model(self,
-        feature_file:str=None,
-        estimate_gridpoints:bool=False,
-        estimate_channels:bool=True,
-        estimate_all_channels_combined:bool=False,
-        output_name:str = "LM",
-        save_results:bool = False
-        ):
+    def run_ML_model(
+        self,
+        feature_file: str = None,
+        estimate_gridpoints: bool = False,
+        estimate_channels: bool = True,
+        estimate_all_channels_combined: bool = False,
+        output_name: str = "LM",
+        save_results: bool = False,
+    ):
         """machine learning model evaluation for ECoG strip channels and/or grid points
 
         Parameters
@@ -466,9 +462,10 @@ class Feature_Reader:
         if save_results:
             self.decoder.save(
                 self.feature_dir,
-                self.feature_file[:-len(".vhdr")]
-                    if ".vhdr" in self.feature_file else self.feature_file,
-                output_name
+                self.feature_file[: -len(".vhdr")]
+                if ".vhdr" in self.feature_file
+                else self.feature_file,
+                output_name,
             )
 
         return self.read_results(
@@ -477,23 +474,24 @@ class Feature_Reader:
             read_channels=estimate_channels,
             ML_model_name=output_name,
             read_mov_detection_rates=self.decoder.get_movement_detection_rate,
-            read_bay_opt_params=self.decoder.RUN_BAY_OPT
+            read_bay_opt_params=self.decoder.RUN_BAY_OPT,
         )
 
-    def read_results(self,
+    def read_results(
+        self,
         performance_dict: dict = {},
         subject_name: str = None,
-        DEFAULT_PERFORMANCE:float = 0.5,
-        read_grid_points:bool = True,
-        read_channels:bool=True,
-        read_all_combined:bool=False,
-        ML_model_name:str='LM',
-        read_mov_detection_rates:bool=False,
-        read_bay_opt_params:bool=False,
-        save_results:bool = False,
-        PATH_OUT:str = None,
-        folder_name:str = None,
-        str_add:str = None
+        DEFAULT_PERFORMANCE: float = 0.5,
+        read_grid_points: bool = True,
+        read_channels: bool = True,
+        read_all_combined: bool = False,
+        ML_model_name: str = "LM",
+        read_mov_detection_rates: bool = False,
+        read_bay_opt_params: bool = False,
+        save_results: bool = False,
+        PATH_OUT: str = None,
+        folder_name: str = None,
+        str_add: str = None,
     ):
         """Save performances of a given patient into performance_dict from saved nm_decoder
 
@@ -524,26 +522,32 @@ class Feature_Reader:
         """
 
         if ".vhdr" in self.feature_file:
-            feature_file = self.feature_file[:-len(".vhdr")]
+            feature_file = self.feature_file[: -len(".vhdr")]
         else:
             feature_file = self.feature_file
 
         if subject_name is None:
-            subject_name = feature_file[feature_file.find('sub-'):feature_file.find('_ses')][4:]
+            subject_name = feature_file[
+                feature_file.find("sub-") : feature_file.find("_ses")
+            ][4:]
 
-        PATH_ML_ = os.path.join(self.feature_dir, feature_file,
-                                feature_file + '_' + ML_model_name + '_ML_RES.p')
+        PATH_ML_ = os.path.join(
+            self.feature_dir,
+            feature_file,
+            feature_file + "_" + ML_model_name + "_ML_RES.p",
+        )
 
         # read ML results
-        with open(PATH_ML_, 'rb') as input:
+        with open(PATH_ML_, "rb") as input:
             ML_res = cPickle.load(input)
 
         performance_dict[subject_name] = {}
 
         def write_CV_res_in_performance_dict(
-            obj_read, obj_write,
+            obj_read,
+            obj_write,
             read_mov_detection_rates=read_mov_detection_rates,
-            read_bay_opt_params=False
+            read_bay_opt_params=False,
         ):
             def transform_list_of_dicts_into_dict_of_lists(l_):
                 dict_out = {}
@@ -554,9 +558,12 @@ class Feature_Reader:
                     dict_out[key_] = key_l
                 return dict_out
 
-            def read_ML_performances(obj_read, obj_write, set_inner_CV_res : bool = False):
-
-                def set_score(key_set : str, key_get : str, take_mean : bool = True, val=None):
+            def read_ML_performances(
+                obj_read, obj_write, set_inner_CV_res: bool = False
+            ):
+                def set_score(
+                    key_set: str, key_get: str, take_mean: bool = True, val=None
+                ):
                     if set_inner_CV_res is True:
                         key_set = "InnerCV_" + key_set
                         key_get = "InnerCV_" + key_get
@@ -564,37 +571,55 @@ class Feature_Reader:
                         val = np.mean(obj_read[key_get])
                     obj_write[key_set] = val
 
-                set_score(key_set="performance_test", key_get="score_test", take_mean=True)
-                set_score(key_set="performance_train", key_get="score_train", take_mean=True)
+                set_score(
+                    key_set="performance_test", key_get="score_test", take_mean=True
+                )
+                set_score(
+                    key_set="performance_train", key_get="score_train", take_mean=True
+                )
 
                 if "coef" in obj_read:
-                    set_score(key_set="coef", key_get=None, take_mean=False,
-                        val = np.concatenate(obj_read["coef"]).mean(axis=0)
+                    set_score(
+                        key_set="coef",
+                        key_get=None,
+                        take_mean=False,
+                        val=np.concatenate(obj_read["coef"]).mean(axis=0),
                     )
 
                 if read_mov_detection_rates:
                     set_score(
                         key_set="mov_detection_rates_test",
                         key_get="mov_detection_rates_test",
-                        take_mean=True
+                        take_mean=True,
                     )
                     set_score(
                         key_set="mov_detection_rates_train",
                         key_get="mov_detection_rates_train",
-                        take_mean=True
+                        take_mean=True,
                     )
-                    set_score(key_set="fprate_test", key_get="fprate_test", take_mean=True)
-                    set_score(key_set="fprate_train", key_get="fprate_train", take_mean=True)
-                    set_score(key_set="tprate_test", key_get="tprate_test", take_mean=True)
-                    set_score(key_set="tprate_train", key_get="tprate_train", take_mean=True)
+                    set_score(
+                        key_set="fprate_test", key_get="fprate_test", take_mean=True
+                    )
+                    set_score(
+                        key_set="fprate_train", key_get="fprate_train", take_mean=True
+                    )
+                    set_score(
+                        key_set="tprate_test", key_get="tprate_test", take_mean=True
+                    )
+                    set_score(
+                        key_set="tprate_train", key_get="tprate_train", take_mean=True
+                    )
 
                 if read_bay_opt_params is True:
                     # transform dict into keys for json saving
                     dict_to_save = transform_list_of_dicts_into_dict_of_lists(
-                                obj_read["best_bay_opt_params"]
+                        obj_read["best_bay_opt_params"]
                     )
-                    set_score(key_set="bay_opt_best_params", key_get=None, take_mean=False,
-                        val = dict_to_save
+                    set_score(
+                        key_set="bay_opt_best_params",
+                        key_get=None,
+                        take_mean=False,
+                        val=dict_to_save,
                     )
 
             read_ML_performances(obj_read, obj_write)
@@ -614,11 +639,12 @@ class Feature_Reader:
                 else:
                     cortex_name = "cortex_left"
 
-                idx_ = [idx 
+                idx_ = [
+                    idx
                     for idx, i in enumerate(
                         self.sidecar["coords"][cortex_name]["ch_names"]
                     )
-                        if ch.startswith(i+'-')
+                    if ch.startswith(i + "-")
                 ][0]
 
                 coords = self.sidecar["coords"][cortex_name]["positions"][idx_]
@@ -627,60 +653,63 @@ class Feature_Reader:
                     ML_res.ch_ind_results[ch],
                     performance_dict[subject_name][ch],
                     read_mov_detection_rates=read_mov_detection_rates,
-                    read_bay_opt_params=read_bay_opt_params
+                    read_bay_opt_params=read_bay_opt_params,
                 )
 
         if read_all_combined:
             performance_dict[subject_name]["all_ch_combined"] = {}
             write_CV_res_in_performance_dict(
                 ML_res.all_ch_results,
-                performance_dict[subject_name]["all_ch_combined"],\
+                performance_dict[subject_name]["all_ch_combined"],
                 read_mov_detection_rates=read_mov_detection_rates,
-                read_bay_opt_params=read_bay_opt_params
+                read_bay_opt_params=read_bay_opt_params,
             )
 
         if read_grid_points:
-            performance_dict[subject_name]["active_gridpoints"] = ML_res.active_gridpoints
+            performance_dict[subject_name][
+                "active_gridpoints"
+            ] = ML_res.active_gridpoints
 
             for project_settings, grid_type in zip(
                 ["project_cortex", "project_subcortex"],
-                ["gridcortex_", "gridsubcortex_"]
+                ["gridcortex_", "gridsubcortex_"],
             ):
                 if self.settings["methods"][project_settings] is False:
                     continue
 
                 # the sidecar keys are grid_cortex and subcortex_grid
                 for grid_point in range(
-                    len(self.sidecar["grid_"+project_settings.split("_")[1]])
+                    len(self.sidecar["grid_" + project_settings.split("_")[1]])
                 ):
 
-                    gp_str = grid_type+str(grid_point)
+                    gp_str = grid_type + str(grid_point)
 
                     performance_dict[subject_name][gp_str] = {}
-                    performance_dict[subject_name][gp_str]["coord"] = \
-                        self.sidecar[
-                            "grid_"+project_settings.split("_")[1]
-                        ][grid_point]
+                    performance_dict[subject_name][gp_str]["coord"] = self.sidecar[
+                        "grid_" + project_settings.split("_")[1]
+                    ][grid_point]
 
                     if gp_str in ML_res.active_gridpoints:
                         write_CV_res_in_performance_dict(
                             ML_res.gridpoint_ind_results[gp_str],
                             performance_dict[subject_name][gp_str],
                             read_mov_detection_rates=read_mov_detection_rates,
-                            read_bay_opt_params=read_bay_opt_params
+                            read_bay_opt_params=read_bay_opt_params,
                         )
                     else:
                         # set non interpolated grid point to default performance
-                        performance_dict[subject_name][gp_str]["performance_test"] = \
-                            DEFAULT_PERFORMANCE
-                        performance_dict[subject_name][gp_str]["performance_train"] = \
-                            DEFAULT_PERFORMANCE
+                        performance_dict[subject_name][gp_str][
+                            "performance_test"
+                        ] = DEFAULT_PERFORMANCE
+                        performance_dict[subject_name][gp_str][
+                            "performance_train"
+                        ] = DEFAULT_PERFORMANCE
 
         if save_results:
             nm_IO.save_general_dict(
                 dict_=performance_dict,
                 PATH_OUT=PATH_OUT,
                 str_add=str_add,
-                folder_name=folder_name
+                folder_name=folder_name,
             )
         return performance_dict

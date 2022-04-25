@@ -157,7 +157,7 @@ def add_labels(
             [
                 value
                 for value in settings["bandpass_filter_settings"][
-                    "segment_lengths"
+                    "segment_lengths_ms"
                 ].values()
             ]
         )
@@ -167,7 +167,7 @@ def add_labels(
             dat_ = np.expand_dims(dat_, axis=0)
         label_downsampled = dat_[
             :,
-            :: int(np.ceil(fs / settings["sampling_rate_features"])),
+            :: int(np.ceil(fs / settings["sampling_rate_features_hz"])),
         ]
 
         # and add to df

@@ -1,6 +1,7 @@
 {
     "out_path": "C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\examples\\rt_example",
-    "sampling_rate_features": 10,
+    "sampling_rate_features_hz": 10,
+    "segment_length_features_ms": 1000,
     "methods": {
         "raw_resampling": true,
         "raw_normalization": false,
@@ -20,15 +21,15 @@
         "fooof": false
     },
     "raw_resampling_settings": {
-        "resample_freq": 1000
+        "resample_freq_hz": 1000
     },
     "raw_normalization_settings": {
-        "normalization_time": 30,
+        "normalization_time_s": 30,
         "normalization_method": "zscore",
         "clip": 3
     },
     "feature_normalization_settings": {
-        "normalization_time": 30,
+        "normalization_time_s": 30,
         "normalization_method": "zscore",
         "clip": 3
     },
@@ -47,14 +48,14 @@
         ]
     },
     "stft_settings": {
-        "windowlength": 500,
+        "windowlength_ms": 500,
         "log_transform": true
     },
     "fft_settings": {
-        "windowlength": 1000,
+        "windowlength_ms": 1000,
         "log_transform": true
     },
-    "frequency_ranges": {
+    "frequency_ranges_hz": {
         "theta": [
             4,
             8
@@ -85,7 +86,7 @@
         ]
     },
     "bandpass_filter_settings": {
-        "segment_lengths": {
+        "segment_lengths_ms": {
             "theta": 1000,
             "alpha": 500,
             "low beta": 333,
@@ -116,17 +117,17 @@
             "decay_steepness": false,
             "slope_ratio": false
         },
-        "filter_low_cutoff": 5,
-        "filter_high_cutoff": 80,
+        "filter_low_cutoff_hz": 5,
+        "filter_high_cutoff_hz": 80,
         "detect_troughs": {
             "estimate": true,
-            "distance_troughs": 10,
-            "distance_peaks": 5
+            "distance_troughs_ms": 10,
+            "distance_peaks_ms": 5
         },
         "detect_peaks": {
             "estimate": true,
-            "distance_troughs": 5,
-            "distance_peaks": 10
+            "distance_troughs_ms": 5,
+            "distance_peaks_ms": 10
         },
         "estimator": {
             "mean": [
@@ -143,10 +144,10 @@
         "apply_estimator_between_peaks_and_troughs": true
     },
     "project_cortex_settings": {
-        "max_dist": 20
+        "max_dist_cm": 20
     },
     "project_subcortex_settings": {
-        "max_dist": 5
+        "max_dist_cm": 5
     },
     "coherence": {
         "channels": [
@@ -182,7 +183,7 @@
             "band_width": true,
             "height_over_ap": true
         },
-        "windowlength": 800,
+        "windowlength_ms": 800,
         "peak_width_limits": [
             0.5,
             12
@@ -190,7 +191,7 @@
         "max_n_peaks": 3,
         "min_peak_height": 0,
         "peak_threshold": 2,
-        "freq_range": [
+        "freq_range_hz": [
             2,
             40
         ],

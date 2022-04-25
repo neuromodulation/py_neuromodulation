@@ -26,10 +26,10 @@ def get_fft_features(features_, s, fs, data, KF_dict, ch, f_ranges, f_band_names
         list of frequency band names
     """
 
-    data = data[-int(s["fft_settings"]["windowlength"]*fs/1000):]
+    data = data[-int(s["fft_settings"]["windowlength_ms"] * fs / 1000) :]
 
     Z = np.abs(fft.rfft(data))
-    f = np.arange(0, int(s["fft_settings"]["windowlength"]/2)+1, 1)
+    f = np.arange(0, int(s["fft_settings"]["windowlength_ms"] / 2) + 1, 1)
     for idx_fband, f_range in enumerate(f_ranges):
         fband = f_band_names[idx_fband]
         idx_range = np.where((f >= f_range[0]) & (f <= f_range[1]))[0]
@@ -40,11 +40,11 @@ def get_fft_features(features_, s, fs, data, KF_dict, ch, f_ranges, f_band_names
 
         if s["methods"]["kalman_filter"] is True:
             if fband in s["kalman_filter_settings"]["frequency_bands"]:
-                KF_name = '_'.join([ch, fband])
+                KF_name = "_".join([ch, fband])
                 KF_dict[KF_name].predict()
                 KF_dict[KF_name].update(feature_calc)
                 feature_calc = KF_dict[KF_name].x[0]  # filtered signal
 
-        feature_name = '_'.join([ch, 'fft', fband])
+        feature_name = "_".join([ch, "fft", fband])
         features_[feature_name] = feature_calc
     return features_

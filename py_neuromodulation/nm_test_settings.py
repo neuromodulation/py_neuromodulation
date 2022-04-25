@@ -18,14 +18,14 @@ def test_settings(
     """
     s = settings
 
-    assert isinstance(s["sampling_rate_features"], (float, int))
+    assert isinstance(s["sampling_rate_features_hz"], (float, int))
     if s["methods"]["project_cortex"] is True:
         assert isinstance(
-            s["project_cortex_settings"]["max_dist"], (float, int)
+            s["project_cortex_settings"]["max_dist_cm"], (float, int)
         )
     if s["methods"]["project_subcortex"] is True:
         assert isinstance(
-            s["project_subcortex_settings"]["max_dist"], (float, int)
+            s["project_subcortex_settings"]["max_dist_cm"], (float, int)
         )
     assert (
         isinstance(value, bool) for value in s["methods"].values()
@@ -35,11 +35,11 @@ def test_settings(
     ), "Set at least one method to True."
     if s["methods"]["raw_resampling"] is True:
         assert isinstance(
-            s["raw_resampling_settings"]["resample_freq"], (float, int)
+            s["raw_resampling_settings"]["resample_freq_hz"], (float, int)
         )
     if s["methods"]["raw_normalization"] is True:
         assert isinstance(
-            s["raw_normalization_settings"]["normalization_time"],
+            s["raw_normalization_settings"]["normalization_time_s"],
             (float, int),
         )
         assert s["raw_normalization_settings"]["normalization_method"] in [
@@ -52,7 +52,7 @@ def test_settings(
         )
     if s["methods"]["feature_normalization"] is True:
         assert isinstance(
-            s["feature_normalization_settings"]["normalization_time"],
+            s["feature_normalization_settings"]["normalization_time_s"],
             (float, int),
         )
         assert s["feature_normalization_settings"][
@@ -77,31 +77,31 @@ def test_settings(
         ), "Frequency bands for Kalman filter must be specified as a list."
         assert (
             item
-            in s["bandpass_filter_settings"]["frequency_ranges"].values()
+            in s["bandpass_filter_settings"]["frequency_ranges_hz"].values()
             for item in s["kalman_filter_settings"]["frequency_bands"]
         ), (
             "Frequency bands for Kalman filter must also be specified in "
             "bandpass_filter_settings."
         )
     if s["methods"]["bandpass_filter"] is True:
-        assert isinstance(s["frequency_ranges"], dict)
+        assert isinstance(s["frequency_ranges_hz"], dict)
         assert (
             isinstance(value, list)
-            for value in s["frequency_ranges"].values()
+            for value in s["frequency_ranges_hz"].values()
         )
         assert (
-            len(value) == 2 for value in s["frequency_ranges"].values()
+            len(value) == 2 for value in s["frequency_ranges_hz"].values()
         )
         assert (
             isinstance(value[0], list)
-            for value in s["frequency_ranges"].values()
+            for value in s["frequency_ranges_hz"].values()
         )
         assert (
-            len(value[0]) == 2 for value in s["frequency_ranges"].values()
+            len(value[0]) == 2 for value in s["frequency_ranges_hz"].values()
         )
         assert (
             isinstance(value[1], (float, int))
-            for value in s["frequency_ranges"].values()
+            for value in s["frequency_ranges_hz"].values()
         )
         assert (
             isinstance(value, bool)
@@ -117,16 +117,16 @@ def test_settings(
         ), "Set at least one bandpower_feature to True."
     if s["methods"]["sharpwave_analysis"] is True:
         assert isinstance(
-            s["sharpwave_analysis_settings"]["filter_low_cutoff"],
+            s["sharpwave_analysis_settings"]["filter_low_cutoff_hz"],
             (int, float),
         )
         assert isinstance(
-            s["sharpwave_analysis_settings"]["filter_high_cutoff"],
+            s["sharpwave_analysis_settings"]["filter_high_cutoff_hz"],
             (int, float),
         )
         assert (
-            s["sharpwave_analysis_settings"]["filter_high_cutoff"]
-            > s["sharpwave_analysis_settings"]["filter_low_cutoff"]
+            s["sharpwave_analysis_settings"]["filter_high_cutoff_hz"]
+            > s["sharpwave_analysis_settings"]["filter_low_cutoff_hz"]
         )
 
     if s["methods"]["coherence"] is True:
@@ -135,7 +135,7 @@ def test_settings(
         )
 
         assert (
-            f_band_coh in s["frequency_ranges"]
+            f_band_coh in s["frequency_ranges_hz"]
             for f_band_coh in s["coherence"]["frequency_bands"]
         )
 

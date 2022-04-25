@@ -29,12 +29,12 @@ class Features:
         self.verbose = verbose
         self.ch_names = ch_names
         if s["methods"]["raw_resampling"] is True:
-            self.fs = s["raw_resampling_settings"]["resample_freq"]
+            self.fs = s["raw_resampling_settings"]["resample_freq_hz"]
         else:
             self.fs = fs
         self.line_noise = line_noise
-        self.fband_names = [value for value in s["frequency_ranges"].keys()]
-        self.f_ranges = [self.s["frequency_ranges"][fband_name]
+        self.fband_names = [value for value in s["frequency_ranges_hz"].keys()]
+        self.f_ranges = [self.s["frequency_ranges_hz"][fband_name]
                          for fband_name in self.fband_names]
 
         self.KF_dict = {}
@@ -42,7 +42,7 @@ class Features:
         if s["methods"]["bandpass_filter"] is True:
             self.seglengths = floor(
                 self.fs / 1000 * array([value for value in s[
-                        "bandpass_filter_settings"]["segment_lengths"].values()])).astype(int)
+                        "bandpass_filter_settings"]["segment_lengths_ms"].values()])).astype(int)
             self.filter_fun = nm_filter.calc_band_filters(
                 f_ranges=self.f_ranges, sfreq=self.fs,
                 filter_length=self.fs - 1, verbose=self.verbose)
@@ -66,7 +66,7 @@ class Features:
                 fband_names = s["coherence"]["frequency_bands"][idx_coh]
                 fband_specs = []
                 for band_name in fband_names:
-                    fband_specs.append(s["frequency_ranges"][band_name])
+                    fband_specs.append(s["frequency_ranges_hz"][band_name])
 
                 ch_1_name = s["coherence"]["channels"][idx_coh][0]
                 ch_1_name_reref = [ch for ch in self.ch_names if ch.startswith(ch_1_name)][0]
@@ -87,7 +87,7 @@ class Features:
                 self.s["fooof"], self.fs, self.verbose
             )
 
-        self.new_dat_index = int(self.fs / self.s["sampling_rate_features"])
+        self.new_dat_index = int(self.fs / self.s["sampling_rate_features_hz"])
 
     def estimate_features(self, data) -> dict:
         """ Calculate features, as defined in settings.json

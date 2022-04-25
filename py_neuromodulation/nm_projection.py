@@ -23,9 +23,9 @@ class Projection:
         self.nm_channels = nm_channels
         self.project_cortex = settings["methods"]["project_cortex"]
         self.project_subcortex = settings["methods"]["project_subcortex"]
-        self.max_dist_cortex = settings["project_cortex_settings"]["max_dist"]
+        self.max_dist_cortex = settings["project_cortex_settings"]["max_dist_cm"]
         self.max_dist_subcortex = settings["project_subcortex_settings"][
-            "max_dist"
+            "max_dist_cm"
         ]
         self.ecog_channels: Optional[list] = None
         self.lfp_channels: Optional[list] = None
