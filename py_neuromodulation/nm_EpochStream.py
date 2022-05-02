@@ -1,9 +1,11 @@
 import os
+import pickle
 
 import numpy as np
 import pandas as pd
 
 import py_neuromodulation as py_nm
+from py_neuromodulation import nm_generator
 
 
 class EpochStream(py_nm.nm_stream.PNStream):
@@ -19,7 +21,7 @@ class EpochStream(py_nm.nm_stream.PNStream):
         """
         self.data = np.load(path_epoch)
 
-    def get_data_gen_all_data(
+    def get_data(
         self,
     ) -> np.array:
         """This data generator returns one epoch at a time.
@@ -38,9 +40,6 @@ class EpochStream(py_nm.nm_stream.PNStream):
         for n_batch in range(self.data.shape[0]):
             yield self.data[n_batch, :, :]
 
-    def get_data_gen_epoch(self) -> np.array:
-        self.settings["sampling_rate_features_hz"]
-
     def run(
         self,
     ):
@@ -49,26 +48,36 @@ class EpochStream(py_nm.nm_stream.PNStream):
         # shape is n, channels=7, 800 Hz
 
         self.feature_arr = pd.DataFrame()
-        data_gen = self.get_data()
-        idx = 0
+        self.feature_arr_list = []
+        epoch_gen = self.get_data()
+        idx_epoch = 0
 
         while True:
             data = next(
-                data_gen, None
+                epoch_gen, None
             )  # None will be returned if generator ran through
             if data is None:
                 break
+            gen = nm_generator.ieeg_raw_generator(data, self.settings, self.fs)
 
-            feature_series = self.run_analysis.process_data(data)
-            if idx == 0:
-                self.feature_arr = pd.DataFrame([feature_series])
-                idx += 1
-            else:
-                self.feature_arr = self.feature_arr.append(
-                    feature_series, ignore_index=True
-                )
+            def get_data_within_epoch() -> np.array:
+                return next(gen, None)
 
-        self.feature_arr.to_csv("features_epoch.csv")
+            idx_within_epoch = 0
+            while True:
+                data_within_epoch = get_data_within_epoch()
+                if data_within_epoch is None:
+                    break
+
+                feature_series = self.run_analysis.process_data(data_within_epoch)
+                if idx_within_epoch == 0:
+                    self.feature_arr = pd.DataFrame([feature_series])
+                    idx_within_epoch += 1
+                else:
+                    self.feature_arr = self.feature_arr.append(
+                        feature_series, ignore_index=True
+                    )
+            self.feature_arr_list.append(self.feature_arr)
 
     def _add_timestamp(self, feature_series: pd.Series, idx: int = None) -> pd.Series:
         # in case of epochs no timestamp is necessary

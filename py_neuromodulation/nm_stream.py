@@ -151,7 +151,7 @@ class PNStream(ABC):
             settings=self.settings,
             fs=self.fs
             if self.settings["methods"]["raw_resampling"] is False
-            else self.settings["raw_resampling_settings"]["resample_freq"],
+            else self.settings["raw_resampling_settings"]["resample_freq_hz"],
             line_noise=self.line_noise,
         )
 
@@ -337,7 +337,7 @@ class PNStream(ABC):
         bads (list)
         used_types (list)
         target_keywords (list)
-        reference (list)
+        reference Union[list, str]
         """
 
         if PATH_NM_CHANNELS and os.path.isfile(PATH_NM_CHANNELS):
@@ -405,7 +405,7 @@ class PNStream(ABC):
     def save_features(self, folder_name: str):
         nm_IO.save_features(self.feature_arr, self.PATH_OUT, folder_name)
 
-    def save_after_stream(self, folder_name: str) -> None:
+    def save_after_stream(self, folder_name: str, save_features: bool = True) -> None:
         """Save features, settings, nm_channels and sidecar after run"""
 
         # create derivate folder_name output folder if doesn't exist
@@ -413,8 +413,8 @@ class PNStream(ABC):
             os.makedirs(os.path.join(self.PATH_OUT, folder_name))
 
         self.save_sidecar(folder_name)
-
-        self.save_features(folder_name)
+        if save_features is True:
+            self.save_features(folder_name)
 
         self.save_settings(folder_name)
 
