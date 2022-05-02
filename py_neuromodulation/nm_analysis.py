@@ -462,7 +462,7 @@ class Feature_Reader:
         if save_results:
             self.decoder.save(
                 self.feature_dir,
-                self.feature_file[: -len(".vhdr")]
+                self.feature_file
                 if ".vhdr" in self.feature_file
                 else self.feature_file,
                 output_name,
@@ -630,6 +630,7 @@ class Feature_Reader:
         if read_channels:
 
             ch_to_use = self.ch_names_ECOG
+            ch_to_use = self.decoder.used_chs
             for ch in ch_to_use:
 
                 performance_dict[subject_name][ch] = {}
@@ -638,17 +639,17 @@ class Feature_Reader:
                     cortex_name = "cortex_right"
                 else:
                     cortex_name = "cortex_left"
+                if len(self.sidecar["coords"]) > 0:  # check if coords are empty
+                    idx_ = [
+                        idx
+                        for idx, i in enumerate(
+                            self.sidecar["coords"][cortex_name]["ch_names"]
+                        )
+                        if ch.startswith(i + "-")
+                    ][0]
 
-                idx_ = [
-                    idx
-                    for idx, i in enumerate(
-                        self.sidecar["coords"][cortex_name]["ch_names"]
-                    )
-                    if ch.startswith(i + "-")
-                ][0]
-
-                coords = self.sidecar["coords"][cortex_name]["positions"][idx_]
-                performance_dict[subject_name][ch]["coord"] = coords
+                    coords = self.sidecar["coords"][cortex_name]["positions"][idx_]
+                    performance_dict[subject_name][ch]["coord"] = coords
                 write_CV_res_in_performance_dict(
                     ML_res.ch_ind_results[ch],
                     performance_dict[subject_name][ch],

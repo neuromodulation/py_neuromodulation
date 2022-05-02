@@ -74,6 +74,7 @@ class BidsStream(nm_stream.PNStream):
             bads=self.raw_arr.info["bads"],
             used_types=used_types,
             target_keywords=target_keywords,
+            reference="default",
         )
 
         if self.PATH_ANNOTATIONS:
