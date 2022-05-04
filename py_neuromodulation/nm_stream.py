@@ -141,7 +141,12 @@ class PNStream(ABC):
             self.settings, self.CH_NAMES_USED, self.fs, self.line_noise, self.VERBOSE
         )
 
-        self.resample = self._set_resampling(self.settings, self.fs)
+        self.resample = self._set_resampling(
+            sfreq_new=self.settings["raw_resampling_settings"][
+                "resample_freq_hz"
+            ],
+            sfreq_old=self.fs,
+        )
 
         self.rereference, self.nm_channels = self._set_rereference(
             self.settings, self.nm_channels
@@ -221,8 +226,8 @@ class PNStream(ABC):
         return rereference, nm_channels
 
     def _set_resampling(
-        self, settings: dict, fs: Union[int, float]
-    ) -> nm_resample.Resample:
+        self, settings: dict, sfreq_old: int | float
+    ) -> nm_resample.Resample | None:
         """Initialize Resampling
 
         Parameters
@@ -234,8 +239,16 @@ class PNStream(ABC):
         -------
         nm_resample.Resample
         """
-        if settings["methods"]["raw_resampling"] is True:
-            resample = nm_resample.Resample(settings, fs)
+        ### We can actually leave out "is True", because this is implied by the
+        ### if statement. Actually leaving out "is True" or ""== True" makes
+        ### the code faster
+        if settings["methods"]["raw_resampling"]:
+            resample = nm_resample.Resample(
+                sfreq_old=sfreq_old,
+                sfreq_new=settings["raw_resampling_settings"][
+                    "resample_freq_hz"
+                ],
+            )
         else:
             resample = None
         return resample

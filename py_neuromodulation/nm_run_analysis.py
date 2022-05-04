@@ -112,7 +112,7 @@ class Run:
 
         # resample
         if self.settings["methods"]["raw_resampling"] is True:
-            ieeg_batch = self.resample.raw_resampling(ieeg_batch)
+            ieeg_batch = self.resample.resample_raw(ieeg_batch)
 
         # notch filter
         if self.settings["methods"]["notch_filter"] is True:
