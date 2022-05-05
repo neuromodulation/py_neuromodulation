@@ -9,6 +9,7 @@ from enum import Enum
 from typing import Tuple, Union
 
 from py_neuromodulation import (
+    nm_filter,
     nm_projection,
     nm_rereference,
     nm_run_analysis,
@@ -19,7 +20,6 @@ from py_neuromodulation import (
     nm_plots,
     nm_test_settings,
 )
-from py_neuromodulation import nm_notch_filter
 
 
 class GRIDS(Enum):
@@ -35,7 +35,7 @@ class PNStream(ABC):
     features: nm_features.Features
     run_analysis: nm_run_analysis.Run
     rereference: nm_rereference.RT_rereference
-    notch_filter: nm_notch_filter.NotchFilter
+    notch_filter: nm_filter.NotchFilter
     projection: nm_projection.Projection
     settings: dict
     nm_channels: pd.DataFrame
@@ -114,7 +114,9 @@ class PNStream(ABC):
         pass
 
     @abstractmethod
-    def _add_timestamp(self, feature_series: pd.Series, idx: int = None) -> pd.Series:
+    def _add_timestamp(
+        self, feature_series: pd.Series, idx: int = None
+    ) -> pd.Series:
         """Add to feature_series "time" keyword
         For Bids specify with fs_features, for real time analysis with current time stamp
         """
@@ -138,13 +140,15 @@ class PNStream(ABC):
         ) = self._get_ch_info(self.nm_channels)
 
         self.features = self._set_features(
-            self.settings, self.CH_NAMES_USED, self.fs, self.line_noise, self.VERBOSE
+            self.settings,
+            self.CH_NAMES_USED,
+            self.fs,
+            self.line_noise,
+            self.VERBOSE,
         )
 
         self.resample = self._set_resampling(
-            sfreq_new=self.settings["raw_resampling_settings"][
-                "resample_freq_hz"
-            ],
+            settings=self.settings,
             sfreq_old=self.fs,
         )
 
@@ -193,7 +197,9 @@ class PNStream(ABC):
         VERBOSE: bool,
     ) -> None:
         """initialize feature class from settings"""
-        return nm_features.Features(settings, CH_NAMES_USED, fs, line_noise, VERBOSE)
+        return nm_features.Features(
+            settings, CH_NAMES_USED, fs, line_noise, VERBOSE
+        )
 
     def set_fs(self, fs: Union[int, float]) -> None:
         self.fs = fs
@@ -260,24 +266,24 @@ class PNStream(ABC):
         line_noise: int,
         notch_widths: int = 3,
         trans_bandwidth: int = 15,
-    ) -> nm_notch_filter.NotchFilter:
+    ) -> nm_filter.NotchFilter | None:
 
-        if settings["methods"]["notch_filter"] is True:
-            notch_filter = nm_notch_filter.NotchFilter(
-                fs=fs,
+        if settings["methods"]["notch_filter"]:
+            return nm_filter.NotchFilter(
+                sfreq=fs,
                 line_noise=line_noise,
                 notch_widths=notch_widths,
                 trans_bandwidth=trans_bandwidth,
             )
-        else:
-            notch_filter = None
-        return notch_filter
+        return
 
     def set_linenoise(self, line_noise: int) -> None:
         self.line_noise = line_noise
 
     @staticmethod
-    def get_grids(settings: dict(), PATH_GRIDS: str, GRID_TYPE: GRIDS) -> Tuple:
+    def get_grids(
+        settings: dict(), PATH_GRIDS: str, GRID_TYPE: GRIDS
+    ) -> Tuple:
         """Read settings specified grids
 
         Parameters
@@ -330,11 +336,15 @@ class PNStream(ABC):
     def _get_ch_info(nm_channels: pd.DataFrame):
         """Get used feature and label info from nm_channels"""
 
-        CH_NAMES_USED = nm_channels[nm_channels["used"] == 1]["new_name"].tolist()
+        CH_NAMES_USED = nm_channels[nm_channels["used"] == 1][
+            "new_name"
+        ].tolist()
         CH_TYPES_USED = nm_channels[nm_channels["used"] == 1]["type"].tolist()
 
         # used channels for feature estimation
-        FEATURE_IDX = np.where(nm_channels["used"] & ~nm_channels["target"])[0].tolist()
+        FEATURE_IDX = np.where(nm_channels["used"] & ~nm_channels["target"])[
+            0
+        ].tolist()
 
         # If multiple targets exist, select only the first
         LABEL_IDX = np.where(nm_channels["target"] == 1)[0]
@@ -405,7 +415,9 @@ class PNStream(ABC):
             sidecar["proj_matrix_cortex"] = self.projection.proj_matrix_cortex
         if self.settings["methods"]["project_subcortex"]:
             sidecar["grid_subcortex"] = self.grid_subcortex
-            sidecar["proj_matrix_subcortex"] = self.projection.proj_matrix_subcortex
+            sidecar[
+                "proj_matrix_subcortex"
+            ] = self.projection.proj_matrix_subcortex
 
         nm_IO.save_sidecar(sidecar, self.PATH_OUT, folder_name)
 
@@ -418,7 +430,9 @@ class PNStream(ABC):
     def save_features(self, folder_name: str):
         nm_IO.save_features(self.feature_arr, self.PATH_OUT, folder_name)
 
-    def save_after_stream(self, folder_name: str, save_features: bool = True) -> None:
+    def save_after_stream(
+        self, folder_name: str, save_features: bool = True
+    ) -> None:
         """Save features, settings, nm_channels and sidecar after run"""
 
         # create derivate folder_name output folder if doesn't exist
