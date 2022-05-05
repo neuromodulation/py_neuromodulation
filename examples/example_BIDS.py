@@ -56,8 +56,8 @@ def run_example_BIDS():
 
     bay_opt_param_space = [
         skopt_space.Integer(1, 100, name="max_depth"),
-        skopt_space.Real(10 ** -5, 10 ** 0, "log-uniform", name="learning_rate"),
-        skopt_space.Real(10 ** 0, 10 ** 1, "uniform", name="gamma"),
+        skopt_space.Real(10**-5, 10**0, "log-uniform", name="learning_rate"),
+        skopt_space.Real(10**0, 10**1, "uniform", name="gamma"),
     ]
 
     feature_reader.decoder = nm_decode.Decoder(
@@ -75,7 +75,7 @@ def run_example_BIDS():
         RUN_BAY_OPT=False,
         bay_opt_param_space=bay_opt_param_space,
         use_nested_cv=True,
-        fs=feature_reader.settings["sampling_rate_features"],
+        fs=feature_reader.settings["sampling_rate_features_hz"],
     )
 
     performances = feature_reader.run_ML_model(
@@ -85,11 +85,10 @@ def run_example_BIDS():
         save_results=True,
     )
 
-    # run here Bay. Opt.
-
     # performance_dict = feature_reader.read_results(read_grid_points=True, read_channels=True,
     #                                               read_all_combined=False,
     #                                               read_mov_detection_rates=True)
-    feature_reader.plot_subject_grid_ch_performance(
-        performance_dict=performances, plt_grid=True
-    )
+    if nm_BIDS.settings["methods"]["project_cortex"] is True:
+        feature_reader.plot_subject_grid_ch_performance(
+            performance_dict=performances, plt_grid=True
+        )

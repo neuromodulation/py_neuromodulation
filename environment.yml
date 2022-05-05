@@ -2,31 +2,17 @@ name: pn_env
 channels:
   - conda-forge  
 dependencies:
-  - python==3.9
-  - filterpy>=1.4.5
-  - matplotlib>=3.3.4
-  - mne>=0.23.0
+  - python>=3.10
+  - mne
   - mne-bids>=0.9
-  - numpy>=1.21.2
-  - pandas>=1.2.2
-  - pip
-  - scikit-learn>=0.24.2
-  - scikit-optimize
-  - scipy>=1.7.1
-  - seaborn>=0.11
-  - imbalanced-learn
-  - xgboost
+  - numpy=1.21
+  - pandas
+  - scikit-learn
+  - scipy
   - ipykernel
   - pytest
-  - nibabel
-  - numba
-  - numpydoc
+  - filtyterpy
   - fooof
-  - sphinx
-  - recommonmark
-  - nbsphinx
-  - sphinx_rtd_theme
-  - conda-forge::pynput
-  - tstenner::pylsl
-  - pip:
-    - pybids>=0.12.4
+  - scikit-optimize
+  - xgboost
+  - imbalanced-learn

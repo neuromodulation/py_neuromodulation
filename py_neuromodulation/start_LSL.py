@@ -31,7 +31,7 @@ if __name__ == "__main__":
     CH_TYPE = "ecog"  # pretend ECoG signals, s.t. define_M1 works 
 
     # read settings
-    settings_wrapper = nm_settings.SettingsWrapper('settings_LSL.json')
+    settings_wrapper = nm_settings.SettingsWrapper("settings_LSL.json")
 
     # (if available) add coordinates to settings here
     '''
@@ -70,10 +70,15 @@ if __name__ == "__main__":
             rereference_ = rereference.RT_rereference(settings_wrapper.df_M1)
         else:
             rereference_ = None
-        
+
         # define resampler for faster feature estimation
-        if settings_wrapper.settings["methods"]["raw_resampling"] is True:
-            resample_ = resample.Resample(settings_wrapper.settings)
+        if settings_wrapper.settings["methods"]["raw_resampling"]:
+            resample_ = resample.Resample(
+                sfreq_old=sfreq,
+                sfreq_new=settings_wrapper.settings["raw_resampling_settings"][
+                    "resample_freq_hz"
+                ],
+            )
         else:
             resample_ = None
 
@@ -136,4 +141,4 @@ if __name__ == "__main__":
         # save df_M1 as csv
         df_M1.to_csv(os.path.join(settings["out_path"], folder_name,
                                   folder_name+"_DF_M1.csv"))
-'''
+'''"""
