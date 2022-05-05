@@ -9,12 +9,12 @@ class TestBandPassFilterData:
 
     @pytest.mark.parametrize(
         "filter_length",
-        ["999ms", "1999ms", "3999ms", "2s"],
+        ["500ms", "999ms", "1999ms", "3999ms", "2s"],
     )
     def test_filter_length(self, filter_length) -> None:
         """Test different filter lengths."""
         f_ranges = [
-            [4, 8],
+            [13, 35],
         ]
         sfreq = 4000
         duration = 10
@@ -23,8 +23,8 @@ class TestBandPassFilterData:
             f_ranges=f_ranges,
             sfreq=sfreq,
             filter_length=filter_length,
-            l_trans_bandwidth=4,
-            h_trans_bandwidth=4,
+            l_trans_bandwidth=8,  # transition bandwidth needs to be adjusted for smaller filter length
+            h_trans_bandwidth=8,
             verbose=None,
         )
         oscill_freqs = 50
@@ -66,7 +66,7 @@ class TestBandPassFilterData:
         )
 
     def test_filter_2d(self) -> None:
-        """Test filtering of 2d array with multiple frequency ranges."""
+        """Test filtering of 2d array with multiple frequency ranges and multiple channels."""
         f_ranges = [
             [4, 8],
             [8, 12],
