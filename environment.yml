@@ -5,7 +5,7 @@ dependencies:
   - python>=3.10
   - mne
   - mne-bids>=0.9
-  - numpy
+  - numpy=1.21
   - pandas
   - scikit-learn
   - scipy

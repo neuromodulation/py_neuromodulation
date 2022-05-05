@@ -635,20 +635,20 @@ class Feature_Reader:
 
                 performance_dict[subject_name][ch] = {}
 
-                if self.sidecar["sess_right"] is True:
-                    cortex_name = "cortex_right"
-                else:
-                    cortex_name = "cortex_left"
                 if len(self.sidecar["coords"]) > 0:  # check if coords are empty
-                    idx_ = [
-                        idx
-                        for idx, i in enumerate(
-                            self.sidecar["coords"][cortex_name]["ch_names"]
-                        )
-                        if ch.startswith(i + "-")
-                    ][0]
 
-                    coords = self.sidecar["coords"][cortex_name]["positions"][idx_]
+                    coords_exist = False
+                    for cortex_loc in self.sidecar["coords"].keys():
+                        for ch_name_coord_idx, ch_name_coord in enumerate(
+                            self.sidecar["coords"][cortex_loc]["ch_names"]
+                        ):
+                            if ch.startswith(ch_name_coord):
+                                coords = self.sidecar["coords"][cortex_loc][
+                                    "positions"
+                                ][ch_name_coord_idx]
+                                coords_exist = True  # optimally break out of the two loops...
+                    if coords_exist is False:
+                        coords = None
                     performance_dict[subject_name][ch]["coord"] = coords
                 write_CV_res_in_performance_dict(
                     ML_res.ch_ind_results[ch],
