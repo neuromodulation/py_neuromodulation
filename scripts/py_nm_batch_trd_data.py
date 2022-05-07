@@ -1,4 +1,5 @@
 import os
+from re import VERBOSE
 
 import numpy as np
 import scipy.io as spio
@@ -6,6 +7,8 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
 from multiprocessing import Pool
 import pickle
+
+from py_neuromodulation import nm_EpochStream, nm_GenericStream
 
 from yaml import load
 
@@ -46,11 +49,106 @@ def _todict(matobj):
     return dict
 
 
-from py_neuromodulation import nm_EpochStream
+def set_settings(settings: dict):
+    for method in list(settings["methods"].keys()):
+        settings["methods"][method] = False
+
+    settings["methods"]["fft"] = True
+    settings["methods"]["fooof"] = True
+    settings["methods"]["return_raw"] = True
+    settings["methods"]["raw_hjorth"] = True
+    settings["methods"]["re_referencing"] = False
+    settings["methods"]["raw_normalization"] = False
+    settings["methods"]["feature_normalization"] = True
+
+    settings["fooof"]["periodic"]["center_frequency"] = False
+    settings["fooof"]["periodic"]["band_width"] = False
+    settings["fooof"]["periodic"]["height_over_ap"] = False
+
+    settings["methods"]["sharpwave_analysis"] = True
+
+    for key in list(
+        settings["sharpwave_analysis_settings"]["sharpwave_features"].keys()
+    ):
+        settings["sharpwave_analysis_settings"]["sharpwave_features"][key] = True
+    settings["sharpwave_analysis_settings"]["sharpwave_features"]["peak_left"] = False
+    settings["sharpwave_analysis_settings"]["sharpwave_features"]["peak_right"] = False
+    settings["sharpwave_analysis_settings"][
+        "apply_estimator_between_peaks_and_troughs"
+    ] = True
+    settings["sharpwave_analysis_settings"]["filter_low_cutoff"] = 5
+    settings["sharpwave_analysis_settings"]["filter_high_cutoff"] = 40
+    return settings
 
 
-def run_patient(f):
-    epoch_stream = nm_EpochStream.EpochStream()
+def run_patient_GenericStream(f):
+
+    file_name = os.path.basename(f)[: -len("_edit.mat")]
+    dat = loadmat(os.path.join(PATH_DATA, f))["D"]
+    labels = dat["labels"][~np.array(dat["bad"], dtype="bool")]
+
+    data = np.swapaxes(np.swapaxes(dat["data"], 0, 2), 1, 2)
+    data = data[~np.array(dat["bad"], dtype="bool"), :, :]
+    NUM_CH = data.shape[1]
+
+    label_encoder = LabelEncoder()
+    integer_encoded = label_encoder.fit_transform(labels)
+
+    enc = OneHotEncoder(handle_unknown="ignore", sparse=False)
+    label_arr = enc.fit_transform(integer_encoded.reshape(-1, 1))
+
+    label_arr_concat = np.concatenate(
+        (np.expand_dims(integer_encoded + 1, axis=1), label_arr), axis=1
+    )  # integer encoded + 1, since REST will be set to zero
+
+    label_arr_epochs = np.zeros([data.shape[0], 4, data.shape[2]])
+    label_arr_epochs_names = list(label_encoder.classes_)
+    label_arr_epochs_names.insert(0, "ALL")
+
+    integer_encoded_names = label_arr_epochs_names.copy()
+    integer_encoded_names[0] = "REST"
+
+    # label_arr_epochs columns: ALL, NTR, PLS, UNPLS
+    # integer_encoded_names: 0 - REST, 1 - NTR, 2 - PLS, 3 - UNPLS
+
+    arr_insert = np.repeat(label_arr_concat[:, :, np.newaxis], 1000, axis=2)
+    label_arr_epochs[:, :, 3500:4500] = arr_insert
+
+    data_comb = np.concatenate((data, label_arr_epochs), axis=1)
+    data_stream = np.concatenate(data_comb, axis=1)
+
+    ch_names = list(dat["ch_names"])
+    ch_names = ch_names + label_arr_epochs_names
+
+    ch_types = ["seeg" for _ in range(NUM_CH)]
+    ch_types = ch_types + ["misc" for _ in range(len(label_arr_epochs_names))]
+
+    stream = nm_GenericStream.GenericStream(
+        READ_BIDS=False,
+        ch_names=ch_names,
+        ch_types=ch_types,
+        fs=dat["fsample"],
+        line_noise=50,
+        PATH_NM_CHANNELS=None,
+        bads=[],
+        reference=None,
+        PATH_OUT=os.path.join(PATH_DATA, "features_epochs_nonorm"),
+        VERBOSE=False,
+    )
+
+    stream.set_data(data_stream)
+    stream.settings = set_settings(stream.settings)
+    stream.nm_channels.loc[
+        stream.nm_channels.query('type == "misc"').index, "target"
+    ] = 1
+
+    stream.run()
+
+    stream.save_after_stream(file_name)
+
+
+def run_patient_EpochStream(f):
+    epoch_stream = nm_EpochStream.EpochStream(VERBOSE=False)
     # epoch_stream.read_epoch_data(
     #    os.path.join("scripts", "preproc_ecog_v0.3_Jan22_rerefSegments_data.npy")
     # )
@@ -78,32 +176,7 @@ def run_patient(f):
         reference=None,
     )
 
-    for method in list(epoch_stream.settings["methods"].keys()):
-        epoch_stream.settings["methods"][method] = False
-
-    epoch_stream.settings["methods"]["fft"] = True
-    epoch_stream.settings["methods"]["sharpwave_analysis"] = True
-
-    for key in list(
-        epoch_stream.settings["sharpwave_analysis_settings"][
-            "sharpwave_features"
-        ].keys()
-    ):
-        epoch_stream.settings["sharpwave_analysis_settings"]["sharpwave_features"][
-            key
-        ] = False
-    epoch_stream.settings["sharpwave_analysis_settings"][
-        "apply_estimator_between_peaks_and_troughs"
-    ] = True
-    epoch_stream.settings["sharpwave_analysis_settings"]["sharpwave_features"][
-        "prominence"
-    ] = True
-    epoch_stream.settings["sharpwave_analysis_settings"]["sharpwave_features"][
-        "sharpness"
-    ] = True
-    epoch_stream.settings["sharpwave_analysis_settings"]["filter_low_cutoff"] = 5
-    epoch_stream.settings["sharpwave_analysis_settings"]["filter_high_cutoff"] = 40
-
+    epoch_stream.settings = set_settings(epoch_stream.settings)
     epoch_stream.run()
 
     label_encoder = LabelEncoder()
@@ -135,7 +208,7 @@ def run_patient(f):
             ignore_index=True,
         )
 
-    epoch_stream.PATH_OUT = os.path.join(PATH_DATA, "features")
+    epoch_stream.PATH_OUT = os.path.join(PATH_DATA, "features_epochs_nonorm")
 
     dict_out["features"] = np.stack(
         [
@@ -144,7 +217,9 @@ def run_patient(f):
         ]
     )
 
-    with open(os.path.join(PATH_DATA, "features", file_name, "dict_out.p"), "wb") as fp:
+    with open(
+        os.path.join(PATH_DATA, "features_epochs_nonorm", file_name, "dict_out.p"), "wb"
+    ) as fp:
         pickle.dump(dict_out, fp)
 
     epoch_stream.save_after_stream(file_name, save_features=False)
@@ -158,10 +233,10 @@ PATH_DATA = r"C:\Users\ICN_admin\Documents\TRD Analysis"
 def main():
 
     files = [f for f in os.listdir(PATH_DATA) if "_edit" in f]
-    # for f in files:
-    #    run_patient(f)
+    #for f in files:
+    #    run_patient_GenericStream(f)
     pool = Pool(processes=len(files))
-    pool.map(run_patient, files)
+    pool.map(run_patient_GenericStream, files)
 
 
 if __name__ == "__main__":
