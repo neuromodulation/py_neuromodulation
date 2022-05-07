@@ -1,4 +1,4 @@
-from typing import Optional, Iterable
+from typing import Optional, Iterable, Union
 import os
 import pathlib
 import mne
@@ -9,11 +9,11 @@ import timeit
 from py_neuromodulation import nm_IO, nm_generator, nm_stream
 
 
-class BidsStream(nm_stream.PNStream):
+class GenericStream(nm_stream.PNStream):
 
     PATH_ANNOTATIONS: str
     PATH_GRIDS: str
-    PATH_BIDS: str
+    PATH_DATA: str
     PATH_RUN: str
     LIMIT_DATA: bool
     LIMIT_LOW: int
@@ -23,10 +23,11 @@ class BidsStream(nm_stream.PNStream):
     raw_arr_data: np.array
     annot: mne.Annotations
     VERBOSE: bool = False
+    READ_BIDS: bool = False
 
     def __init__(
         self,
-        PATH_RUN,
+        PATH_RUN: str = None,
         PATH_SETTINGS: str = os.path.join(
             pathlib.Path(__file__).parent.resolve(), "nm_settings.json"
         ),
@@ -39,6 +40,15 @@ class BidsStream(nm_stream.PNStream):
         LIMIT_DATA: bool = False,
         LIMIT_LOW: int = 0,
         LIMIT_HIGH: int = 10000,
+        READ_BIDS: bool = False,
+        ch_names: Optional[Iterable[str]] = None,
+        ch_types: Optional[Iterable[str]] = None,
+        bads: Optional[Iterable[int]] = None,
+        fs: float = None,
+        line_noise: float = None,
+        coord_names: Optional[Iterable[str]] = None,
+        coord_list: Optional[Iterable[str]] = None,
+        reference: Optional[Union[str, Iterable[str]]] = "default",
         used_types: Optional[Iterable[str]] = ("ecog", "dbs", "seeg"),
         target_keywords: Optional[Iterable[str]] = ("mov", "squared", "label"),
     ) -> None:
@@ -49,6 +59,12 @@ class BidsStream(nm_stream.PNStream):
             PATH_OUT=PATH_OUT,
             PATH_GRIDS=PATH_GRIDS,
             VERBOSE=VERBOSE,
+            ch_names=ch_names,
+            ch_types=ch_types,
+            bads=bads,
+            fs=fs,
+            line_noise=line_noise,
+            reference=reference,
         )
 
         self.PATH_RUN = PATH_RUN
@@ -58,61 +74,61 @@ class BidsStream(nm_stream.PNStream):
         self.LIMIT_DATA = LIMIT_DATA
         self.LIMIT_LOW = LIMIT_LOW
         self.LIMIT_HIGH = LIMIT_HIGH
+        self.coord_names = coord_names
+        self.coord_list = coord_list
 
-        self.raw_arr, self.raw_arr_data, fs, line_noise = nm_IO.read_BIDS_data(
-            self.PATH_RUN, self.PATH_BIDS
-        )
+        if READ_BIDS is True:
+            self.raw_arr, raw_arr_data, fs, line_noise = nm_IO.read_BIDS_data(
+                self.PATH_RUN, self.PATH_DATA
+            )
+            self.set_data(raw_arr_data)
+            self.ch_types = self.raw_arr.get_channel_types()
+            self.ch_names = self.raw_arr.ch_names
+            self.bads = self.raw_arr.info["bads"]
 
-        self.set_fs(fs)
+            self.coord_list, self.coord_names = self._get_bids_coord_list(self.raw_arr)
 
-        self.set_linenoise(line_noise)
+            # read BIDS annotations
+            if self.PATH_ANNOTATIONS:
+                self.annot, self.annot_data, self.raw_arr = nm_IO.get_annotations(
+                    self.PATH_ANNOTATIONS, self.PATH_RUN, self.raw_arr
+                )
 
         self.nm_channels = self._get_nm_channels(
             PATH_NM_CHANNELS,
-            ch_names=self.raw_arr.ch_names,
-            ch_types=self.raw_arr.get_channel_types(),
-            bads=self.raw_arr.info["bads"],
+            ch_names=self.ch_names,
+            ch_types=self.ch_types,
+            bads=self.bads,
             used_types=used_types,
             target_keywords=target_keywords,
-            reference="default",
+            reference=self.reference,
         )
 
-        if self.PATH_ANNOTATIONS:
-            self.annot, self.annot_data, self.raw_arr = nm_IO.get_annotations(
-                self.PATH_ANNOTATIONS, self.PATH_RUN, self.raw_arr
-            )
-        if self.LIMIT_DATA:
-            self.raw_arr_data = self.raw_arr_data[:, LIMIT_LOW:LIMIT_HIGH]
-
-        self.coord_list, self.coord_names = self._get_bids_coord_list(self.raw_arr)
-
         if self.coord_list is None and True in [
-            self.settings["project_cortex"],
-            self.settings["project_subcortex"],
+            self.settings["methods"]["project_cortex"],
+            self.settings["methods"]["project_subcortex"],
         ]:
-            raise ValueError("no coordinates could be loaded from BIDS Dataset")
+            raise ValueError("no coordinates could be loaded")
         elif self.coord_list is not None:
             self.coords = self._add_coordinates(self.coord_names, self.coord_list)
             self.sess_right = self._get_sess_lat(self.coords)
 
+    def set_data(self, data: np.array):
+        """Set Data should be called after init without BIDS data.
+
+        Parameters
+        ----------
+        data : np.array
+            shape (channels, time)
+        """
+        self.raw_arr_data = data
+
+        if self.LIMIT_DATA:
+            self.raw_arr_data = self.raw_arr_data[:, self.LIMIT_LOW : self.LIMIT_HIGH]
+
         self.gen = nm_generator.ieeg_raw_generator(
             self.raw_arr_data, self.settings, self.fs
         )
-
-    def run_bids(self) -> None:
-        """process BIDS recording, add labels and save features after finish"""
-
-        # init features, projection etc. here
-        # settings, nm_channels might have been changed by the user in e.g. the ipynb
-        self._set_run()
-
-        self.run()
-
-        self._add_labels()
-
-        folder_name = os.path.basename(self.PATH_RUN)
-
-        self.save_after_stream(folder_name)
 
     def get_data(self) -> np.array:
         return next(self.gen, None)
@@ -121,7 +137,10 @@ class BidsStream(nm_stream.PNStream):
         """BIDS specific fun function
         Does not need to run in parallel
         """
-        # Loop
+        # init features, projection etc. here
+        # settings, nm_channels might have been changed by the user in e.g. the ipynb
+        self._set_run()
+
         idx = 0
         while True:
             data = self.get_data()
@@ -143,12 +162,18 @@ class BidsStream(nm_stream.PNStream):
                 self.feature_arr = pd.DataFrame([feature_series])
                 idx += 1
             else:
-                self.feature_arr = self.feature_arr.append(
-                    feature_series, ignore_index=True
-                )
+                self.feature_arr = pd.concat([
+                    self.feature_arr, feature_series.to_frame().T
+                ], ignore_index=False, axis=0)
 
             if predict is True:
                 prediction = self.model.predict(feature_series)
+
+        self._add_labels()
+
+        if self.READ_BIDS:
+            folder_name = os.path.basename(self.PATH_RUN)
+            self.save_after_stream(folder_name)
 
     def _add_timestamp(self, feature_series: pd.Series, idx: int = None) -> pd.Series:
         """time stamp is added in ms

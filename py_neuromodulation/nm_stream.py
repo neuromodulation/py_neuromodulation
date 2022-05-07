@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import pathlib
 from sklearn import base
+from typing import Optional, Iterable
 import _pickle as cPickle
 import numpy as np
 import pandas as pd
@@ -68,13 +69,28 @@ class PNStream(ABC):
         PATH_OUT: str = os.getcwd(),
         PATH_GRIDS: str = pathlib.Path(__file__).parent.resolve(),
         VERBOSE: bool = True,
+        ch_names: Optional[Iterable[str]] = None,
+        ch_types: Optional[Iterable[str]] = None,
+        bads: Optional[Iterable[int]] = None,
+        fs: float = None,
+        line_noise: float = None,
+        coord_names: Optional[Iterable[str]] = None,
+        coord_list: Optional[Iterable[str]] = None,
+        reference: Optional[Union[str, Iterable[str]]] = "default",
     ) -> None:
 
         self.PATH_SETTINGS = PATH_SETTINGS
         self.PATH_NM_CHANNELS = PATH_NM_CHANNELS
         self.PATH_OUT = PATH_OUT
         self.VERBOSE = VERBOSE
-
+        self.ch_names = ch_names
+        self.ch_types = ch_types
+        self.bads = bads
+        self.fs = fs
+        self.line_noise = line_noise
+        self.coord_names = coord_names
+        self.coord_list = coord_list
+        self.reference = reference
         self.settings = nm_IO.read_settings(self.PATH_SETTINGS)
 
         if True in [
@@ -114,9 +130,7 @@ class PNStream(ABC):
         pass
 
     @abstractmethod
-    def _add_timestamp(
-        self, feature_series: pd.Series, idx: int = None
-    ) -> pd.Series:
+    def _add_timestamp(self, feature_series: pd.Series, idx: int = None) -> pd.Series:
         """Add to feature_series "time" keyword
         For Bids specify with fs_features, for real time analysis with current time stamp
         """
@@ -197,9 +211,7 @@ class PNStream(ABC):
         VERBOSE: bool,
     ) -> None:
         """initialize feature class from settings"""
-        return nm_features.Features(
-            settings, CH_NAMES_USED, fs, line_noise, VERBOSE
-        )
+        return nm_features.Features(settings, CH_NAMES_USED, fs, line_noise, VERBOSE)
 
     def set_fs(self, fs: Union[int, float]) -> None:
         self.fs = fs
@@ -245,15 +257,11 @@ class PNStream(ABC):
         -------
         nm_resample.Resample
         """
-        ### We can actually leave out "is True", because this is implied by the
-        ### if statement. Actually leaving out "is True" or ""== True" makes
-        ### the code faster
+
         if settings["methods"]["raw_resampling"]:
             resample = nm_resample.Resample(
                 sfreq_old=sfreq_old,
-                sfreq_new=settings["raw_resampling_settings"][
-                    "resample_freq_hz"
-                ],
+                sfreq_new=settings["raw_resampling_settings"]["resample_freq_hz"],
             )
         else:
             resample = None
@@ -281,9 +289,7 @@ class PNStream(ABC):
         self.line_noise = line_noise
 
     @staticmethod
-    def get_grids(
-        settings: dict(), PATH_GRIDS: str, GRID_TYPE: GRIDS
-    ) -> Tuple:
+    def get_grids(settings: dict(), PATH_GRIDS: str, GRID_TYPE: GRIDS) -> Tuple:
         """Read settings specified grids
 
         Parameters
@@ -336,15 +342,11 @@ class PNStream(ABC):
     def _get_ch_info(nm_channels: pd.DataFrame):
         """Get used feature and label info from nm_channels"""
 
-        CH_NAMES_USED = nm_channels[nm_channels["used"] == 1][
-            "new_name"
-        ].tolist()
+        CH_NAMES_USED = nm_channels[nm_channels["used"] == 1]["new_name"].tolist()
         CH_TYPES_USED = nm_channels[nm_channels["used"] == 1]["type"].tolist()
 
         # used channels for feature estimation
-        FEATURE_IDX = np.where(nm_channels["used"] & ~nm_channels["target"])[
-            0
-        ].tolist()
+        FEATURE_IDX = np.where(nm_channels["used"] & ~nm_channels["target"])[0].tolist()
 
         # If multiple targets exist, select only the first
         LABEL_IDX = np.where(nm_channels["target"] == 1)[0]
@@ -415,9 +417,7 @@ class PNStream(ABC):
             sidecar["proj_matrix_cortex"] = self.projection.proj_matrix_cortex
         if self.settings["methods"]["project_subcortex"]:
             sidecar["grid_subcortex"] = self.grid_subcortex
-            sidecar[
-                "proj_matrix_subcortex"
-            ] = self.projection.proj_matrix_subcortex
+            sidecar["proj_matrix_subcortex"] = self.projection.proj_matrix_subcortex
 
         nm_IO.save_sidecar(sidecar, self.PATH_OUT, folder_name)
 
@@ -430,9 +430,7 @@ class PNStream(ABC):
     def save_features(self, folder_name: str):
         nm_IO.save_features(self.feature_arr, self.PATH_OUT, folder_name)
 
-    def save_after_stream(
-        self, folder_name: str, save_features: bool = True
-    ) -> None:
+    def save_after_stream(self, folder_name: str, save_features: bool = True) -> None:
         """Save features, settings, nm_channels and sidecar after run"""
 
         # create derivate folder_name output folder if doesn't exist
