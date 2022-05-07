@@ -384,6 +384,8 @@ class Feature_Reader:
         time_stack_n_samples=5,
         use_nested_cv=False,
         VERBOSE=False,
+        undersampling=False,
+        oversampling=False,
     ):
         if decoder is not None:
             self.decoder = decoder
@@ -408,6 +410,8 @@ class Feature_Reader:
                 time_stack_n_samples=time_stack_n_samples,
                 VERBOSE=VERBOSE,
                 use_nested_cv=use_nested_cv,
+                undersampling=undersampling,
+                oversampling=oversampling,
             )
 
     def run_ML_model(
