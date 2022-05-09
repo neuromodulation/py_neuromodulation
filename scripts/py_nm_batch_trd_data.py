@@ -233,8 +233,9 @@ PATH_DATA = r"C:\Users\ICN_admin\Documents\TRD Analysis"
 def main():
 
     files = [f for f in os.listdir(PATH_DATA) if "_edit" in f]
-    #for f in files:
+    # for f in files:
     #    run_patient_GenericStream(f)
+    files.remove("effspm8_KSC_EMO_edit.mat")
     pool = Pool(processes=len(files))
     pool.map(run_patient_GenericStream, files)
 
