@@ -218,6 +218,7 @@ class Feature_Reader:
         epoch_len: int = 4,
         threshold: float = 0.1,
         normalize_data: bool = True,
+        RETURN_X_Y_epochs : bool = False
     ):
 
         filtered_df = self.feature_arr[
@@ -234,7 +235,7 @@ class Feature_Reader:
             threshold=threshold,
         )
 
-        nm_plots.plot_epochs_avg(
+        XY_epochs = nm_plots.plot_epochs_avg(
             X_epoch=X_epoch,
             y_epoch=y_epoch,
             epoch_len=epoch_len,
@@ -249,7 +250,10 @@ class Feature_Reader:
             save=True,
             OUT_PATH=self.feature_dir,
             feature_file=self.feature_file,
+            RETURN_X_Y_epochs=RETURN_X_Y_epochs
         )
+        if RETURN_X_Y_epochs:
+            return XY_epochs[0], XY_epochs[1]
 
     def plot_subject_grid_ch_performance(
         self,

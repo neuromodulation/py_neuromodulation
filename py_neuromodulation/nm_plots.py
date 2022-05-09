@@ -102,7 +102,7 @@ def plot_epochs_avg(
     save: bool = False,
     OUT_PATH: str = None,
     feature_file: str = None,
-):
+    RETURN_X_Y_epochs : bool = False):
 
     # cut channel name of for axis + "_" for more dense plot
     if cut_ch_name_cols and None not in (ch_name, feature_names):
@@ -162,6 +162,8 @@ def plot_epochs_avg(
         print("Feature epoch average figure saved to: " + str(plt_path))
     if show_plot is False:
         plt.close()
+    if RETURN_X_Y_epochs:
+        return X_epoch, y_epoch
 
 
 def plot_grid_elec_3d(
