@@ -23,7 +23,8 @@ from itertools import product
 import nibabel as nib
 
 import py_neuromodulation
-from py_neuromodulation import nm_decode, nm_analysis, nm_BidsStream, nm_IO
+from py_neuromodulation import nm_decode, nm_analysis, nm_IO
+from py_neuromodulation import nm_stream_offline
 
 
 class CohortRunner:
@@ -86,7 +87,8 @@ class CohortRunner:
         self.target_keywords = target_keywords
         self.get_movement_detection_rate = get_movement_detection_rate
         self.grid_cortex = pd.read_csv(
-            os.path.join(py_neuromodulation.__path__[0], "grid_cortex.tsv"), sep="\t"
+            os.path.join(py_neuromodulation.__path__[0], "grid_cortex.tsv"),
+            sep="\t",
         ).to_numpy()
 
     def init_decoder(self) -> nm_decode.Decoder:
@@ -117,7 +119,7 @@ class CohortRunner:
                 break
 
         if self.run_bids:
-            nm_BIDS = nm_BidsStream.BidsStream(
+            nm_BIDS = nm_stream_offline.BidsStream(
                 PATH_RUN=PATH_RUN,
                 PATH_BIDS=PATH_BIDS,
                 PATH_OUT=PATH_OUT,
@@ -180,7 +182,7 @@ class CohortRunner:
                 estimate_gridpoints=self.estimate_gridpoints,
                 estimate_all_channels_combined=self.estimate_all_channels_combined,
                 save_results=True,
-                output_name="XGBNOMP"
+                output_name="XGBNOMP",
             )
 
         if self.plot_grid_performances:
@@ -234,9 +236,9 @@ class CohortRunner:
                 read_mov_detection_rates=True,
             )
 
-            sub = feature_file[feature_file.find("sub-") : feature_file.find("_ses")][
-                4:
-            ]
+            sub = feature_file[
+                feature_file.find("sub-") : feature_file.find("_ses")
+            ][4:]
             if sub not in performance_out:
                 performance_out[sub] = {}
             performance_out[sub][feature_file] = performance_run[
@@ -254,7 +256,9 @@ class CohortRunner:
         """Read results for multiple cohorts"""
 
         for cohort in self.cohorts.keys():
-            self.read_cohort_results(os.path.join(self.outpath, cohort), cohort)
+            self.read_cohort_results(
+                os.path.join(self.outpath, cohort), cohort
+            )
 
     def read_all_channels(
         self,
@@ -321,13 +325,19 @@ class CohortRunner:
                 channel_all[cohort][subject_name][ch] = {}
             channel_all[cohort][subject_name][ch][feature_file] = {}
 
-            channel_all[cohort][subject_name][ch][feature_file]["data"] = data_to_read[
-                ch
+            channel_all[cohort][subject_name][ch][feature_file][
+                "data"
+            ] = data_to_read[ch]
+            channel_all[cohort][subject_name][ch][feature_file][
+                "feature_names"
+            ] = [
+                ch_[len(ch) + 1 :]
+                for ch_ in decoder.features.columns
+                if ch in ch_
             ]
-            channel_all[cohort][subject_name][ch][feature_file]["feature_names"] = [
-                ch_[len(ch) + 1 :] for ch_ in decoder.features.columns if ch in ch_
-            ]
-            channel_all[cohort][subject_name][ch][feature_file]["label"] = decoder.label
+            channel_all[cohort][subject_name][ch][feature_file][
+                "label"
+            ] = decoder.label
             channel_all[cohort][subject_name][ch][feature_file][
                 "label_name"
             ] = decoder.label_name
@@ -336,9 +346,11 @@ class CohortRunner:
             lat = "CON"  # Beijing is always contralateral
             # Pittsburgh Subjects
             if (
-                "LEFT" in decoder.label_name and "LEFT" in decoder.features.columns[1]
+                "LEFT" in decoder.label_name
+                and "LEFT" in decoder.features.columns[1]
             ) or (
-                "RIGHT" in decoder.label_name and "RIGHT" in decoder.features.columns[1]
+                "RIGHT" in decoder.label_name
+                and "RIGHT" in decoder.features.columns[1]
             ):
                 lat = "IPS"
 
@@ -372,9 +384,14 @@ class CohortRunner:
                 )
 
         if read_channels is True:
-            np.save(os.path.join(self.outpath, "channel_all.npy"), grid_point_all)
+            np.save(
+                os.path.join(self.outpath, "channel_all.npy"), grid_point_all
+            )
         else:
-            np.save(os.path.join(self.outpath, "grid_point_all.npy"), grid_point_all)
+            np.save(
+                os.path.join(self.outpath, "grid_point_all.npy"),
+                grid_point_all,
+            )
 
     @staticmethod
     def rewrite_grid_point_all(d, outpath):
@@ -397,6 +414,8 @@ class CohortRunner:
                         if f not in p[gp][cohort][sub].keys():
                             p[gp][cohort][sub][f] = {}
                         for key_ in d[cohort][sub][gp][f].keys():
-                            p[gp][cohort][sub][f][key_] = d[cohort][sub][gp][f][key_]
+                            p[gp][cohort][sub][f][key_] = d[cohort][sub][gp][
+                                f
+                            ][key_]
 
         np.save(os.path.join(outpath, "grid_point_all_re.npy"), p)

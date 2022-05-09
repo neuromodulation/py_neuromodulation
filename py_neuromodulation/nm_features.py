@@ -15,7 +15,7 @@ from py_neuromodulation import (
 
 
 class Features:
-    def __init__(self, s, ch_names, fs, line_noise, verbose=None) -> None:
+    def __init__(self, s, ch_names, fs, verbose=None) -> None:
         """Initialize Feature module
 
         Parameters
@@ -31,7 +31,6 @@ class Features:
             self.fs = s["raw_resampling_settings"]["resample_freq_hz"]
         else:
             self.fs = fs
-        self.line_noise = line_noise
         self.fband_names = [value for value in s["frequency_ranges_hz"].keys()]
         self.f_ranges = [
             self.s["frequency_ranges_hz"][fband_name]

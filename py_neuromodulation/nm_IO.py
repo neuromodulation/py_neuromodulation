@@ -1,19 +1,21 @@
-import mne_bids
-import mne
-import numpy as np
-import os
 import json
-from scipy import io
-import pandas as pd
+import os
 from pathlib import Path
 
+import mne
+import mne_bids
+import numpy as np
+import pandas as pd
+from scipy import io
 
-def read_settings(PATH_SETTINGS: str) -> None:
-    with open(PATH_SETTINGS, encoding="utf-8") as json_file:
-        return json.load(json_file)
+_PathLike = str | os.PathLike
 
 
-def read_BIDS_data(PATH_RUN, BIDS_PATH, datatype: str = "ieeg"):
+def read_BIDS_data(
+    PATH_RUN: _PathLike | mne_bids.BIDSPath,
+    BIDS_PATH: _PathLike | None = None,
+    datatype: str = "ieeg",
+) -> tuple[mne.io.Raw, np.ndarray, int | float, int]:
     """Given a run path and bids data path, read the respective data
 
     Parameters
@@ -29,17 +31,19 @@ def read_BIDS_data(PATH_RUN, BIDS_PATH, datatype: str = "ieeg"):
     fs : int
     line_noise : int
     """
-    entities = mne_bids.get_entities_from_fname(PATH_RUN)
-
-    bids_path = mne_bids.BIDSPath(
-        subject=entities["subject"],
-        session=entities["session"],
-        task=entities["task"],
-        run=entities["run"],
-        acquisition=entities["acquisition"],
-        datatype=datatype,
-        root=BIDS_PATH,
-    )
+    if isinstance(PATH_RUN, mne_bids.BIDSPath):
+        bids_path = PATH_RUN
+    else:
+        entities = mne_bids.get_entities_from_fname(PATH_RUN)
+        bids_path = mne_bids.BIDSPath(
+            subject=entities["subject"],
+            session=entities["session"],
+            task=entities["task"],
+            run=entities["run"],
+            acquisition=entities["acquisition"],
+            datatype=datatype,
+            root=BIDS_PATH,
+        )
 
     raw_arr = mne_bids.read_raw_bids(bids_path)
 
@@ -61,16 +65,21 @@ def read_grid(PATH_GRIDS: str, grid_str: str):
         )
     else:
         grid = pd.read_csv(
-            os.path.join(PATH_GRIDS, "grid_" + grid_str.name.lower() + ".tsv"), sep="\t"
+            os.path.join(PATH_GRIDS, "grid_" + grid_str.name.lower() + ".tsv"),
+            sep="\t",
         )
     return grid
 
 
-def get_annotations(PATH_ANNOTATIONS: str, PATH_RUN: str, raw_arr: mne.io.RawArray):
+def get_annotations(
+    PATH_ANNOTATIONS: str, PATH_RUN: str, raw_arr: mne.io.RawArray
+):
 
     try:
         annot = mne.read_annotations(
-            os.path.join(PATH_ANNOTATIONS, os.path.basename(PATH_RUN)[:-5] + ".txt")
+            os.path.join(
+                PATH_ANNOTATIONS, os.path.basename(PATH_RUN)[:-5] + ".txt"
+            )
         )
         raw_arr.set_annotations(annot)
 
@@ -81,7 +90,9 @@ def get_annotations(PATH_ANNOTATIONS: str, PATH_RUN: str, raw_arr: mne.io.RawArr
         print(
             "expected location: "
             + str(
-                os.path.join(PATH_ANNOTATIONS, os.path.basename(PATH_RUN)[:-5] + ".txt")
+                os.path.join(
+                    PATH_ANNOTATIONS, os.path.basename(PATH_RUN)[:-5] + ".txt"
+                )
             )
         )
     return annot, annot_data, raw_arr
@@ -169,7 +180,9 @@ def add_labels(
             for idx, label_ch in enumerate(nm_channels.name[ind_label]):
                 df_[label_ch] = label_downsampled[idx, :]
         else:
-            print("label dimensions don't match, saving downsampled label extra")
+            print(
+                "label dimensions don't match, saving downsampled label extra"
+            )
     else:
         print("no target specified")
 
@@ -216,23 +229,33 @@ def save_features_and_settings(
 
 def save_settings(settings: dict, PATH_OUT: str, folder_name: str = None):
     if folder_name is not None:
-        PATH_OUT = os.path.join(PATH_OUT, folder_name, folder_name + "_SETTINGS.json")
+        PATH_OUT = os.path.join(
+            PATH_OUT, folder_name, folder_name + "_SETTINGS.json"
+        )
 
     with open(PATH_OUT, "w") as f:
         json.dump(settings, f, indent=4)
     print("settings.json saved to " + str(PATH_OUT))
 
 
-def save_nmchannels(nmchannels: pd.DataFrame, PATH_OUT: str, folder_name: str = None):
+def save_nmchannels(
+    nmchannels: pd.DataFrame, PATH_OUT: str, folder_name: str = None
+):
     if folder_name is not None:
-        PATH_OUT = os.path.join(PATH_OUT, folder_name, folder_name + "_nm_channels.csv")
+        PATH_OUT = os.path.join(
+            PATH_OUT, folder_name, folder_name + "_nm_channels.csv"
+        )
     nmchannels.to_csv(PATH_OUT)
     print("nm_channels.csv saved to " + str(PATH_OUT))
 
 
-def save_features(df_features: pd.DataFrame, PATH_OUT: str, folder_name: str = None):
+def save_features(
+    df_features: pd.DataFrame, PATH_OUT: str, folder_name: str = None
+):
     if folder_name is not None:
-        PATH_OUT = os.path.join(PATH_OUT, folder_name, folder_name + "_FEATURES.csv")
+        PATH_OUT = os.path.join(
+            PATH_OUT, folder_name, folder_name + "_FEATURES.csv"
+        )
     df_features.to_csv(PATH_OUT)
     print("FEATURES.csv saved to " + str(PATH_OUT))
 
@@ -266,7 +289,11 @@ def save_general_dict(
 
     with open(PATH_OUT, "w") as f:
         json.dump(
-            dict_, f, default=default_json_convert, indent=4, separators=(",", ": ")
+            dict_,
+            f,
+            default=default_json_convert,
+            indent=4,
+            separators=(",", ": "),
         )
     print(f"{str_add} saved to " + str(PATH_OUT))
 

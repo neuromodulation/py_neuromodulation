@@ -70,9 +70,15 @@ def set_settings(settings: dict):
     for key in list(
         settings["sharpwave_analysis_settings"]["sharpwave_features"].keys()
     ):
-        settings["sharpwave_analysis_settings"]["sharpwave_features"][key] = True
-    settings["sharpwave_analysis_settings"]["sharpwave_features"]["peak_left"] = False
-    settings["sharpwave_analysis_settings"]["sharpwave_features"]["peak_right"] = False
+        settings["sharpwave_analysis_settings"]["sharpwave_features"][
+            key
+        ] = True
+    settings["sharpwave_analysis_settings"]["sharpwave_features"][
+        "peak_left"
+    ] = False
+    settings["sharpwave_analysis_settings"]["sharpwave_features"][
+        "peak_right"
+    ] = False
     settings["sharpwave_analysis_settings"][
         "apply_estimator_between_peaks_and_troughs"
     ] = True
@@ -160,7 +166,9 @@ def run_patient_EpochStream(f):
     epoch_stream.data = np.swapaxes(np.swapaxes(dat["data"], 0, 2), 1, 2)
 
     # use only good trials
-    epoch_stream.data = epoch_stream.data[~np.array(dat["bad"], dtype="bool"), :, :]
+    epoch_stream.data = epoch_stream.data[
+        ~np.array(dat["bad"], dtype="bool"), :, :
+    ]
 
     epoch_stream.set_fs(dat["fsample"])
     epoch_stream.set_linenoise(50)
@@ -208,7 +216,7 @@ def run_patient_EpochStream(f):
             ignore_index=True,
         )
 
-    epoch_stream.PATH_OUT = os.path.join(PATH_DATA, "features_epochs_nonorm")
+    epoch_stream.path_out = os.path.join(PATH_DATA, "features_epochs_nonorm")
 
     dict_out["features"] = np.stack(
         [
@@ -218,7 +226,10 @@ def run_patient_EpochStream(f):
     )
 
     with open(
-        os.path.join(PATH_DATA, "features_epochs_nonorm", file_name, "dict_out.p"), "wb"
+        os.path.join(
+            PATH_DATA, "features_epochs_nonorm", file_name, "dict_out.p"
+        ),
+        "wb",
     ) as fp:
         pickle.dump(dict_out, fp)
 
@@ -233,7 +244,7 @@ PATH_DATA = r"C:\Users\ICN_admin\Documents\TRD Analysis"
 def main():
 
     files = [f for f in os.listdir(PATH_DATA) if "_edit" in f]
-    #for f in files:
+    # for f in files:
     #    run_patient_GenericStream(f)
     pool = Pool(processes=len(files))
     pool.map(run_patient_GenericStream, files)
