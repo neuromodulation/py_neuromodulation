@@ -1,7 +1,11 @@
-from numpy import ceil
+from typing import Iterator
+
+import numpy as np
 
 
-def ieeg_raw_generator(ieeg_raw, settings: dict, fs: int):
+def ieeg_raw_generator(
+    ieeg_raw, settings: dict, fs: int
+) -> Iterator[np.ndarray]:
     """
     This generator function mimics online data acquisition.
     The nm_channels.csv selected raw channels are iteratively sampled with fs.
@@ -15,7 +19,7 @@ def ieeg_raw_generator(ieeg_raw, settings: dict, fs: int):
 
     cnt_fsnew = 0
     offset_time = settings["segment_length_features_ms"]
-    offset_start = ceil(offset_time / 1000 * fs).astype(int)
+    offset_start = np.ceil(offset_time / 1000 * fs).astype(int)
     fs_new = settings["sampling_rate_features_hz"]
 
     for cnt in range(ieeg_raw.shape[1]):

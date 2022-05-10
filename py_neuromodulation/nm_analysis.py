@@ -54,19 +54,21 @@ class Feature_Reader:
             self.feature_file = feature_file
 
         FILE_BASENAME = Path(self.feature_file).stem
-        PATH_READ_FILE = str(Path(self.feature_dir, FILE_BASENAME, FILE_BASENAME))
+        PATH_READ_FILE = str(
+            Path(self.feature_dir, FILE_BASENAME, FILE_BASENAME)
+        )
 
         self.settings = nm_IO.read_settings(PATH_READ_FILE)
         self.sidecar = nm_IO.read_sidecar(PATH_READ_FILE)
         self.fs = self.sidecar["fs"]
-        self.line_noise = self.sidecar["line_noise"]
         self.nm_channels = nm_IO.read_nm_channels(PATH_READ_FILE)
         self.feature_arr = nm_IO.read_features(PATH_READ_FILE)
 
         self.ch_names = self.nm_channels.new_name
         self.used_chs = list(
             self.nm_channels[
-                (self.nm_channels["target"] == 0) & (self.nm_channels["used"] == 1)
+                (self.nm_channels["target"] == 0)
+                & (self.nm_channels["used"] == 1)
             ]["new_name"]
         )
         self.ch_names_ECOG = self.nm_channels.query(
@@ -78,11 +80,16 @@ class Feature_Reader:
 
         self.label_name = self._get_target_ch()
         self.label = self.read_target_ch(
-            self.feature_arr, self.label_name, binarize=binarize_label, binarize_th=0.3
+            self.feature_arr,
+            self.label_name,
+            binarize=binarize_label,
+            binarize_th=0.3,
         )
 
     def _get_target_ch(self) -> str:
-        target_names = list(self.nm_channels[self.nm_channels["target"] == 1]["name"])
+        target_names = list(
+            self.nm_channels[self.nm_channels["target"] == 1]["name"]
+        )
         target_clean = [
             target_name
             for target_name in target_names
@@ -148,7 +155,9 @@ class Feature_Reader:
 
         if list_feature_keywords is not None:
             feature_select = [
-                f for f in feature_select if any(x in f for x in list_feature_keywords)
+                f
+                for f in feature_select
+                if any(x in f for x in list_feature_keywords)
             ]
 
             if (
@@ -171,9 +180,13 @@ class Feature_Reader:
 
     def plot_cort_projection(self) -> None:
         if self.sidecar["sess_right"]:
-            ecog_strip = np.array(self.sidecar["coords"]["cortex_right"]["positions"])
+            ecog_strip = np.array(
+                self.sidecar["coords"]["cortex_right"]["positions"]
+            )
         else:
-            ecog_strip = np.array(self.sidecar["coords"]["cortex_left"]["positions"])
+            ecog_strip = np.array(
+                self.sidecar["coords"]["cortex_left"]["positions"]
+            )
         self.nmplotter.plot_cortex(
             grid_cortex=np.array(self.sidecar["grid_cortex"])
             if "grid_cortex" in self.sidecar
@@ -221,7 +234,9 @@ class Feature_Reader:
     ):
 
         filtered_df = self.feature_arr[
-            self.filter_features(self.feature_arr.columns, ch, list_feature_keywords)
+            self.filter_features(
+                self.feature_arr.columns, ch, list_feature_keywords
+            )
         ]
 
         data = np.expand_dims(np.array(filtered_df), axis=1)
@@ -286,7 +301,9 @@ class Feature_Reader:
 
         for ch in ch_:
             if "grid" not in ch and "combined" not in ch:
-                ecog_coords_strip.append(performance_dict[subject_name][ch]["coord"])
+                ecog_coords_strip.append(
+                    performance_dict[subject_name][ch]["coord"]
+                )
                 ecog_strip_performance.append(
                     performance_dict[subject_name][ch]["performance_test"]
                 )
@@ -303,7 +320,9 @@ class Feature_Reader:
             grid_cortex=np.array(self.sidecar["grid_cortex"])
             if "grid_cortex" in self.sidecar
             else None,
-            ecog_strip=ecog_coords_strip if len(ecog_coords_strip) > 0 else None,
+            ecog_strip=ecog_coords_strip
+            if len(ecog_coords_strip) > 0
+            else None,
             grid_color=grid_performance if len(grid_performance) > 0 else None,
             strip_color=ecog_strip_performance
             if len(ecog_strip_performance) > 0
@@ -353,13 +372,17 @@ class Feature_Reader:
 
         ind_mov = ind_mov[low_limit & up_limit]
 
-        epoch_ = np.zeros([ind_mov.shape[0], epoch_lim, data.shape[1], data.shape[2]])
+        epoch_ = np.zeros(
+            [ind_mov.shape[0], epoch_lim, data.shape[1], data.shape[2]]
+        )
 
         y_arr = np.zeros([ind_mov.shape[0], int(epoch_lim)])
 
         for idx, i in enumerate(ind_mov):
 
-            epoch_[idx, :, :, :] = data[i - epoch_lim // 2 : i + epoch_lim // 2, :, :]
+            epoch_[idx, :, :, :] = data[
+                i - epoch_lim // 2 : i + epoch_lim // 2, :, :
+            ]
 
             y_arr[idx, :] = y_[i - epoch_lim // 2 : i + epoch_lim // 2]
 
@@ -384,6 +407,8 @@ class Feature_Reader:
         time_stack_n_samples=5,
         use_nested_cv=False,
         VERBOSE=False,
+        undersampling=False,
+        oversampling=False,
     ):
         if decoder is not None:
             self.decoder = decoder
@@ -408,6 +433,8 @@ class Feature_Reader:
                 time_stack_n_samples=time_stack_n_samples,
                 VERBOSE=VERBOSE,
                 use_nested_cv=use_nested_cv,
+                undersampling=undersampling,
+                oversampling=oversampling,
             )
 
     def run_ML_model(
@@ -572,10 +599,14 @@ class Feature_Reader:
                     obj_write[key_set] = val
 
                 set_score(
-                    key_set="performance_test", key_get="score_test", take_mean=True
+                    key_set="performance_test",
+                    key_get="score_test",
+                    take_mean=True,
                 )
                 set_score(
-                    key_set="performance_train", key_get="score_train", take_mean=True
+                    key_set="performance_train",
+                    key_get="score_train",
+                    take_mean=True,
                 )
 
                 if "coef" in obj_read:
@@ -598,16 +629,24 @@ class Feature_Reader:
                         take_mean=True,
                     )
                     set_score(
-                        key_set="fprate_test", key_get="fprate_test", take_mean=True
+                        key_set="fprate_test",
+                        key_get="fprate_test",
+                        take_mean=True,
                     )
                     set_score(
-                        key_set="fprate_train", key_get="fprate_train", take_mean=True
+                        key_set="fprate_train",
+                        key_get="fprate_train",
+                        take_mean=True,
                     )
                     set_score(
-                        key_set="tprate_test", key_get="tprate_test", take_mean=True
+                        key_set="tprate_test",
+                        key_get="tprate_test",
+                        take_mean=True,
                     )
                     set_score(
-                        key_set="tprate_train", key_get="tprate_train", take_mean=True
+                        key_set="tprate_train",
+                        key_get="tprate_train",
+                        take_mean=True,
                     )
 
                 if read_bay_opt_params is True:
@@ -624,7 +663,10 @@ class Feature_Reader:
 
             read_ML_performances(obj_read, obj_write)
 
-            if len([key_ for key_ in obj_read.keys() if "InnerCV_" in key_]) > 0:
+            if (
+                len([key_ for key_ in obj_read.keys() if "InnerCV_" in key_])
+                > 0
+            ):
                 read_ML_performances(obj_read, obj_write, set_inner_CV_res=True)
 
         if read_channels:
@@ -635,21 +677,24 @@ class Feature_Reader:
 
                 performance_dict[subject_name][ch] = {}
 
-                if len(self.sidecar["coords"]) > 0:  # check if coords are empty
+                if "coords" in self.sidecar:
+                    if (
+                        len(self.sidecar["coords"]) > 0
+                    ):  # check if coords are empty
 
-                    coords_exist = False
-                    for cortex_loc in self.sidecar["coords"].keys():
-                        for ch_name_coord_idx, ch_name_coord in enumerate(
-                            self.sidecar["coords"][cortex_loc]["ch_names"]
-                        ):
-                            if ch.startswith(ch_name_coord):
-                                coords = self.sidecar["coords"][cortex_loc][
-                                    "positions"
-                                ][ch_name_coord_idx]
-                                coords_exist = True  # optimally break out of the two loops...
-                    if coords_exist is False:
-                        coords = None
-                    performance_dict[subject_name][ch]["coord"] = coords
+                        coords_exist = False
+                        for cortex_loc in self.sidecar["coords"].keys():
+                            for ch_name_coord_idx, ch_name_coord in enumerate(
+                                self.sidecar["coords"][cortex_loc]["ch_names"]
+                            ):
+                                if ch.startswith(ch_name_coord):
+                                    coords = self.sidecar["coords"][cortex_loc][
+                                        "positions"
+                                    ][ch_name_coord_idx]
+                                    coords_exist = True  # optimally break out of the two loops...
+                        if coords_exist is False:
+                            coords = None
+                        performance_dict[subject_name][ch]["coord"] = coords
                 write_CV_res_in_performance_dict(
                     ML_res.ch_ind_results[ch],
                     performance_dict[subject_name][ch],
@@ -686,9 +731,11 @@ class Feature_Reader:
                     gp_str = grid_type + str(grid_point)
 
                     performance_dict[subject_name][gp_str] = {}
-                    performance_dict[subject_name][gp_str]["coord"] = self.sidecar[
-                        "grid_" + project_settings.split("_")[1]
-                    ][grid_point]
+                    performance_dict[subject_name][gp_str][
+                        "coord"
+                    ] = self.sidecar["grid_" + project_settings.split("_")[1]][
+                        grid_point
+                    ]
 
                     if gp_str in ML_res.active_gridpoints:
                         write_CV_res_in_performance_dict(

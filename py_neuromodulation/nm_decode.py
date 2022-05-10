@@ -8,6 +8,7 @@ from sklearn.utils import class_weight
 from scipy.ndimage import binary_dilation, binary_erosion
 from scipy.ndimage import label as label_ndimage
 from imblearn.over_sampling import RandomOverSampler
+from imblearn.under_sampling import RandomUnderSampler
 import pandas as pd
 import os
 import json
@@ -60,6 +61,7 @@ class Decoder:
     STACK_FEATURES_N_SAMPLES: bool
     time_stack_n_samples: int
     ros: RandomOverSampler = None
+    rus: RandomUnderSampler = None
     VERBOSE: bool = False
     ch_ind_data: dict = {}
     grid_point_ind_data: dict = {}
@@ -102,6 +104,8 @@ class Decoder:
         bay_opt_param_space: list = [],
         VERBOSE: bool = False,
         fs: int = None,
+        undersampling: bool = False,
+        oversampling: bool = False,
     ) -> None:
         """Initialize here a feature file for processing
         Read settings.json nm_channels.csv and features.csv
@@ -149,6 +153,8 @@ class Decoder:
         self.time_stack_n_samples = time_stack_n_samples
         self.bay_opt_param_space = bay_opt_param_space
         self.VERBOSE = VERBOSE
+        self.undersampling = undersampling
+        self.oversampling = oversampling
 
         self.ch_ind_data = {}
         self.grid_point_ind_data = {}
@@ -158,7 +164,10 @@ class Decoder:
         self.gridpoint_ind_results = {}
         self.all_ch_results = {}
 
-        if type(self.model) is discriminant_analysis.LinearDiscriminantAnalysis:
+        if undersampling:
+            self.rus = RandomUnderSampler(random_state=0)
+
+        if oversampling:
             self.ros = RandomOverSampler(random_state=0)
 
     def set_data(self, features, label, label_name, used_chs):
@@ -485,8 +494,10 @@ class Decoder:
         else:
 
             # check for LDA; and apply rebalancing
-            if type(model) is discriminant_analysis.LinearDiscriminantAnalysis:
+            if self.oversampling:
                 X_train, y_train = self.ros.fit_resample(X_train, y_train)
+            if self.undersampling:
+                X_train, y_train = self.rus.fit_resample(X_train, y_train)
 
             if type(model) is xgboost.sklearn.XGBClassifier:
                 model.fit(X_train, y_train, eval_metric="logloss")  # to avoid warning

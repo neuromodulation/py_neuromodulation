@@ -8,29 +8,31 @@ import pandas as pd
 import time
 import timeit
 from pynput.keyboard import Key, Listener
-#import pylsl
+
+# import pylsl
 #  clone TMSI-Python-Interface from here: https://gitlab.com/tmsi/tmsi-python-interface
 
-from py_neuromodulation import \
-    (nm_projection,
+from py_neuromodulation import (
+    nm_projection,
     nm_rereference,
     nm_run_analysis,
     nm_features,
     nm_resample,
     nm_stream,
     nm_test_settings,
-    FieldTrip)
+    FieldTrip,
+)
 
 
 class RealTimePyNeuro(nm_stream.PNStream):
 
-    queue_raw:multiprocessing.Queue = multiprocessing.Queue(1)
-    queue_features:multiprocessing.Queue = multiprocessing.Queue(1)
-    ftc:FieldTrip.Client = None
+    queue_raw: multiprocessing.Queue = multiprocessing.Queue(1)
+    queue_features: multiprocessing.Queue = multiprocessing.Queue(1)
+    ftc: FieldTrip.Client = None
     filename: str
-    esc_key_received : bool = False
-    use_FieldTripClient : bool = True
-    feature_count_idx : int = 0
+    esc_key_received: bool = False
+    use_FieldTripClient: bool = True
+    feature_count_idx: int = 0
 
     def __init__(
         self,
@@ -42,23 +44,23 @@ class RealTimePyNeuro(nm_stream.PNStream):
         VERBOSE: bool = True,
         fs: int = 128,
         line_noise: int = 50,
-        use_FieldTripClient : bool = True
+        use_FieldTripClient: bool = True,
     ) -> None:
 
-        super().__init__(PATH_SETTINGS=PATH_SETTINGS,
-            PATH_NM_CHANNELS=PATH_NM_CHANNELS,
-            PATH_OUT=PATH_OUT,
-            PATH_GRIDS=PATH_GRIDS,
-            VERBOSE=VERBOSE)
+        super().__init__(
+            path_settings=PATH_SETTINGS,
+            path_nm_channels=PATH_NM_CHANNELS,
+            path_out=PATH_OUT,
+            path_grids=PATH_GRIDS,
+            verbose=VERBOSE,
+        )
 
         self.set_fs(fs)
         self.set_linenoise(line_noise)
         self.filename = filename
         self.use_FieldTripClient = use_FieldTripClient
 
-        self.nm_channels = self._get_nm_channels(
-            self.PATH_NM_CHANNELS
-        )
+        self.nm_channels = self._get_nm_channels(self.path_nm_channels)
 
         # leave out coordinate setting for now
 
@@ -86,29 +88,28 @@ class RealTimePyNeuro(nm_stream.PNStream):
         """
         ftc = FieldTrip.Client()
         # Python FieldTripBuffer https://www.fieldtriptoolbox.org/development/realtime/buffer_python/
-        ftc.connect('localhost', port=PORT)   # might throw IOError
+        ftc.connect("localhost", port=PORT)  # might throw IOError
         H = ftc.getHeader()
 
         if H is None:
-            print('Failed to retrieve header!')
+            print("Failed to retrieve header!")
             sys.exit(1)
 
         print(H)
         print(H.labels)
 
         return ftc
-    
-    @staticmethod
-    def init_lsl(wait_max : int = 10, buffer_size : int = 1000):
 
-        #streams = pylsl.resolve_streams(wait_time=min(0.1, wait_max))
-        #print("Stream found")
-        #return pylsl.StreamInlet(info=streams[0], max_buflen=buffer_size)
+    @staticmethod
+    def init_lsl(wait_max: int = 10, buffer_size: int = 1000):
+
+        # streams = pylsl.resolve_streams(wait_time=min(0.1, wait_max))
+        # print("Stream found")
+        # return pylsl.StreamInlet(info=streams[0], max_buflen=buffer_size)
         ...
 
     def run(self) -> None:
-        """Start get_data, calcFeatures and sendFeature processes
-        """
+        """Start get_data, calcFeatures and sendFeature processes"""
 
         self._set_run()
 
@@ -117,8 +118,8 @@ class RealTimePyNeuro(nm_stream.PNStream):
         while self.listener.is_alive() is True:
             ieeg_batch = self.get_data_client()
             ieeg_batch = ieeg_batch[-128:, :2]  # take last, #1: data
-            #ieeg_batch = np.random.random([128, 2]).T  # channels, samples
-            # check if time stamp changed 
+            # ieeg_batch = np.random.random([128, 2]).T  # channels, samples
+            # check if time stamp changed
             if np.array_equal(ieeg_batch, last_batch) is False:
 
                 last_batch = ieeg_batch
@@ -133,12 +134,12 @@ class RealTimePyNeuro(nm_stream.PNStream):
 
         self.disconnect()
 
-    def get_data_lsl(self, max_samples: int = 1000, timeout : int = 5):
-        #samples, _ = self.lsl_client.pull_chunk(
+    def get_data_lsl(self, max_samples: int = 1000, timeout: int = 5):
+        # samples, _ = self.lsl_client.pull_chunk(
         #    max_samples=max_samples,
         #    timeout=timeout
-        #)
-        #return np.vstack(samples).T
+        # )
+        # return np.vstack(samples).T
         ...
 
     def send_data_lsl(self, features: pd.Series):
@@ -147,12 +148,12 @@ class RealTimePyNeuro(nm_stream.PNStream):
         for reference implementation
         """
 
-        #info = pylsl.StreamInfo(name='py_nm', type=None,
+        # info = pylsl.StreamInfo(name='py_nm', type=None,
         #                        channel_count=None,
         #                        nominal_srate=None,
         #                        channel_format='float32', source_id=None)
-        #outlet = pylsl.StreamOutlet(info)
-        #outlet.push_sample(features.to_numpy())
+        # outlet = pylsl.StreamOutlet(info)
+        # outlet.push_sample(features.to_numpy())
         ...
 
     def disconnect_lsl(self):
@@ -164,19 +165,15 @@ class RealTimePyNeuro(nm_stream.PNStream):
     def send_data_FieldTripClient(self, features: pd.Series):
 
         # H = self.ftc_send.getHeader()  # retrieving header is not necessary for sending
-        self.ftc_send.putData(np.random.random([1,2]))
-        #self.ftc_send.putData(np.expand_dims(np.array(features), axis=0))
+        self.ftc_send.putData(np.random.random([1, 2]))
+        # self.ftc_send.putData(np.expand_dims(np.array(features), axis=0))
 
     def disconnect_FieldTripClient(self):
         self.ftc.disconnect()
 
-    def init_keyboard_listener(
-        self
-    ):
-
+    def init_keyboard_listener(self):
         def on_press(key):
-            print('{0} pressed'.format(
-                key))
+            print("{0} pressed".format(key))
 
         def on_release(key):
             if key == Key.esc:
@@ -187,11 +184,9 @@ class RealTimePyNeuro(nm_stream.PNStream):
                 self._sendFeatures(None)
                 return False
 
-        self.listener = Listener(
-            on_press=on_press,
-            on_release=on_release)
+        self.listener = Listener(on_press=on_press, on_release=on_release)
         self.listener.start()
-    
+
     def _sendFeatures(self, features: pd.Series):
         if features is None:
             self.save_after_stream(self.filename)
@@ -203,8 +198,7 @@ class RealTimePyNeuro(nm_stream.PNStream):
                 self.feature_count_idx += 1
             else:
                 self.feature_arr = self.feature_arr.append(
-                    features,
-                    ignore_index=True
+                    features, ignore_index=True
                 )
 
             print("length of features:" + str(len(self.feature_arr)))
@@ -215,7 +209,9 @@ class RealTimePyNeuro(nm_stream.PNStream):
 
         return False
 
-    def _add_timestamp(self, feature_series: pd.Series, idx: int = None) -> pd.Series:
+    def _add_timestamp(
+        self, feature_series: pd.Series, idx: int = None
+    ) -> pd.Series:
 
         feature_series["time"] = time.time()  # UNIX Timestamp
 

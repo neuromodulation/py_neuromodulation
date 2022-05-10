@@ -58,7 +58,9 @@ class EpochStream(py_nm.nm_stream.PNStream):
             )  # None will be returned if generator ran through
             if data is None:
                 break
-            gen = nm_generator.ieeg_raw_generator(data, self.settings, self.fs)
+            gen = nm_generator.ieeg_raw_generator(
+                data, self.settings, self.sfreq
+            )
 
             def get_data_within_epoch() -> np.array:
                 return next(gen, None)
@@ -69,7 +71,9 @@ class EpochStream(py_nm.nm_stream.PNStream):
                 if data_within_epoch is None:
                     break
 
-                feature_series = self.run_analysis.process_data(data_within_epoch)
+                feature_series = self.run_analysis.process_data(
+                    data_within_epoch
+                )
                 if idx_within_epoch == 0:
                     self.feature_arr = pd.DataFrame([feature_series])
                     idx_within_epoch += 1
@@ -79,7 +83,9 @@ class EpochStream(py_nm.nm_stream.PNStream):
                     )
             self.feature_arr_list.append(self.feature_arr)
 
-    def _add_timestamp(self, feature_series: pd.Series, idx: int = None) -> pd.Series:
+    def _add_timestamp(
+        self, feature_series: pd.Series, idx: int = None
+    ) -> pd.Series:
         # in case of epochs no timestamp is necessary
         return feature_series
 

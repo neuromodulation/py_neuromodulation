@@ -1,36 +1,59 @@
 import os
+
+import py_neuromodulation as nm
+import xgboost
+from py_neuromodulation import (
+    nm_analysis,
+    nm_decode,
+    nm_define_nmchannels,
+    nm_IO,
+)
 from sklearn import linear_model, metrics, model_selection
 from skopt import space as skopt_space
-import xgboost
-from py_neuromodulation import nm_BidsStream, nm_analysis, nm_decode
 
 
 def run_example_BIDS():
     """run the example BIDS path in pyneuromodulation/tests/data"""
+    sub = "testsub"
+    ses = "EphysMedOff"
+    task = "buttonpress"
+    run = 0
+    datatype = "ieeg"
 
-    RUN_NAME = "sub-testsub_ses-EphysMedOff_task-buttonpress_run-0"
+    RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}"
     PATH_RUN = os.path.join(
         os.path.abspath(os.path.join("examples", "data")),
-        "sub-testsub",
-        "ses-EphysMedOff",
-        "ieeg",
+        f"sub-{sub}",
+        f"ses-{ses}",
+        datatype,
         RUN_NAME,
     )
     PATH_BIDS = os.path.abspath(os.path.join("examples", "data"))
     PATH_OUT = os.path.abspath(os.path.join("examples", "data", "derivatives"))
 
-    # read default settings
-    nm_BIDS = nm_BidsStream.BidsStream(
-        PATH_RUN=PATH_RUN,
-        PATH_BIDS=PATH_BIDS,
-        PATH_OUT=PATH_OUT,
-        LIMIT_DATA=False,
-        VERBOSE=True,
-        target_keywords=("SQUARED_ROTATION",),
-        used_types=("ecog", "seeg"),
+    raw, _, _, _ = nm_IO.read_BIDS_data(
+        PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype
     )
 
-    nm_BIDS.run_bids()
+    nm_channels = nm_define_nmchannels.set_channels(
+        ch_names=raw.ch_names,
+        ch_types=raw.get_channel_types(),
+        reference="default",
+        bads=raw.info["bads"],
+        new_names="default",
+        used_types=("ecog", "dbs"),
+        target_keywords=("SQUARED_ROTATION",),
+    )
+
+    nm_BIDS = nm.BidsStream(
+        settings=None,
+        nm_channels=nm_channels,
+        path_out=PATH_OUT,
+        path_grids=None,
+        verbose=True,
+    )
+
+    nm_BIDS.run(filepath=PATH_RUN, bids_root=PATH_BIDS, datatype=datatype)
 
     # init analyzer
     feature_reader = nm_analysis.Feature_Reader(
@@ -41,14 +64,19 @@ def run_example_BIDS():
     # feature_reader.plot_cort_projection()
 
     # plot for a single channel
-    ch_used = feature_reader.nm_channels.query('(type=="ecog") and (used == 1)').iloc[
-        0
-    ]["name"]
+    ch_used = feature_reader.nm_channels.query(
+        '(type=="ecog") and (used == 1)'
+    ).iloc[0]["name"]
 
-    feature_used = "stft" if feature_reader.settings["methods"]["stft"] else "fft"
+    feature_used = (
+        "stft" if feature_reader.settings["methods"]["stft"] else "fft"
+    )
 
     feature_reader.plot_target_averaged_channel(
-        ch=ch_used, list_feature_keywords=[feature_used], epoch_len=4, threshold=0.5
+        ch=ch_used,
+        list_feature_keywords=[feature_used],
+        epoch_len=4,
+        threshold=0.5,
     )
 
     # model = linear_model.LogisticRegression(class_weight='balanced')
@@ -56,7 +84,9 @@ def run_example_BIDS():
 
     bay_opt_param_space = [
         skopt_space.Integer(1, 100, name="max_depth"),
-        skopt_space.Real(10**-5, 10**0, "log-uniform", name="learning_rate"),
+        skopt_space.Real(
+            10**-5, 10**0, "log-uniform", name="learning_rate"
+        ),
         skopt_space.Real(10**0, 10**1, "uniform", name="gamma"),
     ]
 

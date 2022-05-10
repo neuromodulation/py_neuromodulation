@@ -18,9 +18,9 @@ class Run:
         self,
         features: nm_features.Features,
         settings: dict,
-        reference: nm_rereference.RT_rereference,
-        projection: nm_projection.Projection,
-        resample: nm_resample.Resample,
+        reference: nm_rereference.RT_rereference | None,
+        projection: nm_projection.Projection | None,
+        resample: nm_resample.Resample | None,
         notch_filter: nm_filter.NotchFilter | None,
         verbose: bool,
         feature_idx: list,
@@ -67,7 +67,6 @@ class Run:
         self.settings = settings
         self.fs_new = int(settings["sampling_rate_features_hz"])
         self.fs = features.fs
-        self.line_noise = features.line_noise
         self.feature_idx = feature_idx
         self.sample_add = int(self.fs / self.fs_new)
         self.verbose = verbose
