@@ -67,7 +67,6 @@ class Run:
         self.settings = settings
         self.fs_new = int(settings["sampling_rate_features_hz"])
         self.fs = features.fs
-        self.line_noise = features.line_noise
         self.feature_idx = feature_idx
         self.sample_add = int(self.fs / self.fs_new)
         self.verbose = verbose
