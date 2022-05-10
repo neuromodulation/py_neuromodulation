@@ -55,6 +55,7 @@ class PNStream(ABC):
         path_out: _PathLike | None = None,
         path_grids: _PathLike | None = None,
         verbose: bool = True,
+        folder_name: str = "sub",
     ) -> None:
         if settings is None:
             settings = (
@@ -75,6 +76,8 @@ class PNStream(ABC):
         self.sess_right = None
         self.projection = None
         self.sfreq = None
+        self.model = None
+        self.folder_name = folder_name
 
     @abstractmethod
     def run(self):
@@ -103,9 +106,7 @@ class PNStream(ABC):
         """Initialize preprocessing, and feature estimation modules"""
         nm_test_settings.test_settings(self.settings, self.nm_channels)
 
-        (CH_NAMES_USED, _, FEATURE_IDX, _) = self._get_ch_info(
-            self.nm_channels
-        )
+        (CH_NAMES_USED, _, FEATURE_IDX, _) = self._get_ch_info(self.nm_channels)
 
         self.features = self._set_features(
             self.settings,
@@ -216,13 +217,11 @@ class PNStream(ABC):
         self,
         settings: dict,
         sfreq: int | float,
+        line_noise: int | float = 50,
     ) -> nm_filter.NotchFilter | None:
         if settings["methods"]["notch_filter"]:
-            kwargs = settings.setdefault("notch_filter_settings", {})
-            if "line_noise" not in kwargs:
-                kwargs["notch_freqs"] = self.line_noise
-            return nm_filter.NotchFilter(sfreq=sfreq, **kwargs)
-        return
+            return nm_filter.NotchFilter(sfreq=sfreq, line_noise=line_noise)
+        return None
 
     def set_linenoise(self, line_noise: int) -> None:
         self.line_noise = line_noise
@@ -344,7 +343,6 @@ class PNStream(ABC):
         sidecar = {
             "original_fs": self.sfreq,
             "fs": self.run_analysis.fs,
-            "line_noise": self.line_noise,
             "ch_names": self.features.ch_names,
             "sess_right": self.sess_right,
         }
@@ -383,7 +381,7 @@ class PNStream(ABC):
 
         self.save_sidecar(folder_name)
 
-        if feature_arr:
+        if feature_arr is not None:
             self.save_features(folder_name, feature_arr)
 
         self.save_settings(folder_name)

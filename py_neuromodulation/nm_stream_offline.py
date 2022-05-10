@@ -48,9 +48,7 @@ class _OfflineStream(nm_stream_abc.PNStream):
         feature_df = pd.DataFrame(features)
         feature_df = self._add_labels(features=feature_df, data=data)
 
-        self.save_after_stream(
-            os.path.basename(str(self.path_out)), feature_df
-        )
+        self.save_after_stream(self.folder_name, feature_df)
 
     def _handle_data(self, data: np.ndarray | pd.DataFrame) -> np.ndarray:
         names_expected = self.nm_channels["name"].to_list()
@@ -143,6 +141,9 @@ class BidsStream(_OfflineStream):
         bids_root: _PathLike | None = None,
     ) -> None:
         """Run stream with BIDS file."""
+
+        self.folder_name = os.path.basename(filepath)
+
         raw, data, sfreq, _ = nm_IO.read_BIDS_data(
             PATH_RUN=filepath,
             BIDS_PATH=bids_root,
