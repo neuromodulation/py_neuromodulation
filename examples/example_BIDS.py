@@ -42,7 +42,7 @@ def run_example_BIDS():
         bads=raw.info["bads"],
         new_names="default",
         used_types=("ecog", "dbs"),
-        target_keywords=("SQUARED_ROTATION"),
+        target_keywords=("SQUARED_ROTATION",),
     )
 
     nm_BIDS = nm.BidsStream(
