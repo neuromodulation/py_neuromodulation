@@ -6,4 +6,4 @@ from . import (
     nm_across_patient_decoding,
     nm_stream_offline,
 )
-from .nm_stream_offline import Stream, BidsStream
+from .nm_stream_offline import Stream

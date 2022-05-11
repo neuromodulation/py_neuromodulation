@@ -31,7 +31,14 @@ def run_example_BIDS():
     PATH_BIDS = os.path.abspath(os.path.join("examples", "data"))
     PATH_OUT = os.path.abspath(os.path.join("examples", "data", "derivatives"))
 
-    raw, _, _, _ = nm_IO.read_BIDS_data(
+    (
+        raw,
+        data,
+        sfreq,
+        line_noise,
+        coord_list,
+        coord_names,
+    ) = nm_IO.read_BIDS_data(
         PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype
     )
 
@@ -45,15 +52,25 @@ def run_example_BIDS():
         target_keywords=("SQUARED_ROTATION",),
     )
 
-    nm_BIDS = nm.BidsStream(
+    stream = nm.Stream(
         settings=None,
         nm_channels=nm_channels,
-        path_out=PATH_OUT,
         path_grids=None,
         verbose=True,
     )
 
-    nm_BIDS.run(filepath=PATH_RUN, bids_root=PATH_BIDS, datatype=datatype)
+    stream.init_stream(
+        sfreq=sfreq,
+        line_noise=line_noise,
+        coord_list=coord_list,
+        coord_names=coord_names,
+    )
+
+    stream.run(
+        data=data,
+        out_path_root=PATH_OUT,
+        folder_name=RUN_NAME,
+    )
 
     # init analyzer
     feature_reader = nm_analysis.Feature_Reader(
@@ -118,7 +135,7 @@ def run_example_BIDS():
     # performance_dict = feature_reader.read_results(read_grid_points=True, read_channels=True,
     #                                               read_all_combined=False,
     #                                               read_mov_detection_rates=True)
-    if nm_BIDS.settings["methods"]["project_cortex"] is True:
+    if stream.settings["methods"]["project_cortex"] is True:
         feature_reader.plot_subject_grid_ch_performance(
             performance_dict=performances, plt_grid=True
         )

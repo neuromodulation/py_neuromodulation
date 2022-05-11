@@ -100,7 +100,7 @@ class NotchFilter:
     def __init__(
         self,
         sfreq: int | float,
-        line_noise: int = 50,
+        line_noise: int,
         notch_widths: int | np.ndarray | None = 3,
         trans_bandwidth: int = 15,
     ) -> None:

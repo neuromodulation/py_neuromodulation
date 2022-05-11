@@ -15,14 +15,16 @@ class _OfflineStream(nm_stream_abc.PNStream):
     def _run_offline(
         self,
         data: np.ndarray,
+        out_path_root: str = None,
+        folder_name: str = "sub",
     ) -> None:
-        self._set_run()
 
         generator = nm_generator.ieeg_raw_generator(
             data, self.settings, self.sfreq
         )
         features = []
         first_sample = True
+
         while True:
             data_batch = next(generator, None)
             if data_batch is None:
@@ -48,7 +50,7 @@ class _OfflineStream(nm_stream_abc.PNStream):
         feature_df = pd.DataFrame(features)
         feature_df = self._add_labels(features=feature_df, data=data)
 
-        self.save_after_stream(self.folder_name, feature_df)
+        self.save_after_stream(out_path_root, folder_name, feature_df)
 
     def _handle_data(self, data: np.ndarray | pd.DataFrame) -> np.ndarray:
         names_expected = self.nm_channels["name"].to_list()
@@ -117,60 +119,11 @@ class Stream(_OfflineStream):
     def run(
         self,
         data: np.ndarray | pd.DataFrame,
-        sfreq: int | float,
-        coord_names: list | None = None,
-        coord_list: list | None = None,
+        out_path_root: _PathLike = None,
+        folder_name: str = "sub",
     ) -> None:
         """BIDS specific fun function. Does not need to run in parallel."""
-        self.sfreq = int(sfreq)
 
         data = self._handle_data(data)
-        self.coords = self._set_coords(
-            coord_names=coord_names, coord_list=coord_list
-        )
-        self._set_run()
 
-        self._run_offline(data)
-
-
-class BidsStream(_OfflineStream):
-    def run(
-        self,
-        filepath: _PathLike | mne_bids.BIDSPath,
-        datatype: str,
-        bids_root: _PathLike | None = None,
-    ) -> None:
-        """Run stream with BIDS file."""
-
-        self.folder_name = os.path.basename(filepath)
-
-        raw, data, sfreq, _ = nm_IO.read_BIDS_data(
-            PATH_RUN=filepath,
-            BIDS_PATH=bids_root,
-            datatype=datatype,
-        )
-        coord_list, coord_names = _get_coord_list(raw)
-        self.coords = self._set_coords(
-            coord_names=coord_names, coord_list=coord_list
-        )
-        self.sfreq = int(sfreq)
-
-        self._run_offline(data)
-
-
-def _get_coord_list(
-    raw: mne.io.BaseRaw,
-) -> tuple[list, list] | tuple[None, None]:
-    montage = raw.get_montage()
-    if montage is not None:
-        coord_list = np.array(
-            list(dict(montage.get_positions()["ch_pos"]).values())
-        ).tolist()
-        coord_names = np.array(
-            list(dict(montage.get_positions()["ch_pos"]).keys())
-        ).tolist()
-    else:
-        coord_list = None
-        coord_names = None
-
-    return coord_list, coord_names
+        self._run_offline(data, out_path_root, folder_name)

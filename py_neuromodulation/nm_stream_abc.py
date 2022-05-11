@@ -43,7 +43,6 @@ class PNStream(ABC):
     coords: dict
     projection: nm_projection.Projection | None
     sfreq: int | None
-    path_out: _PathLike | None
     path_grids: _PathLike | None
     model: base.BaseEstimator
     verbose: bool
@@ -52,32 +51,27 @@ class PNStream(ABC):
         self,
         nm_channels: pd.DataFrame | _PathLike,
         settings: dict | _PathLike | None = None,
-        path_out: _PathLike | None = None,
         path_grids: _PathLike | None = None,
+        coords: dict = {},
         verbose: bool = True,
-        folder_name: str = "sub",
     ) -> None:
         if settings is None:
             settings = (
                 pathlib.Path(__file__).parent.resolve() / "nm_settings.json"
             )
-        if path_out is None:
-            path_out = os.get_cwd()
         if path_grids is None:
             path_grids = pathlib.Path(__file__).parent.resolve()
 
-        self.path_out = path_out
         self.path_grids = path_grids
         self.verbose = verbose
         self.settings = self._get_settings(settings)
         self.nm_channels = self._get_nm_channels(nm_channels)
         self.run_analysis = None
-        self.coords = {}
+        self.coords = coords
         self.sess_right = None
         self.projection = None
         self.sfreq = None
         self.model = None
-        self.folder_name = folder_name
 
     @abstractmethod
     def run(self):
@@ -102,48 +96,94 @@ class PNStream(ABC):
         with open(model_name, "rb") as fid:
             self.model = cPickle.load(fid)
 
-    def _set_run(self):
+    def init_stream(
+        self,
+        sfreq: int | float,
+        line_noise: int | float = None,
+        features: nm_features.Features = None,
+        rereference: nm_rereference.RT_rereference = None,
+        resample: nm_resample.Resample = None,
+        notch_filter: nm_filter.NotchFilter = None,
+        run_analysis: nm_run_analysis.Run = None,
+        coord_names: list | None = None,
+        coord_list: list | None = None,
+        projection: nm_projection.Projection = None,
+    ):
         """Initialize preprocessing, and feature estimation modules"""
+
+        self.sfreq = sfreq
+
         nm_test_settings.test_settings(self.settings, self.nm_channels)
 
         (CH_NAMES_USED, _, FEATURE_IDX, _) = self._get_ch_info(self.nm_channels)
 
-        self.features = self._set_features(
-            self.settings,
-            CH_NAMES_USED,
-            self.sfreq,
-            self.verbose,
+        self.features = (
+            features
+            if features is not None
+            else self._set_features(
+                self.settings,
+                CH_NAMES_USED,
+                self.sfreq,
+                self.verbose,
+            )
         )
-        self.rereference, self.nm_channels = self._set_rereference(
-            self.settings, self.nm_channels
-        )
-
-        self.resample = self._set_resampling(
-            settings=self.settings,
-            sfreq_old=self.sfreq,
-        )
-
-        self.notch_filter = self._set_notch_filter(
-            settings=self.settings,
-            sfreq=self.sfreq
-            if self.settings["methods"]["raw_resampling"] is False
-            else self.settings["raw_resampling_settings"]["resample_freq_hz"],
-        )
-
-        if self.coords:
-            self.projection = self._get_projection(
+        if rereference is None:
+            self.rereference, self.nm_channels = self._set_rereference(
                 self.settings, self.nm_channels
             )
+        else:
+            # in this case the self.nm_channels 'new_name' column should be
+            # specified by the user to indicate rerefereance
+            # in the new channel name
+            self.rereference = rereference
 
-        self.run_analysis = nm_run_analysis.Run(
-            features=self.features,
-            settings=self.settings,
-            reference=self.rereference,
-            projection=self.projection,
-            resample=self.resample,
-            notch_filter=self.notch_filter,
-            verbose=self.verbose,
-            feature_idx=FEATURE_IDX,
+        self.resample = (
+            resample
+            if resample is not None
+            else self._set_resampling(
+                settings=self.settings,
+                sfreq_old=self.sfreq,
+            )
+        )
+
+        self.notch_filter = (
+            notch_filter
+            if notch_filter is not None
+            else self._set_notch_filter(
+                settings=self.settings,
+                sfreq=self.sfreq
+                if self.settings["methods"]["raw_resampling"] is False
+                else self.settings["raw_resampling_settings"][
+                    "resample_freq_hz"
+                ],
+                line_noise=line_noise,
+            )
+        )
+
+        if coord_list is not None and coord_names is not None:
+            self.coords = self._set_coords(
+                coord_names=coord_names, coord_list=coord_list
+            )
+
+            self.projection = (
+                projection
+                if projection is not None
+                else self._get_projection(self.settings, self.nm_channels)
+            )
+
+        self.run_analysis = (
+            run_analysis
+            if run_analysis is not None
+            else nm_run_analysis.Run(
+                features=self.features,
+                settings=self.settings,
+                reference=self.rereference,
+                projection=self.projection,
+                resample=self.resample,
+                notch_filter=self.notch_filter,
+                verbose=self.verbose,
+                feature_idx=FEATURE_IDX,
+            )
         )
 
     def _set_features(
@@ -157,9 +197,6 @@ class PNStream(ABC):
         return nm_features.Features(
             s=settings, ch_names=CH_NAMES_USED, fs=fs, verbose=VERBOSE
         )
-
-    def set_fs(self, fs: int | float) -> None:
-        self.sfreq = int(fs)
 
     def _set_rereference(
         self, settings: dict, nm_channels: pd.DataFrame
@@ -217,14 +254,18 @@ class PNStream(ABC):
         self,
         settings: dict,
         sfreq: int | float,
-        line_noise: int | float = 50,
+        line_noise: int | float,
+        trans_bandwidth: int = 15,
+        notch_widths: int | np.ndarray | None = 3,
     ) -> nm_filter.NotchFilter | None:
         if settings["methods"]["notch_filter"]:
-            return nm_filter.NotchFilter(sfreq=sfreq, line_noise=line_noise)
-        return None
-
-    def set_linenoise(self, line_noise: int) -> None:
-        self.line_noise = line_noise
+            return nm_filter.NotchFilter(
+                sfreq=sfreq,
+                line_noise=line_noise,
+                notch_widths=notch_widths,
+                trans_bandwidth=trans_bandwidth,
+            )
+        return
 
     @staticmethod
     def get_grids(settings: dict, PATH_GRIDS: str, GRID_TYPE: GRIDS) -> tuple:
@@ -336,9 +377,9 @@ class PNStream(ABC):
             "Either cortex_left or cortex_right positions must" " be provided."
         )
 
-    def save_sidecar(self, folder_name: str):
-        """Save sidecar incuding fs, line_noise, coords, sess_right to
-        PATH_OUT and subfolder 'folder_name'"""
+    def save_sidecar(self, out_path_root: _PathLike, folder_name: str):
+        """Save sidecar incuding fs, coords, sess_right to
+        out_path_root and subfolder 'folder_name'"""
 
         sidecar = {
             "original_fs": self.sfreq,
@@ -359,34 +400,44 @@ class PNStream(ABC):
                     "proj_matrix_subcortex"
                 ] = self.projection.proj_matrix_subcortex
 
-        nm_IO.save_sidecar(sidecar, self.path_out, folder_name)
+        nm_IO.save_sidecar(sidecar, out_path_root, folder_name)
 
-    def save_settings(self, folder_name: _PathLike):
-        nm_IO.save_settings(self.settings, self.path_out, folder_name)
+    def save_settings(self, out_path_root: _PathLike, folder_name: str):
+        nm_IO.save_settings(self.settings, out_path_root, folder_name)
 
-    def save_nm_channels(self, folder_name: _PathLike):
-        nm_IO.save_nmchannels(self.nm_channels, self.path_out, folder_name)
+    def save_nm_channels(self, out_path_root: _PathLike, folder_name: str):
+        nm_IO.save_nmchannels(self.nm_channels, out_path_root, folder_name)
 
-    def save_features(self, folder_name: _PathLike, feature_arr: pd.DataFrame):
-        nm_IO.save_features(feature_arr, self.path_out, folder_name)
+    def save_features(
+        self,
+        out_path_root: _PathLike,
+        folder_name: str,
+        feature_arr: pd.DataFrame,
+    ):
+        nm_IO.save_features(feature_arr, out_path_root, folder_name)
 
     def save_after_stream(
-        self, folder_name: _PathLike, feature_arr: pd.DataFrame | None = None
+        self,
+        out_path_root: _PathLike = None,
+        folder_name: str = "sub",
+        feature_arr: pd.DataFrame | None = None,
     ) -> None:
         """Save features, settings, nm_channels and sidecar after run"""
 
+        if out_path_root is None:
+            out_path_root = os.get_cwd()
         # create derivate folder_name output folder if doesn't exist
-        if os.path.exists(os.path.join(self.path_out, folder_name)) is False:
-            os.makedirs(os.path.join(self.path_out, folder_name))
+        if os.path.exists(os.path.join(out_path_root, folder_name)) is False:
+            os.makedirs(os.path.join(out_path_root, folder_name))
 
-        self.save_sidecar(folder_name)
+        self.save_sidecar(out_path_root, folder_name)
 
         if feature_arr is not None:
-            self.save_features(folder_name, feature_arr)
+            self.save_features(out_path_root, folder_name, feature_arr)
 
-        self.save_settings(folder_name)
+        self.save_settings(out_path_root, folder_name)
 
-        self.save_nm_channels(folder_name)
+        self.save_nm_channels(out_path_root, folder_name)
 
     def plot_cortical_projection(self):
         """plot projection of cortical grid electrodes on cortex"""
