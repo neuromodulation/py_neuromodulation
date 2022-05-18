@@ -761,3 +761,21 @@ class Feature_Reader:
                 folder_name=folder_name,
             )
         return performance_dict
+
+    @staticmethod
+    def get_dataframe_performances(p : dict) -> pd.DataFrame:
+        df = pd.DataFrame()
+        for sub in p.keys():
+            for ch in p[sub].keys():
+                dict_add = p[sub][ch]
+                dict_add["sub"] = sub
+                dict_add["ch"] = ch
+
+                if "all_ch_" in ch:
+                    dict_add["all_combined"] = True
+                else:
+                    dict_add["all_combined"] = False
+
+                df = df.append(dict_add, ignore_index=True)
+
+        return df

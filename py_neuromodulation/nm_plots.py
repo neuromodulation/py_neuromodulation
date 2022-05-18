@@ -3,10 +3,160 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt
 from typing import Optional
-import seaborn as sns
+import seaborn as sb
 import pandas as pd
 
-from py_neuromodulation import nm_IO
+from py_neuromodulation import nm_IO, nm_stats
+
+
+def plot_df_subjects(
+    df,
+    x_col="sub",
+    y_col="performance_test",
+    hue="all combined",
+    title="channel specific performances",
+    PATH_SAVE: str = None,
+):
+    alpha_box = 0.4
+    plt.figure(figsize=(5, 3), dpi=300)
+    sb.boxplot(
+        x=x_col,
+        y=y_col,
+        hue=hue,
+        data=df,
+        palette="viridis",
+        showmeans=False,
+        boxprops=dict(alpha=alpha_box),
+        showcaps=True,
+        showbox=True,
+        showfliers=False,
+        notch=False,
+        whiskerprops={"linewidth": 2, "zorder": 10, "alpha": alpha_box},
+        capprops={"alpha": alpha_box},
+        medianprops=dict(
+            linestyle="-", linewidth=5, color="gray", alpha=alpha_box
+        ),
+    )
+
+    ax = sb.stripplot(
+        x=x_col,
+        y=y_col,
+        hue=hue,
+        data=df,
+        palette="viridis",
+        dodge=True,
+        s=5,
+    )
+
+    # TODO: get number of unique hue elements
+    handles, labels = ax.get_legend_handles_labels()
+    l = plt.legend(
+        handles[0:2],
+        labels[0:2],
+        bbox_to_anchor=(1.05, 1),
+        loc=2,
+        borderaxespad=0.0,
+    )
+    plt.title(title)
+    plt.ylabel(y_col)
+    plt.xticks(rotation=90)
+    if PATH_SAVE is not None:
+        plt.savefig(
+            PATH_SAVE,
+            bbox_inches="tight",
+        )
+    plt.show()
+
+
+def plot_epoch(
+    X_epoch: np.array,
+    y_epoch: np.array,
+    feature_names: list,
+    z_score: bool = None,
+    epoch_len: int = 4,
+    sfreq: int = 10,
+    str_title: str = None,
+    str_label: str = None,
+):
+
+    if z_score is None:
+        X_epoch = stats.zscore(
+            np.nan_to_num(np.nanmean(np.squeeze(X_epoch), axis=0)), axis=0
+        ).T
+    y_epoch = np.stack(np.array(y_epoch))
+    plt.figure(figsize=(6, 6))
+    plt.subplot(211)
+    plt.imshow(X_epoch, aspect="auto")
+    plt.yticks(np.arange(0, len(feature_names), 1), feature_names)
+    plt.xticks(
+        np.arange(0, X_epoch.shape[1], 1),
+        np.round(np.arange(-epoch_len / 2, epoch_len / 2, 1 / sfreq), 2),
+        rotation=90,
+    )
+    plt.gca().invert_yaxis()
+    plt.xlabel("Time [s]")
+    plt.title(str_title)
+
+    plt.subplot(212)
+    for i in range(y_epoch.shape[0]):
+        plt.plot(y_epoch[i, :], color="black", alpha=0.4)
+    plt.plot(
+        y_epoch.mean(axis=0),
+        color="black",
+        alpha=1,
+        linewidth=3.0,
+        label="mean target",
+    )
+    plt.legend()
+    plt.ylabel("target")
+    plt.title(str_label)
+    plt.xticks(
+        np.arange(0, X_epoch.shape[1], 1),
+        np.round(np.arange(-epoch_len / 2, epoch_len / 2, 1 / sfreq), 2),
+        rotation=90,
+    )
+    plt.xlabel("Time [s]")
+    plt.tight_layout()
+
+
+def reg_plot(x_col: str, y_col: str, data: pd.DataFrame):
+    rho, p = nm_stats.permutationTestSpearmansRho(
+        data[x_col],
+        data[y_col],
+        False,
+        "R^2",
+        5000,
+    )
+    sb.regplot(x=x_col, y=y_col, data=data)
+    plt.title(f"{y_col}~{x_col} p={np.round(p, 2)} rho={np.round(rho, 2)}")
+
+
+def plot_bar_performance_per_channel(
+    ch_names,
+    performances: dict,
+    PATH_OUT: str,
+    sub: str = None,
+    save_str: str = "ch_comp_bar_plt.png",
+    performance_metric: str = "Balanced Accuracy",
+):
+    """
+    performances dict is output of ml_decode
+    """
+    plt.figure(figsize=(4, 3), dpi=300)
+    if sub is None:
+        sub = list(performances.keys())[0]
+    plt.bar(
+        np.arange(len(ch_names)),
+        [performances[sub][p]["performance_test"] for p in performances[sub]],
+    )
+    plt.xticks(np.arange(len(ch_names)), ch_names, rotation=90)
+    plt.xlabel("channels")
+    plt.ylabel(performance_metric)
+    plt.savefig(
+        os.path.join(PATH_OUT, save_str),
+        bbox_inches="tight",
+    )
+    plt.close()
 
 
 def plot_corr_matrix(
@@ -21,11 +171,13 @@ def plot_corr_matrix(
 ):
 
     # cut out channel name for each column
-    feature_col_name = [i[len(ch_name) + 1 :] for i in feature_names if ch_name in i]
+    feature_col_name = [
+        i[len(ch_name) + 1 :] for i in feature_names if ch_name in i
+    ]
 
     plt.figure(figsize=(7, 7))
     corr = feature.corr()
-    sns.heatmap(corr, xticklabels=feature_col_name, yticklabels=feature_col_name)
+    sb.heatmap(corr, xticklabels=feature_col_name, yticklabels=feature_col_name)
     plt.title("Features channel: " + str(ch_name))
 
     if save_plot:
@@ -79,7 +231,9 @@ def get_plt_path(
             )
     elif None not in (OUT_PATH, feature_file) and ch_name is None:
         plt_path = os.path.join(
-            OUT_PATH, feature_file, str_plt_type + "_ch_" + feature_name + ".png"
+            OUT_PATH,
+            feature_file,
+            str_plt_type + "_ch_" + feature_name + ".png",
         )
 
     else:
@@ -111,7 +265,9 @@ def plot_epochs_avg(
         ]
 
     if normalize_data:
-        X_epoch_mean = stats.zscore(np.nanmean(np.squeeze(X_epoch), axis=0), axis=0).T
+        X_epoch_mean = stats.zscore(
+            np.nanmean(np.squeeze(X_epoch), axis=0), axis=0
+        ).T
     else:
         X_epoch_mean = np.nanmean(np.squeeze(X_epoch), axis=0).T
 
@@ -137,7 +293,11 @@ def plot_epochs_avg(
     for i in range(y_epoch.shape[0]):
         plt.plot(y_epoch[i, :], color="black", alpha=0.4)
     plt.plot(
-        y_epoch.mean(axis=0), color="black", alpha=1, linewidth=3.0, label="mean target"
+        y_epoch.mean(axis=0),
+        color="black",
+        alpha=1,
+        linewidth=3.0,
+        label="mean target",
     )
     plt.legend()
     plt.ylabel("target")
@@ -174,7 +334,9 @@ def plot_grid_elec_3d(
     ax = plt.axes(projection="3d")
 
     if cortex_grid is not None:
-        grid_color = np.ones(cortex_grid.shape[0]) if grid_color is None else grid_color
+        grid_color = (
+            np.ones(cortex_grid.shape[0]) if grid_color is None else grid_color
+        )
         _ = ax.scatter3D(
             cortex_grid[:, 0],
             cortex_grid[:, 1],
@@ -273,7 +435,9 @@ class NM_Plot:
         if grid_cortex is not None:
 
             grid_color = (
-                np.ones(grid_cortex.shape[0]) if grid_color is None else grid_color
+                np.ones(grid_cortex.shape[0])
+                if grid_color is None
+                else grid_color
             )
 
             pos_ecog = axes.scatter(
@@ -286,7 +450,9 @@ class NM_Plot:
             )
         if ecog_strip is not None:
             strip_color = (
-                np.ones(ecog_strip.shape[0]) if strip_color is None else strip_color
+                np.ones(ecog_strip.shape[0])
+                if strip_color is None
+                else strip_color
             )
 
             pos_ecog = axes.scatter(
