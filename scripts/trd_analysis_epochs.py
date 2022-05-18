@@ -40,7 +40,9 @@ def plot_epoch_avg_features(
     stimuli_to_plot : list, optional
         _description_, by default ["PLS", "UNPLS", "NTR"]
     """
-    idx_ch = [i for i in range(len(feature_names)) if ch_name in feature_names[i]]
+    idx_ch = [
+        i for i in range(len(feature_names)) if ch_name in feature_names[i]
+    ]
     feature_names_ch = np.array(feature_names)[idx_ch]
 
     plt.figure(figsize=(13, 4), dpi=300)
@@ -93,7 +95,9 @@ def plot_df_subjects(
         notch=False,
         whiskerprops={"linewidth": 2, "zorder": 10, "alpha": alpha_box},
         capprops={"alpha": alpha_box},
-        medianprops=dict(linestyle="-.", linewidth=5, color="gray", alpha=alpha_box),
+        medianprops=dict(
+            linestyle="-.", linewidth=5, color="gray", alpha=alpha_box
+        ),
     )
 
     ax = sb.stripplot(
@@ -110,7 +114,11 @@ def plot_df_subjects(
     # to effectively remove the last two.
     handles, labels = ax.get_legend_handles_labels()
     l = plt.legend(
-        handles[0:2], labels[0:2], bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.0
+        handles[0:2],
+        labels[0:2],
+        bbox_to_anchor=(1.05, 1),
+        loc=2,
+        borderaxespad=0.0,
     )
     plt.title("subject specific channel performances")
     plt.ylabel(y_col)
@@ -140,7 +148,7 @@ def plot_bar_performance_per_channel(
 
 
 def main():
-    PATH_OUT = r"C:\Users\ICN_admin\Documents\TRD Analysis\features"
+    PATH_OUT = r"C:\Users\ICN_admin\Documents\TRD Analysis\features_epochs_realtime_nonorm_3classes"
     files = [f for f in os.listdir(PATH_OUT) if f.startswith("effspm8")]
     performances_all = {}
     df_plt = pd.DataFrame()
@@ -155,14 +163,18 @@ def main():
             )
 
             # read pickle file here with label and data across epoch
-            with open(os.path.join(PATH_OUT, file_name, "dict_out.p"), "rb") as fp:
+            with open(
+                os.path.join(PATH_OUT, file_name, "dict_out.p"), "rb"
+            ) as fp:
                 dict_out = pickle.load(fp)
 
             PLT_ = False
             if PLT_ is True:
                 # dict_out["data"] with shape (trials, time, num_features)
                 for ch_name in [
-                    ch for ch in feature_reader.nm_channels["name"] if "label" not in ch
+                    ch
+                    for ch in feature_reader.nm_channels["name"]
+                    if "label" not in ch
                 ]:
 
                     plot_epoch_avg_features(
@@ -179,7 +191,9 @@ def main():
 
             feature_ch_dfs = []
             ch_names = [
-                ch for ch in feature_reader.nm_channels["name"] if "label" not in ch
+                ch
+                for ch in feature_reader.nm_channels["name"]
+                if "label" not in ch
             ]
             for ch_name in ch_names:
                 idx_ch = [
@@ -195,9 +209,9 @@ def main():
                     :, :, idx_ch
                 ].reshape(dict_out["features"].shape[0], int(10 * len(idx_ch)))
 
-                features_after_stim = dict_out["features"][:, np.arange(25, 35, 1), :][
-                    :, :, idx_ch
-                ]
+                features_after_stim = dict_out["features"][
+                    :, np.arange(25, 35, 1), :
+                ][:, :, idx_ch]
 
                 feature_arr = features_after_stim.reshape(
                     int(features_after_stim.shape[0] * 10), len(idx_ch)
@@ -218,18 +232,20 @@ def main():
                 )
 
             # model = linear_model.LogisticRegression()
-            model = svm.SVC(kernel="linear")
-            # model = xgboost.XGBClassifier()
+            # model = svm.SVC(kernel="linear")
+            model = xgboost.XGBClassifier()
 
             decoder_feature_arr = pd.concat(feature_ch_dfs, axis=1)
             decoder_label = np.repeat(dict_out["label"], 10)
 
-            KEEP_NTR = False
+            KEEP_NTR = True
             if KEEP_NTR == False:
                 decoder_feature_arr = decoder_feature_arr.iloc[
                     np.where(decoder_label != "NTR")[0], :
                 ]
-                decoder_label = decoder_label[np.where(decoder_label != "NTR")[0]]
+                decoder_label = decoder_label[
+                    np.where(decoder_label != "NTR")[0]
+                ]
                 decoder_label[np.where(decoder_label == "PLS")] = 0
                 decoder_label[np.where(decoder_label == "UNPLS")] = 1
                 decoder_label = np.array(decoder_label, dtype="bool")
@@ -243,13 +259,13 @@ def main():
                 eval_method=metrics.balanced_accuracy_score,
                 cv_method=model_selection.KFold(n_splits=3, shuffle=True),
                 # cv_method="NonShuffledTrainTestSplit",
-                get_movement_detection_rate=True,
+                get_movement_detection_rate=False,
                 min_consequent_count=3,
                 TRAIN_VAL_SPLIT=False,
                 RUN_BAY_OPT=False,
                 STACK_FEATURES_N_SAMPLES=False,
                 bay_opt_param_space=None,
-                save_coef=True,
+                save_coef=False,
                 use_nested_cv=False,
                 fs=feature_reader.settings["sampling_rate_features_hz"],
             )
@@ -274,7 +290,8 @@ def main():
                 dict_add["ch"] = ch_name
                 dict_add["all combined"] = ALL_COMB
                 dict_add["feature_names"] = [
-                    f[feature_names_ch[0].find("_") + 1 :] for f in feature_names_ch
+                    f[feature_names_ch[0].find("_") + 1 :]
+                    for f in feature_names_ch
                 ]
                 df_plt = df_plt.append(
                     dict_add,
@@ -282,13 +299,16 @@ def main():
                 )
 
             performances_all[file_name] = [
-                performances[""][p]["performance_test"] for p in performances[""]
+                performances[""][p]["performance_test"]
+                for p in performances[""]
             ]
 
         except:
             print(f"error at {file_name}")
 
-    plot_df_subjects(df_plt, PATH_OUT, x_col="sub", y_col="mov_detection_rates_test")
+    plot_df_subjects(
+        df_plt, PATH_OUT, x_col="sub", y_col="mov_detection_rates_test"
+    )
     plot_df_subjects(df_plt, PATH_OUT, x_col="sub", y_col="performance_test")
 
     # get the SVM coefficients of maximum performance_test
@@ -300,7 +320,9 @@ def main():
     df_max_idx = df_ch[idx_max]
     coef_ = np.vstack(df_max_idx["coef"])
 
-    df_plt_coef = pd.DataFrame(data=coef_, columns=df_plt.iloc[0]["feature_names"])
+    df_plt_coef = pd.DataFrame(
+        data=coef_, columns=df_plt.iloc[0]["feature_names"]
+    )
     df_plt_coef = df_plt_coef.stack().reset_index()
     df_plt_coef = df_plt_coef.rename(
         columns={"level_1": "feature_name", 0: "svm_coefficient_value"}
@@ -316,7 +338,9 @@ def main():
     plt.boxplot(coef_)
     plt.xticks(np.arange(9), df_plt.iloc[0]["feature_names"])
 
-    all_per = np.concatenate([performances_all[p] for p in performances_all.keys()])
+    all_per = np.concatenate(
+        [performances_all[p] for p in performances_all.keys()]
+    )
     plt.hist(all_per)
     plt.xlabel("Balanced Accuracy")
     plt.title("All channel performances")

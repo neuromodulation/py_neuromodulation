@@ -33,7 +33,9 @@ def plot_df_subjects(
         notch=False,
         whiskerprops={"linewidth": 2, "zorder": 10, "alpha": alpha_box},
         capprops={"alpha": alpha_box},
-        medianprops=dict(linestyle="-.", linewidth=5, color="gray", alpha=alpha_box),
+        medianprops=dict(
+            linestyle="-.", linewidth=5, color="gray", alpha=alpha_box
+        ),
     )
 
     ax = sb.stripplot(
@@ -50,7 +52,11 @@ def plot_df_subjects(
     # to effectively remove the last two.
     handles, labels = ax.get_legend_handles_labels()
     l = plt.legend(
-        handles[0:2], labels[0:2], bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.0
+        handles[0:2],
+        labels[0:2],
+        bbox_to_anchor=(1.05, 1),
+        loc=2,
+        borderaxespad=0.0,
     )
     plt.title("subject specific channel performances")
     plt.ylabel(y_col)
@@ -61,11 +67,80 @@ def plot_df_subjects(
     )
 
 
+def plot_epoch(
+    X_epoch: np.array,
+    y_epoch: np.array,
+    feature_names: list,
+    z_score: bool = None,
+    epoch_len: int = 4,
+    sfreq: int = 10,
+    str_title: str = None,
+    str_label: str = None,
+):
+
+    if z_score is None:
+        X_epoch = stats.zscore(
+            np.nan_to_num(np.nanmean(np.squeeze(X_epoch), axis=0)), axis=0
+        ).T
+    y_epoch = np.stack(np.array(y_epoch))
+    plt.figure(figsize=(6, 6))
+    plt.subplot(211)
+    plt.imshow(X_epoch, aspect="auto")
+    plt.yticks(np.arange(0, len(feature_names), 1), feature_names)
+    plt.xticks(
+        np.arange(0, X_epoch.shape[1], 1),
+        np.round(np.arange(-epoch_len / 2, epoch_len / 2, 1 / sfreq), 2),
+        rotation=90,
+    )
+    plt.gca().invert_yaxis()
+    plt.xlabel("Time [s]")
+    plt.title(str_title)
+
+    plt.subplot(212)
+    for i in range(y_epoch.shape[0]):
+        plt.plot(y_epoch[i, :], color="black", alpha=0.4)
+    plt.plot(
+        y_epoch.mean(axis=0),
+        color="black",
+        alpha=1,
+        linewidth=3.0,
+        label="mean target",
+    )
+    plt.legend()
+    plt.ylabel("target")
+    plt.title(str_label)
+    plt.xticks(
+        np.arange(0, X_epoch.shape[1], 1),
+        np.round(np.arange(-epoch_len / 2, epoch_len / 2, 1 / sfreq), 2),
+        rotation=90,
+    )
+    plt.xlabel("Time [s]")
+    plt.tight_layout()
+
+
+def reg_plot(x_col: str, y_col: str, data: pd.DataFrame):
+    rho, p = icn_stats.permutationTestSpearmansRho(
+        data[x_col],
+        data[y_col],
+        False,
+        "R^2",
+        5000,
+    )
+    sb.regplot(x=x_col, y=y_col, data=data)
+    plt.title(f"{y_col}~{x_col} p={np.round(p, 2)} rho={np.round(rho, 2)}")
+
+
 def main():
 
-    PATH_OUT = r"C:\Users\ICN_admin\Documents\TRD Analysis\features_epochs_nonorm"
+    PLT_ = False
+
+    PATH_OUT = (
+        r"C:\Users\ICN_admin\Documents\TRD Analysis\features_epochs_nonorm"
+    )
     feature_reader = nm_analysis.Feature_Reader(
-        feature_dir=PATH_OUT, feature_file="effspm8_JUN_EMO", binarize_label=False
+        feature_dir=PATH_OUT,
+        feature_file="effspm8_JUN_EMO",
+        binarize_label=False,
     )
 
     with open("dict_res_out_PLS_UNPLS_MI.p", "rb") as handle:
@@ -123,18 +198,10 @@ def main():
     print("plot mean performances")
 
     # plot depression correlation
-    metric = "BDI"
-    df_plt = df.query("all_comb == False").groupby("sub").apply("mean")
-    df_plt = df.query("all_comb == True")
-    rho, p = icn_stats.permutationTestSpearmansRho(
-        df_plt["performance_test"],
-        df_plt[metric],
-        False,
-        "R^2",
-        5000,
-    )
-    sb.regplot(x="performance_test", y=metric, data=df_plt)
-    plt.title(f"Accuracy~{metric} p={np.round(p, 2)} rho={np.round(rho, 2)}")
+    if PLT_ is True:
+        df_plt = df.query("all_comb == False").groupby("sub").apply("mean")
+        df_plt = df.query("all_comb == True")
+        reg_plot(x_col="performance_test", y_col="BDI", data=df_plt)
 
     cm = []
     x_epoch = []
@@ -160,7 +227,11 @@ def main():
     y_te_ = np.concatenate(y_te)
     y_te_[np.where(y_te_ != 3)[0]] = 0
     X_, y_ = feature_reader.get_epochs(
-        np.expand_dims(y_pr_, axis=(1, 2)), y_te_, epoch_len=4, sfreq=10, threshold=0.1
+        np.expand_dims(y_pr_, axis=(1, 2)),
+        y_te_,
+        epoch_len=4,
+        sfreq=10,
+        threshold=0.1,
     )
     y_unpls = np.squeeze(X_).mean(axis=0)
 
@@ -168,14 +239,22 @@ def main():
     y_te_ = np.concatenate(y_te)
     y_te_[np.where(y_te_ != 2)[0]] = 0
     X_, y_ = feature_reader.get_epochs(
-        np.expand_dims(y_pr_, axis=(1, 2)), y_te_, epoch_len=4, sfreq=10, threshold=0.1
+        np.expand_dims(y_pr_, axis=(1, 2)),
+        y_te_,
+        epoch_len=4,
+        sfreq=10,
+        threshold=0.1,
     )
     y_pls = np.squeeze(X_).mean(axis=0)
 
     y_te_ = np.concatenate(y_te)
     y_te_[np.where(y_te_ != 1)[0]] = 0
     X_, y_ = feature_reader.get_epochs(
-        np.expand_dims(y_pr_, axis=(1, 2)), y_te_, epoch_len=4, sfreq=10, threshold=0.1
+        np.expand_dims(y_pr_, axis=(1, 2)),
+        y_te_,
+        epoch_len=4,
+        sfreq=10,
+        threshold=0.1,
     )
     y_ntr = np.squeeze(X_).mean(axis=0)
 
@@ -183,7 +262,11 @@ def main():
     y_te_[np.where(y_te_ == 0)[0]] = 5
     y_te_[np.where(y_te_ != 5)[0]] = 0
     X_, y_ = feature_reader.get_epochs(
-        np.expand_dims(y_pr_, axis=(1, 2)), y_te_, epoch_len=4, sfreq=10, threshold=0.1
+        np.expand_dims(y_pr_, axis=(1, 2)),
+        y_te_,
+        epoch_len=4,
+        sfreq=10,
+        threshold=0.1,
     )
     y_rest = np.squeeze(X_).mean(axis=0)
 
@@ -253,53 +336,8 @@ def main():
     plot_epoch(x_best.T, y_best, x_best.T)
 
     # plot all
-    plot_epoch(x_epoch, y_epoch)
-
-    def plot_epoch(x_epoch, y_epoch, X_epoch_mean=None):
-        epoch_len = 4
-        feature_names = [f[8:] for f in feature_reader.feature_arr.columns[:23]]
-        label_name = "UNPLS"
-        X_epoch = np.array(x_epoch)
-        sfreq = 10
-        if X_epoch_mean is None:
-            X_epoch_mean = stats.zscore(
-                np.nan_to_num(np.nanmean(np.squeeze(X_epoch), axis=0)), axis=0
-            ).T
-        y_epoch = np.stack(np.array(y_epoch))
-        plt.figure(figsize=(6, 6))
-        plt.subplot(211)
-        plt.imshow(X_epoch_mean, aspect="auto")
-        plt.yticks(np.arange(0, len(feature_names), 1), feature_names)
-        plt.xticks(
-            np.arange(0, X_epoch.shape[1], 1),
-            np.round(np.arange(-epoch_len / 2, epoch_len / 2, 1 / sfreq), 2),
-            rotation=90,
-        )
-        plt.gca().invert_yaxis()
-        plt.xlabel("Time [s]")
-        str_title = "UNPLS aligned features mean all channels"
-        plt.title(str_title)
-
-        plt.subplot(212)
-        for i in range(y_epoch.shape[0]):
-            plt.plot(y_epoch[i, :], color="black", alpha=0.4)
-        plt.plot(
-            y_epoch.mean(axis=0),
-            color="black",
-            alpha=1,
-            linewidth=3.0,
-            label="mean target",
-        )
-        plt.legend()
-        plt.ylabel("target")
-        plt.title(label_name)
-        plt.xticks(
-            np.arange(0, X_epoch.shape[1], 1),
-            np.round(np.arange(-epoch_len / 2, epoch_len / 2, 1 / sfreq), 2),
-            rotation=90,
-        )
-        plt.xlabel("Time [s]")
-        plt.tight_layout()
+    feature_names = [f[8:] for f in feature_reader.feature_arr.columns[:23]]
+    plot_epoch(x_epoch, y_epoch, feature_names)
 
 
 if __name__ == "__main__":
