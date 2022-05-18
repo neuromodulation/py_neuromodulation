@@ -1,5 +1,7 @@
 import os
 
+import nm_plots
+
 import py_neuromodulation as nm
 import xgboost
 from py_neuromodulation import (
@@ -8,7 +10,7 @@ from py_neuromodulation import (
     nm_define_nmchannels,
     nm_IO,
 )
-from sklearn import linear_model, metrics, model_selection
+from sklearn import metrics, model_selection
 from skopt import space as skopt_space
 
 
@@ -21,6 +23,7 @@ def run_example_BIDS():
     datatype = "ieeg"
 
     RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}"
+
     PATH_RUN = os.path.join(
         os.path.abspath(os.path.join("examples", "data")),
         f"sub-{sub}",
@@ -66,19 +69,16 @@ def run_example_BIDS():
         coord_names=coord_names,
     )
 
-    stream.run(
-        data=data,
-        out_path_root=PATH_OUT,
-        folder_name=RUN_NAME,
-    )
+    # stream.run(
+    #    data=data,
+    #    out_path_root=PATH_OUT,
+    #    folder_name=RUN_NAME,
+    # )
 
     # init analyzer
     feature_reader = nm_analysis.Feature_Reader(
         feature_dir=PATH_OUT, feature_file=RUN_NAME
     )
-
-    # plot cortical signal
-    # feature_reader.plot_cort_projection()
 
     # plot for a single channel
     ch_used = feature_reader.nm_channels.query(
@@ -96,7 +96,6 @@ def run_example_BIDS():
         threshold=0.5,
     )
 
-    # model = linear_model.LogisticRegression(class_weight='balanced')
     model = xgboost.XGBClassifier(use_label_encoder=False)
 
     bay_opt_param_space = [
@@ -114,8 +113,7 @@ def run_example_BIDS():
         used_chs=feature_reader.used_chs,
         model=model,
         eval_method=metrics.balanced_accuracy_score,
-        # cv_method=model_selection.KFold(n_splits=3, shuffle=True),
-        cv_method="NonShuffledTrainTestSplit",
+        cv_method=model_selection.KFold(n_splits=3, shuffle=True),
         get_movement_detection_rate=True,
         min_consequent_count=2,
         TRAIN_VAL_SPLIT=False,
@@ -132,10 +130,13 @@ def run_example_BIDS():
         save_results=True,
     )
 
-    # performance_dict = feature_reader.read_results(read_grid_points=True, read_channels=True,
-    #                                               read_all_combined=False,
-    #                                               read_mov_detection_rates=True)
-    if stream.settings["methods"]["project_cortex"] is True:
-        feature_reader.plot_subject_grid_ch_performance(
-            performance_dict=performances, plt_grid=True
-        )
+    df_per = feature_reader.get_dataframe_performances(performances)
+
+    nm_plots.plot_df_subjects(
+        df_per, x_col="sub", y_col="performance_test", hue="all_combined"
+    )
+
+
+if __name__ == "__main__":
+
+    run_example_BIDS()
