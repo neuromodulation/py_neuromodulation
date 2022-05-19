@@ -69,11 +69,11 @@ def run_example_BIDS():
         coord_names=coord_names,
     )
 
-    # stream.run(
-    #    data=data,
-    #    out_path_root=PATH_OUT,
-    #    folder_name=RUN_NAME,
-    # )
+    stream.run(
+        data=data,
+        out_path_root=PATH_OUT,
+        folder_name=RUN_NAME,
+    )
 
     # init analyzer
     feature_reader = nm_analysis.Feature_Reader(

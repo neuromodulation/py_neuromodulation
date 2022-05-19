@@ -11,6 +11,7 @@ from py_neuromodulation import (
     nm_stft,
     nm_fft,
     nm_fooof,
+    nm_nolds,
 )
 
 
@@ -228,4 +229,10 @@ class Features:
             features_ = self.fooof_object.get_fooof_params(
                 features_, data[ch_idx, :], ch
             )
+
+        if self.s["methods"]["nolds"] is True:
+            features_ = nm_nolds.get_nolds_features(
+                features_, self.s, data[ch_idx, :], ch
+            )
+
         return features_
