@@ -3,6 +3,7 @@ from sklearn import preprocessing
 import numpy as np
 from enum import Enum
 
+
 class NORM_METHODS(Enum):
     MEAN = "mean"
     MEDIAN = "median"
@@ -128,7 +129,7 @@ def _transform_previous(
 ) -> np.ndarray:
     """Crop previous data to reduce memory usage given normalization sample count."""
     sample_count = len(previous)
-    idx = max(0, sample_count - normalize_samples)
+    idx = np.nanmax(0, sample_count - normalize_samples)
     return previous[idx:]
 
 
@@ -141,34 +142,42 @@ def _normalize_and_clip(
 ) -> np.ndarray:
     """Normalize data."""
     if method == NORM_METHODS.MEAN.value:
-        mean = previous.mean(axis=0)
+        mean = np.nanmean(previous, axis=0)
         current = (current - mean) / mean
     elif method == NORM_METHODS.MEDIAN.value:
-        median = np.median(previous, axis=0)
+        median = np.nanmedian(previous, axis=0)
         current = (current - median) / median
     elif method == NORM_METHODS.ZSCORE.value:
-        mean = previous.mean(axis=0)
-        current = (current - previous.mean(axis=0)) / previous.std(axis=0)
+        mean = np.nanmean(previous, axis=0)
+        current = (current - mean) / np.nanstd(previous, axis=0)
     elif method == NORM_METHODS.ZSCORE_MEDIAN.value:
-        current = (current - np.median(previous, axis=0)) / previous.std(
-            axis=0
+        current = (current - np.nanmedian(previous, axis=0)) / np.nanstd(
+            previous, axis=0
         )
     elif method == NORM_METHODS.QUANTILE.value:
-        current = preprocessing.QuantileTransformer(n_quantiles=300).fit(
-            previous
-        ).transform(np.expand_dims(current, axis=0))[0, :]
+        current = (
+            preprocessing.QuantileTransformer(n_quantiles=300)
+            .fit(np.nan_to_num(previous))
+            .transform(np.expand_dims(current, axis=0))[0, :]
+        )
     elif method == NORM_METHODS.ROBUST.value:
-        current = preprocessing.RobustScaler().fit(
-            previous
-        ).transform(np.expand_dims(current, axis=0))[0, :]
+        current = (
+            preprocessing.RobustScaler()
+            .fit(np.nan_to_num(previous))
+            .transform(np.expand_dims(current, axis=0))[0, :]
+        )
     elif method == NORM_METHODS.MINMAX.value:
-        current = preprocessing.MinMaxScaler().fit(
-            previous
-        ).transform(np.expand_dims(current, axis=0))[0, :]
+        current = (
+            preprocessing.MinMaxScaler()
+            .fit(np.nan_to_num(previous))
+            .transform(np.expand_dims(current, axis=0))[0, :]
+        )
     elif method == NORM_METHODS.POWER.value:
-        current = preprocessing.PowerTransformer().fit(
-            previous
-        ).transform(np.expand_dims(current, axis=0))[0, :]
+        current = (
+            preprocessing.PowerTransformer()
+            .fit(np.nan_to_num(previous))
+            .transform(np.expand_dims(current, axis=0))[0, :]
+        )
     else:
         raise ValueError(
             f"Only {[e.value for e in NORM_METHODS]} are supported as "
@@ -186,4 +195,4 @@ def _clip(data: np.ndarray, clip: Union[bool, int, float]) -> np.ndarray:
         clip = 3.0  # default value
     else:
         clip = float(clip)
-    return data.clip(min=-clip, max=clip)
+    return np.nan_to_num(data).clip(min=-clip, max=clip)
