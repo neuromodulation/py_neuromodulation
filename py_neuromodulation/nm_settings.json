@@ -1,25 +1,33 @@
 {
-    "out_path": "C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\examples\\rt_example",
     "sampling_rate_features_hz": 10,
     "segment_length_features_ms": 1000,
-    "methods": {
+    "preprocessing": {
         "raw_resampling": true,
-        "raw_normalization": false,
-        "feature_normalization": true,
-        "kalman_filter": false,
+        "raw_normalization": true,
         "re_referencing": true,
         "notch_filter": true,
-        "bandpass_filter": false,
-        "stft": false,
-        "fft": true,
+        "preprocessing_order": [
+            "raw_resampling",
+            "notch_filter",
+            "re_referencing",
+            "raw_normalization"
+        ]
+    },
+    "features": {
         "raw_hjorth": true,
-        "sharpwave_analysis": false,
         "return_raw": true,
-        "project_cortex": false,
-        "project_subcortex": false,
-        "coherence": false,
-        "fooof": false,
-        "nolds": false
+        "bandpass_filter": true,
+        "stft": true,
+        "fft": true,
+        "sharpwave_analysis": true,
+        "coherence": true,
+        "fooof": true,
+        "nolds": true
+    },
+    "postprocessing": {
+        "feature_normalization": true,
+        "project_cortex": true,
+        "project_subcortex": true
     },
     "raw_resampling_settings": {
         "resample_freq_hz": 1000
@@ -33,28 +41,6 @@
         "normalization_time_s": 30,
         "normalization_method": "zscore",
         "clip": 3
-    },
-    "kalman_filter_settings": {
-        "Tp": 0.1,
-        "sigma_w": 0.7,
-        "sigma_v": 1,
-        "frequency_bands": [
-            "theta",
-            "alpha",
-            "low beta",
-            "high beta",
-            "low gamma",
-            "high gamma",
-            "HFA"
-        ]
-    },
-    "stft_settings": {
-        "windowlength_ms": 500,
-        "log_transform": true
-    },
-    "fft_settings": {
-        "windowlength_ms": 1000,
-        "log_transform": true
     },
     "frequency_ranges_hz": {
         "theta": [
@@ -101,7 +87,32 @@
             "mobility": false,
             "complexity": false
         },
-        "log_transform": true
+        "log_transform": true,
+        "kalman_filter": true
+    },
+    "kalman_filter_settings": {
+        "Tp": 0.1,
+        "sigma_w": 0.7,
+        "sigma_v": 1,
+        "frequency_bands": [
+            "theta",
+            "alpha",
+            "low beta",
+            "high beta",
+            "low gamma",
+            "high gamma",
+            "HFA"
+        ]
+    },
+    "stft_settings": {
+        "windowlength_ms": 500,
+        "log_transform": true,
+        "kalman_filter": true
+    },
+    "fft_settings": {
+        "windowlength_ms": 1000,
+        "log_transform": true,
+        "kalman_filter": true
     },
     "sharpwave_analysis_settings": {
         "sharpwave_features": {

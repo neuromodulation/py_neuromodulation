@@ -152,7 +152,7 @@ class PNStream(ABC):
             else self._set_notch_filter(
                 settings=self.settings,
                 sfreq=self.sfreq
-                if self.settings["methods"]["raw_resampling"] is False
+                if self.settings["preprocessing"]["raw_resampling"] is False
                 else self.settings["raw_resampling_settings"][
                     "resample_freq_hz"
                 ],
@@ -190,12 +190,14 @@ class PNStream(ABC):
         self,
         settings: dict,
         CH_NAMES_USED: list,
-        fs: int,
+        sfreq: int,
         VERBOSE: bool,
     ) -> nm_features.Features:
         """initialize feature class from settings"""
         return nm_features.Features(
-            s=settings, ch_names=CH_NAMES_USED, fs=fs, verbose=VERBOSE
+            s=settings,
+            ch_names=CH_NAMES_USED,
+            sfreq=sfreq,
         )
 
     def _set_rereference(
@@ -216,7 +218,7 @@ class PNStream(ABC):
         Tuple
             nm_rereference object, updated nm_channels DataFrame
         """
-        if settings["methods"]["re_referencing"] is True:
+        if settings["preprocessing"]["re_referencing"] is True:
             rereference = nm_rereference.RT_rereference(nm_channels)
         else:
             rereference = None
@@ -239,7 +241,7 @@ class PNStream(ABC):
         -------
         nm_resample.Resample
         """
-        if settings["methods"]["raw_resampling"]:
+        if settings["preprocessing"]["raw_resampling"]:
             resample = nm_resample.Resample(
                 sfreq_old=sfreq_old,
                 sfreq_new=settings["raw_resampling_settings"][
@@ -258,7 +260,7 @@ class PNStream(ABC):
         trans_bandwidth: int = 15,
         notch_widths: int | np.ndarray | None = 3,
     ) -> nm_filter.NotchFilter | None:
-        if settings["methods"]["notch_filter"]:
+        if settings["preprocessing"]["notch_filter"]:
             return nm_filter.NotchFilter(
                 sfreq=sfreq,
                 line_noise=line_noise,
@@ -284,11 +286,11 @@ class PNStream(ABC):
             might be None if not specified in settings
         """
 
-        if settings["methods"]["project_cortex"] is True:
+        if settings["postprocessing"]["project_cortex"] is True:
             grid_cortex = nm_IO.read_grid(PATH_GRIDS, GRID_TYPE.CORTEX)
         else:
             grid_cortex = None
-        if settings["methods"]["project_subcortex"] is True:
+        if settings["postprocessing"]["project_subcortex"] is True:
             grid_subcortex = nm_IO.read_grid(PATH_GRIDS, GRID_TYPE.SUBCORTEX)
         else:
             grid_subcortex = None
@@ -301,8 +303,8 @@ class PNStream(ABC):
 
         if any(
             (
-                settings["methods"]["project_cortex"],
-                settings["methods"]["project_subcortex"],
+                settings["postprocessing"]["project_cortex"],
+                settings["postprocessing"]["project_subcortex"],
             )
         ):
             grid_cortex, grid_subcortex = self.get_grids(
@@ -383,18 +385,18 @@ class PNStream(ABC):
 
         sidecar = {
             "original_fs": self.sfreq,
-            "fs": self.run_analysis.fs,
+            "sfreq": self.run_analysis.sfreq,
             "ch_names": self.features.ch_names,
             "sess_right": self.sess_right,
         }
         if self.projection:
             sidecar["coords"] = (self.projection.coords,)
-            if self.settings["methods"]["project_cortex"]:
+            if self.settings["postprocessing"]["project_cortex"]:
                 sidecar["grid_cortex"] = self.projection.grid_cortex
                 sidecar[
                     "proj_matrix_cortex"
                 ] = self.projection.proj_matrix_cortex
-            if self.settings["methods"]["project_subcortex"]:
+            if self.settings["postprocessing"]["project_subcortex"]:
                 sidecar["grid_subcortex"] = self.projection.grid_subcortex
                 sidecar[
                     "proj_matrix_subcortex"
@@ -469,8 +471,8 @@ class PNStream(ABC):
     ) -> dict:
         if not any(
             (
-                self.settings["methods"]["project_cortex"],
-                self.settings["methods"]["project_subcortex"],
+                self.settings["postprocessing"]["project_cortex"],
+                self.settings["postprocessing"]["project_subcortex"],
             )
         ):
             return {}

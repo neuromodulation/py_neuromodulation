@@ -51,7 +51,7 @@ def run_example_BIDS():
         reference="default",
         bads=raw.info["bads"],
         new_names="default",
-        used_types=("ecog", "dbs"),
+        used_types=("ecog", "dbs", "seeg"),
         target_keywords=("SQUARED_ROTATION",),
     )
 
