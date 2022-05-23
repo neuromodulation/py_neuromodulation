@@ -89,7 +89,7 @@ class _OfflineStream(nm_stream_abc.PNStream):
             # sampling frequency is taken from run_analysis, since resampling
             # might change it
             feature_series["time"] = (
-                self.run_analysis.cnt_samples * 1000 / self.run_analysis.fs
+                self.run_analysis.cnt_samples * 1000 / self.run_analysis.sfreq
             )
 
         if self.verbose:

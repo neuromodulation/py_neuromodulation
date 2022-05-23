@@ -1,9 +1,9 @@
 import timeit
+from . import nm_oscillatory
 import numpy as np
 from py_neuromodulation import (
     nm_normalization,
     nm_stft,
-    nm_fft,
     nm_bandpower,
     nm_filter,
 )
@@ -77,9 +77,7 @@ class NM_Timer:
                             ]["normalization_time"]
                             * self.analyzer.fs
                         ),
-                        sample_add=int(
-                            self.analyzer.fs / self.analyzer.fs_new
-                        ),
+                        sample_add=int(self.analyzer.fs / self.analyzer.fs_new),
                         method=self.analyzer.settings[
                             "raw_normalization_settings"
                         ]["normalization_method"],
@@ -170,7 +168,7 @@ class NM_Timer:
         if self.analyzer.settings["methods"]["fft"]:
             dict_timings["time_fft"] = (
                 timeit.timeit(
-                    lambda: nm_fft.get_fft_features(
+                    lambda: nm_oscillatory.get_fft_features(
                         features_,
                         self.analyzer.features.s,
                         self.analyzer.features.fs,

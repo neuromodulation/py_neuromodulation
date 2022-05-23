@@ -134,6 +134,10 @@ dmypy.json
 ### VisualStudioCode ###
 .vscode
 
+# Ignore pickles
+*.pkl
+**/*.pkl
+
 ### VisualStudioCode Patch ###
 # Ignore all local history of files
 **/.history

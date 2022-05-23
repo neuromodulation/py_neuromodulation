@@ -9,7 +9,6 @@ from py_neuromodulation import (
     nm_projection,
     nm_rereference,
     nm_resample,
-    nm_eval_timing,
 )
 
 
@@ -65,10 +64,10 @@ class Run:
             )
         )
         self.settings = settings
-        self.fs_new = int(settings["sampling_rate_features_hz"])
-        self.fs = features.fs
+        self.sfreq_new = int(settings["sampling_rate_features_hz"])
+        self.sfreq = features.sfreq
         self.feature_idx = feature_idx
-        self.sample_add = int(self.fs / self.fs_new)
+        self.sample_add = int(self.sfreq / self.sfreq_new)
         self.verbose = verbose
         self.offset = max(
             [
@@ -79,18 +78,18 @@ class Run:
             ]
         )  # ms
 
-        if settings["methods"]["raw_normalization"] is True:
+        if settings["preprocessing"]["raw_normalization"] is True:
             self.raw_normalize_samples = int(
                 settings["raw_normalization_settings"]["normalization_time_s"]
-                * self.fs
+                * self.sfreq
             )
 
-        if settings["methods"]["feature_normalization"] is True:
+        if settings["postprocessing"]["feature_normalization"] is True:
             self.feat_normalize_samples = int(
                 settings["feature_normalization_settings"][
                     "normalization_time_s"
                 ]
-                * self.fs_new
+                * self.sfreq_new
             )
 
         self.cnt_samples = 0
@@ -109,39 +108,39 @@ class Run:
         """
         start_time = time()
 
-        # re-reference
-        if self.settings["methods"]["re_referencing"] is True:
-            ieeg_batch = self.reference.rereference(ieeg_batch)
+        for preprocess_method in self.settings["preprocessing"][
+            "preprocessing_order"
+        ]:
+
+            match preprocess_method:
+                case "raw_resample":
+                    ieeg_batch = self.resample.resample_raw(ieeg_batch)
+                case "notch_filter":
+                    ieeg_batch = self.notch_filter.filter_data(ieeg_batch)
+                case "re_referencing":
+                    ieeg_batch = self.reference.rereference(ieeg_batch)
+                case "raw_normalization":
+                    ieeg_batch, self.raw_arr = nm_normalization.normalize_raw(
+                        current=ieeg_batch,
+                        previous=self.raw_arr,
+                        normalize_samples=self.raw_normalize_samples,
+                        sample_add=self.sample_add,
+                        method=self.settings["raw_normalization_settings"][
+                            "normalization_method"
+                        ],
+                        clip=self.settings["raw_normalization_settings"][
+                            "clip"
+                        ],
+                    )
 
         ieeg_batch = ieeg_batch[self.feature_idx, :]
-
-        # resample
-        if self.settings["methods"]["raw_resampling"] is True:
-            ieeg_batch = self.resample.resample_raw(ieeg_batch)
-
-        # notch filter
-        if self.settings["methods"]["notch_filter"] is True:
-            ieeg_batch = self.notch_filter.filter_data(ieeg_batch)
-
-        # normalize raw data
-        if self.settings["methods"]["raw_normalization"] is True:
-            ieeg_batch, self.raw_arr = nm_normalization.normalize_raw(
-                current=ieeg_batch,
-                previous=self.raw_arr,
-                normalize_samples=self.raw_normalize_samples,
-                sample_add=self.sample_add,
-                method=self.settings["raw_normalization_settings"][
-                    "normalization_method"
-                ],
-                clip=self.settings["raw_normalization_settings"]["clip"],
-            )
 
         # calculate features
         features_dict = self.features.estimate_features(ieeg_batch)
         features_values = np.array(list(features_dict.values()), dtype=float)
 
         # normalize features
-        if self.settings["methods"]["feature_normalization"]:
+        if self.settings["postprocessing"]["feature_normalization"]:
             (
                 features_values,
                 self.features_previous,
@@ -167,7 +166,7 @@ class Run:
 
         # add sample counts
         if self.cnt_samples == 0:
-            self.cnt_samples += int(self.fs)
+            self.cnt_samples += int(self.sfreq)
         else:
             self.cnt_samples += self.sample_add
 
@@ -177,8 +176,5 @@ class Run:
                 + str(np.round(time() - start_time, 2))
                 + " seconds"
             )
-
-        # if self.cnt_samples > 4000:
-        #    nm_eval_timing.NM_Timer(self)
 
         return self.features_current

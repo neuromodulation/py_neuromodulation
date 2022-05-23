@@ -21,9 +21,11 @@ class Projection:
         self.grid_subcortex = grid_subcortex
         self.coords = coords
         self.nm_channels = nm_channels
-        self.project_cortex = settings["methods"]["project_cortex"]
-        self.project_subcortex = settings["methods"]["project_subcortex"]
-        self.max_dist_cortex = settings["project_cortex_settings"]["max_dist_cm"]
+        self.project_cortex = settings["postprocessing"]["project_cortex"]
+        self.project_subcortex = settings["postprocessing"]["project_subcortex"]
+        self.max_dist_cortex = settings["project_cortex_settings"][
+            "max_dist_cm"
+        ]
         self.max_dist_subcortex = settings["project_subcortex_settings"][
             "max_dist_cm"
         ]
@@ -48,10 +50,16 @@ class Projection:
             self.ecog_strip = self.coords["cortex_left"]["positions"]
             self.ecog_strip_names = self.coords["cortex_left"]["ch_names"]
 
-        if self.sess_right is True and len(self.coords["subcortex_right"]["positions"]) > 0:
+        if (
+            self.sess_right is True
+            and len(self.coords["subcortex_right"]["positions"]) > 0
+        ):
             self.lfp_elec = self.coords["subcortex_right"]["positions"]
             self.lfp_elec_names = self.coords["subcortex_right"]["ch_names"]
-        elif self.sess_right is False and len(self.coords["subcortex_left"]["positions"]) > 0:
+        elif (
+            self.sess_right is False
+            and len(self.coords["subcortex_left"]["positions"]) > 0
+        ):
             self.lfp_elec = self.coords["subcortex_left"]["positions"]
             self.lfp_elec_names = self.coords["subcortex_left"]["ch_names"]
 
@@ -82,19 +90,22 @@ class Projection:
             nmplotter.plot_cortex()
 
     def remove_not_used_ch_from_coords(self):
-        ch_not_used = self.nm_channels.query('(used==0) or (status=="bad")').name
+        ch_not_used = self.nm_channels.query(
+            '(used==0) or (status=="bad")'
+        ).name
         if len(ch_not_used) > 0:
             for ch in ch_not_used:
                 for key_ in self.coords:
-                    for idx, ch_coords in enumerate(self.coords[key_]["ch_names"]):
+                    for idx, ch_coords in enumerate(
+                        self.coords[key_]["ch_names"]
+                    ):
                         if ch.startswith(ch_coords):
                             # delete index
                             self.coords[key_]["positions"] = np.delete(
-                                self.coords[key_]["positions"],
-                                idx,
-                                axis=0
+                                self.coords[key_]["positions"], idx, axis=0
                             )
                             self.coords[key_]["ch_names"].remove(ch)
+
     def calc_proj_matrix(
         self, max_dist: Union[int, float], grid: np.array, coord_array: np.array
     ) -> np.ndarray:
@@ -110,9 +121,9 @@ class Projection:
 
         proj_matrix = np.zeros(distance_matrix.shape)
         for grid_point in range(distance_matrix.shape[0]):
-            used_channels = np.where(
-                distance_matrix[grid_point, :] < max_dist
-            )[0]
+            used_channels = np.where(distance_matrix[grid_point, :] < max_dist)[
+                0
+            ]
 
             rec_distances = distance_matrix[grid_point, used_channels]
             sum_distances = np.sum(1 / rec_distances)
@@ -187,7 +198,7 @@ class Projection:
         """Initialize channel names via nm_channel new_name column"""
         if self.project_cortex:
             self.ecog_channels = self.nm_channels.query(
-            '(type=="ecog") and (used == 1) and (status=="good")'
+                '(type=="ecog") and (used == 1) and (status=="good")'
             ).name.to_list()
 
             chs_ecog = self.ecog_channels.copy()
@@ -196,12 +207,12 @@ class Projection:
                     self.ecog_channels.remove(ecog_channel)
             # write ecog_channels to be new_name
             self.ecog_channels = list(
-                self.nm_channels.query('name == @self.ecog_channels').new_name
+                self.nm_channels.query("name == @self.ecog_channels").new_name
             )
 
         if self.project_subcortex:
             self.lfp_channels = self.nm_channels.query(
-            '(type=="lfp" or type=="seeg" or type=="dbs") \
+                '(type=="lfp" or type=="seeg" or type=="dbs") \
               and (used == 1) and (status=="good")'
             ).name.to_list()
             # project only channels that are in the coords
@@ -212,12 +223,11 @@ class Projection:
                     self.lfp_channels.remove(lfp_channel)
             # write lfp_channels to be new_name
             self.lfp_channels = list(
-                self.nm_channels.query('name == @self.lfp_channels').new_name
+                self.nm_channels.query("name == @self.lfp_channels").new_name
             )
 
     def init_projection_run(self, feature_series: pd.Series) -> pd.Series:
-        """Initialize indexes for respective channels in feature series computed by nm_features.py
-        """
+        """Initialize indexes for respective channels in feature series computed by nm_features.py"""
         #  here it is assumed that only one hemisphere is recorded at a time!
         if self.project_cortex:
             for ecog_channel in self.ecog_channels:
@@ -274,19 +284,27 @@ class Projection:
         if not self.initialized:
             self.init_projection_run(feature_series=feature_series)
 
-        dat_cortex = np.vstack(
-            [
-                feature_series.iloc[idx_ch].values
-                for idx_ch in self.idx_chs_ecog
-            ]
-        ) if self.project_cortex else None
+        dat_cortex = (
+            np.vstack(
+                [
+                    feature_series.iloc[idx_ch].values
+                    for idx_ch in self.idx_chs_ecog
+                ]
+            )
+            if self.project_cortex
+            else None
+        )
 
-        dat_subcortex = np.vstack(
-            [
-                feature_series.iloc[idx_ch].values
-                for idx_ch in self.idx_chs_lfp
-            ]
-        ) if self.project_subcortex else None
+        dat_subcortex = (
+            np.vstack(
+                [
+                    feature_series.iloc[idx_ch].values
+                    for idx_ch in self.idx_chs_lfp
+                ]
+            )
+            if self.project_subcortex
+            else None
+        )
 
         # project data
         (

@@ -18,7 +18,8 @@
         "project_cortex": false,
         "project_subcortex": false,
         "coherence": false,
-        "fooof": false
+        "fooof": false,
+        "nolds": false
     },
     "raw_resampling_settings": {
         "resample_freq_hz": 1000
@@ -196,5 +197,12 @@
             40
         ],
         "knee": true
+    },
+    "nolds_features": {
+        "sample_entropy": true,
+        "correlation_dimension": true,
+        "lyapunov_exponent": true,
+        "hurst_exponent": true,
+        "detrended_fluctutaion_analysis": true
     }
 }
