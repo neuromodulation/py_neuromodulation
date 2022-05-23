@@ -129,7 +129,7 @@ def _transform_previous(
 ) -> np.ndarray:
     """Crop previous data to reduce memory usage given normalization sample count."""
     sample_count = len(previous)
-    idx = np.nanmax(0, sample_count - normalize_samples)
+    idx = np.nanmax([0, sample_count - normalize_samples])
     return previous[idx:]
 
 

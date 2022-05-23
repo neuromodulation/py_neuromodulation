@@ -29,7 +29,7 @@ class Hjorth(nm_features_abc.Feature):
                 deriv_mobility / mobility
             )
 
-            return features_compute
+        return features_compute
 
 
 class Raw(nm_features_abc.Feature):

@@ -23,17 +23,19 @@ class OscillatoryFeature(nm_features_abc.Feature, ABC):
             for fband_name in self.fband_names
         ]
 
+    def init_KF(self, settings_name: str):
+
         self.KF_dict = {}
 
-        if settings["features"]["kalman_filter"] is True:
-            for f_band in settings["kalman_filter_settings"]["frequency_bands"]:
+        if self.s[settings_name]["kalman_filter"] is True:
+            for f_band in self.s["kalman_filter_settings"]["frequency_bands"]:
                 for channel in self.ch_names:
                     self.KF_dict[
                         "_".join([channel, f_band])
                     ] = nm_kalmanfilter.define_KF(
-                        settings["kalman_filter_settings"]["Tp"],
-                        settings["kalman_filter_settings"]["sigma_w"],
-                        settings["kalman_filter_settings"]["sigma_v"],
+                        self.s["kalman_filter_settings"]["Tp"],
+                        self.s["kalman_filter_settings"]["sigma_w"],
+                        self.s["kalman_filter_settings"]["sigma_v"],
                     )
 
     def update_KF(self, feature_calc: float, fband: str, ch_name: str) -> float:
@@ -52,6 +54,7 @@ class FFT(OscillatoryFeature):
         super().__init__(
             settings, ch_names, sfreq
         )  # needs to be called to init KF_dict
+        self.init_KF("fft_settings")
 
     def calc_feature(self, data: np.array, features_compute: dict) -> dict:
         for ch_idx, ch_name in enumerate(self.ch_names):
@@ -69,7 +72,7 @@ class FFT(OscillatoryFeature):
                 0, int(self.s["fft_settings"]["windowlength_ms"] / 2) + 1, 1
             )
             for idx_fband, f_range in enumerate(self.f_ranges):
-                fband = self.f_band_names[idx_fband]
+                fband = self.fband_names[idx_fband]
                 idx_range = np.where((f >= f_range[0]) & (f <= f_range[1]))[0]
                 feature_calc = np.mean(Z[idx_range])
 
@@ -88,22 +91,23 @@ class STFT(OscillatoryFeature):
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:
-        self.ch_names = ch_names
-        self.s = settings
-        self.sfreq = sfreq
+        super().__init__(
+            settings, ch_names, sfreq
+        )  # needs to be called to init KF_dict
+        self.init_KF("stft_settings")
 
     def calc_feature(self, data: np.array, features_compute: dict) -> dict:
         for ch_idx, ch_name in enumerate(self.ch_names):
             f, t, Zxx = signal.stft(
                 data[ch_idx, :],
-                sfreq=self.sfreq,
+                fs=self.sfreq,
                 window="hamming",
                 nperseg=int(self.s["stft_settings"]["windowlength_ms"]),
                 boundary="even",
             )
             Z = np.abs(Zxx)
             for idx_fband, f_range in enumerate(self.f_ranges):
-                fband = self.f_band_names[idx_fband]
+                fband = self.fband_names[idx_fband]
                 idx_range = np.where((f >= f_range[0]) & (f <= f_range[1]))[0]
                 feature_calc = np.mean(Z[idx_range, :])  # 1. dim: f, 2. dim: t
 
@@ -119,9 +123,10 @@ class BandPower(OscillatoryFeature):
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:
-        self.ch_names = ch_names
-        self.s = settings
-        self.sfreq = sfreq
+        super().__init__(
+            settings, ch_names, sfreq
+        )  # needs to be called to init KF_dict
+        self.init_KF("bandpass_filter_settings")
 
         self.seglengths = np.floor(
             self.sfreq
@@ -153,8 +158,10 @@ class BandPower(OscillatoryFeature):
 
         data = self.bandpass_filter.filter_data(data)
         for ch_idx, ch_name in enumerate(self.ch_names):
-            for idx, f_band in enumerate(self.s["frequency_ranges_hz"].keys()):
-                seglength = self.seglengths[ch_idx]
+            for f_band_idx, f_band in enumerate(
+                self.s["frequency_ranges_hz"].keys()
+            ):
+                seglength = self.seglengths[f_band_idx]
                 for bp_feature in [
                     k
                     for k, v in self.s["bandpass_filter_settings"][
