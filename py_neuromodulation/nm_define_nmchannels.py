@@ -19,50 +19,50 @@ def set_channels(
 ):
     """Return dataframe with channel-specific settings in nm_channels format.
 
-    Return an nm_channels dataframe with the columns: "name", "rereference",
-    "used", "target", "type", "status", "new_name"]. "name" is set to ch_names,
-    "rereference" can be specified individually. "used" is set to 1 for all 
-    channel types specified in `used_types`, else to 0. "target" is set to 1 
-    for all channels containing any of the `target_keywords`, else to 0.
+        Return an nm_channels dataframe with the columns: "name", "rereference",
+        "used", "target", "type", "status", "new_name"]. "name" is set to ch_names,
+        "rereference" can be specified individually. "used" is set to 1 for all
+        channel types specified in `used_types`, else to 0. "target" is set to 1
+        for all channels containing any of the `target_keywords`, else to 0.
 
-    Possible channel types:
-    https://github.com/mne-tools/mne-python/blob/6ae3b22033c745cce5cd5de9b92da54c13c36484/doc/_includes/channel_types.rst
+        Possible channel types:
+        https://github.com/mne-tools/mne-python/blob/6ae3b22033c745cce5cd5de9b92da54c13c36484/doc/_includes/channel_types.rst
 
-    Arguments
-    ---------
-        ch_names : list
-            list of channel names.
-        ch_types : list
-            list of channel types. Should optimally be of the types: "ECOG",
-            "DBS" or "SEEG".
-        reference : str | list of str | None, default: 'default'
-            re-referencing scheme. Default is "default". This sets ECOG channel
-            references to "average" and creates a bipolar referencing scheme
-            for LFP/DBS/SEEG channels, where each channel is referenced to
-            the adjacent lower channel, split by left and right hemisphere.
-            For this, the channel names must contain the substring "_L_" and/or
-            "_R_" (lower or upper case). CAVE: Adjacent channels will be
-            determined using the sort() function.
-        bads :  str | list of str, default: None
-            channels that should be marked as bad and not be used for
-            average re-referencing etc.
-        new_names : list of str | None, default: 'default'
-            new channel names that should be used when writing out the
-            features and results. Useful when applying re-referencing. Set to
-            `None` if no renaming should be performed. 'default' will infer
-            channel renaming from re-referencing information. If a list is
-            given, it should be in the same order as `ch_names`.
-        ECOG_ONLY : boolean, default: False
-            if True, set only 'ecog' channel type to used
-        used_types : iterable of str | None, default : ("ecog", "dbs", "seeg")
-            data channel types to be used. Set to `None` to use no channel
-            types.
-        target_keywords : iterable of str | None, default : ("ecog", "dbs", "seeg")
-            keywords for target channels
-.
-    Returns
-    -------
-        df: DataFrame in nm_channels format
+        Arguments
+        ---------
+            ch_names : list
+                list of channel names.
+            ch_types : list
+                list of channel types. Should optimally be of the types: "ECOG",
+                "DBS" or "SEEG".
+            reference : str | list of str | None, default: 'default'
+                re-referencing scheme. Default is "default". This sets ECOG channel
+                references to "average" and creates a bipolar referencing scheme
+                for LFP/DBS/SEEG channels, where each channel is referenced to
+                the adjacent lower channel, split by left and right hemisphere.
+                For this, the channel names must contain the substring "_L_" and/or
+                "_R_" (lower or upper case). CAVE: Adjacent channels will be
+                determined using the sort() function.
+            bads :  str | list of str, default: None
+                channels that should be marked as bad and not be used for
+                average re-referencing etc.
+            new_names : list of str | None, default: 'default'
+                new channel names that should be used when writing out the
+                features and results. Useful when applying re-referencing. Set to
+                `None` if no renaming should be performed. 'default' will infer
+                channel renaming from re-referencing information. If a list is
+                given, it should be in the same order as `ch_names`.
+            ECOG_ONLY : boolean, default: False
+                if True, set only 'ecog' channel type to used
+            used_types : iterable of str | None, default : ("ecog", "dbs", "seeg")
+                data channel types to be used. Set to `None` to use no channel
+                types.
+            target_keywords : iterable of str | None, default : ("ecog", "dbs", "seeg")
+                keywords for target channels
+    .
+        Returns
+        -------
+            df: DataFrame in nm_channels format
     """
     if not (len(ch_names) == len(ch_types)):
         raise ValueError(
@@ -134,7 +134,7 @@ def set_channels(
                 f"Got: {len(ch_names)} `ch_names` and {len(reference)}"
                 " `references`."
             )
-        df["reference"] = reference
+        df["rereference"] = reference
     elif not reference:
         df.loc[:, "rereference"] = "None"
     else:
