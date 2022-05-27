@@ -155,3 +155,7 @@ examples/data/derivatives/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_iee
 examples/data/derivatives/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg/MOV_algined_features_ch_ECOG_AT_SM_L_6-avgref_sharpwaveprominence.png
 examples/data/derivatives/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg_LM_ML_RES.p
 examples/data/derivatives/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg_run_analysis.p
+
+# temp files
+*.tmp
+

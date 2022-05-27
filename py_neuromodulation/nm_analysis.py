@@ -444,7 +444,7 @@ class Feature_Reader:
         estimate_channels: bool = True,
         estimate_all_channels_combined: bool = False,
         output_name: str = "LM",
-        save_results: bool = False,
+        save_results: bool = True,
     ):
         """machine learning model evaluation for ECoG strip channels and/or grid points
 
@@ -763,7 +763,7 @@ class Feature_Reader:
         return performance_dict
 
     @staticmethod
-    def get_dataframe_performances(p : dict) -> pd.DataFrame:
+    def get_dataframe_performances(p: dict) -> pd.DataFrame:
         df = pd.DataFrame()
         for sub in p.keys():
             for ch in p[sub].keys():
