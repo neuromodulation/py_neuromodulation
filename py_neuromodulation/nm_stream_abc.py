@@ -386,7 +386,6 @@ class PNStream(ABC):
         sidecar = {
             "original_fs": self.sfreq,
             "sfreq": self.run_analysis.sfreq,
-            "ch_names": self.features.ch_names,
             "sess_right": self.sess_right,
         }
         if self.projection:
