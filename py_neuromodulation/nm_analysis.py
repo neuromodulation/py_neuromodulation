@@ -60,7 +60,7 @@ class Feature_Reader:
 
         self.settings = nm_IO.read_settings(PATH_READ_FILE)
         self.sidecar = nm_IO.read_sidecar(PATH_READ_FILE)
-        self.fs = self.sidecar["fs"]
+        self.fs = self.sidecar["sfreq"]
         self.nm_channels = nm_IO.read_nm_channels(PATH_READ_FILE)
         self.feature_arr = nm_IO.read_features(PATH_READ_FILE)
 
@@ -77,14 +77,14 @@ class Feature_Reader:
 
         # init plotter
         self.nmplotter = nm_plots.NM_Plot()
-
-        self.label_name = self._get_target_ch()
-        self.label = self.read_target_ch(
-            self.feature_arr,
-            self.label_name,
-            binarize=binarize_label,
-            binarize_th=0.3,
-        )
+        if self.nm_channels["target"].sum() > 0:
+            self.label_name = self._get_target_ch()
+            self.label = self.read_target_ch(
+                self.feature_arr,
+                self.label_name,
+                binarize=binarize_label,
+                binarize_th=0.3,
+            )
 
     def _get_target_ch(self) -> str:
         target_names = list(
