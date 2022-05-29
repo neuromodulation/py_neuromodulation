@@ -55,19 +55,29 @@ def set_settings(settings: dict):
     for method in list(settings["methods"].keys()):
         settings["methods"][method] = False
 
-    settings["methods"]["fft"] = True
-    settings["methods"]["fooof"] = True
-    settings["methods"]["return_raw"] = True
-    settings["methods"]["raw_hjorth"] = True
-    settings["methods"]["re_referencing"] = False
-    settings["methods"]["raw_normalization"] = False
-    settings["methods"]["feature_normalization"] = True
+    settings["features"]["fft"] = True
+    settings["features"]["fooof"] = True
+    settings["features"]["return_raw"] = True
+    settings["features"]["raw_hjorth"] = True
+    settings["features"]["sharpwave_analysis"] = True
+
+    settings["preprocessing"]["re_referencing"] = True
+    settings["preprocessing"]["raw_reseample"] = True
+    settings["preprocessing"]["notch_filter"] = True
+    settings["preprocessing"]["raw_normalization"] = False
+    settings["preprocessing"]["preprocessing_order"] = [
+        "raw_resampling",
+        "notch_filter",
+        "re_referencing",
+    ]
+
+    settings["postprocessing"]["feature_normalization"] = True
+    settings["postprocessing"]["project_cortex"] = False
+    settings["postprocessing"]["project_subcortex"] = False
 
     settings["fooof"]["periodic"]["center_frequency"] = False
     settings["fooof"]["periodic"]["band_width"] = False
     settings["fooof"]["periodic"]["height_over_ap"] = False
-
-    settings["methods"]["sharpwave_analysis"] = True
 
     for key in list(
         settings["sharpwave_analysis_settings"]["sharpwave_features"].keys()
@@ -159,7 +169,7 @@ def run_patient_GenericStream(f):
     stream.run(
         data=data_stream,
         folder_name=file_name,
-        out_path_root=os.path.join(PATH_DATA, "features_nonlinear_dynamic"),
+        out_path_root=os.path.join(PATH_DATA, "features_comp_again"),
     )
 
 

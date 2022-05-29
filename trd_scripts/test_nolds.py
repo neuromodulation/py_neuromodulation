@@ -15,13 +15,36 @@ from skopt import space as skopt_space
 
 
 def set_settings(settings: dict):
-    for method in list(settings["methods"].keys()):
-        settings["methods"][method] = False
+    for method in list(settings["features"].keys()):
+        settings["features"][method] = False
 
-    settings["methods"]["re_referencing"] = True
-    settings["methods"]["feature_normalization"] = True
-    settings["methods"]["nolds"] = True
-    settings["methods"]["raw_reseample"] = True
+    settings["preprocessing"]["re_referencing"] = True
+    settings["preprocessing"]["raw_reseample"] = True
+    settings["preprocessing"]["notch_filter"] = True
+    settings["preprocessing"]["raw_normalization"] = False
+    settings["preprocessing"]["preprocessing_order"] = [
+        "raw_resampling",
+        "notch_filter",
+        "re_referencing",
+    ]
+
+    settings["postprocessing"]["feature_normalization"] = True
+    settings["postprocessing"]["project_cortex"] = False
+    settings["postprocessing"]["project_subcortex"] = False
+
+    settings["features"]["nolds"] = True
+    settings["features"]["fft"] = True
+
+    settings["nolds_features"]["data"]["raw"] = True
+    settings["nolds_features"]["data"]["frequency_bands"] = [
+        "theta",
+        "alpha",
+        "low beta",
+        "high beta",
+        "low gamma",
+        "high gamma",
+        "HFA",
+    ]
 
     return settings
 
@@ -48,8 +71,8 @@ def run_example_BIDS():
     )
 
     nm_channels["used"] = 0
-    nm_channels.at[0, "used"] = 1
-    nm_channels.at[9, "target"] = 1
+    nm_channels.at[0, "used"] = 1  # select only one channel
+    nm_channels.at[9, "target"] = 1  # target is squared rotation
     nm_channels.at[8, "target"] = 0
 
     stream = nm.Stream(
@@ -78,54 +101,56 @@ def run_example_BIDS():
     feature_reader = nm_analysis.Feature_Reader(
         feature_dir=PATH_OUT, feature_file=RUN_NAME
     )
+    Anylze = False
+    if Anylze is True:
 
-    # plot for a single channel
-    ch_used = feature_reader.nm_channels.query(
-        '(type=="ecog") and (used == 1)'
-    ).iloc[0]["name"]
+        # plot for a single channel
+        ch_used = feature_reader.nm_channels.query(
+            '(type=="ecog") and (used == 1)'
+        ).iloc[0]["name"]
 
-    feature_used = (
-        "stft" if feature_reader.settings["methods"]["stft"] else "fft"
-    )
+        feature_used = (
+            "stft" if feature_reader.settings["methods"]["stft"] else "fft"
+        )
 
-    feature_reader.plot_target_averaged_channel(
-        ch=ch_used,
-        list_feature_keywords=[feature_used],
-        epoch_len=4,
-        threshold=0.5,
-    )
+        feature_reader.plot_target_averaged_channel(
+            ch=ch_used,
+            list_feature_keywords=[feature_used],
+            epoch_len=4,
+            threshold=0.5,
+        )
 
-    model = xgboost.XGBClassifier(use_label_encoder=False)
+        model = xgboost.XGBClassifier(use_label_encoder=False)
 
-    feature_reader.decoder = nm_decode.Decoder(
-        features=feature_reader.feature_arr,
-        label=feature_reader.label,
-        label_name=feature_reader.label_name,
-        used_chs=feature_reader.used_chs,
-        model=model,
-        eval_method=metrics.balanced_accuracy_score,
-        cv_method=model_selection.KFold(n_splits=3, shuffle=True),
-        get_movement_detection_rate=True,
-        min_consequent_count=2,
-        TRAIN_VAL_SPLIT=False,
-        RUN_BAY_OPT=False,
-        bay_opt_param_space=None,
-        use_nested_cv=True,
-        fs=feature_reader.settings["sampling_rate_features_hz"],
-    )
+        feature_reader.decoder = nm_decode.Decoder(
+            features=feature_reader.feature_arr,
+            label=feature_reader.label,
+            label_name=feature_reader.label_name,
+            used_chs=feature_reader.used_chs,
+            model=model,
+            eval_method=metrics.balanced_accuracy_score,
+            cv_method=model_selection.KFold(n_splits=3, shuffle=True),
+            get_movement_detection_rate=True,
+            min_consequent_count=2,
+            TRAIN_VAL_SPLIT=False,
+            RUN_BAY_OPT=False,
+            bay_opt_param_space=None,
+            use_nested_cv=True,
+            fs=feature_reader.settings["sampling_rate_features_hz"],
+        )
 
-    performances = feature_reader.run_ML_model(
-        estimate_channels=True,
-        estimate_gridpoints=False,
-        estimate_all_channels_combined=True,
-        save_results=True,
-    )
+        performances = feature_reader.run_ML_model(
+            estimate_channels=True,
+            estimate_gridpoints=False,
+            estimate_all_channels_combined=True,
+            save_results=True,
+        )
 
-    df_per = feature_reader.get_dataframe_performances(performances)
+        df_per = feature_reader.get_dataframe_performances(performances)
 
-    nm_plots.plot_df_subjects(
-        df_per, x_col="sub", y_col="performance_test", hue="all_combined"
-    )
+        nm_plots.plot_df_subjects(
+            df_per, x_col="sub", y_col="performance_test", hue="all_combined"
+        )
 
 
 if __name__ == "__main__":

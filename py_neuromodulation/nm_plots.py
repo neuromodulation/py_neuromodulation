@@ -48,11 +48,12 @@ def plot_df_subjects(
         s=5,
     )
 
-    # TODO: get number of unique hue elements
+    n_hues = df[hue].nunique()
+
     handles, labels = ax.get_legend_handles_labels()
     l = plt.legend(
-        handles[0:2],
-        labels[0:2],
+        handles[0:n_hues],
+        labels[0:n_hues],
         bbox_to_anchor=(1.05, 1),
         loc=2,
         borderaxespad=0.0,

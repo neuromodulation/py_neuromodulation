@@ -534,3 +534,36 @@ class PNStream(ABC):
             )
 
         return coords
+
+    def reset_settings(
+        self,
+    ) -> None:
+        for f in self.settings["features"]:
+            self.settings["features"][f] = False
+        for f in self.settings["preprocessing"]:
+            if f == "preprocessing_order":
+                self.settings["features"][f] = []
+            else:
+                self.settings["features"][f] = False
+        for f in self.settings["postprocessing"]:
+            self.settings["postprocessing"][f] = False
+
+    def set_settings_fast_compute(
+        self,
+    ) -> None:
+
+        self.reset_settings()
+        self.settings["features"]["fft"] = True
+        self.settings["preprocessing"]["re_referencing"] = True
+        self.settings["preprocessing"]["raw_reseample"] = True
+        self.settings["preprocessing"]["notch_filter"] = True
+        self.settings["preprocessing"]["raw_normalization"] = False
+        self.settings["preprocessing"]["preprocessing_order"] = [
+            "raw_resampling",
+            "notch_filter",
+            "re_referencing",
+        ]
+
+        self.settings["postprocessing"]["feature_normalization"] = True
+        self.settings["postprocessing"]["project_cortex"] = False
+        self.settings["postprocessing"]["project_subcortex"] = False
