@@ -4,13 +4,18 @@ import numpy as np
 from numpy.testing import assert_array_equal
 from pathlib import Path
 
-from py_neuromodulation import nm_BidsStream
+from py_neuromodulation import (
+    nm_generator,
+    nm_stream_offline,
+    nm_IO,
+    nm_define_nmchannels,
+)
 
 # https://stackoverflow.com/a/10253916/5060208
 # despite that pytest needs to be envoked by python: python -m pytest tests/
 
-class TestWrapper:
 
+class TestWrapper:
     def __init__(self):
         """This test function sets a data batch and automatic initialized M1 datafram
 
@@ -24,35 +29,76 @@ class TestWrapper:
             fs (float): example sampling frequency
         """
 
-        RUN_NAME = "sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg.vhdr"
+        sub = "testsub"
+        ses = "EphysMedOff"
+        task = "buttonpress"
+        run = 0
+        datatype = "ieeg"
+
+        RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}"
+
         PATH_RUN = os.path.join(
-            os.path.abspath(os.path.join('examples', 'data')),
-            'sub-testsub',
-            'ses-EphysMedOff',
-            'ieeg',
-            RUN_NAME
+            os.path.abspath(os.path.join("examples", "data")),
+            f"sub-{sub}",
+            f"ses-{ses}",
+            datatype,
+            RUN_NAME,
         )
-        PATH_BIDS = os.path.abspath(os.path.join('examples', 'data'))
-        PATH_OUT = os.path.abspath(os.path.join('examples', 'data', 'derivatives'))
-
-        # read default settings
-        self.nm_BIDS = nm_BidsStream.BidsStream(
-            PATH_RUN=PATH_RUN,
-            PATH_BIDS=PATH_BIDS,
-            PATH_OUT=PATH_OUT,
-            LIMIT_DATA=False
+        PATH_BIDS = os.path.abspath(os.path.join("examples", "data"))
+        PATH_OUT = os.path.abspath(
+            os.path.join("examples", "data", "derivatives")
         )
-        self.nm_channels = self.nm_BIDS.nm_channels
-        self.settings = self.nm_BIDS.settings
 
-        self.ieeg_batch = self.nm_BIDS.get_data()
+        (
+            raw,
+            self.data,
+            sfreq,
+            line_noise,
+            coord_list,
+            coord_names,
+        ) = nm_IO.read_BIDS_data(
+            PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype
+        )
 
-        self.nm_BIDS._set_run()
+        nm_channels = nm_define_nmchannels.set_channels(
+            ch_names=raw.ch_names,
+            ch_types=raw.get_channel_types(),
+            reference="default",
+            bads=raw.info["bads"],
+            new_names="default",
+            used_types=("ecog", "dbs", "seeg"),
+            target_keywords=("SQUARED_ROTATION",),
+        )
+
+        self.stream = nm_stream_offline.Stream(
+            settings=None,
+            nm_channels=nm_channels,
+            path_grids=None,
+            verbose=True,
+        )
+        self.stream.reset_settings()
+        self.stream.settings["fooof"]["aperiodic"]["exponent"] = True
+        self.stream.settings["fooof"]["aperiodic"]["offset"] = True
+        self.stream.settings["features"]["fooof"] = True
+
+        self.stream.init_stream(
+            sfreq=sfreq,
+            line_noise=line_noise,
+            coord_list=coord_list,
+            coord_names=coord_names,
+        )
 
     def test_fooof_features(self):
-        data = self.nm_BIDS.get_data()
-        feature_series = self.nm_BIDS.run_analysis.process_data(data)
+        generator = nm_generator.ieeg_raw_generator(
+            self.data, self.stream.settings, self.stream.sfreq
+        )
+        data_batch = next(generator, None)
+        feature_series = self.stream.run_analysis.process_data(data_batch)
+        # since the settings can define searching for "max_n_peaks" peaks
+        # there will be None's in the feature_series
+        # with a non successful fit, aperiod features can also be None
         assert feature_series is not None
+
 
 def test_fooof():
     test_wrapper = TestWrapper()
