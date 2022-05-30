@@ -38,12 +38,16 @@ class BandPassFilter:
         self,
         f_ranges: list[list],
         sfreq: int | float,
-        filter_length: str = "999ms",
+        filter_length: str | float = "999ms",
         l_trans_bandwidth: int | float | str = 4,
         h_trans_bandwidth: int | float | str = 4,
         verbose: bool | int | str | None = None,
     ) -> None:
         filter_bank = []
+        # mne create_filter function only accepts str and int
+        if isinstance(filter_length, float):
+            filter_length = int(filter_length)
+
         for f_range in f_ranges:
             filt = mne.filter.create_filter(
                 None,
