@@ -542,9 +542,9 @@ class PNStream(ABC):
             self.settings["features"][f] = False
         for f in self.settings["preprocessing"]:
             if f == "preprocessing_order":
-                self.settings["features"][f] = []
+                self.settings["preprocessing"][f] = []
             else:
-                self.settings["features"][f] = False
+                self.settings["preprocessing"][f] = False
         for f in self.settings["postprocessing"]:
             self.settings["postprocessing"][f] = False
 

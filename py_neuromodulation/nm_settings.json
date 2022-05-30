@@ -22,7 +22,8 @@
         "sharpwave_analysis": true,
         "coherence": true,
         "fooof": true,
-        "nolds": true
+        "nolds": true,
+        "bursts": true
     },
     "postprocessing": {
         "feature_normalization": true,
@@ -103,6 +104,21 @@
             "high gamma",
             "HFA"
         ]
+    },
+    "burst_settings": {
+        "threshold": 75,
+        "time_duration_s": 30,
+        "frequency_bands": [
+            "low beta",
+            "high beta",
+            "low gamma"
+        ],
+        "burst_features": {
+            "duration": true,
+            "amplitude": true,
+            "burst_rate_per_s": true,
+            "in_burst": true
+        }
     },
     "stft_settings": {
         "windowlength_ms": 500,

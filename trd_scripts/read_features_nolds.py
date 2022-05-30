@@ -38,10 +38,14 @@ def analyze_nolds():
             if "fft" not in f and "MOV" not in f and "time" not in f
         ]
     ]
+    features_nolds_raw = feature_reader.feature_arr[
+        [f for f in feature_reader.feature_arr.columns if "raw" in f]
+    ]
     features_all = feature_reader.feature_arr
     for features_, feature_names in [
         (features_fft, "fft"),
         (features_nolds, "nolds"),
+        (features_nolds_raw, "nolds_raw"),
         (features_all, "all"),
     ]:
         feature_reader.decoder = nm_decode.Decoder(

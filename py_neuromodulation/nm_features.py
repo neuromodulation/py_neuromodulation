@@ -1,4 +1,5 @@
 # from multiprocessing import Process, Manager
+import nm_bursts
 import numpy as np
 from typing import Iterable
 
@@ -59,6 +60,8 @@ class Features:
                     self.features.append(
                         nm_coherence.NM_Coherence(s, ch_names, sfreq)
                     )
+                case "bursts":
+                    self.features.append(nm_bursts.Burst(s, ch_names, sfreq))
 
     def estimate_features(self, data) -> dict:
         """Calculate features, as defined in settings.json
