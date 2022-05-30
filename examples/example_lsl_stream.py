@@ -7,6 +7,8 @@ from threading import Timer
 import numpy as np
 import pylsl
 import pickle
+from matplotlib import pyplot as plt
+from matplotlib.animation import FuncAnimation
 
 from pynput.keyboard import Key, Listener
 from py_neuromodulation import nm_lsl_stream, nm_define_nmchannels
@@ -196,8 +198,9 @@ class StreamApp:
         # predict features based on model
         STOP_COND = False
         counter_samples = 0
+        CREATE_FIG = True
 
-        feature_df = pd.DataFrame()
+        feature_df = []
 
         while STOP_COND is False:
             features_comp = queue_features.get()
@@ -224,32 +227,54 @@ class StreamApp:
                     label = "rest"
                 features_comp["label"] = label
             if self.PREDICTION is True:
-                predict = self.model.predict(features_comp)
-                print(predict)
+                # predict = self.model.predict(np.expand_dims(features_comp, axis=0))
+                prediction_proba = self.model.predict_proba(
+                    np.expand_dims(features_comp, axis=0)
+                )[0, :]
 
-            if features_comp.shape[0] == 0:
-                feature_df = pd.DataFrame(features_comp)
-            else:
-                feature_df = pd.concat([feature_df, features_comp])
+                def update_plt(axes):
+                    axes.bar([0, 1, 2], prediction_proba, color="blue")
+                    # axes.figure.canvas.draw()
+
+                def update(
+                    frame, prediction_proba
+                ):  # here frame needs to be accepted by the function since this is used in FuncAnimations
+                    # ax.bar([0, 1, 2], prediction_proba, color="blue")
+                    ln.set_data([0, 1, 2], prediction_proba)
+                    return (ln,)
+
+                if CREATE_FIG is True:
+                    CREATE_FIG = False
+                    
+                    # timer = fig.canvas.new_timer(interval=100)
+                    # timer.add_callback(update_plt, ax)
+                    # timer.start()
+
+                # ax.bar([0, 1, 2], prediction_proba, color="blue")
+                print(self.model.predict(np.expand_dims(features_comp, axis=0)))
+                # plt.show()
+
+            feature_df.append(features_comp)
 
             if self.VERBOSE is True:
                 print(
                     f"received features in process_features with shape {features_comp.shape}"
                 )
 
-    def terminate_session(self, feature_df: pd.DataFrame):
+    def terminate_session(self, feature_df: list):
         if self.VERBOSE is True:
             print("save features")
-        self.stream.save_after_stream(
-            self.PATH_OUT,
-            self.folder_name,
-            feature_arr=feature_df,
-        )
+        if self.TRAINING is True and self.PREDICTION is False:
+            self.stream.save_after_stream(
+                self.PATH_OUT,
+                self.folder_name,
+                feature_arr=pd.DataFrame(feature_df),
+            )
 
 
 if __name__ == "__main__":
 
-    app = StreamApp(VERBOSE=False, TRAINING=True)
+    app = StreamApp(VERBOSE=False, TRAINING=False, PREDICTION=True)
 
     streams = pylsl.resolve_streams(
         wait_time=1,
@@ -282,5 +307,7 @@ if __name__ == "__main__":
 
     listener = Listener(on_press=on_press, on_release=on_release)
     listener.start()
+
+    plt.show()
 
     app.start_processes()

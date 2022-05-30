@@ -1,6 +1,6 @@
 import pickle
 import os
-
+import numpy as np
 from sklearn import linear_model
 
 from py_neuromodulation import nm_analysis

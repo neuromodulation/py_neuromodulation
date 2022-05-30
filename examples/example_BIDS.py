@@ -62,6 +62,9 @@ def run_example_BIDS():
         verbose=True,
     )
 
+    stream.reset_settings()
+    stream.settings["features"]["bursts"] = True
+
     stream.init_stream(
         sfreq=sfreq,
         line_noise=line_noise,
