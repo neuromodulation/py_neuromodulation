@@ -22,7 +22,8 @@
         "sharpwave_analysis": true,
         "coherence": true,
         "fooof": true,
-        "nolds": true
+        "nolds": true,
+        "bursts": true
     },
     "postprocessing": {
         "feature_normalization": true,
@@ -104,6 +105,21 @@
             "HFA"
         ]
     },
+    "burst_settings": {
+        "threshold": 75,
+        "time_duration_s": 30,
+        "frequency_bands": [
+            "low beta",
+            "high beta",
+            "low gamma"
+        ],
+        "burst_features": {
+            "duration": true,
+            "amplitude": true,
+            "burst_rate_per_s": true,
+            "in_burst": true
+        }
+    },
     "stft_settings": {
         "windowlength_ms": 500,
         "log_transform": true,
@@ -129,8 +145,16 @@
             "decay_steepness": false,
             "slope_ratio": false
         },
-        "filter_low_cutoff_hz": 5,
-        "filter_high_cutoff_hz": 80,
+        "filter_ranges_hz": [
+            [
+                5,
+                80
+            ],
+            [
+                5,
+                30
+            ]
+        ],
         "detect_troughs": {
             "estimate": true,
             "distance_troughs_ms": 10,
@@ -214,6 +238,18 @@
         "correlation_dimension": true,
         "lyapunov_exponent": true,
         "hurst_exponent": true,
-        "detrended_fluctutaion_analysis": true
+        "detrended_fluctutaion_analysis": true,
+        "data": {
+            "raw": true,
+            "frequency_bands": [
+                "theta",
+                "alpha",
+                "low beta",
+                "high beta",
+                "low gamma",
+                "high gamma",
+                "HFA"
+            ]
+        }
     }
 }

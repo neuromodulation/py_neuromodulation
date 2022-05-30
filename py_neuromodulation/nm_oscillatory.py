@@ -8,11 +8,12 @@ from py_neuromodulation import nm_filter, nm_features_abc, nm_kalmanfilter
 
 class OscillatoryFeature(nm_features_abc.Feature, ABC):
     def __init__(
-        self, settings: dict, ch_names: Iterable[str], sfreq: float
+        self, settings: dict, ch_names: Iterable[str], sfreq: float, use_kf: bool=True
     ) -> None:
         self.s = settings
         self.sfreq = sfreq
         self.ch_names = ch_names
+        self.use_kf = use_kf
 
         self.fband_names = [
             value for value in settings["frequency_ranges_hz"].keys()
@@ -49,12 +50,13 @@ class OscillatoryFeature(nm_features_abc.Feature, ABC):
 
 class FFT(OscillatoryFeature):
     def __init__(
-        self, settings: dict, ch_names: Iterable[str], sfreq: float
+        self, settings: dict, ch_names: Iterable[str], sfreq: float, use_kf: bool=True,
     ) -> None:
         super().__init__(
-            settings, ch_names, sfreq
+            settings, ch_names, sfreq, use_kf
         )  # needs to be called to init KF_dict
-        self.init_KF("fft_settings")
+        if self.use_kf is True:
+            self.init_KF("fft_settings")
 
     def calc_feature(self, data: np.array, features_compute: dict) -> dict:
         for ch_idx, ch_name in enumerate(self.ch_names):
@@ -89,12 +91,13 @@ class FFT(OscillatoryFeature):
 
 class STFT(OscillatoryFeature):
     def __init__(
-        self, settings: dict, ch_names: Iterable[str], sfreq: float
+        self, settings: dict, ch_names: Iterable[str], sfreq: float, use_kf: bool=True,
     ) -> None:
         super().__init__(
-            settings, ch_names, sfreq
+            settings, ch_names, sfreq, use_kf
         )  # needs to be called to init KF_dict
-        self.init_KF("stft_settings")
+        if self.use_kf is True:
+            self.init_KF("stft_settings")
 
     def calc_feature(self, data: np.array, features_compute: dict) -> dict:
         for ch_idx, ch_name in enumerate(self.ch_names):
@@ -121,12 +124,13 @@ class STFT(OscillatoryFeature):
 
 class BandPower(OscillatoryFeature):
     def __init__(
-        self, settings: dict, ch_names: Iterable[str], sfreq: float
+        self, settings: dict, ch_names: Iterable[str], sfreq: float, use_kf: bool=True,
     ) -> None:
         super().__init__(
-            settings, ch_names, sfreq
+            settings, ch_names, sfreq, use_kf
         )  # needs to be called to init KF_dict
-        self.init_KF("bandpass_filter_settings")
+        if self.use_kf is True:
+            self.init_KF("bandpass_filter_settings")
 
         self.seglengths = np.floor(
             self.sfreq

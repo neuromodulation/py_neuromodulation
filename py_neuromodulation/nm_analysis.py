@@ -60,7 +60,7 @@ class Feature_Reader:
 
         self.settings = nm_IO.read_settings(PATH_READ_FILE)
         self.sidecar = nm_IO.read_sidecar(PATH_READ_FILE)
-        self.fs = self.sidecar["fs"]
+        self.fs = self.sidecar["sfreq"]
         self.nm_channels = nm_IO.read_nm_channels(PATH_READ_FILE)
         self.feature_arr = nm_IO.read_features(PATH_READ_FILE)
 
@@ -77,14 +77,14 @@ class Feature_Reader:
 
         # init plotter
         self.nmplotter = nm_plots.NM_Plot()
-
-        self.label_name = self._get_target_ch()
-        self.label = self.read_target_ch(
-            self.feature_arr,
-            self.label_name,
-            binarize=binarize_label,
-            binarize_th=0.3,
-        )
+        if self.nm_channels["target"].sum() > 0:
+            self.label_name = self._get_target_ch()
+            self.label = self.read_target_ch(
+                self.feature_arr,
+                self.label_name,
+                binarize=binarize_label,
+                binarize_th=0.3,
+            )
 
     def _get_target_ch(self) -> str:
         target_names = list(
@@ -255,9 +255,9 @@ class Feature_Reader:
             epoch_len=epoch_len,
             sfreq=self.settings["sampling_rate_features_hz"],
             feature_names=list(filtered_df.columns),
-            feature_str_add="_".join(list_feature_keywords),
+            feature_str_add="_".join(list_feature_keywords) if list_feature_keywords is not None else "all",
             cut_ch_name_cols=True,
-            ch_name=ch,
+            ch_name=ch if ch is not None else "ch",
             label_name=self.label_name,
             normalize_data=normalize_data,
             show_plot=True,
@@ -444,7 +444,7 @@ class Feature_Reader:
         estimate_channels: bool = True,
         estimate_all_channels_combined: bool = False,
         output_name: str = "LM",
-        save_results: bool = False,
+        save_results: bool = True,
     ):
         """machine learning model evaluation for ECoG strip channels and/or grid points
 
@@ -763,7 +763,7 @@ class Feature_Reader:
         return performance_dict
 
     @staticmethod
-    def get_dataframe_performances(p : dict) -> pd.DataFrame:
+    def get_dataframe_performances(p: dict) -> pd.DataFrame:
         df = pd.DataFrame()
         for sub in p.keys():
             for ch in p[sub].keys():

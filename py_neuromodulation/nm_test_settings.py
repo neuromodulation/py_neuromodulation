@@ -126,18 +126,19 @@ def test_settings(
             ].values()
         ), "Set at least one bandpower_feature to True."
     if s["features"]["sharpwave_analysis"] is True:
-        assert isinstance(
-            s["sharpwave_analysis_settings"]["filter_low_cutoff_hz"],
-            (int, float),
-        )
-        assert isinstance(
-            s["sharpwave_analysis_settings"]["filter_high_cutoff_hz"],
-            (int, float),
-        )
-        assert (
-            s["sharpwave_analysis_settings"]["filter_high_cutoff_hz"]
-            > s["sharpwave_analysis_settings"]["filter_low_cutoff_hz"]
-        )
+        for filter_range in s["sharpwave_analysis_settings"]["filter_ranges_hz"]:
+            assert isinstance(
+                filter_range[0],
+                (int, float),
+            )
+            assert isinstance(
+                filter_range[1],
+                (int, float),
+            )
+            assert (
+                filter_range[1]
+                > filter_range[0]
+            )
 
     if s["features"]["coherence"] is True:
         assert (

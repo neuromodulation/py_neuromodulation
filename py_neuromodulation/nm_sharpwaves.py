@@ -18,17 +18,27 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
         self.sw_settings = settings["sharpwave_analysis_settings"]
         self.sfreq = sfreq
         self.ch_names = ch_names
-        self.filter = create_filter(
-            None,
-            sfreq,
-            l_freq=self.sw_settings["filter_low_cutoff_hz"],
-            h_freq=self.sw_settings["filter_high_cutoff_hz"],
-            fir_design="firwin",
-            l_trans_bandwidth=5,
-            h_trans_bandwidth=5,
-            filter_length=str(sfreq) + "ms",
-            verbose=False,
-        )
+        self.list_filter = []
+        for filter_range in settings["sharpwave_analysis_settings"][
+            "filter_ranges_hz"
+        ]:
+
+            self.list_filter.append(
+                (
+                    f"range_{filter_range[0]}_{filter_range[1]}",
+                    create_filter(
+                        None,
+                        sfreq,
+                        l_freq=filter_range[0],
+                        h_freq=filter_range[1],
+                        fir_design="firwin",
+                        l_trans_bandwidth=5,
+                        h_trans_bandwidth=5,
+                        filter_length=str(sfreq) + "ms",
+                        verbose=False,
+                    ),
+                )
+            )
 
         # initialize used features
         self.used_features = list()
@@ -128,76 +138,89 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
         features_ (dict): set features for Features.py object
         """
         for ch_idx, ch_name in enumerate(self.ch_names):
-            self.filtered_data = convolve(
-                data[ch_idx, :], self.filter, mode="same"
-            )
+            for filter_name, filter in self.list_filter:
+                self.filtered_data = convolve(
+                    data[ch_idx, :], filter, mode="same"
+                )
 
-            # check settings if troughs and peaks are analyzed
+                # check settings if troughs and peaks are analyzed
 
-            dict_ch_features = {}
+                dict_ch_features = {}
 
-            for detect_troughs in [False, True]:
+                for detect_troughs in [False, True]:
 
-                if detect_troughs is False:
-                    if self.sw_settings["detect_peaks"]["estimate"] is False:
-                        continue
-                    key_name_pt = "Peak"
-                    # the detect_troughs loop start with peaks, s.t. data does not
-                    # need to be flipped
+                    if detect_troughs is False:
+                        if (
+                            self.sw_settings["detect_peaks"]["estimate"]
+                            is False
+                        ):
+                            continue
+                        key_name_pt = "Peak"
+                        # the detect_troughs loop start with peaks, s.t. data does not
+                        # need to be flipped
 
-                if detect_troughs is True:
-                    if self.sw_settings["detect_troughs"]["estimate"] is False:
-                        continue
-                    key_name_pt = "Trough"
+                    if detect_troughs is True:
+                        if (
+                            self.sw_settings["detect_troughs"]["estimate"]
+                            is False
+                        ):
+                            continue
+                        key_name_pt = "Trough"
 
-                    self.filtered_data = -self.filtered_data
+                        self.filtered_data = -self.filtered_data
 
-                self.initialize_sw_features()  # reset sharpwave feature attriubtes to empty lists
-                self.analyze_waveform()
+                    self.initialize_sw_features()  # reset sharpwave feature attriubtes to empty lists
+                    self.analyze_waveform()
 
-                # this function needs to looks different;
-                # for each feature take the respective fun.
-                for feature_idx, feature_name in enumerate(self.used_features):
-                    key_name = "_".join(
-                        [
-                            ch_name,
-                            "Sharpwave",
-                            self.estimator_names[feature_idx].title(),
-                            feature_name,
-                        ]
-                    )
-                    val = (
-                        self.estimator_functions[feature_idx](
-                            getattr(self, feature_name)
+                    # for each feature take the respective fun.
+                    for feature_idx, feature_name in enumerate(
+                        self.used_features
+                    ):
+                        key_name = "_".join(
+                            [
+                                ch_name,
+                                "Sharpwave",
+                                self.estimator_names[feature_idx].title(),
+                                feature_name,
+                                filter_name,
+                            ]
                         )
-                        if len(getattr(self, feature_name)) != 0
-                        else 0
-                    )
-                    if key_name not in dict_ch_features:
-                        dict_ch_features[key_name] = {}
-                    dict_ch_features[key_name][key_name_pt] = val
+                        val = (
+                            self.estimator_functions[feature_idx](
+                                getattr(self, feature_name)
+                            )
+                            if len(getattr(self, feature_name)) != 0
+                            else 0
+                        )
+                        if key_name not in dict_ch_features:
+                            dict_ch_features[key_name] = {}
+                        dict_ch_features[key_name][key_name_pt] = val
 
-            if self.sw_settings["apply_estimator_between_peaks_and_troughs"]:
-                # apply between 'Trough' and 'Peak' the respective function again
-                # save only the 'est_fun' (e.g. max) between them
+                if self.sw_settings[
+                    "apply_estimator_between_peaks_and_troughs"
+                ]:
+                    # apply between 'Trough' and 'Peak' the respective function again
+                    # save only the 'est_fun' (e.g. max) between them
 
-                for idx, key_name in enumerate(dict_ch_features):
-                    # the key_name stays, since the estimator function stays between peaks and troughs
-                    features_compute[key_name] = self.estimator_functions[idx](
-                        [
-                            list(dict_ch_features[key_name].values())[0],
-                            list(dict_ch_features[key_name].values())[1],
-                        ]
-                    )
+                    for idx, key_name in enumerate(dict_ch_features):
+                        # the key_name stays, since the estimator function stays between peaks and troughs
+                        features_compute[key_name] = self.estimator_functions[
+                            idx
+                        ](
+                            [
+                                list(dict_ch_features[key_name].values())[0],
+                                list(dict_ch_features[key_name].values())[1],
+                            ]
+                        )
 
-            else:
-                # otherwise, save all
-                # write all "flatted" key value pairs in features_
-                for key, value in dict_ch_features.items():
-                    for key_sub, value_sub in dict_ch_features[key].items():
-                        features_compute[
-                            key + "_analyze_" + key_sub
-                        ] = value_sub
+                else:
+                    # otherwise, save all
+                    # write all "flatted" key value pairs in features_
+                    for key, value in dict_ch_features.items():
+                        for key_sub, value_sub in dict_ch_features[key].items():
+                            features_compute[
+                                key + "_analyze_" + key_sub
+                            ] = value_sub
 
         return features_compute
 
