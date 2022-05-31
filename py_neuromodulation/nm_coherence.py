@@ -82,7 +82,7 @@ class NM_Coherence(nm_features_abc.Feature):
         self.ch_names = ch_names
 
         for idx_coh in range(len(self.s["coherence"]["channels"])):
-            fband_names = self.s["coherence"]["frequency_bands"][idx_coh]
+            fband_names = self.s["coherence"]["frequency_bands"]
             fband_specs = []
             for band_name in fband_names:
                 fband_specs.append(self.s["frequency_ranges_hz"][band_name])
@@ -102,15 +102,15 @@ class NM_Coherence(nm_features_abc.Feature):
             self.coherence_objects.append(
                 CoherenceObject(
                     sfreq,
-                    self.s["coherence"]["params"][idx_coh]["window"],
+                    self.s["coherence"]["params"]["window"],
                     fband_specs,
                     fband_names,
                     ch_1_name,
                     ch_2_name,
                     ch_1_idx,
                     ch_2_idx,
-                    self.s["coherence"]["method"][idx_coh]["coh"],
-                    self.s["coherence"]["method"][idx_coh]["icoh"],
+                    self.s["coherence"]["method"]["coh"],
+                    self.s["coherence"]["method"]["icoh"],
                 )
             )
 
