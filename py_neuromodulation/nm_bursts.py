@@ -2,9 +2,7 @@ import enum
 import numpy as np
 from typing import Iterable
 
-from pkg_resources import get_build_platform
-
-from py_neuromodulation import nm_features_abc, nm_oscillatory, nm_filter
+from py_neuromodulation import nm_features_abc, nm_filter
 
 
 class Burst(nm_features_abc.Feature):
@@ -85,11 +83,19 @@ class Burst(nm_features_abc.Feature):
                 )
 
                 features_compute[
-                    f"bursts_{ch_name}_{fband_name}_duration"
+                    f"bursts_{ch_name}_{fband_name}_duration_mean"
                 ] = np.mean(burst_length)
                 features_compute[
-                    f"bursts_{ch_name}_{fband_name}_amplitude"
+                    f"bursts_{ch_name}_{fband_name}_amplitude_mean"
                 ] = np.mean([np.mean(a) for a in burst_amplitude])
+
+                features_compute[
+                    f"bursts_{ch_name}_{fband_name}_duration_max"
+                ] = np.max(burst_length)
+                features_compute[
+                    f"bursts_{ch_name}_{fband_name}_amplitude_max"
+                ] = np.max([np.max(a) for a in burst_amplitude])
+
                 features_compute[
                     f"bursts_{ch_name}_{fband_name}_burst_rate_per_s"
                 ] = np.mean(burst_length) / (
