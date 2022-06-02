@@ -52,23 +52,20 @@ def _todict(matobj):
 
 
 def set_settings(settings: dict):
-    for method in list(settings["methods"].keys()):
-        settings["methods"][method] = False
 
     settings["features"]["fft"] = True
     settings["features"]["fooof"] = True
     settings["features"]["return_raw"] = True
     settings["features"]["raw_hjorth"] = True
     settings["features"]["sharpwave_analysis"] = True
+    settings["features"]["nolds"] = True
+    settings["features"]["bursts"] = True
+    settings["features"]["coherence"] = True
 
-    settings["preprocessing"]["re_referencing"] = True
-    settings["preprocessing"]["raw_reseample"] = True
-    settings["preprocessing"]["notch_filter"] = True
-    settings["preprocessing"]["raw_normalization"] = False
+    settings["preprocessing"]["re_referencing"] = False
     settings["preprocessing"]["preprocessing_order"] = [
         "raw_resampling",
         "notch_filter",
-        "re_referencing",
     ]
 
     settings["postprocessing"]["feature_normalization"] = True
@@ -91,11 +88,51 @@ def set_settings(settings: dict):
     settings["sharpwave_analysis_settings"]["sharpwave_features"][
         "peak_right"
     ] = False
+    settings["sharpwave_analysis_settings"]["sharpwave_features"][
+        "trough"
+    ] = False
     settings["sharpwave_analysis_settings"][
         "apply_estimator_between_peaks_and_troughs"
     ] = True
-    settings["sharpwave_analysis_settings"]["filter_low_cutoff"] = 5
-    settings["sharpwave_analysis_settings"]["filter_high_cutoff"] = 40
+
+    settings["sharpwave_analysis_settings"]["estimator"]["max"] = [
+        "prominence",
+        "sharpness",
+    ]
+    settings["sharpwave_analysis_settings"]["estimator"]["mean"] = [
+        "width",
+        "interval",
+        "decay_time",
+        "rise_time",
+        "rise_steepness",
+        "decay_steepness",
+        "slope_ratio",
+    ]
+
+    settings["coherence"]["channels"] = [
+        ["Cg25L01", "Cg25L03"],
+        ["Cg25R01", "Cg25R03"],
+        ["Cg25L01", "Cg25R03"],
+        ["Cg25R01", "Cg25L03"],
+    ]
+
+    settings["coherence"]["frequency_bands"] = ["high beta", "low gamma"]
+    settings["coherence"]["method"]["coh"] = True
+    settings["coherence"]["method"]["icoh"] = True
+
+    settings["nolds_features"]["sample_entropy"] = False
+    settings["nolds_features"]["correlation_dimension"] = False
+    settings["nolds_features"]["lyapunov_exponent"] = False
+    settings["nolds_features"]["hurst_exponent"] = True
+    settings["nolds_features"]["detrended_fluctutaion_analysis"] = False
+    settings["nolds_features"]["data"]["raw"] = True
+    settings["nolds_features"]["data"]["frequency_bands"] = [
+        "low beta",
+        "high beta",
+        "low gamma",
+        "HFA",
+    ]
+
     return settings
 
 
@@ -155,12 +192,14 @@ def run_patient_GenericStream(f):
         verbose=True,
     )
 
+    stream.set_settings_fast_compute()
+
+    stream.settings = set_settings(stream.settings)
+
     stream.init_stream(
         sfreq=dat["fsample"],
         line_noise=50,
     )
-
-    stream.settings = set_settings(stream.settings)
 
     stream.nm_channels.loc[
         stream.nm_channels.query('type == "misc"').index, "target"
@@ -169,7 +208,7 @@ def run_patient_GenericStream(f):
     stream.run(
         data=data_stream,
         folder_name=file_name,
-        out_path_root=os.path.join(PATH_DATA, "features_comp_again"),
+        out_path_root=os.path.join(PATH_DATA, "30_05"),
     )
 
 

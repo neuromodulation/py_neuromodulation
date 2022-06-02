@@ -1,4 +1,10 @@
-from sklearn import model_selection, metrics, linear_model, discriminant_analysis, base
+from sklearn import (
+    model_selection,
+    metrics,
+    linear_model,
+    discriminant_analysis,
+    base,
+)
 from skopt.space import Real, Integer, Categorical
 from skopt.utils import use_named_args
 from skopt import gp_minimize, Optimizer
@@ -15,13 +21,16 @@ import json
 import numpy as np
 from numba import jit
 import xgboost
+from mrmr import mrmr_classif
 from typing import Type
 import _pickle as cPickle
 
 
 class CV_res:
     def __init__(
-        self, get_movement_detection_rate: bool = False, RUN_BAY_OPT: bool = False
+        self,
+        get_movement_detection_rate: bool = False,
+        RUN_BAY_OPT: bool = False,
     ) -> None:
 
         self.score_train = []
@@ -175,17 +184,12 @@ class Decoder:
         self.features = features
         self.label = label
         self.label_name = label_name
-        self.data = np.nan_to_num(
-            np.array(
-                self.features[
-                    [
-                        col
-                        for col in self.features.columns
-                        if not (("time" in col) or (self.label_name in col))
-                    ]
-                ]
-            )
-        )
+        self.feature_names = [
+            col
+            for col in self.features.columns
+            if not (("time" in col) or (self.label_name in col))
+        ]
+        self.data = np.nan_to_num(np.array(self.features[self.feature_names]))
         self.used_chs = used_chs
 
     def set_data_ind_channels(self):
@@ -195,7 +199,11 @@ class Decoder:
             self.ch_ind_data[ch] = np.nan_to_num(
                 np.array(
                     self.features[
-                        [col for col in self.features.columns if col.startswith(ch)]
+                        [
+                            col
+                            for col in self.features.columns
+                            if col.startswith(ch)
+                        ]
                     ]
                 )
             )
@@ -236,8 +244,13 @@ class Decoder:
             if self.save_coef:
                 set_score("coef", cv_res.coef)
             if self.get_movement_detection_rate:
-                set_score("mov_detection_rates_test", cv_res.mov_detection_rates_test)
-                set_score("mov_detection_rates_train", cv_res.mov_detection_rates_train)
+                set_score(
+                    "mov_detection_rates_test", cv_res.mov_detection_rates_test
+                )
+                set_score(
+                    "mov_detection_rates_train",
+                    cv_res.mov_detection_rates_train,
+                )
                 set_score("fprate_test", cv_res.fprate_test)
                 set_score("fprate_train", cv_res.fprate_train)
                 set_score("tprate_test", cv_res.tprate_test)
@@ -266,12 +279,16 @@ class Decoder:
             "grid_points",
         ]
         if feature_contacts not in valid_feature_contacts:
-            raise ValueError(f"{feature_contacts} not in {valid_feature_contacts}")
+            raise ValueError(
+                f"{feature_contacts} not in {valid_feature_contacts}"
+            )
 
         if feature_contacts == "grid_points":
             for grid_point in self.active_gridpoints:
                 self.run_CV(self.grid_point_ind_data[grid_point], self.label)
-                self.set_CV_results("gridpoint_ind_results", contact_point=grid_point)
+                self.set_CV_results(
+                    "gridpoint_ind_results", contact_point=grid_point
+                )
             return self.gridpoint_ind_results
 
         if feature_contacts == "ind_channels":
@@ -281,7 +298,7 @@ class Decoder:
             return self.ch_ind_results
 
         if feature_contacts == "all_channels_combined":
-            dat_combined = np.concatenate(list(self.ch_ind_data.values()), axis=1)
+            dat_combined = np.array(self.features)
             self.run_CV(dat_combined, self.label)
             self.set_CV_results("all_ch_results", contact_point=None)
             return self.all_ch_results
@@ -307,7 +324,9 @@ class Decoder:
 
         if subcortex_only:
             self.active_gridpoints = [
-                i for i in self.active_gridpoints if i.startswith("gridsubcortex")
+                i
+                for i in self.active_gridpoints
+                if i.startswith("gridsubcortex")
             ]
 
         self.feature_names = [
@@ -349,7 +368,9 @@ class Decoder:
             count of individual movement blocks
         """
         mask = prediction > threshold
-        structure = [True] * min_consequent_count  # used for erosion and dilation
+        structure = [
+            True
+        ] * min_consequent_count  # used for erosion and dilation
         eroded = binary_erosion(mask, structure)
         dilated = binary_dilation(eroded, structure)
         labeled_array, labels_count = label_ndimage(dilated)
@@ -392,13 +413,17 @@ class Decoder:
         hit_rate = np.zeros(labels_count)
         pred_group_bin = np.array(pred_grouped > 0)
 
-        for label_number in range(1, labels_count + 1):  # labeling starts from 1
+        for label_number in range(
+            1, labels_count + 1
+        ):  # labeling starts from 1
             hit_rate[label_number - 1] = np.sum(
                 pred_group_bin[np.where(y_grouped == label_number)[0]]
             )
 
         try:
-            mov_detection_rate = np.where(hit_rate > 0)[0].shape[0] / labels_count
+            mov_detection_rate = (
+                np.where(hit_rate > 0)[0].shape[0] / labels_count
+            )
         except ZeroDivisionError:
             print("no movements in label")
             return 0, 0, 0
@@ -430,14 +455,17 @@ class Decoder:
         for time_idx, time_ in enumerate(np.arange(n, X.shape[0])):
             for time_point in range(n):
                 time_arr[
-                    time_idx, time_point * X.shape[1] : (time_point + 1) * X.shape[1]
+                    time_idx,
+                    time_point * X.shape[1] : (time_point + 1) * X.shape[1],
                 ] = X[time_ - time_point, :]
         return time_arr, y[n:]
 
     @staticmethod
     def append_samples_val(X_train, y_train, X_val, y_val, n):
 
-        X_train, y_train = Decoder.append_previous_n_samples(X_train, y_train, n=n)
+        X_train, y_train = Decoder.append_previous_n_samples(
+            X_train, y_train, n=n
+        )
         X_val, y_val = Decoder.append_previous_n_samples(X_val, y_val, n=n)
         return X_train, y_train, X_val, y_val
 
@@ -500,7 +528,9 @@ class Decoder:
                 X_train, y_train = self.rus.fit_resample(X_train, y_train)
 
             if type(model) is xgboost.sklearn.XGBClassifier:
-                model.fit(X_train, y_train, eval_metric="logloss")  # to avoid warning
+                model.fit(
+                    X_train, y_train, eval_metric="logloss"
+                )  # to avoid warning
             else:
                 model.fit(X_train, y_train)
 
@@ -564,7 +594,10 @@ class Decoder:
     ) -> Type[CV_res]:
 
         mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(
-            y_test, y_test_pr, self.mov_detection_threshold, self.min_consequent_count
+            y_test,
+            y_test_pr,
+            self.mov_detection_threshold,
+            self.min_consequent_count,
         )
 
         cv_res.mov_detection_rates_test.append(mov_detection_rate)
@@ -572,7 +605,10 @@ class Decoder:
         cv_res.fprate_test.append(fpr)
 
         mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(
-            y_train, y_train_pr, self.mov_detection_threshold, self.min_consequent_count
+            y_train,
+            y_train_pr,
+            self.mov_detection_threshold,
+            self.min_consequent_count,
         )
 
         cv_res.mov_detection_rates_train.append(mov_detection_rate)
@@ -596,7 +632,11 @@ class Decoder:
         if self.STACK_FEATURES_N_SAMPLES is True:
             if X_test is not None:
                 X_train, y_train, X_test, y_test = Decoder.append_samples_val(
-                    X_train, y_train, X_test, y_test, n=self.time_stack_n_samples
+                    X_train,
+                    y_train,
+                    X_test,
+                    y_test,
+                    n=self.time_stack_n_samples,
                 )
             else:
                 X_train, y_train = Decoder.append_previous_n_samples(
@@ -610,6 +650,17 @@ class Decoder:
 
         if self.RUN_BAY_OPT is True:
             model_train = self.bay_opt_wrapper(model_train, X_train, y_train)
+
+        if len(self.feature_names) > X_train.shape[1]:
+            feature_names_ch = self.feature_names[: X_train.shape[1]]
+            X_train = pd.DataFrame(X_train, columns=feature_names_ch)
+        else:
+            X_train = pd.DataFrame(X_train, columns=self.feature_names)
+        y_train = pd.Series(y_train)
+        selected_features = mrmr_classif(X=X_train, y=y_train, K=10, n_jobs=60)
+
+        X_train = X_train[selected_features]
+        X_test = X_test[selected_features]
 
         # fit model
         model_train = self.fit_model(model_train, X_train, y_train)
@@ -646,9 +697,12 @@ class Decoder:
 
                 if test_area_points > test_points:
                     start_index = np.random.randint(
-                        int(self.fs * 10), N_samples - self.fs * 10 - test_points
+                        int(self.fs * 10),
+                        N_samples - self.fs * 10 - test_points,
                     )
-                    test_index = np.arange(start_index, start_index + test_points)
+                    test_index = np.arange(
+                        start_index, start_index + test_points
+                    )
                     train_index = np.concatenate(
                         (
                             np.arange(0, start_index),
@@ -662,11 +716,16 @@ class Decoder:
                     cv_single_tr_te_split = model_selection.check_cv(
                         cv=[
                             model_selection.train_test_split(
-                                np.arange(data.shape[0]), test_size=0.3, shuffle=False
+                                np.arange(data.shape[0]),
+                                test_size=0.3,
+                                shuffle=False,
                             )
                         ]
                     )
-                    for train_index, test_index in cv_single_tr_te_split.split():
+                    for (
+                        train_index,
+                        test_index,
+                    ) in cv_single_tr_te_split.split():
                         yield train_index, test_index
             else:
                 for train_index, test_index in self.cv_method.split(data):
@@ -690,7 +749,9 @@ class Decoder:
             if self.use_nested_cv is True:
                 data_inner = data[train_index]
                 label_inner = label[train_index]
-                for train_index_inner, test_index_inner in split_data(data_inner):
+                for train_index_inner, test_index_inner in split_data(
+                    data_inner
+                ):
                     X_train_inner = data_inner[train_index_inner, :]
                     y_train_inner = label_inner[train_index_inner]
                     X_test_inner = data_inner[test_index_inner]
@@ -715,7 +776,12 @@ class Decoder:
         Save best params into self.best_bay_opt_params
         """
 
-        X_train_bo, X_test_bo, y_train_bo, y_test_bo = model_selection.train_test_split(
+        (
+            X_train_bo,
+            X_test_bo,
+            y_train_bo,
+            y_test_bo,
+        ) = model_selection.train_test_split(
             X_train, y_train, train_size=0.7, shuffle=False
         )
 
@@ -812,7 +878,9 @@ class Decoder:
         # res is here automatically appended by skopt
         return res.x
 
-    def save(self, feature_path: str, feature_file: str, str_save_add=None) -> None:
+    def save(
+        self, feature_path: str, feature_file: str, str_save_add=None
+    ) -> None:
         """Save decoder object to pickle"""
 
         # why is the decoder not saved to a .json?

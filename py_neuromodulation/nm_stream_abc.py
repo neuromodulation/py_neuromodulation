@@ -555,7 +555,7 @@ class PNStream(ABC):
         self.reset_settings()
         self.settings["features"]["fft"] = True
         self.settings["preprocessing"]["re_referencing"] = True
-        self.settings["preprocessing"]["raw_reseample"] = True
+        self.settings["preprocessing"]["raw_resampling"] = True
         self.settings["preprocessing"]["notch_filter"] = True
         self.settings["preprocessing"]["raw_normalization"] = False
         self.settings["preprocessing"]["preprocessing_order"] = [

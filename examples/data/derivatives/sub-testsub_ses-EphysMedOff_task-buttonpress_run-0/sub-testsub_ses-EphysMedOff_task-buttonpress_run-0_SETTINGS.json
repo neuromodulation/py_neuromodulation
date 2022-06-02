@@ -1,25 +1,29 @@
 {
-    "out_path": "C:\\Users\\ICN_admin\\Documents\\py_neuromodulation\\examples\\rt_example",
     "sampling_rate_features_hz": 10,
     "segment_length_features_ms": 1000,
-    "methods": {
-        "raw_resampling": true,
+    "preprocessing": {
+        "raw_resampling": false,
         "raw_normalization": false,
-        "feature_normalization": true,
-        "kalman_filter": false,
-        "re_referencing": true,
-        "notch_filter": true,
+        "re_referencing": false,
+        "notch_filter": false,
+        "preprocessing_order": []
+    },
+    "features": {
+        "raw_hjorth": false,
+        "return_raw": false,
         "bandpass_filter": false,
         "stft": false,
-        "fft": true,
-        "raw_hjorth": true,
+        "fft": false,
         "sharpwave_analysis": false,
-        "return_raw": true,
-        "project_cortex": false,
-        "project_subcortex": false,
         "coherence": false,
         "fooof": false,
-        "nolds": false
+        "nolds": false,
+        "bursts": true
+    },
+    "postprocessing": {
+        "feature_normalization": false,
+        "project_cortex": false,
+        "project_subcortex": false
     },
     "raw_resampling_settings": {
         "resample_freq_hz": 1000
@@ -33,28 +37,6 @@
         "normalization_time_s": 30,
         "normalization_method": "zscore",
         "clip": 3
-    },
-    "kalman_filter_settings": {
-        "Tp": 0.1,
-        "sigma_w": 0.7,
-        "sigma_v": 1,
-        "frequency_bands": [
-            "theta",
-            "alpha",
-            "low beta",
-            "high beta",
-            "low gamma",
-            "high gamma",
-            "HFA"
-        ]
-    },
-    "stft_settings": {
-        "windowlength_ms": 500,
-        "log_transform": true
-    },
-    "fft_settings": {
-        "windowlength_ms": 1000,
-        "log_transform": true
     },
     "frequency_ranges_hz": {
         "theta": [
@@ -101,7 +83,47 @@
             "mobility": false,
             "complexity": false
         },
-        "log_transform": true
+        "log_transform": true,
+        "kalman_filter": true
+    },
+    "kalman_filter_settings": {
+        "Tp": 0.1,
+        "sigma_w": 0.7,
+        "sigma_v": 1,
+        "frequency_bands": [
+            "theta",
+            "alpha",
+            "low beta",
+            "high beta",
+            "low gamma",
+            "high gamma",
+            "HFA"
+        ]
+    },
+    "burst_settings": {
+        "threshold": 75,
+        "time_duration_s": 30,
+        "frequency_bands": [
+            "low beta",
+            "high beta",
+            "low gamma"
+        ],
+        "burst_features": {
+            "duration": true,
+            "amplitude": true,
+            "burst_rate_per_s": true,
+            "in_burst": true
+        }
+    },
+    "stft_settings": {
+        "windowlength_ms": 500,
+        "log_transform": true,
+        "kalman_filter": true
+    },
+    "fft_settings": {
+        "windowlength_ms": 1000,
+        "log_transform": true,
+        "kalman_filter": true
     },
     "sharpwave_analysis_settings": {
         "sharpwave_features": {
@@ -118,8 +140,16 @@
             "decay_steepness": false,
             "slope_ratio": false
         },
-        "filter_low_cutoff_hz": 5,
-        "filter_high_cutoff_hz": 80,
+        "filter_ranges_hz": [
+            [
+                5,
+                80
+            ],
+            [
+                5,
+                30
+            ]
+        ],
         "detect_troughs": {
             "estimate": true,
             "distance_troughs_ms": 10,
@@ -158,21 +188,15 @@
             ]
         ],
         "frequency_bands": [
-            [
-                "high beta"
-            ]
+            "high beta"
         ],
-        "method": [
-            {
-                "coh": true,
-                "icoh": true
-            }
-        ],
-        "params": [
-            {
-                "window": "hann"
-            }
-        ]
+        "method": {
+            "coh": true,
+            "icoh": true
+        },
+        "params": {
+            "window": "hann"
+        }
     },
     "fooof": {
         "aperiodic": {
@@ -203,6 +227,18 @@
         "correlation_dimension": true,
         "lyapunov_exponent": true,
         "hurst_exponent": true,
-        "detrended_fluctutaion_analysis": true
+        "detrended_fluctutaion_analysis": true,
+        "data": {
+            "raw": true,
+            "frequency_bands": [
+                "theta",
+                "alpha",
+                "low beta",
+                "high beta",
+                "low gamma",
+                "high gamma",
+                "HFA"
+            ]
+        }
     }
 }
