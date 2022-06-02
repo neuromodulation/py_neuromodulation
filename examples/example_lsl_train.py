@@ -5,7 +5,7 @@ from sklearn import linear_model
 
 from py_neuromodulation import nm_analysis
 
-PATH_OUT = r"C:\Users\ICN_admin\Documents\LSL_Test"
+PATH_OUT = "/Users/hi/Documents/py_neuromodulation/examples/model_real_time_train"
 folder_name = "Test"
 
 

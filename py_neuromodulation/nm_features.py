@@ -1,5 +1,4 @@
 # from multiprocessing import Process, Manager
-import nm_bursts
 import numpy as np
 from typing import Iterable
 
@@ -11,6 +10,7 @@ from py_neuromodulation import (
     nm_nolds,
     nm_features_abc,
     nm_oscillatory,
+    nm_bursts,
 )
 
 

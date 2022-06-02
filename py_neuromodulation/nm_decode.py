@@ -21,7 +21,8 @@ import json
 import numpy as np
 from numba import jit
 import xgboost
-from mrmr import mrmr_classif
+
+# from mrmr import mrmr_classif
 from typing import Type
 import _pickle as cPickle
 

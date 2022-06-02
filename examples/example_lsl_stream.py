@@ -1,8 +1,10 @@
 from audioop import mul
-import nm_stream_abc
+from lib2to3.pytree import Base
 import pandas as pd
 import os
 import multiprocessing
+
+
 from threading import Timer
 import numpy as np
 import pylsl
@@ -15,6 +17,7 @@ from py_neuromodulation import (
     nm_lsl_stream,
     nm_define_nmchannels,
     nm_RealTimeStreamApp,
+    nm_stream_abc,
 )
 
 
@@ -93,8 +96,8 @@ def main():
         VERBOSE=False,
         TRAINING=False,
         PREDICTION=True,
-        fig=None,
-        ax=None,
+        training_samples_each_cond_s=30,
+        PATH_OUT="/Users/hi/Documents/py_neuromodulation/examples/model_real_time_train",
     )
 
     # pylsl needs to be started from the main thread
@@ -115,7 +118,7 @@ def main():
         print("{0} pressed".format(key))
 
     def on_release(key):
-        if key == Key.esc:
+        if key == Key.caps_lock:
             # Stop listener
             print("reiceived stop key pressed")
 
@@ -160,15 +163,18 @@ def main():
         data = queue_plotting.get()  # this blocks untill it gets some data
         for idx, rect in enumerate(bar_plt):
             rect.set_height(data[idx])
-        plt.pause(0.002)
+        plt.pause(0.05)
         return bar_plt
 
-    fig, ax = plt.subplots()
-    bar_plt = plt.bar([0, 1, 2], [0, 1, 2])
-    plt.xticks([0, 1, 2], ["rest", "left", "right"])
+    if app.PREDICTION is True:
+        fig, ax = plt.subplots()
+        bar_plt = plt.bar([0, 1, 2], [0, 1, 2])
+        plt.xticks([0, 1, 2], ["left", "rest", "right"])
 
-    ani = FuncAnimation(fig, update, blit=False, fargs=(app.queue_plotting,))
-    plt.show()
+        ani = FuncAnimation(
+            fig, update, blit=False, fargs=(app.queue_plotting,)
+        )
+        plt.show()
 
     for p in processes:
         p.join()

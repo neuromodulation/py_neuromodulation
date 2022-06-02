@@ -1,5 +1,8 @@
+from multiprocessing import managers
 import os
 import multiprocessing
+from multiprocessing.managers import BaseManager
+from queue import LifoQueue
 import pickle
 import numpy as np
 import pandas as pd
@@ -8,24 +11,31 @@ from matplotlib import pyplot as plt
 from py_neuromodulation import nm_stream_abc
 
 
+class MyManager(BaseManager):
+    pass
+
+
+MyManager.register("LifoQueue", LifoQueue)
+
+
 class StreamApp:
     def __init__(
         self,
         stream: nm_stream_abc.PNStream,
         VERBOSE: bool = False,
-        TRAINING: bool = True,
-        PREDICTION: bool = False,
+        TRAINING: bool = False,
+        PREDICTION: bool = True,
         PATH_OUT: str = r"C:\Users\ICN_admin\Documents\LSL_Test",
         folder_name: str = "Test",
         training_samples_each_cond_s: int = 10,
-        fig=None,
-        ax=None,
     ) -> None:
 
         self.stream = stream
         self.queue_raw = multiprocessing.Queue(1)
         self.queue_features = multiprocessing.Queue(1)
-        self.queue_plotting = multiprocessing.Queue()
+        manager = MyManager()
+        manager.start()
+        self.queue_plotting = manager.LifoQueue()
         self.VERBOSE = VERBOSE
         self.TRAINING = TRAINING
         self.PATH_OUT = PATH_OUT
@@ -49,8 +59,6 @@ class StreamApp:
                 "rb",
             ) as fid:
                 self.model = pickle.load(fid)
-            self.ax = ax
-            self.fig = fig
         # Test init Stream:
 
         # Test get data:
