@@ -126,17 +126,25 @@ def main():
     listener = Listener(on_press=on_press, on_release=on_release)
     listener.start()
 
-    def update(
-        frame, queue_plotting: multiprocessing.Queue
-    ):  # here frame needs to be accepted by the function since this is used in FuncAnimations
-        data = queue_plotting.get()  # this blocks untill it gets some data
-        ln.set_data([0, 1, 2], data)
-        return (ln,)
+    processes = [
+        multiprocessing.Process(
+            target=app.get_features_wrapper,
+            args=(
+                app.queue_raw,
+                app.queue_features,
+            ),
+        ),
+        multiprocessing.Process(
+            target=app.process_features,
+            args=(
+                app.queue_features,
+                app.queue_plotting,
+            ),
+        ),
+    ]
 
-    fig, ax = plt.subplots()
-    (ln,) = plt.plot([], [], "ro")
-    ani = FuncAnimation(fig, update, blit=True, fargs=(app.queue_plotting,))
-    plt.show()
+    for p in processes:
+        p.start()
 
     time_call_get_data_s = np.round(
         1 / app.stream.settings["sampling_rate_features_hz"], 2
@@ -146,7 +154,24 @@ def main():
     timer = RepeatTimer(time_call_get_data_s, get_data, args=(app.queue_raw,))
     timer.start()
 
-    app.start_processes()
+    def update(
+        frame, queue_plotting: multiprocessing.Queue
+    ):  # here frame needs to be accepted by the function since this is used in FuncAnimations
+        data = queue_plotting.get()  # this blocks untill it gets some data
+        for idx, rect in enumerate(bar_plt):
+            rect.set_height(data[idx])
+        plt.pause(0.002)
+        return bar_plt
+
+    fig, ax = plt.subplots()
+    bar_plt = plt.bar([0, 1, 2], [0, 1, 2])
+    plt.xticks([0, 1, 2], ["rest", "left", "right"])
+
+    ani = FuncAnimation(fig, update, blit=False, fargs=(app.queue_plotting,))
+    plt.show()
+
+    for p in processes:
+        p.join()
 
 
 if __name__ == "__main__":

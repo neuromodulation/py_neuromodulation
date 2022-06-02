@@ -1,11 +1,9 @@
 from multiprocessing import Process, Queue
+from random import random
 import time
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-
-# https://stackoverflow.com/questions/57377653/how-can-i-use-multiprocessing-to-plot-data-while-sampling-sensors
-# https://stackoverflow.com/questions/64789437/what-is-the-difference-between-figure-show-figure-canvas-draw-and-figure-canva
 
 
 def collectData(communicator):
@@ -24,26 +22,27 @@ def update(
     frame, communicator: Queue
 ):  # here frame needs to be accepted by the function since this is used in FuncAnimations
     data = communicator.get()  # this blocks untill it gets some data
-    xdata.append(data[0])
-    ydata.append(data[1])
-    ln.set_data(xdata, ydata)
-    fig.canvas.draw()
-    fig.show()
 
-    return (ln,)
+    for rect in ln:
+        rect.set_height(np.random.random())
+    return ln
 
 
 if __name__ == "__main__":
     fig, ax = plt.subplots()
+    # ax.set_xlim([0, 1])  # set the limits to the values you expect
+    # ax.set_ylim([0, 1])
     xdata, ydata = [], []
-    (ln,) = plt.plot([], [], "ro")
+    # (ln,) = plt.plot([], [], "ro")
+    ln = plt.bar([0, 1, 2], [0, 1, 2])
+    plt.xticks([0, 1, 2], ["rest", "left", "right"])
 
     communicator = Queue()
     print("Start process...")
     duta = Process(target=collectData, args=(communicator,))
     duta.start()
     ani = FuncAnimation(fig, update, blit=True, fargs=(communicator,))
-    plt.show()
+    plt.show(block=True)
     print("...done with process")
     duta.join()
     print("Completed multiprocessing")

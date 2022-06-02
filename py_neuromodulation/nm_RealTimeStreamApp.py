@@ -62,33 +62,6 @@ class StreamApp:
         # dat = np.array(dat).T
         # f = self.stream.run_analysis.process_data(dat)
 
-    def start_processes(
-        self,
-    ):
-
-        processes = [
-            multiprocessing.Process(
-                target=self.get_features_wrapper,
-                args=(
-                    self.queue_raw,
-                    self.queue_features,
-                ),
-            ),
-            multiprocessing.Process(
-                target=self.process_features,
-                args=(
-                    self.queue_features,
-                    self.queue_plotting,
-                ),
-            ),
-        ]
-
-        for p in processes:
-            p.start()
-
-        for p in processes:
-            p.join()
-
     def get_features_wrapper(
         self,
         queue_raw: multiprocessing.Queue,
