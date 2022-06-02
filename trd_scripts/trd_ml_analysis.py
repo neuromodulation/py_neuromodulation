@@ -17,7 +17,7 @@ from sklearn import (
 from matplotlib import pyplot as plt
 from imblearn import over_sampling
 
-PATH_FEATURES = r"C:\Users\ICN_admin\Documents\TRD Analysis\features_epochs_realtime_norm_4classes"
+PATH_FEATURES = r"C:\Users\ICN_admin\Documents\TRD Analysis\30_05"
 
 subjects = [
     f
@@ -57,6 +57,10 @@ for sub in subjects:
     # ]  # preprocessing.LabelEncoder().fit_transform(analyzer.feature_arr["label"])
     # analyzer.label_name = "label"
 
+    # feature_names = [f for f in analyzer.feature_arr.columns if "fft" in f]
+
+    # analyzer.feature_arr = analyzer.feature_arr[feature_names]
+
     analyzer.set_decoder(
         TRAIN_VAL_SPLIT=False,
         RUN_BAY_OPT=False,
@@ -81,8 +85,10 @@ for sub in subjects:
         oversampling=True,
     )
 
+    analyzer.decoder.feature_names = list(analyzer.decoder.features.columns)
+
     performances = analyzer.run_ML_model(
-        estimate_channels=True, estimate_all_channels_combined=True
+        estimate_channels=False, estimate_all_channels_combined=True
     )
 
     df = analyzer.get_dataframe_performances(performances)
@@ -115,6 +121,8 @@ for sub in subjects:
     mean_acc.append(label_out)
 
 
+analyzer.plot_target_averaged_channel(ch_names_ECOG="Cg25R01")
+
 # plot mean accuracies
 plt.subplot(121)
 plt.plot(
@@ -138,7 +146,9 @@ plt.ylabel("Accuracy")
 plt.title("predictions")
 
 plt.subplot(122)
-plt.plot(np.arange(-3, 3, 0.1), np.stack([f["label"] for f in mean_acc]).mean(axis=0))
+plt.plot(
+    np.arange(-3, 3, 0.1), np.stack([f["label"] for f in mean_acc]).mean(axis=0)
+)
 plt.title("label")
 plt.xlabel("Time [s]")
 
@@ -150,8 +160,18 @@ nm_plots.plot_df_subjects(
     y_col="performance_test",
     x_col="sub",
     hue="all_combined",
+    PATH_SAVE=r"C:\Users\ICN_admin\Documents\TRD Analysis\30_05\result_figures\LM_shuffled.png",
 )
 plt.savefig("XGB_All_multi_class_ba.png", bbox_inches="tight")
+
+plt.imshow(analyzer.feature_arr.T, aspect="auto")
+plt.xticks(
+    np.arange(0, analyzer.feature_arr.shape[0], 100),
+    int(np.arange(0, analyzer.feature_arr.shape[0] / 10), 10),
+)
+plt.xlabel("Time [s]")
+plt.ylabel("#Fetures")
+plt.clim(-3, 3)
 
 plt.tight_layout()
 

@@ -103,3 +103,6 @@ class TestWrapper:
 def test_fooof():
     test_wrapper = TestWrapper()
     test_wrapper.test_fooof_features()
+
+
+test_fooof()

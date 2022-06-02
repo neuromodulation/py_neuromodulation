@@ -193,21 +193,15 @@
             ]
         ],
         "frequency_bands": [
-            [
-                "high beta"
-            ]
+            "high beta"
         ],
-        "method": [
-            {
-                "coh": true,
-                "icoh": true
-            }
-        ],
-        "params": [
-            {
-                "window": "hann"
-            }
-        ]
+        "method": {
+            "coh": true,
+            "icoh": true
+        },
+        "params": {
+            "window": "hann"
+        }
     },
     "fooof": {
         "aperiodic": {

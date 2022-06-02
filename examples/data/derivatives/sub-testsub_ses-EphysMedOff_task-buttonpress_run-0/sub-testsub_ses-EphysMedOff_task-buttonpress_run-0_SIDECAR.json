@@ -1,13 +1,5 @@
 {
     "original_fs": 1375.0,
-    "fs": 1000,
-    "ch_names": [
-        "ECOG_L_1_SMC_AT-avgref",
-        "ECOG_L_2_SMC_AT-avgref",
-        "ECOG_L_3_SMC_AT-avgref",
-        "ECOG_L_4_SMC_AT-avgref",
-        "ECOG_L_5_SMC_AT-avgref",
-        "ECOG_L_6_SMC_AT-avgref"
-    ],
+    "sfreq": 1375.0,
     "sess_right": null
 }

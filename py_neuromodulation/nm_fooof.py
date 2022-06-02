@@ -7,7 +7,9 @@ from py_neuromodulation import nm_features_abc
 
 
 class FooofAnalyzer(nm_features_abc.Feature):
-    def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: float) -> None:
+    def __init__(
+        self, settings: dict, ch_names: Iterable[str], sfreq: float
+    ) -> None:
         self.settings_fooof = settings["fooof"]
         self.sfreq = sfreq
         self.ch_names = ch_names
@@ -29,9 +31,7 @@ class FooofAnalyzer(nm_features_abc.Feature):
             self.settings_fooof["windowlength_ms"] * sfreq / 1000
         )
 
-        self.f_vec = np.arange(
-            0, int(self.settings_fooof["windowlength_ms"] / 2) + 1, 1
-        )
+        self.f_vec = np.arange(0, int(self.num_samples / 2) + 1, 1)
 
     def _get_spectrum(self, data: np.array):
         """return absolute value fft spectrum"""
@@ -42,13 +42,18 @@ class FooofAnalyzer(nm_features_abc.Feature):
         return Z
 
     def calc_feature(
-        self, data: np.array, features_compute: dict,
+        self,
+        data: np.array,
+        features_compute: dict,
     ) -> dict:
         for ch_idx, ch_name in enumerate(self.ch_names):
             spectrum = self._get_spectrum(data[ch_idx, :])
 
-            self.fm.fit(self.f_vec, spectrum, self.freq_range)
-
+            try:
+                self.fm.fit(self.f_vec, spectrum, self.freq_range)
+            except Exception as e:
+                print(e)
+                print(f"failing spectrum: {spectrum}")
             if self.settings_fooof["aperiodic"]["exponent"]:
                 features_compute[f"{ch_name}_fooof_a_exp"] = (
                     self.fm.get_params("aperiodic_params", "exponent")

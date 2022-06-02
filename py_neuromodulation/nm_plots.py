@@ -56,6 +56,7 @@ def plot_df_subjects(
         labels[0:n_hues],
         bbox_to_anchor=(1.05, 1),
         loc=2,
+        title=hue,
         borderaxespad=0.0,
     )
     plt.title(title)
@@ -172,9 +173,12 @@ def plot_corr_matrix(
 ):
 
     # cut out channel name for each column
-    feature_col_name = [
-        i[len(ch_name) + 1 :] for i in feature_names if ch_name in i
-    ]
+    if ch_name is not None:
+        feature_col_name = [
+            i[len(ch_name) + 1 :] for i in feature_names if ch_name in i
+        ]
+    else:
+        feature_col_name = feature.columns
 
     plt.figure(figsize=(7, 7))
     corr = feature.corr()
@@ -195,6 +199,10 @@ def plot_corr_matrix(
 
     if show_plot is False:
         plt.close()
+
+
+def plot_feature_series_time(features) -> None:
+    plt.imshow(features.T, aspect="auto")
 
 
 def get_plt_path(

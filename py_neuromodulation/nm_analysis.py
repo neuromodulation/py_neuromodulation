@@ -255,7 +255,9 @@ class Feature_Reader:
             epoch_len=epoch_len,
             sfreq=self.settings["sampling_rate_features_hz"],
             feature_names=list(filtered_df.columns),
-            feature_str_add="_".join(list_feature_keywords) if list_feature_keywords is not None else "all",
+            feature_str_add="_".join(list_feature_keywords)
+            if list_feature_keywords is not None
+            else "all",
             cut_ch_name_cols=True,
             ch_name=ch if ch is not None else "ch",
             label_name=self.label_name,
@@ -333,6 +335,18 @@ class Feature_Reader:
             feature_file=self.feature_file,
             feature_str_add=feature_str_add,
             show_plot=True,
+        )
+
+    def plot_feature_series_time(
+        self,
+    ):
+        self.nmplotter.plot_feature_series_time(self.feature_arr)
+
+    def plot_corr_matrix(
+        self,
+    ):
+        self.nmplotter.plot_corr_matrix(
+            self.feature_arr,
         )
 
     @staticmethod
@@ -482,8 +496,6 @@ class Feature_Reader:
             self.decoder.set_data_ind_channels()
             _ = self.decoder.run_CV_caller("ind_channels")
         if estimate_all_channels_combined:
-            if estimate_channels is not True:
-                self.decoder.set_data_ind_channels()
             _ = self.decoder.run_CV_caller("all_channels_combined")
 
         if save_results:
