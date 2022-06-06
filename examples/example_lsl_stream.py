@@ -38,6 +38,11 @@ def setup_stream():
         "O1",
         "O2",
     ]
+
+    ch_names = [
+        "C3",
+        "C4",
+    ]
     nm_channels = nm_define_nmchannels.set_channels(
         ch_names=ch_names,
         ch_types=["eeg" for _ in range(len(ch_names))],
