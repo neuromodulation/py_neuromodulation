@@ -32,24 +32,24 @@ class Nolds(nm_features_abc.Feature):
 
         for ch_idx, ch_name in enumerate(self.ch_names):
             if self.s["nolds_features"]["sample_entropy"]:
-                features_compute[f"nolds_{ch_name}_sample_entropy"] = nolds.sampen(
+                features_compute[f"{ch_name}_nolds_sample_entropy"] = nolds.sampen(
                     data[ch_idx, :]
                 )
             if self.s["nolds_features"]["correlation_dimension"]:
                 features_compute[
-                    f"nolds_{ch_name}_correlation_dimension_{data_str}"
+                    f"{ch_name}_nolds_correlation_dimension_{data_str}"
                 ] = nolds.corr_dim(data[ch_idx, :], emb_dim=2)
             if self.s["nolds_features"]["lyapunov_exponent"]:
-                features_compute[f"nolds_{ch_name}_lyapunov_exponent_{data_str}"] = nolds.lyap_r(
+                features_compute[f"{ch_name}_nolds_lyapunov_exponent_{data_str}"] = nolds.lyap_r(
                     data[ch_idx, :]
                 )
             if self.s["nolds_features"]["hurst_exponent"]:
-                features_compute[f"nolds_{ch_name}_hurst_exponent_{data_str}"] = nolds.hurst_rs(
+                features_compute[f"{ch_name}_nolds_hurst_exponent_{data_str}"] = nolds.hurst_rs(
                     data[ch_idx, :]
                 )
             if self.s["nolds_features"]["detrended_fluctutaion_analysis"]:
                 features_compute[
-                    f"nolds_{ch_name}_detrended_fluctutaion_analysis_{data_str}"
+                    f"{ch_name}_nolds_detrended_fluctutaion_analysis_{data_str}"
                 ] = nolds.dfa(data[ch_idx, :])
 
         return features_compute

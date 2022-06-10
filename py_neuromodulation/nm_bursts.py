@@ -83,21 +83,21 @@ class Burst(nm_features_abc.Feature):
                 )
 
                 features_compute[
-                    f"bursts_{ch_name}_{fband_name}_duration_mean"
+                    f"{ch_name}_bursts_{fband_name}_duration_mean"
                 ] = np.mean(burst_length)
                 features_compute[
-                    f"bursts_{ch_name}_{fband_name}_amplitude_mean"
+                    f"{ch_name}_bursts_{fband_name}_amplitude_mean"
                 ] = np.mean([np.mean(a) for a in burst_amplitude])
 
                 features_compute[
-                    f"bursts_{ch_name}_{fband_name}_duration_max"
+                    f"{ch_name}_bursts_{fband_name}_duration_max"
                 ] = np.max(burst_length)
                 features_compute[
-                    f"bursts_{ch_name}_{fband_name}_amplitude_max"
+                    f"{ch_name}_bursts_{fband_name}_amplitude_max"
                 ] = np.max([np.max(a) for a in burst_amplitude])
 
                 features_compute[
-                    f"bursts_{ch_name}_{fband_name}_burst_rate_per_s"
+                    f"{ch_name}_bursts_{fband_name}_burst_rate_per_s"
                 ] = np.mean(burst_length) / (
                     self.s["segment_length_features_ms"] / 1000
                 )
@@ -107,7 +107,7 @@ class Burst(nm_features_abc.Feature):
                     in_burst = True
 
                 features_compute[
-                    f"bursts_{ch_name}_{fband_name}_in_burst"
+                    f"{ch_name}_bursts_{fband_name}_in_burst"
                 ] = in_burst
         return features_compute
 
