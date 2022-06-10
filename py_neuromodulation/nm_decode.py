@@ -4,6 +4,8 @@ from sklearn import (
     linear_model,
     discriminant_analysis,
     base,
+    decomposition,
+    cross_decomposition,
 )
 from skopt.space import Real, Integer, Categorical
 from skopt.utils import use_named_args
@@ -22,7 +24,7 @@ import numpy as np
 from numba import jit
 import xgboost
 
-# from mrmr import mrmr_classif
+from mrmr import mrmr_classif
 from typing import Type
 import _pickle as cPickle
 
@@ -32,6 +34,7 @@ class CV_res:
         self,
         get_movement_detection_rate: bool = False,
         RUN_BAY_OPT: bool = False,
+        mrmr_select: bool = False,
     ) -> None:
 
         self.score_train = []
@@ -52,6 +55,8 @@ class CV_res:
             self.fprate_train = []
         if RUN_BAY_OPT is True:
             self.best_bay_opt_params = []
+        if mrmr_select is True:
+            self.mrmr_select = []
 
 
 class Decoder:
@@ -113,9 +118,12 @@ class Decoder:
         min_consequent_count: int = 3,
         bay_opt_param_space: list = [],
         VERBOSE: bool = False,
-        fs: int = None,
+        sfreq: int = None,
         undersampling: bool = False,
         oversampling: bool = False,
+        mrmr_select: bool = False,
+        pca: bool = False,
+        cca: bool = False,
     ) -> None:
         """Initialize here a feature file for processing
         Read settings.json nm_channels.csv and features.csv
@@ -144,9 +152,6 @@ class Decoder:
             consecutive movement blocks with minimum size of 'min_consequent_count'
         """
 
-        if any(e is not None for e in [features, label_name]):
-            self.set_data(features, label, label_name, used_chs)
-
         self.model = model
         self.eval_method = eval_method
         self.cv_method = cv_method
@@ -156,7 +161,7 @@ class Decoder:
         self.TRAIN_VAL_SPLIT = TRAIN_VAL_SPLIT
         self.RUN_BAY_OPT = RUN_BAY_OPT
         self.save_coef = save_coef
-        self.fs = fs
+        self.sfreq = sfreq
         self.get_movement_detection_rate = get_movement_detection_rate
         self.min_consequent_count = min_consequent_count
         self.STACK_FEATURES_N_SAMPLES = STACK_FEATURES_N_SAMPLES
@@ -165,6 +170,14 @@ class Decoder:
         self.VERBOSE = VERBOSE
         self.undersampling = undersampling
         self.oversampling = oversampling
+        self.mrmr_select = mrmr_select
+        self.used_chs = used_chs
+        self.label = label
+        self.label_name = label_name
+        self.cca = cca
+        self.pca = pca
+
+        self.set_data(features)
 
         self.ch_ind_data = {}
         self.grid_point_ind_data = {}
@@ -173,6 +186,7 @@ class Decoder:
         self.ch_ind_results = {}
         self.gridpoint_ind_results = {}
         self.all_ch_results = {}
+        self.columns_names_single_ch = None
 
         if undersampling:
             self.rus = RandomUnderSampler(random_state=0)
@@ -180,18 +194,18 @@ class Decoder:
         if oversampling:
             self.ros = RandomOverSampler(random_state=0)
 
-    def set_data(self, features, label, label_name, used_chs):
+    def set_data(self, features):
 
-        self.features = features
-        self.label = label
-        self.label_name = label_name
-        self.feature_names = [
-            col
-            for col in self.features.columns
-            if not (("time" in col) or (self.label_name in col))
-        ]
-        self.data = np.nan_to_num(np.array(self.features[self.feature_names]))
-        self.used_chs = used_chs
+        if features is not None:
+            self.features = features
+            self.feature_names = [
+                col
+                for col in self.features.columns
+                if not (("time" in col) or (self.label_name in col))
+            ]
+            self.data = np.nan_to_num(
+                np.array(self.features[self.feature_names])
+            )
 
     def set_data_ind_channels(self):
         """specified channel individual data"""
@@ -259,6 +273,9 @@ class Decoder:
 
             if self.RUN_BAY_OPT is True:
                 set_score("best_bay_opt_params", cv_res.best_bay_opt_params)
+
+            if self.mrmr_select is True:
+                set_score("mrmr_select", cv_res.mrmr_select)
             return obj_set
 
         obj_set = set_scores(self.cv_res)
@@ -294,6 +311,7 @@ class Decoder:
 
         if feature_contacts == "ind_channels":
             for ch in self.used_chs:
+                self.ch_name_tested = ch
                 self.run_CV(self.ch_ind_data[ch], self.label)
                 self.set_CV_results("ch_ind_results", contact_point=ch)
             return self.ch_ind_results
@@ -442,7 +460,9 @@ class Decoder:
         return mov_detection_rate, fpr, tpr
 
     def init_cv_res(self) -> None:
-        return CV_res(self.get_movement_detection_rate, self.RUN_BAY_OPT)
+        return CV_res(
+            self.get_movement_detection_rate, self.RUN_BAY_OPT, self.mrmr_select
+        )
 
     @staticmethod
     @jit(nopython=True)
@@ -652,17 +672,43 @@ class Decoder:
         if self.RUN_BAY_OPT is True:
             model_train = self.bay_opt_wrapper(model_train, X_train, y_train)
 
-        if len(self.feature_names) > X_train.shape[1]:
-            feature_names_ch = self.feature_names[: X_train.shape[1]]
-            X_train = pd.DataFrame(X_train, columns=feature_names_ch)
-        else:
-            X_train = pd.DataFrame(X_train, columns=self.feature_names)
-        y_train = pd.Series(y_train)
-        selected_features = mrmr_classif(X=X_train, y=y_train, K=10, n_jobs=60)
+        if self.mrmr_select is True:
+            if len(self.feature_names) > X_train.shape[1]:
+                # analyze induvidual ch
+                columns_names = [
+                    col
+                    for col in self.feature_names
+                    if col.startswith(self.ch_name_tested)
+                ]
+                if self.columns_names_single_ch is None:
+                    self.columns_names_single_ch = [
+                        f[len(self.ch_name_tested) + 1 :] for f in columns_names
+                    ]
+            else:
+                # analyze all_ch_combined
+                columns_names = self.feature_names
+            X_train = pd.DataFrame(X_train, columns=columns_names)
+            X_test = pd.DataFrame(X_test, columns=columns_names)
 
-        X_train = X_train[selected_features]
-        X_test = X_test[selected_features]
+            y_train = pd.Series(y_train)
+            selected_features = mrmr_classif(
+                X=X_train, y=y_train, K=20, n_jobs=60
+            )
 
+            X_train = X_train[selected_features]
+            X_test = X_test[selected_features]
+
+        if self.pca is True:
+            pca = decomposition.PCA(n_components=10)
+            pca.fit(X_train)
+            X_train = pca.transform(X_train)
+            X_test = pca.transform(X_test)
+
+        if self.cca is True:
+            cca = cross_decomposition.CCA(n_components=10)
+            cca.fit(X_train, y_train)
+            X_train = cca.transform(X_train)
+            X_test = cca.transform(X_test)
         # fit model
         model_train = self.fit_model(model_train, X_train, y_train)
 
@@ -672,6 +718,9 @@ class Decoder:
         cv_res = self.eval_model(
             model_train, X_train, X_test, y_train, y_test, cv_res, save_data
         )
+
+        if self.mrmr_select is True:
+            cv_res.mrmr_select.append(selected_features)
 
         return cv_res
 
@@ -693,13 +742,15 @@ class Decoder:
                 # set outer 10s set to train index
                 # test index is thus in the middle starting at random number
                 N_samples = data.shape[0]
-                test_area_points = (N_samples - self.fs * 10) - (self.fs * 10)
+                test_area_points = (N_samples - self.sfreq * 10) - (
+                    self.sfreq * 10
+                )
                 test_points = int(N_samples * 0.3)
 
                 if test_area_points > test_points:
                     start_index = np.random.randint(
-                        int(self.fs * 10),
-                        N_samples - self.fs * 10 - test_points,
+                        int(self.sfreq * 10),
+                        N_samples - self.sfreq * 10 - test_points,
                     )
                     test_index = np.arange(
                         start_index, start_index + test_points

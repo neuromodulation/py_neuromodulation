@@ -26,7 +26,7 @@ class Feature_Reader:
     feature_list: list[str]
     settings: dict
     sidecar: dict
-    fs: int
+    sfreq: int
     line_noise: int
     nm_channels: pd.DataFrame
     feature_arr: pd.DataFrame
@@ -60,7 +60,7 @@ class Feature_Reader:
 
         self.settings = nm_IO.read_settings(PATH_READ_FILE)
         self.sidecar = nm_IO.read_sidecar(PATH_READ_FILE)
-        self.fs = self.sidecar["sfreq"]
+        self.sfreq = self.sidecar["sfreq"]
         self.nm_channels = nm_IO.read_nm_channels(PATH_READ_FILE)
         self.feature_arr = nm_IO.read_features(PATH_READ_FILE)
 
@@ -423,6 +423,9 @@ class Feature_Reader:
         VERBOSE=False,
         undersampling=False,
         oversampling=False,
+        mrmr_select=False,
+        pca=False,
+        cca=False,
     ):
         if decoder is not None:
             self.decoder = decoder
@@ -449,6 +452,10 @@ class Feature_Reader:
                 use_nested_cv=use_nested_cv,
                 undersampling=undersampling,
                 oversampling=oversampling,
+                mrmr_select=mrmr_select,
+                sfreq=self.sfreq,
+                pca=pca,
+                cca=cca,
             )
 
     def run_ML_model(
@@ -514,6 +521,7 @@ class Feature_Reader:
             ML_model_name=output_name,
             read_mov_detection_rates=self.decoder.get_movement_detection_rate,
             read_bay_opt_params=self.decoder.RUN_BAY_OPT,
+            read_mrmr=self.decoder.mrmr_select,
         )
 
     def read_results(
@@ -527,6 +535,7 @@ class Feature_Reader:
         ML_model_name: str = "LM",
         read_mov_detection_rates: bool = False,
         read_bay_opt_params: bool = False,
+        read_mrmr: bool = False,
         save_results: bool = False,
         PATH_OUT: str = None,
         folder_name: str = None,
@@ -671,6 +680,16 @@ class Feature_Reader:
                         key_get=None,
                         take_mean=False,
                         val=dict_to_save,
+                    )
+
+                if read_mrmr is True:
+                    # transform dict into keys for json saving
+
+                    set_score(
+                        key_set="mrmr_select",
+                        key_get=None,
+                        take_mean=False,
+                        val=obj_read["mrmr_select"],
                     )
 
             read_ML_performances(obj_read, obj_write)
