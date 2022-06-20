@@ -414,6 +414,7 @@ class Feature_Reader:
             n_splits=3, shuffle=False
         ),
         get_movement_detection_rate: bool = False,
+        mov_detection_threshold=0.5,
         min_consequent_count=3,
         threshold_score=True,
         bay_opt_param_space: list = [],
@@ -445,6 +446,7 @@ class Feature_Reader:
                 save_coef=save_coef,
                 get_movement_detection_rate=get_movement_detection_rate,
                 min_consequent_count=min_consequent_count,
+                mov_detection_threshold=mov_detection_threshold,
                 bay_opt_param_space=bay_opt_param_space,
                 STACK_FEATURES_N_SAMPLES=STACK_FEATURES_N_SAMPLES,
                 time_stack_n_samples=time_stack_n_samples,
@@ -635,7 +637,7 @@ class Feature_Reader:
                         key_set="coef",
                         key_get=None,
                         take_mean=False,
-                        val=np.concatenate(obj_read["coef"]).mean(axis=0),
+                        val=np.concatenate(obj_read["coef"]),
                     )
 
                 if read_mov_detection_rates:
