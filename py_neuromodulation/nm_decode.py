@@ -569,11 +569,6 @@ class Decoder:
         append_samples=False,
     ) -> Type[CV_res]:
 
-        if append_samples is True:
-            X_train, y_train, X_test, y_test = self.append_samples_val(
-                X_train, y_train, X_test, y_test, self.time_stack_n_samples
-            )
-
         if self.save_coef:
             cv_res.coef.append(model_train.coef_)
 
@@ -709,6 +704,20 @@ class Decoder:
             cca.fit(X_train, y_train)
             X_train = cca.transform(X_train)
             X_test = cca.transform(X_test)
+
+        if self.STACK_FEATURES_N_SAMPLES is True:
+            X_train, y_train, X_test, y_test = self.append_samples_val(
+                X_train, y_train, X_test, y_test, self.time_stack_n_samples
+            )
+
+        # here: omit a class!
+        # idx_train = np.where(y_train != 0)[0]
+        # idx_test = np.where(y_test != 0)[0]
+        # y_train = y_train[idx_train]
+        # X_train = X_train[idx_train]
+        # y_test = y_test[idx_test]
+        # X_test = X_test[idx_test]
+
         # fit model
         model_train = self.fit_model(model_train, X_train, y_train)
 

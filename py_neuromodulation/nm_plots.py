@@ -48,17 +48,18 @@ def plot_df_subjects(
         s=5,
     )
 
-    n_hues = df[hue].nunique()
+    if hue is not None:
+        n_hues = df[hue].nunique()
 
-    handles, labels = ax.get_legend_handles_labels()
-    l = plt.legend(
-        handles[0:n_hues],
-        labels[0:n_hues],
-        bbox_to_anchor=(1.05, 1),
-        loc=2,
-        title=hue,
-        borderaxespad=0.0,
-    )
+        handles, labels = ax.get_legend_handles_labels()
+        l = plt.legend(
+            handles[0:n_hues],
+            labels[0:n_hues],
+            bbox_to_anchor=(1.05, 1),
+            loc=2,
+            title=hue,
+            borderaxespad=0.0,
+        )
     plt.title(title)
     plt.ylabel(y_col)
     plt.xticks(rotation=90)
