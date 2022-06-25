@@ -177,8 +177,8 @@ class Projection:
             grid_session = [self.cortex_grid_left, self.subcortex_grid_left]
 
         coord_array = [
-            self.ecog_strip,
-            self.lfp_elec,
+            self.ecog_strip if grid_session[0] is not None else None,
+            self.lfp_elec if grid_session[1] is not None else None,
         ]
 
         for loc_, grid in enumerate(grid_session):
