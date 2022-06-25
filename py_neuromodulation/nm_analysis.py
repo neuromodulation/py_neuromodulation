@@ -268,6 +268,78 @@ class Feature_Reader:
             feature_file=self.feature_file,
         )
 
+    @staticmethod
+    def get_performace_sub_strip(performance_sub: dict, plt_grid: bool = False):
+
+        ecog_strip_performance = []
+        ecog_coords_strip = []
+        cortex_grid = []
+        grid_performance = []
+
+        channels_ = performance_sub.keys()
+
+        for ch in channels_:
+            if "grid" not in ch and "combined" not in ch:
+                ecog_coords_strip.append(performance_sub[ch]["coord"])
+                ecog_strip_performance.append(
+                    performance_sub[ch]["performance_test"]
+                )
+            elif plt_grid is True and "gridcortex_" in ch:
+                cortex_grid.append(performance_sub[ch]["coord"])
+                grid_performance.append(performance_sub[ch]["performance_test"])
+
+        if len(ecog_coords_strip) > 0:
+            ecog_coords_strip = np.vstack(ecog_coords_strip)
+
+        return (
+            ecog_strip_performance,
+            ecog_coords_strip,
+            cortex_grid,
+            grid_performance,
+        )
+
+    def plot_across_subject_grd_ch_performance(
+        self,
+        performance_dict=None,
+        plt_grid=False,
+        feature_str_add="performance_allch_allgrid",
+    ):
+        ecog_strip_performance = []
+        ecog_coords_strip = []
+        grid_performance = []
+        for sub in performance_dict.keys():
+            (
+                ecog_strip_performance_sub,
+                ecog_coords_strip_sub,
+                _,
+                grid_performance_sub,
+            ) = self.get_performace_sub_strip(
+                performance_dict[sub], plt_grid=plt_grid
+            )
+            ecog_strip_performance.extend(ecog_strip_performance_sub)
+            ecog_coords_strip.extend(ecog_coords_strip_sub)
+            grid_performance.append(grid_performance_sub)
+        grid_performance = list(np.vstack(grid_performance).mean(axis=0))
+        coords_all = np.array(ecog_coords_strip)
+        coords_all[:, 0] = np.abs(coords_all[:, 0])
+
+        self.nmplotter.plot_cortex(
+            grid_cortex=np.array(self.sidecar["grid_cortex"])
+            if "grid_cortex" in self.sidecar
+            else None,
+            ecog_strip=coords_all if len(ecog_coords_strip) > 0 else None,
+            grid_color=grid_performance if len(grid_performance) > 0 else None,
+            strip_color=np.array(ecog_strip_performance)
+            if len(ecog_strip_performance) > 0
+            else None,
+            sess_right=self.sidecar["sess_right"],
+            save=True,
+            OUT_PATH=self.feature_dir,
+            feature_file=self.feature_file,
+            feature_str_add=feature_str_add,
+            show_plot=True,
+        )
+
     def plot_subject_grid_ch_performance(
         self,
         subject_name=None,
@@ -299,24 +371,14 @@ class Feature_Reader:
                 self.feature_file.find("sub-") : self.feature_file.find("_ses")
             ][4:]
 
-        ch_ = list(performance_dict[subject_name].keys())
-
-        for ch in ch_:
-            if "grid" not in ch and "combined" not in ch:
-                ecog_coords_strip.append(
-                    performance_dict[subject_name][ch]["coord"]
-                )
-                ecog_strip_performance.append(
-                    performance_dict[subject_name][ch]["performance_test"]
-                )
-            elif plt_grid is True and "gridcortex_" in ch:
-                cortex_grid.append(performance_dict[subject_name][ch]["coord"])
-                grid_performance.append(
-                    performance_dict[subject_name][ch]["performance_test"]
-                )
-
-        if len(ecog_coords_strip) > 0:
-            ecog_coords_strip = np.vstack(ecog_coords_strip)
+        (
+            ecog_strip_performance,
+            ecog_coords_strip,
+            cortex_grid,
+            grid_performance,
+        ) = self.get_performace_sub_strip(
+            performance_dict[subject_name], plt_grid=plt_grid
+        )
 
         self.nmplotter.plot_cortex(
             grid_cortex=np.array(self.sidecar["grid_cortex"])
@@ -590,6 +652,8 @@ class Feature_Reader:
         # read ML results
         with open(PATH_ML_, "rb") as input:
             ML_res = cPickle.load(input)
+            if self.decoder is None:
+                self.decoder = ML_res
 
         performance_dict[subject_name] = {}
 
@@ -753,7 +817,7 @@ class Feature_Reader:
                 ["project_cortex", "project_subcortex"],
                 ["gridcortex_", "gridsubcortex_"],
             ):
-                if self.settings["methods"][project_settings] is False:
+                if self.settings["postprocessing"][project_settings] is False:
                     continue
 
                 # the sidecar keys are grid_cortex and subcortex_grid
@@ -800,15 +864,18 @@ class Feature_Reader:
         df = pd.DataFrame()
         for sub in p.keys():
             for ch in p[sub].keys():
-                dict_add = p[sub][ch]
+                if "active_gridpoints" in ch:
+                    continue
+                dict_add = p[sub][ch].copy()
                 dict_add["sub"] = sub
                 dict_add["ch"] = ch
 
                 if "all_ch_" in ch:
-                    dict_add["all_combined"] = True
+                    dict_add["ch_type"] = "all ch combinded"
+                elif "gridcortex" in ch:
+                    dict_add["ch_type"] = "cortex grid"
                 else:
-                    dict_add["all_combined"] = False
-
+                    dict_add["ch_type"] = "electrode ch"
                 df = df.append(dict_add, ignore_index=True)
 
         return df
