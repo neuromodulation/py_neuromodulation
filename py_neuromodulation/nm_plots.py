@@ -421,6 +421,8 @@ class NM_Plot:
         feature_str_add: str = None,
         show_plot: bool = True,
         set_clim: bool = True,
+        lower_clim: float = 0.5,
+        upper_clim: float = 0.7,
     ):
         """Plot MNI brain including selected MNI cortical projection grid + used strip ECoG electrodes
         Colorcoded by grid_color
@@ -458,6 +460,8 @@ class NM_Plot:
                 alpha=0.8,
                 cmap="viridis",
             )
+            if set_clim:
+                pos_ecog.set_clim(lower_clim, upper_clim)
         if ecog_strip is not None:
             strip_color = (
                 np.ones(ecog_strip.shape[0])
@@ -476,7 +480,7 @@ class NM_Plot:
             )
         plt.axis("off")
         if set_clim:
-            pos_ecog.set_clim(0.5, 0.8)
+            pos_ecog.set_clim(lower_clim, upper_clim)
             cbar = fig.colorbar(pos_ecog)
             cbar.set_label("Balanced Accuracy")
 
