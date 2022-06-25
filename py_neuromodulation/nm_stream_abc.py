@@ -389,7 +389,7 @@ class PNStream(ABC):
             "sess_right": self.sess_right,
         }
         if self.projection:
-            sidecar["coords"] = (self.projection.coords,)
+            sidecar["coords"] = self.projection.coords
             if self.settings["postprocessing"]["project_cortex"]:
                 sidecar["grid_cortex"] = self.projection.grid_cortex
                 sidecar[
