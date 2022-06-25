@@ -17,10 +17,18 @@ class RMAPChannelSelector:
         fp = epi_img.get_fdata()
         return fp
 
-    def load_all_fingerprints(self, path_dir: str):
+    def load_all_fingerprints(
+        self, path_dir: str, cond_str: str = "_AvgR_Fz.nii"
+    ):
 
-        l_fps = list(filter(lambda k: "_AvgR_Fz.nii" in k, os.listdir(path_dir)))
-        return l_fps, [self.load_fingerprint(os.path.join(path_dir, f)) for f in l_fps]
+        if cond_str is not None:
+            l_fps = list(filter(lambda k: cond_str in k, os.listdir(path_dir)))
+        else:
+            l_fps = os.listdir(path_dir)
+
+        return l_fps, [
+            self.load_fingerprint(os.path.join(path_dir, f)) for f in l_fps
+        ]
 
     def get_fingerprints_from_path_with_cond(
         self,
@@ -44,11 +52,16 @@ class RMAPChannelSelector:
                     os.listdir(path_dir),
                 )
             )
-        return l_fps, [self.load_fingerprint(os.path.join(path_dir, f)) for f in l_fps]
+        return l_fps, [
+            self.load_fingerprint(os.path.join(path_dir, f)) for f in l_fps
+        ]
 
     @staticmethod
     def save_Nii(
-        fp: np.array, affine: np.array, name: str = "img.nii", reshape: bool = True
+        fp: np.array,
+        affine: np.array,
+        name: str = "img.nii",
+        reshape: bool = True,
     ):
 
         if reshape:
@@ -60,11 +73,12 @@ class RMAPChannelSelector:
 
     def get_RMAP(self, X: np.array, y: np.array):
         r = (
-            len(y) * np.sum(X * y[None, :], axis=-1) - (np.sum(X, axis=-1) * np.sum(y))
+            len(y) * np.sum(X * y[None, :], axis=-1)
+            - (np.sum(X, axis=-1) * np.sum(y))
         ) / (
             np.sqrt(
-                (len(y) * np.sum(X ** 2, axis=-1) - np.sum(X, axis=-1) ** 2)
-                * (len(y) * np.sum(y ** 2) - np.sum(y) ** 2)
+                (len(y) * np.sum(X**2, axis=-1) - np.sum(X, axis=-1) ** 2)
+                * (len(y) * np.sum(y**2) - np.sum(y) ** 2)
             )
         )
         return r
@@ -97,6 +111,72 @@ class RMAPChannelSelector:
         val = np.corrcoef(fp_test, fp)[0][1]
         return val
 
+    def leave_one_ch_out_cv(
+        self, l_fps_names: list, l_fps_dat: list, l_per: list
+    ):
+        per_left_out = []
+        per_predict = []
+
+        for idx_left_out, f_left_out in enumerate(l_fps_names):
+            print(idx_left_out)
+            l_cv = l_fps_dat.copy()
+            per_cv = l_per.copy()
+
+            l_cv.pop(idx_left_out)
+            per_cv.pop(idx_left_out)
+
+            conn_arr = []
+            for f in l_cv:
+                conn_arr.append(f.flatten())
+            conn_arr = np.array(conn_arr)
+
+            rmap_cv = np.nan_to_num(self.get_RMAP(conn_arr.T, np.array(per_cv)))
+
+            per_predict.append(
+                np.nan_to_num(
+                    self.get_corr_numba(
+                        rmap_cv, l_fps_dat[idx_left_out].flatten()
+                    )
+                )
+            )
+            per_left_out.append(l_per[idx_left_out])
+        return per_left_out, per_predict
+
+    def leave_one_sub_out_cv(
+        self, l_fps_names: list, l_fps_dat: list, l_per: list, sub_list: list
+    ):
+
+        per_predict = []
+        per_left_out = []
+
+        for subject_test in sub_list:
+            print(subject_test)
+            idx_test = [
+                idx for idx, f in enumerate(l_fps_names) if subject_test in f
+            ]
+            idx_train = [
+                idx
+                for idx, f in enumerate(l_fps_names)
+                if subject_test not in f
+            ]
+            l_cv = list(np.array(l_fps_dat)[idx_train])
+            per_cv = list(np.array(l_per)[idx_train])
+
+            conn_arr = []
+            for f in l_cv:
+                conn_arr.append(f.flatten())
+            conn_arr = np.array(conn_arr)
+            rmap_cv = np.nan_to_num(self.get_RMAP(conn_arr.T, np.array(per_cv)))
+
+            for idx in idx_test:
+                per_predict.append(
+                    np.nan_to_num(
+                        self.get_corr_numba(rmap_cv, l_fps_dat[idx].flatten())
+                    )
+                )
+                per_left_out.append(l_per[idx])
+        return per_left_out, per_predict
+
     def get_highest_corr_sub_ch(
         self,
         cohort_test: str,
@@ -119,11 +199,15 @@ class RMAPChannelSelector:
         for cohort in cohorts_train.keys():
             for sub in cohorts_train[cohort]:
                 fps_name, fps = self.get_fingerprints_from_path_with_cond(
-                    path_dir=path_dir, str_to_keep=f"{cohort}_{sub}_ROI", keep=True
+                    path_dir=path_dir,
+                    str_to_keep=f"{cohort}_{sub}_ROI",
+                    keep=True,
                 )
 
                 for fp, fp_name in zip(fps, fps_name):
-                    ch = fp_name[fp_name.find("ROI") + 4 : fp_name.find("func") - 1]
+                    ch = fp_name[
+                        fp_name.find("ROI") + 4 : fp_name.find("func") - 1
+                    ]
                     corr_val = self.get_corr_numba(fp_test, fp)
                     fp_pairs.append([cohort, sub, ch, corr_val])
 
