@@ -566,7 +566,7 @@ class Decoder:
         y_test,
         cv_res: Type[CV_res],
         save_data=True,
-        append_samples=False,
+        save_probabilities=True,
     ) -> Type[CV_res]:
 
         if self.save_coef:
@@ -596,8 +596,13 @@ class Decoder:
             cv_res.X_test.append(X_test)
         cv_res.y_train.append(y_train)
         cv_res.y_test.append(y_test)
-        cv_res.y_train_pr.append(y_train_pr)
-        cv_res.y_test_pr.append(y_test_pr)
+
+        if save_probabilities is False:
+            cv_res.y_train_pr.append(y_train_pr)
+            cv_res.y_test_pr.append(y_test_pr)
+        else:
+            cv_res.y_train_pr.append(model_train.predict_proba(X_train))
+            cv_res.y_test_pr.append(model_train.predict_proba(X_test))
         return cv_res
 
     def _set_movement_detection_rates(
