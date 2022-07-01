@@ -5,6 +5,7 @@ import os
 from numba import jit
 from scipy import stats
 
+from py_neuromodulation import nm_plots
 
 class RMAPChannelSelector:
     def __init__(self) -> None:
@@ -72,6 +73,9 @@ class RMAPChannelSelector:
         nib.save(img, name)
 
     def get_RMAP(self, X: np.array, y: np.array):
+        # faster than calculate_RMap_numba
+        # https://stackoverflow.com/questions/71252740/correlating-an-array-row-wise-with-a-vector/71253141#71253141
+
         r = (
             len(y) * np.sum(X * y[None, :], axis=-1)
             - (np.sum(X, axis=-1) * np.sum(y))
@@ -114,6 +118,8 @@ class RMAPChannelSelector:
     def leave_one_ch_out_cv(
         self, l_fps_names: list, l_fps_dat: list, l_per: list
     ):
+        # l_fps_dat is not flattened
+
         per_left_out = []
         per_predict = []
 
@@ -145,6 +151,8 @@ class RMAPChannelSelector:
     def leave_one_sub_out_cv(
         self, l_fps_names: list, l_fps_dat: list, l_per: list, sub_list: list
     ):
+        # l_fps_dat assume non flatted arrays
+        # each fp including the sub_list string will be iteratively removed for test set
 
         per_predict = []
         per_left_out = []
@@ -213,3 +221,12 @@ class RMAPChannelSelector:
 
         idx_max = np.argmax(np.array(fp_pairs)[:, 3])
         return fp_pairs[idx_max][0:3]
+
+    def plot_performance_prediction_correlation(per_left_out, per_predict, out_path_save: str = None):
+        df_plt_corr = pd.DataFrame()
+        df_plt_corr["test_performance"] = per_left_out
+        df_plt_corr["struct_conn_predict"] = per_predict  # change "struct" with "funct" for functional connectivity
+
+        nm_plots.reg_plot(
+            x_col="test_performance", y_col="struct_conn_predict", data=df_plt_corr, out_path_save=out_path_save
+        )
