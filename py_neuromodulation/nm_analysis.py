@@ -699,7 +699,7 @@ class Feature_Reader:
                 if "coef" in obj_read:
                     set_score(
                         key_set="coef",
-                        key_get=None,
+                        key_get="coef",
                         take_mean=False,
                         val=np.concatenate(obj_read["coef"]),
                     )
