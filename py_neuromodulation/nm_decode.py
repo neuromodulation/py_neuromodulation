@@ -317,7 +317,7 @@ class Decoder:
             return self.ch_ind_results
 
         if feature_contacts == "all_channels_combined":
-            dat_combined = np.array(self.features)
+            dat_combined = np.array(self.data)
             self.run_CV(dat_combined, self.label)
             self.set_CV_results("all_ch_results", contact_point=None)
             return self.all_ch_results
