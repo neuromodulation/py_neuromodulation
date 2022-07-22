@@ -123,7 +123,7 @@ def plot_epoch(
 
 
 def reg_plot(x_col: str, y_col: str, data: pd.DataFrame, out_path_save: str = None):
-    plt.figure(figsize=(6,4), dpi=300)
+    plt.figure(figsize=(4,4), dpi=300)
     rho, p = nm_stats.permutationTestSpearmansRho(
         data[x_col],
         data[y_col],

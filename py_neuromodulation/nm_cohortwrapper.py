@@ -119,7 +119,7 @@ class CohortRunner:
                 break
 
         if self.run_bids:
-            nm_BIDS = nm_stream_offline.BidsStream(
+            stream = nm_stream_offline.Stream(
                 PATH_RUN=PATH_RUN,
                 PATH_BIDS=PATH_BIDS,
                 PATH_OUT=PATH_OUT,
@@ -131,8 +131,7 @@ class CohortRunner:
                 PATH_SETTINGS=self.PATH_SETTINGS,
                 VERBOSE=self.VERBOSE,
             )
-
-            nm_BIDS.run_bids()
+        stream.run()
 
         feature_file = os.path.basename(PATH_RUN)[:-5]  # cut off ".vhdr"
 
@@ -286,28 +285,44 @@ class CohortRunner:
         dictionary
             ch_all
         """
-        feature_wrapper = nm_analysis.Feature_Reader(
+        feature_reader = nm_analysis.Feature_Reader(
             feature_dir=feature_path, feature_file=feature_file
         )
-        decoder = nm_decode.Decoder()
-        decoder.set_data(
-            feature_wrapper.feature_arr,
-            feature_wrapper.label,
-            feature_wrapper.label_name,
-            feature_wrapper.used_chs,
+        if "Washington" in feature_path:
+            mov_starts = np.where(np.diff(feature_reader.feature_arr["mov"])>0)[0]
+            seg_cut = []
+            for mov_start in mov_starts:
+                for i in range(5):
+                    seg_cut.append(mov_start+i)
+
+            ind_cut = np.concatenate((np.where(feature_reader.feature_arr["mov"] == 11)[0], seg_cut))
+            idx_select = set(np.arange(feature_reader.feature_arr["mov"].shape[0])) - set(ind_cut)
+            feature_reader.feature_arr = feature_reader.feature_arr.iloc[list(idx_select), :].reset_index(drop=True)
+            #analyzer.feature_arr["mov"] = analyzer.feature_arr["mov"] > 0
+            feature_reader.label = np.array(feature_reader.feature_arr["mov"] > 0, dtype=int)
+            subject_name = feature_file[:2]
+            task_name = "hand_movement"
+            run_number = 1
+        else:
+            subject_name = feature_file[
+                feature_file.find("sub-") + 4 : feature_file.find("_ses")
+            ]
+            sess_name = feature_file[
+                feature_file.find("ses-") + 4 : feature_file.find("_task")
+            ]
+            task_name = feature_file[
+                feature_file.find("task-") + 5 : feature_file.find("_run")
+            ]
+            run_number = feature_file[
+                feature_file.find("run-") + 4 : feature_file.find("_ieeg")
+            ]
+        print(feature_reader.label_name)
+        decoder = nm_decode.Decoder(
+            features=feature_reader.feature_arr,
+            label=feature_reader.label,
+            label_name=feature_reader.label_name,
+            used_chs=feature_reader.used_chs,
         )
-        subject_name = feature_file[
-            feature_file.find("sub-") + 4 : feature_file.find("_ses")
-        ]
-        sess_name = feature_file[
-            feature_file.find("ses-") + 4 : feature_file.find("_task")
-        ]
-        task_name = feature_file[
-            feature_file.find("task-") + 5 : feature_file.find("_run")
-        ]
-        run_number = feature_file[
-            feature_file.find("run-") + 4 : feature_file.find("_ieeg")
-        ]
 
         if read_channels is True:
             decoder.set_data_ind_channels()
@@ -382,7 +397,7 @@ class CohortRunner:
                     cohort,
                     read_channels=read_channels,
                 )
-
+  
         if read_channels is True:
             np.save(
                 os.path.join(self.outpath, "channel_all.npy"), grid_point_all

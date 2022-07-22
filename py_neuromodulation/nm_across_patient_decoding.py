@@ -70,7 +70,7 @@ class AcrossPatientRunner:
             y_train,
             X_test,
             y_test,
-            cv_res=nm_decode.CV_res()
+            cv_res=nm_decode.CV_res(get_movement_detection_rate=True)
         )
 
     @staticmethod
@@ -387,7 +387,7 @@ class AcrossPatientRunner:
 
     def run_leave_nminus1_patient_out_across_cohorts(self):
 
-        grid_point_all = np.load(os.path.join(self.outpath, 'grid_point_all.npy'), allow_pickle='TRUE').item()
+        grid_point_all = np.load(os.path.join(self.outpath, 'grid_point_all_re.npy'), allow_pickle='TRUE').item()
         performance_leave_one_patient_out = {}
 
         for grid_point in list(grid_point_all.keys()):

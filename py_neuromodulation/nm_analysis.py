@@ -14,6 +14,7 @@ from py_neuromodulation import nm_decode, nm_IO, nm_plots
 target_filter_str = {
     "CLEAN",
     "SQUARED_EMG",
+    "SQUARED_INTERPOLATED_EMG",
     "SQUARED_ROTAWHEEL",
     "SQUARED_ROTATION" "rota_squared",
 }
@@ -60,6 +61,12 @@ class Feature_Reader:
 
         self.settings = nm_IO.read_settings(PATH_READ_FILE)
         self.sidecar = nm_IO.read_sidecar(PATH_READ_FILE)
+        if self.sidecar["sess_right"] is None:
+            if "coords" in self.sidecar:
+                if len(self.sidecar["coords"]["cortex_left"]["ch_names"])>0:
+                    self.sidecar["sess_right"] = False
+                if len(self.sidecar["coords"]["cortex_right"]["ch_names"])>0:
+                    self.sidecar["sess_right"] = True
         self.sfreq = self.sidecar["sfreq"]
         self.nm_channels = nm_IO.read_nm_channels(PATH_READ_FILE)
         self.feature_arr = nm_IO.read_features(PATH_READ_FILE)
@@ -98,7 +105,12 @@ class Feature_Reader:
         ]
 
         if len(target_clean) == 0:
-            target = target_names[0]
+            if "ARTIFACT" not in target_names[0]:
+                target = target_names[0]
+            elif len(target_names) > 1:
+                target = target_names[1]
+            else:
+                target = target_names[0]
         else:
             for target_ in target_clean:
                 # try to select contralateral label
@@ -750,7 +762,7 @@ class Feature_Reader:
 
                 if read_mrmr is True:
                     # transform dict into keys for json saving
-
+ 
                     set_score(
                         key_set="mrmr_select",
                         key_get=None,
