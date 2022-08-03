@@ -13,7 +13,7 @@ def plot_df_subjects(
     df,
     x_col="sub",
     y_col="performance_test",
-    hue="all combined",
+    hue=None,
     title="channel specific performances",
     PATH_SAVE: str = None,
 ):

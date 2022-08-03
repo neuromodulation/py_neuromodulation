@@ -397,7 +397,7 @@ class CohortRunner:
                     cohort,
                     read_channels=read_channels,
                 )
-  
+
         if read_channels is True:
             np.save(
                 os.path.join(self.outpath, "channel_all.npy"), grid_point_all
