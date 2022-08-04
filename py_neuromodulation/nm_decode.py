@@ -111,7 +111,7 @@ class Decoder:
         mov_detection_threshold: float = 0.5,
         TRAIN_VAL_SPLIT: bool = True,
         RUN_BAY_OPT: bool = False,
-        STACK_FEATURES_N_SAMPLES: bool = True,
+        STACK_FEATURES_N_SAMPLES: bool = False,
         time_stack_n_samples: int = 5,
         save_coef: bool = False,
         get_movement_detection_rate: bool = False,
@@ -711,17 +711,15 @@ class Decoder:
             X_test = cca.transform(X_test)
 
         if self.STACK_FEATURES_N_SAMPLES is True:
-            X_train, y_train, X_test, y_test = self.append_samples_val(
-                X_train, y_train, X_test, y_test, self.time_stack_n_samples
-            )
 
-        # here: omit a class!
-        # idx_train = np.where(y_train != 0)[0]
-        # idx_test = np.where(y_test != 0)[0]
-        # y_train = y_train[idx_train]
-        # X_train = X_train[idx_train]
-        # y_test = y_test[idx_test]
-        # X_test = X_test[idx_test]
+            if return_fitted_model_only is True:
+                X_train, y_train = self.append_previous_n_samples(
+                    X_train, y_train, self.time_stack_n_samples
+                )
+            else:
+                X_train, y_train, X_test, y_test = self.append_samples_val(
+                    X_train, y_train, X_test, y_test, self.time_stack_n_samples
+                )
 
         # fit model
         model_train = self.fit_model(model_train, X_train, y_train)

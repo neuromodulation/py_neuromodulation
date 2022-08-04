@@ -159,3 +159,4 @@ examples/data/derivatives/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_iee
 # temp files
 *.tmp
 
+*.csv

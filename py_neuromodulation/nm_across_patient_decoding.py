@@ -8,10 +8,9 @@ from py_neuromodulation import nm_decode, nm_RMAP
 
 
 class AcrossPatientRunner:
-
     def __init__(
         self,
-        outpath : str,
+        outpath: str,
         model=linear_model.LogisticRegression(class_weight="balanced"),
         TRAIN_VAL_SPLIT=False,
         eval_method=metrics.balanced_accuracy_score,
@@ -20,8 +19,8 @@ class AcrossPatientRunner:
         use_nested_cv=True,
         RUN_BAY_OPT=False,
         ML_model_name="LM",
-        cohorts:dict = None
-        ) -> None:
+        cohorts: list = None,
+    ) -> None:
 
         self.outpath = outpath
         self.model = model
@@ -35,18 +34,14 @@ class AcrossPatientRunner:
         self.cohorts = cohorts
 
         self.grid_cortex = pd.read_csv(
-            os.path.join(
-                py_neuromodulation.__path__[0],
-                'grid_cortex.tsv'
-            ),
-            sep='\t'
+            os.path.join(py_neuromodulation.__path__[0], "grid_cortex.tsv"),
+            sep="\t",
         ).to_numpy()
 
         self.RMAPSelector = nm_RMAP.RMAPChannelSelector()
 
         self.ch_all = np.load(
-            os.path.join(self.outpath, "channel_all.npy"),
-            allow_pickle='TRUE'
+            os.path.join(self.outpath, "channel_all.npy"), allow_pickle="TRUE"
         ).item()
 
     def init_decoder(self) -> nm_decode.Decoder:
@@ -54,13 +49,12 @@ class AcrossPatientRunner:
         return nm_decode.Decoder(
             model=self.model,
             TRAIN_VAL_SPLIT=self.TRAIN_VAL_SPLIT,
-            STACK_FEATURES_N_SAMPLES=True,
             get_movement_detection_rate=True,
             eval_method=self.eval_method,
             VERBOSE=self.VERBOSE,
             cv_method=self.cv_method,
             use_nested_cv=self.use_nested_cv,
-            RUN_BAY_OPT=self.RUN_BAY_OPT
+            RUN_BAY_OPT=self.RUN_BAY_OPT,
         )
 
     def eval_model(self, X_train, y_train, X_test, y_test):
@@ -70,7 +64,7 @@ class AcrossPatientRunner:
             y_train,
             X_test,
             y_test,
-            cv_res=nm_decode.CV_res()
+            cv_res=nm_decode.CV_res(get_movement_detection_rate=True),
         )
 
     @staticmethod
@@ -88,60 +82,212 @@ class AcrossPatientRunner:
         else:
             X_train = X_train[0]
             y_train = y_train[0]
-        
+
         return X_train, y_train
 
-    def get_patients_train_dict(
-        self,
-        sub_test,
-        cohort_test,
-        val_approach : str
-    ):
+    def get_patients_train_dict(self, sub_test, cohort_test, val_approach: str):
         cohorts_train = {}
         for cohort in self.cohorts:
             if val_approach == "leave_1_cohort_out" and cohort == cohort_test:
                 continue
-            if val_approach == "leave_1_sub_out_within_coh" and \
-                cohort != cohort_test:
+            if (
+                val_approach == "leave_1_sub_out_within_coh"
+                and cohort != cohort_test
+            ):
                 continue
             cohorts_train[cohort] = []
             for sub in self.ch_all[cohort]:
-                if val_approach == "leave_1_sub_out_within_coh" and \
-                    sub == sub_test and cohort == cohort_test:
+                if (
+                    val_approach == "leave_1_sub_out_within_coh"
+                    and sub == sub_test
+                    and cohort == cohort_test
+                ):
                     continue
-                if val_approach == "leave_1_sub_out_across_coh" and \
-                    sub == sub_test:
+                if (
+                    val_approach == "leave_1_sub_out_across_coh"
+                    and sub == sub_test
+                ):
                     continue
                 cohorts_train[cohort].append(sub)
         return cohorts_train
 
-    def leave_one_patient_out_RMAP(self):
+    def cross_val_approach_RMAP(
+        self,
+        val_approach: str = "leave_1_cohort_out",
+        df_rmap: pd.DataFrame = None,
+        add_UPDRS: bool = False,
+        df_updrs: pd.DataFrame = None,
+    ):
         p_ = {}
         for cohort_test in self.cohorts:
-            if cohort_test not in p_: p_[cohort_test] = {}
+            print(cohort_test)
+            if cohort_test not in p_:
+                p_[cohort_test] = {}
             for sub_test in self.ch_all[cohort_test].keys():
-                if sub_test not in p_: p_[cohort_test][sub_test] = {}
+                print(sub_test)
+                if sub_test not in p_[cohort_test]:
+                    p_[cohort_test][sub_test] = {}
+
+                ch_test = df_rmap.query("cohort == @cohort_test and sub == @sub_test")["ch"].iloc[0]
+    	        
+                X_test, y_test = self.get_data_sub_ch(
+                    self.ch_all, cohort_test, sub_test, ch_test
+                )
+                if add_UPDRS is True:
+                    updrs = df_updrs.query("sub == @sub_test and cohort == @cohort_test").iloc[0]["UPDRS_total"]
+                    if np.isnan(updrs):
+                        continue
+                    X_test = np.concatenate((
+                        X_test, np.expand_dims(np.repeat(updrs, repeats=X_test.shape[0]), axis=1)
+                        ), axis=1)
+
+                cohorts_train = self.get_patients_train_dict(
+                    sub_test, cohort_test, val_approach=val_approach
+                )
+
+                X_train_comb = []
+                y_train_comb = []
+                for cohort_train in list(cohorts_train.keys()):
+                    for sub_train in cohorts_train[cohort_train]:
+                        ch_train = df_rmap.query("cohort == @cohort_train and sub == @sub_train")["ch"].iloc[0]
+
+                        X_train, y_train = self.get_data_sub_ch(
+                            self.ch_all, cohort_train, sub_train, ch_train
+                        )
+                        if add_UPDRS is True:
+                            updrs = df_updrs.query("sub == @sub_train and cohort == @cohort_train").iloc[0]["UPDRS_total"]
+                            if np.isnan(updrs):  # the returned True is here not boolean but np boolean
+                                continue
+                            X_train = np.concatenate((
+                                X_train, np.expand_dims(np.repeat(updrs, repeats=X_train.shape[0]), axis=1)
+                                ), axis=1)
+
+                        X_train_comb.append(X_train)
+                        y_train_comb.append(y_train)
+                if len(X_train_comb) > 1:
+                    X_train = np.concatenate(X_train_comb, axis=0)
+                    y_train = np.concatenate(y_train_comb, axis=0)
+                else:
+                    X_train = X_train_comb[0]
+                    y_train = X_train_comb[0]
+
+                self.decoder = self.init_decoder()
+
+                #X_train, y_train, X_test, y_test = self.decoder.append_samples_val(X_train, y_train, X_test, y_test, 5)
+
+                model = self.decoder.wrapper_model_train(
+                    X_train=X_train,
+                    y_train=y_train,
+                    return_fitted_model_only=True,
+                )
+                cv_res = self.decoder.eval_model(
+                    model,
+                    X_train,
+                    X_test,
+                    y_train,
+                    y_test,
+                    cv_res=nm_decode.CV_res(get_movement_detection_rate=True),
+                    save_data=False,
+                )
+                p_[cohort_test][sub_test] = cv_res
+        np.save(
+            os.path.join(
+                self.outpath,
+                self.ML_model_name
+                + f"_performance_{val_approach}_RMAP.npy",
+            ),
+            p_,
+        )
+    
+    def cross_val_p2p_RMAP(
+        self,
+        df_rmap: pd.DataFrame = None,
+    ):
+        p_ = {}
+        for cohort_test in self.cohorts:
+            print(cohort_test)
+            if cohort_test not in p_:
+                p_[cohort_test] = {}
+            for sub_test in self.ch_all[cohort_test].keys():
+                print(sub_test)
+                if sub_test not in p_[cohort_test]:
+                    p_[cohort_test][sub_test] = {}
+
+                ch_test = df_rmap.query("cohort == @cohort_test and sub == @sub_test")["ch"].iloc[0]
+    	        
+                X_test, y_test = self.get_data_sub_ch(
+                    self.ch_all, cohort_test, sub_test, ch_test
+                )
+                for cohort_train in self.cohorts:
+                    if cohort_train not in p_[cohort_test][sub_test]:
+                        p_[cohort_test][sub_test][cohort_train] = {}
+                    for sub_train in list(self.ch_all[cohort_train].keys()):
+                        if sub_train not in p_[cohort_test][sub_test][cohort_train]:
+                            p_[cohort_test][sub_test][cohort_train][sub_train] = {}
+                        
+                        ch_train = df_rmap.query("cohort == @cohort_train and sub == @sub_train")["ch"].iloc[0]
+
+                        X_train, y_train = self.get_data_sub_ch(
+                            self.ch_all, cohort_train, sub_train, ch_train
+                        )
+                        self.decoder = self.init_decoder()
+
+                        #X_train, y_train, X_test, y_test = self.decoder.append_samples_val(X_train, y_train, X_test, y_test, 5)
+
+                        model = self.decoder.wrapper_model_train(
+                            X_train=X_train,
+                            y_train=y_train,
+                            return_fitted_model_only=True,
+                        )
+                        cv_res = self.decoder.eval_model(
+                            model,
+                            X_train,
+                            X_test,
+                            y_train,
+                            y_test,
+                            cv_res=nm_decode.CV_res(get_movement_detection_rate=True),
+                            save_data=False,
+                        )
+                        p_[cohort_test][sub_test][cohort_train][sub_train] = cv_res
+
+        np.save(
+            os.path.join(
+                self.outpath,
+                self.ML_model_name
+                + f"_performance_p2p_RMAP.npy",
+            ),
+            p_,
+        )
+
+
+    def leave_one_patient_out_RMAP(
+        self, val_approach: str = "leave_1_cohort_out"
+    ):
+        p_ = {}
+        for cohort_test in self.cohorts:
+            if cohort_test not in p_:
+                p_[cohort_test] = {}
+            for sub_test in self.ch_all[cohort_test].keys():
+                if sub_test not in p_:
+                    p_[cohort_test][sub_test] = {}
                 for ch_test in self.ch_all[cohort_test][sub_test].keys():
                     if ch_test not in p_[cohort_test][sub_test]:
                         p_[cohort_test][sub_test][ch_test] = {}
-                    #for rec_test in self.ch_all[cohort_test][sub_test][ch_test].keys():
-                    #    if rec_test not in p_[cohort_test][sub_test][ch_test]:
-                    #        p_[cohort_test][sub_test][ch_test][rec_test] = {}
-                    #for ch_test in rec_test:
-                        
+
                     cohorts_train = self.get_patients_train_dict(
-                        sub_test,
-                        cohort_test,
-                        val_approach="leave_1_cohort_out"
+                        sub_test, cohort_test, val_approach=val_approach
                     )
 
-                    cohort_train, sub_train, ch_train = \
-                        self.RMAPSelector.get_highest_corr_sub_ch(
-                            cohort_test,
-                            sub_test,
-                            ch_test,
-                            cohorts_train,
-                            path_dir=r"C:\Users\ICN_admin\OneDrive - Charité - Universitätsmedizin Berlin\Connectomics\DecodingToolbox_BerlinPittsburgh_Beijing\functional_connectivity"
+                    (
+                        cohort_train,
+                        sub_train,
+                        ch_train,
+                    ) = self.RMAPSelector.get_highest_corr_sub_ch(
+                        cohort_test,
+                        sub_test,
+                        ch_test,
+                        cohorts_train,
+                        path_dir=r"C:\Users\ICN_admin\OneDrive - Charité - Universitätsmedizin Berlin\Connectomics\DecodingToolbox_BerlinPittsburgh_Beijing\functional_connectivity",
                     )
 
                     X_train, y_train = self.get_data_sub_ch(
@@ -156,7 +302,7 @@ class AcrossPatientRunner:
                     model = self.decoder.wrapper_model_train(
                         X_train=X_train,
                         y_train=y_train,
-                        return_fitted_model_only=True
+                        return_fitted_model_only=True,
                     )
                     cv_res = self.decoder.eval_model(
                         model,
@@ -164,41 +310,67 @@ class AcrossPatientRunner:
                         X_test,
                         y_train,
                         y_test,
-                        cv_res = nm_decode.CV_res(
+                        cv_res=nm_decode.CV_res(
                             get_movement_detection_rate=True
                         ),
                         save_data=False,
-                        append_samples = True
+                        append_samples=True,
                     )
                     p_[cohort_test][sub_test][ch_test] = cv_res
-        np.save(os.path.join(self.outpath, self.ML_model_name+'_performance_leave_one_cohort_out_RMAP.npy'),\
-            p_)
+        np.save(
+            os.path.join(
+                self.outpath,
+                self.ML_model_name
+                + "_performance_leave_one_cohort_out_RMAP.npy",
+            ),
+            p_,
+        )
 
     def run_cohort_leave_one_patient_out_CV_within_cohort(self):
 
-        grid_point_all = np.load(os.path.join(self.outpath, 'grid_point_all.npy'), allow_pickle='TRUE').item()
+        grid_point_all = np.load(
+            os.path.join(self.outpath, "grid_point_all.npy"),
+            allow_pickle="TRUE",
+        ).item()
         performance_leave_one_patient_out = {}
 
         for cohort in self.cohorts:
-            print('cohort: '+str(cohort))
+            print("cohort: " + str(cohort))
             performance_leave_one_patient_out[cohort] = {}
 
             for grid_point in list(grid_point_all.keys()):
-                print('grid point: '+str(grid_point))
+                print("grid point: " + str(grid_point))
                 if cohort not in grid_point_all[grid_point]:
                     continue
                 if len(list(grid_point_all[grid_point][cohort].keys())) <= 1:
                     continue  # cannot do leave one out prediction with a single subject
                 performance_leave_one_patient_out[cohort][grid_point] = {}
 
-                for subject_test in list(grid_point_all[grid_point][cohort].keys()):
+                for subject_test in list(
+                    grid_point_all[grid_point][cohort].keys()
+                ):
                     X_test = []
                     y_test = []
-                    for run in list(grid_point_all[grid_point][cohort][subject_test].keys()):
-                        if grid_point_all[grid_point][cohort][subject_test][run]["lat"] != "CON":
+                    for run in list(
+                        grid_point_all[grid_point][cohort][subject_test].keys()
+                    ):
+                        if (
+                            grid_point_all[grid_point][cohort][subject_test][
+                                run
+                            ]["lat"]
+                            != "CON"
+                        ):
                             continue
-                        X_test.append(grid_point_all[grid_point][cohort][subject_test][run]["data"])
-                        y_test.append(grid_point_all[grid_point][cohort][subject_test][run]["label"])
+                        X_test.append(
+                            grid_point_all[grid_point][cohort][subject_test][
+                                run
+                            ]["data"]
+                        )
+                        y_test.append(
+                            grid_point_all[grid_point][cohort][subject_test][
+                                run
+                            ]["label"]
+                        )
                     if len(X_test) > 1:
                         X_test = np.concatenate(X_test, axis=0)
                         y_test = np.concatenate(y_test, axis=0)
@@ -207,14 +379,33 @@ class AcrossPatientRunner:
                         y_test = y_test[0]
                     X_train = []
                     y_train = []
-                    for subject_train in list(grid_point_all[grid_point][cohort].keys()):
+                    for subject_train in list(
+                        grid_point_all[grid_point][cohort].keys()
+                    ):
                         if subject_test == subject_train:
                             continue
-                        for run in list(grid_point_all[grid_point][cohort][subject_train].keys()):
-                            if grid_point_all[grid_point][cohort][subject_train][run]["lat"] != "CON":
+                        for run in list(
+                            grid_point_all[grid_point][cohort][
+                                subject_train
+                            ].keys()
+                        ):
+                            if (
+                                grid_point_all[grid_point][cohort][
+                                    subject_train
+                                ][run]["lat"]
+                                != "CON"
+                            ):
                                 continue
-                            X_train.append(grid_point_all[grid_point][cohort][subject_train][run]["data"])
-                            y_train.append(grid_point_all[grid_point][cohort][subject_train][run]["label"])
+                            X_train.append(
+                                grid_point_all[grid_point][cohort][
+                                    subject_train
+                                ][run]["data"]
+                            )
+                            y_train.append(
+                                grid_point_all[grid_point][cohort][
+                                    subject_train
+                                ][run]["label"]
+                            )
                     if len(X_train) > 1:
                         X_train = np.concatenate(X_train, axis=0)
                         y_train = np.concatenate(y_train, axis=0)
@@ -227,32 +418,45 @@ class AcrossPatientRunner:
                     model = self.decoder.wrapper_model_train(
                         X_train=X_train,
                         y_train=y_train,
-                        return_fitted_model_only=True
+                        return_fitted_model_only=True,
                     )
                     # use initialized decoder
                     try:
-                        cv_res = self.eval_model(X_train, y_train, X_test, y_test)
+                        cv_res = self.eval_model(
+                            X_train, y_train, X_test, y_test
+                        )
                     except nm_decode.Decoder.ClassMissingException:
                         continue
 
-                    performance_leave_one_patient_out[cohort][grid_point][subject_test] = cv_res
+                    performance_leave_one_patient_out[cohort][grid_point][
+                        subject_test
+                    ] = cv_res
 
         performance_leave_one_patient_out["grid_cortex"] = self.grid_cortex
-        np.save(os.path.join(self.outpath, self.ML_model_name+'_performance_leave_one_patient_out_within_cohort.npy'),\
-            performance_leave_one_patient_out)
+        np.save(
+            os.path.join(
+                self.outpath,
+                self.ML_model_name
+                + "_performance_leave_one_patient_out_within_cohort.npy",
+            ),
+            performance_leave_one_patient_out,
+        )
         return performance_leave_one_patient_out
 
     def run_cohort_leave_one_cohort_out_CV(self):
-        grid_point_all = np.load(os.path.join(self.outpath, 'grid_point_all.npy'), allow_pickle='TRUE').item()
+        grid_point_all = np.load(
+            os.path.join(self.outpath, "grid_point_all.npy"),
+            allow_pickle="TRUE",
+        ).item()
         performance_leave_one_cohort_out = {}
 
         for cohort_test in self.cohorts:
-            print('cohort: '+str(cohort_test))
+            print("cohort: " + str(cohort_test))
             if cohort_test not in performance_leave_one_cohort_out:
                 performance_leave_one_cohort_out[cohort_test] = {}
 
             for grid_point in list(grid_point_all.keys()):
-                print('grid point: '+str(grid_point))
+                print("grid point: " + str(grid_point))
                 if cohort_test not in grid_point_all[grid_point]:
                     continue
                 if len(list(grid_point_all[grid_point].keys())) == 1:
@@ -265,12 +469,31 @@ class AcrossPatientRunner:
                         continue
                     if cohort_train not in grid_point_all[grid_point]:
                         continue
-                    for subject_test in list(grid_point_all[grid_point][cohort_train].keys()):
-                        for run in list(grid_point_all[grid_point][cohort_train][subject_test].keys()):
-                            if grid_point_all[grid_point][cohort_train][subject_test][run]["lat"] != "CON":
+                    for subject_test in list(
+                        grid_point_all[grid_point][cohort_train].keys()
+                    ):
+                        for run in list(
+                            grid_point_all[grid_point][cohort_train][
+                                subject_test
+                            ].keys()
+                        ):
+                            if (
+                                grid_point_all[grid_point][cohort_train][
+                                    subject_test
+                                ][run]["lat"]
+                                != "CON"
+                            ):
                                 continue
-                            X_train.append(grid_point_all[grid_point][cohort_train][subject_test][run]["data"])
-                            y_train.append(grid_point_all[grid_point][cohort_train][subject_test][run]["label"])
+                            X_train.append(
+                                grid_point_all[grid_point][cohort_train][
+                                    subject_test
+                                ][run]["data"]
+                            )
+                            y_train.append(
+                                grid_point_all[grid_point][cohort_train][
+                                    subject_test
+                                ][run]["label"]
+                            )
                 if len(X_train) > 1:
                     X_train = np.concatenate(X_train, axis=0)
                     y_train = np.concatenate(y_train, axis=0)
@@ -283,18 +506,37 @@ class AcrossPatientRunner:
                 model = self.decoder.wrapper_model_train(
                     X_train=X_train,
                     y_train=y_train,
-                    return_fitted_model_only=True
+                    return_fitted_model_only=True,
                 )
 
                 performance_leave_one_cohort_out[cohort_test][grid_point] = {}
-                for subject_test in list(grid_point_all[grid_point][cohort_test].keys()):
+                for subject_test in list(
+                    grid_point_all[grid_point][cohort_test].keys()
+                ):
                     X_test = []
                     y_test = []
-                    for run in list(grid_point_all[grid_point][cohort_test][subject_test].keys()):
-                        if grid_point_all[grid_point][cohort_test][subject_test][run]["lat"] != "CON":
+                    for run in list(
+                        grid_point_all[grid_point][cohort_test][
+                            subject_test
+                        ].keys()
+                    ):
+                        if (
+                            grid_point_all[grid_point][cohort_test][
+                                subject_test
+                            ][run]["lat"]
+                            != "CON"
+                        ):
                             continue
-                        X_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["data"])
-                        y_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["label"])
+                        X_test.append(
+                            grid_point_all[grid_point][cohort_test][
+                                subject_test
+                            ][run]["data"]
+                        )
+                        y_test.append(
+                            grid_point_all[grid_point][cohort_test][
+                                subject_test
+                            ][run]["label"]
+                        )
                     if len(X_test) > 1:
                         X_test = np.concatenate(X_test, axis=0)
                         y_test = np.concatenate(y_test, axis=0)
@@ -308,23 +550,34 @@ class AcrossPatientRunner:
                         X_test,
                         y_train,
                         y_test,
-                        cv_res = nm_decode.CV_res()
+                        cv_res=nm_decode.CV_res(),
                     )
 
-                    performance_leave_one_cohort_out[cohort_test][grid_point][subject_test] = cv_res
+                    performance_leave_one_cohort_out[cohort_test][grid_point][
+                        subject_test
+                    ] = cv_res
 
         performance_leave_one_cohort_out["grid_cortex"] = self.grid_cortex
-        np.save(os.path.join(self.outpath, self.ML_model_name+'_performance_leave_one_cohort_out.npy'), performance_leave_one_cohort_out)
+        np.save(
+            os.path.join(
+                self.outpath,
+                self.ML_model_name + "_performance_leave_one_cohort_out.npy",
+            ),
+            performance_leave_one_cohort_out,
+        )
 
     def run_leave_one_patient_out_across_cohorts(self):
 
-        grid_point_all = np.load(os.path.join(self.outpath, 'grid_point_all.npy'), allow_pickle='TRUE').item()
+        grid_point_all = np.load(
+            os.path.join(self.outpath, "grid_point_all.npy"),
+            allow_pickle="TRUE",
+        ).item()
         performance_leave_one_patient_out = {}
 
         for grid_point in list(grid_point_all.keys()):
-            print('grid point: '+str(grid_point))
+            print("grid point: " + str(grid_point))
             for cohort in self.cohorts:
-                print('cohort: '+str(cohort))
+                print("cohort: " + str(cohort))
                 if cohort not in performance_leave_one_patient_out:
                     performance_leave_one_patient_out[cohort] = {}
 
@@ -336,14 +589,31 @@ class AcrossPatientRunner:
                 if grid_point not in performance_leave_one_patient_out[cohort]:
                     performance_leave_one_patient_out[cohort][grid_point] = {}
 
-                for subject_test in list(grid_point_all[grid_point][cohort].keys()):
+                for subject_test in list(
+                    grid_point_all[grid_point][cohort].keys()
+                ):
                     X_test = []
                     y_test = []
-                    for run in list(grid_point_all[grid_point][cohort][subject_test].keys()):
-                        if grid_point_all[grid_point][cohort][subject_test][run]["lat"] != "CON":
+                    for run in list(
+                        grid_point_all[grid_point][cohort][subject_test].keys()
+                    ):
+                        if (
+                            grid_point_all[grid_point][cohort][subject_test][
+                                run
+                            ]["lat"]
+                            != "CON"
+                        ):
                             continue
-                        X_test.append(grid_point_all[grid_point][cohort][subject_test][run]["data"])
-                        y_test.append(grid_point_all[grid_point][cohort][subject_test][run]["label"])
+                        X_test.append(
+                            grid_point_all[grid_point][cohort][subject_test][
+                                run
+                            ]["data"]
+                        )
+                        y_test.append(
+                            grid_point_all[grid_point][cohort][subject_test][
+                                run
+                            ]["label"]
+                        )
                     if len(X_test) > 1:
                         X_test = np.concatenate(X_test, axis=0)
                         y_test = np.concatenate(y_test, axis=0)
@@ -352,15 +622,38 @@ class AcrossPatientRunner:
                         y_test = y_test[0]
                     X_train = []
                     y_train = []
-                    for cohort_inner in list(grid_point_all[grid_point].keys()):  # available cohorts for that grid point
-                        for subject_train in list(grid_point_all[grid_point][cohort_inner].keys()):
-                            if (subject_test == subject_train) and (cohort_inner == cohort):
+                    for cohort_inner in list(
+                        grid_point_all[grid_point].keys()
+                    ):  # available cohorts for that grid point
+                        for subject_train in list(
+                            grid_point_all[grid_point][cohort_inner].keys()
+                        ):
+                            if (subject_test == subject_train) and (
+                                cohort_inner == cohort
+                            ):
                                 continue
-                            for run in list(grid_point_all[grid_point][cohort_inner][subject_train].keys()):
-                                if grid_point_all[grid_point][cohort_inner][subject_train][run]["lat"] != "CON":
+                            for run in list(
+                                grid_point_all[grid_point][cohort_inner][
+                                    subject_train
+                                ].keys()
+                            ):
+                                if (
+                                    grid_point_all[grid_point][cohort_inner][
+                                        subject_train
+                                    ][run]["lat"]
+                                    != "CON"
+                                ):
                                     continue
-                                X_train.append(grid_point_all[grid_point][cohort_inner][subject_train][run]["data"])
-                                y_train.append(grid_point_all[grid_point][cohort_inner][subject_train][run]["label"])
+                                X_train.append(
+                                    grid_point_all[grid_point][cohort_inner][
+                                        subject_train
+                                    ][run]["data"]
+                                )
+                                y_train.append(
+                                    grid_point_all[grid_point][cohort_inner][
+                                        subject_train
+                                    ][run]["label"]
+                                )
                     if len(X_train) > 1:
                         X_train = np.concatenate(X_train, axis=0)
                         y_train = np.concatenate(y_train, axis=0)
@@ -370,48 +663,83 @@ class AcrossPatientRunner:
 
                     self.decoder = self.init_decoder()
                     try:
-                        cv_res = self.eval_model(X_train, y_train, X_test, y_test)
+                        cv_res = self.eval_model(
+                            X_train, y_train, X_test, y_test
+                        )
                     except nm_decode.Decoder.ClassMissingException:
                         continue
 
-                    performance_leave_one_patient_out[cohort][grid_point][subject_test] = cv_res
+                    performance_leave_one_patient_out[cohort][grid_point][
+                        subject_test
+                    ] = cv_res
 
         performance_leave_one_patient_out["grid_cortex"] = self.grid_cortex
         np.save(
             os.path.join(
                 self.outpath,
-                self.ML_model_name+'_performance_leave_one_patient_out_across_cohorts.npy'
+                self.ML_model_name
+                + "_performance_leave_one_patient_out_across_cohorts.npy",
             ),
-            performance_leave_one_patient_out
+            performance_leave_one_patient_out,
         )
 
     def run_leave_nminus1_patient_out_across_cohorts(self):
 
-        grid_point_all = np.load(os.path.join(self.outpath, 'grid_point_all.npy'), allow_pickle='TRUE').item()
+        grid_point_all = np.load(
+            os.path.join(self.outpath, "grid_point_all_re.npy"),
+            allow_pickle="TRUE",
+        ).item()
         performance_leave_one_patient_out = {}
 
         for grid_point in list(grid_point_all.keys()):
-            print('grid point: '+str(grid_point))
+            print("grid point: " + str(grid_point))
             for cohort_train in self.cohorts:
-                print('cohort: '+str(cohort_train))
+                print("cohort: " + str(cohort_train))
                 if cohort_train not in performance_leave_one_patient_out:
                     performance_leave_one_patient_out[cohort_train] = {}
 
                 if cohort_train not in grid_point_all[grid_point]:
                     continue
-                if len(list(grid_point_all[grid_point][cohort_train].keys())) <= 1:
+                if (
+                    len(list(grid_point_all[grid_point][cohort_train].keys()))
+                    <= 1
+                ):
                     continue  # cannot do leave one out prediction with a single subject
-                if grid_point not in performance_leave_one_patient_out[cohort_train]:
-                    performance_leave_one_patient_out[cohort_train][grid_point] = {}
+                if (
+                    grid_point
+                    not in performance_leave_one_patient_out[cohort_train]
+                ):
+                    performance_leave_one_patient_out[cohort_train][
+                        grid_point
+                    ] = {}
 
-                for subject_train in list(grid_point_all[grid_point][cohort_train].keys()):
+                for subject_train in list(
+                    grid_point_all[grid_point][cohort_train].keys()
+                ):
                     X_train = []
                     y_train = []
-                    for run in list(grid_point_all[grid_point][cohort_train][subject_train].keys()):
-                        if grid_point_all[grid_point][cohort_train][subject_train][run]["lat"] != "CON":
+                    for run in list(
+                        grid_point_all[grid_point][cohort_train][
+                            subject_train
+                        ].keys()
+                    ):
+                        if (
+                            grid_point_all[grid_point][cohort_train][
+                                subject_train
+                            ][run]["lat"]
+                            != "CON"
+                        ):
                             continue
-                        X_train.append(grid_point_all[grid_point][cohort_train][subject_train][run]["data"])
-                        y_train.append(grid_point_all[grid_point][cohort_train][subject_train][run]["label"])
+                        X_train.append(
+                            grid_point_all[grid_point][cohort_train][
+                                subject_train
+                            ][run]["data"]
+                        )
+                        y_train.append(
+                            grid_point_all[grid_point][cohort_train][
+                                subject_train
+                            ][run]["label"]
+                        )
                     if len(X_train) > 1:
                         X_train = np.concatenate(X_train, axis=0)
                         y_train = np.concatenate(y_train, axis=0)
@@ -420,16 +748,37 @@ class AcrossPatientRunner:
                         y_train = y_train[0]
 
                     for cohort_test in list(grid_point_all[grid_point].keys()):
-                        for subject_test in list(grid_point_all[grid_point][cohort_test].keys()):
-                            if (subject_test == subject_train) and (cohort_test == cohort_train):
+                        for subject_test in list(
+                            grid_point_all[grid_point][cohort_test].keys()
+                        ):
+                            if (subject_test == subject_train) and (
+                                cohort_test == cohort_train
+                            ):
                                 continue
                             X_test = []
                             y_test = []
-                            for run in list(grid_point_all[grid_point][cohort_test][subject_test].keys()):
-                                if grid_point_all[grid_point][cohort_test][subject_test][run]["lat"] != "CON":
+                            for run in list(
+                                grid_point_all[grid_point][cohort_test][
+                                    subject_test
+                                ].keys()
+                            ):
+                                if (
+                                    grid_point_all[grid_point][cohort_test][
+                                        subject_test
+                                    ][run]["lat"]
+                                    != "CON"
+                                ):
                                     continue
-                                X_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["data"])
-                                y_test.append(grid_point_all[grid_point][cohort_test][subject_test][run]["label"])
+                                X_test.append(
+                                    grid_point_all[grid_point][cohort_test][
+                                        subject_test
+                                    ][run]["data"]
+                                )
+                                y_test.append(
+                                    grid_point_all[grid_point][cohort_test][
+                                        subject_test
+                                    ][run]["label"]
+                                )
                             if len(X_test) > 1:
                                 X_test = np.concatenate(X_test, axis=0)
                                 y_test = np.concatenate(y_test, axis=0)
@@ -439,18 +788,50 @@ class AcrossPatientRunner:
 
                             self.decoder = self.init_decoder()
                             try:
-                                cv_res = self.eval_model(X_train, y_train, X_test, y_test)
+                                cv_res = self.eval_model(
+                                    X_train, y_train, X_test, y_test
+                                )
                             except nm_decode.Decoder.ClassMissingException:
                                 continue
 
-                            if subject_train not in performance_leave_one_patient_out[cohort_train][grid_point]:
-                                performance_leave_one_patient_out[cohort_train][grid_point][subject_train] = {}
-                            if cohort_test not in performance_leave_one_patient_out[cohort_train][grid_point][subject_train]:
-                                performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test] = {}
-                            if subject_test not in performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test]:
-                                performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test] = {}
+                            if (
+                                subject_train
+                                not in performance_leave_one_patient_out[
+                                    cohort_train
+                                ][grid_point]
+                            ):
+                                performance_leave_one_patient_out[cohort_train][
+                                    grid_point
+                                ][subject_train] = {}
+                            if (
+                                cohort_test
+                                not in performance_leave_one_patient_out[
+                                    cohort_train
+                                ][grid_point][subject_train]
+                            ):
+                                performance_leave_one_patient_out[cohort_train][
+                                    grid_point
+                                ][subject_train][cohort_test] = {}
+                            if (
+                                subject_test
+                                not in performance_leave_one_patient_out[
+                                    cohort_train
+                                ][grid_point][subject_train][cohort_test]
+                            ):
+                                performance_leave_one_patient_out[cohort_train][
+                                    grid_point
+                                ][subject_train][cohort_test][subject_test] = {}
 
-                            performance_leave_one_patient_out[cohort_train][grid_point][subject_train][cohort_test][subject_test] = cv_res
+                            performance_leave_one_patient_out[cohort_train][
+                                grid_point
+                            ][subject_train][cohort_test][subject_test] = cv_res
 
         performance_leave_one_patient_out["grid_cortex"] = self.grid_cortex
-        np.save(os.path.join(self.outpath, self.ML_model_name+'_performance_leave_nminus1_patient_out_across_cohorts.npy'), performance_leave_one_patient_out)
+        np.save(
+            os.path.join(
+                self.outpath,
+                self.ML_model_name
+                + "_performance_leave_nminus1_patient_out_across_cohorts.npy",
+            ),
+            performance_leave_one_patient_out,
+        )
