@@ -1,7 +1,5 @@
 import os
 
-import nm_plots
-
 import py_neuromodulation as nm
 import xgboost
 from py_neuromodulation import (
@@ -9,20 +7,23 @@ from py_neuromodulation import (
     nm_decode,
     nm_define_nmchannels,
     nm_IO,
+    nm_plots
 )
 from sklearn import metrics, model_selection
 from skopt import space as skopt_space
 
 
 def run_example_BIDS():
-    """run the example BIDS path in pyneuromodulation/tests/data"""
+    """run the example BIDS path in pyneuromodulation/tests/data
+    TODO: change this, this path doesnt exist.
+    """
     sub = "testsub"
     ses = "EphysMedOff"
     task = "buttonpress"
     run = 0
     datatype = "ieeg"
 
-    RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}"
+    RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}_{datatype}"
 
     PATH_RUN = os.path.join(
         os.path.abspath(os.path.join("examples", "data")),
@@ -31,7 +32,7 @@ def run_example_BIDS():
         datatype,
         RUN_NAME,
     )
-    PATH_BIDS = os.path.abspath(os.path.join("examples", "data"))
+    PATH_BIDS = os.path.abspath(os.path.join("data"))
     PATH_OUT = os.path.abspath(os.path.join("examples", "data", "derivatives"))
 
     (
