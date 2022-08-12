@@ -1,4 +1,13 @@
 import os
+import sys
+
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+if SCRIPT_DIR.split("/")[-1] == "py_neuromodulation":
+    # this check is necessary, so we can also run the script from the root directory
+    SCRIPT_DIR = os.path.join(SCRIPT_DIR, "examples")
+
+sys.path.append(os.path.dirname(SCRIPT_DIR))
 
 import py_neuromodulation as nm
 import xgboost
@@ -12,6 +21,7 @@ from py_neuromodulation import (
 from sklearn import metrics, model_selection
 from skopt import space as skopt_space
 
+# TODO: Fix error here
 
 def run_example_BIDS():
     """run the example BIDS path in pyneuromodulation/tests/data
@@ -23,17 +33,17 @@ def run_example_BIDS():
     run = 0
     datatype = "ieeg"
 
-    RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}_{datatype}"
+    RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}"
 
-    PATH_RUN = os.path.join(
-        os.path.abspath(os.path.join("examples", "data")),
+    # changes in path needed so we can run the script both from the root and from the examples directory
+    PATH_RUN = os.path.join((os.path.join(SCRIPT_DIR, "data")),
         f"sub-{sub}",
         f"ses-{ses}",
         datatype,
         RUN_NAME,
     )
-    PATH_BIDS = os.path.abspath(os.path.join("data"))
-    PATH_OUT = os.path.abspath(os.path.join("examples", "data", "derivatives"))
+    PATH_BIDS = os.path.join(SCRIPT_DIR,"data")
+    PATH_OUT = os.path.join(SCRIPT_DIR,"data", "derivatives")
 
     (
         raw,
