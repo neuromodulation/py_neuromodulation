@@ -100,7 +100,7 @@ def run_example_BIDS():
     ).iloc[0]["name"]
 
     feature_used = (
-        "stft" if feature_reader.settings["methods"]["stft"] else "fft"
+        "stft" if feature_reader.settings["features"]["stft"] else "fft"
     )
 
     feature_reader.plot_target_averaged_channel(
@@ -134,7 +134,7 @@ def run_example_BIDS():
         RUN_BAY_OPT=False,
         bay_opt_param_space=bay_opt_param_space,
         use_nested_cv=True,
-        fs=feature_reader.settings["sampling_rate_features_hz"],
+        sfreq=feature_reader.settings["sampling_rate_features_hz"],
     )
 
     performances = feature_reader.run_ML_model(
