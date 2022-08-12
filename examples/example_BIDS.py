@@ -147,7 +147,7 @@ def run_example_BIDS():
     df_per = feature_reader.get_dataframe_performances(performances)
 
     nm_plots.plot_df_subjects(
-        df_per, x_col="sub", y_col="performance_test", hue="all_combined"
+        df_per, x_col="sub", y_col="performance_test", hue=None
     )
 
 
