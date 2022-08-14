@@ -16,12 +16,13 @@ from py_neuromodulation import (
     nm_decode,
     nm_define_nmchannels,
     nm_IO,
-    nm_plots
+    nm_plots,
 )
 from sklearn import metrics, model_selection
 from skopt import space as skopt_space
 
 # TODO: Fix error here
+
 
 def run_example_BIDS():
     """run the example BIDS path in pyneuromodulation/tests/data
@@ -36,14 +37,15 @@ def run_example_BIDS():
     RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}"
 
     # changes in path needed so we can run the script both from the root and from the examples directory
-    PATH_RUN = os.path.join((os.path.join(SCRIPT_DIR, "data")),
+    PATH_RUN = os.path.join(
+        (os.path.join(SCRIPT_DIR, "data")),
         f"sub-{sub}",
         f"ses-{ses}",
         datatype,
         RUN_NAME,
     )
-    PATH_BIDS = os.path.join(SCRIPT_DIR,"data")
-    PATH_OUT = os.path.join(SCRIPT_DIR,"data", "derivatives")
+    PATH_BIDS = os.path.join(SCRIPT_DIR, "data")
+    PATH_OUT = os.path.join(SCRIPT_DIR, "data", "derivatives")
 
     (
         raw,
@@ -74,7 +76,7 @@ def run_example_BIDS():
     )
 
     stream.reset_settings()
-    stream.settings["features"]["bursts"] = True
+    stream.set_settings_fast_compute()
 
     stream.init_stream(
         sfreq=sfreq,
@@ -147,7 +149,7 @@ def run_example_BIDS():
     df_per = feature_reader.get_dataframe_performances(performances)
 
     nm_plots.plot_df_subjects(
-        df_per, x_col="sub", y_col="performance_test", hue=None
+        df_per, x_col="sub", y_col="performance_test", hue="ch_type"
     )
 
 
