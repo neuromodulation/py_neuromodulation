@@ -20,6 +20,8 @@ class AcrossPatientRunner:
         RUN_BAY_OPT=False,
         ML_model_name="LM",
         cohorts: list = None,
+        load_channel_all: bool = False,
+        load_grid_point_all: bool = False,
     ) -> None:
 
         self.outpath = outpath
@@ -40,9 +42,16 @@ class AcrossPatientRunner:
 
         self.RMAPSelector = nm_RMAP.RMAPChannelSelector()
 
-        self.ch_all = np.load(
-            os.path.join(self.outpath, "channel_all.npy"), allow_pickle="TRUE"
-        ).item()
+        if load_channel_all is True:
+            self.ch_all = np.load(
+                os.path.join(self.outpath, "channel_all.npy"),
+                allow_pickle="TRUE",
+            ).item()
+        if load_grid_point_all is True:
+            self.grid_point_all = np.load(
+                os.path.join(self.outpath, "grid_point_all.npy"),
+                allow_pickle="TRUE",
+            ).item()
 
     def init_decoder(self) -> nm_decode.Decoder:
 
@@ -85,7 +94,7 @@ class AcrossPatientRunner:
 
         return X_train, y_train
 
-    def get_patients_train_dict(self, sub_test, cohort_test, val_approach: str):
+    def get_patients_train_dict(self, sub_test, cohort_test, val_approach: str, data_select: dict):
         cohorts_train = {}
         for cohort in self.cohorts:
             if val_approach == "leave_1_cohort_out" and cohort == cohort_test:
@@ -96,7 +105,7 @@ class AcrossPatientRunner:
             ):
                 continue
             cohorts_train[cohort] = []
-            for sub in self.ch_all[cohort]:
+            for sub in data_select[cohort]:
                 if (
                     val_approach == "leave_1_sub_out_within_coh"
                     and sub == sub_test
@@ -111,56 +120,116 @@ class AcrossPatientRunner:
                 cohorts_train[cohort].append(sub)
         return cohorts_train
 
+    def get_data_grid_point(
+        self, sub_test: str, cohort_test: str, best_gp_list: list
+    ):
+        for gp in best_gp_list:
+            if gp in self.grid_point_all[cohort_test][sub_test]:
+                X_test, y_test = self.get_data_sub_ch(
+                    self.grid_point_all, cohort_test, sub_test, gp
+                )
+                break
+            else:
+                continue
+        return X_test, y_test
+
+    def get_data_channels(self, sub_test: str, cohort_test: str, df_rmap: list):
+        ch_test = df_rmap.query("cohort == @cohort_test and sub == @sub_test")[
+            "ch"
+        ].iloc[0]
+        X_test, y_test = self.get_data_sub_ch(
+            self.ch_all, cohort_test, sub_test, ch_test
+        )
+        return X_test, y_test
+
     def cross_val_approach_RMAP(
         self,
         val_approach: str = "leave_1_cohort_out",
-        df_rmap: pd.DataFrame = None,
+        df_select: pd.DataFrame = None,
+        select_best_gp: bool = False,
         add_UPDRS: bool = False,
         df_updrs: pd.DataFrame = None,
     ):
+
+        if select_best_gp is True:
+            best_gp_list = list(
+                df_select.sort_values("performance_test", ascending=False)["ch"]
+            )
+            data_select = self.grid_point_all
+        else:
+            data_select = self.ch_all
+
         p_ = {}
         for cohort_test in self.cohorts:
             print(cohort_test)
             if cohort_test not in p_:
                 p_[cohort_test] = {}
-            for sub_test in self.ch_all[cohort_test].keys():
+            for sub_test in data_select[cohort_test].keys():
                 print(sub_test)
                 if sub_test not in p_[cohort_test]:
                     p_[cohort_test][sub_test] = {}
+                if select_best_gp is True:
+                    X_test, y_test = self.get_data_grid_point(
+                        sub_test, cohort_test, best_gp_list
+                    )
+                else:
+                    X_test, y_test = self.get_data_channels(
+                        sub_test, cohort_test, df_rmap=df_select
+                    )
 
-                ch_test = df_rmap.query("cohort == @cohort_test and sub == @sub_test")["ch"].iloc[0]
-    	        
-                X_test, y_test = self.get_data_sub_ch(
-                    self.ch_all, cohort_test, sub_test, ch_test
-                )
                 if add_UPDRS is True:
-                    updrs = df_updrs.query("sub == @sub_test and cohort == @cohort_test").iloc[0]["UPDRS_total"]
+                    updrs = df_updrs.query(
+                        "sub == @sub_test and cohort == @cohort_test"
+                    ).iloc[0]["UPDRS_total"]
                     if np.isnan(updrs):
                         continue
-                    X_test = np.concatenate((
-                        X_test, np.expand_dims(np.repeat(updrs, repeats=X_test.shape[0]), axis=1)
-                        ), axis=1)
+                    X_test = np.concatenate(
+                        (
+                            X_test,
+                            np.expand_dims(
+                                np.repeat(updrs, repeats=X_test.shape[0]),
+                                axis=1,
+                            ),
+                        ),
+                        axis=1,
+                    )
 
                 cohorts_train = self.get_patients_train_dict(
-                    sub_test, cohort_test, val_approach=val_approach
+                    sub_test, cohort_test, val_approach=val_approach, data_select=data_select
                 )
 
                 X_train_comb = []
                 y_train_comb = []
                 for cohort_train in list(cohorts_train.keys()):
                     for sub_train in cohorts_train[cohort_train]:
-                        ch_train = df_rmap.query("cohort == @cohort_train and sub == @sub_train")["ch"].iloc[0]
-
-                        X_train, y_train = self.get_data_sub_ch(
-                            self.ch_all, cohort_train, sub_train, ch_train
-                        )
+                        if select_best_gp is True:
+                            X_train, y_train = self.get_data_grid_point(
+                                sub_train, cohort_train, best_gp_list
+                            )
+                        else:
+                            X_train, y_train = self.get_data_channels(
+                                sub_train, cohort_train, df_rmap=df_select
+                            )
                         if add_UPDRS is True:
-                            updrs = df_updrs.query("sub == @sub_train and cohort == @cohort_train").iloc[0]["UPDRS_total"]
-                            if np.isnan(updrs):  # the returned True is here not boolean but np boolean
+                            updrs = df_updrs.query(
+                                "sub == @sub_train and cohort == @cohort_train"
+                            ).iloc[0]["UPDRS_total"]
+                            if np.isnan(
+                                updrs
+                            ):  # the returned True is here not boolean but np boolean
                                 continue
-                            X_train = np.concatenate((
-                                X_train, np.expand_dims(np.repeat(updrs, repeats=X_train.shape[0]), axis=1)
-                                ), axis=1)
+                            X_train = np.concatenate(
+                                (
+                                    X_train,
+                                    np.expand_dims(
+                                        np.repeat(
+                                            updrs, repeats=X_train.shape[0]
+                                        ),
+                                        axis=1,
+                                    ),
+                                ),
+                                axis=1,
+                            )
 
                         X_train_comb.append(X_train)
                         y_train_comb.append(y_train)
@@ -173,7 +242,7 @@ class AcrossPatientRunner:
 
                 self.decoder = self.init_decoder()
 
-                #X_train, y_train, X_test, y_test = self.decoder.append_samples_val(X_train, y_train, X_test, y_test, 5)
+                # X_train, y_train, X_test, y_test = self.decoder.append_samples_val(X_train, y_train, X_test, y_test, 5)
 
                 model = self.decoder.wrapper_model_train(
                     X_train=X_train,
@@ -193,46 +262,65 @@ class AcrossPatientRunner:
         np.save(
             os.path.join(
                 self.outpath,
-                self.ML_model_name
-                + f"_performance_{val_approach}_RMAP.npy",
+                self.ML_model_name + f"_performance_{val_approach}_RMAP.npy",
             ),
             p_,
         )
-    
+
     def cross_val_p2p_RMAP(
         self,
-        df_rmap: pd.DataFrame = None,
+        df_select: pd.DataFrame = None,
+        select_best_gp: bool = False,
     ):
+        if select_best_gp is True:
+            best_gp_list = list(
+                df_select.sort_values("performance_test", ascending=False)["ch"]
+            )
+            data_select = self.grid_point_all
+        else:
+            data_select = self.ch_all
+
         p_ = {}
         for cohort_test in self.cohorts:
             print(cohort_test)
             if cohort_test not in p_:
                 p_[cohort_test] = {}
-            for sub_test in self.ch_all[cohort_test].keys():
+            for sub_test in data_select[cohort_test].keys():
                 print(sub_test)
                 if sub_test not in p_[cohort_test]:
                     p_[cohort_test][sub_test] = {}
 
-                ch_test = df_rmap.query("cohort == @cohort_test and sub == @sub_test")["ch"].iloc[0]
-    	        
-                X_test, y_test = self.get_data_sub_ch(
-                    self.ch_all, cohort_test, sub_test, ch_test
-                )
+                if select_best_gp is True:
+                    X_test, y_test = self.get_data_grid_point(
+                        sub_test, cohort_test, best_gp_list
+                    )
+                else:
+                    X_test, y_test = self.get_data_channels(
+                        sub_test, cohort_test, df_rmap=df_select
+                    )
                 for cohort_train in self.cohorts:
                     if cohort_train not in p_[cohort_test][sub_test]:
                         p_[cohort_test][sub_test][cohort_train] = {}
-                    for sub_train in list(self.ch_all[cohort_train].keys()):
-                        if sub_train not in p_[cohort_test][sub_test][cohort_train]:
-                            p_[cohort_test][sub_test][cohort_train][sub_train] = {}
-                        
-                        ch_train = df_rmap.query("cohort == @cohort_train and sub == @sub_train")["ch"].iloc[0]
+                    for sub_train in list(data_select[cohort_train].keys()):
+                        if (
+                            sub_train
+                            not in p_[cohort_test][sub_test][cohort_train]
+                        ):
+                            p_[cohort_test][sub_test][cohort_train][
+                                sub_train
+                            ] = {}
 
-                        X_train, y_train = self.get_data_sub_ch(
-                            self.ch_all, cohort_train, sub_train, ch_train
-                        )
+                        if select_best_gp is True:
+                            X_train, y_train = self.get_data_grid_point(
+                                sub_train, cohort_train, best_gp_list
+                            )
+                        else:
+                            X_train, y_train = self.get_data_channels(
+                                sub_train, cohort_train, df_rmap=df_select
+                            )
                         self.decoder = self.init_decoder()
 
-                        #X_train, y_train, X_test, y_test = self.decoder.append_samples_val(X_train, y_train, X_test, y_test, 5)
+                        # X_train, y_train, X_test, y_test = self.decoder.append_samples_val(X_train, y_train, X_test, y_test, 5)
 
                         model = self.decoder.wrapper_model_train(
                             X_train=X_train,
@@ -245,20 +333,22 @@ class AcrossPatientRunner:
                             X_test,
                             y_train,
                             y_test,
-                            cv_res=nm_decode.CV_res(get_movement_detection_rate=True),
+                            cv_res=nm_decode.CV_res(
+                                get_movement_detection_rate=True
+                            ),
                             save_data=False,
                         )
-                        p_[cohort_test][sub_test][cohort_train][sub_train] = cv_res
+                        p_[cohort_test][sub_test][cohort_train][
+                            sub_train
+                        ] = cv_res
 
         np.save(
             os.path.join(
                 self.outpath,
-                self.ML_model_name
-                + f"_performance_p2p_RMAP.npy",
+                self.ML_model_name + f"_performance_p2p_RMAP.npy",
             ),
             p_,
         )
-
 
     def leave_one_patient_out_RMAP(
         self, val_approach: str = "leave_1_cohort_out"
