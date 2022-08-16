@@ -1,7 +1,6 @@
 import os
 import sys
 
-
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 if SCRIPT_DIR.split("/")[-1] == "py_neuromodulation":
     # this check is necessary, so we can also run the script from the root directory
@@ -21,12 +20,9 @@ from py_neuromodulation import (
 from sklearn import metrics, model_selection
 from skopt import space as skopt_space
 
-# TODO: Fix error here
-
 
 def run_example_BIDS():
-    """run the example BIDS path in pyneuromodulation/tests/data
-    TODO: change this, this path doesnt exist.
+    """run the example BIDS path in py_neuromodulation/examples/data
     """
     sub = "testsub"
     ses = "EphysMedOff"
@@ -117,9 +113,9 @@ def run_example_BIDS():
     bay_opt_param_space = [
         skopt_space.Integer(1, 100, name="max_depth"),
         skopt_space.Real(
-            10**-5, 10**0, "log-uniform", name="learning_rate"
+            10 ** -5, 10 ** 0, "log-uniform", name="learning_rate"
         ),
-        skopt_space.Real(10**0, 10**1, "uniform", name="gamma"),
+        skopt_space.Real(10 ** 0, 10 ** 1, "uniform", name="gamma"),
     ]
 
     feature_reader.decoder = nm_decode.Decoder(
@@ -149,10 +145,10 @@ def run_example_BIDS():
     df_per = feature_reader.get_dataframe_performances(performances)
 
     nm_plots.plot_df_subjects(
-        df_per, x_col="sub", y_col="performance_test", hue="ch_type"
+        df_per, x_col="sub", y_col="performance_test", hue="ch_type",
+        PATH_SAVE=os.path.join(PATH_OUT, RUN_NAME, RUN_NAME + "_decoding_performance.png")
     )
 
 
 if __name__ == "__main__":
-
     run_example_BIDS()
