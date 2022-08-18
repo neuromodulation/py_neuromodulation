@@ -122,7 +122,7 @@ class Stream(_OfflineStream):
         out_path_root: _PathLike = None,
         folder_name: str = "sub",
     ) -> None:
-        """BIDS specific fun function. Does not need to run in parallel."""
+        """Does not need to run in parallel."""
 
         data = self._handle_data(data)
 

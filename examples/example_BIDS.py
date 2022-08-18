@@ -71,7 +71,6 @@ def run_example_BIDS():
         verbose=True,
     )
 
-    stream.reset_settings()
     stream.set_settings_fast_compute()
 
     stream.init_stream(
