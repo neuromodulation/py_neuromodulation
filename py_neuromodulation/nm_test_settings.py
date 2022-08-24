@@ -126,7 +126,9 @@ def test_settings(
             ].values()
         ), "Set at least one bandpower_feature to True."
     if s["features"]["sharpwave_analysis"] is True:
-        for filter_range in s["sharpwave_analysis_settings"]["filter_ranges_hz"]:
+        for filter_range in s["sharpwave_analysis_settings"][
+            "filter_ranges_hz"
+        ]:
             assert isinstance(
                 filter_range[0],
                 (int, float),
@@ -135,10 +137,30 @@ def test_settings(
                 filter_range[1],
                 (int, float),
             )
+            assert filter_range[1] > filter_range[0]
+        # check if all features are also enbled via an estimator
+        used_features = list()
+        for feature_name, val in s["sharpwave_analysis_settings"][
+            "sharpwave_features"
+        ].items():
+            if val is True:
+                used_features.append(feature_name)
+                fun_names = []
+        for used_feature in used_features:
+            estimator_list_feature = (
+                []
+            )  # one feature can have multiple estimators
+            for estimator, est_features in s["sharpwave_analysis_settings"][
+                "estimator"
+            ].items():
+                if est_features is not None:
+                    for est_feature in est_features:
+                        if used_feature == est_feature:
+                            estimator_list_feature.append(estimator)
             assert (
-                filter_range[1]
-                > filter_range[0]
-            )
+                len(estimator_list_feature) > 0
+            ), f"add estimator key for {used_feature}"
+            fun_names.append(estimator_list_feature)
 
     if s["features"]["coherence"] is True:
         assert (
