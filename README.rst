@@ -58,7 +58,13 @@ To run feature estimation given the example BIDS data run in root directory.
 
 .. code-block::
 
-    python main.py
+    python examples/example_BIDS.py
+
+Alternatively run from the examples directory:
+
+.. code-block::
+
+    python example_BIDS.py
 
 This will write a feature_arr.csv file in the 'examples/data/derivatives' folder.
 

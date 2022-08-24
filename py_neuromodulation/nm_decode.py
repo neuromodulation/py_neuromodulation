@@ -23,6 +23,7 @@ import json
 import numpy as np
 from numba import jit
 import xgboost
+from copy import deepcopy
 
 from mrmr import mrmr_classif
 from typing import Type
@@ -35,6 +36,7 @@ class CV_res:
         get_movement_detection_rate: bool = False,
         RUN_BAY_OPT: bool = False,
         mrmr_select: bool = False,
+        model_save: bool = False,
     ) -> None:
 
         self.score_train = []
@@ -57,6 +59,8 @@ class CV_res:
             self.best_bay_opt_params = []
         if mrmr_select is True:
             self.mrmr_select = []
+        if model_save is True:
+            self.model_save = []
 
 
 class Decoder:
@@ -124,6 +128,7 @@ class Decoder:
         mrmr_select: bool = False,
         pca: bool = False,
         cca: bool = False,
+        model_save: bool = False,
     ) -> None:
         """Initialize here a feature file for processing
         Read settings.json nm_channels.csv and features.csv
@@ -176,6 +181,7 @@ class Decoder:
         self.label_name = label_name
         self.cca = cca
         self.pca = pca
+        self.model_save = model_save
 
         self.set_data(features)
 
@@ -242,6 +248,10 @@ class Decoder:
             obj_set = getattr(self, attr_name)
 
         def set_scores(cv_res: Type[CV_res], set_inner_CV_res: bool = False):
+            """
+            This function renames the CV_res keys for InnerCV
+            """
+
             def set_score(key_: str, val):
                 if set_inner_CV_res is True:
                     key_ = "InnerCV_" + key_
@@ -276,6 +286,8 @@ class Decoder:
 
             if self.mrmr_select is True:
                 set_score("mrmr_select", cv_res.mrmr_select)
+            if self.model_save is True:
+                set_score("model_save", cv_res.model_save)
             return obj_set
 
         obj_set = set_scores(self.cv_res)
@@ -461,7 +473,10 @@ class Decoder:
 
     def init_cv_res(self) -> None:
         return CV_res(
-            self.get_movement_detection_rate, self.RUN_BAY_OPT, self.mrmr_select
+            get_movement_detection_rate=self.get_movement_detection_rate,
+            RUN_BAY_OPT=self.RUN_BAY_OPT,
+            mrmr_select=self.mrmr_select,
+            model_save=self.model_save,
         )
 
     @staticmethod
@@ -566,7 +581,7 @@ class Decoder:
         y_test,
         cv_res: Type[CV_res],
         save_data=True,
-        save_probabilities=True,
+        save_probabilities=False,
     ) -> Type[CV_res]:
 
         if self.save_coef:
@@ -594,6 +609,10 @@ class Decoder:
         if save_data is True:
             cv_res.X_train.append(X_train)
             cv_res.X_test.append(X_test)
+        if self.model_save is True:
+            cv_res.model_save.append(
+                deepcopy(model_train)
+            )  # clone won't copy params
         cv_res.y_train.append(y_train)
         cv_res.y_test.append(y_test)
 
@@ -644,10 +663,18 @@ class Decoder:
         y_train,
         X_test=None,
         y_test=None,
-        cv_res: Type[CV_res] = CV_res(),
+        cv_res: Type[CV_res] = None,
         return_fitted_model_only: bool = False,
         save_data=True,
     ):
+
+        if cv_res is None:
+            cv_res = CV_res(
+                get_movement_detection_rate=self.get_movement_detection_rate,
+                RUN_BAY_OPT=self.RUN_BAY_OPT,
+                mrmr_select=self.mrmr_select,
+                model_save=self.model_save,
+            )
 
         model_train = clone(self.model)
         if self.STACK_FEATURES_N_SAMPLES is True:
@@ -776,7 +803,6 @@ class Decoder:
                     ).flatten()
                     yield train_index, test_index
                 else:
-                    # perform simple train test split
                     cv_single_tr_te_split = model_selection.check_cv(
                         cv=[
                             model_selection.train_test_split(
