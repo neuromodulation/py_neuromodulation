@@ -598,6 +598,7 @@ class Feature_Reader:
             read_mov_detection_rates=self.decoder.get_movement_detection_rate,
             read_bay_opt_params=self.decoder.RUN_BAY_OPT,
             read_mrmr=self.decoder.mrmr_select,
+            model_save=self.decoder.model_save,
         )
 
     def read_results(
@@ -612,6 +613,7 @@ class Feature_Reader:
         read_mov_detection_rates: bool = False,
         read_bay_opt_params: bool = False,
         read_mrmr: bool = False,
+        model_save: bool = False,
         save_results: bool = False,
         PATH_OUT: str = None,
         folder_name: str = None,
@@ -768,6 +770,13 @@ class Feature_Reader:
                         key_get=None,
                         take_mean=False,
                         val=obj_read["mrmr_select"],
+                    )
+                if model_save is True:
+                    set_score(
+                        key_set="model_save",
+                        key_get=None,
+                        take_mean=False,
+                        val=obj_read["model_save"],
                     )
 
             read_ML_performances(obj_read, obj_write)
