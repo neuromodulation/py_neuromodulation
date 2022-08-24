@@ -52,17 +52,25 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
         # initializing estimator functions, respecitive for all sharpwave features
         fun_names = []
         for used_feature in self.used_features:
+            estimator_list_feature = (
+                []
+            )  # one feature can have multiple estimators
             for estimator, est_features in self.sw_settings[
                 "estimator"
             ].items():
                 if est_features is not None:
                     for est_feature in est_features:
                         if used_feature == est_feature:
-                            fun_names.append(estimator)
+                            estimator_list_feature.append(estimator)
+            fun_names.append(estimator_list_feature)
 
         self.estimator_names = fun_names
         self.estimator_functions = [
-            getattr(np, est_name) for est_name in self.estimator_names
+            [
+                getattr(np, est_name)
+                for est_name in self.estimator_names[feature_idx]
+            ]
+            for feature_idx in range(len(self.estimator_names))
         ]
 
     def initialize_sw_features(self) -> None:
@@ -176,25 +184,31 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
                     for feature_idx, feature_name in enumerate(
                         self.used_features
                     ):
-                        key_name = "_".join(
-                            [
-                                ch_name,
-                                "Sharpwave",
-                                self.estimator_names[feature_idx].title(),
-                                feature_name,
-                                filter_name,
-                            ]
-                        )
-                        val = (
-                            self.estimator_functions[feature_idx](
-                                getattr(self, feature_name)
+                        for est_idx, estimator_name in enumerate(
+                            self.estimator_names[feature_idx]
+                        ):
+                            key_name = "_".join(
+                                [
+                                    ch_name,
+                                    "Sharpwave",
+                                    self.estimator_names[feature_idx][
+                                        est_idx
+                                    ].title(),
+                                    feature_name,
+                                    filter_name,
+                                ]
                             )
-                            if len(getattr(self, feature_name)) != 0
-                            else 0
-                        )
-                        if key_name not in dict_ch_features:
-                            dict_ch_features[key_name] = {}
-                        dict_ch_features[key_name][key_name_pt] = val
+                            # zero check because no peaks can be also detected
+                            val = (
+                                self.estimator_functions[feature_idx][est_idx](
+                                    getattr(self, feature_name)
+                                )
+                                if len(getattr(self, feature_name)) != 0
+                                else 0
+                            )
+                            if key_name not in dict_ch_features:
+                                dict_ch_features[key_name] = {}
+                            dict_ch_features[key_name][key_name_pt] = val
 
                 if self.sw_settings[
                     "apply_estimator_between_peaks_and_troughs"
@@ -204,9 +218,10 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
 
                     for idx, key_name in enumerate(dict_ch_features):
                         # the key_name stays, since the estimator function stays between peaks and troughs
-                        features_compute[key_name] = self.estimator_functions[
-                            idx
-                        ](
+                        # this array needs to be flattened
+                        features_compute[key_name] = np.concatenate(
+                            self.estimator_functions
+                        )[idx](
                             [
                                 list(dict_ch_features[key_name].values())[0],
                                 list(dict_ch_features[key_name].values())[1],
