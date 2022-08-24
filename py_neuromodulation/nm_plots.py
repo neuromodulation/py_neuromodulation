@@ -68,7 +68,7 @@ def plot_df_subjects(
             PATH_SAVE,
             bbox_inches="tight",
         )
-    #plt.show()
+    # plt.show()
 
 
 def plot_epoch(
@@ -122,8 +122,10 @@ def plot_epoch(
     plt.tight_layout()
 
 
-def reg_plot(x_col: str, y_col: str, data: pd.DataFrame, out_path_save: str = None):
-    plt.figure(figsize=(4,4), dpi=300)
+def reg_plot(
+    x_col: str, y_col: str, data: pd.DataFrame, out_path_save: str = None
+):
+    plt.figure(figsize=(4, 4), dpi=300)
     rho, p = nm_stats.permutationTestSpearmansRho(
         data[x_col],
         data[y_col],
@@ -135,7 +137,11 @@ def reg_plot(x_col: str, y_col: str, data: pd.DataFrame, out_path_save: str = No
     plt.title(f"{y_col}~{x_col} p={np.round(p, 2)} rho={np.round(rho, 2)}")
 
     if out_path_save is not None:
-        plt.savefig(out_path_save, bbox_inches="tight",)
+        plt.savefig(
+            out_path_save,
+            bbox_inches="tight",
+        )
+
 
 def plot_bar_performance_per_channel(
     ch_names,
@@ -462,6 +468,7 @@ class NM_Plot:
                 s=150,
                 alpha=0.8,
                 cmap="viridis",
+                label="grid points",
             )
             if set_clim:
                 pos_ecog.set_clim(lower_clim, upper_clim)
@@ -480,8 +487,10 @@ class NM_Plot:
                 alpha=0.8,
                 cmap="viridis",
                 marker="x",
+                label="ecog electrode",
             )
         plt.axis("off")
+        plt.legend()
         if set_clim:
             pos_ecog.set_clim(lower_clim, upper_clim)
             cbar = fig.colorbar(pos_ecog)
