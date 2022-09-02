@@ -24,10 +24,10 @@ class Projection:
         self.project_cortex = settings["postprocessing"]["project_cortex"]
         self.project_subcortex = settings["postprocessing"]["project_subcortex"]
         self.max_dist_cortex = settings["project_cortex_settings"][
-            "max_dist_cm"
+            "max_dist_mm"
         ]
         self.max_dist_subcortex = settings["project_subcortex_settings"][
-            "max_dist_cm"
+            "max_dist_mm"
         ]
         self.ecog_channels: Optional[list] = None
         self.lfp_channels: Optional[list] = None
