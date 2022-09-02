@@ -432,6 +432,7 @@ class NM_Plot:
         set_clim: bool = True,
         lower_clim: float = 0.5,
         upper_clim: float = 0.7,
+        cbar_label: str = "Balanced Accuracy",
     ):
         """Plot MNI brain including selected MNI cortical projection grid + used strip ECoG electrodes
         Colorcoded by grid_color
@@ -494,7 +495,7 @@ class NM_Plot:
         if set_clim:
             pos_ecog.set_clim(lower_clim, upper_clim)
             cbar = fig.colorbar(pos_ecog)
-            cbar.set_label("Balanced Accuracy")
+            cbar.set_label(cbar_label)
 
         if save:
             plt_path = get_plt_path(
