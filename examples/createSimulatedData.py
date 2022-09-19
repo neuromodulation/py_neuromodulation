@@ -42,7 +42,10 @@ GAMMA_WAVE = np.sin(2 * np.pi * GAMMA * time_points + GAMMA_PHASE)
 # Add frequencies of brain oscillations with different weights in each channel and then add noise
 data = np.zeros((N_CHANNELS, int(TIME_DURATION * SFREQ)))
 for i in range(N_CHANNELS):
-    a, b, t, g = np.random.uniform(MIN_LIM_DATA, MAX_LIM_DATA, size=4)
+    a = np.random.uniform(0, MAX_LIM_DATA, size=1)
+    b = np.random.uniform(MIN_LIM_DATA, a, size=1)
+    t = np.random.uniform(0, MAX_LIM_DATA, size=1)
+    g = np.random.uniform(MIN_LIM_DATA, b, size=1)
     data[i, :] = a * ALPHA_WAVE + b * BETA_WAVE + t * THETA_WAVE + g * GAMMA_WAVE
 
 data += np.random.normal(0., 0.5, size=(N_CHANNELS, data.shape[1]))
