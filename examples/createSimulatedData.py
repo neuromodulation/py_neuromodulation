@@ -48,7 +48,7 @@ for i in range(N_CHANNELS):
     g = np.random.uniform(MIN_LIM_DATA, b, size=1)
     data[i, :] = a * ALPHA_WAVE + b * BETA_WAVE + t * THETA_WAVE + g * GAMMA_WAVE
 
-data += np.random.normal(0., 0.5, size=(N_CHANNELS, data.shape[1]))
+data += np.random.normal(0., 0.005, size=(N_CHANNELS, data.shape[1]))
 
 ###
 # Create dictionary for saving data
