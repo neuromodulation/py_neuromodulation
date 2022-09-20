@@ -11,9 +11,9 @@ from py_neuromodulation import (
 )
 
 sub = "006"
-ses = "EcogLfpMedOff01"
+ses = "EcogLfpMedOff02"
 task = "SelfpacedRotationL"
-acq = "StimOff"
+acq = "StimOn"
 run = 1
 datatype = "ieeg"
 
@@ -52,16 +52,9 @@ nm_channels = nm_define_nmchannels.set_channels(
     bads=raw.info["bads"],
     new_names="default",
     used_types=("ecog", "dbs"),
-    target_keywords=("ACC_R_X_D2_TM", ),  # This defines which channel is gonna be
+    target_keywords=("ANALOG_L_ROTA_CH", ),  # This defines which channel is gonna be
     # used as target later during the decoding steps
 )
-
-#### PROBLEM ALERT:
-# IF I INSERT REREFERENCING IN THE PREPROCESSING, AND ADD A USED_TYPE THAT HAS RE REFERENCING AS NONE, IT THROWS AN ERROR
-
-
-# ACC_R_X -> accelerometer located somewhere in RIGHT hand/arm. X coordinate of movement
-# For now I take only the X coordinate of the right side as target.
 
 stream = nm.Stream(
     settings=None,
