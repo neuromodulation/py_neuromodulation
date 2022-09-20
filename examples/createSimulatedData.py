@@ -24,7 +24,7 @@ GAMMA_PHASE = np.random.uniform(-np.pi, np.pi)
 MAX_LIM_DATA = 1.5
 MIN_LIM_DATA = -1.5
 
-N_CHANNELS = 8
+N_CHANNELS = 3
 TIME_DURATION = 60  # seconds
 
 SFREQ = 1000  # Hz
