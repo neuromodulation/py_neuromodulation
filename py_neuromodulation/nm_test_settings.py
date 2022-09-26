@@ -63,12 +63,6 @@ def test_settings(
         assert isinstance(
             s["raw_normalization_settings"]["clip"], (float, int, bool)
         )
-    if s["preprocessing"]["re_referencing"]:
-        used_types = nm_channel[nm_channel['used'].astype(bool)]['type'].unique()
-        # get types that have re_reference different than None
-        re_referenced_types = nm_channel[nm_channel['rereference'] != "None"]['type'].unique()
-        assert np.array_equal(used_types, re_referenced_types), \
-            "The used_types need to have re_referencing other than None"
 
 
     if s["postprocessing"]["feature_normalization"] is True:
