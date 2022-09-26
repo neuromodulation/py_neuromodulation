@@ -191,7 +191,10 @@ def plot_corr_matrix(
         feature_col_name = feature.columns
 
     plt.figure(figsize=(7, 7))
-    corr = feature.corr()
+    if feature_names is not None:
+        corr = feature[feature_names].corr()
+    else:
+        corr = feature.corr()
     sb.heatmap(corr, xticklabels=feature_col_name, yticklabels=feature_col_name)
     plt.title("Features channel: " + str(ch_name))
 
