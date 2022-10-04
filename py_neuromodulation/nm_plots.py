@@ -432,6 +432,7 @@ class NM_Plot:
         feature_file: str = None,
         feature_str_add: str = None,
         show_plot: bool = True,
+        title: str = "Cortical grid",
         set_clim: bool = True,
         lower_clim: float = 0.5,
         upper_clim: float = 0.7,
@@ -495,6 +496,7 @@ class NM_Plot:
             )
         plt.axis("off")
         plt.legend()
+        plt.title(title)
         if set_clim:
             pos_ecog.set_clim(lower_clim, upper_clim)
             cbar = fig.colorbar(pos_ecog)
