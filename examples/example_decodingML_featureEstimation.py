@@ -10,9 +10,9 @@ from py_neuromodulation import (
     nm_plots,
 )
 
-sub = "006"
-ses = "EcogLfpMedOff02"
-task = "SelfpacedRotationL"
+sub = "008"
+ses = "EcogLfpMedOff01"
+task = "SelfpacedRotationR"
 acq = "StimOn"
 run = 1
 datatype = "ieeg"
@@ -52,7 +52,7 @@ nm_channels = nm_define_nmchannels.set_channels(
     bads=raw.info["bads"],
     new_names="default",
     used_types=("ecog", "dbs"),
-    target_keywords=("ANALOG_L_ROTA_CH", ),  # This defines which channel is gonna be
+    target_keywords=("ANALOG_R_ROTA_CH", ),  # This defines which channel is gonna be
     # used as target later during the decoding steps
 )
 
