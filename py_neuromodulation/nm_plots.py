@@ -179,7 +179,9 @@ def plot_corr_matrix(
         OUT_PATH: str = None,
         feature_name_plt="Features_corr_matr",
         save_plot: bool = True,
+        save_plot_name: str = None,
         figsize: tuple[int] = (7, 7),
+        title: str = None,
 ):
     # cut out channel name for each column
     if ch_name is not None:
@@ -195,9 +197,12 @@ def plot_corr_matrix(
     else:
         corr = feature.corr()
     sb.heatmap(corr, xticklabels=feature_col_name, yticklabels=feature_col_name)
-    plt.title("Features channel: " + str(ch_name))
+    if title is None:
+        plt.title("Features channel: " + str(ch_name))
+    else:
+        plt.title(title)
 
-    if save_plot:
+    if save_plot and save_plot_name is None:
         plt_path = get_plt_path(
             OUT_PATH=OUT_PATH,
             feature_file=feature_file,
@@ -205,7 +210,10 @@ def plot_corr_matrix(
             str_plt_type=feature_name_plt,
             # feature_name=feature_names.__str__,  # This here raises an error in os.path.join in line 251
         )
+    if save_plot and save_plot_name is not None:
+        plt_path = os.path.join(OUT_PATH, save_plot_name)
 
+    if save_plot:
         plt.savefig(plt_path, bbox_inches="tight")
         print("Correlation matrix figure saved to " + str(plt_path))
 
