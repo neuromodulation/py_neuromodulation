@@ -23,7 +23,9 @@
         "coherence": true,
         "fooof": true,
         "nolds": true,
-        "bursts": true
+        "bursts": true,
+        "linelength": true,
+        "mne_connectiviy": true
     },
     "postprocessing": {
         "feature_normalization": true,
@@ -245,5 +247,9 @@
                 "HFA"
             ]
         }
+    },
+    "mne_connectiviy": {
+        "method": "plv",
+        "mode": "multitaper"
     }
 }
