@@ -170,10 +170,10 @@
         "apply_estimator_between_peaks_and_troughs": true
     },
     "project_cortex_settings": {
-        "max_dist_cm": 20
+        "max_dist_mm": 20
     },
     "project_subcortex_settings": {
-        "max_dist_cm": 5
+        "max_dist_mm": 5
     },
     "coherence": {
         "channels": [

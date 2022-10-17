@@ -67,7 +67,7 @@ def run_example_BIDS():
         settings=None,
         nm_channels=nm_channels,
         path_grids=None,
-        verbose=True,
+        verbose=False,
     )
 
     stream.set_settings_fast_compute()

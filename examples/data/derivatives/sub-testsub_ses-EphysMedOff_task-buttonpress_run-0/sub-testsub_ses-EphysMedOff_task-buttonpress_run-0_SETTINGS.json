@@ -2,28 +2,32 @@
     "sampling_rate_features_hz": 10,
     "segment_length_features_ms": 1000,
     "preprocessing": {
-        "raw_resampling": false,
+        "raw_resampling": true,
         "raw_normalization": false,
-        "re_referencing": false,
-        "notch_filter": false,
-        "preprocessing_order": []
+        "re_referencing": true,
+        "notch_filter": true,
+        "preprocessing_order": [
+            "raw_resampling",
+            "notch_filter",
+            "re_referencing"
+        ]
     },
     "features": {
         "raw_hjorth": false,
         "return_raw": false,
         "bandpass_filter": false,
         "stft": false,
-        "fft": false,
+        "fft": true,
         "sharpwave_analysis": false,
         "coherence": false,
         "fooof": false,
         "nolds": false,
-        "bursts": true
+        "bursts": false
     },
     "postprocessing": {
-        "feature_normalization": false,
-        "project_cortex": false,
-        "project_subcortex": false
+        "feature_normalization": true,
+        "project_cortex": true,
+        "project_subcortex": true
     },
     "raw_resampling_settings": {
         "resample_freq_hz": 1000
@@ -175,10 +179,10 @@
         "apply_estimator_between_peaks_and_troughs": true
     },
     "project_cortex_settings": {
-        "max_dist_cm": 20
+        "max_dist_mm": 20
     },
     "project_subcortex_settings": {
-        "max_dist_cm": 5
+        "max_dist_mm": 5
     },
     "coherence": {
         "channels": [
