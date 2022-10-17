@@ -32,9 +32,9 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
                         l_freq=filter_range[0],
                         h_freq=filter_range[1],
                         fir_design="firwin",
-                        l_trans_bandwidth=5,
-                        h_trans_bandwidth=5,
-                        filter_length=str(sfreq) + "ms",
+                        #l_trans_bandwidth=None,
+                        #h_trans_bandwidth=None,
+                        #filter_length=str(sfreq) + "ms",
                         verbose=False,
                     ),
                 )
