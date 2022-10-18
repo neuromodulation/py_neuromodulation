@@ -13,19 +13,21 @@
         ]
     },
     "features": {
-        "raw_hjorth": false,
+        "raw_hjorth": true,
         "return_raw": false,
-        "bandpass_filter": false,
+        "bandpass_filter": true,
         "stft": false,
         "fft": true,
-        "sharpwave_analysis": false,
+        "sharpwave_analysis": true,
         "coherence": false,
-        "fooof": false,
-        "nolds": false,
-        "bursts": false
+        "fooof": true,
+        "nolds": true,
+        "bursts": true,
+        "linelength": false,
+        "mne_connectiviy": false
     },
     "postprocessing": {
-        "feature_normalization": true,
+        "feature_normalization": false,
         "project_cortex": true,
         "project_subcortex": true
     },
@@ -134,15 +136,15 @@
             "peak_left": false,
             "peak_right": false,
             "trough": false,
-            "width": false,
+            "width": true,
             "prominence": true,
             "interval": true,
-            "decay_time": false,
-            "rise_time": false,
+            "decay_time": true,
+            "rise_time": true,
             "sharpness": true,
-            "rise_steepness": false,
-            "decay_steepness": false,
-            "slope_ratio": false
+            "rise_steepness": true,
+            "decay_steepness": true,
+            "slope_ratio": true
         },
         "filter_ranges_hz": [
             [
@@ -166,15 +168,33 @@
         },
         "estimator": {
             "mean": [
-                "interval"
+                "width",
+                "decay_time",
+                "rise_time",
+                "rise_steepness",
+                "decay_steepness",
+                "sharpness",
+                "prominence",
+                "interval",
+                "slope_ratio"
             ],
             "median": null,
             "max": [
-                "prominence",
-                "sharpness"
+                "sharpness",
+                "prominence"
             ],
             "min": null,
-            "var": null
+            "var": [
+                "width",
+                "decay_time",
+                "rise_time",
+                "rise_steepness",
+                "decay_steepness",
+                "sharpness",
+                "prominence",
+                "interval",
+                "slope_ratio"
+            ]
         },
         "apply_estimator_between_peaks_and_troughs": true
     },
@@ -208,9 +228,9 @@
             "offset": true
         },
         "periodic": {
-            "center_frequency": true,
-            "band_width": true,
-            "height_over_ap": true
+            "center_frequency": false,
+            "band_width": false,
+            "height_over_ap": false
         },
         "windowlength_ms": 800,
         "peak_width_limits": [
@@ -238,11 +258,12 @@
                 "theta",
                 "alpha",
                 "low beta",
-                "high beta",
-                "low gamma",
-                "high gamma",
-                "HFA"
+                "high gamma"
             ]
         }
+    },
+    "mne_connectiviy": {
+        "method": "plv",
+        "mode": "multitaper"
     }
 }
