@@ -13,7 +13,7 @@ from py_neuromodulation import (
 sub = "008"
 ses = "EcogLfpMedOff01"
 task = "SelfpacedRotationR"
-acq = "StimOn"
+acq = "StimOff"
 run = 1
 datatype = "ieeg"
 
