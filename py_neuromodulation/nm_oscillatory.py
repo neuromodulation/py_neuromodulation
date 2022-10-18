@@ -176,22 +176,22 @@ class BandPower(OscillatoryFeature):
                     if bp_feature == "activity":
                         if self.s["bandpass_filter_settings"]["log_transform"]:
                             feature_calc = np.log(
-                                np.var(data[ch_idx, -seglength:])
+                                np.var(data[ch_idx, f_band_idx, -seglength:])
                             )
                         else:
-                            feature_calc = np.var(data[ch_idx, -seglength:])
+                            feature_calc = np.var(data[ch_idx, f_band_idx, -seglength:])
                     elif bp_feature == "mobility":
                         deriv_variance = np.var(
-                            np.diff(data[ch_idx, -seglength:])
+                            np.diff(data[ch_idx, f_band_idx, -seglength:])
                         )
                         feature_calc = np.sqrt(
-                            deriv_variance / np.var(data[ch_idx, -seglength:])
+                            deriv_variance / np.var(data[ch_idx, f_band_idx, -seglength:])
                         )
                     elif bp_feature == "complexity":
-                        dat_deriv = np.diff(data[ch_idx, -seglength:])
+                        dat_deriv = np.diff(data[ch_idx, f_band_idx, -seglength:])
                         deriv_variance = np.var(dat_deriv)
                         mobility = np.sqrt(
-                            deriv_variance / np.var(data[ch_idx, -seglength:])
+                            deriv_variance / np.var(data[ch_idx, f_band_idx, -seglength:])
                         )
                         dat_deriv_2 = np.diff(dat_deriv)
                         dat_deriv_2_var = np.var(dat_deriv_2)
