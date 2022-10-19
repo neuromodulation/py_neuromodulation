@@ -27,6 +27,7 @@ class Features:
             sfreq = s["raw_resampling_settings"]["resample_freq_hz"]
 
         self.sfreq = sfreq
+        self.features = []
 
         for feature in s["features"]:
             if s["features"][feature] is False:
