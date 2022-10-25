@@ -139,11 +139,3 @@ class TestWrapper:
                 self.ieeg_batch[bp_reref_idx, :]
                 - self.ieeg_batch[referenced_bp_channel, :],
             )
-
-
-def test_rereference():
-    test_wrapper = TestWrapper()
-    test_wrapper.test_rereference()
-
-
-test_rereference()
