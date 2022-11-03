@@ -5,5 +5,7 @@ from . import (
     nm_cohortwrapper,
     nm_across_patient_decoding,
     nm_stream_offline,
-) 
+)
 from .nm_stream_offline import Stream
+
+__version__ = "0.1.0.dev1"

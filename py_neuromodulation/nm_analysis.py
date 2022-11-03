@@ -63,9 +63,9 @@ class Feature_Reader:
         self.sidecar = nm_IO.read_sidecar(PATH_READ_FILE)
         if self.sidecar["sess_right"] is None:
             if "coords" in self.sidecar:
-                if len(self.sidecar["coords"]["cortex_left"]["ch_names"])>0:
+                if len(self.sidecar["coords"]["cortex_left"]["ch_names"]) > 0:
                     self.sidecar["sess_right"] = False
-                if len(self.sidecar["coords"]["cortex_right"]["ch_names"])>0:
+                if len(self.sidecar["coords"]["cortex_right"]["ch_names"]) > 0:
                     self.sidecar["sess_right"] = True
         self.sfreq = self.sidecar["sfreq"]
         self.nm_channels = nm_IO.read_nm_channels(PATH_READ_FILE)
@@ -117,7 +117,9 @@ class Feature_Reader:
                 if self.sidecar["sess_right"] is True and "LEFT" in target_:
                     target = target_
                     continue
-                elif self.sidecar["sess_right"] is False and "RIGHT" in target_:
+                elif (
+                    self.sidecar["sess_right"] is False and "RIGHT" in target_
+                ):
                     target = target_
                     continue
                 if target_ == target_clean[-1]:
@@ -243,7 +245,7 @@ class Feature_Reader:
         epoch_len: int = 4,
         threshold: float = 0.1,
         normalize_data: bool = True,
-    ):
+    ) -> None:
 
         filtered_df = self.feature_arr[
             self.filter_features(
@@ -281,7 +283,9 @@ class Feature_Reader:
         )
 
     @staticmethod
-    def get_performace_sub_strip(performance_sub: dict, plt_grid: bool = False):
+    def get_performace_sub_strip(
+        performance_sub: dict, plt_grid: bool = False
+    ):
 
         ecog_strip_performance = []
         ecog_coords_strip = []
@@ -298,7 +302,9 @@ class Feature_Reader:
                 )
             elif plt_grid is True and "gridcortex_" in ch:
                 cortex_grid.append(performance_sub[ch]["coord"])
-                grid_performance.append(performance_sub[ch]["performance_test"])
+                grid_performance.append(
+                    performance_sub[ch]["performance_test"]
+                )
 
         if len(ecog_coords_strip) > 0:
             ecog_coords_strip = np.vstack(ecog_coords_strip)
@@ -690,7 +696,10 @@ class Feature_Reader:
                 obj_read, obj_write, set_inner_CV_res: bool = False
             ):
                 def set_score(
-                    key_set: str, key_get: str, take_mean: bool = True, val=None
+                    key_set: str,
+                    key_get: str,
+                    take_mean: bool = True,
+                    val=None,
                 ):
                     if set_inner_CV_res is True:
                         key_set = "InnerCV_" + key_set
@@ -764,7 +773,7 @@ class Feature_Reader:
 
                 if read_mrmr is True:
                     # transform dict into keys for json saving
- 
+
                     set_score(
                         key_set="mrmr_select",
                         key_get=None,
@@ -785,7 +794,9 @@ class Feature_Reader:
                 len([key_ for key_ in obj_read.keys() if "InnerCV_" in key_])
                 > 0
             ):
-                read_ML_performances(obj_read, obj_write, set_inner_CV_res=True)
+                read_ML_performances(
+                    obj_read, obj_write, set_inner_CV_res=True
+                )
 
         if read_channels:
 
@@ -806,9 +817,9 @@ class Feature_Reader:
                                 self.sidecar["coords"][cortex_loc]["ch_names"]
                             ):
                                 if ch.startswith(ch_name_coord):
-                                    coords = self.sidecar["coords"][cortex_loc][
-                                        "positions"
-                                    ][ch_name_coord_idx]
+                                    coords = self.sidecar["coords"][
+                                        cortex_loc
+                                    ]["positions"][ch_name_coord_idx]
                                     coords_exist = True  # optimally break out of the two loops...
                         if coords_exist is False:
                             coords = None
@@ -882,7 +893,7 @@ class Feature_Reader:
 
     @staticmethod
     def get_dataframe_performances(p: dict) -> pd.DataFrame:
-        df = pd.DataFrame()
+        performances = []
         for sub in p.keys():
             for ch in p[sub].keys():
                 if "active_gridpoints" in ch:
@@ -897,6 +908,7 @@ class Feature_Reader:
                     dict_add["ch_type"] = "cortex grid"
                 else:
                     dict_add["ch_type"] = "electrode ch"
-                df = df.append(dict_add, ignore_index=True)
+                performances.append(dict_add)
+        df = pd.DataFrame(performances)
 
         return df
