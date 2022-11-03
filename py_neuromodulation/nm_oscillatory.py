@@ -69,6 +69,7 @@ class FFT(OscillatoryFeature):
                 ) :,
             ]
 
+
             Z = np.abs(fft.rfft(data_ch))
             f = np.arange(
                 0, int(self.s["fft_settings"]["windowlength_ms"] / 2) + 1, 1
