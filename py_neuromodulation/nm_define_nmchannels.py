@@ -2,7 +2,7 @@
 from typing import Iterable, Optional, Union
 
 import pandas as pd
-
+import numpy as np
 
 _LFP_TYPES = ["seeg", "dbs", "lfp"]  # must be lower-case
 
@@ -167,6 +167,9 @@ def set_channels(
         for name, ref in zip(df["name"], df["rereference"]):
             if ref == "None":
                 new_names.append(name)
+            elif type(ref) == float:
+                if np.isnan(ref):
+                    new_names.append(name)
             elif ref == "average":
                 new_names.append(name + "-avgref")
             else:
