@@ -245,8 +245,10 @@ class Feature_Reader:
         epoch_len: int = 4,
         threshold: float = 0.1,
         normalize_data: bool = True,
+        show_plot: bool = True,
+        title: str = "Movement aligned features",
     ) -> None:
-
+        # TODO: This does not work properly when we have bipolar rereferencing
         filtered_df = self.feature_arr[
             self.filter_features(
                 self.feature_arr.columns, ch, list_feature_keywords
@@ -276,10 +278,11 @@ class Feature_Reader:
             ch_name=ch if ch is not None else "ch",
             label_name=self.label_name,
             normalize_data=normalize_data,
-            show_plot=True,
+            show_plot=show_plot,
             save=True,
             OUT_PATH=self.feature_dir,
             feature_file=self.feature_file,
+            str_title=title,
         )
 
     @staticmethod
