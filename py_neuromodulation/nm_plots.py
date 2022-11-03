@@ -285,6 +285,7 @@ def plot_epochs_avg(
         save: bool = False,
         OUT_PATH: str = None,
         feature_file: str = None,
+        str_title: str = "Movement aligned features",
 ):
     # cut channel name of for axis + "_" for more dense plot
     if cut_ch_name_cols and None not in (ch_name, feature_names):
@@ -312,7 +313,7 @@ def plot_epochs_avg(
         rotation=90,
     )
     plt.xlabel("Time [s]")
-    str_title = "Movement aligned features"
+    str_title = str_title
     if ch_name:
         str_title += f" channel: {ch_name}"
     plt.title(str_title)
