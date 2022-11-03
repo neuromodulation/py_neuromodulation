@@ -64,7 +64,7 @@ class Run:
             )
         )
         self.settings = settings
-        self.sfreq_new = int(settings["sampling_rate_features_hz"])
+        self.sfreq_new = settings["sampling_rate_features_hz"]
         self.sfreq = features.sfreq
         self.feature_idx = feature_idx
         self.sample_add = int(self.sfreq / self.sfreq_new)

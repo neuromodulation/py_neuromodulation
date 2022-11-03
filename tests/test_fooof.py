@@ -98,11 +98,3 @@ class TestWrapper:
         # there will be None's in the feature_series
         # with a non successful fit, aperiod features can also be None
         assert feature_series is not None
-
-
-def test_fooof():
-    test_wrapper = TestWrapper()
-    test_wrapper.test_fooof_features()
-
-
-test_fooof()

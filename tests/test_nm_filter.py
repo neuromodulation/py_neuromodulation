@@ -93,10 +93,3 @@ class TestBandPassFilterData:
             len(f_ranges),
             duration * sfreq,
         )
-
-
-if __name__ == "__main__":
-    test = TestBandPassFilterData()
-    # test.test_filter_length()
-    # test.test_filter_1d()
-    # test.test_filter_2d()

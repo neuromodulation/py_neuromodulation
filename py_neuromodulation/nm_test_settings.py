@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from py_neuromodulation import nm_normalization
 
@@ -23,11 +24,11 @@ def test_settings(
     assert isinstance(s["sampling_rate_features_hz"], (float, int))
     if s["postprocessing"]["project_cortex"] is True:
         assert isinstance(
-            s["project_cortex_settings"]["max_dist_cm"], (float, int)
+            s["project_cortex_settings"]["max_dist_mm"], (float, int)
         )
     if s["postprocessing"]["project_subcortex"] is True:
         assert isinstance(
-            s["project_subcortex_settings"]["max_dist_cm"], (float, int)
+            s["project_subcortex_settings"]["max_dist_mm"], (float, int)
         )
     enabled_methods = [
         m
@@ -62,6 +63,8 @@ def test_settings(
         assert isinstance(
             s["raw_normalization_settings"]["clip"], (float, int, bool)
         )
+
+
     if s["postprocessing"]["feature_normalization"] is True:
         assert isinstance(
             s["feature_normalization_settings"]["normalization_time_s"],

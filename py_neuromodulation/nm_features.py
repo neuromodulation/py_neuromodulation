@@ -11,6 +11,8 @@ from py_neuromodulation import (
     nm_features_abc,
     nm_oscillatory,
     nm_bursts,
+    nm_linelength,
+    nm_mne_connectiviy
 )
 
 
@@ -25,6 +27,7 @@ class Features:
             sfreq = s["raw_resampling_settings"]["resample_freq_hz"]
 
         self.sfreq = sfreq
+        self.features = []
 
         for feature in s["features"]:
             if s["features"][feature] is False:
@@ -62,6 +65,10 @@ class Features:
                     )
                 case "bursts":
                     self.features.append(nm_bursts.Burst(s, ch_names, sfreq))
+                case "linelength":
+                    self.features.append(nm_linelength.LineLengh(s, ch_names, sfreq))
+                case "mne_connectiviy":
+                    self.features.append(nm_mne_connectiviy.MNEConnectivity(s, ch_names, sfreq))
 
     def estimate_features(self, data) -> dict:
         """Calculate features, as defined in settings.json
