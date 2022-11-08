@@ -1,5 +1,5 @@
 {
-    "sampling_rate_features_hz": 10,
+    "sampling_rate_features_hz": 1,
     "segment_length_features_ms": 1000,
     "preprocessing": {
         "raw_resampling": false,

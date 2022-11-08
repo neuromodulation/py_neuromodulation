@@ -182,6 +182,8 @@ def plot_corr_matrix(
         save_plot_name: str = None,
         figsize: tuple[int] = (7, 7),
         title: str = None,
+        cbar_vmin: float = 0.,
+        cbar_vmax: float = 1.
 ):
     # cut out channel name for each column
     if ch_name is not None:
@@ -196,7 +198,7 @@ def plot_corr_matrix(
         corr = feature[feature_names].corr()
     else:
         corr = feature.corr()
-    sb.heatmap(corr, xticklabels=feature_col_name, yticklabels=feature_col_name)
+    sb.heatmap(corr, xticklabels=feature_col_name, yticklabels=feature_col_name, vmin = cbar_vmin, vmax = cbar_vmax)
     if title is None:
         plt.title("Features channel: " + str(ch_name))
     else:

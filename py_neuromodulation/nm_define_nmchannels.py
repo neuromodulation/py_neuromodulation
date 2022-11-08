@@ -168,6 +168,9 @@ def set_channels(
         for name, ref in zip(df["name"], df["rereference"]):
             if ref == "None":
                 new_names.append(name)
+            elif type(ref) == float:
+                if np.isnan(ref):
+                    new_names.append(name)
             elif ref == "average":
                 new_names.append(name + "-avgref")
             else:

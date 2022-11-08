@@ -107,9 +107,10 @@ class NotchFilter:
         line_noise: int,
         notch_widths: int | np.ndarray | None = 3,
         trans_bandwidth: int = 15,
+        freqs : np.ndarray = None,
     ) -> None:
-        # fs -1 due to exactly half of nyquist frequency
-        freqs = np.arange(line_noise, sfreq / 2, line_noise, dtype=int)
+        if freqs is None:
+            freqs = np.arange(line_noise, sfreq / 2, line_noise, dtype=int)
         if freqs[-1] >= sfreq / 2:
             freqs = freqs[:-1]
 

@@ -173,12 +173,6 @@ class StreamApp:
                 )[0, :]
                 queue_plotting.put(prediction_proba)
 
-                if CREATE_FIG is True:
-                    fig, ax = plt.subplots()
-                    ax.bar([0, 1, 2], prediction_proba, color="blue")
-                    fig.canvas.draw()
-                    plt.show()
-
                 print(self.model.predict(np.expand_dims(features_comp, axis=0)))
 
             feature_df.append(features_comp)
