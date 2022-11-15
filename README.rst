@@ -16,35 +16,32 @@ Find the documentation here https://neuromodulation.github.io/py_neuromodulation
 Setup
 =====
 
-For running this toolbox first create a new virtual conda environment:
+For running this toolbox first create a new virtual conda environment and activate it:
 
 .. code-block::
 
-    conda env create --file=environment.yml
+    conda create -n pynm-test python=3.10
+    conda activate pynm-test
 
-And enable it:
-
-.. code-block::
-
-    conda activate pn_env
-
-Optionally the ipython kernel can be specified to installed for the pyneuromodulation_test conda environment:
+Then install the packages listed in the `pyproject.toml`.
 
 .. code-block::
 
-    ipython kernel install --user --name=pn_env
+    pip install .[dev]
+    pytest -v .
 
-To install py_neuromodulation in an editable development version inside your conda enviroment, type the following inside the py_neuromodulation root directory:
+
+Optionally the ipython kernel can be specified to installed for the pynm-test conda environment:
 
 .. code-block::
 
-    conda develop .
+    ipython kernel install --user --name=pynm-test
 
 Then py_neuromodulation can be imported via:
 
 .. code-block::
 
-    import py_neuromodulation
+    import py_neuromodulation as py_nm
 
 The main modules include running real time enabled feature preprocessing based on `iEEG BIDS <https://www.nature.com/articles/s41597-019-0105-7>`_ data.
 
@@ -60,13 +57,8 @@ To run feature estimation given the example BIDS data run in root directory.
 
     python examples/example_BIDS.py
 
-Alternatively run from the examples directory:
 
-.. code-block::
-
-    python example_BIDS.py
-
-This will write a feature_arr.csv file in the 'examples/data/derivatives' folder.
+This will write a feature_arr.csv and different sidecar files in the 'examples/data/derivatives' folder.
 
 For further documentation view `ParametrizationDefinition <ParametrizationDefinition.html#>`_ for description of necessary parametrization files.
 `FeatureEstimationDemo <FeatureEstimationDemo.html#>`_ walks through an example feature estimation and explains sharpwave estimation.
