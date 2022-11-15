@@ -290,10 +290,11 @@ def plot_epochs_avg(
         str_title: str = "Movement aligned features",
 ):
     # cut channel name of for axis + "_" for more dense plot
-    if cut_ch_name_cols and None not in (ch_name, feature_names):
-        feature_names = [
-            i[len(ch_name) + 1:] for i in list(feature_names) if ch_name in i
-        ]
+    if feature_names is None:
+        if cut_ch_name_cols and None not in (ch_name, feature_names):
+            feature_names = [
+                i[len(ch_name) + 1:] for i in list(feature_names) if ch_name in i
+            ]
 
     if normalize_data:
         X_epoch_mean = stats.zscore(
@@ -310,8 +311,8 @@ def plot_epochs_avg(
     plt.imshow(X_epoch_mean, aspect="auto")
     plt.yticks(np.arange(0, len(feature_names), 1), feature_names)
     plt.xticks(
-        np.arange(0, X_epoch.shape[1], 1),
-        np.round(np.arange(-epoch_len / 2, epoch_len / 2, 1 / sfreq), 2),
+        np.arange(0, X_epoch.shape[1], int(X_epoch.shape[1]/10)),
+        np.round(np.arange(-epoch_len / 2, epoch_len / 2, epoch_len/10), 2),
         rotation=90,
     )
     plt.xlabel("Time [s]")
@@ -334,8 +335,8 @@ def plot_epochs_avg(
     plt.ylabel("target")
     plt.title(label_name)
     plt.xticks(
-        np.arange(0, X_epoch.shape[1], 1),
-        np.round(np.arange(-epoch_len / 2, epoch_len / 2, 1 / sfreq), 2),
+        np.arange(0, X_epoch.shape[1], int(X_epoch.shape[1]/10)),
+        np.round(np.arange(-epoch_len / 2, epoch_len / 2, epoch_len/10), 2),
         rotation=90,
     )
     plt.xlabel("Time [s]")

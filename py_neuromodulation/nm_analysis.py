@@ -242,6 +242,7 @@ class Feature_Reader:
         self,
         ch: str = None,
         list_feature_keywords: Optional[list[str]] = None,
+        features_to_plt : list = None,
         epoch_len: int = 4,
         threshold: float = 0.1,
         normalize_data: bool = True,
@@ -249,11 +250,16 @@ class Feature_Reader:
         title: str = "Movement aligned features",
     ) -> None:
         # TODO: This does not work properly when we have bipolar rereferencing
-        filtered_df = self.feature_arr[
-            self.filter_features(
-                self.feature_arr.columns, ch, list_feature_keywords
-            )
-        ]
+
+        if features_to_plt is None:
+
+            filtered_df = self.feature_arr[
+                self.filter_features(
+                    self.feature_arr.columns, ch, list_feature_keywords
+                )
+            ]
+        else:
+            filtered_df = self.feature_arr[features_to_plt]
 
         data = np.expand_dims(np.array(filtered_df), axis=1)
 
@@ -275,7 +281,7 @@ class Feature_Reader:
             if list_feature_keywords is not None
             else "all",
             cut_ch_name_cols=True,
-            ch_name=ch if ch is not None else "ch",
+            ch_name=ch if ch is not None else None,
             label_name=self.label_name,
             normalize_data=normalize_data,
             show_plot=show_plot,
