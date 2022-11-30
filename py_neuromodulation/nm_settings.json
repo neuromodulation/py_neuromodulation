@@ -40,12 +40,7 @@
         "normalization_method": {
             "mean": false,
             "median": false,
-            "zscore": true,
-            "zscore-median": false,
-            "quantile": false,
-            "power": false,
-            "robust": false,
-            "minmax": false
+            "zscore": true
         },
         "clip": 3
     },
@@ -54,12 +49,12 @@
         "normalization_method": {
             "mean": false,
             "median": false,
-            "zscore": true,
+            "zscore": false,
             "zscore-median": false,
             "quantile": false,
             "power": false,
             "robust": false,
-            "minmax": false
+            "minmax": true
         },
         "clip": 3
     },
