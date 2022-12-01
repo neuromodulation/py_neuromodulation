@@ -38,6 +38,7 @@ def read_BIDS_data(
     PATH_RUN: _PathLike | mne_bids.BIDSPath,
     BIDS_PATH: _PathLike | None = None,
     datatype: str = "ieeg",
+    line_noise: int = 50,
 ) -> tuple[mne.io.Raw, np.ndarray, int | float, int, list | None, list | None]:
     """Given a run path and bids data path, read the respective data
 
@@ -70,11 +71,13 @@ def read_BIDS_data(
 
     raw_arr = mne_bids.read_raw_bids(bids_path)
     coord_list, coord_names = get_coord_list(raw_arr)
+    if raw_arr.info["line_freq"] is not None:
+        line_noise = int(raw_arr.info["line_freq"])
     return (
         raw_arr,
         raw_arr.get_data(),
         raw_arr.info["sfreq"],
-        int(raw_arr.info["line_freq"]),
+        line_noise,
         coord_list,
         coord_names,
     )
