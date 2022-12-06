@@ -73,6 +73,8 @@ def read_BIDS_data(
     coord_list, coord_names = get_coord_list(raw_arr)
     if raw_arr.info["line_freq"] is not None:
         line_noise = int(raw_arr.info["line_freq"])
+    else:
+        print("Line noise is not available in the data, using value of {} Hz.".format(line_noise))
     return (
         raw_arr,
         raw_arr.get_data(),
