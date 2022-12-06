@@ -98,6 +98,8 @@ def set_channels(
         df["used"] = 0
 
     if target_keywords:
+        if type(target_keywords) is str:
+            target_keywords = tuple([target_keywords])
         targets = []
         for ch_name in ch_names:
             if any(kw.lower() in ch_name.lower() for kw in target_keywords):
