@@ -21,7 +21,7 @@
         "sharpwave_analysis": true,
         "coherence": false,
         "fooof": true,
-        "nolds": true,
+        "nolds": false,
         "bursts": true,
         "linelength": false,
         "mne_connectiviy": false
@@ -214,6 +214,11 @@
         "frequency_bands": [
             "high beta"
         ],
+        "features": {
+            "mean_fband": true,
+            "max_fband": true,
+            "max_allfbands": true
+        },
         "method": {
             "coh": true,
             "icoh": true
