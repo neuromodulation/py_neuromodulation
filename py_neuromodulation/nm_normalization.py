@@ -139,6 +139,7 @@ def _normalize_and_clip(
     method: str,
     clip: Union[int, float, bool],
     description: str,
+    #TODO: add which type of normalization, check shape of current, if has 2 dimensions dont use expand
 ) -> np.ndarray:
     """Normalize data."""
     if method == NORM_METHODS.MEAN.value:
