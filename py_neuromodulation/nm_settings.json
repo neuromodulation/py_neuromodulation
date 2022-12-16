@@ -40,7 +40,12 @@
         "normalization_method": {
             "mean": false,
             "median": false,
-            "zscore": true
+            "zscore": true,
+            "zscore-median": false,
+            "quantile": false,
+            "power": false,
+            "robust": false,
+            "minmax": false
         },
         "clip": 3
     },
