@@ -80,11 +80,25 @@ stream_zscorePre.settings['preprocessing']['raw_normalization'] = True
 stream_zscorePre.settings['preprocessing']['preprocessing_order'] = ["raw_normalization",]
 stream_zscorePre.settings['postprocessing']['feature_normalization'] = True
 stream_zscorePre.settings[ "raw_normalization_settings"]["normalization_method"] = {
-            "quantile": True,
-        }
-stream_zscorePre.settings[ "feature_normalization_settings"]["normalization_method"] = {
-            "quantile": True,
-        }
+    "mean": False,
+    "median": False,
+    "zscore": True,
+    "zscore-median": False,
+    "quantile": False,
+    "power": False,
+    "robust": False,
+    "minmax": False
+}
+stream_zscorePre.settings["feature_normalization_settings"]["normalization_method"] = {
+    "mean": False,
+    "median": False,
+    "zscore": False,
+    "zscore-median": False,
+    "quantile": True,
+    "power": False,
+    "robust": False,
+    "minmax": False
+}
 
 
 
