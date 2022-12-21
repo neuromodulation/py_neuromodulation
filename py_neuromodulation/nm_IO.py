@@ -367,10 +367,10 @@ def get_paths_example_data():
 
     sys.path.append(os.path.dirname(SCRIPT_DIR))
 
-    sub = "testsub"
-    ses = "EphysMedOff"
-    task = "buttonpress"
-    run = 0
+    sub = "000"
+    ses = "right"
+    task = "force"
+    run = 3
     datatype = "ieeg"
 
     # Define run name and access paths in the BIDS format.
