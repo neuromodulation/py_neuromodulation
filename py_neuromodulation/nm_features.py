@@ -12,7 +12,7 @@ from py_neuromodulation import (
     nm_oscillatory,
     nm_bursts,
     nm_linelength,
-    nm_mne_connectiviy
+    nm_mne_connectiviy,
 )
 
 
@@ -48,7 +48,9 @@ class Features:
                         nm_oscillatory.STFT(s, ch_names, sfreq)
                     )
                 case "fft":
-                    self.features.append(nm_oscillatory.FFT(s, ch_names, sfreq))
+                    self.features.append(
+                        nm_oscillatory.FFT(s, ch_names, sfreq)
+                    )
                 case "sharpwave_analysis":
                     self.features.append(
                         nm_sharpwaves.SharpwaveAnalyzer(s, ch_names, sfreq)
@@ -66,9 +68,15 @@ class Features:
                 case "bursts":
                     self.features.append(nm_bursts.Burst(s, ch_names, sfreq))
                 case "linelength":
-                    self.features.append(nm_linelength.LineLengh(s, ch_names, sfreq))
-                case "mne_connectiviy":
-                    self.features.append(nm_mne_connectiviy.MNEConnectivity(s, ch_names, sfreq))
+                    self.features.append(
+                        nm_linelength.LineLengh(s, ch_names, sfreq)
+                    )
+                case "mne_connectivity":
+                    self.features.append(
+                        nm_mne_connectiviy.MNEConnectivity(s, ch_names, sfreq)
+                    )
+                case _:
+                    raise ValueError(f"Unknown feature found. Got: {feature}.")
 
     def estimate_features(self, data) -> dict:
         """Calculate features, as defined in settings.json
