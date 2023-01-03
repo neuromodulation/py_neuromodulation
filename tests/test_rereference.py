@@ -85,7 +85,7 @@ class TestWrapper:
             coord_names=coord_names,
         )
 
-        generator = nm_generator.ieeg_raw_generator(
+        generator = nm_generator.raw_data_generator(
             self.data, self.stream.settings, self.stream.sfreq
         )
         self.ieeg_batch = next(generator, None)

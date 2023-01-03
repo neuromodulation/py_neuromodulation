@@ -242,7 +242,7 @@ class Feature_Reader:
         self,
         ch: str = None,
         list_feature_keywords: Optional[list[str]] = None,
-        features_to_plt : list = None,
+        features_to_plt: list = None,
         epoch_len: int = 4,
         threshold: float = 0.1,
         normalize_data: bool = True,
@@ -894,7 +894,7 @@ class Feature_Reader:
         if save_results:
             nm_IO.save_general_dict(
                 dict_=performance_dict,
-                PATH_OUT=PATH_OUT,
+                path_out=PATH_OUT,
                 str_add=str_add,
                 folder_name=folder_name,
             )

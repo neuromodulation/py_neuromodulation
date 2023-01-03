@@ -18,8 +18,8 @@ from py_neuromodulation import (
     nm_run_analysis,
     nm_features,
     nm_resample,
+    nm_settings,
     nm_stream,
-    nm_test_settings,
     FieldTrip,
 )
 

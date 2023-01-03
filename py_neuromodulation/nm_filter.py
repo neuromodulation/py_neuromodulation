@@ -2,7 +2,8 @@
 import mne
 from mne.filter import _overlap_add_filter
 import numpy as np
-from numpy import array, convolve, expand_dims
+
+from .nm_processing_abc import Preprocessor
 
 
 class BandPassFilter:
@@ -36,7 +37,7 @@ class BandPassFilter:
 
     def __init__(
         self,
-        f_ranges: list[list],
+        f_ranges: list[list[int | float | None]],
         sfreq: int | float,
         filter_length: str | float = "999ms",
         l_trans_bandwidth: int | float | str = 4,
@@ -57,7 +58,7 @@ class BandPassFilter:
                 fir_design="firwin",
                 l_trans_bandwidth=l_trans_bandwidth,  # type: ignore
                 h_trans_bandwidth=h_trans_bandwidth,  # type: ignore
-                filter_length=filter_length,
+                filter_length=filter_length,  # type: ignore
                 verbose=verbose,
             )
             filter_bank.append(filt)
@@ -88,35 +89,50 @@ class BandPassFilter:
                 f"Data must have one or two dimensions. Got:"
                 f" {data.ndim} dimensions."
             )
-
         if data.ndim == 1:
-            data = expand_dims(data, axis=0)
-        filtered = array(
+            data = np.expand_dims(data, axis=0)
+        filtered = np.array(
             [
-                [convolve(flt, chan, mode="same") for flt in self.filter_bank]
+                [
+                    np.convolve(flt, chan, mode="same")
+                    for flt in self.filter_bank
+                ]
                 for chan in data
             ]
         )
         return filtered
 
 
-class NotchFilter:
+class NotchFilter(Preprocessor):
     def __init__(
         self,
         sfreq: int | float,
-        line_noise: int,
+        line_noise: int | float | None = None,
+        freqs: np.ndarray | None = None,
         notch_widths: int | np.ndarray | None = 3,
         trans_bandwidth: int = 15,
-        freqs : np.ndarray = None,
     ) -> None:
+        if line_noise is None and freqs is None:
+            raise ValueError(
+                "Either line_noise or freqs must be defined if notch_filter is"
+                "activated."
+            )
         if freqs is None:
             freqs = np.arange(line_noise, sfreq / 2, line_noise, dtype=int)
-        if freqs[-1] >= sfreq / 2:
-            freqs = freqs[:-1]
+
+        if freqs.size > 0:
+            if freqs[-1] >= sfreq / 2:
+                freqs = freqs[:-1]
 
         # Code is copied from filter.py notch_filter
         if freqs.size == 0:
             self.filter_bank = None
+            print(
+                "WARNING: notch_filter is activated but data is not being"
+                f" filtered. This may be due to a low sampling frequency or"
+                f" incorrect specifications. Make sure your settings are"
+                f" correct. Got: {sfreq = }, {line_noise = }, {freqs = }."
+            )
             return
 
         filter_length = int(sfreq - 1)
@@ -158,7 +174,7 @@ class NotchFilter:
             fir_design="firwin",
         )
 
-    def filter_data(self, data: np.ndarray) -> np.ndarray:
+    def process(self, data: np.ndarray) -> np.ndarray:
         if self.filter_bank is None:
             return data
         return _overlap_add_filter(

@@ -89,11 +89,11 @@ class TestWrapper:
         )
 
     def test_fooof_features(self):
-        generator = nm_generator.ieeg_raw_generator(
+        generator = nm_generator.raw_data_generator(
             self.data, self.stream.settings, self.stream.sfreq
         )
         data_batch = next(generator, None)
-        feature_series = self.stream.run_analysis.process_data(data_batch)
+        feature_series = self.stream.run_analysis.process(data_batch)
         # since the settings can define searching for "max_n_peaks" peaks
         # there will be None's in the feature_series
         # with a non successful fit, aperiod features can also be None

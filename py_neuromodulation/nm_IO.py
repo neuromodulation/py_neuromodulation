@@ -1,7 +1,6 @@
 import json
 import os
 from pathlib import Path
-from typing import Iterable
 
 import mne
 import mne_bids
@@ -10,6 +9,28 @@ import pandas as pd
 from scipy import io
 
 _PathLike = str | os.PathLike
+
+
+def load_nm_channels(
+    nm_channels: pd.DataFrame | _PathLike,
+) -> pd.DataFrame:
+    """Read nm_channels from path or specify via BIDS arguments.
+    Nexessary parameters are then
+    ch_names (list),
+    ch_types (list),
+    bads (list)
+    used_types (list)
+    target_keywords (list)
+    reference Union[list, str]
+    """
+    if isinstance(nm_channels, pd.DataFrame):
+        return nm_channels
+    if nm_channels:
+        if not os.path.isfile(nm_channels):
+            raise ValueError(
+                "PATH_NM_CHANNELS is not a valid file. Got: " f"{nm_channels}"
+            )
+    return pd.read_csv(nm_channels)
 
 
 def read_BIDS_data(
@@ -76,17 +97,17 @@ def get_coord_list(
     return coord_list, coord_names
 
 
-def read_grid(PATH_GRIDS: str, grid_str: str):
-    if not PATH_GRIDS:
+def read_grid(PATH_GRIDS: _PathLike | None, grid_str: str) -> pd.DataFrame:
+    if PATH_GRIDS is None:
         grid = pd.read_csv(
             os.path.join(
-                Path(__file__).parent, "grid_" + grid_str.name.lower() + ".tsv"
+                Path(__file__).parent, "grid_" + grid_str.lower() + ".tsv"
             ),
             sep="\t",
         )
     else:
         grid = pd.read_csv(
-            os.path.join(PATH_GRIDS, "grid_" + grid_str.name.lower() + ".tsv"),
+            os.path.join(PATH_GRIDS, "grid_" + grid_str.lower() + ".tsv"),
             sep="\t",
         )
     return grid
@@ -160,17 +181,17 @@ def read_plot_modules(
 
 
 def add_labels(
-    df_,
-    settings,
-    nm_channels,
-    raw_arr_data,
-    fs,
-):
+    features: pd.DataFrame,
+    settings: dict,
+    nm_channels: pd.DataFrame,
+    raw_arr_data: np.ndarray,
+    fs: int | float,
+) -> pd.DataFrame | None:
     """Given a constructed feature data frame, resample the target labels and add to dataframe
 
     Parameters
     ----------
-    df_ : pd.DataFrame
+    features : pd.DataFrame
         computed feature dataframe
     settings_wrapper : settings.py
         initialized settings used for feature estimation
@@ -179,35 +200,33 @@ def add_labels(
 
     Returns
     -------
-    df_ : pd.DataFrame
+    pd.DataFrame | None
         computed feature dataframe including resampled features
     """
     # resample_label
     ind_label = np.where(nm_channels.target == 1)[0]
-    if ind_label.shape[0] != 0:
-        offset_time = settings["segment_length_features_ms"]
-
-        offset_start = np.ceil(offset_time / 1000 * fs).astype(int)
-        dat_ = raw_arr_data[ind_label, offset_start:]
-        if dat_.ndim == 1:
-            dat_ = np.expand_dims(dat_, axis=0)
-        label_downsampled = dat_[
-            :,
-            :: int(np.ceil(fs / settings["sampling_rate_features_hz"])),
-        ]
-
-        # and add to df
-        if df_.shape[0] == label_downsampled.shape[1]:
-            for idx, label_ch in enumerate(nm_channels.name[ind_label]):
-                df_[label_ch] = label_downsampled[idx, :]
-        else:
-            print(
-                "label dimensions don't match, saving downsampled label extra"
-            )
-    else:
+    if ind_label.shape[0] == 0:
         print("no target specified")
+        return None
 
-    return df_
+    offset_time = settings["segment_length_features_ms"]
+
+    offset_start = np.ceil(offset_time / 1000 * fs).astype(int)
+    data = raw_arr_data[ind_label, offset_start:]
+    if data.ndim == 1:
+        data = np.expand_dims(data, axis=0)
+    label_downsampled = data[
+        :,
+        :: int(np.ceil(fs / settings["sampling_rate_features_hz"])),
+    ]
+
+    # and add to df
+    if features.shape[0] == label_downsampled.shape[1]:
+        for idx, label_ch in enumerate(nm_channels.name[ind_label]):
+            features[label_ch] = label_downsampled[idx, :]
+    else:
+        print("label dimensions don't match, saving downsampled label extra")
+    return features
 
 
 def save_features_and_settings(
@@ -220,7 +239,7 @@ def save_features_and_settings(
     coords,
     fs,
     line_noise,
-):
+) -> None:
     """save settings.json, nm_channels.csv and features.csv
 
     Parameters
@@ -245,70 +264,68 @@ def save_features_and_settings(
     save_sidecar(dict_sidecar, out_path, folder_name)
     save_features(df_features, out_path, folder_name)
     save_settings(settings, out_path, folder_name)
-    save_nmchannels(nm_channels, out_path, folder_name)
+    save_nm_channels(nm_channels, out_path, folder_name)
 
 
-def save_settings(settings: dict, PATH_OUT: str, folder_name: str = None):
+def save_settings(
+    settings: dict, path_out: _PathLike, folder_name: str | None = None
+) -> None:
+    path_out = _pathlike_to_str(path_out)
     if folder_name is not None:
-        PATH_OUT = os.path.join(
-            PATH_OUT, folder_name, folder_name + "_SETTINGS.json"
+        path_out = os.path.join(
+            path_out, folder_name, folder_name + "_SETTINGS.json"
         )
 
-    with open(PATH_OUT, "w") as f:
+    with open(path_out, "w") as f:
         json.dump(settings, f, indent=4)
-    print("settings.json saved to " + str(PATH_OUT))
+    print("settings.json saved to " + path_out)
 
 
-def save_nmchannels(
-    nmchannels: pd.DataFrame, PATH_OUT: str, folder_name: str = None
-):
+def save_nm_channels(
+    nmchannels: pd.DataFrame,
+    path_out: _PathLike,
+    folder_name: str | None = None,
+) -> None:
+    path_out = _pathlike_to_str(path_out)
     if folder_name is not None:
-        PATH_OUT = os.path.join(
-            PATH_OUT, folder_name, folder_name + "_nm_channels.csv"
+        path_out = os.path.join(
+            path_out, folder_name, folder_name + "_nm_channels.csv"
         )
-    nmchannels.to_csv(PATH_OUT)
-    print("nm_channels.csv saved to " + str(PATH_OUT))
+    nmchannels.to_csv(path_out)
+    print("nm_channels.csv saved to " + path_out)
 
 
 def save_features(
-    df_features: pd.DataFrame, PATH_OUT: str, folder_name: str = None
-):
+    df_features: pd.DataFrame,
+    path_out: _PathLike,
+    folder_name: str | None = None,
+) -> None:
+    path_out = _pathlike_to_str(path_out)
     if folder_name is not None:
-        PATH_OUT = os.path.join(
-            PATH_OUT, folder_name, folder_name + "_FEATURES.csv"
+        path_out = os.path.join(
+            path_out, folder_name, folder_name + "_FEATURES.csv"
         )
-    df_features.to_csv(PATH_OUT)
-    print("FEATURES.csv saved to " + str(PATH_OUT))
+    df_features.to_csv(path_out)
+    print("FEATURES.csv saved to " + str(path_out))
 
 
-def default_json_convert(obj):
-    if isinstance(obj, np.ndarray):
-        return obj.tolist()
-    elif isinstance(obj, pd.DataFrame):
-        return obj.to_numpy().tolist()
-    elif isinstance(obj, np.integer):
-        return int(obj)
-    elif isinstance(obj, np.floating):
-        return float(obj)
-    raise TypeError("Not serializable")
-
-
-def save_sidecar(sidecar: dict, PATH_OUT: str, folder_name: str = None):
-    save_general_dict(sidecar, PATH_OUT, "_SIDECAR.json", folder_name)
-
-
-def read_sidecar(PATH: str) -> dict:
-    with open(PATH + "_SIDECAR.json") as f:
-        return json.load(f)
+def save_sidecar(
+    sidecar: dict, path_out: _PathLike, folder_name: str | None = None
+) -> None:
+    path_out = _pathlike_to_str(path_out)
+    save_general_dict(sidecar, path_out, "_SIDECAR.json", folder_name)
 
 
 def save_general_dict(
-    dict_: dict, PATH_OUT: str, str_add: str, folder_name: str = None
-):
+    dict_: dict,
+    path_out: _PathLike,
+    str_add: str,
+    folder_name: str | None = None,
+) -> None:
     if folder_name is not None:
-        PATH_OUT = os.path.join(PATH_OUT, folder_name, folder_name + str_add)
+        path_out = os.path.join(path_out, folder_name, folder_name + str_add)
 
-    with open(PATH_OUT, "w") as f:
+    with open(path_out, "w") as f:
         json.dump(
             dict_,
             f,
@@ -316,11 +333,27 @@ def save_general_dict(
             indent=4,
             separators=(",", ": "),
         )
-    print(f"{str_add} saved to " + str(PATH_OUT))
+    print(f"{str_add} saved to " + str(path_out))
+
+
+def default_json_convert(obj) -> list | int | float:
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if isinstance(obj, pd.DataFrame):
+        return obj.to_numpy().tolist()
+    if isinstance(obj, np.integer):
+        return int(obj)
+    if isinstance(obj, np.floating):
+        return float(obj)
+    raise TypeError("Not serializable")
+
+
+def read_sidecar(PATH: str) -> dict:
+    with open(PATH + "_SIDECAR.json") as f:
+        return json.load(f)
 
 
 def read_settings(PATH: str) -> dict:
-
     with open(PATH if ".json" in PATH else PATH + "_SETTINGS.json") as f:
         return json.load(f)
 
@@ -335,14 +368,14 @@ def read_nm_channels(PATH: str) -> pd.DataFrame:
 
 def get_run_list_indir(PATH: str) -> list:
     f_files = []
-    for dirpath, subdirs, files in os.walk(PATH):
+    for dirpath, _, files in os.walk(PATH):
         for x in files:
             if "FEATURES" in x:
                 f_files.append(os.path.basename(dirpath))
     return f_files
 
 
-def loadmat(filename):
+def loadmat(filename) -> dict:
     """
     this function should be called instead of direct spio.loadmat
     as it cures the problem of not properly recovering python dictionaries
@@ -353,7 +386,7 @@ def loadmat(filename):
     return _check_keys(data)
 
 
-def _check_keys(dict):
+def _check_keys(dict) -> dict:
     """
     checks if entries in dictionary are mat-objects. If yes
     todict is called to change them to nested dictionaries
@@ -364,7 +397,7 @@ def _check_keys(dict):
     return dict
 
 
-def _todict(matobj):
+def _todict(matobj) -> dict:
     """
     A recursive function which constructs from matobjects nested dictionaries
     """
@@ -376,3 +409,9 @@ def _todict(matobj):
         else:
             dict[strg] = elem
     return dict
+
+
+def _pathlike_to_str(path: _PathLike) -> str:
+    if isinstance(path, str):
+        return path
+    return str(path)

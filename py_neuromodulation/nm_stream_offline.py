@@ -1,8 +1,8 @@
+"""Module for offline data streams."""
 import os
-import timeit
 
-import mne
-import mne_bids
+# import timeit
+
 import numpy as np
 import pandas as pd
 
@@ -12,45 +12,37 @@ _PathLike = str | os.PathLike
 
 
 class _OfflineStream(nm_stream_abc.PNStream):
-    def _run_offline(
-        self,
-        data: np.ndarray,
-        out_path_root: str = None,
-        folder_name: str = "sub",
-    ) -> None:
+    def _add_labels(
+        self, features: pd.DataFrame, data: np.ndarray
+    ) -> pd.DataFrame:
+        """Add resampled labels to features if there are target channels."""
+        if self.nm_channels["target"].sum() > 0:
+            features = nm_IO.add_labels(
+                features=features,
+                settings=self.settings,
+                nm_channels=self.nm_channels,
+                raw_arr_data=data,
+                fs=self.sfreq,
+            )
+        return features
 
-        generator = nm_generator.ieeg_raw_generator(
-            data, self.settings, self.sfreq
-        )
-        features = []
-        first_sample = True
+    def _add_timestamp(
+        self, feature_series: pd.Series, cnt_samples: int
+    ) -> pd.Series:
+        """Add time stamp in ms.
 
-        while True:
-            data_batch = next(generator, None)
-            if data_batch is None:
-                break
-            feature_series = self.run_analysis.process_data(data_batch)
+        Due to normalization run_analysis needs to keep track of the counted
+        samples. These are accessed here for time conversion.
+        """
+        feature_series["time"] = cnt_samples * 1000 / self.sfreq
 
-            # Measuring timing
-            # number_repeat = 100
-            # val = timeit.timeit(
-            #    lambda: self.run_analysis.process_data(data),
-            #    number=number_repeat
-            # ) / number_repeat
+        if self.verbose:
+            print(
+                str(np.round(feature_series["time"] / 1000, 2))
+                + " seconds of data processed"
+            )
 
-            feature_series = self._add_timestamp(feature_series, first_sample)
-            features.append(feature_series)
-
-            if self.model is not None:
-                prediction = self.model.predict(feature_series)
-
-            if first_sample:
-                first_sample = False
-
-        feature_df = pd.DataFrame(features)
-        feature_df = self._add_labels(features=feature_df, data=data)
-
-        self.save_after_stream(out_path_root, folder_name, feature_df)
+        return feature_series
 
     def _handle_data(self, data: np.ndarray | pd.DataFrame) -> np.ndarray:
         names_expected = self.nm_channels["name"].to_list()
@@ -76,50 +68,57 @@ class _OfflineStream(nm_stream_abc.PNStream):
             )
         return data.to_numpy()
 
-    def _add_timestamp(
-        self, feature_series: pd.Series, first_sample: bool
-    ) -> pd.Series:
-        """time stamp is added in ms
-        Due to normalization run_analysis needs to keep track of the counted samples
-        Those are accessed here for time conversion"""
+    def _run_offline(
+        self,
+        data: np.ndarray,
+        out_path_root: _PathLike | None = None,
+        folder_name: str = "sub",
+    ) -> None:
+        generator = nm_generator.raw_data_generator(
+            data=data,
+            settings=self.settings,
+            sfreq=self.sfreq,
+        )
+        features = []
+        first_sample = True
+        sample_add = int(self.sfreq / self.run_analysis.sfreq_features)
+        cnt_samples = int(self.sfreq)
 
-        if first_sample:
-            feature_series["time"] = self.run_analysis.offset
-        else:
-            # sampling frequency is taken from run_analysis, since resampling
-            # might change it
-            feature_series["time"] = (
-                self.run_analysis.cnt_samples * 1000 / self.run_analysis.sfreq
-            )
+        while True:
+            data_batch = next(generator, None)
+            if data_batch is None:
+                break
+            feature_series = self.run_analysis.process(data_batch)
 
-        if self.verbose:
-            print(
-                str(np.round(feature_series["time"] / 1000, 2))
-                + " seconds of data processed"
-            )
+            # Measuring timing
+            # number_repeat = 100
+            # val = timeit.timeit(
+            #    lambda: self.run_analysis.process_data(data),
+            #    number=number_repeat
+            # ) / number_repeat
 
-        return feature_series
+            feature_series = self._add_timestamp(feature_series, first_sample)
+            features.append(feature_series)
 
-    def _add_labels(
-        self, features: pd.DataFrame, data: np.ndarray
-    ) -> pd.DataFrame:
-        """Add resampled labels to features if there are target channels."""
-        if self.nm_channels.target.sum() > 0:
-            features = nm_IO.add_labels(
-                df_=features,
-                settings=self.settings,
-                nm_channels=self.nm_channels,
-                raw_arr_data=data,
-                fs=self.sfreq,
-            )
-        return features
+            if self.model is not None:
+                prediction = self.model.predict(feature_series)
+
+            if first_sample:
+                first_sample = False
+
+            cnt_samples += sample_add
+
+        feature_df = pd.DataFrame(features)
+        feature_df = self._add_labels(features=feature_df, data=data)
+
+        self.save_after_stream(out_path_root, folder_name, feature_df)
 
 
 class Stream(_OfflineStream):
     def run(
         self,
         data: np.ndarray | pd.DataFrame,
-        out_path_root: _PathLike = None,
+        out_path_root: _PathLike | None = None,
         folder_name: str = "sub",
     ) -> None:
         """Does not need to run in parallel."""

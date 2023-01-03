@@ -58,7 +58,7 @@ class EpochStream(py_nm.nm_stream.PNStream):
             )  # None will be returned if generator ran through
             if data is None:
                 break
-            gen = nm_generator.ieeg_raw_generator(
+            gen = nm_generator.raw_data_generator(
                 data, self.settings, self.sfreq
             )
 

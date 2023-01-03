@@ -23,7 +23,11 @@ class MNEConnectivity(nm_features_abc.Feature):
 
     @staticmethod
     def get_epoched_data(raw: mne.io.RawArray, epoch_length: float=2) -> np.array:
-        events = mne.make_fixed_length_events(raw, duration=epoch_length, overlap=0)
+        events = mne.make_fixed_length_events(
+            raw, 
+            duration=epoch_length, 
+            overlap=0
+            )
         event_id = {"rest": 1}
 
         epochs = mne.Epochs(

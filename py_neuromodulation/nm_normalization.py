@@ -1,7 +1,10 @@
-from typing import NoReturn, Optional, Union
-from sklearn import preprocessing
-import numpy as np
+"""Module for real-time data normalization."""
 from enum import Enum
+
+import sklearn.preprocessing
+import numpy as np
+
+from .nm_processing_abc import Preprocessor
 
 
 class NORM_METHODS(Enum):
@@ -15,131 +18,113 @@ class NORM_METHODS(Enum):
     MINMAX = "minmax"
 
 
-def normalize_raw(
-    current: np.ndarray,
-    previous: Optional[np.ndarray],
-    normalize_samples: int,
-    sample_add: int,
-    method: str = NORM_METHODS.MEAN.value,
-    clip: bool = False,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Normalize data with respect to the past number of `normalize_samples`.
-    Parameters
-    ----------
-    current : numpy array
-        current raw data to normalize.
-    previous : numpy array or None
-        previous raw data, not normalized. Used for normalization of current data.
-    normalize_samples : int
-        number of past samples considered for normalization
-    sample_add : int
-        number of samples to add to previous
-    method : str | default is 'mean'
-        data is normalized via subtraction of the 'mean' or 'median' and
-        subsequent division by the 'mean' or 'median'. For z-scoring enter
-        'zscore'.
-    clip : int | float, optional
-        value at which to clip after normalization
-    Returns
-    -------
-    current_norm : numpy array
-        normalized array
-    previous : numpy array
-        previous features, not normalized.
-    Raises
-    ------
-    ValueError
-        returned  if norm_type is not 'mean', 'median' or 'zscore'
-    """
-    current = current.T
-    if previous is None:
-        return current.T, current
-    else:
-        previous = np.vstack((previous, current[-sample_add:]))
-        previous = _transform_previous(
-            previous=previous, normalize_samples=normalize_samples
+class RawNormalizer(Preprocessor):
+    def __init__(
+        self,
+        sfreq: int | float,
+        sampling_rate_features_hz: int,
+        normalization_method: str = "zscore",
+        normalization_time_s: int | float = 30,
+        clip: bool | int | float = False,
+    ) -> None:
+        """Normalize raw data.
+
+        normalize_samples : int
+            number of past samples considered for normalization
+        sample_add : int
+            number of samples to add to previous
+        method : str | default is 'mean'
+            data is normalized via subtraction of the 'mean' or 'median' and
+            subsequent division by the 'mean' or 'median'. For z-scoring enter
+            'zscore'.
+        clip : int | float, optional
+            value at which to clip after normalization
+        """
+        self.method = normalization_method
+        self.clip = clip
+        self.num_samples_normalize = int(normalization_time_s * sfreq)
+        self.add_samples = int(sfreq / sampling_rate_features_hz)
+        self.previous = None
+
+    def process(self, data: np.ndarray) -> np.ndarray:
+        data = data.T
+        if self.previous is None:
+            self.previous = data
+            return data.T
+
+        self.previous = np.vstack((self.previous, data[-self.add_samples :]))
+
+        data, self.previous = _normalize_and_clip(
+            current=data,
+            previous=self.previous,
+            method=self.method,
+            clip=self.clip,
+            description="raw",
         )
+        if self.previous.shape[0] >= self.num_samples_normalize:
+            self.previous = self.previous[1:]
 
-    current, previous = _normalize_and_clip(
-        current=current,
-        previous=previous,
-        method=method,
-        clip=clip,
-        description="feature",
-    )
+        print(f"{self.previous.shape[0]}")
 
-    return current.T, previous
+        return data.T
 
 
-def normalize_features(
-    current: np.ndarray,
-    previous: Optional[np.ndarray],
-    normalize_samples: int,
-    method: str = NORM_METHODS.MEAN.value,
-    clip: bool = False,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Normalize features with respect to the past number of normalize_samples.
-    Parameters
-    ----------
-    current : numpy array
-        current features to normalize.
-    previous : numpy array or None
-        previous features, not normalized. Used for normalization of current features.
-    normalize_samples : int
-        number of past samples considered for normalization
-    method : str | default is 'mean'
-        data is normalized via subtraction of the 'mean' or 'median' and
-        subsequent division by the 'mean' or 'median'. For z-scoring enter
-        'zscore'.
-    clip : int | float, optional
-        value at which to clip on the lower and upper end after normalization.
-        Useful for artifact rejection and handling of outliers.
-    Returns
-    -------
-    current : numpy array
-        normalized current features
-    previous : numpy array
-        previous features, not normalized.
-    Raises
-    ------
-    ValueError
-        returned  if method is not 'mean', 'median' or 'zscore'
-    """
-    if previous is None:
-        return current, current
+class FeatureNormalizer(Preprocessor):
+    def __init__(
+        self,
+        sampling_rate_features_hz: int,
+        normalization_method: str = "zscore",
+        normalization_time_s: int | float = 30,
+        clip: bool | int | float = False,
+    ) -> None:
+        """Normalize raw data.
 
-    previous = np.vstack((previous, current))
-    previous = _transform_previous(
-        previous=previous, normalize_samples=normalize_samples
-    )
+        normalize_samples : int
+            number of past samples considered for normalization
+        sample_add : int
+            number of samples to add to previous
+        method : str | default is 'mean'
+            data is normalized via subtraction of the 'mean' or 'median' and
+            subsequent division by the 'mean' or 'median'. For z-scoring enter
+            'zscore'.
+        clip : int | float, optional
+            value at which to clip after normalization
+        """
+        self.method = normalization_method
+        self.clip = clip
+        self.num_samples_normalize = int(
+            normalization_time_s * sampling_rate_features_hz
+        )
+        self.previous = None
 
-    current, previous = _normalize_and_clip(
-        current=current,
-        previous=previous,
-        method=method,
-        clip=clip,
-        description="feature",
-    )
+    def process(self, data: np.ndarray) -> np.ndarray:
+        if self.previous is None:
+            self.previous = data
+            return data
 
-    return current, previous
+        self.previous = np.vstack((self.previous, data))
 
+        data, self.previous = _normalize_and_clip(
+            current=data,
+            previous=self.previous,
+            method=self.method,
+            clip=self.clip,
+            description="feature",
+        )
+        if self.previous.shape[0] >= self.num_samples_normalize:
+            self.previous = self.previous[1:]
 
-def _transform_previous(
-    previous: np.ndarray, normalize_samples: int
-) -> np.ndarray:
-    """Crop previous data to reduce memory usage given normalization sample count."""
-    sample_count = len(previous)
-    idx = np.nanmax([0, sample_count - normalize_samples])
-    return previous[idx:]
+        return data
+
 
 
 def _normalize_and_clip(
     current: np.ndarray,
     previous: np.ndarray,
     method: str,
-    clip: Union[int, float, bool],
+    clip: int | float | bool,
     description: str,
-) -> np.ndarray:
+) -> tuple[np.ndarray, np.ndarray]:
     """Normalize data."""
     if method == NORM_METHODS.MEAN.value:
         mean = np.nanmean(previous, axis=0)
@@ -156,25 +141,25 @@ def _normalize_and_clip(
         )
     elif method == NORM_METHODS.QUANTILE.value:
         current = (
-            preprocessing.QuantileTransformer(n_quantiles=300)
+            sklearn.preprocessing.QuantileTransformer(n_quantiles=300)
             .fit(np.nan_to_num(previous))
             .transform(np.expand_dims(current, axis=0))[0, :]
         )
     elif method == NORM_METHODS.ROBUST.value:
         current = (
-            preprocessing.RobustScaler()
+            sklearn.preprocessing.RobustScaler()
             .fit(np.nan_to_num(previous))
             .transform(np.expand_dims(current, axis=0))[0, :]
         )
     elif method == NORM_METHODS.MINMAX.value:
         current = (
-            preprocessing.MinMaxScaler()
+            sklearn.preprocessing.MinMaxScaler()
             .fit(np.nan_to_num(previous))
             .transform(np.expand_dims(current, axis=0))[0, :]
         )
     elif method == NORM_METHODS.POWER.value:
         current = (
-            preprocessing.PowerTransformer()
+            sklearn.preprocessing.PowerTransformer()
             .fit(np.nan_to_num(previous))
             .transform(np.expand_dims(current, axis=0))[0, :]
         )
@@ -189,7 +174,7 @@ def _normalize_and_clip(
     return current, previous
 
 
-def _clip(data: np.ndarray, clip: Union[bool, int, float]) -> np.ndarray:
+def _clip(data: np.ndarray, clip: bool | int | float) -> np.ndarray:
     """Clip data."""
     if clip is True:
         clip = 3.0  # default value

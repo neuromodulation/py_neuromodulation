@@ -10,12 +10,12 @@ from py_neuromodulation import nm_IO, nm_stats
 
 
 def plot_df_subjects(
-        df,
-        x_col="sub",
-        y_col="performance_test",
-        hue=None,
-        title="channel specific performances",
-        PATH_SAVE: str = None,
+    df,
+    x_col="sub",
+    y_col="performance_test",
+    hue=None,
+    title="channel specific performances",
+    PATH_SAVE: str = None,
 ):
     alpha_box = 0.4
     plt.figure(figsize=(5, 3), dpi=300)
@@ -72,14 +72,14 @@ def plot_df_subjects(
 
 
 def plot_epoch(
-        X_epoch: np.array,
-        y_epoch: np.array,
-        feature_names: list,
-        z_score: bool = None,
-        epoch_len: int = 4,
-        sfreq: int = 10,
-        str_title: str = None,
-        str_label: str = None,
+    X_epoch: np.array,
+    y_epoch: np.array,
+    feature_names: list,
+    z_score: bool = None,
+    epoch_len: int = 4,
+    sfreq: int = 10,
+    str_title: str = None,
+    str_label: str = None,
 ):
     if z_score is None:
         X_epoch = stats.zscore(
@@ -122,7 +122,7 @@ def plot_epoch(
 
 
 def reg_plot(
-        x_col: str, y_col: str, data: pd.DataFrame, out_path_save: str = None
+    x_col: str, y_col: str, data: pd.DataFrame, out_path_save: str = None
 ):
     plt.figure(figsize=(4, 4), dpi=300)
     rho, p = nm_stats.permutationTestSpearmansRho(
@@ -143,12 +143,12 @@ def reg_plot(
 
 
 def plot_bar_performance_per_channel(
-        ch_names,
-        performances: dict,
-        PATH_OUT: str,
-        sub: str = None,
-        save_str: str = "ch_comp_bar_plt.png",
-        performance_metric: str = "Balanced Accuracy",
+    ch_names,
+    performances: dict,
+    PATH_OUT: str,
+    sub: str = None,
+    save_str: str = "ch_comp_bar_plt.png",
+    performance_metric: str = "Balanced Accuracy",
 ):
     """
     performances dict is output of ml_decode
@@ -171,24 +171,24 @@ def plot_bar_performance_per_channel(
 
 
 def plot_corr_matrix(
-        feature: pd.DataFrame,
-        feature_file,
-        ch_name: str = None,
-        feature_names: list[str] = None,
-        show_plot=False,
-        OUT_PATH: str = None,
-        feature_name_plt="Features_corr_matr",
-        save_plot: bool = True,
-        save_plot_name: str = None,
-        figsize: tuple[int] = (7, 7),
-        title: str = None,
-        cbar_vmin: float = 0.,
-        cbar_vmax: float = 1.
+    feature: pd.DataFrame,
+    feature_file,
+    ch_name: str = None,
+    feature_names: list[str] = None,
+    show_plot=False,
+    OUT_PATH: str = None,
+    feature_name_plt="Features_corr_matr",
+    save_plot: bool = True,
+    save_plot_name: str = None,
+    figsize: tuple[int] = (7, 7),
+    title: str = None,
+    cbar_vmin: float = 0.0,
+    cbar_vmax: float = 1.0,
 ):
     # cut out channel name for each column
     if ch_name is not None:
         feature_col_name = [
-            i[len(ch_name) + 1:] for i in feature_names if ch_name in i
+            i[len(ch_name) + 1 :] for i in feature_names if ch_name in i
         ]
     else:
         feature_col_name = feature.columns
@@ -198,7 +198,13 @@ def plot_corr_matrix(
         corr = feature[feature_names].corr()
     else:
         corr = feature.corr()
-    sb.heatmap(corr, xticklabels=feature_col_name, yticklabels=feature_col_name, vmin = cbar_vmin, vmax = cbar_vmax)
+    sb.heatmap(
+        corr,
+        xticklabels=feature_col_name,
+        yticklabels=feature_col_name,
+        vmin=cbar_vmin,
+        vmax=cbar_vmax,
+    )
     if title is None:
         plt.title("Features channel: " + str(ch_name))
     else:
@@ -228,11 +234,11 @@ def plot_feature_series_time(features) -> None:
 
 
 def get_plt_path(
-        OUT_PATH: str = None,
-        feature_file: str = None,
-        ch_name: str = None,
-        str_plt_type: str = None,
-        feature_name: str = None,
+    OUT_PATH: str | None = None,
+    feature_file: str | None = None,
+    ch_name: str | None = None,
+    str_plt_type: str | None = None,
+    feature_name: str | None = None,
 ) -> None:
     """[summary]
 
@@ -252,7 +258,9 @@ def get_plt_path(
     if None not in (ch_name, OUT_PATH, feature_file):
         if feature_name is None:
             plt_path = os.path.join(
-                OUT_PATH, feature_file, str_plt_type + "_ch_" + ch_name + ".png"
+                OUT_PATH,
+                feature_file,
+                str_plt_type + "_ch_" + ch_name + ".png",
             )
         else:
             plt_path = os.path.join(
@@ -273,27 +281,29 @@ def get_plt_path(
 
 
 def plot_epochs_avg(
-        X_epoch: np.array,
-        y_epoch: np.array,
-        epoch_len: int,
-        sfreq: int,
-        feature_names: list[str] = None,
-        feature_str_add: str = None,
-        cut_ch_name_cols: bool = True,
-        ch_name: str = None,
-        label_name: str = None,
-        normalize_data: bool = True,
-        show_plot: bool = True,
-        save: bool = False,
-        OUT_PATH: str = None,
-        feature_file: str = None,
-        str_title: str = "Movement aligned features",
-):
+    X_epoch: np.ndarray,
+    y_epoch: np.ndarray,
+    epoch_len: int,
+    sfreq: int,
+    feature_names: list[str] = None,
+    feature_str_add: str = None,
+    cut_ch_name_cols: bool = True,
+    ch_name: str = None,
+    label_name: str = None,
+    normalize_data: bool = True,
+    show_plot: bool = True,
+    save: bool = False,
+    OUT_PATH: str = None,
+    feature_file: str = None,
+    str_title: str = "Movement aligned features",
+) -> None:
     # cut channel name of for axis + "_" for more dense plot
     if feature_names is None:
         if cut_ch_name_cols and None not in (ch_name, feature_names):
             feature_names = [
-                i[len(ch_name) + 1:] for i in list(feature_names) if ch_name in i
+                i[len(ch_name) + 1 :]
+                for i in list(feature_names)
+                if ch_name in i
             ]
 
     if normalize_data:
@@ -311,8 +321,8 @@ def plot_epochs_avg(
     plt.imshow(X_epoch_mean, aspect="auto")
     plt.yticks(np.arange(0, len(feature_names), 1), feature_names)
     plt.xticks(
-        np.arange(0, X_epoch.shape[1], int(X_epoch.shape[1]/10)),
-        np.round(np.arange(-epoch_len / 2, epoch_len / 2, epoch_len/10), 2),
+        np.arange(0, X_epoch.shape[1], int(X_epoch.shape[1] / 10)),
+        np.round(np.arange(-epoch_len / 2, epoch_len / 2, epoch_len / 10), 2),
         rotation=90,
     )
     plt.xlabel("Time [s]")
@@ -335,8 +345,8 @@ def plot_epochs_avg(
     plt.ylabel("target")
     plt.title(label_name)
     plt.xticks(
-        np.arange(0, X_epoch.shape[1], int(X_epoch.shape[1]/10)),
-        np.round(np.arange(-epoch_len / 2, epoch_len / 2, epoch_len/10), 2),
+        np.arange(0, X_epoch.shape[1], int(X_epoch.shape[1] / 10)),
+        np.round(np.arange(-epoch_len / 2, epoch_len / 2, epoch_len / 10), 2),
         rotation=90,
     )
     plt.xlabel("Time [s]")
@@ -357,10 +367,10 @@ def plot_epochs_avg(
 
 
 def plot_grid_elec_3d(
-        cortex_grid: Optional[np.array] = None,
-        ecog_strip: Optional[np.array] = None,
-        grid_color: Optional[np.array] = None,
-        strip_color: Optional[np.array] = None,
+    cortex_grid: np.ndarray | None = None,
+    ecog_strip: np.ndarray | None = None,
+    grid_color: np.ndarray | None = None,
+    strip_color: np.ndarray | None = None,
 ):
     ax = plt.axes(projection="3d")
 
@@ -380,7 +390,9 @@ def plot_grid_elec_3d(
 
     if ecog_strip is not None:
         strip_color = (
-            np.ones(ecog_strip.shape[0]) if strip_color is None else strip_color
+            np.ones(ecog_strip.shape[0])
+            if strip_color is None
+            else strip_color
         )
         _ = ax.scatter(
             ecog_strip[:, 0],
@@ -396,12 +408,12 @@ def plot_grid_elec_3d(
 
 class NM_Plot:
     def __init__(
-            self,
-            ecog_strip: Optional[np.array] = None,
-            grid_cortex: Optional[np.array] = None,
-            grid_subcortex: Optional[np.array] = None,
-            sess_right: Optional[bool] = False,
-            proj_matrix_cortex: Optional[np.array] = None,
+        self,
+        ecog_strip: np.ndarray | None = None,
+        grid_cortex: np.ndarray | None = None,
+        grid_subcortex: np.ndarray | None = None,
+        sess_right: Optional[bool] = False,
+        proj_matrix_cortex: np.ndarray | None = None,
     ) -> None:
 
         self.grid_cortex = grid_cortex
@@ -425,27 +437,29 @@ class NM_Plot:
             self.z_stn,
         ) = nm_IO.read_plot_modules()
 
-    def plot_grid_elec_3d(self):
+    def plot_grid_elec_3d(self) -> None:
 
-        plot_grid_elec_3d(np.array(self.grid_cortex), np.array(self.ecog_strip))
+        plot_grid_elec_3d(
+            np.array(self.grid_cortex), np.array(self.ecog_strip)
+        )
 
     def plot_cortex(
-            self,
-            grid_cortex: Optional[np.ndarray] = None,
-            grid_color: Optional[np.ndarray] = None,
-            ecog_strip: Optional[np.ndarray] = None,
-            strip_color: Optional[np.ndarray] = None,
-            sess_right: Optional[bool] = None,
-            save: bool = False,
-            OUT_PATH: str = None,
-            feature_file: str = None,
-            feature_str_add: str = None,
-            show_plot: bool = True,
-            title: str = "Cortical grid",
-            set_clim: bool = True,
-            lower_clim: float = 0.5,
-            upper_clim: float = 0.7,
-            cbar_label: str = "Balanced Accuracy",
+        self,
+        grid_cortex: Optional[np.ndarray] = None,
+        grid_color: Optional[np.ndarray] = None,
+        ecog_strip: Optional[np.ndarray] = None,
+        strip_color: Optional[np.ndarray] = None,
+        sess_right: Optional[bool] = None,
+        save: bool = False,
+        OUT_PATH: str = None,
+        feature_file: str = None,
+        feature_str_add: str = None,
+        show_plot: bool = True,
+        title: str = "Cortical grid",
+        set_clim: bool = True,
+        lower_clim: float = 0.5,
+        upper_clim: float = 0.7,
+        cbar_label: str = "Balanced Accuracy",
     ):
         """Plot MNI brain including selected MNI cortical projection grid + used strip ECoG electrodes
         Colorcoded by grid_color

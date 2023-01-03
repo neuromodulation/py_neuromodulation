@@ -1,35 +1,29 @@
 {
     "sampling_rate_features_hz": 10,
     "segment_length_features_ms": 1000,
-    "preprocessing": {
-        "raw_resampling": true,
-        "raw_normalization": false,
-        "re_referencing": true,
-        "notch_filter": true,
-        "preprocessing_order": [
-            "raw_resampling",
-            "notch_filter",
-            "re_referencing"
-        ]
-    },
+    "preprocessing": [
+        "raw_resampling",
+        "notch_filter",
+        "re_referencing"
+    ],
     "features": {
-        "raw_hjorth": true,
+        "raw_hjorth": false,
         "return_raw": false,
-        "bandpass_filter": true,
+        "bandpass_filter": false,
         "stft": false,
         "fft": true,
-        "sharpwave_analysis": true,
+        "sharpwave_analysis": false,
         "coherence": false,
-        "fooof": true,
-        "nolds": true,
-        "bursts": true,
+        "fooof": false,
+        "nolds": false,
+        "bursts": false,
         "linelength": false,
         "mne_connectiviy": false
     },
     "postprocessing": {
-        "feature_normalization": false,
-        "project_cortex": true,
-        "project_subcortex": true
+        "feature_normalization": true,
+        "project_cortex": false,
+        "project_subcortex": false
     },
     "raw_resampling_settings": {
         "resample_freq_hz": 1000
@@ -129,22 +123,22 @@
     "fft_settings": {
         "windowlength_ms": 1000,
         "log_transform": true,
-        "kalman_filter": true
+        "kalman_filter": false
     },
     "sharpwave_analysis_settings": {
         "sharpwave_features": {
             "peak_left": false,
             "peak_right": false,
             "trough": false,
-            "width": true,
+            "width": false,
             "prominence": true,
             "interval": true,
-            "decay_time": true,
-            "rise_time": true,
+            "decay_time": false,
+            "rise_time": false,
             "sharpness": true,
-            "rise_steepness": true,
-            "decay_steepness": true,
-            "slope_ratio": true
+            "rise_steepness": false,
+            "decay_steepness": false,
+            "slope_ratio": false
         },
         "filter_ranges_hz": [
             [
@@ -168,33 +162,15 @@
         },
         "estimator": {
             "mean": [
-                "width",
-                "decay_time",
-                "rise_time",
-                "rise_steepness",
-                "decay_steepness",
-                "sharpness",
-                "prominence",
-                "interval",
-                "slope_ratio"
+                "interval"
             ],
             "median": null,
             "max": [
-                "sharpness",
-                "prominence"
+                "prominence",
+                "sharpness"
             ],
             "min": null,
-            "var": [
-                "width",
-                "decay_time",
-                "rise_time",
-                "rise_steepness",
-                "decay_steepness",
-                "sharpness",
-                "prominence",
-                "interval",
-                "slope_ratio"
-            ]
+            "var": null
         },
         "apply_estimator_between_peaks_and_troughs": true
     },
@@ -214,6 +190,11 @@
         "frequency_bands": [
             "high beta"
         ],
+        "features": {
+            "mean_fband": true,
+            "max_fband": true,
+            "max_allfbands": true
+        },
         "method": {
             "coh": true,
             "icoh": true
@@ -228,9 +209,9 @@
             "offset": true
         },
         "periodic": {
-            "center_frequency": false,
-            "band_width": false,
-            "height_over_ap": false
+            "center_frequency": true,
+            "band_width": true,
+            "height_over_ap": true
         },
         "windowlength_ms": 800,
         "peak_width_limits": [
@@ -258,7 +239,10 @@
                 "theta",
                 "alpha",
                 "low beta",
-                "high gamma"
+                "high beta",
+                "low gamma",
+                "high gamma",
+                "HFA"
             ]
         }
     },

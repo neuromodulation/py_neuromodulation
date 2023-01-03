@@ -1,5 +1,6 @@
 """Test the nm_resample module."""
 import numpy as np
+import pandas as pd
 from py_neuromodulation import nm_resample
 
 
@@ -13,10 +14,11 @@ class TestResampleRaw:
         data = np.sin(2 * np.pi * times * oscill_freqs)
 
         sfreq_new = 1000.0
-        resample = nm_resample.Resample(
-            sfreq_old=sfreq_old, sfreq_new=sfreq_new
+        resample = nm_resample.Resampler(
+            resample_freq_hz=sfreq_new,
+            sfreq=sfreq_old,
         )
-        data_resampled = resample.resample_raw(data)
+        data_resampled = resample.process(data)
         assert data_resampled.shape[-1] == int(duration * sfreq_new)
         # This test only works when ratio of old and new sfreq is an integer
         # It will also only work up to a certain decimal precision.
@@ -36,10 +38,11 @@ class TestResampleRaw:
         data = np.sin(2 * np.pi * times * oscill_freqs)
 
         sfreq_new = 4000.0
-        resample = nm_resample.Resample(
-            sfreq_old=sfreq_old, sfreq_new=sfreq_new
+        resample = nm_resample.Resampler(
+            resample_freq_hz=sfreq_new,
+            sfreq=sfreq_old,
         )
-        data_resampled = resample.resample_raw(data)
+        data_resampled = resample.process(data)
         assert data_resampled.shape[-1] == int(duration * sfreq_new)
 
     def test_no_resample(self) -> None:
@@ -51,8 +54,9 @@ class TestResampleRaw:
         data = np.sin(2 * np.pi * times * oscill_freqs)
 
         sfreq_new = 1000.0
-        resample = nm_resample.Resample(
-            sfreq_old=sfreq_old, sfreq_new=sfreq_new
+        resample = nm_resample.Resampler(
+            resample_freq_hz=sfreq_new,
+            sfreq=sfreq_old,
         )
-        data_resampled = resample.resample_raw(data)
+        data_resampled = resample.process(data)
         np.testing.assert_array_almost_equal(data, data_resampled)

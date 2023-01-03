@@ -519,7 +519,7 @@ class Decoder:
                 classes_weights = class_weight.compute_sample_weight(
                     class_weight="balanced", y=y_train
                 )
-
+                model.set_params(eval_metric="logloss")
                 model.fit(
                     X_train,
                     y_train,
@@ -527,7 +527,6 @@ class Decoder:
                     early_stopping_rounds=7,
                     sample_weight=classes_weights,
                     verbose=self.VERBOSE,
-                    eval_metric="logloss",
                 )
             elif type(model) is xgboost.sklearn.XGBRegressor:
                 # might be necessary to adapt for other classifiers
@@ -545,13 +544,13 @@ class Decoder:
 
                     return "r2", -r2
 
+                model.set_params(eval_metric=evalerror)
                 model.fit(
                     X_train,
                     y_train,
                     eval_set=[(X_val, y_val)],
                     early_stopping_rounds=10,
                     verbose=self.VERBOSE,
-                    eval_metric=evalerror,
                 )
             else:
                 model.fit(X_train, y_train, eval_set=[(X_val, y_val)])
@@ -564,9 +563,8 @@ class Decoder:
                 X_train, y_train = self.rus.fit_resample(X_train, y_train)
 
             if type(model) is xgboost.sklearn.XGBClassifier:
-                model.fit(
-                    X_train, y_train, eval_metric="logloss"
-                )  # to avoid warning
+                model.set_params(eval_metric="logloss")
+                model.fit(X_train, y_train)
             else:
                 model.fit(X_train, y_train)
 
@@ -709,7 +707,8 @@ class Decoder:
                 ]
                 if self.columns_names_single_ch is None:
                     self.columns_names_single_ch = [
-                        f[len(self.ch_name_tested) + 1 :] for f in columns_names
+                        f[len(self.ch_name_tested) + 1 :]
+                        for f in columns_names
                     ]
             else:
                 # analyze all_ch_combined
@@ -886,7 +885,9 @@ class Decoder:
         # set bay. opt. obtained best params to model
         params_bo_dict = {}
         for i in range(len(params_bo)):
-            setattr(model_train, self.bay_opt_param_space[i].name, params_bo[i])
+            setattr(
+                model_train, self.bay_opt_param_space[i].name, params_bo[i]
+            )
             params_bo_dict[self.bay_opt_param_space[i].name] = params_bo[i]
 
         self.best_bay_opt_params.append(params_bo_dict)

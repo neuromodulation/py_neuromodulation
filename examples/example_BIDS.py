@@ -16,12 +16,13 @@ from py_neuromodulation import (
     nm_define_nmchannels,
     nm_IO,
     nm_plots,
+    nm_settings,
 )
 from sklearn import metrics, model_selection
 from skopt import space as skopt_space
 
 
-def run_example_BIDS():
+def run_example_BIDS() -> None:
     """run the example BIDS path in py_neuromodulation/examples/data"""
     sub = "testsub"
     ses = "EphysMedOff"
@@ -63,21 +64,14 @@ def run_example_BIDS():
         target_keywords=("SQUARED_ROTATION",),
     )
 
-    stream = nm.Stream(
-        settings=None,
-        nm_channels=nm_channels,
-        path_grids=None,
-        verbose=False,
-    )
+    settings = nm_settings.get_default_settings()
+    settings = nm_settings.set_settings_fast_compute(settings)
 
-    stream.set_settings_fast_compute()
-    # We first take care of the preprocessing steps - and here we want to perform all of them in the order given by stream.settings['preprocessing']['preprocessing_order']
+    # We first take care of the preprocessing steps - and here we want to
+    # perform all of them in the order given
+    # by settings['preprocessing']
 
-    stream.settings["preprocessing"]["raw_resampling"] = True
-    stream.settings["preprocessing"]["raw_normalization"] = True
-    stream.settings["preprocessing"]["re_referencing"] = True
-    stream.settings["preprocessing"]["notch_filter"] = True
-    stream.settings["preprocessing"]["preprocessing_order"] = [
+    settings["preprocessing"] = [
         "raw_resampling",
         "notch_filter",
         "re_referencing",
@@ -86,44 +80,44 @@ def run_example_BIDS():
 
     # Now we focus on the features that we want to estimate:
 
-    stream.settings["features"]["raw_hjorth"] = True
-    stream.settings["features"]["bandpass_filter"] = True
-    stream.settings["features"]["fft"] = True
-    stream.settings["features"]["sharpwave_analysis"] = True
-    stream.settings["features"]["fooof"] = False
-    stream.settings["features"]["nolds"] = False
+    settings["features"]["raw_hjorth"] = True
+    settings["features"]["bandpass_filter"] = True
+    settings["features"]["fft"] = True
+    settings["features"]["sharpwave_analysis"] = True
+    settings["features"]["fooof"] = False
+    settings["features"]["nolds"] = False
 
     # Then we set the postprocessing steps
-    stream.settings["postprocessing"]["feature_normalization"] = False
-    stream.settings["postprocessing"]["project_cortex"] = True
-    stream.settings["postprocessing"]["project_subcortex"] = True
+    settings["postprocessing"]["feature_normalization"] = False
+    settings["postprocessing"]["project_cortex"] = True
+    settings["postprocessing"]["project_subcortex"] = True
     # # One can also change the settings related to those steps, for example:
-    stream.settings["sharpwave_analysis_settings"]["sharpwave_features"][
+    settings["sharpwave_analysis_settings"]["sharpwave_features"][
         "peak_left"
     ] = True
-    stream.settings["sharpwave_analysis_settings"]["sharpwave_features"][
+    settings["sharpwave_analysis_settings"]["sharpwave_features"][
         "peak_right"
     ] = True
-    stream.settings["sharpwave_analysis_settings"]["sharpwave_features"][
+    settings["sharpwave_analysis_settings"]["sharpwave_features"][
         "trough"
     ] = True
-    stream.settings["sharpwave_analysis_settings"]["sharpwave_features"][
+    settings["sharpwave_analysis_settings"]["sharpwave_features"][
         "width"
     ] = True
-    stream.settings["sharpwave_analysis_settings"]["sharpwave_features"][
+    settings["sharpwave_analysis_settings"]["sharpwave_features"][
         "decay_time"
     ] = True
-    stream.settings["sharpwave_analysis_settings"]["sharpwave_features"][
+    settings["sharpwave_analysis_settings"]["sharpwave_features"][
         "rise_time"
     ] = True
-    stream.settings["sharpwave_analysis_settings"]["sharpwave_features"][
+    settings["sharpwave_analysis_settings"]["sharpwave_features"][
         "rise_steepness"
     ] = True
-    stream.settings["sharpwave_analysis_settings"]["sharpwave_features"][
+    settings["sharpwave_analysis_settings"]["sharpwave_features"][
         "decay_steepness"
     ] = True
 
-    stream.settings["sharpwave_analysis_settings"]["estimator"]["mean"] = [
+    settings["sharpwave_analysis_settings"]["estimator"]["mean"] = [
         "peak_left",
         "peak_right",
         "trough",
@@ -137,16 +131,20 @@ def run_example_BIDS():
         "interval",
     ]
 
-    stream.settings["sharpwave_analysis_settings"]["estimator"]["max"] = [
+    settings["sharpwave_analysis_settings"]["estimator"]["max"] = [
         "sharpness",
         "prominence",
     ]
 
-    stream.init_stream(
+    stream = nm.Stream(
         sfreq=sfreq,
+        nm_channels=nm_channels,
+        settings=settings,
+        path_grids=None,
         line_noise=line_noise,
         coord_list=coord_list,
         coord_names=coord_names,
+        verbose=False,
     )
 
     stream.run(
@@ -223,5 +221,86 @@ def run_example_BIDS():
     )
 
 
+def run_features_BIDS() -> None:
+    """run the example BIDS path in py_neuromodulation/examples/data"""
+    sub = "testsub"
+    ses = "EphysMedOff"
+    task = "buttonpress"
+    run = 0
+    datatype = "ieeg"
+
+    RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}"
+
+    # changes in path needed so we can run the script both from the root and from the examples directory
+    PATH_RUN = os.path.join(
+        (os.path.join(SCRIPT_DIR, "data")),
+        f"sub-{sub}",
+        f"ses-{ses}",
+        datatype,
+        RUN_NAME,
+    )
+    PATH_BIDS = os.path.join(SCRIPT_DIR, "data")
+    PATH_OUT = os.path.join(SCRIPT_DIR, "data", "derivatives")
+
+    (
+        raw,
+        data,
+        sfreq,
+        line_noise,
+        coord_list,
+        coord_names,
+    ) = nm_IO.read_BIDS_data(
+        PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype
+    )
+
+    nm_channels = nm_define_nmchannels.set_channels(
+        ch_names=raw.ch_names,
+        ch_types=raw.get_channel_types(),
+        reference="default",
+        bads=raw.info["bads"],
+        new_names="default",
+        used_types=("ecog", "dbs", "seeg"),
+        target_keywords=("SQUARED_ROTATION",),
+    )
+
+    settings = nm_settings.get_default_settings()
+    settings = nm_settings.set_settings_fast_compute(settings)
+
+    settings["fft_settings"]["kalman_filter"] = False
+
+    stream = nm.Stream(
+        sfreq=sfreq,
+        nm_channels=nm_channels,
+        settings=settings,
+        path_grids=None,
+        line_noise=line_noise,
+        coord_list=coord_list,
+        coord_names=coord_names,
+        verbose=False,
+    )
+
+    stream.run(
+        data=data,
+        out_path_root=PATH_OUT,
+        folder_name=RUN_NAME,
+    )
+
+
 if __name__ == "__main__":
-    run_example_BIDS()
+    import cProfile
+    import pstats
+    import io
+
+    pr = cProfile.Profile()
+    pr.enable()
+
+    my_result = run_features_BIDS()
+
+    pr.disable()
+    s = io.StringIO()
+    ps = pstats.Stats(pr, stream=s).sort_stats("tottime")
+    ps.print_stats()
+
+    with open("cprofile.txt", "w+") as f:
+        f.write(s.getvalue())
+    # run_example_BIDS()

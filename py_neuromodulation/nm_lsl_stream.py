@@ -10,10 +10,12 @@ class StreamNotFoundException(Exception):
     def __str__(self) -> str:
         return "No Stream found"
 
+
 # Note: For multiprocessing pylsl can only be used within the main thread
 # There instantiation of the lsl_inlet would need to be pulled out
 # into the main app starting streaming
 # https://github.com/chkothe/pylsl/issues/7
+
 
 class LSLStream(nm_stream_abc.PNStream):
     def init_LSL(
@@ -43,10 +45,12 @@ class LSLStream(nm_stream_abc.PNStream):
         )
 
     def run(self, raw_data: np.array):
-        feature_series = self.run_analysis.process_data(raw_data)
+        feature_series = self.run_analysis.process(raw_data)
         return feature_series
 
-    def get_data(self, ):
+    def get_data(
+        self,
+    ):
         """Data is pulled by lsl, and is returned in shape (ch, time)
 
         Parameters

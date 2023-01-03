@@ -155,7 +155,7 @@ class RealTimePyNeuro(nm_stream_abc.PNStream):
                 queue_features.put(None)
                 FLAG_STOP = True
             else:
-                feature_series = self.run_analysis.process_data(ieeg_batch)
+                feature_series = self.run_analysis.process(ieeg_batch)
                 feature_series = self._add_timestamp(feature_series)
                 print("calc features")
                 queue_features.put(feature_series)

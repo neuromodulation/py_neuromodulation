@@ -3,31 +3,33 @@ from typing import Iterator
 import numpy as np
 
 
-def ieeg_raw_generator(
-    ieeg_raw, settings: dict, fs: int
+def raw_data_generator(
+    data: np.ndarray, settings:dict, sfreq: int,
 ) -> Iterator[np.ndarray]:
     """
     This generator function mimics online data acquisition.
-    The nm_channels.csv selected raw channels are iteratively sampled with fs.
+    The data are iteratively sampled with sfreq_new.
     Arguments
     ---------
         ieeg_raw (np array): shape (channels, time)
+        sfreq: int
+        sfreq_new: int
+        offset_time: int | float
     Returns
     -------
         np.array: new batch for run function of full segment length shape
     """
-
-    cnt_fsnew = 0
+    sfreq_new = settings["sampling_rate_features_hz"]
     offset_time = settings["segment_length_features_ms"]
-    offset_start = np.ceil(offset_time / 1000 * fs).astype(int)
-    fs_new = settings["sampling_rate_features_hz"]
-
-    for cnt in range(ieeg_raw.shape[1]):
+    offset_start = np.ceil(offset_time / 1000 * sfreq).astype(int)
+    
+    cnt_fsnew = 0
+    for cnt in range(data.shape[1]):
         if cnt < offset_start:
             cnt_fsnew += 1
             continue
 
         cnt_fsnew += 1
-        if cnt_fsnew >= (fs / fs_new):
+        if cnt_fsnew >= (sfreq / sfreq_new):
             cnt_fsnew = 0
-            yield ieeg_raw[:, cnt - offset_start : cnt]
+            yield data[:, cnt - offset_start : cnt]

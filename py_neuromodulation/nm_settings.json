@@ -1,18 +1,12 @@
 {
     "sampling_rate_features_hz": 10,
     "segment_length_features_ms": 1000,
-    "preprocessing": {
-        "raw_resampling": true,
-        "raw_normalization": true,
-        "re_referencing": true,
-        "notch_filter": true,
-        "preprocessing_order": [
-            "raw_resampling",
-            "notch_filter",
-            "re_referencing",
-            "raw_normalization"
-        ]
-    },
+    "preprocessing": [
+        "raw_resampling",
+        "notch_filter",
+        "re_referencing",
+        "raw_normalization"
+    ],
     "features": {
         "raw_hjorth": true,
         "return_raw": true,

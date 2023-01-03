@@ -22,7 +22,9 @@ class Projection:
         self.coords = coords
         self.nm_channels = nm_channels
         self.project_cortex = settings["postprocessing"]["project_cortex"]
-        self.project_subcortex = settings["postprocessing"]["project_subcortex"]
+        self.project_subcortex = settings["postprocessing"][
+            "project_subcortex"
+        ]
         self.max_dist_cortex = settings["project_cortex_settings"][
             "max_dist_mm"
         ]
@@ -32,7 +34,9 @@ class Projection:
         self.ecog_channels: Optional[list] = None
         self.lfp_channels: Optional[list] = None
 
-        self.idx_chs_ecog: list = []  # feature series indexes for ecog channels
+        self.idx_chs_ecog: list = (
+            []
+        )  # feature series indexes for ecog channels
         self.names_chs_ecog: list = []  # feature series name of ecog features
         self.idx_chs_lfp: list = []  # feature series indexes for lfp channels
         self.names_chs_lfp: list = []  # feature series name of lfp features
@@ -107,7 +111,10 @@ class Projection:
                             self.coords[key_]["ch_names"].remove(ch)
 
     def calc_proj_matrix(
-        self, max_dist: Union[int, float], grid: np.array, coord_array: np.array
+        self,
+        max_dist: Union[int, float],
+        grid: np.ndarray,
+        coord_array: np.ndarray,
     ) -> np.ndarray:
         """Calculate projection matrix."""
         channels = coord_array.shape[0]
@@ -121,9 +128,9 @@ class Projection:
 
         proj_matrix = np.zeros(distance_matrix.shape)
         for grid_point in range(distance_matrix.shape[0]):
-            used_channels = np.where(distance_matrix[grid_point, :] < max_dist)[
-                0
-            ]
+            used_channels = np.where(
+                distance_matrix[grid_point, :] < max_dist
+            )[0]
 
             rec_distances = distance_matrix[grid_point, used_channels]
             sum_distances = np.sum(1 / rec_distances)
@@ -226,7 +233,7 @@ class Projection:
                 self.nm_channels.query("name == @self.lfp_channels").new_name
             )
 
-    def init_projection_run(self, feature_series: pd.Series) -> pd.Series:
+    def init_projection_run(self, feature_series: pd.Series) -> None:
         """Initialize indexes for respective channels in feature series computed by nm_features.py"""
         #  here it is assumed that only one hemisphere is recorded at a time!
         if self.project_cortex:
@@ -312,41 +319,30 @@ class Projection:
             proj_subcortex_array,
         ) = self.get_projected_cortex_subcortex_data(dat_cortex, dat_subcortex)
 
+        features_new = {}
         # proj_cortex_array has shape grid_points x feature_number
         if self.project_cortex:
-            feature_series = feature_series.append(
-                pd.Series(
-                    {
-                        "gridcortex_"
-                        + str(act_grid_point)
-                        + "_"
-                        + feature_name: proj_cortex_array[
-                            act_grid_point, feature_idx
-                        ]
-                        for feature_idx, feature_name in enumerate(
-                            self.feature_names
-                        )
-                        for act_grid_point in self.active_cortex_gridpoints
-                    }
-                )
-            )
+
+            features_new = features_new | {
+                "gridcortex_"
+                + str(act_grid_point)
+                + "_"
+                + feature_name: proj_cortex_array[act_grid_point, feature_idx]
+                for feature_idx, feature_name in enumerate(self.feature_names)
+                for act_grid_point in self.active_cortex_gridpoints
+            }
         if self.project_subcortex:
-            feature_series = feature_series.append(
-                pd.Series(
-                    {
-                        "gridsubcortex_"
-                        + str(act_grid_point)
-                        + "_"
-                        + feature_name: proj_subcortex_array[
-                            act_grid_point, feature_idx
-                        ]
-                        for feature_idx, feature_name in enumerate(
-                            self.feature_names
-                        )
-                        for act_grid_point in self.active_subcortex_gridpoints
-                    }
-                )
-            )
+            features_new = features_new | {
+                "gridsubcortex_"
+                + str(act_grid_point)
+                + "_"
+                + feature_name: proj_subcortex_array[
+                    act_grid_point, feature_idx
+                ]
+                for feature_idx, feature_name in enumerate(self.feature_names)
+                for act_grid_point in self.active_subcortex_gridpoints
+            }
+        feature_series = pd.concat([feature_series, pd.Series(features_new)])
 
         return feature_series
 

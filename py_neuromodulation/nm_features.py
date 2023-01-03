@@ -1,6 +1,5 @@
-# from multiprocessing import Process, Manager
+"""Module for calculating features."""
 import numpy as np
-from typing import Iterable
 
 from py_neuromodulation import (
     nm_hjorth_raw,
@@ -12,21 +11,19 @@ from py_neuromodulation import (
     nm_oscillatory,
     nm_bursts,
     nm_linelength,
-    nm_mne_connectiviy
+    nm_mne_connectiviy,
+    nm_std,
 )
 
 
 class Features:
 
-    sfreq: float
-    features: Iterable[nm_features_abc.Feature] = []
+    features: list[nm_features_abc.Feature] = []
 
-    def __init__(self, s, ch_names, sfreq) -> None:
-
-        if s["preprocessing"]["raw_resampling"] is True:
-            sfreq = s["raw_resampling_settings"]["resample_freq_hz"]
-
-        self.sfreq = sfreq
+    def __init__(
+        self, s: dict, ch_names: list[str], sfreq: int | float
+    ) -> None:
+        """Class for calculating features."""
         self.features = []
 
         for feature in s["features"]:
@@ -48,7 +45,9 @@ class Features:
                         nm_oscillatory.STFT(s, ch_names, sfreq)
                     )
                 case "fft":
-                    self.features.append(nm_oscillatory.FFT(s, ch_names, sfreq))
+                    self.features.append(
+                        nm_oscillatory.FFT(s, ch_names, sfreq)
+                    )
                 case "sharpwave_analysis":
                     self.features.append(
                         nm_sharpwaves.SharpwaveAnalyzer(s, ch_names, sfreq)
@@ -66,11 +65,19 @@ class Features:
                 case "bursts":
                     self.features.append(nm_bursts.Burst(s, ch_names, sfreq))
                 case "linelength":
-                    self.features.append(nm_linelength.LineLengh(s, ch_names, sfreq))
-                case "mne_connectiviy":
-                    self.features.append(nm_mne_connectiviy.MNEConnectivity(s, ch_names, sfreq))
+                    self.features.append(
+                        nm_linelength.LineLengh(s, ch_names, sfreq)
+                    )
+                case "mne_connectivity":
+                    self.features.append(
+                        nm_mne_connectiviy.MNEConnectivity(s, ch_names, sfreq)
+                    )
+                case "std":
+                    self.features.append(nm_std.Std(s, ch_names, sfreq))
+                case _:
+                    raise ValueError("")
 
-    def estimate_features(self, data) -> dict:
+    def estimate_features(self, data: np.ndarray) -> dict:
         """Calculate features, as defined in settings.json
         Features are based on bandpower, raw Hjorth parameters and sharp wave
         characteristics.
