@@ -62,8 +62,6 @@ class RawNormalizer:
         if self.previous.shape[0] >= self.num_samples_normalize:
             self.previous = self.previous[1:]
 
-        print(f"{self.previous.shape[0]}")
-
         return data.T
 
 

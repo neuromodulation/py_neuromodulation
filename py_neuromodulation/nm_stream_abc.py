@@ -1,5 +1,6 @@
 """Module that contains PNStream ABC."""
 from abc import ABC, abstractmethod
+import math
 import os
 import pathlib
 import _pickle as cPickle
@@ -24,7 +25,7 @@ class PNStream(ABC):
     run_analysis: nm_run_analysis.DataProcessor
     features: nm_features.Features
     coords: dict
-    sfreq: int | None
+    sfreq: int
     path_grids: _PathLike | None
     model: base.BaseEstimator | None
     sess_rigtht: bool | None
@@ -56,7 +57,7 @@ class PNStream(ABC):
             self.coords = {}
         else:
             self.coords = coords
-        self.sfreq = sfreq
+        self.sfreq = math.floor(sfreq)
         self.sess_right = None
         self.projection = None
         self.model = None
@@ -138,7 +139,6 @@ class PNStream(ABC):
             sess_right=sess_right,
         )
         nmplotter.plot_cortex(set_clim=False)
-
 
     def save_after_stream(
         self,

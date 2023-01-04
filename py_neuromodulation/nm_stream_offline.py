@@ -1,8 +1,6 @@
 """Module for offline data streams."""
 import os
 
-# import timeit
-
 import numpy as np
 import pandas as pd
 
@@ -34,6 +32,7 @@ class _OfflineStream(nm_stream_abc.PNStream):
         Due to normalization run_analysis needs to keep track of the counted
         samples. These are accessed here for time conversion.
         """
+        timestamp = cnt_samples * 1000 / self.sfreq
         feature_series["time"] = cnt_samples * 1000 / self.sfreq
 
         if self.verbose:
@@ -80,7 +79,6 @@ class _OfflineStream(nm_stream_abc.PNStream):
             sfreq=self.sfreq,
         )
         features = []
-        first_sample = True
         sample_add = int(self.sfreq / self.run_analysis.sfreq_features)
         cnt_samples = int(self.sfreq)
 
@@ -89,22 +87,11 @@ class _OfflineStream(nm_stream_abc.PNStream):
             if data_batch is None:
                 break
             feature_series = self.run_analysis.process(data_batch)
-
-            # Measuring timing
-            # number_repeat = 100
-            # val = timeit.timeit(
-            #    lambda: self.run_analysis.process_data(data),
-            #    number=number_repeat
-            # ) / number_repeat
-
-            feature_series = self._add_timestamp(feature_series, first_sample)
+            feature_series = self._add_timestamp(feature_series, cnt_samples)
             features.append(feature_series)
 
             if self.model is not None:
                 prediction = self.model.predict(feature_series)
-
-            if first_sample:
-                first_sample = False
 
             cnt_samples += sample_add
 

@@ -12,7 +12,6 @@ from py_neuromodulation import (
     nm_bursts,
     nm_linelength,
     nm_mne_connectiviy,
-    nm_std,
 )
 
 
@@ -66,7 +65,7 @@ class Features:
                     self.features.append(nm_bursts.Burst(s, ch_names, sfreq))
                 case "linelength":
                     self.features.append(
-                        nm_linelength.LineLengh(s, ch_names, sfreq)
+                        nm_linelength.LineLength(s, ch_names, sfreq)
                     )
                 case "mne_connectivity":
                     self.features.append(

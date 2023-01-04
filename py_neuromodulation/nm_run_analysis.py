@@ -2,7 +2,7 @@
 from enum import Enum
 import os
 from time import time
-from typing import Any, Protocol, Type
+from typing import Protocol, Type
 
 import numpy as np
 import pandas as pd
