@@ -154,30 +154,64 @@ def _normalize_and_clip(
         current = (current - np.nanmedian(previous, axis=0)) / np.nanstd(
             previous, axis=0
         )
+    # For the following methods we check for the shape of current
+    # when current is a 1D array, then it is the post-processing normalization,
+    # and we need to expand, and take the [0, :] component
+    # When current is a 2D array, then it is pre-processing normalization, and
+    # there's no need for expanding.
     elif method == NORM_METHODS.QUANTILE.value:
-        current = (
-            preprocessing.QuantileTransformer(n_quantiles=300)
-            .fit(np.nan_to_num(previous))
-            .transform(np.expand_dims(current, axis=0))[0, :]
-        )
+        if len(current.shape) == 1:
+            current = (
+                preprocessing.QuantileTransformer(n_quantiles=300)
+                    .fit(np.nan_to_num(previous))
+                    .transform(np.expand_dims(current, axis=0))[0, :]
+            )
+        else:
+            current = (
+                preprocessing.QuantileTransformer(n_quantiles=300)
+                .fit(np.nan_to_num(previous))
+                .transform(current)
+            )
     elif method == NORM_METHODS.ROBUST.value:
-        current = (
-            preprocessing.RobustScaler()
-            .fit(np.nan_to_num(previous))
-            .transform(np.expand_dims(current, axis=0))[0, :]
-        )
+        if len(current.shape) == 1:
+            current = (
+                preprocessing.RobustScaler()
+                    .fit(np.nan_to_num(previous))
+                    .transform(np.expand_dims(current, axis=0))[0, :]
+            )
+        else:
+            current = (
+                preprocessing.RobustScaler()
+                    .fit(np.nan_to_num(previous))
+                    .transform(current)
+            )
+
     elif method == NORM_METHODS.MINMAX.value:
-        current = (
-            preprocessing.MinMaxScaler()
-            .fit(np.nan_to_num(previous))
-            .transform(np.expand_dims(current, axis=0))[0, :]
-        )
+        if len(current.shape) == 1:
+            current = (
+                preprocessing.MinMaxScaler()
+                    .fit(np.nan_to_num(previous))
+                    .transform(np.expand_dims(current, axis=0))[0, :]
+            )
+        else:
+            current = (
+                preprocessing.MinMaxScaler()
+                    .fit(np.nan_to_num(previous))
+                    .transform(current)
+            )
     elif method == NORM_METHODS.POWER.value:
-        current = (
-            preprocessing.PowerTransformer()
-            .fit(np.nan_to_num(previous))
-            .transform(np.expand_dims(current, axis=0))[0, :]
-        )
+        if len(current.shape) == 1:
+            current = (
+                preprocessing.PowerTransformer()
+                    .fit(np.nan_to_num(previous))
+                    .transform(np.expand_dims(current, axis=0))[0, :]
+            )
+        else:
+            current = (
+                preprocessing.PowerTransformer()
+                    .fit(np.nan_to_num(previous))
+                    .transform(current)
+            )
     else:
         raise ValueError(
             f"Only {[e.value for e in NORM_METHODS]} are supported as "

@@ -37,12 +37,30 @@
     },
     "raw_normalization_settings": {
         "normalization_time_s": 30,
-        "normalization_method": "zscore",
+        "normalization_method": {
+            "mean": false,
+            "median": false,
+            "zscore": true,
+            "zscore-median": false,
+            "quantile": false,
+            "power": false,
+            "robust": false,
+            "minmax": false
+        },
         "clip": 3
     },
     "feature_normalization_settings": {
         "normalization_time_s": 30,
-        "normalization_method": "zscore",
+        "normalization_method": {
+            "mean": false,
+            "median": false,
+            "zscore": false,
+            "zscore-median": false,
+            "quantile": false,
+            "power": false,
+            "robust": false,
+            "minmax": true
+        },
         "clip": 3
     },
     "frequency_ranges_hz": {

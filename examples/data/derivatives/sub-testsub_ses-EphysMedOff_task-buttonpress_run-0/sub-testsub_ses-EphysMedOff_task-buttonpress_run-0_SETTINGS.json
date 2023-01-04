@@ -3,13 +3,11 @@
     "segment_length_features_ms": 1000,
     "preprocessing": {
         "raw_resampling": true,
-        "raw_normalization": false,
+        "raw_normalization": true,
         "re_referencing": true,
         "notch_filter": true,
         "preprocessing_order": [
-            "raw_resampling",
-            "notch_filter",
-            "re_referencing"
+            "raw_normalization"
         ]
     },
     "features": {
@@ -27,7 +25,7 @@
         "mne_connectiviy": false
     },
     "postprocessing": {
-        "feature_normalization": false,
+        "feature_normalization": true,
         "project_cortex": true,
         "project_subcortex": true
     },
@@ -36,12 +34,25 @@
     },
     "raw_normalization_settings": {
         "normalization_time_s": 30,
-        "normalization_method": "zscore",
+        "normalization_method": {
+            "mean": false,
+            "median": false,
+            "zscore": true
+        },
         "clip": 3
     },
     "feature_normalization_settings": {
         "normalization_time_s": 30,
-        "normalization_method": "zscore",
+        "normalization_method": {
+            "mean": false,
+            "median": false,
+            "zscore": false,
+            "zscore-median": false,
+            "quantile": false,
+            "power": false,
+            "robust": false,
+            "minmax": true
+        },
         "clip": 3
     },
     "frequency_ranges_hz": {

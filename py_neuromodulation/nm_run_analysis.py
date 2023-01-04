@@ -120,14 +120,24 @@ class Run:
                 case "re_referencing":
                     ieeg_batch = self.reference.rereference(ieeg_batch)
                 case "raw_normalization":
+                    used_method = next(
+                        (
+                            method
+                            for method in self.settings[
+                                "raw_normalization_settings"
+                            ]["normalization_method"].keys()
+                            if self.settings["raw_normalization_settings"][
+                                "normalization_method"
+                            ][method]
+                        ),
+                        "mean",
+                    )
                     ieeg_batch, self.raw_arr = nm_normalization.normalize_raw(
                         current=ieeg_batch,
                         previous=self.raw_arr,
                         normalize_samples=self.raw_normalize_samples,
                         sample_add=self.sample_add,
-                        method=self.settings["raw_normalization_settings"][
-                            "normalization_method"
-                        ],
+                        method=used_method,
                         clip=self.settings["raw_normalization_settings"][
                             "clip"
                         ],
@@ -148,9 +158,18 @@ class Run:
                 current=features_values,
                 previous=self.features_previous,
                 normalize_samples=self.feat_normalize_samples,
-                method=self.settings["feature_normalization_settings"][
-                    "normalization_method"
-                ],
+                method=next(
+                    (
+                        method
+                        for method in self.settings[
+                            "feature_normalization_settings"
+                        ]["normalization_method"].keys()
+                        if self.settings["feature_normalization_settings"][
+                            "normalization_method"
+                        ][method]
+                    ),
+                    "mean",
+                ),
                 clip=self.settings["feature_normalization_settings"]["clip"],
             )
 
