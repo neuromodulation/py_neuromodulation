@@ -4,8 +4,6 @@ from enum import Enum
 import sklearn.preprocessing
 import numpy as np
 
-from .nm_processing_abc import Preprocessor
-
 
 class NORM_METHODS(Enum):
     MEAN = "mean"
@@ -18,7 +16,7 @@ class NORM_METHODS(Enum):
     MINMAX = "minmax"
 
 
-class RawNormalizer(Preprocessor):
+class RawNormalizer:
     def __init__(
         self,
         sfreq: int | float,
@@ -69,7 +67,7 @@ class RawNormalizer(Preprocessor):
         return data.T
 
 
-class FeatureNormalizer(Preprocessor):
+class FeatureNormalizer:
     def __init__(
         self,
         sampling_rate_features_hz: int,
@@ -115,7 +113,6 @@ class FeatureNormalizer(Preprocessor):
             self.previous = self.previous[1:]
 
         return data
-
 
 
 def _normalize_and_clip(

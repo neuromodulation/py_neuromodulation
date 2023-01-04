@@ -3,8 +3,6 @@ import mne
 from mne.filter import _overlap_add_filter
 import numpy as np
 
-from .nm_processing_abc import Preprocessor
-
 
 class BandPassFilter:
     """Bandpass filters data in given frequency ranges.
@@ -103,7 +101,7 @@ class BandPassFilter:
         return filtered
 
 
-class NotchFilter(Preprocessor):
+class NotchFilter:
     def __init__(
         self,
         sfreq: int | float,

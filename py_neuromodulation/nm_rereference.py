@@ -2,12 +2,12 @@
 import numpy as np
 import pandas as pd
 
-from .nm_processing_abc import Preprocessor
 
-
-class ReReferencer(Preprocessor):
+class ReReferencer:
     def __init__(
-        self, nm_channels: pd.DataFrame,
+        self,
+        sfreq: int | float,
+        nm_channels: pd.DataFrame,
     ) -> None:
         """Initialize real-time rereference information.
 

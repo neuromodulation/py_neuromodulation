@@ -2,7 +2,7 @@
 from enum import Enum
 import os
 from time import time
-from typing import Type
+from typing import Any, Protocol, Type
 
 import numpy as np
 import pandas as pd
@@ -15,10 +15,14 @@ from py_neuromodulation import (
     nm_projection,
     nm_rereference,
     nm_resample,
-    nm_settings,
 )
 
 _PathLike = str | os.PathLike
+
+
+class Preprocessor(Protocol):
+    def process(self, data: np.ndarray) -> np.ndarray:
+        ...
 
 
 _PREPROCESSING_CONSTRUCTORS = [
@@ -79,16 +83,8 @@ class DataProcessor:
 
         self.features_previous = None
 
-        # self.offset = max(
-        #     list(
-        #         self.settings["bandpass_filter_settings"][
-        #             "segment_lengths_ms"
-        #         ].values()
-        #     )
-        # )  # ms
-
         (ch_names_used, _, self.feature_idx, _) = self._get_ch_info()
-        self.preprocessors = []
+        self.preprocessors: list[Preprocessor] = []
         for preprocessing_method in self.settings["preprocessing"]:
             settings_str = f"{preprocessing_method}_settings"
             match preprocessing_method:
@@ -107,6 +103,7 @@ class DataProcessor:
                     self.preprocessors.append(preprocessor)
                 case "re_referencing":
                     preprocessor = nm_rereference.ReReferencer(
+                        sfreq=self.sfreq_raw,
                         nm_channels=self.nm_channels,
                     )
                     self.preprocessors.append(preprocessor)

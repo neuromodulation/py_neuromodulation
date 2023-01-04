@@ -1,12 +1,9 @@
 """Module for resampling."""
 import mne
 import numpy as np
-import pandas as pd
-
-from .nm_processing_abc import Preprocessor
 
 
-class Resampler(Preprocessor):
+class Resampler:
     """Resample data.
 
     Parameters
@@ -21,7 +18,7 @@ class Resampler(Preprocessor):
     """
 
     def __init__(
-        self, 
+        self,
         sfreq: int | float,
         resample_freq_hz: int | float,
     ) -> None:
