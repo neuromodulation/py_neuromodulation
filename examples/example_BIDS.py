@@ -23,10 +23,10 @@ from skopt import space as skopt_space
 
 def run_example_BIDS():
     """run the example BIDS path in py_neuromodulation/examples/data"""
-    sub = "testsub"
-    ses = "EphysMedOff"
-    task = "buttonpress"
-    run = 0
+    sub = "000"
+    ses = "right"
+    task = "force"
+    run = 3
     datatype = "ieeg"
 
     RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}"
@@ -60,7 +60,7 @@ def run_example_BIDS():
         bads=raw.info["bads"],
         new_names="default",
         used_types=("ecog", "dbs", "seeg"),
-        target_keywords=("SQUARED_ROTATION",),
+        target_keywords="MOV_RIGHT_CLEAN",
     )
 
     stream = nm.Stream(

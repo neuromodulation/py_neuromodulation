@@ -4,9 +4,9 @@ from py_neuromodulation import nm_normalization
 
 
 def test_settings(
-        settings: dict,
-        nm_channel: pd.DataFrame,
-        verbose=True,
+    settings: dict,
+    nm_channel: pd.DataFrame,
+    verbose=True,
 ) -> None:
     """Test if settings are specified correctly in nm_settings.json
     Parameters
@@ -37,7 +37,7 @@ def test_settings(
     ]
     for preprocess_method in s["preprocessing"]["preprocessing_order"]:
         assert (
-                preprocess_method in enabled_methods
+            preprocess_method in enabled_methods
         ), "Enabled Preprocessing methods need to be listed in preprocesssing_order"
 
     assert (
@@ -59,12 +59,16 @@ def test_settings(
         assert (
             isinstance(value, bool)
             for value in s["raw_normalization_settings"][
-            "normalization_method"
-        ].values()
+                "normalization_method"
+            ].values()
         )
         # Check if only one value is set to true.
-        assert sum(s["raw_normalization_settings"]["normalization_method"].values()) == 1,\
-            "Please set only one method in raw normalization settings to true"
+        assert (
+            sum(
+                s["raw_normalization_settings"]["normalization_method"].values()
+            )
+            == 1
+        ), "Please set only one method in raw normalization settings to true"
 
         assert isinstance(
             s["raw_normalization_settings"]["clip"], (float, int, bool)
@@ -75,26 +79,30 @@ def test_settings(
             s["feature_normalization_settings"]["normalization_time_s"],
             (float, int),
         )
-        # assert s["feature_normalization_settings"]["normalization_method"] in [
-        #     e.value for e in nm_normalization.NORM_METHODS
-        # ]
+
         assert isinstance(
             s["feature_normalization_settings"]["clip"], (float, int, bool)
         )
         assert (
             isinstance(value, bool)
             for value in s["feature_normalization_settings"][
-            "normalization_method"
-        ].values()
+                "normalization_method"
+            ].values()
         )
         # Check if only one value is set to true.
-        assert sum(s["feature_normalization_settings"]["normalization_method"].values()) == 1,\
-            "Please set only one method in feature normalization settings to true"
+        assert (
+            sum(
+                s["feature_normalization_settings"][
+                    "normalization_method"
+                ].values()
+            )
+            == 1
+        ), "Please set only one method in feature normalization settings to true"
 
     if (
-            s["bandpass_filter_settings"]["kalman_filter"] is True
-            or s["stft_settings"]["kalman_filter"]
-            or s["fft_settings"]["kalman_filter"]
+        s["bandpass_filter_settings"]["kalman_filter"] is True
+        or s["stft_settings"]["kalman_filter"]
+        or s["fft_settings"]["kalman_filter"]
     ):
         assert isinstance(s["kalman_filter_settings"]["Tp"], (float, int))
         assert isinstance(s["kalman_filter_settings"]["sigma_w"], (float, int))
@@ -134,8 +142,8 @@ def test_settings(
         assert (
             isinstance(value, bool)
             for value in s["bandpass_filter_settings"][
-            "bandpower_features"
-        ].values()
+                "bandpower_features"
+            ].values()
         )
         assert any(
             value is True
@@ -176,7 +184,7 @@ def test_settings(
                         if used_feature == est_feature:
                             estimator_list_feature.append(estimator)
             assert (
-                    len(estimator_list_feature) > 0
+                len(estimator_list_feature) > 0
             ), f"add estimator key for {used_feature}"
             fun_names.append(estimator_list_feature)
 

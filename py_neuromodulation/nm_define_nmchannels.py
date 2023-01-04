@@ -2,6 +2,7 @@
 from typing import Iterable, Optional, Union
 
 import pandas as pd
+import numpy as np
 
 
 _LFP_TYPES = ["seeg", "dbs", "lfp"]  # must be lower-case
@@ -167,6 +168,9 @@ def set_channels(
         for name, ref in zip(df["name"], df["rereference"]):
             if ref == "None":
                 new_names.append(name)
+            elif type(ref) == float:
+                if np.isnan(ref):
+                    new_names.append(name)
             elif ref == "average":
                 new_names.append(name + "-avgref")
             else:
@@ -233,4 +237,38 @@ def _get_default_references(
         df.iloc[df[df["name"] == lfp].index[0], ref_idx] = lfp_r_refs[i]
     for other_ch in other_chs:
         df.iloc[df[df["name"] == other_ch].index[0], ref_idx] = "None"
+    return df
+
+def get_default_channels_from_data(
+        data: np.array, car_rereferencing:bool=True,
+):
+    """
+    From data array with shape (n_channels, n_time) get default dataframe with
+    ecog datatype, no bad channels, no targets, common average rereferencing
+    """
+
+    ch_name = [f"ch{idx}" for idx in range(data.shape[0])]
+    status = ["good" for _ in range(data.shape[0])]
+    type_nm = ["ecog" for _ in range(data.shape[0])]
+
+    if car_rereferencing is True:
+        rereference = ["average" for _ in range(data.shape[0])]
+        new_name = [f"{ch}-avgref" for ch in ch_name]
+    else:
+        rereference = ["None" for _ in range(data.shape[0])]
+        new_name = ch_name
+
+    new_name = [f"{ch}-avgref" for ch in ch_name]
+    target = np.array([0 for _ in range(data.shape[0])])
+    used = np.array([1 for _ in range(data.shape[0])])
+
+    df = pd.DataFrame()
+    df["name"] = ch_name
+    df["rereference"] = rereference
+    df["used"] = used
+    df["target"] = target
+    df["type"] = type_nm
+    df["status"] = status
+    df["new_name"] = new_name
+
     return df

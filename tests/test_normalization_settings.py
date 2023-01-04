@@ -1,5 +1,6 @@
 import unittest
 import os
+import pdb
 import py_neuromodulation as nm
 from py_neuromodulation import (
     nm_define_nmchannels,
@@ -8,15 +9,15 @@ from py_neuromodulation import (
 
 
 class TestNormSettings(unittest.TestCase):
-
     def set_up(self):
         """
         Load BIDS data, create stream.
         Returns necessary variables for testing different settings.
         :return: stream, sfreq, line_noise, coord_list, coord_names, data, PATH_OUT, RUN_NAME
         """
-        SCRIPT_DIR = os.path.join(os.path.dirname(os.path.abspath('.')), "examples")
-
+        SCRIPT_DIR = os.path.join(
+            os.path.abspath("."), "examples"
+        )
         sub = "testsub"
         ses = "EphysMedOff"
         task = "buttonpress"
@@ -47,11 +48,13 @@ class TestNormSettings(unittest.TestCase):
         )
 
         # Provide a path for the output data. Each re-referencing method has their PATH_OUT
-        PATH_OUT = os.path.join(SCRIPT_DIR, "data", "derivatives", "test_normalization")
+        PATH_OUT = os.path.join(
+            SCRIPT_DIR, "data", "derivatives", "test_normalization"
+        )
         nm_channels = nm_define_nmchannels.set_channels(
             ch_names=raw.ch_names,
             ch_types=raw.get_channel_types(),
-            reference='default',
+            reference="default",
             bads=raw.info["bads"],
             new_names="default",
             used_types=("ecog",),  # We focus only on LFP data
@@ -64,21 +67,41 @@ class TestNormSettings(unittest.TestCase):
             path_grids=None,
             verbose=False,
         )
-        return stream, sfreq, line_noise, coord_list, coord_names, data, nm_channels, PATH_OUT, RUN_NAME
+        return (
+            stream,
+            sfreq,
+            line_noise,
+            coord_list,
+            coord_names,
+            data,
+            nm_channels,
+            PATH_OUT,
+            RUN_NAME,
+        )
 
     def test_fast_compute_settings(self):
         """
         Try if normalization on fast compute settings works.
         No assertion in the end, only want to see if it raises any errors
         """
-        stream, sfreq, line_noise, coord_list, coord_names, data, nm_channels, PATH_OUT, RUN_NAME = self.set_up()
+        (
+            stream,
+            sfreq,
+            line_noise,
+            coord_list,
+            coord_names,
+            data,
+            nm_channels,
+            PATH_OUT,
+            RUN_NAME,
+        ) = self.set_up()
 
         stream.set_settings_fast_compute()
         stream.init_stream(
             sfreq=sfreq,
             line_noise=line_noise,
             coord_list=coord_list,
-            coord_names=coord_names
+            coord_names=coord_names,
         )
 
         stream.run(
@@ -88,14 +111,28 @@ class TestNormSettings(unittest.TestCase):
         )
 
     def test_quantile_norm(self):
-        stream, sfreq, line_noise, coord_list, coord_names, data, nm_channels, PATH_OUT, RUN_NAME = self.set_up()
+        (
+            stream,
+            sfreq,
+            line_noise,
+            coord_list,
+            coord_names,
+            data,
+            nm_channels,
+            PATH_OUT,
+            RUN_NAME,
+        ) = self.set_up()
 
         stream.set_settings_fast_compute()
 
-        stream.settings['preprocessing']['raw_normalization'] = True
-        stream.settings['preprocessing']['preprocessing_order'] = ["raw_normalization",]
-        stream.settings['postprocessing']['feature_normalization'] = True
-        stream.settings[ "raw_normalization_settings"]["normalization_method"] = {
+        stream.settings["preprocessing"]["raw_normalization"] = True
+        stream.settings["preprocessing"]["preprocessing_order"] = [
+            "raw_normalization",
+        ]
+        stream.settings["postprocessing"]["feature_normalization"] = True
+        stream.settings["raw_normalization_settings"][
+            "normalization_method"
+        ] = {
             "mean": False,
             "median": False,
             "zscore": False,
@@ -103,9 +140,11 @@ class TestNormSettings(unittest.TestCase):
             "quantile": True,
             "power": False,
             "robust": False,
-            "minmax": False
-                }
-        stream.settings[ "feature_normalization_settings"]["normalization_method"] = {
+            "minmax": False,
+        }
+        stream.settings["feature_normalization_settings"][
+            "normalization_method"
+        ] = {
             "mean": False,
             "median": False,
             "zscore": False,
@@ -113,14 +152,14 @@ class TestNormSettings(unittest.TestCase):
             "quantile": True,
             "power": False,
             "robust": False,
-            "minmax": False
-                }
+            "minmax": False,
+        }
 
         stream.init_stream(
             sfreq=sfreq,
             line_noise=line_noise,
             coord_list=coord_list,
-            coord_names=coord_names
+            coord_names=coord_names,
         )
 
         stream.run(
@@ -128,17 +167,30 @@ class TestNormSettings(unittest.TestCase):
             out_path_root=PATH_OUT,
             folder_name=RUN_NAME,
         )
-
 
     def test_zscore_median_norm(self):
-        stream, sfreq, line_noise, coord_list, coord_names, data, nm_channels, PATH_OUT, RUN_NAME = self.set_up()
+        (
+            stream,
+            sfreq,
+            line_noise,
+            coord_list,
+            coord_names,
+            data,
+            nm_channels,
+            PATH_OUT,
+            RUN_NAME,
+        ) = self.set_up()
 
         stream.set_settings_fast_compute()
 
-        stream.settings['preprocessing']['raw_normalization'] = True
-        stream.settings['preprocessing']['preprocessing_order'] = ["raw_normalization",]
-        stream.settings['postprocessing']['feature_normalization'] = True
-        stream.settings[ "raw_normalization_settings"]["normalization_method"] = {
+        stream.settings["preprocessing"]["raw_normalization"] = True
+        stream.settings["preprocessing"]["preprocessing_order"] = [
+            "raw_normalization",
+        ]
+        stream.settings["postprocessing"]["feature_normalization"] = True
+        stream.settings["raw_normalization_settings"][
+            "normalization_method"
+        ] = {
             "mean": False,
             "median": False,
             "zscore": False,
@@ -146,17 +198,19 @@ class TestNormSettings(unittest.TestCase):
             "quantile": False,
             "power": False,
             "robust": False,
-            "minmax": False
-                }
-        stream.settings[ "feature_normalization_settings"]["normalization_method"] = {
+            "minmax": False,
+        }
+        stream.settings["feature_normalization_settings"][
+            "normalization_method"
+        ] = {
             "zscore-median": True,
-                }
+        }
 
         stream.init_stream(
             sfreq=sfreq,
             line_noise=line_noise,
             coord_list=coord_list,
-            coord_names=coord_names
+            coord_names=coord_names,
         )
 
         stream.run(
@@ -165,19 +219,32 @@ class TestNormSettings(unittest.TestCase):
             folder_name=RUN_NAME,
         )
 
-
     def test_minmax_norm(self):
-        stream, sfreq, line_noise, coord_list, coord_names, data, nm_channels, PATH_OUT, RUN_NAME = self.set_up()
+        (
+            stream,
+            sfreq,
+            line_noise,
+            coord_list,
+            coord_names,
+            data,
+            nm_channels,
+            PATH_OUT,
+            RUN_NAME,
+        ) = self.set_up()
 
         stream.set_settings_fast_compute()
 
-        stream.settings['preprocessing']['raw_normalization'] = True
-        stream.settings['preprocessing']['preprocessing_order'] = ["raw_normalization",]
-        stream.settings['postprocessing']['feature_normalization'] = True
-        stream.settings[ "raw_normalization_settings"]["normalization_method"] = {
-            "minmax": True
-                }
-        stream.settings[ "feature_normalization_settings"]["normalization_method"] = {
+        stream.settings["preprocessing"]["raw_normalization"] = True
+        stream.settings["preprocessing"]["preprocessing_order"] = [
+            "raw_normalization",
+        ]
+        stream.settings["postprocessing"]["feature_normalization"] = True
+        stream.settings["raw_normalization_settings"][
+            "normalization_method"
+        ] = {"minmax": True}
+        stream.settings["feature_normalization_settings"][
+            "normalization_method"
+        ] = {
             "mean": False,
             "median": False,
             "zscore": False,
@@ -185,14 +252,14 @@ class TestNormSettings(unittest.TestCase):
             "quantile": False,
             "power": False,
             "robust": False,
-            "minmax": True
-                }
+            "minmax": True,
+        }
 
         stream.init_stream(
             sfreq=sfreq,
             line_noise=line_noise,
             coord_list=coord_list,
-            coord_names=coord_names
+            coord_names=coord_names,
         )
 
         stream.run(
