@@ -17,8 +17,8 @@ import numpy as np
 import re
 
 # change root directory of the project
-SCRIPT_DIR = os.path.dirname(os.path.abspath(''))
-if SCRIPT_DIR.split("/")[-1] == "py_neuromodulation":
+SCRIPT_DIR = os.path.abspath('')  #os.path.dirname()
+if os.path.basename(SCRIPT_DIR) == "py_neuromodulation":
     # this check is necessary, so we can also run the script from the root directory
     SCRIPT_DIR = os.path.join(SCRIPT_DIR, "examples")
 
