@@ -79,9 +79,7 @@ def test_settings(
             s["feature_normalization_settings"]["normalization_time_s"],
             (float, int),
         )
-        # assert s["feature_normalization_settings"]["normalization_method"] in [
-        #     e.value for e in nm_normalization.NORM_METHODS
-        # ]
+
         assert isinstance(
             s["feature_normalization_settings"]["clip"], (float, int, bool)
         )
