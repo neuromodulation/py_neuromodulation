@@ -86,6 +86,8 @@ def set_channels(
     df["name"] = ch_names
 
     if used_types:
+        if type(used_types) is str:
+            used_types = tuple([used_types])          # Even if the user passes only ("ecog"), the if statement bellow will work
         used_list = []
         for ch_type in ch_types:
             if any(
