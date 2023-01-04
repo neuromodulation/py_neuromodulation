@@ -14,9 +14,9 @@
         "fft": true,
         "sharpwave_analysis": false,
         "coherence": false,
-        "fooof": false,
+        "fooof": true,
         "nolds": false,
-        "bursts": false,
+        "bursts": true,
         "linelength": false,
         "mne_connectiviy": false
     },

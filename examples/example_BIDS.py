@@ -79,28 +79,21 @@ def run_example_BIDS() -> None:
     ]
 
     # Now we focus on the features that we want to estimate:
-
     settings["features"]["raw_hjorth"] = True
     settings["features"]["bandpass_filter"] = True
     settings["features"]["fft"] = True
     settings["features"]["sharpwave_analysis"] = True
-    settings["features"]["fooof"] = False
+    settings["features"]["fooof"] = True
     settings["features"]["nolds"] = False
+    settings["features"]["bursts"] = True
 
     # Then we set the postprocessing steps
     settings["postprocessing"]["feature_normalization"] = False
     settings["postprocessing"]["project_cortex"] = True
     settings["postprocessing"]["project_subcortex"] = True
-    # # One can also change the settings related to those steps, for example:
-    settings["sharpwave_analysis_settings"]["sharpwave_features"][
-        "peak_left"
-    ] = True
-    settings["sharpwave_analysis_settings"]["sharpwave_features"][
-        "peak_right"
-    ] = True
-    settings["sharpwave_analysis_settings"]["sharpwave_features"][
-        "trough"
-    ] = True
+
+
+    # Additional sharpwave features
     settings["sharpwave_analysis_settings"]["sharpwave_features"][
         "width"
     ] = True
@@ -117,10 +110,11 @@ def run_example_BIDS() -> None:
         "decay_steepness"
     ] = True
 
+    settings["sharpwave_analysis_settings"]["sharpwave_features"][
+        "slope_ratio"
+    ] = True
+
     settings["sharpwave_analysis_settings"]["estimator"]["mean"] = [
-        "peak_left",
-        "peak_right",
-        "trough",
         "width",
         "decay_time",
         "rise_time",
@@ -129,12 +123,43 @@ def run_example_BIDS() -> None:
         "sharpness",
         "prominence",
         "interval",
+        "slope_ratio",
+    ]
+
+    settings["sharpwave_analysis_settings"]["estimator"]["var"] = [
+        "width",
+        "decay_time",
+        "rise_time",
+        "rise_steepness",
+        "decay_steepness",
+        "sharpness",
+        "prominence",
+        "interval",
+        "slope_ratio",
     ]
 
     settings["sharpwave_analysis_settings"]["estimator"]["max"] = [
         "sharpness",
         "prominence",
     ]
+    
+    # for now we only look at the aperiodic component of fooof
+    settings["fooof"]["periodic"]["center_frequency"] = False
+    settings["fooof"]["periodic"]["band_width"] = False
+    settings["fooof"]["periodic"]["height_over_ap"] = False
+
+    # If we also want to compute nolds features (‘NOnLinear measures for Dynamical Systems’), this is how to select the frequency bands:
+
+    settings["nolds_features"]["data"]["frequency_bands"] = [
+        "theta",
+        "alpha",
+        "low beta",
+        "high gamma"]
+
+    settings["postprocessing"]["feature_normalization"] = False
+    settings["postprocessing"]["project_cortex"] = True
+    settings["postprocessing"]["project_subcortex"] = True
+
 
     stream = nm.Stream(
         sfreq=sfreq,

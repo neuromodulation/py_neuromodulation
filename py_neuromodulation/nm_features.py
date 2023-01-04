@@ -75,7 +75,7 @@ class Features:
                 case "std":
                     self.features.append(nm_std.Std(s, ch_names, sfreq))
                 case _:
-                    raise ValueError("")
+                    raise ValueError(f"Unknown feature found. Got: {feature}.")
 
     def estimate_features(self, data: np.ndarray) -> dict:
         """Calculate features, as defined in settings.json
