@@ -63,7 +63,7 @@ def test_settings(
         ].values()
         )
         # Check if only one value is set to true.
-        assert sum(s["raw_normalization_settings"]["normalization_method"].values()) == 1,\
+        assert sum(s["raw_normalization_settings"]["normalization_method"].values()) <= 1,\
             "Please set only one method in raw normalization settings to true"
 
         assert isinstance(
@@ -88,7 +88,7 @@ def test_settings(
         ].values()
         )
         # Check if only one value is set to true.
-        assert sum(s["feature_normalization_settings"]["normalization_method"].values()) == 1,\
+        assert sum(s["feature_normalization_settings"]["normalization_method"].values()) <= 1,\
             "Please set only one method in feature normalization settings to true"
 
     if (

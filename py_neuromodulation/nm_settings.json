@@ -109,7 +109,7 @@
             "complexity": false
         },
         "log_transform": true,
-        "kalman_filter": true
+        "kalman_filter": false
     },
     "kalman_filter_settings": {
         "Tp": 0.1,

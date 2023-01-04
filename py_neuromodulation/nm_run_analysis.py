@@ -127,7 +127,7 @@ class Run:
                         sample_add=self.sample_add,
                         method=next((method for method in self.settings["raw_normalization_settings"][
                             "normalization_method"].keys() if self.settings["raw_normalization_settings"][
-                            "normalization_method"][method]),"mean"),
+                            "normalization_method"][method]),"zscore"),
                         clip=self.settings["raw_normalization_settings"][
                             "clip"
                         ],
@@ -150,7 +150,7 @@ class Run:
                 normalize_samples=self.feat_normalize_samples,
                 method=next((method for method in self.settings["feature_normalization_settings"][
                             "normalization_method"].keys() if self.settings["feature_normalization_settings"][
-                            "normalization_method"][method]),"mean"),
+                            "normalization_method"][method]),"zscore"),
                 clip=self.settings["feature_normalization_settings"]["clip"],
             )
 
