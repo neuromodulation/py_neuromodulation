@@ -182,6 +182,8 @@ def plot_corr_matrix(
         save_plot_name: str = None,
         figsize: tuple[int] = (7, 7),
         title: str = None,
+        cbar_vmin: float = 0.,
+        cbar_vmax: float = 1.
 ):
     # cut out channel name for each column
     if ch_name is not None:
@@ -196,7 +198,7 @@ def plot_corr_matrix(
         corr = feature[feature_names].corr()
     else:
         corr = feature.corr()
-    sb.heatmap(corr, xticklabels=feature_col_name, yticklabels=feature_col_name)
+    sb.heatmap(corr, xticklabels=feature_col_name, yticklabels=feature_col_name, vmin = cbar_vmin, vmax = cbar_vmax)
     if title is None:
         plt.title("Features channel: " + str(ch_name))
     else:
@@ -288,10 +290,11 @@ def plot_epochs_avg(
         str_title: str = "Movement aligned features",
 ):
     # cut channel name of for axis + "_" for more dense plot
-    if cut_ch_name_cols and None not in (ch_name, feature_names):
-        feature_names = [
-            i[len(ch_name) + 1:] for i in list(feature_names) if ch_name in i
-        ]
+    if feature_names is None:
+        if cut_ch_name_cols and None not in (ch_name, feature_names):
+            feature_names = [
+                i[len(ch_name) + 1:] for i in list(feature_names) if ch_name in i
+            ]
 
     if normalize_data:
         X_epoch_mean = stats.zscore(
@@ -308,8 +311,8 @@ def plot_epochs_avg(
     plt.imshow(X_epoch_mean, aspect="auto")
     plt.yticks(np.arange(0, len(feature_names), 1), feature_names)
     plt.xticks(
-        np.arange(0, X_epoch.shape[1], 1),
-        np.round(np.arange(-epoch_len / 2, epoch_len / 2, 1 / sfreq), 2),
+        np.arange(0, X_epoch.shape[1], int(X_epoch.shape[1]/10)),
+        np.round(np.arange(-epoch_len / 2, epoch_len / 2, epoch_len/10), 2),
         rotation=90,
     )
     plt.xlabel("Time [s]")
@@ -332,8 +335,8 @@ def plot_epochs_avg(
     plt.ylabel("target")
     plt.title(label_name)
     plt.xticks(
-        np.arange(0, X_epoch.shape[1], 1),
-        np.round(np.arange(-epoch_len / 2, epoch_len / 2, 1 / sfreq), 2),
+        np.arange(0, X_epoch.shape[1], int(X_epoch.shape[1]/10)),
+        np.round(np.arange(-epoch_len / 2, epoch_len / 2, epoch_len/10), 2),
         rotation=90,
     )
     plt.xlabel("Time [s]")

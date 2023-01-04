@@ -7,6 +7,7 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+.pypirc/
 .Python
 build/
 develop-eggs/
@@ -110,6 +111,12 @@ ENV/
 env.bak/
 venv.bak/
 
+# Visual Studio Code
+.vscode
+
+# PyCharm
+.idea
+
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -127,36 +134,3 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-
-# Other
-.idea/
-
-### VisualStudioCode ###
-.vscode
-
-# Ignore pickles
-*.pkl
-**/*.pkl
-
-### VisualStudioCode Patch ###
-# Ignore all local history of files
-**/.history
-
-# individual png outputs
-examples/data/derivatives/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg/MOV_algined_features_ch_ECOG_AT_SM_L_1-avgref_bandpass.png
-examples/data/derivatives/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg/MOV_algined_features_ch_ECOG_AT_SM_L_1-avgref_sharpwaveprominence.png
-examples/data/derivatives/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg/MOV_algined_features_ch_ECOG_AT_SM_L_2-avgref_bandpass.png
-examples/data/derivatives/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg/MOV_algined_features_ch_ECOG_AT_SM_L_2-avgref_sharpwaveprominence.png
-examples/data/derivatives/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg/MOV_algined_features_ch_ECOG_AT_SM_L_3-avgref_bandpass.png
-examples/data/derivatives/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg/MOV_algined_features_ch_ECOG_AT_SM_L_3-avgref_sharpwaveprominence.png
-examples/data/derivatives/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg/MOV_algined_features_ch_ECOG_AT_SM_L_4-avgref_bandpass.png
-examples/data/derivatives/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg/MOV_algined_features_ch_ECOG_AT_SM_L_4-avgref_sharpwaveprominence.png
-examples/data/derivatives/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg/MOV_algined_features_ch_ECOG_AT_SM_L_6-avgref_bandpass.png
-examples/data/derivatives/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg/MOV_algined_features_ch_ECOG_AT_SM_L_6-avgref_sharpwaveprominence.png
-examples/data/derivatives/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg_LM_ML_RES.p
-examples/data/derivatives/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_ieeg_run_analysis.p
-
-# temp files
-*.tmp
-
-*.csv

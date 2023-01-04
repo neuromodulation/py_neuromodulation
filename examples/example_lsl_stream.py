@@ -39,10 +39,6 @@ def setup_stream():
         "O2",
     ]
 
-    ch_names = [
-        "C3",
-        "C4",
-    ]
     nm_channels = nm_define_nmchannels.set_channels(
         ch_names=ch_names,
         ch_types=["eeg" for _ in range(len(ch_names))],
@@ -51,6 +47,8 @@ def setup_stream():
         used_types=("eeg",),
     )
 
+    # set used to false for all channels except C3 and C4
+    nm_channels.used = [0, 0, 1, 1, 0, 0, 0, 0]
     stream = nm_lsl_stream.LSLStream(
         settings=None,
         nm_channels=nm_channels,
@@ -74,6 +72,9 @@ def setup_stream():
     for f in stream.settings["postprocessing"]:
         stream.settings["postprocessing"][f] = False
     stream.settings["postprocessing"]["feature_normalization"] = True
+    stream.settings["feature_normalization_settings"][
+        "normalization_method"
+    ] = "zscore"
 
     stream.settings["frequency_ranges_hz"] = {
         "theta": [4, 8],
@@ -82,6 +83,7 @@ def setup_stream():
         "high beta": [20, 35],
         "low gamma": [60, 80],
     }
+    stream.settings["sampling_rate_features_hz"] = 1
     stream.init_stream(
         sfreq=250,
         line_noise=50,
@@ -111,10 +113,10 @@ def main():
         wait_time=1,
     )
 
-    lsl_streaminlet = pylsl.StreamInlet(info=streams[0], max_buflen=25)
+    lsl_streaminlet = pylsl.StreamInlet(info=streams[0], max_buflen=50)
 
     def get_data(queue_raw: multiprocessing.Queue):
-        samples, _ = lsl_streaminlet.pull_chunk(max_samples=25, timeout=1)
+        samples, _ = lsl_streaminlet.pull_chunk(max_samples=50, timeout=1)
         raw_data = np.array(samples).T  # shape (ch, time)
         queue_raw.put(raw_data)
 
@@ -157,6 +159,7 @@ def main():
     time_call_get_data_s = np.round(
         1 / app.stream.settings["sampling_rate_features_hz"], 2
     )
+    time_call_get_data_s = 1  # in seconds
 
     # RepeatTimer will allow synchronized data pull
     timer = RepeatTimer(time_call_get_data_s, get_data, args=(app.queue_raw,))
@@ -168,7 +171,7 @@ def main():
         data = queue_plotting.get()  # this blocks untill it gets some data
         for idx, rect in enumerate(bar_plt):
             rect.set_height(data[idx])
-        plt.pause(0.05)
+        plt.pause(0.005)
         return bar_plt
 
     if app.PREDICTION is True:

@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 from pathlib import Path
 from typing import Iterable
 
@@ -351,6 +352,44 @@ def loadmat(filename):
     """
     data = io.loadmat(filename, struct_as_record=False, squeeze_me=True)
     return _check_keys(data)
+
+
+def get_paths_example_data():
+    """
+    This function should provide RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT and datatype for the example
+    dataset used in most examples.
+    """
+
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(''))
+    if os.path.basename(SCRIPT_DIR) == "py_neuromodulation":
+        # this check is necessary, so we can also run the script from the root directory
+        SCRIPT_DIR = os.path.join(SCRIPT_DIR, "examples")
+
+    sys.path.append(os.path.dirname(SCRIPT_DIR))
+
+    sub = "testsub"
+    ses = "EphysMedOff"
+    task = "buttonpress"
+    run = 0
+    datatype = "ieeg"
+
+    # Define run name and access paths in the BIDS format.
+    RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}"
+
+    PATH_RUN = os.path.join(
+        (os.path.join(SCRIPT_DIR, "data")),
+        f"sub-{sub}",
+        f"ses-{ses}",
+        datatype,
+        RUN_NAME,
+    )
+    PATH_BIDS = os.path.join(SCRIPT_DIR, "data")
+
+    # Provide a path for the output data.
+    PATH_OUT = os.path.join(SCRIPT_DIR, "data", "derivatives")
+
+    return RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype
+
 
 
 def _check_keys(dict):

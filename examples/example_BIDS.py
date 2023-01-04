@@ -67,46 +67,19 @@ def run_example_BIDS():
         settings=None,
         nm_channels=nm_channels,
         path_grids=None,
-        verbose=False,
+        verbose=True,
     )
 
     stream.set_settings_fast_compute()
-    # We first take care of the preprocessing steps - and here we want to perform all of them in the order given by stream.settings['preprocessing']['preprocessing_order']
-
-    stream.settings["preprocessing"]["raw_resampling"] = True
-    stream.settings["preprocessing"]["raw_normalization"] = True
-    stream.settings["preprocessing"]["re_referencing"] = True
-    stream.settings["preprocessing"]["notch_filter"] = True
-    stream.settings["preprocessing"]["preprocessing_order"] = [
-        "raw_resampling",
-        "notch_filter",
-        "re_referencing",
-        "raw_normalization",
-    ]
-
-    # Now we focus on the features that we want to estimate:
-
     stream.settings["features"]["raw_hjorth"] = True
     stream.settings["features"]["bandpass_filter"] = True
     stream.settings["features"]["fft"] = True
     stream.settings["features"]["sharpwave_analysis"] = True
-    stream.settings["features"]["fooof"] = False
+    stream.settings["features"]["fooof"] = True
     stream.settings["features"]["nolds"] = False
+    stream.settings["features"]["bursts"] = True
 
-    # Then we set the postprocessing steps
-    stream.settings["postprocessing"]["feature_normalization"] = False
-    stream.settings["postprocessing"]["project_cortex"] = True
-    stream.settings["postprocessing"]["project_subcortex"] = True
-    # # One can also change the settings related to those steps, for example:
-    stream.settings["sharpwave_analysis_settings"]["sharpwave_features"][
-        "peak_left"
-    ] = True
-    stream.settings["sharpwave_analysis_settings"]["sharpwave_features"][
-        "peak_right"
-    ] = True
-    stream.settings["sharpwave_analysis_settings"]["sharpwave_features"][
-        "trough"
-    ] = True
+    # Additional sharpwave features
     stream.settings["sharpwave_analysis_settings"]["sharpwave_features"][
         "width"
     ] = True
@@ -123,10 +96,11 @@ def run_example_BIDS():
         "decay_steepness"
     ] = True
 
+    stream.settings["sharpwave_analysis_settings"]["sharpwave_features"][
+        "slope_ratio"
+    ] = True
+
     stream.settings["sharpwave_analysis_settings"]["estimator"]["mean"] = [
-        "peak_left",
-        "peak_right",
-        "trough",
         "width",
         "decay_time",
         "rise_time",
@@ -135,12 +109,42 @@ def run_example_BIDS():
         "sharpness",
         "prominence",
         "interval",
+        "slope_ratio",
+    ]
+
+    stream.settings["sharpwave_analysis_settings"]["estimator"]["var"] = [
+        "width",
+        "decay_time",
+        "rise_time",
+        "rise_steepness",
+        "decay_steepness",
+        "sharpness",
+        "prominence",
+        "interval",
+        "slope_ratio",
     ]
 
     stream.settings["sharpwave_analysis_settings"]["estimator"]["max"] = [
         "sharpness",
         "prominence",
     ]
+
+    # for now we only look at the aperiodic component of fooof
+    stream.settings["fooof"]["periodic"]["center_frequency"] = False
+    stream.settings["fooof"]["periodic"]["band_width"] = False
+    stream.settings["fooof"]["periodic"]["height_over_ap"] = False
+
+    # If we also want to compute nolds features (‘NOnLinear measures for Dynamical Systems’), this is how to select the frequency bands:
+
+    stream.settings["nolds_features"]["data"]["frequency_bands"] = [
+        "theta",
+        "alpha",
+        "low beta",
+        "high gamma"]
+
+    stream.settings["postprocessing"]["feature_normalization"] = False
+    stream.settings["postprocessing"]["project_cortex"] = True
+    stream.settings["postprocessing"]["project_subcortex"] = True
 
     stream.init_stream(
         sfreq=sfreq,
