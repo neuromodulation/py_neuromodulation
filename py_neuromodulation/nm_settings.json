@@ -91,7 +91,7 @@
             "complexity": false
         },
         "log_transform": true,
-        "kalman_filter": true
+        "kalman_filter": false
     },
     "kalman_filter_settings": {
         "Tp": 0.1,
@@ -125,12 +125,12 @@
     "stft_settings": {
         "windowlength_ms": 500,
         "log_transform": true,
-        "kalman_filter": true
+        "kalman_filter": false
     },
     "fft_settings": {
         "windowlength_ms": 1000,
         "log_transform": true,
-        "kalman_filter": true
+        "kalman_filter": false
     },
     "sharpwave_analysis_settings": {
         "sharpwave_features": {
