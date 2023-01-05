@@ -191,6 +191,18 @@ def run_example_BIDS() -> None:
         epoch_len=4,
         threshold=0.5,
     )
+
+    feature_reader.plot_all_features(
+        ytick_labelsize=3,
+        clim_low=-2,
+        clim_high=2,
+        time_limit_low_s=50,
+        time_limit_high_s=100,
+        normalize=True,
+        save=True
+    )
+
+
     model = xgboost.XGBRegressor()
 
     feature_reader.decoder = nm_decode.Decoder(

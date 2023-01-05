@@ -140,3 +140,4 @@ dmypy.json
 **/*.pkl
 *.p
 
+.pdf

@@ -405,8 +405,61 @@ def plot_grid_elec_3d(
             marker="o",
         )
 
+def plot_all_features(
+    df: pd.DataFrame,
+    time_limit_low_s: float = None,
+    time_limit_high_s: float = None,
+    normalize: bool = True,
+    ytick_labelsize: int = 4,
+    clim_low: float = None,
+    clim_high: float = None,
+    save: bool = False,
+    title='all_feature_plt.pdf',
+    OUT_PATH:str=None,
+    feature_file:str=None,
+):
+
+    if time_limit_high_s is not None:
+        df = df[df['time'] < time_limit_high_s*1000]
+    if time_limit_low_s is not None:
+        df = df[df['time'] > time_limit_low_s*1000]
+
+    cols_plt = [c for c in df.columns if c != 'time']
+    if normalize is True:
+        data_plt = stats.zscore(df[cols_plt])
+    else:
+        data_plt = df[cols_plt]
+
+    plt.figure(figsize=(7,5), dpi=300)
+    plt.imshow(data_plt.T, aspect='auto')
+    plt.xlabel("Time [s]")
+    plt.ylabel("Feature Names")
+    plt.yticks(
+        np.arange(len(cols_plt)),
+        cols_plt,
+        size =ytick_labelsize
+    )
+
+    tick_num = np.arange(0, df.shape[0], int(df.shape[0] / 10))
+    tick_labels = np.array(np.rint(df['time'].iloc[tick_num]/1000), dtype=int)
+    plt.xticks(tick_num, tick_labels)
+
+    plt.title(f"Feature Plot {feature_file}")
+    
+    if clim_low is not None:
+        plt.clim(vmin=clim_low)
+    if clim_high is not None:
+        plt.clim(vmax=clim_high)
+
+    plt.colorbar()
+
+    if save is True:
+        plt_path = os.path.join(OUT_PATH, feature_file, title)
+        plt.savefig(plt_path, bbox_inches="tight")
+
 
 class NM_Plot:
+
     def __init__(
         self,
         ecog_strip: np.ndarray | None = None,

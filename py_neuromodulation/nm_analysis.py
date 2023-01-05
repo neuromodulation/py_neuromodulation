@@ -212,7 +212,7 @@ class Feature_Reader:
             set_clim=False,
         )
 
-    def plot_features(
+    def plot_target_avg_all_channels(
         self,
         ch_names_ECOG=None,
         list_feature_keywords: list[str] = ["stft"],
@@ -290,6 +290,40 @@ class Feature_Reader:
             feature_file=self.feature_file,
             str_title=title,
         )
+
+    def plot_all_features(
+        self,
+        ch_used: str = None,
+        time_limit_low_s: float = None,
+        time_limit_high_s: float = None,
+        normalize: bool = True,
+        save: bool = False,
+        title='all_feature_plt.pdf',
+        ytick_labelsize: int = 10,
+        clim_low: float = None,
+        clim_high: float = None,
+        ):
+
+        if ch_used is not None:
+            col_used = [c for c in self.feature_arr.columns if c.startswith(ch_used) or c == 'time' or 'LABEL' in c or 'MOV' in c]
+            df = self.feature_arr[col_used[::-1]]
+        else:
+            df = self.feature_arr[self.feature_arr.columns[::-1]]
+
+        nm_plots.plot_all_features(
+            df=df,
+            time_limit_low_s=time_limit_low_s,
+            time_limit_high_s=time_limit_high_s,
+            normalize=normalize,
+            save=save,
+            title=title,
+            ytick_labelsize=ytick_labelsize,
+            feature_file=self.feature_file,
+            OUT_PATH=self.feature_dir,
+            clim_low=clim_low,
+            clim_high=clim_high
+        )
+
 
     @staticmethod
     def get_performace_sub_strip(
