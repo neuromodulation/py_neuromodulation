@@ -7,6 +7,12 @@
         "re_referencing",
         "raw_normalization"
     ],
+    "documentation_preprocessing_options": [
+        "raw_resampling",
+        "notch_filter",
+        "re_referencing",
+        "raw_normalization"
+    ],
     "features": {
         "raw_hjorth": true,
         "return_raw": true,
@@ -29,32 +35,24 @@
     "raw_resampling_settings": {
         "resample_freq_hz": 1000
     },
+    "documentation_normalization_options": [
+        "mean",
+        "median",
+        "zscore",
+        "zscore-median",
+        "quantile",
+        "power",
+        "robust",
+        "minmax"
+    ],
     "raw_normalization_settings": {
         "normalization_time_s": 30,
-        "normalization_method": {
-            "mean": false,
-            "median": false,
-            "zscore": true,
-            "zscore-median": false,
-            "quantile": false,
-            "power": false,
-            "robust": false,
-            "minmax": false
-        },
+        "normalization_method": "zscore",
         "clip": 3
     },
     "feature_normalization_settings": {
         "normalization_time_s": 30,
-        "normalization_method": {
-            "mean": false,
-            "median": false,
-            "zscore": false,
-            "zscore-median": false,
-            "quantile": false,
-            "power": false,
-            "robust": false,
-            "minmax": true
-        },
+        "normalization_method": "zscore",
         "clip": 3
     },
     "frequency_ranges_hz": {

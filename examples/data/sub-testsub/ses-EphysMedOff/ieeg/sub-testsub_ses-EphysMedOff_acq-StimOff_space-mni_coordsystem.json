@@ -1,8 +1,0 @@
-{
-    "IntendedFor": "n/a",
-    "iEEGCoordinateSystem": "MNI152NLin2009bAsym",
-    "iEEGCoordinateUnits": "mm",
-    "iEEGCoordinateSystemDescription": "MNI152 2009b NLIN asymmetric T2 template",
-    "iEEGCoordinateProcessingDescription": "Co-registration, normalization and electrode localization done with Lead-DBS",
-    "iEEGCoordinateProcessingReference": "Horn, A., Li, N., Dembek, T. A., Kappel, A., Boulay, C., Ewert, S., et al. (2018). Lead-DBS v2: Towards a comprehensive pipeline for deep brain stimulation imaging. NeuroImage."
-}
