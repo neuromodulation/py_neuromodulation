@@ -127,7 +127,7 @@ class STFT(OscillatoryFeature):
 
 class BandPower(OscillatoryFeature):
     def __init__(
-        self, settings: dict, ch_names: Iterable[str], sfreq: float
+        self, settings: dict, ch_names: Iterable[str], sfreq: float, use_kf: bool = None
     ) -> None:
         super().__init__(settings, ch_names, sfreq)
         bp_settings = self.s["bandpass_filter_settings"]
@@ -141,7 +141,7 @@ class BandPower(OscillatoryFeature):
 
         self.log_transform = bp_settings["log_transform"]
 
-        if bp_settings["kalman_filter"]:
+        if use_kf is True or (use_kf is None and bp_settings["kalman_filter"] is True):
             self.init_KF("bandpass_activity")
 
         bp_features = ["activity", "mobility", "complexity"]

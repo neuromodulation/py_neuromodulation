@@ -9,14 +9,12 @@ from py_neuromodulation import (
     nm_stream_offline,
     nm_IO,
     nm_define_nmchannels,
+    nm_settings
 )
-
-# https://stackoverflow.com/a/10253916/5060208
-# despite that pytest needs to be envoked by python: python -m pytest tests/
 
 
 class TestWrapper:
-    def __init__(self):
+    def setup_stream(self):
         """This test function sets a data batch and automatic initialized M1 datafram
 
         Args:
@@ -29,29 +27,11 @@ class TestWrapper:
             fs (float): example sampling frequency
         """
 
-        sub = "testsub"
-        ses = "EphysMedOff"
-        task = "buttonpress"
-        run = 0
-        datatype = "ieeg"
-
-        RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}"
-
-        PATH_RUN = os.path.join(
-            os.path.abspath(os.path.join("examples", "data")),
-            f"sub-{sub}",
-            f"ses-{ses}",
-            datatype,
-            RUN_NAME,
-        )
-        PATH_BIDS = os.path.abspath(os.path.join("examples", "data"))
-        PATH_OUT = os.path.abspath(
-            os.path.join("examples", "data", "derivatives")
-        )
+        RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data()
 
         (
             raw,
-            self.data,
+            data,
             sfreq,
             line_noise,
             coord_list,
@@ -67,33 +47,38 @@ class TestWrapper:
             bads=raw.info["bads"],
             new_names="default",
             used_types=("ecog", "dbs", "seeg"),
-            target_keywords=("SQUARED_ROTATION",),
+            target_keywords=("MOV_RIGHT_CLEAN",),
         )
 
-        self.stream = nm_stream_offline.Stream(
-            settings=None,
+        settings = nm_settings.get_default_settings()
+        settings = nm_settings.reset_settings(settings)
+        settings["fooof"]["aperiodic"]["exponent"] = True
+        settings["fooof"]["aperiodic"]["offset"] = True
+        settings["features"]["fooof"] = True
+
+        stream = nm_stream_offline.Stream(
+            settings=settings,
             nm_channels=nm_channels,
             path_grids=None,
             verbose=True,
-        )
-        self.stream.reset_settings()
-        self.stream.settings["fooof"]["aperiodic"]["exponent"] = True
-        self.stream.settings["fooof"]["aperiodic"]["offset"] = True
-        self.stream.settings["features"]["fooof"] = True
-
-        self.stream.init_stream(
             sfreq=sfreq,
             line_noise=line_noise,
             coord_list=coord_list,
-            coord_names=coord_names,
+            coord_names=coord_names
         )
 
+        return data, stream
+
     def test_fooof_features(self):
+
+        data, stream = self.setup_stream()
+
         generator = nm_generator.raw_data_generator(
-            self.data, self.stream.settings, self.stream.sfreq
+            data, 
+            stream.settings, stream.sfreq
         )
         data_batch = next(generator, None)
-        feature_series = self.stream.run_analysis.process(data_batch)
+        feature_series = stream.run_analysis.process(data_batch)
         # since the settings can define searching for "max_n_peaks" peaks
         # there will be None's in the feature_series
         # with a non successful fit, aperiod features can also be None

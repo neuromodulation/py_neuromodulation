@@ -393,7 +393,7 @@ def get_paths_example_data():
     dataset used in most examples.
     """
 
-    SCRIPT_DIR = os.path.dirname(os.path.abspath(''))
+    SCRIPT_DIR = os.path.abspath('')
     if os.path.basename(SCRIPT_DIR) == "py_neuromodulation":
         # this check is necessary, so we can also run the script from the root directory
         SCRIPT_DIR = os.path.join(SCRIPT_DIR, "examples")

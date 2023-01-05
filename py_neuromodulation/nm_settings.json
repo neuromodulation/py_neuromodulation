@@ -20,12 +20,12 @@
         "stft": true,
         "fft": true,
         "sharpwave_analysis": true,
-        "coherence": true,
+        "coherence": false,
         "fooof": true,
         "nolds": true,
         "bursts": true,
         "linelength": true,
-        "mne_connectiviy": true
+        "mne_connectivity": true
     },
     "postprocessing": {
         "feature_normalization": true,
@@ -200,8 +200,8 @@
     "coherence": {
         "channels": [
             [
-                "LFP_L_1_STN_BS",
-                "ECOG_L_4_SMC_AT"
+                "STN_RIGHT_0",
+                "ECOG_RIGHT_0"
             ]
         ],
         "frequency_bands": [
