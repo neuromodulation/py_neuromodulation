@@ -24,10 +24,10 @@ from skopt import space as skopt_space
 
 def run_example_BIDS() -> None:
     """run the example BIDS path in py_neuromodulation/examples/data"""
-    sub = "testsub"
-    ses = "EphysMedOff"
-    task = "buttonpress"
-    run = 0
+    sub = "000"
+    ses = "right"
+    task = "force"
+    run = 3
     datatype = "ieeg"
 
     RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}"
@@ -61,7 +61,7 @@ def run_example_BIDS() -> None:
         bads=raw.info["bads"],
         new_names="default",
         used_types=("ecog", "dbs", "seeg"),
-        target_keywords=("SQUARED_ROTATION",),
+        target_keywords="MOV_RIGHT_CLEAN",
     )
 
     settings = nm_settings.get_default_settings()
@@ -193,16 +193,7 @@ def run_example_BIDS() -> None:
         epoch_len=4,
         threshold=0.5,
     )
-
-    model = xgboost.XGBClassifier(use_label_encoder=False)
-
-    bay_opt_param_space = [
-        skopt_space.Integer(1, 100, name="max_depth"),
-        skopt_space.Real(
-            10**-5, 10**0, "log-uniform", name="learning_rate"
-        ),
-        skopt_space.Real(10**0, 10**1, "uniform", name="gamma"),
-    ]
+    model = xgboost.XGBRegressor()
 
     feature_reader.decoder = nm_decode.Decoder(
         features=feature_reader.feature_arr,
@@ -210,14 +201,13 @@ def run_example_BIDS() -> None:
         label_name=feature_reader.label_name,
         used_chs=feature_reader.used_chs,
         model=model,
-        eval_method=metrics.balanced_accuracy_score,
+        eval_method=metrics.r2_score,
         cv_method=model_selection.KFold(n_splits=3, shuffle=True),
-        get_movement_detection_rate=True,
+        get_movement_detection_rate=False,
         min_consequent_count=2,
         TRAIN_VAL_SPLIT=False,
         RUN_BAY_OPT=False,
-        bay_opt_param_space=bay_opt_param_space,
-        use_nested_cv=True,
+        use_nested_cv=False,
         sfreq=feature_reader.settings["sampling_rate_features_hz"],
     )
 
@@ -235,9 +225,7 @@ def run_example_BIDS() -> None:
         x_col="sub",
         y_col="performance_test",
         hue="ch_type",
-        PATH_SAVE=os.path.join(
-            PATH_OUT, RUN_NAME, RUN_NAME + "_decoding_performance.png"
-        ),
+        PATH_SAVE=os.path.join(PATH_OUT, RUN_NAME, RUN_NAME + "_decoding_performance.png")
     )
 
 

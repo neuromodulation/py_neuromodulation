@@ -86,6 +86,8 @@ def set_channels(
     df["name"] = ch_names
 
     if used_types:
+        if type(used_types) is str:
+            used_types = [used_types]          # Even if the user passes only ("ecog"), the if statement bellow will work
         used_list = []
         for ch_type in ch_types:
             if any(
@@ -99,6 +101,8 @@ def set_channels(
         df["used"] = 0
 
     if target_keywords:
+        if type(target_keywords) is str:
+            target_keywords = [target_keywords]
         targets = []
         for ch_name in ch_names:
             if any(kw.lower() in ch_name.lower() for kw in target_keywords):
