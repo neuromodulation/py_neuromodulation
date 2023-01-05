@@ -1,0 +1,16 @@
+,name,rereference,used,target,type,status,new_name
+0,ANALOG_R_ROTA_CH,None,0,0,misc,good,ANALOG_R_ROTA_CH
+1,ECOG_L_1_SMC_AT,average,1,0,ecog,good,ECOG_L_1_SMC_AT-avgref
+2,ECOG_L_2_SMC_AT,average,1,0,ecog,good,ECOG_L_2_SMC_AT-avgref
+3,ECOG_L_3_SMC_AT,average,1,0,ecog,good,ECOG_L_3_SMC_AT-avgref
+4,ECOG_L_4_SMC_AT,average,1,0,ecog,good,ECOG_L_4_SMC_AT-avgref
+5,ECOG_L_5_SMC_AT,average,1,0,ecog,good,ECOG_L_5_SMC_AT-avgref
+6,ECOG_L_6_SMC_AT,average,1,0,ecog,good,ECOG_L_6_SMC_AT-avgref
+7,EEG_AO,None,0,0,misc,good,EEG_AO
+8,LFP_L_1_STN_BS,LFP_L_567_STN_BS,0,0,seeg,good,LFP_L_1_STN_BS-LFP_L_567_STN_BS
+9,LFP_L_234_STN_BS,LFP_L_1_STN_BS,0,0,seeg,good,LFP_L_234_STN_BS-LFP_L_1_STN_BS
+10,LFP_L_567_STN_BS,LFP_L_234_STN_BS,0,0,seeg,good,LFP_L_567_STN_BS-LFP_L_234_STN_BS
+11,LFP_R_234_STN_BS,LFP_R_567_STN_BS,0,0,seeg,good,LFP_R_234_STN_BS-LFP_R_567_STN_BS
+12,LFP_R_567_STN_BS,LFP_R_234_STN_BS,0,0,seeg,good,LFP_R_567_STN_BS-LFP_R_234_STN_BS
+13,SQUARED_ARTIFACT,None,0,0,misc,good,SQUARED_ARTIFACT
+14,SQUARED_ROTATION,None,0,1,misc,good,SQUARED_ROTATION
