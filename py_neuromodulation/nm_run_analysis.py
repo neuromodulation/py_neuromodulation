@@ -145,14 +145,18 @@ class DataProcessor:
 
     @staticmethod
     def _add_coordinates(coord_names: list[str], coord_list: list) -> dict:
-        """set coordinate information to settings from RawArray
-        The set coordinate positions are set as lists,
-        since np.arrays cannot be saved in json
+        """Write cortical and subcortical coordinate information in joint dictionary
+
         Parameters
         ----------
-        raw_arr : mne.io.RawArray
-        PATH_GRIDS : string, optional
-            absolute path to grid_cortex.tsv and grid_subcortex.tsv, by default: None
+        coord_names : list[str]
+            list of coordinate names
+        coord_list : list
+            list of list of 3D coordinates
+
+        Returns
+        -------
+        dict with (sub)cortex_left and (sub)cortex_right ch_names and positions
         """
 
         def is_left_coord(val: int | float, coord_region: str) -> bool:

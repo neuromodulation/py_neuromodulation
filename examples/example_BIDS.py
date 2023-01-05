@@ -72,25 +72,23 @@ def run_example_BIDS() -> None:
     # by settings['preprocessing']
 
     settings["preprocessing"] = [
-        "raw_resampling",
         "notch_filter",
         "re_referencing",
-        "raw_normalization",
     ]
 
     # Now we focus on the features that we want to estimate:
-    settings["features"]["raw_hjorth"] = True
-    settings["features"]["bandpass_filter"] = True
+    settings["features"]["raw_hjorth"] = False
+    settings["features"]["bandpass_filter"] = False
     settings["features"]["fft"] = True
-    settings["features"]["sharpwave_analysis"] = True
-    settings["features"]["fooof"] = True
+    settings["features"]["sharpwave_analysis"] = False
+    settings["features"]["fooof"] = False
     settings["features"]["nolds"] = False
-    settings["features"]["bursts"] = True
+    settings["features"]["bursts"] = False
 
     # Then we set the postprocessing steps
-    settings["postprocessing"]["feature_normalization"] = False
-    settings["postprocessing"]["project_cortex"] = True
-    settings["postprocessing"]["project_subcortex"] = True
+    settings["postprocessing"]["feature_normalization"] = True
+    settings["postprocessing"]["project_cortex"] = False
+    settings["postprocessing"]["project_subcortex"] = False
 
     # Additional sharpwave features
     settings["sharpwave_analysis_settings"]["sharpwave_features"][
