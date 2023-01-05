@@ -63,7 +63,7 @@ class ReReferencer:
 
     def process(self, data: np.ndarray) -> np.ndarray:
 
-        """Rereference data according to the initialized RT_rereference class.
+        """Rereference data according to the initialized ReReferencer class.
 
         Args:
             ieeg_batch (numpy ndarray) :
