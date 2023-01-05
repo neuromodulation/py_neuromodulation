@@ -71,8 +71,6 @@ class Features:
                     self.features.append(
                         nm_mne_connectiviy.MNEConnectivity(s, ch_names, sfreq)
                     )
-                case "std":
-                    self.features.append(nm_std.Std(s, ch_names, sfreq))
                 case _:
                     raise ValueError(f"Unknown feature found. Got: {feature}.")
 
