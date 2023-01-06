@@ -1,12 +1,12 @@
+import math
 import os
-import sys
 import numpy as np
 from numpy.testing import assert_array_equal
-from pathlib import Path
 
+from py_neuromodulation.nm_rereference import ReReferencer
 from py_neuromodulation import (
     nm_generator,
-    nm_stream_offline,
+    nm_settings,
     nm_IO,
     nm_define_nmchannels,
 )
@@ -15,8 +15,8 @@ from py_neuromodulation import (
 # despite that pytest needs to be envoked by python: python -m pytest tests/
 
 
-class TestWrapper:
-    def __init__(self):
+class TestReReference:
+    def setUp(self) -> None:
         """This test function sets a data batch and automatic initialized M1 datafram
 
         Args:
@@ -28,14 +28,14 @@ class TestWrapper:
             settings_wrapper (settings.py): settings.json
             fs (float): example sampling frequency
         """
-
-        sub = "testsub"
-        ses = "EphysMedOff"
-        task = "buttonpress"
-        run = 0
+        sub = "000"
+        ses = "right"
+        task = "force"
+        run = 3
         datatype = "ieeg"
 
-        RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}"
+        # Define run name and access paths in the BIDS format.
+        RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}_{datatype}.vhdr"
 
         PATH_RUN = os.path.join(
             os.path.abspath(os.path.join("examples", "data")),
@@ -45,13 +45,10 @@ class TestWrapper:
             RUN_NAME,
         )
         PATH_BIDS = os.path.abspath(os.path.join("examples", "data"))
-        PATH_OUT = os.path.abspath(
-            os.path.join("examples", "data", "derivatives")
-        )
 
         (
             raw,
-            self.data,
+            data,
             sfreq,
             line_noise,
             coord_list,
@@ -70,34 +67,26 @@ class TestWrapper:
             target_keywords=("SQUARED_ROTATION",),
         )
 
-        self.stream = nm_stream_offline.Stream(
-            settings=None,
-            nm_channels=self.nm_channels,
-            path_grids=None,
-            verbose=True,
-        )
-        self.stream.set_settings_fast_compute()  # includes rereference features
-
-        self.stream.init_stream(
-            sfreq=sfreq,
-            line_noise=line_noise,
-            coord_list=coord_list,
-            coord_names=coord_names,
-        )
+        settings = nm_settings.get_default_settings()
+        settings = nm_settings.set_settings_fast_compute(
+            settings
+        )  # includes rereference features
 
         generator = nm_generator.raw_data_generator(
-            self.data, self.stream.settings, self.stream.sfreq
+            data, settings, math.floor(sfreq)
         )
-        self.ieeg_batch = next(generator, None)
+        self.data_batch = next(generator, None)
+        self.re_referencer = ReReferencer(sfreq, self.nm_channels)
 
-    def test_rereference(self):
+    def test_rereference(self) -> None:
         """
         Args:
             ref_here (RT_rereference): Rereference initialized object
             ieeg_batch (np.ndarray): sample data
             df_M1 (pd.Dataframe): rereferencing dataframe
         """
-        ref_dat = self.stream.rereference.rereference(self.ieeg_batch)
+        self.setUp()
+        ref_dat = self.re_referencer.process(self.data_batch)
 
         print("Testing channels which are used but not rereferenced.")
         for no_ref_idx in np.where(
@@ -105,7 +94,7 @@ class TestWrapper:
             == 1
         )[0]:
             assert_array_equal(
-                ref_dat[no_ref_idx, :], self.ieeg_batch[no_ref_idx, :]
+                ref_dat[no_ref_idx, :], self.data_batch[no_ref_idx, :]
             )
 
         print("Testing ECOG average reference.")
@@ -115,8 +104,8 @@ class TestWrapper:
         )[0]:
             assert_array_equal(
                 ref_dat[ecog_ch_idx, :],
-                self.ieeg_batch[ecog_ch_idx, :]
-                - self.ieeg_batch[
+                self.data_batch[ecog_ch_idx, :]
+                - self.data_batch[
                     (self.nm_channels["type"] == "ecog")
                     & (self.nm_channels.index != ecog_ch_idx)
                 ].mean(axis=0),
@@ -136,6 +125,6 @@ class TestWrapper:
             )[0][0]
             assert_array_equal(
                 ref_dat[bp_reref_idx, :],
-                self.ieeg_batch[bp_reref_idx, :]
-                - self.ieeg_batch[referenced_bp_channel, :],
+                self.data_batch[bp_reref_idx, :]
+                - self.data_batch[referenced_bp_channel, :],
             )

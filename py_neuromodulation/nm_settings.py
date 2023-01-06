@@ -3,7 +3,7 @@ import pathlib
 
 import pandas as pd
 
-from py_neuromodulation import nm_normalization, nm_IO
+from py_neuromodulation import nm_IO
 
 
 def get_default_settings() -> dict:

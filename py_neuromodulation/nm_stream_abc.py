@@ -12,6 +12,7 @@ from py_neuromodulation import (
     nm_IO,
     nm_plots,
     nm_run_analysis,
+    nm_settings
 )
 
 _PathLike = str | os.PathLike
@@ -42,10 +43,6 @@ class PNStream(ABC):
         coord_list: list | None = None,
         verbose: bool = True,
     ) -> None:
-        if settings is None:
-            settings = (
-                pathlib.Path(__file__).parent.resolve() / "nm_settings.json"
-            )
         self.settings = self._load_settings(settings)
         self.nm_channels = self._load_nm_channels(nm_channels)
         if path_grids is None:
@@ -108,9 +105,11 @@ class PNStream(ABC):
         return nm_channels
 
     @staticmethod
-    def _load_settings(settings: dict | _PathLike) -> dict:
+    def _load_settings(settings: dict | _PathLike | None) -> dict:
         if isinstance(settings, dict):
             return settings
+        if settings is None: 
+            return nm_settings.get_default_settings()
         return nm_IO.read_settings(str(settings))
 
     def load_model(self, model_name: _PathLike) -> None:
