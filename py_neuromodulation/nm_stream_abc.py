@@ -1,6 +1,5 @@
 """Module that contains PNStream ABC."""
 from abc import ABC, abstractmethod
-import math
 import os
 import pathlib
 import _pickle as cPickle
@@ -25,10 +24,10 @@ class PNStream(ABC):
     run_analysis: nm_run_analysis.DataProcessor
     features: nm_features.Features
     coords: dict
-    sfreq: int
+    sfreq: int | float
     path_grids: _PathLike | None
     model: base.BaseEstimator | None
-    sess_rigtht: bool | None
+    sess_right: bool | None
     verbose: bool
 
     def __init__(
@@ -57,12 +56,12 @@ class PNStream(ABC):
             self.coords = {}
         else:
             self.coords = coords
-        self.sfreq = math.floor(sfreq)
+        self.sfreq = sfreq
         self.sess_right = None
         self.projection = None
         self.model = None
         self.run_analysis = nm_run_analysis.DataProcessor(
-            sfreq=sfreq,
+            sfreq=self.sfreq,
             settings=self.settings,
             nm_channels=self.nm_channels,
             path_grids=self.path_grids,
@@ -179,7 +178,7 @@ class PNStream(ABC):
     def save_settings(
         self, out_path_root: _PathLike, folder_name: str
     ) -> None:
-        nm_IO.save_settings(self.settings, out_path_root, folder_name)
+        self.run_analysis.save_settings(out_path_root, folder_name)
 
     def save_sidecar(self, out_path_root: _PathLike, folder_name: str) -> None:
         """Save sidecar incuding fs, coords, sess_right to
