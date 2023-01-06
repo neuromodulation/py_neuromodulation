@@ -13,6 +13,8 @@ class ReReferencer:
 
         Parameters
         ----------
+        sfreq : int | float
+            Sampling frequency. Is not used, only kept for compatibility.
         nm_channels : Pandas DataFrame
             Dataframe containing information about rereferencing, as
             specified in nm_channels.csv.
@@ -20,29 +22,32 @@ class ReReferencer:
 
         Raises:
             ValueError: rereferencing using undefined channel
-            ValueError: rereferencing according to same channel
+            ValueError: rereferencing to same channel
         """
-        (self.channels_used,) = np.where((nm_channels.used == 1))
-        (self.channels_not_used,) = np.where((nm_channels.used != 1))
+        (channels_used,) = np.where((nm_channels.used == 1))
 
         ch_names = nm_channels["name"].tolist()
-        ch_types = nm_channels.type
+        ch_types = nm_channels["type"]
         refs = nm_channels["rereference"]
 
         type_map = {}
-        for ch_type in nm_channels.type.unique():
+        for ch_type in ch_types.unique():
             type_map[ch_type] = np.where(
-                (ch_types == ch_type) & (nm_channels.status == "good")
+                (ch_types == ch_type) & (nm_channels["status"] == "good")
             )[0]
 
-        self.ref_map = {}
-        for ch_idx in self.channels_used:
-            ref = refs[ch_idx]
+        ref_matrix = np.zeros((len(nm_channels), len(nm_channels)))
+        for ind in range(len(nm_channels)):
+            ref_matrix[ind, ind] = 1
+            if ind not in channels_used:
+                continue
+            ref = refs[ind]
             if ref.lower() == "none" or pd.isnull(ref):
                 ref_idx = None
-            elif ref == "average":
-                ch_type = ch_types[ch_idx]
-                ref_idx = type_map[ch_type][type_map[ch_type] != ch_idx]
+                continue
+            if ref.lower() == "average":
+                ch_type = ch_types[ind]
+                ref_idx = type_map[ch_type][type_map[ch_type] != ind]
             else:
                 ref_idx = []
                 ref_channels = ref.split("&")
@@ -53,38 +58,25 @@ class ReReferencer:
                             " part of the recording channels. First missing"
                             f" channel: {ref_chan}."
                         )
-                    if ref_chan == ch_names[ch_idx]:
+                    if ref_chan == ch_names[ind]:
                         raise ValueError(
                             "You cannot rereference to the same channel."
                             f" Channel: {ref_chan}."
                         )
                     ref_idx.append(ch_names.index(ref_chan))
-            self.ref_map[ch_idx] = ref_idx
+            ref_matrix[ind, ref_idx] = -1 / len(ref_idx)
+        self.ref_matrix = ref_matrix
 
     def process(self, data: np.ndarray) -> np.ndarray:
-
         """Rereference data according to the initialized ReReferencer class.
 
         Args:
-            ieeg_batch (numpy ndarray) :
+            data (numpy ndarray) :
                 shape(n_channels, n_samples) - data to be rereferenced.
 
         Returns:
-            reref_data (numpy ndarray): rereferenced data
+            reref_data (numpy ndarray): 
+            shape(n_channels, n_samples) - rereferenced data
         """
-
-        new_data = []
-        for ch_idx in self.channels_used:
-            ref_idx = self.ref_map[ch_idx]
-            if ref_idx is None:
-                new_data_ch = data[ch_idx, :]
-            else:
-                ref_data = data[ref_idx, :]
-                new_data_ch = data[ch_idx, :] - np.mean(ref_data, axis=0)
-            new_data.append(new_data_ch)
-
-        reref_data = np.empty_like(data)
-        reref_data[self.channels_used, :] = np.vstack(new_data)
-        reref_data[self.channels_not_used, :] = data[self.channels_not_used]
-
-        return reref_data
+        return self.ref_matrix @ data
+        
