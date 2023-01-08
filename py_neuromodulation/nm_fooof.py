@@ -33,6 +33,30 @@ class FooofAnalyzer(nm_features_abc.Feature):
 
         self.f_vec = np.arange(0, int(self.num_samples / 2) + 1, 1)
 
+    def test_settings(
+        s: dict,
+        ch_names: Iterable[str],
+        sfreq: int | float,
+    ):
+        assert isinstance(s["fooof"]["aperiodic"]["exponent"], bool)
+        assert isinstance(s["fooof"]["aperiodic"]["offset"], bool)
+        assert isinstance(s["fooof"]["periodic"]["center_frequency"], bool)
+        assert isinstance(s["fooof"]["periodic"]["band_width"], bool)
+        assert isinstance(s["fooof"]["periodic"]["height_over_ap"], bool)
+        assert isinstance(s["fooof"]["knee"], bool)
+        assert isinstance(s["fooof"]["windowlength_ms"], (int, float))
+        assert (
+            s["fooof"]["windowlength_ms"] <= s["segment_length_features_ms"]
+        ), (
+            "fooof windowlength_ms needs to be smaller equal than segment_length_features_ms "
+            f"got windowlength_ms: {s['fooof']['windowlength_ms']} and {s['segment_length_features_ms']}"
+        )
+
+        assert (
+            s["fooof"]["freq_range_hz"][0] < sfreq
+            and s["fooof"]["freq_range_hz"][1] < sfreq
+        ), f"fooof frequency range needs to be below sfreq, got {s['fooof']['freq_range_hz']}"
+
     def _get_spectrum(self, data: np.array):
         """return absolute value fft spectrum"""
 

@@ -1,5 +1,4 @@
 from . import (
-    nm_decode,
     nm_analysis,
     nm_stream_abc,
     nm_cohortwrapper,

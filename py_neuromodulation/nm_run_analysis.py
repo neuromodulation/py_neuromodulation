@@ -25,6 +25,8 @@ class Preprocessor(Protocol):
     def process(self, data: np.ndarray) -> np.ndarray:
         ...
 
+    def test_settings(self, settings: dict):
+        ...
 
 _PREPROCESSING_CONSTRUCTORS = [
     "notch_filter",

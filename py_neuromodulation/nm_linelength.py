@@ -15,6 +15,15 @@ class LineLength(nm_features_abc.Feature):
     def get_line_length(x: np.ndarray) -> np.ndarray:
         return np.mean(np.abs(np.diff(x)) / (x.shape[0] - 1))
 
+    @staticmethod
+    def test_settings(
+        settings: dict,
+        ch_names: Iterable[str],
+        sfreq: int | float,
+    ):
+        # no settings to be checked
+        pass
+
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         for ch_idx, ch_name in enumerate(self.ch_names):
             features_compute[

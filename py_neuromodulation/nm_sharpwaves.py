@@ -32,9 +32,9 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
                         l_freq=filter_range[0],
                         h_freq=filter_range[1],
                         fir_design="firwin",
-                        #l_trans_bandwidth=None,
-                        #h_trans_bandwidth=None,
-                        #filter_length=str(sfreq) + "ms",
+                        # l_trans_bandwidth=None,
+                        # h_trans_bandwidth=None,
+                        # filter_length=str(sfreq) + "ms",
                         verbose=False,
                     ),
                 )
@@ -371,3 +371,46 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
 
             if self.sw_settings["sharpwave_features"]["width"] is True:
                 self.width.append(peak_idx_right - peak_idx_left)  # ms
+
+    @staticmethod
+    def test_settings(
+        s: dict,
+        ch_names: Iterable[str],
+        sfreq: int | float,
+    ):
+        for filter_range in s["sharpwave_analysis_settings"][
+            "filter_ranges_hz"
+        ]:
+            assert isinstance(
+                filter_range[0],
+                int,
+            ), f"filter range needs to be of type int, got {filter_range[0]}"
+            assert isinstance(
+                filter_range[1],
+                int,
+            ), f"filter range needs to be of type int, got {filter_range[1]}"
+            assert (
+                filter_range[1] > filter_range[0]
+            ), f"second filter value needs to be higher than first one, got {filter_range}"
+
+        # check if all features are also enbled via an estimator
+        used_features = list()
+        for feature_name, val in s["sharpwave_analysis_settings"][
+            "sharpwave_features"
+        ].items():
+            if val is True:
+                used_features.append(feature_name)
+        for used_feature in used_features:
+            estimator_list_feature = (
+                []
+            )  # one feature can have multiple estimators
+            for estimator, est_features in s["sharpwave_analysis_settings"][
+                "estimator"
+            ].items():
+                if est_features is not None:
+                    for est_feature in est_features:
+                        if used_feature == est_feature:
+                            estimator_list_feature.append(estimator)
+            assert (
+                len(estimator_list_feature) > 0
+            ), f"add estimator key for {used_feature}"
