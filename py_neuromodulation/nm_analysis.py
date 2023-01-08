@@ -8,6 +8,7 @@ import _pickle as cPickle
 import numpy as np
 import pandas as pd
 from sklearn import base, linear_model, metrics, model_selection
+from scipy import stats
 
 from py_neuromodulation import nm_decode, nm_IO, nm_plots
 
@@ -191,6 +192,17 @@ class Feature_Reader:
 
     def set_target_ch(self, ch_name: str) -> None:
         self.label = ch_name
+
+    def normalize_features(self, ) -> pd.DataFrame:
+        """Normalize feature_arr feature columns
+
+        Returns:
+            pd.DataFrame: z-scored feature_arr
+        """
+        cols_norm = [c for c in self.feature_arr.columns if 'time' not in c]
+        feature_arr_norm = stats.zscore(self.feature_arr[cols_norm])
+        feature_arr_norm['time'] = self.feature_arr['time']
+        return feature_arr_norm
 
     def plot_cort_projection(self) -> None:
         if self.sidecar["sess_right"]:
