@@ -5,6 +5,8 @@ import py_neuromodulation as nm
 from py_neuromodulation import (
     nm_define_nmchannels,
     nm_IO,
+    nm_settings,
+    nm_stream_offline
 )
 
 
@@ -15,26 +17,8 @@ class TestNormSettings(unittest.TestCase):
         Returns necessary variables for testing different settings.
         :return: stream, sfreq, line_noise, coord_list, coord_names, data, PATH_OUT, RUN_NAME
         """
-        SCRIPT_DIR = os.path.join(
-            os.path.abspath("."), "examples"
-        )
-        sub = "testsub"
-        ses = "EphysMedOff"
-        task = "buttonpress"
-        run = 0
-        datatype = "ieeg"
 
-        # Define run name and access paths in the BIDS format.
-        RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}"
-
-        PATH_RUN = os.path.join(
-            (os.path.join(SCRIPT_DIR, "data")),
-            f"sub-{sub}",
-            f"ses-{ses}",
-            datatype,
-            RUN_NAME,
-        )
-        PATH_BIDS = os.path.join(SCRIPT_DIR, "data")
+        RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data()
 
         (
             raw,
@@ -47,62 +31,40 @@ class TestNormSettings(unittest.TestCase):
             PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype
         )
 
-        # Provide a path for the output data. Each re-referencing method has their PATH_OUT
-        PATH_OUT = os.path.join(
-            SCRIPT_DIR, "data", "derivatives", "test_normalization"
-        )
         nm_channels = nm_define_nmchannels.set_channels(
             ch_names=raw.ch_names,
             ch_types=raw.get_channel_types(),
             reference="default",
             bads=raw.info["bads"],
             new_names="default",
-            used_types=("ecog",),  # We focus only on LFP data
-            target_keywords=("SQUARED_ROTATION",),
+            used_types=("ecog", "dbs", "seeg"),
+            target_keywords=("MOV_RIGHT_CLEAN",),
         )
 
-        stream = nm.Stream(
-            settings=None,
+        settings = nm_settings.get_default_settings()
+        settings = nm_settings.reset_settings(settings)
+
+        stream = nm_stream_offline.Stream(
+            settings=settings,
             nm_channels=nm_channels,
             path_grids=None,
-            verbose=False,
+            verbose=True,
+            sfreq=sfreq,
+            line_noise=line_noise,
+            coord_list=coord_list,
+            coord_names=coord_names
         )
-        return (
-            stream,
-            sfreq,
-            line_noise,
-            coord_list,
-            coord_names,
-            data,
-            nm_channels,
-            PATH_OUT,
-            RUN_NAME,
-        )
+
+        return data, stream
 
     def test_fast_compute_settings(self):
         """
         Try if normalization on fast compute settings works.
         No assertion in the end, only want to see if it raises any errors
         """
-        (
-            stream,
-            sfreq,
-            line_noise,
-            coord_list,
-            coord_names,
-            data,
-            nm_channels,
-            PATH_OUT,
-            RUN_NAME,
-        ) = self.set_up()
+        data, stream = self.set_up()
 
         stream.set_settings_fast_compute()
-        stream.init_stream(
-            sfreq=sfreq,
-            line_noise=line_noise,
-            coord_list=coord_list,
-            coord_names=coord_names,
-        )
 
         stream.run(
             data=data,
