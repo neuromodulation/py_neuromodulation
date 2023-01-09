@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.signal import convolve, find_peaks
+from scipy import signal
 from mne.filter import create_filter
 from typing import Iterable
 
@@ -23,22 +23,25 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
             "filter_ranges_hz"
         ]:
 
-            self.list_filter.append(
-                (
-                    f"range_{filter_range[0]}_{filter_range[1]}",
-                    create_filter(
-                        None,
-                        sfreq,
-                        l_freq=filter_range[0],
-                        h_freq=filter_range[1],
-                        fir_design="firwin",
-                        # l_trans_bandwidth=None,
-                        # h_trans_bandwidth=None,
-                        # filter_length=str(sfreq) + "ms",
-                        verbose=False,
-                    ),
+            if filter_range[0] is None:
+                self.list_filter.append(("no_filter", None))
+            else:
+                self.list_filter.append(
+                    (
+                        f"range_{filter_range[0]}_{filter_range[1]}",
+                        create_filter(
+                            None,
+                            sfreq,
+                            l_freq=filter_range[0],
+                            h_freq=filter_range[1],
+                            fir_design="firwin",
+                            # l_trans_bandwidth=None,
+                            # h_trans_bandwidth=None,
+                            # filter_length=str(sfreq) + "ms",
+                            verbose=False,
+                        ),
+                    )
                 )
-            )
 
         # initialize used features
         self.used_features = list()
@@ -47,7 +50,7 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
                 self.used_features.append(feature_name)
 
         # initialize attributes
-        self.initialize_sw_features()
+        self._initialize_sw_features()
 
         # initializing estimator functions, respecitive for all sharpwave features
         fun_names = []
@@ -73,7 +76,7 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
             for feature_idx in range(len(self.estimator_names))
         ]
 
-    def initialize_sw_features(self) -> None:
+    def _initialize_sw_features(self) -> None:
         """Resets used attributes to empty lists"""
         for feature_name in self.used_features:
             setattr(self, feature_name, list())
@@ -82,7 +85,7 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
             self.trough = list()
         self.troughs_idx = list()
 
-    def get_peaks_around(self, trough_ind, arr_ind_peaks, filtered_dat):
+    def _get_peaks_around(self, trough_ind, arr_ind_peaks, filtered_dat):
         """Find the closest peaks to the right and left side a given trough.
 
         Parameters
@@ -130,26 +133,29 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
         self,
         data: np.array,
         features_compute: dict,
-    ):
+    ) -> dict:
         """Given a new data batch, the peaks, troughs and sharpwave features
         are estimated. Importantly only new data is being analyzed here. In
-        steps of 1/settings["sampling_rate_features] are analyzed and returned.
-        Data is assumed to be notch filtered and bandpass filtered beforehand.
+        steps of 1/settings["sampling_rate_features] analyzed and returned.
+        Pre-initialized filters are applied to each channel.
 
         Parameters
         ----------
+        data (np.ndarray): 2d data array with shape [num_channels, samples]
         features_ (dict): Features.py estimated features
-        data (np.ndarray): 1d single channel data batch
-        ch (string): channel name
+
         Returns
         -------
         features_ (dict): set features for Features.py object
         """
         for ch_idx, ch_name in enumerate(self.ch_names):
             for filter_name, filter in self.list_filter:
-                self.filtered_data = convolve(
-                    data[ch_idx, :], filter, mode="same"
-                )
+                if filter_name == "no_filter":
+                    self.data_process_sw = data[ch_idx, :]
+                else:
+                    self.data_process_sw = signal.convolve(
+                        data[ch_idx, :], filter, mode="same"
+                    )
 
                 # check settings if troughs and peaks are analyzed
 
@@ -175,9 +181,9 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
                             continue
                         key_name_pt = "Trough"
 
-                        self.filtered_data = -self.filtered_data
+                        self.data_process_sw = -self.data_process_sw
 
-                    self.initialize_sw_features()  # reset sharpwave feature attriubtes to empty lists
+                    self._initialize_sw_features()  # reset sharpwave feature attriubtes to empty lists
                     self.analyze_waveform()
 
                     # for each feature take the respective fun.
@@ -252,12 +258,12 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
 
         """
 
-        peaks = find_peaks(
-            self.filtered_data,
+        peaks = signal.find_peaks(
+            self.data_process_sw,
             distance=self.sw_settings["detect_troughs"]["distance_peaks_ms"],
         )[0]
-        troughs = find_peaks(
-            -self.filtered_data,
+        troughs = signal.find_peaks(
+            -self.data_process_sw,
             distance=self.sw_settings["detect_troughs"]["distance_troughs_ms"],
         )[0]
 
@@ -268,14 +274,16 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
                     peak_idx_right,
                     peak_left,
                     peak_right,
-                ) = self.get_peaks_around(trough_idx, peaks, self.filtered_data)
+                ) = self._get_peaks_around(
+                    trough_idx, peaks, self.data_process_sw
+                )
             except NoValidTroughException:
                 # in this case there are no adjacent two peaks around this trough
                 # str(e) could print the exception error message
                 # print(str(e))
                 continue
 
-            trough = self.filtered_data[trough_idx]
+            trough = self.data_process_sw[trough_idx]
             self.trough.append(trough)
             self.troughs_idx.append(trough_idx)
 
@@ -303,20 +311,20 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
                 # trough_idx 5 ms need to be consistent
                 if (trough_idx - int(5 * (1000 / self.sfreq)) <= 0) or (
                     trough_idx + int(5 * (1000 / self.sfreq))
-                    >= self.filtered_data.shape[0]
+                    >= self.data_process_sw.shape[0]
                 ):
                     continue
 
                 sharpness = (
                     (
-                        self.filtered_data[trough_idx]
-                        - self.filtered_data[
+                        self.data_process_sw[trough_idx]
+                        - self.data_process_sw[
                             trough_idx - int(5 * (1000 / self.sfreq))
                         ]
                     )
                     + (
-                        self.filtered_data[trough_idx]
-                        - self.filtered_data[
+                        self.data_process_sw[trough_idx]
+                        - self.data_process_sw[
                             trough_idx + int(5 * (1000 / self.sfreq))
                         ]
                     )
@@ -329,7 +337,9 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
                 # from peak/trough to trough/peak
                 # here  + 1 due to python syntax, s.t. the last element is included
                 rise_steepness = np.max(
-                    np.diff(self.filtered_data[peak_idx_left : trough_idx + 1])
+                    np.diff(
+                        self.data_process_sw[peak_idx_left : trough_idx + 1]
+                    )
                 )
                 self.rise_steepness.append(rise_steepness)
 
@@ -338,7 +348,9 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
                 is True
             ):
                 decay_steepness = np.max(
-                    np.diff(self.filtered_data[trough_idx : peak_idx_right + 1])
+                    np.diff(
+                        self.data_process_sw[trough_idx : peak_idx_right + 1]
+                    )
                 )
                 self.decay_steepness.append(decay_steepness)
 
@@ -355,7 +367,7 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
                 self.prominence.append(
                     np.abs(
                         (peak_right + peak_left) / 2
-                        - self.filtered_data[trough_idx]
+                        - self.data_process_sw[trough_idx]
                     )
                 )
 
@@ -392,12 +404,18 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
             assert (
                 filter_range[1] > filter_range[0]
             ), f"second filter value needs to be higher than first one, got {filter_range}"
-
+            assert filter_range[0] < sfreq and filter_range[1] < sfreq, (
+                "filter range has to be smaller than sfreq, "
+                f"got sfreq {sfreq} and filter range {filter_range}"
+            )
         # check if all features are also enbled via an estimator
         used_features = list()
         for feature_name, val in s["sharpwave_analysis_settings"][
             "sharpwave_features"
         ].items():
+            assert isinstance(
+                val, bool
+            ), f"sharpwave_feature type {feature_name} has to be of type bool, got {val}"
             if val is True:
                 used_features.append(feature_name)
         for used_feature in used_features:
