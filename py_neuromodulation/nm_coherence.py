@@ -1,6 +1,7 @@
 from scipy import signal
 import numpy as np
 from typing import Iterable
+import warnings
 
 from py_neuromodulation import nm_features_abc
 
@@ -140,7 +141,7 @@ class NM_Coherence(nm_features_abc.Feature):
             self.coherence_objects.append(
                 CoherenceObject(
                     sfreq,
-                    self.s["coherence"]["params"]["window"],
+                    "hann",
                     fband_specs,
                     fband_names,
                     ch_1_name,
@@ -151,6 +152,45 @@ class NM_Coherence(nm_features_abc.Feature):
                     self.s["coherence"]["method"]["icoh"],
                     self.s["coherence"]["features"],
                 )
+            )
+
+    @staticmethod
+    def test_settings(
+        s: dict,
+        ch_names: Iterable[str],
+        sfreq: int | float,
+    ):
+
+        assert (
+            len(s["coherence"]["frequency_bands"]) > 0
+        ), "coherence frequency_bands list needs to specify at least one frequency band"
+        assert (ch_coh in ch_names for ch_coh in s["coherence"]["channels"]), (
+            f"coherence selected channels don't match the ones in nm_channels"
+            f"ch_names: {ch_names} settings['coherence']['channels']: {s['coherence']['channels']}"
+        )
+
+        assert (
+            f_band_coh in s["frequency_ranges_hz"]
+            for f_band_coh in s["coherence"]["frequency_bands"]
+        ), (
+            "coherence selected frequency bands don't match the ones"
+            "specified in s['frequency_ranges_hz']"
+            f"coherence frequency bands: {s['coherence']['frequency_bands']}"
+            f"specified frequency_ranges_hz: {s['frequency_ranges_hz']}"
+        )
+
+        assert (
+            s["frequency_ranges_hz"][fb][0] < sfreq / 2
+            and s["frequency_ranges_hz"][fb][1] < sfreq / 2
+            for fb in s["coherence"]["frequency_bands"].values()
+        ), (
+            "the coherence frequency band ranges need to be smaller than the nyquist frequency"
+            f"got sfreq = {sfreq} and fband ranges {s['coherence']['frequency_bands']}"
+        )
+
+        if sum(list(s["coherence"]["method"].values())) == 0:
+            warnings.warn(
+                "feature coherence enabled, but no coherence['method'] selected"
             )
 
     def calc_feature(self, data: np.array, features_compute: dict) -> dict:

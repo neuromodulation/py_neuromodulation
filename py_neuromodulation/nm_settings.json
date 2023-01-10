@@ -20,7 +20,7 @@
         "stft": true,
         "fft": true,
         "sharpwave_analysis": true,
-        "coherence": false,
+        "coherence": true,
         "fooof": true,
         "nolds": true,
         "bursts": true,
@@ -85,6 +85,16 @@
             400
         ]
     },
+    "fft_settings": {
+        "windowlength_ms": 1000,
+        "log_transform": true,
+        "kalman_filter": false
+    },
+    "stft_settings": {
+        "windowlength_ms": 500,
+        "log_transform": true,
+        "kalman_filter": false
+    },
     "bandpass_filter_settings": {
         "segment_lengths_ms": {
             "theta": 1000,
@@ -131,16 +141,6 @@
             "burst_rate_per_s": true,
             "in_burst": true
         }
-    },
-    "stft_settings": {
-        "windowlength_ms": 500,
-        "log_transform": true,
-        "kalman_filter": false
-    },
-    "fft_settings": {
-        "windowlength_ms": 1000,
-        "log_transform": true,
-        "kalman_filter": false
     },
     "sharpwave_analysis_settings": {
         "sharpwave_features": {
@@ -215,9 +215,6 @@
         "method": {
             "coh": true,
             "icoh": true
-        },
-        "params": {
-            "window": "hann"
         }
     },
     "fooof": {

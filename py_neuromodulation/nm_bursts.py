@@ -1,13 +1,13 @@
-import enum
 import numpy as np
 from typing import Iterable
+import warnings
 
 from py_neuromodulation import nm_features_abc, nm_filter
 
 
 class Burst(nm_features_abc.Feature):
     def __init__(
-        self, settings: dict, ch_names: Iterable[str], sfreq: float
+        self, settings: dict, ch_names: Iterable[str], sfreq: int | float
     ) -> None:
 
         self.s = settings
@@ -58,6 +58,24 @@ class Burst(nm_features_abc.Feature):
             return d
 
         self.data_buffer = init_ch_fband_dict()
+
+    @staticmethod
+    def test_settings(s: dict, ch_names: Iterable[str], sfreq: int | float):
+        assert isinstance(
+            s["burst_settings"]["threshold"], (int, float)
+        ), f'threshold for burst setting must be either float or int, got {s["burst_settings"]["threshold"]}'
+        assert isinstance(
+            s["burst_settings"]["time_duration_s"], (int, float)
+        ), f'time_duration_s for burst setting must be either float or int, got {s["burst_settings"]["time_duration_s"]}'
+        assert (
+            fb in s["burst_settings"]["frequency_ranges_hz"].values()
+            for fb in s["burst_settings"]["frequency_bands"]
+        ), 'frequency band names have to be defined in s["frequency_ranges_hz"]'
+
+        if sum(s["burst_settings"]["burst_features"].values()) == 0:
+            warnings.warn(
+                "Burst feature enabled, but no burst_settings['burst_features'] enabled"
+            )
 
     def calc_feature(self, data: np.array, features_compute: dict) -> dict:
 
