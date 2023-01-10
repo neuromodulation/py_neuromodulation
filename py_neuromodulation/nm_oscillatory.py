@@ -265,6 +265,23 @@ class BandPower(OscillatoryFeature):
             ].values()
         ), "Set at least one bandpower_feature to True."
 
+        for fband_name, seg_length_fband in s["bandpass_filter_settings"]["segment_lengths_ms"].items():
+            assert isinstance(seg_length_fband, int), (
+                f"bandpass segment_lengths_ms for {fband_name} "
+                f"needs to be of type int, got {seg_length_fband}"
+            )
+
+            assert seg_length_fband <= s["segment_length_features_ms"], (
+                f"segment length {seg_length_fband} needs to be smaller than "
+                f" s['segment_length_features_ms'] = {s['segment_length_features_ms']}"
+            )
+ 
+        for fband_name in list(s["frequency_ranges_hz"].keys()):
+            assert fband_name in list(s["bandpass_filter_settings"]["segment_lengths_ms"].keys()), (
+                f"frequency range {fband_name} "
+                "needs to be defined in s['bandpass_filter_settings']['segment_lengths_ms']"
+            )
+
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
 
         data = self.bandpass_filter.filter_data(data)
