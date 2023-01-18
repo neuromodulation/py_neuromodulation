@@ -1,12 +1,10 @@
 Feature Estimation
-===============
+==================
 
 .. toctree::
    :maxdepth: 4
 
-   features
-   filter
-   bandpower
-   kalmanfilter
-   hjorth_raw
-   sharpwaves
+   nm_oscillatory
+   nm_kalmanfilter
+   nm_hjorth_raw
+   nm_sharpwaves

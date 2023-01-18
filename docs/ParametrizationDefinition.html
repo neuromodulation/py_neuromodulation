@@ -1,48 +1,50 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
-  <meta charset="utf-8" />
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>ParametrizationDefinition &mdash; py_neuromodulation  documentation</title>
   
 
   
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-
+  
   
   
 
   
-  
-
-  
-
-  
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="FeatureEstimationDemo" href="FeatureEstimationDemo.html" />
-    <link rel="prev" title="Setup" href="setup.html" /> 
+    <link rel="prev" title="py_neuromodulation" href="setup.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -79,7 +81,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -88,9 +89,10 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">py_neuromodulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html#setup">Setup</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Examples</span></p>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">ParametrizationDefinition</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#nm_settings.json">nm_settings.json</a></li>
@@ -99,7 +101,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="FeatureEstimationDemo.html">FeatureEstimationDemo</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Code</span></p>
+<p class="caption" role="heading"><span class="caption-text">Code</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="outline_parametrization.html">Parametrization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="outline_featureestimation.html">Feature Estimation</a></li>
@@ -109,7 +111,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -144,20 +145,18 @@
 
 
 
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="index.html">Docs</a> &raquo;</li>
         
       <li>ParametrizationDefinition</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="_sources/ParametrizationDefinition.ipynb.txt" rel="nofollow"> View page source</a>
           
         
@@ -281,10 +280,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -381,11 +381,12 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
 /* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
 div.rendered_html table {
   border: none;
   border-collapse: collapse;
@@ -394,10 +395,14 @@ div.rendered_html table {
   font-size: 12px;
   table-layout: fixed;
 }
+.jp-RenderedHTMLCommon thead,
 div.rendered_html thead {
   border-bottom: 1px solid black;
   vertical-align: bottom;
 }
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
 div.rendered_html tr,
 div.rendered_html th,
 div.rendered_html td {
@@ -409,12 +414,15 @@ div.rendered_html td {
   max-width: none;
   border: none;
 }
+.jp-RenderedHTMLCommon th,
 div.rendered_html th {
   font-weight: bold;
 }
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
 div.rendered_html tbody tr:nth-child(odd) {
   background: #f5f5f5;
 }
+.jp-RenderedHTMLCommon tbody tr:hover,
 div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
@@ -441,42 +449,42 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="ParametrizationDefinition">
-<h1>ParametrizationDefinition<a class="headerlink" href="#ParametrizationDefinition" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="nm_settings.json">
-<h2>nm_settings.json<a class="headerlink" href="#nm_settings.json" title="Permalink to this headline">¶</a></h2>
+<section id="ParametrizationDefinition">
+<h1>ParametrizationDefinition<a class="headerlink" href="#ParametrizationDefinition" title="Permalink to this heading">¶</a></h1>
+<section id="nm_settings.json">
+<h2>nm_settings.json<a class="headerlink" href="#nm_settings.json" title="Permalink to this heading">¶</a></h2>
 <p>In order to estimate multimodal features of neurophysiological data, certain parametrization steps are required. Here the following two parametrization files are explained: - <code class="docutils literal notranslate"><span class="pre">nm_settings.json</span></code> - <code class="docutils literal notranslate"><span class="pre">nm_channels.csv</span></code></p>
 <p>The <code class="docutils literal notranslate"><span class="pre">nm_settings.json</span></code> specifies the general feature processing. Most importantly, all provided features can be enabled and disabled:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;methods&quot;</span><span class="p">:</span>
-<span class="p">{</span>
-        <span class="nt">&quot;raw_resampling&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-        <span class="nt">&quot;normalization&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;kalman_filter&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;re_referencing&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;notch_filter&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;bandpass_filter&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;raw_hjorth&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;sharpwave_analysis&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;return_raw&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;project_cortex&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-        <span class="nt">&quot;project_subcortex&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-        <span class="nt">&quot;pdc&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-        <span class="nt">&quot;dtf&quot;</span><span class="p">:</span> <span class="kc">false</span>
-<span class="p">}</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;methods&quot;</span><span class="p">:</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;raw_resampling&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;normalization&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;kalman_filter&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;re_referencing&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;notch_filter&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;bandpass_filter&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;raw_hjorth&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;sharpwave_analysis&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;return_raw&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;project_cortex&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;project_subcortex&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;pdc&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;dtf&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p><strong>raw_resampling</strong> defines a resampling rate to which the original data is downsampled to. This can be of advantage, since high sampling frequencies automatically require higher computational cost. In the method specific settings the resampling frequency can be defined:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;raw_resampling_settings&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="nt">&quot;resample_freq&quot;</span><span class="p">:</span> <span class="mi">1000</span>
-    <span class="p">}</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;raw_resampling_settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;resample_freq&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p><strong>normalization</strong> allows for normalizing the past <em>normalization_time</em> according to either the <em>mean</em> or <em>median</em> <em>normalization_method</em> in the following manner for <em>median</em>:</p>
 <p><span class="math notranslate nohighlight">\(X_{norm} = \frac{X - median(X)}{median(X)}\)</span></p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;raw_normalization_settings&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="nt">&quot;normalization_time&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-        <span class="nt">&quot;normalization_method&quot;</span><span class="p">:</span> <span class="s2">&quot;median&quot;</span>
-    <span class="p">}</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;raw_normalization_settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;normalization_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;normalization_method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;median&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p><strong>kalman_filtering</strong> is motivated by filtering estimated band power features using the white noise acceleration model (see <a class="reference external" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6927801/">“Improved detection of Parkinsonian resting tremor with feature engineering and Kalman filtering”</a> Yao et al 19) for a great reference. The white noise acceleration model get’s specified by the <span class="math notranslate nohighlight">\(T_p\)</span> prediction interval (Hz), and the process noise is then defined by <span class="math notranslate nohighlight">\(\sigma_w\)</span> and <span class="math notranslate nohighlight">\(\sigma_v\)</span>:</p>
@@ -488,16 +496,16 @@ sigma_w^2frac{T_p^2}{3} &amp; sigma_w^2T_p\</p>
 <p>end{array} } right]`$</p>
 </dd>
 </dl>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;kalman_filter_settings&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="nt">&quot;Tp&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
-        <span class="nt">&quot;sigma_w&quot;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
-        <span class="nt">&quot;sigma_v&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="nt">&quot;frequency_bands&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="s2">&quot;low gamma&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;high gamma&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;all gamma&quot;</span>
-        <span class="p">]</span>
-    <span class="p">}</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;kalman_filter_settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;Tp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;sigma_w&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.7</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;sigma_v&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;frequency_bands&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;low gamma&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;high gamma&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;all gamma&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">]</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Individual frequency bands (specified in the <strong>bandpass_filter_settings</strong>) can be selected for Kalman Filtering (see <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/20172805/">“Real-time epileptic seizure prediction using AR models and support vector machines”</a> (Chisci et al 10))</p>
@@ -505,80 +513,79 @@ sigma_w^2frac{T_p^2}{3} &amp; sigma_w^2T_p\</p>
 rereferencing, by specifying the channel name to rereference to, e.g. <em>LFP_BS_STN_L_1</em> - <em>none</em> for no rereferencing being used for this particular channel</p>
 <p><strong>notch_filter</strong> enables notch filters at the specified line_noise and it’s harmonics.</p>
 <p><strong>bandpass_filter</strong> enables band power feature estimation. Settings are defined in such manner:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;bandpass_filter_settings&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="nt">&quot;frequency_ranges&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="nt">&quot;theta&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">[</span>
-                <span class="mi">4</span><span class="p">,</span>
-                <span class="mi">8</span>
-            <span class="p">],</span>
-            <span class="mi">1000</span>
-            <span class="p">]</span>
-    <span class="p">},</span>
-    <span class="nt">&quot;bandpower_features&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="nt">&quot;activity&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;mobility&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;complexity&quot;</span><span class="p">:</span> <span class="kc">true</span>
-    <span class="p">}</span>
-<span class="p">}</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;bandpass_filter_settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;frequency_ranges&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;theta&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">            </span><span class="p">[</span><span class="w"></span>
+<span class="w">                </span><span class="mi">4</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="mi">8</span><span class="w"></span>
+<span class="w">            </span><span class="p">],</span><span class="w"></span>
+<span class="w">            </span><span class="mi">1000</span><span class="w"></span>
+<span class="w">            </span><span class="p">]</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;bandpower_features&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;activity&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;mobility&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;complexity&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Here the name (in this case <em>theta</em>) get’s specified, and in the the subsequent list the frequency range (here from 4 - 8 Hz) is defined. Then, the last parameter defines a time range in which FIR filtered data is used for feature estimation in milliseconds. Here the previous 1000 ms are used to estimate features based on the FIR filtered signals in the range of 4 to 8 Hz. This might be beneficial when using shorter frequency bands, e.g. gamma, where estimating band power in a range of e.g. 100
 ms might result in a temporal more specified feature calculation. A common way to estimate band power is to take the variance of FIR filtered data. This is equavilent to the activity <a class="reference external" href="https://en.wikipedia.org/wiki/Hjorth_parameters">Hjorth</a> parameter. The last key in the <em>bandpass_filter_settings</em> allows to take the <em>activity</em>, <em>mobility</em> and <em>complexity</em> Hjorth parameters as well. For estimating Hjorth parameters of the raw unfiltered signal, the <strong>raw_hjorth</strong> method can be enabled.</p>
 <p><strong>sharpwave_analysis</strong> allows for calculation of temporal sharpwave features. See <a class="reference external" href="https://www.sciencedirect.com/science/article/abs/pii/S1364661316302182">“Brain Oscillations and the Importance of Waveform Shape”</a> Cole et al 17 for a great motivation to use these features. Here, sharpwave features are estimated using a prior bandpass filter between <em>filter_low_cutoff</em> and <em>filter_high_cutoff</em>. The sharpwave peak and trough features can be calculated, defined by the <em>estimate</em> key. According
 to a current data batch one or more sharpwaves can be detected. The subsequent feature is returned rather by the <em>mean, median, maximum, minimum or variance</em> as defined by the <em>estimator</em>.</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;sharpwave_analysis_settings&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="nt">&quot;sharpwave_features&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="nt">&quot;peak_left&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;peak_right&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;trough&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;width&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;prominence&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;interval&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;decay_time&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;rise_time&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;sharpness&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;rise_steepness&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;decay_steepness&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;slope_ratio&quot;</span><span class="p">:</span> <span class="kc">true</span>
-    <span class="p">},</span>
-    <span class="nt">&quot;filter_low_cutoff&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-    <span class="nt">&quot;filter_high_cutoff&quot;</span><span class="p">:</span> <span class="mi">90</span><span class="p">,</span>
-    <span class="nt">&quot;detect_troughs&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="nt">&quot;estimate&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;distance_troughs&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-        <span class="nt">&quot;distance_peaks&quot;</span><span class="p">:</span> <span class="mi">1</span>
-    <span class="p">},</span>
-    <span class="nt">&quot;detect_peaks&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="nt">&quot;estimate&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;distance_troughs&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="nt">&quot;distance_peaks&quot;</span><span class="p">:</span> <span class="mi">5</span>
-    <span class="p">},</span>
-    <span class="nt">&quot;estimator&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="nt">&quot;mean&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;median&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;max&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;min&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-        <span class="nt">&quot;var&quot;</span><span class="p">:</span> <span class="kc">true</span>
-    <span class="p">}</span>
-<span class="p">}</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;sharpwave_analysis_settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;sharpwave_features&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;peak_left&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;peak_right&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;trough&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;width&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;prominence&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;decay_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;rise_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;sharpness&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;rise_steepness&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;decay_steepness&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;slope_ratio&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;filter_low_cutoff&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;filter_high_cutoff&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">90</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;detect_troughs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;estimate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;distance_troughs&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;distance_peaks&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;detect_peaks&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;estimate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;distance_troughs&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;distance_peaks&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;estimator&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;mean&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;median&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;max&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;min&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>A separate tutorial on sharpwave features is provided in the documentation.</p>
 <p>Next, raw signals can be returned, specifed by the <strong>return_raw</strong> method.</p>
 <p><strong>projection_cortex</strong> and <strong>projection_subcortex</strong> allows then feature projection of individual channels to a common subcortical or cortical grid, defined by <em>grid_cortex.tsv</em> and <em>subgrid_cortex.tsv</em>. For both projections a <em>max_dist</em> parameter needs to be specified, in which data is linearly interpolated, weighted by their inverse grid point distance.</p>
 <p>Additionally <strong>pdc</strong> and <strong>dtf</strong> enable partical directed coherence and direct transfer function, to enable connectiviy features for certain <em>frequency_bands</em> between specific channels.</p>
-</div>
-<div class="section" id="nm_channels.csv">
-<h2>nm_channels.csv<a class="headerlink" href="#nm_channels.csv" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="nm_channels.csv">
+<h2>nm_channels.csv<a class="headerlink" href="#nm_channels.csv" title="Permalink to this heading">¶</a></h2>
 <p>As described above, rereferencing will be estimated automatically given the specified channel types. To demonstrate a typical rereferencing scheme, here the example BIDS data in ‘py_neuromodulation/examples/data’ is read.</p>
 <p>First, the path needs to specified and necessary libaries imported:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">sys</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">bids</span> <span class="kn">import</span> <span class="n">BIDSLayout</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">json</span>
@@ -596,8 +603,7 @@ to a current data batch one or more sharpwaves can be detected. The subsequent f
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">BIDS_EXAMPLE_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_PYNEUROMODULATION</span><span class="p">,</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">BIDS_EXAMPLE_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_PYNEUROMODULATION</span><span class="p">,</span>
                                     <span class="s1">&#39;examples&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">))</span>
 
 <span class="n">PATH_RUN</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">BIDS_EXAMPLE_PATH</span><span class="p">,</span> <span class="s1">&#39;sub-testsub&#39;</span><span class="p">,</span> <span class="s1">&#39;ses-EphysMedOff&#39;</span><span class="p">,</span>
@@ -625,8 +631,7 @@ No Error occurred when testing the settings.
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># read BIDS data</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># read BIDS data</span>
 <span class="n">raw_arr</span><span class="p">,</span> <span class="n">raw_arr_data</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">line_noise</span> <span class="o">=</span> <span class="n">nm_IO</span><span class="o">.</span><span class="n">read_BIDS_data</span><span class="p">(</span><span class="n">PATH_RUN</span><span class="p">,</span> <span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;BIDS_path&quot;</span><span class="p">])</span>
 
 <span class="c1"># read df_M1 / create M1 if None specified</span>
@@ -673,8 +678,7 @@ C:\Users\ICN_admin\Anaconda3\envs\pyneuromodulation\lib\site-packages\mne_bids\d
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">nm_channels</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">nm_channels</span>
 </pre></div>
 </div>
 </div>
@@ -835,37 +839,37 @@ C:\Users\ICN_admin\Anaconda3\envs\pyneuromodulation\lib\site-packages\mne_bids\d
 </table>
 </div></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
            
           </div>
           <footer>
+  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="FeatureEstimationDemo.html" class="btn btn-neutral float-right" title="FeatureEstimationDemo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="setup.html" class="btn btn-neutral float-left" title="Setup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+      
+        <a href="FeatureEstimationDemo.html" class="btn btn-neutral float-right" title="FeatureEstimationDemo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="setup.html" class="btn btn-neutral float-left" title="py_neuromodulation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2021, Timon Merk.
+        &copy; Copyright 2021, Timon Merk
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
+
         </div>
       </div>
 
@@ -873,6 +877,7 @@ C:\Users\ICN_admin\Anaconda3\envs\pyneuromodulation\lib\site-packages\mne_bids\d
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

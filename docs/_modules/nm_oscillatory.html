@@ -1,0 +1,416 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>nm_oscillatory &mdash; py_neuromodulation  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> py_neuromodulation
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup.html">py_neuromodulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup.html#setup">Setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Code</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../outline_parametrization.html">Parametrization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../outline_featureestimation.html">Feature Estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../outline_analysis.html">Analysis</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">py_neuromodulation</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>nm_oscillatory</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for nm_oscillatory</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">fft</span><span class="p">,</span> <span class="n">signal</span>
+
+<span class="kn">from</span> <span class="nn">py_neuromodulation</span> <span class="kn">import</span> <span class="n">nm_filter</span><span class="p">,</span> <span class="n">nm_features_abc</span><span class="p">,</span> <span class="n">nm_kalmanfilter</span>
+
+
+<span class="k">class</span> <span class="nc">OscillatoryFeature</span><span class="p">(</span><span class="n">nm_features_abc</span><span class="o">.</span><span class="n">Feature</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">ch_names</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">sfreq</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s</span> <span class="o">=</span> <span class="n">settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span> <span class="o">=</span> <span class="n">sfreq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ch_names</span> <span class="o">=</span> <span class="n">ch_names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">KF_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_ranges_dict</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;frequency_ranges_hz&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fband_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;frequency_ranges_hz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_ranges</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;frequency_ranges_hz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">init_KF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">f_band</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;kalman_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_bands&quot;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ch_names</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">KF_dict</span><span class="p">[</span>
+                    <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">channel</span><span class="p">,</span> <span class="n">feature</span><span class="p">,</span> <span class="n">f_band</span><span class="p">])</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">nm_kalmanfilter</span><span class="o">.</span><span class="n">define_KF</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;kalman_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;Tp&quot;</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;kalman_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;sigma_w&quot;</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;kalman_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;sigma_v&quot;</span><span class="p">],</span>
+                <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">update_KF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_calc</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">KF_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">KF_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">KF_dict</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">KF_dict</span><span class="p">[</span><span class="n">KF_name</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">KF_dict</span><span class="p">[</span><span class="n">KF_name</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">feature_calc</span><span class="p">)</span>
+            <span class="n">feature_calc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">KF_dict</span><span class="p">[</span><span class="n">KF_name</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">feature_calc</span>
+
+
+<div class="viewcode-block" id="FFT"><a class="viewcode-back" href="../nm_oscillatory.html#nm_oscillatory.FFT">[docs]</a><span class="k">class</span> <span class="nc">FFT</span><span class="p">(</span><span class="n">OscillatoryFeature</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">ch_names</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">sfreq</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">ch_names</span><span class="p">,</span> <span class="n">sfreq</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;fft_settings&quot;</span><span class="p">][</span><span class="s2">&quot;kalman_filter&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">init_KF</span><span class="p">(</span><span class="s2">&quot;fft&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;fft_settings&quot;</span><span class="p">][</span><span class="s2">&quot;log_transform&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log_transform</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log_transform</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">window_ms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;fft_settings&quot;</span><span class="p">][</span><span class="s2">&quot;windowlength_ms&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">window_ms</span> <span class="o">/</span> <span class="mi">1000</span> <span class="o">*</span> <span class="n">sfreq</span><span class="p">))</span>
+        <span class="n">freqs</span> <span class="o">=</span> <span class="n">fft</span><span class="o">.</span><span class="n">rfftfreq</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">window_samples</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_params</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ch_idx</span><span class="p">,</span> <span class="n">ch_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ch_names</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">fband</span><span class="p">,</span> <span class="n">f_range</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_ranges_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">idx_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">freqs</span> <span class="o">&gt;=</span> <span class="n">f_range</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">freqs</span> <span class="o">&lt;</span> <span class="n">f_range</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">feature_name</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">ch_name</span><span class="p">,</span> <span class="s2">&quot;fft&quot;</span><span class="p">,</span> <span class="n">fband</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">feature_params</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ch_idx</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">idx_range</span><span class="p">))</span>
+
+<div class="viewcode-block" id="FFT.calc_feature"><a class="viewcode-back" href="../nm_oscillatory.html#nm_oscillatory.FFT.calc_feature">[docs]</a>    <span class="k">def</span> <span class="nf">calc_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">features_compute</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_samples</span> <span class="p">:]</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">fft</span><span class="o">.</span><span class="n">rfft</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">ch_idx</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">idx_range</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_params</span><span class="p">:</span>
+            <span class="n">Z_ch</span> <span class="o">=</span> <span class="n">Z</span><span class="p">[</span><span class="n">ch_idx</span><span class="p">,</span> <span class="n">idx_range</span><span class="p">]</span>
+            <span class="n">feature_calc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Z_ch</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_transform</span><span class="p">:</span>
+                <span class="n">feature_calc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">feature_calc</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">KF_dict</span><span class="p">:</span>
+                <span class="n">feature_calc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_KF</span><span class="p">(</span><span class="n">feature_calc</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">)</span>
+
+            <span class="n">features_compute</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature_calc</span>
+        <span class="k">return</span> <span class="n">features_compute</span></div></div>
+
+
+<div class="viewcode-block" id="STFT"><a class="viewcode-back" href="../nm_oscillatory.html#nm_oscillatory.STFT">[docs]</a><span class="k">class</span> <span class="nc">STFT</span><span class="p">(</span><span class="n">OscillatoryFeature</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">ch_names</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">sfreq</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">ch_names</span><span class="p">,</span> <span class="n">sfreq</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;stft_settings&quot;</span><span class="p">][</span><span class="s2">&quot;kalman_filter&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">init_KF</span><span class="p">(</span><span class="s2">&quot;stft&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nperseg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;stft_settings&quot;</span><span class="p">][</span><span class="s2">&quot;windowlength_ms&quot;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_params</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ch_idx</span><span class="p">,</span> <span class="n">ch_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ch_names</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">fband</span><span class="p">,</span> <span class="n">f_range</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_ranges_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">feature_name</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">ch_name</span><span class="p">,</span> <span class="s2">&quot;stft&quot;</span><span class="p">,</span> <span class="n">fband</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">feature_params</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ch_idx</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">f_range</span><span class="p">))</span>
+
+<div class="viewcode-block" id="STFT.calc_feature"><a class="viewcode-back" href="../nm_oscillatory.html#nm_oscillatory.STFT.calc_feature">[docs]</a>    <span class="k">def</span> <span class="nf">calc_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">features_compute</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">Zxx</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">stft</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span>
+            <span class="n">fs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span><span class="p">,</span>
+            <span class="n">window</span><span class="o">=</span><span class="s2">&quot;hamming&quot;</span><span class="p">,</span>
+            <span class="n">nperseg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nperseg</span><span class="p">,</span>
+            <span class="n">boundary</span><span class="o">=</span><span class="s2">&quot;even&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Zxx</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ch_idx</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">f_range</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_params</span><span class="p">:</span>
+            <span class="n">Z_ch</span> <span class="o">=</span> <span class="n">Z</span><span class="p">[</span><span class="n">ch_idx</span><span class="p">]</span>
+            <span class="n">idx_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">f</span> <span class="o">&gt;=</span> <span class="n">f_range</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">f</span> <span class="o">&lt;=</span> <span class="n">f_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">feature_calc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">Z_ch</span><span class="p">[</span><span class="n">idx_range</span><span class="p">,</span> <span class="p">:])</span>  <span class="c1"># 1. dim: f, 2. dim: t</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">KF_dict</span><span class="p">:</span>
+                <span class="n">feature_calc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_KF</span><span class="p">(</span><span class="n">feature_calc</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">)</span>
+
+            <span class="n">features_compute</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature_calc</span>
+
+        <span class="k">return</span> <span class="n">features_compute</span></div></div>
+
+
+<div class="viewcode-block" id="BandPower"><a class="viewcode-back" href="../nm_oscillatory.html#nm_oscillatory.BandPower">[docs]</a><span class="k">class</span> <span class="nc">BandPower</span><span class="p">(</span><span class="n">OscillatoryFeature</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">ch_names</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">sfreq</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">use_kf</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">ch_names</span><span class="p">,</span> <span class="n">sfreq</span><span class="p">)</span>
+        <span class="n">bp_settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">bandpass_filter</span> <span class="o">=</span> <span class="n">nm_filter</span><span class="o">.</span><span class="n">BandPassFilter</span><span class="p">(</span>
+            <span class="n">f_ranges</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f_ranges_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>
+            <span class="n">sfreq</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span><span class="p">,</span>
+            <span class="n">filter_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_transform</span> <span class="o">=</span> <span class="n">bp_settings</span><span class="p">[</span><span class="s2">&quot;log_transform&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">use_kf</span> <span class="ow">is</span> <span class="kc">True</span> <span class="ow">or</span> <span class="p">(</span><span class="n">use_kf</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bp_settings</span><span class="p">[</span><span class="s2">&quot;kalman_filter&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">init_KF</span><span class="p">(</span><span class="s2">&quot;bandpass_activity&quot;</span><span class="p">)</span>
+
+        <span class="n">bp_features</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;activity&quot;</span><span class="p">,</span> <span class="s2">&quot;mobility&quot;</span><span class="p">,</span> <span class="s2">&quot;complexity&quot;</span><span class="p">]</span>
+        <span class="n">seglengths</span> <span class="o">=</span> <span class="n">bp_settings</span><span class="p">[</span><span class="s2">&quot;segment_lengths_ms&quot;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_params</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ch_idx</span><span class="p">,</span> <span class="n">ch_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ch_names</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">f_band_idx</span><span class="p">,</span> <span class="n">f_band</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f_ranges_dict</span><span class="p">):</span>
+                <span class="n">seglength_ms</span> <span class="o">=</span> <span class="n">seglengths</span><span class="p">[</span><span class="n">f_band</span><span class="p">]</span>
+                <span class="n">seglen</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span> <span class="o">/</span> <span class="mi">1000</span> <span class="o">*</span> <span class="n">seglength_ms</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">bp_feature</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">bp_settings</span><span class="p">[</span><span class="s2">&quot;bandpower_features&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">bp_feature</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">bp_features</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">()</span>
+                        <span class="n">feature_name</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                            <span class="p">[</span><span class="n">ch_name</span><span class="p">,</span> <span class="s2">&quot;bandpass&quot;</span><span class="p">,</span> <span class="n">bp_feature</span><span class="p">,</span> <span class="n">f_band</span><span class="p">]</span>
+                        <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">feature_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="p">(</span>
+                                <span class="n">ch_idx</span><span class="p">,</span>
+                                <span class="n">ch_name</span><span class="p">,</span>
+                                <span class="n">f_band</span><span class="p">,</span>
+                                <span class="n">f_band_idx</span><span class="p">,</span>
+                                <span class="n">seglen</span><span class="p">,</span>
+                                <span class="n">bp_feature</span><span class="p">,</span>
+                                <span class="n">feature_name</span><span class="p">,</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
+
+<div class="viewcode-block" id="BandPower.calc_feature"><a class="viewcode-back" href="../nm_oscillatory.html#nm_oscillatory.BandPower.calc_feature">[docs]</a>    <span class="k">def</span> <span class="nf">calc_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">features_compute</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandpass_filter</span><span class="o">.</span><span class="n">filter_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">ch_idx</span><span class="p">,</span>
+            <span class="n">ch_name</span><span class="p">,</span>
+            <span class="n">f_band</span><span class="p">,</span>
+            <span class="n">f_band_idx</span><span class="p">,</span>
+            <span class="n">seglen</span><span class="p">,</span>
+            <span class="n">bp_feature</span><span class="p">,</span>
+            <span class="n">feature_name</span><span class="p">,</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_params</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">bp_feature</span> <span class="o">==</span> <span class="s2">&quot;activity&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_transform</span><span class="p">:</span>
+                    <span class="n">feature_calc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">ch_idx</span><span class="p">,</span> <span class="n">f_band_idx</span><span class="p">,</span> <span class="o">-</span><span class="n">seglen</span><span class="p">:])</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">feature_calc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">ch_idx</span><span class="p">,</span> <span class="n">f_band_idx</span><span class="p">,</span> <span class="o">-</span><span class="n">seglen</span><span class="p">:])</span>
+            <span class="k">elif</span> <span class="n">bp_feature</span> <span class="o">==</span> <span class="s2">&quot;mobility&quot;</span><span class="p">:</span>
+                <span class="n">deriv_variance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">ch_idx</span><span class="p">,</span> <span class="n">f_band_idx</span><span class="p">,</span> <span class="o">-</span><span class="n">seglen</span><span class="p">:])</span>
+                <span class="p">)</span>
+                <span class="n">feature_calc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                    <span class="n">deriv_variance</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">ch_idx</span><span class="p">,</span> <span class="n">f_band_idx</span><span class="p">,</span> <span class="o">-</span><span class="n">seglen</span><span class="p">:])</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">bp_feature</span> <span class="o">==</span> <span class="s2">&quot;complexity&quot;</span><span class="p">:</span>
+                <span class="n">dat_deriv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">ch_idx</span><span class="p">,</span> <span class="n">f_band_idx</span><span class="p">,</span> <span class="o">-</span><span class="n">seglen</span><span class="p">:])</span>
+                <span class="n">deriv_variance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">dat_deriv</span><span class="p">)</span>
+                <span class="n">mobility</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                    <span class="n">deriv_variance</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">ch_idx</span><span class="p">,</span> <span class="n">f_band_idx</span><span class="p">,</span> <span class="o">-</span><span class="n">seglen</span><span class="p">:])</span>
+                <span class="p">)</span>
+                <span class="n">dat_deriv_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">dat_deriv</span><span class="p">)</span>
+                <span class="n">dat_deriv_2_var</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">dat_deriv_2</span><span class="p">)</span>
+                <span class="n">deriv_mobility</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dat_deriv_2_var</span> <span class="o">/</span> <span class="n">deriv_variance</span><span class="p">)</span>
+                <span class="n">feature_calc</span> <span class="o">=</span> <span class="n">deriv_mobility</span> <span class="o">/</span> <span class="n">mobility</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">KF_dict</span> <span class="ow">and</span> <span class="p">(</span><span class="n">bp_feature</span> <span class="o">==</span> <span class="s2">&quot;activity&quot;</span><span class="p">):</span>
+                <span class="n">feature_calc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_KF</span><span class="p">(</span><span class="n">feature_calc</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">)</span>
+
+            <span class="n">features_compute</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature_calc</span>
+
+        <span class="k">return</span> <span class="n">features_compute</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Timon Merk
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

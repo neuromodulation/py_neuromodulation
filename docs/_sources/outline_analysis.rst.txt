@@ -4,5 +4,5 @@ Analysis
 .. toctree::
    :maxdepth: 4
 
-   nm_reader
+   nm_analysis
    nm_decode

@@ -1,5 +1,5 @@
-settings.py
+nm_settings.py
 =============
 
-.. autoclass:: settings.SettingsWrapper
+.. autoclass:: nm_settings
       :members:
