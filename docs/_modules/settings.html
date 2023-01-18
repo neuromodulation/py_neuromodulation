@@ -1,0 +1,492 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>settings &mdash; py_neuromodulation  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> py_neuromodulation
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup.html">Setup</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../ParametrizationDefinition.html">ParametrizationDefinition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FeatureEstimationDemo.html">FeatureEstimationDemo</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Code</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../outline_parametrization.html">Parametrization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../outline_featureestimation.html">Feature Estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../outline_analysis.html">Analysis</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">py_neuromodulation</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>settings</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for settings</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">import</span> <span class="nn">define_M1</span>
+
+
+<div class="viewcode-block" id="SettingsWrapper"><a class="viewcode-back" href="../settings.html#settings.SettingsWrapper">[docs]</a><span class="k">class</span> <span class="nc">SettingsWrapper</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings_path</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;initialize settings class with settings.json and setting df_M1 toolbox parameter</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        settings_path : str, optional</span>
+<span class="sd">            path to settings.json, by default &#39;settings.json&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reading settings.json.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings_path</span> <span class="o">=</span> <span class="n">settings_path</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">settings_path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">json_file</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Testing settings.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_settings</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m1_path</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_M1</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ind_label</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">set_fs_line_noise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">line_noise</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;fs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;line_noise&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">line_noise</span>
+
+    <span class="k">def</span> <span class="nf">set_channel_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ch_names</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;ch_names&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ch_names</span>
+
+    <span class="k">def</span> <span class="nf">set_channel_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ch_types</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;ch_types&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ch_types</span>
+
+<div class="viewcode-block" id="SettingsWrapper.add_coord"><a class="viewcode-back" href="../settings.html#settings.SettingsWrapper.add_coord">[docs]</a>    <span class="k">def</span> <span class="nf">add_coord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_arr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;set coordinate information to settings from RawArray</span>
+<span class="sd">        The set coordinate positions are set as lists, since np.arrays cannot be saved in json</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        raw_arr : mne.io.RawArray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">raw_arr</span><span class="o">.</span><span class="n">get_montage</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_list&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">raw_arr</span><span class="o">.</span><span class="n">get_montage</span><span class="p">()</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span>
+                          <span class="p">[</span><span class="s2">&quot;ch_pos&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_names&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">raw_arr</span><span class="o">.</span><span class="n">get_montage</span><span class="p">()</span><span class="o">.</span><span class="n">get_positions</span><span class="p">()</span>
+                          <span class="p">[</span><span class="s2">&quot;ch_pos&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                   
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;cortex_right&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;cortex_left&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;subcortex_right&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;subcortex_left&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;cortex_right&quot;</span><span class="p">][</span><span class="s2">&quot;ch_names&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_names&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">ch_idx</span><span class="p">,</span> <span class="n">ch</span>
+                <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_list&quot;</span><span class="p">])</span>
+                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_list&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;ECOG&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_names&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">])]</span>
+
+            <span class="c1"># multiply by 1000 to get m instead of mm</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;cortex_right&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1000</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ch</span> <span class="k">for</span> <span class="n">ch_idx</span><span class="p">,</span> <span class="n">ch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_list&quot;</span><span class="p">])</span>
+                                                                   <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_list&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span>
+                                                                   <span class="p">(</span><span class="s2">&quot;ECOG&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_names&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">])])</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;cortex_left&quot;</span><span class="p">][</span><span class="s2">&quot;ch_names&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_names&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">ch_idx</span><span class="p">,</span> <span class="n">ch</span> <span class="ow">in</span>
+                                                                 <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_list&quot;</span><span class="p">])</span> <span class="k">if</span>
+                                                                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_list&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+                                                                 <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;ECOG&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_names&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">])]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;cortex_left&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1000</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ch</span> <span class="k">for</span> <span class="n">ch_idx</span><span class="p">,</span> <span class="n">ch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_list&quot;</span><span class="p">])</span>
+                                                                  <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_list&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span>
+                                                                  <span class="p">(</span><span class="s2">&quot;ECOG&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_names&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">])])</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;subcortex_right&quot;</span><span class="p">][</span><span class="s2">&quot;ch_names&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_names&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">ch_idx</span><span class="p">,</span> <span class="n">ch</span> <span class="ow">in</span>
+                                                                     <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_list&quot;</span><span class="p">])</span> <span class="k">if</span>
+                                                                     <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_list&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+                                                                      <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;LFP&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_names&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">])]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;subcortex_right&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1000</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ch</span> <span class="k">for</span> <span class="n">ch_idx</span><span class="p">,</span> <span class="n">ch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_list&quot;</span><span class="p">])</span>
+                                                                      <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_list&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span>
+                                                                      <span class="p">(</span><span class="s2">&quot;LFP&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_names&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">])])</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;subcortex_left&quot;</span><span class="p">][</span><span class="s2">&quot;ch_names&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_names&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">ch_idx</span><span class="p">,</span> <span class="n">ch</span> <span class="ow">in</span>
+                                                                     <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_list&quot;</span><span class="p">])</span> <span class="k">if</span>
+                                                                     <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_list&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+                                                                      <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;LFP&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_names&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">])]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;subcortex_left&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1000</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ch</span> <span class="k">for</span> <span class="n">ch_idx</span><span class="p">,</span> <span class="n">ch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_list&quot;</span><span class="p">])</span>
+                                                                      <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_list&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span>
+                                                                      <span class="p">(</span><span class="s2">&quot;LFP&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_names&quot;</span><span class="p">][</span><span class="n">ch_idx</span><span class="p">])])</span>
+            <span class="n">PATH_PYNEUROMODULATION</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">absolute</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>
+            <span class="n">cortex_tsv</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">PATH_PYNEUROMODULATION</span><span class="p">,</span> <span class="s1">&#39;examples&#39;</span><span class="p">,</span> <span class="s1">&#39;grid_cortex.tsv&#39;</span><span class="p">)</span>
+            <span class="n">subcortex_tsv</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">PATH_PYNEUROMODULATION</span><span class="p">,</span> <span class="s1">&#39;examples&#39;</span><span class="p">,</span> <span class="s1">&#39;grid_subcortex.tsv&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">cortex_tsv</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;grid_cortex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                    <span class="n">cortex_tsv</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># left cortical grid</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;grid_cortex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">subcortex_tsv</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;grid_subcortex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                    <span class="n">subcortex_tsv</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># left subcortical grid</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;grid_subcortex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;cortex_left&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sess_right&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord&quot;</span><span class="p">][</span><span class="s2">&quot;cortex_right&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sess_right&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_list&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;coord_names&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;grid_cortex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;grid_subcortex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="SettingsWrapper.set_M1"><a class="viewcode-back" href="../settings.html#settings.SettingsWrapper.set_M1">[docs]</a>    <span class="k">def</span> <span class="nf">set_M1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m1_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ch_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ch_types</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;set df_M1 dataframe; specifies channel names, rereferencing method, ch_type,</span>
+<span class="sd">        if a channel is used or not, and if a channel should be treated as a label</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        m1_path : string, optional</span>
+<span class="sd">            path to df_M1.tsv file</span>
+<span class="sd">        ch_names : list, optional</span>
+<span class="sd">            by default None</span>
+<span class="sd">        ch_types : list, optional</span>
+<span class="sd">            BIDS compatible channel types, by default None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m1_path</span> <span class="o">=</span> <span class="n">m1_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_M1</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m1_path</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>\
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">m1_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m1_path</span><span class="p">)</span>\
+            <span class="k">else</span> <span class="n">define_M1</span><span class="o">.</span><span class="n">set_M1</span><span class="p">(</span><span class="n">ch_names</span><span class="p">,</span> <span class="n">ch_types</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;ch_names&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_M1</span><span class="p">[</span><span class="s1">&#39;new_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;ch_types&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_M1</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;feature_idx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df_M1</span><span class="p">[</span><span class="s2">&quot;used&quot;</span><span class="p">]</span> <span class="o">&amp;</span> <span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">df_M1</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="c1"># If multiple targets exist, select only the first</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ind_label</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_M1</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="SettingsWrapper.test_settings"><a class="viewcode-back" href="../settings.html#settings.SettingsWrapper.test_settings">[docs]</a>    <span class="k">def</span> <span class="nf">test_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Test if settings are specified correctly in settings.json</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        verbose: boolean</span>
+<span class="sd">            set to True if feedback is desired.</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings_path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">json_file</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">dict</span><span class="p">))</span>
+
+        <span class="c1">#assert (os.path.isdir(s[&quot;BIDS_path&quot;]))</span>
+        <span class="c1">#assert (os.path.isdir(s[&quot;out_path&quot;]))</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;sampling_rate_features&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;project_cortex&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;project_cortex_settings&quot;</span><span class="p">][</span><span class="s2">&quot;max_dist&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;project_subcortex&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;project_subcortex_settings&quot;</span><span class="p">][</span><span class="s2">&quot;max_dist&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)))</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> \
+            <span class="s2">&quot;Methods must be a boolean value.&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">any</span><span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">True</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())),</span> \
+            <span class="s2">&quot;Set at least one method to True.&quot;</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;raw_resampling&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;raw_resampling_settings&quot;</span><span class="p">][</span><span class="s2">&quot;resample_freq&quot;</span><span class="p">],</span>
+                    <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;raw_normalization&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;raw_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;normalization_time&quot;</span><span class="p">],</span>
+                    <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)))</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;raw_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;normalization_method&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;median&quot;</span><span class="p">,</span> <span class="s2">&quot;zscore&quot;</span><span class="p">])</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;raw_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;clip&quot;</span><span class="p">],</span>
+                              <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;feature_normalization&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">s</span><span class="p">[</span><span class="s2">&quot;feature_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;normalization_time&quot;</span><span class="p">],</span>
+                <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)))</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;feature_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;normalization_method&quot;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;median&quot;</span><span class="p">,</span> <span class="s2">&quot;zscore&quot;</span><span class="p">])</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;feature_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;clip&quot;</span><span class="p">],</span>
+                              <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;kalman_filter&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;kalman_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;Tp&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)))</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;kalman_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;sigma_w&quot;</span><span class="p">],</span>
+                               <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)))</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;kalman_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;sigma_v&quot;</span><span class="p">],</span>
+                               <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)))</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;kalman_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_bands&quot;</span><span class="p">]),</span> \
+                <span class="s2">&quot;No frequency bands specified for Kalman filter.&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;kalman_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_bands&quot;</span><span class="p">],</span>
+                            <span class="nb">list</span><span class="p">)),</span> <span class="s2">&quot;Frequency bands for Kalman filter must &quot;</span> \
+                                    <span class="s2">&quot;be specified as a list.&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="n">item</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span>
+                <span class="s2">&quot;frequency_ranges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span>
+                <span class="s2">&quot;kalman_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_bands&quot;</span><span class="p">]),</span> \
+                <span class="s2">&quot;Frequency bands for Kalman filter must also be specified in &quot;</span> \
+                <span class="s2">&quot;bandpass_filter_settings.&quot;</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;bandpass_filter&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_ranges&quot;</span><span class="p">],</span>
+                            <span class="nb">dict</span><span class="p">))</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span>
+                <span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_ranges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span>
+                <span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_ranges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">list</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span>
+                <span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_ranges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span>
+                <span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_ranges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span>
+                <span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_ranges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span>
+                <span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;bandpower_features&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">any</span><span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">True</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span>
+                <span class="s2">&quot;bandpower_features&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())),</span> <span class="s2">&quot;Set at least one &quot;</span> \
+                                                <span class="s2">&quot;bandpower_feature to True.&quot;</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;sharpwave_analysis&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;sharpwave_analysis_settings&quot;</span><span class="p">][</span>
+                                <span class="s2">&quot;filter_low_cutoff&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)))</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;sharpwave_analysis_settings&quot;</span><span class="p">][</span>
+                                <span class="s2">&quot;filter_high_cutoff&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)))</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;sharpwave_analysis_settings&quot;</span><span class="p">][</span><span class="s2">&quot;filter_high_cutoff&quot;</span><span class="p">]</span> <span class="o">&gt;</span>
+                    <span class="n">s</span><span class="p">[</span><span class="s2">&quot;sharpwave_analysis_settings&quot;</span><span class="p">][</span><span class="s2">&quot;filter_low_cutoff&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;pdc&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;pdc_settings&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_ranges&quot;</span><span class="p">],</span> <span class="nb">dict</span><span class="p">))</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="n">key</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span>
+                <span class="s2">&quot;frequency_ranges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;pdc_settings&quot;</span><span class="p">][</span>
+                <span class="s2">&quot;frequency_ranges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> \
+                <span class="s2">&quot;Frequency bands for PDC must also be specified in &quot;</span> \
+                <span class="s2">&quot;bandpass_filter_settings.&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;pdc_settings&quot;</span><span class="p">][</span>
+                <span class="s2">&quot;frequency_ranges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="s2">&quot;Channels for PDC must be &quot;</span> \
+                                            <span class="s2">&quot;specified as a list.&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span>
+                <span class="s2">&quot;pdc_settings&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_ranges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;pdc_settings&quot;</span><span class="p">][</span><span class="s2">&quot;model_order&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">))),</span> \
+                <span class="s2">&quot;Model order in PDC settings must be either an integer or </span><span class="se">\&quot;</span><span class="s2">auto</span><span class="se">\&quot;</span><span class="s2">.&quot;</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;pdc_settings&quot;</span><span class="p">][</span><span class="s2">&quot;model_order&quot;</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;pdc_settings&quot;</span><span class="p">][</span><span class="s2">&quot;model_order&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">),</span> \
+                    <span class="s2">&quot;Model order in PDC settings must be either an integer &quot;</span> \
+                    <span class="s2">&quot;or </span><span class="se">\&quot;</span><span class="s2">auto</span><span class="se">\&quot;</span><span class="s2">.&quot;</span>
+                <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;pdc_settings&quot;</span><span class="p">][</span><span class="s2">&quot;max_order&quot;</span><span class="p">],</span> <span class="nb">int</span><span class="p">)),</span> \
+                    <span class="s2">&quot;Maximum order in PDC settings must be an integer.&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;pdc_settings&quot;</span><span class="p">][</span><span class="s2">&quot;num_fft&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">))),</span> \
+                <span class="s2">&quot;mum_fft in PDC settings must be either an integer or </span><span class="se">\&quot;</span><span class="s2">auto</span><span class="se">\&quot;</span><span class="s2">.&quot;</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">][</span><span class="s2">&quot;dtf&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;dtf_settings&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_ranges&quot;</span><span class="p">],</span> <span class="nb">dict</span><span class="p">))</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="n">key</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span>
+                <span class="s2">&quot;frequency_ranges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;dtf_settings&quot;</span><span class="p">][</span>
+                <span class="s2">&quot;frequency_ranges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> \
+                <span class="s2">&quot;Frequency bands for DTF must also be specified in &quot;</span> \
+                <span class="s2">&quot;bandpass_filter_settings.&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;dtf_settings&quot;</span><span class="p">][</span>
+                <span class="s2">&quot;frequency_ranges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="s2">&quot;Channels for DTF must be &quot;</span> \
+                                               <span class="s2">&quot;specified as a list.&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span>
+                <span class="s2">&quot;pdc_settings&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_ranges&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;dtf_settings&quot;</span><span class="p">][</span><span class="s2">&quot;model_order&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">))),</span> \
+                <span class="s2">&quot;Model order in DTF settings must be either an integer or </span><span class="se">\&quot;</span><span class="s2">auto</span><span class="se">\&quot;</span><span class="s2">.&quot;</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;dtf_settings&quot;</span><span class="p">][</span><span class="s2">&quot;model_order&quot;</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;dtf_settings&quot;</span><span class="p">][</span><span class="s2">&quot;model_order&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">),</span> \
+                    <span class="s2">&quot;Model order in DTF settings must be either an integer &quot;</span> \
+                    <span class="s2">&quot;or </span><span class="se">\&quot;</span><span class="s2">auto</span><span class="se">\&quot;</span><span class="s2">.&quot;</span>
+                <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;dtf_settings&quot;</span><span class="p">][</span><span class="s2">&quot;max_order&quot;</span><span class="p">],</span> <span class="nb">int</span><span class="p">)),</span> \
+                    <span class="s2">&quot;Maximum order in DTF settings must be an integer.&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;dtf_settings&quot;</span><span class="p">][</span><span class="s2">&quot;num_fft&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">))),</span> \
+                <span class="s2">&quot;mum_fft in DTF settings must be either an integer or </span><span class="se">\&quot;</span><span class="s2">auto</span><span class="se">\&quot;</span><span class="s2">.&quot;</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No Error occurred when testing the settings.&quot;</span><span class="p">)</span>
+        <span class="k">return</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Timon Merk.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
