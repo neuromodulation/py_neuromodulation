@@ -23,7 +23,7 @@ class Resampler:
         resample_freq_hz: int | float,
     ) -> None:
 
-        assert isinstance("resample_freq_hz", (float, int))
+        assert isinstance(resample_freq_hz, (float, int))
 
         self.sfreq_new: int | float = resample_freq_hz
         ratio = float(self.sfreq_new / sfreq)
