@@ -1,46 +1,48 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
-  <meta charset="utf-8" />
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>rereference.py &mdash; py_neuromodulation  documentation</title>
-  
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-
-  
+  <title>nm_rereference.py &mdash; py_neuromodulation  documentation</title>
   
 
   
   
-
+  
   
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="projection.py" href="projection.html" />
-    <link rel="prev" title="normalize_raw.py" href="normalization.html" /> 
+    <link rel="next" title="nm_projection.py" href="projection.html" />
+    <link rel="prev" title="nm_normalization.py" href="normalization.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -77,7 +79,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -86,23 +87,25 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">py_neuromodulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html#setup">Setup</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Examples</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="ParametrizationDefinition.html">ParametrizationDefinition</a></li>
-<li class="toctree-l1"><a class="reference internal" href="FeatureEstimationDemo.html">FeatureEstimationDemo</a></li>
-</ul>
-<p class="caption"><span class="caption-text">Code</span></p>
+<p class="caption" role="heading"><span class="caption-text">Code</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="outline_parametrization.html">Parametrization</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="settings.html">settings.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="settings.html">nm_settings.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="run_analysis.html">run_analysis.py</a></li>
-<li class="toctree-l2"><a class="reference internal" href="resample.html">resample.py</a></li>
-<li class="toctree-l2"><a class="reference internal" href="normalization.html">normalize_raw.py</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">rereference.py</a></li>
-<li class="toctree-l2"><a class="reference internal" href="projection.html">projection.py</a></li>
-<li class="toctree-l2"><a class="reference internal" href="IO.html">IO.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="resample.html">nm_resample.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="normalization.html">nm_normalization.py</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">nm_rereference.py</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nm_rereference.ReReferencer"><code class="docutils literal notranslate"><span class="pre">ReReferencer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nm_rereference.ReReferencer.process"><code class="docutils literal notranslate"><span class="pre">ReReferencer.process()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="projection.html">nm_projection.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IO.html">nm_IO.py</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="outline_featureestimation.html">Feature Estimation</a></li>
@@ -112,7 +115,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -147,22 +149,20 @@
 
 
 
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="index.html">Docs</a> &raquo;</li>
         
           <li><a href="outline_parametrization.html">Parametrization</a> &raquo;</li>
         
-      <li>rereference.py</li>
+      <li>nm_rereference.py</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="_sources/rereference.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -200,38 +200,68 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="rereference-py">
-<h1>rereference.py<a class="headerlink" href="#rereference-py" title="Permalink to this headline">¶</a></h1>
-</div>
+<section id="nm-rereference-py">
+<h1>nm_rereference.py<a class="headerlink" href="#nm-rereference-py" title="Permalink to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="nm_rereference.ReReferencer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nm_rereference.</span></span><span class="sig-name descname"><span class="pre">ReReferencer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sfreq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nm_channels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nm_rereference.html#ReReferencer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_rereference.ReReferencer" title="Permalink to this definition">¶</a></dt>
+<dd><p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nm_rereference.ReReferencer.process" title="nm_rereference.ReReferencer.process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">process</span></code></a>(data)</p></td>
+<td><p>Rereference data according to the initialized ReReferencer class.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="nm_rereference.ReReferencer.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/nm_rereference.html#ReReferencer.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nm_rereference.ReReferencer.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rereference data according to the initialized ReReferencer class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ieeg_batch</strong> (<em>numpy ndarray</em>) – shape(n_channels, n_samples) - data to be rereferenced.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>rereferenced data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>reref_data (numpy ndarray)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 
 
            </div>
            
           </div>
           <footer>
+  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="projection.html" class="btn btn-neutral float-right" title="projection.py" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="normalization.html" class="btn btn-neutral float-left" title="normalize_raw.py" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+      
+        <a href="projection.html" class="btn btn-neutral float-right" title="nm_projection.py" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="normalization.html" class="btn btn-neutral float-left" title="nm_normalization.py" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2021, Timon Merk.
+        &copy; Copyright 2021, Timon Merk
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
+
         </div>
       </div>
 
@@ -239,6 +269,7 @@
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

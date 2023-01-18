@@ -1,44 +1,46 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
 <head>
-  <meta charset="utf-8" />
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <title>FeatureEstimationDemo &mdash; py_neuromodulation  documentation</title>
   
 
   
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-
+  
   
   
 
   
-  
-
-  
-
-  
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Parametrization" href="outline_parametrization.html" />
@@ -79,7 +81,6 @@
           
         </div>
 
-        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -88,9 +89,10 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="setup.html">Setup</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">py_neuromodulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html#setup">Setup</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Examples</span></p>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="ParametrizationDefinition.html">ParametrizationDefinition</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">FeatureEstimationDemo</a><ul>
@@ -101,7 +103,7 @@
 </ul>
 </li>
 </ul>
-<p class="caption"><span class="caption-text">Code</span></p>
+<p class="caption" role="heading"><span class="caption-text">Code</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="outline_parametrization.html">Parametrization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="outline_featureestimation.html">Feature Estimation</a></li>
@@ -111,7 +113,6 @@
             
           
         </div>
-        
       </div>
     </nav>
 
@@ -146,20 +147,18 @@
 
 
 
-
-
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="index.html">Docs</a> &raquo;</li>
         
       <li>FeatureEstimationDemo</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="_sources/FeatureEstimationDemo.ipynb.txt" rel="nofollow"> View page source</a>
           
         
@@ -283,10 +282,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -383,11 +383,12 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
 /* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
 div.rendered_html table {
   border: none;
   border-collapse: collapse;
@@ -396,10 +397,14 @@ div.rendered_html table {
   font-size: 12px;
   table-layout: fixed;
 }
+.jp-RenderedHTMLCommon thead,
 div.rendered_html thead {
   border-bottom: 1px solid black;
   vertical-align: bottom;
 }
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
 div.rendered_html tr,
 div.rendered_html th,
 div.rendered_html td {
@@ -411,12 +416,15 @@ div.rendered_html td {
   max-width: none;
   border: none;
 }
+.jp-RenderedHTMLCommon th,
 div.rendered_html th {
   font-weight: bold;
 }
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
 div.rendered_html tbody tr:nth-child(odd) {
   background: #f5f5f5;
 }
+.jp-RenderedHTMLCommon tbody tr:hover,
 div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
@@ -443,10 +451,10 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<div class="section" id="FeatureEstimationDemo">
-<h1>FeatureEstimationDemo<a class="headerlink" href="#FeatureEstimationDemo" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="Read-example-BIDS-data">
-<h2>Read example BIDS data<a class="headerlink" href="#Read-example-BIDS-data" title="Permalink to this headline">¶</a></h2>
+<section id="FeatureEstimationDemo">
+<h1>FeatureEstimationDemo<a class="headerlink" href="#FeatureEstimationDemo" title="Permalink to this heading">¶</a></h1>
+<section id="Read-example-BIDS-data">
+<h2>Read example BIDS data<a class="headerlink" href="#Read-example-BIDS-data" title="Permalink to this heading">¶</a></h2>
 <p>In this demo the basic offline workflow of py_neuromodulation will be demonstrated. For that, the example BIDS dataset in <em>pyneuromodulation/examples/data/</em> will be analyzed. The parametrization <code class="docutils literal notranslate"><span class="pre">nm_settings.json</span></code> is stored in the package directory <em>pyneuromodulation/nm_settings.json</em>, a <code class="docutils literal notranslate"><span class="pre">nm_channels.csv</span></code> is created given the <em>channel_type</em> information from the BIDS data.</p>
 <p>A projection will be defined based on the <em>pyneuromodulation/grid_cortex.tsv</em> and <em>pyneuromodulation/grid_subcortex.tsv</em> files. Band power features and sharpwave features will then be estimated and projected to the provided grid.</p>
 <p>First, necessary modules will be included and the BIDS_PATH and RUN_PATH, the path to the BIDS brainvision run file, will be defined given the example.</p>
@@ -454,8 +462,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">sys</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">bids</span> <span class="kn">import</span> <span class="n">BIDSLayout</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 <span class="kn">import</span> <span class="nn">os</span>
@@ -499,8 +506,7 @@ used run path: C:\Users\ICN_admin\Documents\py_neuromodulation\examples\data\sub
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">PATH_RUN</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">PATH_RUN</span>
 </pre></div>
 </div>
 </div>
@@ -517,8 +523,7 @@ used run path: C:\Users\ICN_admin\Documents\py_neuromodulation\examples\data\sub
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">BIDS_EXAMPLE_PATH</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">BIDS_EXAMPLE_PATH</span>
 </pre></div>
 </div>
 </div>
@@ -535,8 +540,7 @@ used run path: C:\Users\ICN_admin\Documents\py_neuromodulation\examples\data\sub
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">PATH_PYNEUROMODULATION</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">PATH_PYNEUROMODULATION</span>
 </pre></div>
 </div>
 </div>
@@ -553,8 +557,7 @@ WindowsPath(&#39;C:/Users/ICN_admin/Documents/py_neuromodulation&#39;)
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">nm_BIDS</span> <span class="o">=</span> <span class="n">nm_start_BIDS</span><span class="o">.</span><span class="n">NM_BIDS</span><span class="p">(</span><span class="n">PATH_RUN</span><span class="p">,</span> <span class="n">PATH_BIDS</span><span class="o">=</span><span class="n">BIDS_EXAMPLE_PATH</span><span class="p">,</span> <span class="n">PATH_GRIDS</span><span class="o">=</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nm_BIDS</span> <span class="o">=</span> <span class="n">nm_start_BIDS</span><span class="o">.</span><span class="n">NM_BIDS</span><span class="p">(</span><span class="n">PATH_RUN</span><span class="p">,</span> <span class="n">PATH_BIDS</span><span class="o">=</span><span class="n">BIDS_EXAMPLE_PATH</span><span class="p">,</span> <span class="n">PATH_GRIDS</span><span class="o">=</span>
                                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_PYNEUROMODULATION</span><span class="p">,</span> <span class="s1">&#39;pyneuromodulation&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
@@ -704,8 +707,7 @@ Designing a one-pass, zero-phase, non-causal bandpass filter:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;BIDS_path&#39;</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;BIDS_path&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -723,8 +725,7 @@ Designing a one-pass, zero-phase, non-causal bandpass filter:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">nm_channels</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">nm_channels</span>
 </pre></div>
 </div>
 </div>
@@ -891,8 +892,7 @@ Designing a one-pass, zero-phase, non-causal bandpass filter:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span>
 </pre></div>
 </div>
 </div>
@@ -1111,8 +1111,7 @@ Designing a one-pass, zero-phase, non-causal bandpass filter:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;methods&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -1139,17 +1138,16 @@ Designing a one-pass, zero-phase, non-causal bandpass filter:
 </pre></div></div>
 </div>
 <p>As defined, data will be <strong>resampled</strong>, <strong>normalized</strong> and <strong>rereferenced</strong> (as defined in the nm_channels) before feature estimation. Then, <strong>bandpower features</strong>, <strong>sharpwave features</strong> and <strong>hjorth parameters</strong> are calculated. Additionally, gamma band features will be Kalman filtered. Since <em>project_cortex</em> is set to true, projection to a grid is also enabled.</p>
-</div>
-<div class="section" id="Grid-projection">
-<h2>Grid projection<a class="headerlink" href="#Grid-projection" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Grid-projection">
+<h2>Grid projection<a class="headerlink" href="#Grid-projection" title="Permalink to this heading">¶</a></h2>
 <p>Next we will read the cortical grid, defined in <em>pyneuromodulation/grid_cortex.tsv</em>, and calculate the <strong>projection matrix</strong> from individual channels to the grid:</p>
 <p>We can now inspect the individual coordinates, and the projected grid points. Therfore we read first a standard MNI hull, defined in the plot folder:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">PATH_PLOT</span> <span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="s1">&#39;plots&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">PATH_PLOT</span> <span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">,</span> <span class="s1">&#39;plots&#39;</span><span class="p">)</span>
 <span class="n">faces</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">loadmat</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_PLOT</span><span class="p">,</span> <span class="s1">&#39;faces.mat&#39;</span><span class="p">))</span>
 <span class="n">vertices</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">loadmat</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_PLOT</span><span class="p">,</span> <span class="s1">&#39;Vertices.mat&#39;</span><span class="p">))</span>
 <span class="n">grid</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">loadmat</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_PLOT</span><span class="p">,</span> <span class="s1">&#39;grid.mat&#39;</span><span class="p">))[</span><span class="s1">&#39;grid&#39;</span><span class="p">]</span>
@@ -1164,8 +1162,7 @@ Designing a one-pass, zero-phase, non-causal bandpass filter:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">cortex_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">grid_cortex</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cortex_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">projection</span><span class="o">.</span><span class="n">grid_cortex</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="n">nm_BIDS</span><span class="o">.</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sess_right&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
     <span class="n">cortex_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">cortex_grid</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span><span class="o">*-</span><span class="mi">1</span>
@@ -1210,17 +1207,16 @@ Designing a one-pass, zero-phase, non-causal bandpass filter:
 </div>
 <p>As visible, only grid points are active (channel data is projected unto them as shown in yellow) within the <em>max_dist</em> of every individual channel for the cortical and subcortical grid (as specified in the <code class="docutils literal notranslate"><span class="pre">nm_settings.json</span></code>).</p>
 <p>Next, the <strong>rereference</strong> and <strong>resample</strong> classes get instantiated, and an acquisition system is simulated by a <strong>generator</strong>:</p>
-</div>
-<div class="section" id="Feature-Estimation">
-<h2>Feature Estimation<a class="headerlink" href="#Feature-Estimation" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Feature-Estimation">
+<h2>Feature Estimation<a class="headerlink" href="#Feature-Estimation" title="Permalink to this heading">¶</a></h2>
 <p>Now the used <strong>feature</strong> and <strong>run_analysis</strong> classes are instantiated. Here FIR Filters and Kalman Filters are parametrized. During online feature estimation filters only have to be applied, instead of a repetitive calculatation, which saves computational time.</p>
 <p>Given the previously initialized generator, we can now receive a first data batch of 1 sec in shape (channels, samples):</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">ieeg_batch</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">gen</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ieeg_batch</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">gen</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1229,8 +1225,7 @@ Designing a one-pass, zero-phase, non-causal bandpass filter:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">ieeg_batch</span><span class="o">.</span><span class="n">shape</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ieeg_batch</span><span class="o">.</span><span class="n">shape</span>
 </pre></div>
 </div>
 </div>
@@ -1247,8 +1242,7 @@ Designing a one-pass, zero-phase, non-causal bandpass filter:
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1">#for i in range(10):</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#for i in range(10):</span>
 <span class="k">if</span> <span class="n">ieeg_batch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">ieeg_batch</span><span class="p">)</span>
 </pre></div>
@@ -1268,8 +1262,7 @@ Last batch took: 0.1 seconds
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">ch</span> <span class="o">=</span> <span class="s1">&#39;ECOG_AT_SM_L_1&#39;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ch</span> <span class="o">=</span> <span class="s1">&#39;ECOG_AT_SM_L_1&#39;</span>
 <span class="n">ch_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">f_</span> <span class="k">for</span> <span class="n">f_</span> <span class="ow">in</span> <span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">f_</span><span class="p">]</span>
 </pre></div>
 </div>
@@ -1278,8 +1271,7 @@ Last batch took: 0.1 seconds
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">feature_arr</span><span class="p">[</span><span class="n">ch_cols</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># upper run_analysis was called three times for consective data batches</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">feature_arr</span><span class="p">[</span><span class="n">ch_cols</span><span class="p">]</span><span class="o">.</span><span class="n">T</span>  <span class="c1"># upper run_analysis was called three times for consective data batches</span>
 </pre></div>
 </div>
 </div>
@@ -1640,16 +1632,15 @@ Last batch took: 0.1 seconds
 </table>
 </div></div>
 </div>
-</div>
-<div class="section" id="Sharpwave-features">
-<h2>Sharpwave features<a class="headerlink" href="#Sharpwave-features" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="Sharpwave-features">
+<h2>Sharpwave features<a class="headerlink" href="#Sharpwave-features" title="Permalink to this heading">¶</a></h2>
 <p>Now let’s investigate sharpwave features. First, data for a specific channel is bandpass filtered in a predefined range (here 5 - 80 Hz).</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">normalize_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;raw_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;normalization_time&quot;</span><span class="p">]</span> <span class="o">*</span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">fs</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">normalize_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">settings_wrapper</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;raw_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;normalization_time&quot;</span><span class="p">]</span> <span class="o">*</span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">fs</span><span class="p">)</span>
 <span class="n">raw_norm</span> <span class="o">=</span> <span class="n">nm_normalization</span><span class="o">.</span><span class="n">normalize_raw</span><span class="p">(</span><span class="n">ieeg_batch</span><span class="p">,</span> <span class="n">normalize_samples</span><span class="p">,</span> <span class="n">nm_BIDS</span><span class="o">.</span><span class="n">fs</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1660,8 +1651,7 @@ Last batch took: 0.1 seconds
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[97]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># data is being filtered in get_sharpwave_features</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># data is being filtered in get_sharpwave_features</span>
 
 <span class="n">data</span> <span class="o">=</span> <span class="n">raw_norm</span><span class="p">[</span><span class="n">ch_idx</span><span class="p">,:]</span>
 <span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">initialize_sw_features</span><span class="p">()</span>
@@ -1673,16 +1663,14 @@ Last batch took: 0.1 seconds
 
 <span class="n">peaks</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">find_peaks</span><span class="p">(</span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="n">peak_dist</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 <span class="n">troughs</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">find_peaks</span><span class="p">(</span><span class="o">-</span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sw_features</span><span class="o">.</span><span class="n">filtered_data</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="n">trough_dist</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-
-</pre></div>
+<br/></pre></div>
 </div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[100]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">time_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">1375</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">time_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">1375</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span><span class="mf">3.5</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span><span class="mf">3.5</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
@@ -1731,8 +1719,7 @@ Last batch took: 0.1 seconds
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[73]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sharpwave_analysis_settings&quot;</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nm_BIDS</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sharpwave_analysis_settings&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -1770,37 +1757,37 @@ Last batch took: 0.1 seconds
 </pre></div></div>
 </div>
 <p>E.g. in this example the median, max, min and variance of all sharpness features would be returned.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
            
           </div>
           <footer>
+  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="outline_parametrization.html" class="btn btn-neutral float-right" title="Parametrization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="ParametrizationDefinition.html" class="btn btn-neutral float-left" title="ParametrizationDefinition" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+      
+        <a href="outline_parametrization.html" class="btn btn-neutral float-right" title="Parametrization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="ParametrizationDefinition.html" class="btn btn-neutral float-left" title="ParametrizationDefinition" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2021, Timon Merk.
+        &copy; Copyright 2021, Timon Merk
 
     </p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
+
         </div>
       </div>
 
@@ -1808,6 +1795,7 @@ Last batch took: 0.1 seconds
 
   </div>
   
+
 
   <script type="text/javascript">
       jQuery(function () {

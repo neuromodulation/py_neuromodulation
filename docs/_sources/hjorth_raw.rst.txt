@@ -1,5 +1,5 @@
-hjorth_raw.py
+nm_hjorth_raw.py
 =============
 
-.. automodule:: hjorth_raw
+.. automodule:: nm_hjorth_raw
       :members:

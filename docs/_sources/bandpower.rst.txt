@@ -1,5 +1,5 @@
-bandpower.py
+nm_oscillatory.py
 =============
 
-.. automodule:: bandpower
+.. automodule:: nm_oscillatory.BandPower
       :members:
