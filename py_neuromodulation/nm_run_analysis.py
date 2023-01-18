@@ -22,7 +22,7 @@ _PathLike = str | os.PathLike
 
 class Preprocessor(Protocol):
     def process(self, data: np.ndarray) -> np.ndarray:
-        ...
+        pass
 
 
 _PREPROCESSING_CONSTRUCTORS = [
