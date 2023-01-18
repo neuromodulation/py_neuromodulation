@@ -11,6 +11,15 @@ class Hjorth(nm_features_abc.Feature):
     ) -> None:
         self.s = settings
         self.ch_names = ch_names
+    
+    @staticmethod
+    def test_settings(
+        settings: dict,
+        ch_names: Iterable[str],
+        sfreq: int | float,
+    ):
+        # no settings to test
+        pass
 
     def calc_feature(self, data: np.array, features_compute: dict) -> dict:
         for ch_idx, ch_name in enumerate(self.ch_names):

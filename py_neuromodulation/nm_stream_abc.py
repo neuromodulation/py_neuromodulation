@@ -1,6 +1,5 @@
 """Module that contains PNStream ABC."""
 from abc import ABC, abstractmethod
-import math
 import os
 import pathlib
 import _pickle as cPickle
@@ -13,6 +12,7 @@ from py_neuromodulation import (
     nm_IO,
     nm_plots,
     nm_run_analysis,
+    nm_settings
 )
 
 _PathLike = str | os.PathLike
@@ -25,10 +25,10 @@ class PNStream(ABC):
     run_analysis: nm_run_analysis.DataProcessor
     features: nm_features.Features
     coords: dict
-    sfreq: int
+    sfreq: int | float
     path_grids: _PathLike | None
     model: base.BaseEstimator | None
-    sess_rigtht: bool | None
+    sess_right: bool | None
     verbose: bool
 
     def __init__(
@@ -43,10 +43,6 @@ class PNStream(ABC):
         coord_list: list | None = None,
         verbose: bool = True,
     ) -> None:
-        if settings is None:
-            settings = (
-                pathlib.Path(__file__).parent.resolve() / "nm_settings.json"
-            )
         self.settings = self._load_settings(settings)
         self.nm_channels = self._load_nm_channels(nm_channels)
         if path_grids is None:
@@ -57,12 +53,12 @@ class PNStream(ABC):
             self.coords = {}
         else:
             self.coords = coords
-        self.sfreq = math.floor(sfreq)
+        self.sfreq = sfreq
         self.sess_right = None
         self.projection = None
         self.model = None
         self.run_analysis = nm_run_analysis.DataProcessor(
-            sfreq=sfreq,
+            sfreq=self.sfreq,
             settings=self.settings,
             nm_channels=self.nm_channels,
             path_grids=self.path_grids,
@@ -109,9 +105,11 @@ class PNStream(ABC):
         return nm_channels
 
     @staticmethod
-    def _load_settings(settings: dict | _PathLike) -> dict:
+    def _load_settings(settings: dict | _PathLike | None) -> dict:
         if isinstance(settings, dict):
             return settings
+        if settings is None: 
+            return nm_settings.get_default_settings()
         return nm_IO.read_settings(str(settings))
 
     def load_model(self, model_name: _PathLike) -> None:
@@ -179,7 +177,7 @@ class PNStream(ABC):
     def save_settings(
         self, out_path_root: _PathLike, folder_name: str
     ) -> None:
-        nm_IO.save_settings(self.settings, out_path_root, folder_name)
+        self.run_analysis.save_settings(out_path_root, folder_name)
 
     def save_sidecar(self, out_path_root: _PathLike, folder_name: str) -> None:
         """Save sidecar incuding fs, coords, sess_right to

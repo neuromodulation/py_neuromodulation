@@ -1,5 +1,6 @@
 """This module contains the class to process a given batch of data."""
 from enum import Enum
+import math
 import os
 from time import time
 from typing import Protocol, Type
@@ -24,6 +25,8 @@ class Preprocessor(Protocol):
     def process(self, data: np.ndarray) -> np.ndarray:
         pass
 
+    def test_settings(self, settings: dict):
+        ...
 
 _PREPROCESSING_CONSTRUCTORS = [
     "notch_filter",
@@ -43,7 +46,7 @@ class GRIDS(Enum):
 class DataProcessor:
     def __init__(
         self,
-        sfreq: int,
+        sfreq: int | float,
         settings: dict | _PathLike,
         nm_channels: pd.DataFrame | _PathLike,
         coord_names: list | None = None,
@@ -76,7 +79,7 @@ class DataProcessor:
 
         self.sfreq_features = self.settings["sampling_rate_features_hz"]
         self._sfreq_raw_orig = sfreq
-        self.sfreq_raw = sfreq
+        self.sfreq_raw = math.floor(sfreq)
         self.line_noise = line_noise
         self.path_grids = path_grids
         self.verbose = verbose

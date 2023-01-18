@@ -58,23 +58,18 @@ def read_BIDS_data(
     if isinstance(PATH_RUN, mne_bids.BIDSPath):
         bids_path = PATH_RUN
     else:
-        entities = mne_bids.get_entities_from_fname(PATH_RUN)
-        bids_path = mne_bids.BIDSPath(
-            subject=entities["subject"],
-            session=entities["session"],
-            task=entities["task"],
-            run=entities["run"],
-            acquisition=entities["acquisition"],
-            datatype=datatype,
-            root=BIDS_PATH,
-        )
+        bids_path = mne_bids.get_bids_path_from_fname(PATH_RUN)
 
     raw_arr = mne_bids.read_raw_bids(bids_path)
     coord_list, coord_names = get_coord_list(raw_arr)
     if raw_arr.info["line_freq"] is not None:
         line_noise = int(raw_arr.info["line_freq"])
     else:
-        print("Line noise is not available in the data, using value of {} Hz.".format(line_noise))
+        print(
+            "Line noise is not available in the data, using value of {} Hz.".format(
+                line_noise
+            )
+        )
     return (
         raw_arr,
         raw_arr.get_data(),
@@ -398,7 +393,7 @@ def get_paths_example_data():
     dataset used in most examples.
     """
 
-    SCRIPT_DIR = os.path.abspath('')
+    SCRIPT_DIR = os.path.abspath("")
     if os.path.basename(SCRIPT_DIR) == "py_neuromodulation":
         # this check is necessary, so we can also run the script from the root directory
         SCRIPT_DIR = os.path.join(SCRIPT_DIR, "examples")

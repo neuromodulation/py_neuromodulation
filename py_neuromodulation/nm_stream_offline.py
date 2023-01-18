@@ -1,4 +1,5 @@
 """Module for offline data streams."""
+import math
 import os
 
 import numpy as np
@@ -76,7 +77,7 @@ class _OfflineStream(nm_stream_abc.PNStream):
         generator = nm_generator.raw_data_generator(
             data=data,
             settings=self.settings,
-            sfreq=self.sfreq,
+            sfreq=math.floor(self.sfreq),
         )
         features = []
         sample_add = int(self.sfreq / self.run_analysis.sfreq_features)

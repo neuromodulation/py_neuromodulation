@@ -1,231 +1,133 @@
-import unittest
 import os
-import pdb
-import py_neuromodulation as nm
-from py_neuromodulation import (
-    nm_define_nmchannels,
-    nm_IO,
-    nm_settings,
-    nm_stream_offline
-)
+import unittest
+import pytest
+import numpy as np
 
+from py_neuromodulation import nm_normalization
 
-class TestNormSettings(unittest.TestCase):
-    def set_up(self):
-        """
-        Load BIDS data, create stream.
-        Returns necessary variables for testing different settings.
-        :return: stream, sfreq, line_noise, coord_list, coord_names, data, PATH_OUT, RUN_NAME
-        """
+def test_raw_normalization_init():
 
-        RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data()
-
-        (
-            raw,
-            data,
-            sfreq,
-            line_noise,
-            coord_list,
-            coord_names,
-        ) = nm_IO.read_BIDS_data(
-            PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype
+    with pytest.raises(Exception):
+        nm_normalization.RawNormalizer(
+            sfreq=1000,
+            sampling_rate_features_hz=500,
+            normalization_method="meann",
+            normalization_time_s=30,
+            clip=3
         )
 
-        nm_channels = nm_define_nmchannels.set_channels(
-            ch_names=raw.ch_names,
-            ch_types=raw.get_channel_types(),
-            reference="default",
-            bads=raw.info["bads"],
-            new_names="default",
-            used_types=("ecog", "dbs", "seeg"),
-            target_keywords=("MOV_RIGHT_CLEAN",),
+def test_feature_normalization_init():
+
+    with pytest.raises(Exception):
+        nm_normalization.FeatureNormalizer(
+            sampling_rate_features_hz=500,
+            normalization_method="meann",
+            normalization_time_s=30,
+            clip=3
         )
 
-        settings = nm_settings.get_default_settings()
-        settings = nm_settings.reset_settings(settings)
+def test_process_norm_features():
 
-        stream = nm_stream_offline.Stream(
-            settings=settings,
-            nm_channels=nm_channels,
-            path_grids=None,
-            verbose=True,
-            sfreq=sfreq,
-            line_noise=line_noise,
-            coord_list=coord_list,
-            coord_names=coord_names
+    norm = nm_normalization.FeatureNormalizer(
+        sampling_rate_features_hz=500,
+        normalization_method="mean",
+        normalization_time_s=30,
+        clip=3
+    )
+    data = np.ones([1, 5])
+    data_normed = norm.process(data)
+
+    assert np.all(np.isfinite(data_normed) == True)
+
+    assert np.all(np.equal(data, norm.previous) == 1)
+
+def test_previous_size_FeatureNorm():
+
+    norm = nm_normalization.FeatureNormalizer(
+        sampling_rate_features_hz=10,
+        normalization_method="zscore",
+        normalization_time_s=10,
+        clip=3
+    )
+
+    num_features = 5
+
+    for _ in range(150):
+        data = norm.process(np.random.random([1, num_features]))
+
+    assert norm.previous.shape[0] < norm.num_samples_normalize
+    
+def test_zscore_feature_analysis():    
+    norm = nm_normalization.FeatureNormalizer(
+        sampling_rate_features_hz=10,
+        normalization_method="zscore",
+        normalization_time_s=30,
+        clip=False
+    )
+
+    num_features = 5
+
+    for _ in range(400):
+        data_to_norm = np.random.random([1, num_features])
+        data_normed = norm.process(data_to_norm)
+
+    expect_res = norm.previous[:, 0].std() * data_normed[0, 0] + norm.previous[:, 0].mean()
+
+    assert pytest.approx(expect_res, 0.1) == data_to_norm[0, 0]
+
+def test_zscore_raw_analysis():
+
+    norm = nm_normalization.RawNormalizer(
+        sampling_rate_features_hz=10,
+        normalization_method="zscore",
+        normalization_time_s=30,
+        sfreq=10,
+        clip=False
+    )
+
+    num_samples = 100
+
+    for _ in range(400):
+        data_to_norm = np.random.random([1, num_samples])
+        data_normed = norm.process(data_to_norm)
+
+    expect_res = norm.previous[:, 0].std() * data_normed[0, 0] + norm.previous[:, 0].mean()
+
+    np.testing.assert_allclose(expect_res, data_to_norm[0, 0], rtol=0.1, atol=0.1)
+
+def test_all_norm_methods_raw():
+
+    for norm_method in [e.value for e in nm_normalization.NORM_METHODS]:
+        norm = nm_normalization.RawNormalizer(
+            sampling_rate_features_hz=10,
+            normalization_method=norm_method,
+            normalization_time_s=30,
+            sfreq=10,
+            clip=False
         )
 
-        return data, stream
+        num_samples = 10
 
-    def test_fast_compute_settings(self):
-        """
-        Try if normalization on fast compute settings works.
-        No assertion in the end, only want to see if it raises any errors
-        """
-        data, stream = self.set_up()
+        for _ in range(10):
+            data_to_norm = np.random.random([1, num_samples])
+            data_normed = norm.process(data_to_norm)
 
-        stream.set_settings_fast_compute()
+        assert np.all(np.isfinite(data_normed) == True)
 
-        stream.run(
-            data=data,
-            out_path_root=PATH_OUT,
-            folder_name=RUN_NAME,
+def test_all_norm_methods_feature():
+
+    for norm_method in [e.value for e in nm_normalization.NORM_METHODS]:
+        norm = nm_normalization.FeatureNormalizer(
+            sampling_rate_features_hz=10,
+            normalization_method=norm_method,
+            normalization_time_s=30,
+            clip=False
         )
 
-    def test_quantile_norm(self):
-        (
-            stream,
-            sfreq,
-            line_noise,
-            coord_list,
-            coord_names,
-            data,
-            nm_channels,
-            PATH_OUT,
-            RUN_NAME,
-        ) = self.set_up()
+        num_samples = 10
 
-        stream.set_settings_fast_compute()
+        for _ in range(10):
+            data_to_norm = np.random.random([1, num_samples])
+            data_normed = norm.process(data_to_norm)
 
-        stream.settings["preprocessing"]["raw_normalization"] = True
-        stream.settings["preprocessing"]["preprocessing_order"] = [
-            "raw_normalization",
-        ]
-        stream.settings["postprocessing"]["feature_normalization"] = True
-        stream.settings["raw_normalization_settings"][
-            "normalization_method"
-        ] = {
-            "mean": False,
-            "median": False,
-            "zscore": False,
-            "zscore-median": False,
-            "quantile": True,
-            "power": False,
-            "robust": False,
-            "minmax": False,
-        }
-        stream.settings["feature_normalization_settings"][
-            "normalization_method"
-        ] = {
-            "mean": False,
-            "median": False,
-            "zscore": False,
-            "zscore-median": False,
-            "quantile": True,
-            "power": False,
-            "robust": False,
-            "minmax": False,
-        }
-
-        stream.init_stream(
-            sfreq=sfreq,
-            line_noise=line_noise,
-            coord_list=coord_list,
-            coord_names=coord_names,
-        )
-
-        stream.run(
-            data=data,
-            out_path_root=PATH_OUT,
-            folder_name=RUN_NAME,
-        )
-
-    def test_zscore_median_norm(self):
-        (
-            stream,
-            sfreq,
-            line_noise,
-            coord_list,
-            coord_names,
-            data,
-            nm_channels,
-            PATH_OUT,
-            RUN_NAME,
-        ) = self.set_up()
-
-        stream.set_settings_fast_compute()
-
-        stream.settings["preprocessing"]["raw_normalization"] = True
-        stream.settings["preprocessing"]["preprocessing_order"] = [
-            "raw_normalization",
-        ]
-        stream.settings["postprocessing"]["feature_normalization"] = True
-        stream.settings["raw_normalization_settings"][
-            "normalization_method"
-        ] = {
-            "mean": False,
-            "median": False,
-            "zscore": False,
-            "zscore-median": True,
-            "quantile": False,
-            "power": False,
-            "robust": False,
-            "minmax": False,
-        }
-        stream.settings["feature_normalization_settings"][
-            "normalization_method"
-        ] = {
-            "zscore-median": True,
-        }
-
-        stream.init_stream(
-            sfreq=sfreq,
-            line_noise=line_noise,
-            coord_list=coord_list,
-            coord_names=coord_names,
-        )
-
-        stream.run(
-            data=data,
-            out_path_root=PATH_OUT,
-            folder_name=RUN_NAME,
-        )
-
-    def test_minmax_norm(self):
-        (
-            stream,
-            sfreq,
-            line_noise,
-            coord_list,
-            coord_names,
-            data,
-            nm_channels,
-            PATH_OUT,
-            RUN_NAME,
-        ) = self.set_up()
-
-        stream.set_settings_fast_compute()
-
-        stream.settings["preprocessing"]["raw_normalization"] = True
-        stream.settings["preprocessing"]["preprocessing_order"] = [
-            "raw_normalization",
-        ]
-        stream.settings["postprocessing"]["feature_normalization"] = True
-        stream.settings["raw_normalization_settings"][
-            "normalization_method"
-        ] = {"minmax": True}
-        stream.settings["feature_normalization_settings"][
-            "normalization_method"
-        ] = {
-            "mean": False,
-            "median": False,
-            "zscore": False,
-            "zscore-median": False,
-            "quantile": False,
-            "power": False,
-            "robust": False,
-            "minmax": True,
-        }
-
-        stream.init_stream(
-            sfreq=sfreq,
-            line_noise=line_noise,
-            coord_list=coord_list,
-            coord_names=coord_names,
-        )
-
-        stream.run(
-            data=data,
-            out_path_root=PATH_OUT,
-            folder_name=RUN_NAME,
-        )
+        assert np.all(np.isfinite(data_normed) == True)

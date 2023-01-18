@@ -1,6 +1,6 @@
 """Test the nm_resample module."""
 import numpy as np
-import pandas as pd
+
 from py_neuromodulation import nm_resample
 
 

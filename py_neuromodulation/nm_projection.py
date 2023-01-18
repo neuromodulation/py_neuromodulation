@@ -17,6 +17,8 @@ class Projection:
         plot_projection: bool = False,
     ) -> None:
 
+        self.test_settings(settings)
+
         self.grid_cortex = grid_cortex
         self.grid_subcortex = grid_subcortex
         self.coords = coords
@@ -92,6 +94,17 @@ class Projection:
                 proj_matrix_cortex=self.proj_matrix_cortex,
             )
             nmplotter.plot_cortex()
+
+    @staticmethod
+    def test_settings(s: dict):
+        if s["postprocessing"]["project_cortex"] is True:
+            assert isinstance(
+                s["project_cortex_settings"]["max_dist_mm"], (float, int)
+            )
+        if s["postprocessing"]["project_subcortex"] is True:
+            assert isinstance(
+                s["project_subcortex_settings"]["max_dist_mm"], (float, int)
+            )
 
     def remove_not_used_ch_from_coords(self):
         ch_not_used = self.nm_channels.query(

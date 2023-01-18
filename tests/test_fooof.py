@@ -1,15 +1,9 @@
-import os
-import sys
-import numpy as np
-from numpy.testing import assert_array_equal
-from pathlib import Path
-
 from py_neuromodulation import (
     nm_generator,
     nm_stream_offline,
     nm_IO,
     nm_define_nmchannels,
-    nm_settings
+    nm_settings,
 )
 
 
@@ -27,7 +21,13 @@ class TestWrapper:
             fs (float): example sampling frequency
         """
 
-        RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data()
+        (
+            RUN_NAME,
+            PATH_RUN,
+            PATH_BIDS,
+            PATH_OUT,
+            datatype,
+        ) = nm_IO.get_paths_example_data()
 
         (
             raw,
@@ -64,18 +64,17 @@ class TestWrapper:
             sfreq=sfreq,
             line_noise=line_noise,
             coord_list=coord_list,
-            coord_names=coord_names
+            coord_names=coord_names,
         )
 
         return data, stream
 
-    def test_fooof_features(self):
+    def test_fooof_features(self) -> None:
 
         data, stream = self.setup_stream()
 
         generator = nm_generator.raw_data_generator(
-            data, 
-            stream.settings, stream.sfreq
+            data, stream.settings, stream.sfreq
         )
         data_batch = next(generator, None)
         feature_series = stream.run_analysis.process(data_batch)
