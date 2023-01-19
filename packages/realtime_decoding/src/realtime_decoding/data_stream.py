@@ -278,7 +278,6 @@ def initialize_data_stream(
         PySide2.QtWidgets.QApplication.quit()
         del plotter_app
 
-
         with open_lsl_stream(device) as stream:
             listener = Listener(on_press=on_press, on_release=on_release)
             # rawdata_thread = realtime_decoding.RawDataTMSi(
@@ -297,8 +296,6 @@ def initialize_data_stream(
                 interval=interval,
                 queue_raw=queue_source,
                 queue_features=queue_features,
-                path_nm_channels=cwd / "nm_channels_feat.csv",
-                path_nm_settings=cwd / "nm_settings_feat.json",
                 out_dir=out_dir,
                 path_grids=None,
                 line_noise=50,
