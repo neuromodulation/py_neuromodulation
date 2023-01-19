@@ -1,4 +1,4 @@
-"""
+'''
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,13 +28,12 @@ limitations under the License.
  */
 
 
-"""
+'''
 
 import sys
 from os.path import join, dirname, realpath
-
-Plotters_dir = dirname(realpath(__file__))  # directory of this file
-modules_dir = join(Plotters_dir, "...")  # directory with all modules
+Plotters_dir = dirname(realpath(__file__)) # directory of this file
+modules_dir = join(Plotters_dir, '...') # directory with all modules
 sys.path.append(modules_dir)
 
 from .plotting_gui import PlottingGUI
