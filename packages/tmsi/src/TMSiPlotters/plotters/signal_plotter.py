@@ -45,7 +45,9 @@ Plotter_dir = dirname(realpath(__file__))  # directory of this file
 measurements_dir = join(
     Plotter_dir, "../../measurements"
 )  # directory with all measurements
-modules_dir = normpath(join(Plotter_dir, "../.."))  # directory with all modules
+modules_dir = normpath(
+    join(Plotter_dir, "../..")
+)  # directory with all modules
 
 from TMSiSDK import tmsi_device
 from TMSiSDK import sample_data_server
@@ -98,7 +100,9 @@ class SignalViewer:
         # Configuration settings
         self.num_channels = np.size(self.gui_handle._channel_selection, 0)
         if isinstance(self.device, TMSiDevice):
-            self.active_channels = np.size(self.device.get_device_channels(), 0)
+            self.active_channels = np.size(
+                self.device.get_device_channels(), 0
+            )
             self.sample_rate = self.device.get_device_sampling_frequency()
         else:
             self.active_channels = np.size(self.device.channels, 0)
@@ -262,7 +266,9 @@ class SignalViewer:
         for i in range(self.num_channels):
             self.c = pg.PlotCurveItem()
             self.c.setPen(
-                color="black", cosmetic=True, joinStyle=QtCore.Qt.MiterJoin
+                "black",
+                cosmetic=True,
+                joinStyle=QtCore.Qt.MiterJoin,
             )
             self.RealTimePlotWidget.window.addItem(self.c)
             self.c.setPos(0, (i) * self._plot_offset)
@@ -370,7 +376,10 @@ class SignalViewer:
             x, y = self.curve[i].getData()
 
             # Convert to original sample data
-            y = y * -1 * self._plot_diff[i]["diff"] + self._plot_diff[i]["mean"]
+            y = (
+                y * -1 * self._plot_diff[i]["diff"]
+                + self._plot_diff[i]["mean"]
+            )
 
             # Find the mean and the difference between minimum and maximum
             self._plot_diff[i]["mean"] = (
@@ -674,7 +683,10 @@ class SignalViewer:
 
         # Set all UNI channels' checkboxes to the Checked state
         for i in range(np.size(self.gui_handle._checkboxes, 0)):
-            if self.gui_handle._checkboxes[i][1].value == ChannelType.UNI.value:
+            if (
+                self.gui_handle._checkboxes[i][1].value
+                == ChannelType.UNI.value
+            ):
                 self.gui_handle._checkboxes[i][0].setChecked(True)
 
         # Call the update function (normally called by individual checkboxes)
@@ -700,7 +712,10 @@ class SignalViewer:
 
         # Set all UNI channels' checkboxes to the Checked state
         for i in range(np.size(self.gui_handle._checkboxes, 0)):
-            if self.gui_handle._checkboxes[i][1].value == ChannelType.UNI.value:
+            if (
+                self.gui_handle._checkboxes[i][1].value
+                == ChannelType.UNI.value
+            ):
                 self.gui_handle._checkboxes[i][0].setChecked(False)
 
         # Call the update function (normally called by individual checkboxes)
@@ -724,7 +739,10 @@ class SignalViewer:
 
         # Set all BIP channels' checkboxes to the Checked state
         for i in range(np.size(self.gui_handle._checkboxes, 0)):
-            if self.gui_handle._checkboxes[i][1].value == ChannelType.BIP.value:
+            if (
+                self.gui_handle._checkboxes[i][1].value
+                == ChannelType.BIP.value
+            ):
                 self.gui_handle._checkboxes[i][0].setChecked(True)
 
         # Call the update function (normally called by individual checkboxes)
@@ -750,7 +768,10 @@ class SignalViewer:
 
         # Set all BIP channels' checkboxes to the Checked state
         for i in range(np.size(self.gui_handle._checkboxes, 0)):
-            if self.gui_handle._checkboxes[i][1].value == ChannelType.BIP.value:
+            if (
+                self.gui_handle._checkboxes[i][1].value
+                == ChannelType.BIP.value
+            ):
                 self.gui_handle._checkboxes[i][0].setChecked(False)
 
         # Call the update function (normally called by individual checkboxes)
@@ -774,7 +795,10 @@ class SignalViewer:
 
         # Set all AUX channels' checkboxes to the Checked state
         for i in range(np.size(self.gui_handle._checkboxes, 0)):
-            if self.gui_handle._checkboxes[i][1].value == ChannelType.AUX.value:
+            if (
+                self.gui_handle._checkboxes[i][1].value
+                == ChannelType.AUX.value
+            ):
                 self.gui_handle._checkboxes[i][0].setChecked(True)
 
         # Call the update function (normally called by individual checkboxes)
@@ -800,7 +824,10 @@ class SignalViewer:
 
         # Set all AUX channels' checkboxes to the Checked state
         for i in range(np.size(self.gui_handle._checkboxes, 0)):
-            if self.gui_handle._checkboxes[i][1].value == ChannelType.AUX.value:
+            if (
+                self.gui_handle._checkboxes[i][1].value
+                == ChannelType.AUX.value
+            ):
                 self.gui_handle._checkboxes[i][0].setChecked(False)
 
         # Call the update function (normally called by individual checkboxes)
@@ -820,7 +847,9 @@ class SignalViewer:
         ]
 
         # When all sensor channels are already checked, do not update the plot
-        if all(self.gui_handle._checkboxes[i][0].isChecked() for i in DIGI_lst):
+        if all(
+            self.gui_handle._checkboxes[i][0].isChecked() for i in DIGI_lst
+        ):
             return
 
         # Set all sensor channels' checkboxes to the Checked state
@@ -890,7 +919,8 @@ class SignalViewer:
         elif (
             idx_final[0][0] == 0
             and idx_final[0][-1]
-            != (self.window_size * self.sample_rate) / self._downsampling_factor
+            != (self.window_size * self.sample_rate)
+            / self._downsampling_factor
             - 1
         ):
             idx_final = (
