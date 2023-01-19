@@ -245,39 +245,12 @@ def initialize_data_stream(
     queue_decoding = multiprocessing.Queue(1)
     verbose = False
 
-    import PySide2.QtWidgets
-    from TMSiPlotters.gui import PlottingGUI
-    from TMSiPlotters.plotters import PlotterFormat
-
     with open_tmsi_device(saga_config=saga_config) as device:
         # Register the consumer to the TMSiSDK sample data server
         sfreq = device.config.sample_rate
         # num_channels = np.size(device.channels, 0)
         device.start_measurement()
         TMSiSDK.sample_data_server.registerConsumer(device.id, queue_source)
-        # Check if there is already a plotter application in existence
-        plotter_app = PySide2.QtWidgets.QApplication.instance()
-        # Initialise the plotter application if there is no other plotter application
-        if not plotter_app:
-            plotter_app = PySide2.QtWidgets.QApplication(sys.argv)
-
-        # Define the GUI object and show it
-        plot_window = PlottingGUI(
-            plotter_format=PlotterFormat.signal_viewer,
-            figurename="A RealTimePlot",
-            device=device,
-            # channel_selection = [0, 1, 2],
-            # filter_app = filter_appl
-        )
-        plot_window.show()
-
-        # Enter the event loop
-        plotter_app.exec_()
-
-        # Quit and delete the Plotter application
-        PySide2.QtWidgets.QApplication.quit()
-        del plotter_app
-
         with open_lsl_stream(device) as stream:
             listener = Listener(on_press=on_press, on_release=on_release)
             # rawdata_thread = realtime_decoding.RawDataTMSi(
