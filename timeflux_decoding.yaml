@@ -1,0 +1,89 @@
+graphs:
+  - id: GUI
+    nodes:
+    - id: prediction_inlet
+      module: timeflux.nodes.lsl
+      class: Receive
+      params:
+        prop: source_id
+        value: decoding_1
+        unit: ns
+        sync: null
+    - id: feature_inlet
+      module: timeflux.nodes.lsl
+      class: Receive
+      params:
+        prop: source_id
+        value: features_1
+        unit: ns
+        sync: null
+    - id: rawdata_inlet
+      module: timeflux.nodes.lsl
+      class: Receive
+      params:
+        prop: source_id
+        value: rawdata_1
+        unit: ns
+        sync: null
+    # - id: ui
+    #   module: timeflux.nodes.debug
+    #   class: Display
+    - id: ui
+      module: timeflux_ui.nodes.ui
+      class: UI
+    edges:
+      - source: prediction_inlet
+        target: ui:MovementDecoding
+      - source: feature_inlet
+        target: ui:Features
+      - source: rawdata_inlet
+        target: ui:RawData
+    rate: 5
+
+  - id: DataRecorder
+    nodes:
+    - id: raw_inlet
+      module: timeflux.nodes.lsl
+      class: Receive
+      params:
+        prop: source_id
+        value: rawdata_1
+        unit: ns
+        sync: null
+        channels: null
+        max_samples: 10000
+    - id: features_inlet
+      module: timeflux.nodes.lsl
+      class: Receive
+      params:
+        prop: source_id
+        value: features_1
+        unit: ns
+        sync: null
+        channels: null
+        max_samples: 10000
+    - id: prediction_inlet
+      module: timeflux.nodes.lsl
+      class: Receive
+      params:
+        prop: source_id
+        value: decoding_1
+        unit: ns
+        sync: null
+        channels: null
+        max_samples: 10000
+    - id: save
+      module: timeflux.nodes.hdf5
+      class: Save
+      params:
+        filename: test.hdf5
+        path: "./data"
+        min_itemsize: null
+    edges:
+      - source: raw_inlet
+        target: save:rawdata
+      - source: features_inlet
+        target: save:features
+      - source: prediction_inlet
+        target: save:prediction
+    rate: 1

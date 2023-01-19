@@ -1,0 +1,79 @@
+{
+    "sampling_rate_features_hz": 10,
+    "segment_length_features_ms": 1000,
+    "preprocessing": [ 
+        "re_referencing"
+    ],
+    "features": {
+        "raw_hjorth": false,
+        "return_raw": false,
+        "bandpass_filter": false,
+        "stft": false,
+        "fft": true,
+        "sharpwave_analysis": false,
+        "coherence": false,
+        "fooof": false,
+        "nolds": false,
+        "bursts": false,
+        "linelength": false,
+        "mne_connectiviy": false
+    },
+    "postprocessing": {
+        "feature_normalization": false,
+        "project_cortex": false,
+        "project_subcortex": false
+    },
+    "notch_filter_settings": {
+        "freqs": [50, 100, 150]
+    },
+    "fft_settings": {
+        "windowlength_ms": 500,
+        "log_transform": true,
+        "kalman_filter": false
+    },
+    "feature_normalization_settings": {
+        "normalization_time_s": 30,
+        "normalization_method": "zscore",
+        "clip": 3
+    },
+    "frequency_ranges_hz": {
+        "theta": [
+            4,
+            8
+        ],
+        "alpha": [
+            8,
+            12
+        ],
+        "low beta": [
+            13,
+            20
+        ],
+        "high beta": [
+            20,
+            35
+        ],
+        "low gamma": [
+            60,
+            80
+        ],
+        "high gamma": [
+            90,
+            200
+        ],
+        "HFA": [
+            200,
+            400
+        ]
+    },
+    "project_cortex_settings": {
+        "max_dist_mm": 20
+    },
+    "project_subcortex_settings": {
+        "max_dist_mm": 5
+    },    
+    "test": [
+        "notch_filter",
+        "re_referencing"
+    ]
+}

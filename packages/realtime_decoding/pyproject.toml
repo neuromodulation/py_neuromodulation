@@ -1,0 +1,32 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools"]
+
+[project]
+authors = [{name = "Richard M. Köhler"}]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+  "tmsi",
+  "numpy",
+  "numpy_ringbuffer",
+  "pandas",
+  "pylsl",
+  "py_neuromodulation",
+  "scikit-learn",
+]
+description = "Package for launching realtime decoding with py_neuromodulation"
+keywords = ["realtime", "decoding", "ieeg"]
+license = {file = "LICENSE"}
+maintainers = [{name = "Richard M. Köhler"}]
+name = "realtime_decoding"
+readme = {file = "README.md", content-type = "text/markdown"}
+requires-python = ">=3.10"
+version = "0.1.0"
+
+[project.scripts]
+realtime_decoding = "realtime_decoding:main"
