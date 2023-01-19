@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 from .tmsi_device_enums import ChannelType
 
@@ -61,7 +61,7 @@ class TMSiChannel:
 
     def get_channel_unit_name(self):
         return self._unit_name
-    
+
     def is_reference(self):
         if self._is_reference == 1:
             return 1
@@ -69,9 +69,11 @@ class TMSiChannel:
             return 0
 
     def set_device_channel_information(self):
-        raise NotImplementedError('method not available for this channel')
+        raise NotImplementedError("method not available for this channel")
 
-    def set_device_channel_names(self, default_channel_name = None, alternative_channel_name = None):
+    def set_device_channel_names(
+        self, default_channel_name=None, alternative_channel_name=None
+    ):
         if default_channel_name is not None:
             self._def_name = default_channel_name
         if alternative_channel_name is not None:

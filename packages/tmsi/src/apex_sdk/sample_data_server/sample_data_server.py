@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 from queue import Queue
 from copy import copy
@@ -38,11 +38,11 @@ from ..sample_data_server.event_data import EventDataConsumer, EventData
 from ..tmsi_utilities.singleton import Singleton
 
 
-class SampleDataServer(metaclass = Singleton):
+class SampleDataServer(metaclass=Singleton):
     def __init__(self):
         self.__consumer_list = []
         self.__event_consumer_list = []
-    
+
     def get_consumer_list(self) -> list[SampleDataConsumer]:
         """Gets the list of available consumer.
 
@@ -69,9 +69,9 @@ class SampleDataServer(metaclass = Singleton):
         """
         num_consumers = len(self.__event_consumer_list)
         for i in range(num_consumers):
-            if (self.__event_consumer_list[i].id == id):
+            if self.__event_consumer_list[i].id == id:
                 self.__event_consumer_list[i].q.put(data)
-    
+
     def put_sample_data(self, id: int, data: SampleData):
         """Puts data in the corresponding consumer.
 
@@ -82,7 +82,7 @@ class SampleDataServer(metaclass = Singleton):
         """
         num_consumers = len(self.__consumer_list)
         for i in range(num_consumers):
-            if (self.__consumer_list[i].id == id):
+            if self.__consumer_list[i].id == id:
                 self.__consumer_list[i].q.put(data)
 
     def register_consumer(self, id: int, q: Queue):
@@ -115,7 +115,7 @@ class SampleDataServer(metaclass = Singleton):
         """
         num_consumers = len(self.__consumer_list)
         for i in range(num_consumers):
-            if self.__consumer_list[i].id == id: 
+            if self.__consumer_list[i].id == id:
                 if self.__consumer_list[i].q == q:
                     idx_remove = copy(i)
         self.__consumer_list.pop(idx_remove)
@@ -130,9 +130,7 @@ class SampleDataServer(metaclass = Singleton):
         """
         num_consumers = len(self.__event_consumer_list)
         for i in range(num_consumers):
-            if self.__event_consumer_list[i].id == id: 
+            if self.__event_consumer_list[i].id == id:
                 if self.__event_consumer_list[i].q == q:
                     idx_remove = copy(i)
         self.__event_consumer_list.pop(idx_remove)
-
-    

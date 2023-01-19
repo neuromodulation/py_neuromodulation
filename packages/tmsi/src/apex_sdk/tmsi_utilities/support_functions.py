@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,32 +28,45 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 import ctypes.wintypes
 import os
 import struct
 
+
 def array_to_matrix(input_array, n_channels):
     n_samples = len(input_array) // n_channels
-    return [input_array[ii:n_samples * n_channels:n_channels]
-            for ii in range(n_channels)]
+    return [
+        input_array[ii : n_samples * n_channels : n_channels]
+        for ii in range(n_channels)
+    ]
+
 
 def matrix_to_multiplexed_array(input_matrix):
-    return [input_matrix[i][j] for j in range(len(input_matrix[0])) for i in range(len(input_matrix))] 
+    return [
+        input_matrix[i][j]
+        for j in range(len(input_matrix[0]))
+        for i in range(len(input_matrix))
+    ]
+
 
 def float_to_uint(f):
-    fmt_pack='f'*len(f)
-    fmt_unpack='I'*len(f)
-    pack_struct=struct.Struct(fmt_pack)
+    fmt_pack = "f" * len(f)
+    fmt_unpack = "I" * len(f)
+    pack_struct = struct.Struct(fmt_pack)
     return struct.unpack(fmt_unpack, pack_struct.pack(*list(f)))
+
 
 def get_documents_path():
     CSIDL_PERSONAL = 5
     SHGFP_TYPE_CURRENT = 0
-    buf= ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-    ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
+    buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+    ctypes.windll.shell32.SHGetFolderPathW(
+        None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf
+    )
     return buf.value
 
+
 def get_local_app_data():
-    return os.getenv('LOCALAPPDATA')
+    return os.getenv("LOCALAPPDATA")

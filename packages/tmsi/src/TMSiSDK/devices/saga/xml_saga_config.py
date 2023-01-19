@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,30 +28,31 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
 
 from .saga_types import SagaConfig, SagaChannel
 
+
 def __prettify(elem):
-    """Return a pretty-printed XML string for the Element.
-    """
-    rough_string = ET.tostring(elem, 'utf-8')
+    """Return a pretty-printed XML string for the Element."""
+    rough_string = ET.tostring(elem, "utf-8")
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent="  ")
+
 
 def xml_write_config(filename, saga_config):
     """Writes a device configuration to the specified file.
 
-       Args:
-           'filename' Location of the xml-file to write
+    Args:
+        'filename' Location of the xml-file to write
 
-           'saga_config' device configuration to write
+        'saga_config' device configuration to write
 
-       Returns:
-           True if successfull, False otherwise.
+    Returns:
+        True if successfull, False otherwise.
     """
     try:
         root = ET.Element("DeviceConfig")
@@ -59,14 +60,28 @@ def xml_write_config(filename, saga_config):
         # 1. Write the device configuration properties
         xml_device = ET.SubElement(root, "Device")
 
-        ET.SubElement(xml_device, "BaseSampleRateHz").text = str(saga_config._base_sample_rate)
-        ET.SubElement(xml_device, "ConfiguredInterface").text = str(saga_config._configured_interface)
+        ET.SubElement(xml_device, "BaseSampleRateHz").text = str(
+            saga_config._base_sample_rate
+        )
+        ET.SubElement(xml_device, "ConfiguredInterface").text = str(
+            saga_config._configured_interface
+        )
         ET.SubElement(xml_device, "Triggers").text = str(saga_config._triggers)
-        ET.SubElement(xml_device, "ReferenceMethod").text = str(saga_config._reference_method)
-        ET.SubElement(xml_device, "AutoReferenceMethod").text = str(saga_config._auto_reference_method)
-        ET.SubElement(xml_device, "DRSyncOutDiv").text = str(saga_config._dr_sync_out_divider)
-        ET.SubElement(xml_device, "DRSyncOutDutyCycl").text = str(saga_config._dr_sync_out_duty_cycle)
-        ET.SubElement(xml_device, "RepairLogging").text = str(saga_config._repair_logging)
+        ET.SubElement(xml_device, "ReferenceMethod").text = str(
+            saga_config._reference_method
+        )
+        ET.SubElement(xml_device, "AutoReferenceMethod").text = str(
+            saga_config._auto_reference_method
+        )
+        ET.SubElement(xml_device, "DRSyncOutDiv").text = str(
+            saga_config._dr_sync_out_divider
+        )
+        ET.SubElement(xml_device, "DRSyncOutDutyCycl").text = str(
+            saga_config._dr_sync_out_duty_cycle
+        )
+        ET.SubElement(xml_device, "RepairLogging").text = str(
+            saga_config._repair_logging
+        )
 
         # 2. Write the channel list
         xml_channels = ET.SubElement(root, "Channels")
@@ -75,8 +90,12 @@ def xml_write_config(filename, saga_config):
             xml_channel = ET.SubElement(xml_channels, "Channel")
 
             ET.SubElement(xml_channel, "ChanNr").text = str(idx)
-            ET.SubElement(xml_channel, "ChanDivider").text = str(saga_channel.chan_divider)
-            ET.SubElement(xml_channel, "AltChanName").text = saga_channel.alt_name
+            ET.SubElement(xml_channel, "ChanDivider").text = str(
+                saga_channel.chan_divider
+            )
+            ET.SubElement(
+                xml_channel, "AltChanName"
+            ).text = saga_channel.alt_name
 
         xml_data = __prettify(root)
 
@@ -88,17 +107,18 @@ def xml_write_config(filename, saga_config):
     except:
         return False
 
-def xml_read_config(filename) :
+
+def xml_read_config(filename):
     """Read a device configuration from the specified file.
 
-       Args:
-           'filename' Location of the xml-file to read
+    Args:
+        'filename' Location of the xml-file to read
 
-       Returns:
-           if successfull :
-               True and a 'SagaConfig'-object with the read configuration.
-           otherwise :
-               False and a default 'SagaConfig'-object
+    Returns:
+        if successfull :
+            True and a 'SagaConfig'-object with the read configuration.
+        otherwise :
+            False and a default 'SagaConfig'-object
     """
     result = True
     saga_config = SagaConfig()
@@ -143,7 +163,3 @@ def xml_read_config(filename) :
         saga_config = None
 
     return result, saga_config
-
-
-
-

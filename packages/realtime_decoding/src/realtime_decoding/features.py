@@ -5,6 +5,8 @@ import multiprocessing.synchronize
 import pathlib
 import os
 import queue
+import tkinter
+import tkinter.filedialog
 
 import numpy as np
 import realtime_decoding
@@ -46,6 +48,16 @@ class Features(multiprocessing.Process):
         self.out_dir = pathlib.Path(out_dir)
         self.finished = multiprocessing.Event()
 
+        root = tkinter.Tk()
+        paths = {}
+        for keyword, ftype in (("nm_channels", "csv"), "nm_settings", "json"):
+            filename = tkinter.filedialog.askopenfilename(
+                title=f"Select {keyword} file",
+                filetypes=(("Files", f"*.{ftype}*"),),
+            )
+            paths[keyword] = pathlib.Path(filename)
+        root.withdraw()
+
         self.processor = nm.nm_run_analysis.DataProcessor(
             sfreq=self.sfreq,
             settings=path_nm_settings,
@@ -77,7 +89,7 @@ class Features(multiprocessing.Process):
             self.out_dir / self.path_nm_settings.name, "w", encoding="utf-8"
         ) as outfile:
             json.dump(self.processor.settings, outfile)
-    
+
     def clear_queue(self) -> None:
         realtime_decoding.clear_queue(self.queue_raw)
 

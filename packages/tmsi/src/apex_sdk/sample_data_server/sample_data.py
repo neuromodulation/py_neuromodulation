@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,18 +28,21 @@ limitations under the License.
  */
 
 
-'''
+"""
+
 
 class SampleSet:
     def __init__(self, num_samples, samples):
         self.num_samples = num_samples
         self.samples = samples
 
+
 class SampleData:
     def __init__(self, num_sample_sets, num_samples_per_sample_set, samples):
         self.num_sample_sets = num_sample_sets
         self.num_samples_per_sample_set = num_samples_per_sample_set
         self.samples = samples
+
 
 class SampleDataConsumer:
     def __init__(self, id, q):

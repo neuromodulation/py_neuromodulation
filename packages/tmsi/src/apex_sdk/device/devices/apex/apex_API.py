@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 from ctypes import *
 from sys import platform
@@ -44,7 +44,7 @@ TMSiDeviceHandle = DeviceHandle(0)
 ApexDllAvailable = False
 ApexDllLocked = True
 
-if platform == "win32": # Windows
+if platform == "win32":  # Windows
     search_path = "C:/Program files/TMSi/APEX"
     name = "TMSiApexDeviceLib.dll"
     result = os.path.join(search_path, name)
@@ -56,7 +56,10 @@ if platform == "win32": # Windows
         ApexSDK = CDLL(so_name)
         ApexDllLocked = False
         sdk_handle = ApexSDK._handle
-        TMSiLogger().debug("Successfully loaded Apex device library, handle: " + hex(sdk_handle) )
+        TMSiLogger().debug(
+            "Successfully loaded Apex device library, handle: "
+            + hex(sdk_handle)
+        )
     except OSError as e:
         if ApexDllAvailable:
             TMSiLogger().warning("{} already in use.".format(so_name))
@@ -66,7 +69,7 @@ else:
 if ApexDllAvailable and not ApexDllLocked:
     # DLL interface
 
-    #---
+    # ---
     # @details This command is used to retrieve a list of available TMSi devices
     # connected to the PC. This query is performed on the "DRInterfaceType" specified
     # by the user. All other interface types are ignored.
@@ -82,12 +85,17 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSI_OK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiGetDeviceList = ApexSDK.TMSiGetDeviceList
     TMSiGetDeviceList.restype = TMSiDeviceRetVal
-    TMSiGetDeviceList.argtype = [POINTER(TMSiDevList), c_uint, c_uint, POINTER(c_uint)]
+    TMSiGetDeviceList.argtype = [
+        POINTER(TMSiDevList),
+        c_uint,
+        c_uint,
+        POINTER(c_uint),
+    ]
 
-    #---
+    # ---
     # @details This command is used to open a interface. This will create a connection
     # between API and DR and "lock" the interface.
     #
@@ -105,13 +113,12 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSI_OK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiOpenInterface = ApexSDK.TMSiOpenInterface
     TMSiOpenInterface.restype = TMSiDeviceRetVal
     TMSiOpenInterface.argtype = [POINTER(c_void_p), c_ushort, c_ushort, c_uint]
 
-
-    #---
+    # ---
     # @details This command is used to close an interface.
     #
     # @Pre \ref TMSiOpenInterface should have been called and returned a valid
@@ -125,13 +132,12 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSI_OK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiCloseInterface = ApexSDK.TMSiCloseInterface
     TMSiCloseInterface.restype = TMSiDeviceRetVal
     TMSiCloseInterface.argtype = [c_void_p]
 
-
-    #---
+    # ---
     # @details This command is used to retrieve a list of bluetooth-dongles
     # connected to the PC.
     #
@@ -144,13 +150,16 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if dongles have been found.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiGetDongleList = ApexSDK.TMSiGetDongleList
     TMSiGetDongleList.restype = TMSiDeviceRetVal
-    TMSiGetDongleList.argtype = [POINTER(TMSiDongleList), c_uint, POINTER(c_uint)]
+    TMSiGetDongleList.argtype = [
+        POINTER(TMSiDongleList),
+        c_uint,
+        POINTER(c_uint),
+    ]
 
-
-    #---
+    # ---
     # @details This command is used to pair a PC-BT-dongle with a Apex recorder.
     #
     # @param[in] DongleID, retrieved by "TMSiGetDongleList".
@@ -159,13 +168,12 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if pairing successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiPairDevice = ApexSDK.TMSiPairDevice
     TMSiPairDevice.restype = TMSiDeviceRetVal
     TMSiPairDevice.argtype = [c_ushort, c_ushort]
 
-
-    #---
+    # ---
     # @details This command is used to retrieve an info report from a TMSi device.
     #
     # @Pre \ref TMSiOpenInterface should have been called and returned a valid
@@ -179,12 +187,12 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSI_OK Ok, if response received successful.
     # @li Any TMSI_DS*, TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiGetDeviceInfo = ApexSDK.TMSiGetDeviceInfo
     TMSiGetDeviceInfo.restype = TMSiDeviceRetVal
     TMSiGetDeviceInfo.argtype = [c_void_p, POINTER(TMSiDevInfoReport)]
 
-    #---
+    # ---
     # @details This command is used to retrieve an power status report from a TMSi
     # device.
     #
@@ -199,13 +207,12 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiGetDevicePowerStatus = ApexSDK.TMSiGetDevicePowerStatus
     TMSiGetDevicePowerStatus.restype = TMSiDeviceRetVal
     TMSiGetDevicePowerStatus.argtype = [c_void_p, POINTER(TMSiDevInfoReport)]
 
-
-    #---
+    # ---
     # @details This command is used to get the device interface status.
     #
     # @Pre @li \ref TMSiOpenInterface should have been called and returned a valid
@@ -220,13 +227,16 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiGetDeviceInterfaceStatus = ApexSDK.TMSiGetDeviceInterfaceStatus
     TMSiGetDeviceInterfaceStatus.restype = TMSiDeviceRetVal
-    TMSiGetDeviceInterfaceStatus.argtype = [c_void_p, c_uint, POINTER(TMSiInterfaceStatus)]
+    TMSiGetDeviceInterfaceStatus.argtype = [
+        c_void_p,
+        c_uint,
+        POINTER(TMSiInterfaceStatus),
+    ]
 
-
-    #---
+    # ---
     # @details This command is used to set the device interface configuration.
     #
     # @Pre @li \ref TMSiOpenInterface should have been called and returned a valid
@@ -241,13 +251,12 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiSetDeviceInterfaceConfig = ApexSDK.TMSiSetDeviceInterfaceConfig
     TMSiSetDeviceInterfaceConfig.restype = TMSiDeviceRetVal
     TMSiSetDeviceInterfaceConfig.argtype = [c_void_p, c_uint, c_byte]
 
-
-    #---
+    # ---
     # @details This command is used to retrieve the actual sampling configuration from a TMSi
     # device.
     #
@@ -263,12 +272,15 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSI_OK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiGetDeviceSamplingConfig = ApexSDK.TMSiGetDeviceSamplingConfig
     TMSiGetDeviceSamplingConfig.restype = TMSiDeviceRetVal
-    TMSiGetDeviceSamplingConfig.argtype = [c_void_p, POINTER(TMSiDevSamplingCfg)]
+    TMSiGetDeviceSamplingConfig.argtype = [
+        c_void_p,
+        POINTER(TMSiDevSamplingCfg),
+    ]
 
-    #---
+    # ---
     # @details This command is used to set the actual sampling configuration from a TMSi
     # device.
     #
@@ -284,12 +296,15 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSI_OK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiSetDeviceSamplingConfig = ApexSDK.TMSiSetDeviceSamplingConfig
     TMSiSetDeviceSamplingConfig.restype = TMSiDeviceRetVal
-    TMSiSetDeviceSamplingConfig.argtype = [c_void_p, POINTER(TMSiDevSamplingCfg)]
+    TMSiSetDeviceSamplingConfig.argtype = [
+        c_void_p,
+        POINTER(TMSiDevSamplingCfg),
+    ]
 
-    #---
+    # ---
     # @details This command is used to get the channel configuration data from a device. All
     # available channels will be returned.
     #
@@ -307,13 +322,18 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiGetDeviceChannelConfig = ApexSDK.TMSiGetDeviceChannelConfig
     TMSiGetDeviceChannelConfig.restype = TMSiDeviceRetVal
-    TMSiGetDeviceChannelConfig.argtype = [c_void_p, POINTER(TMSiDevChName), POINTER(TMSiDevAltChName), c_uint, POINTER(c_uint)]
+    TMSiGetDeviceChannelConfig.argtype = [
+        c_void_p,
+        POINTER(TMSiDevChName),
+        POINTER(TMSiDevAltChName),
+        c_uint,
+        POINTER(c_uint),
+    ]
 
-
-    #---
+    # ---
     # @details This command is used to update alternate channel names.
     #
     # @Pre @li \ref TMSiOpenInterface should have been called and returned a valid
@@ -328,12 +348,16 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiSetDeviceChannelConfig = ApexSDK.TMSiSetDeviceChannelConfig
     TMSiSetDeviceChannelConfig.restype = TMSiDeviceRetVal
-    TMSiSetDeviceChannelConfig.argtype = [c_void_p, POINTER(TMSiDevAltChName), c_uint]
+    TMSiSetDeviceChannelConfig.argtype = [
+        c_void_p,
+        POINTER(TMSiDevAltChName),
+        c_uint,
+    ]
 
-    #---
+    # ---
     # @details This command is used to get reference status of the channels.
     #
     # @Pre @li \ref TMSiOpenInterface should have been called and returned a valid
@@ -349,13 +373,17 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiGetDeviceReferenceConfig = ApexSDK.TMSiGetDeviceReferenceConfig
     TMSiGetDeviceReferenceConfig.restype = TMSiDeviceRetVal
-    TMSiGetDeviceReferenceConfig.argtype = [c_void_p, POINTER(TMSiDevChanRef), c_uint, POINTER(c_uint)]
+    TMSiGetDeviceReferenceConfig.argtype = [
+        c_void_p,
+        POINTER(TMSiDevChanRef),
+        c_uint,
+        POINTER(c_uint),
+    ]
 
-
-    #---
+    # ---
     # @details This command is used to set reference status of the channels.
     #
     # @Pre @li \ref TMSiOpenInterface should have been called and returned a valid
@@ -370,13 +398,16 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiSetDeviceReferenceConfig = ApexSDK.TMSiSetDeviceReferenceConfig
     TMSiSetDeviceReferenceConfig.restype = TMSiDeviceRetVal
-    TMSiSetDeviceReferenceConfig.argtype = [c_void_p, POINTER(TMSiDevChanRef), c_uint]
+    TMSiSetDeviceReferenceConfig.argtype = [
+        c_void_p,
+        POINTER(TMSiDevChanRef),
+        c_uint,
+    ]
 
-
-    #---
+    # ---
     # @details This command is used to get the time off a TMSi device.
     #
     # @Pre \ref TMSiOpenInterface should have been called and returned a valid
@@ -393,13 +424,12 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSI_OK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiGetDeviceRTC = ApexSDK.TMSiGetDeviceRTC
     TMSiGetDeviceRTC.restype = TMSiDeviceRetVal
     TMSiGetDeviceRTC.argtype = [c_void_p, POINTER(TMSiTime)]
 
-
-    #---
+    # ---
     # @details This command is used to set the time on a TMSi device.
     #
     # @Pre \ref TMSiOpenInterface should have been called and returned a valid
@@ -416,13 +446,12 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSI_OK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiSetDeviceRTC = ApexSDK.TMSiSetDeviceRTC
     TMSiSetDeviceRTC.restype = TMSiDeviceRetVal
     TMSiSetDeviceRTC.argtype = [c_void_p, POINTER(TMSiTime)]
 
-
-    #---
+    # ---
     # @details This command is used to get the card recording configuration from
     # the data recorder.
     #
@@ -438,13 +467,15 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiGetDeviceCardRecordingConfig = ApexSDK.TMSiGetDeviceCardRecordingConfig
     TMSiGetDeviceCardRecordingConfig.restype = TMSiDeviceRetVal
-    TMSiGetDeviceCardRecordingConfig.argtype = [c_void_p, POINTER(TMSiDevCardRecCfg)]
+    TMSiGetDeviceCardRecordingConfig.argtype = [
+        c_void_p,
+        POINTER(TMSiDevCardRecCfg),
+    ]
 
-
-    #---
+    # ---
     # @details This command is used to set a new card recording configuration
     # to the data recorder.
     #
@@ -460,13 +491,15 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiSetDeviceCardRecordingConfig = ApexSDK.TMSiSetDeviceCardRecordingConfig
     TMSiSetDeviceCardRecordingConfig.restype = TMSiDeviceRetVal
-    TMSiSetDeviceCardRecordingConfig.argtype = [c_void_p, POINTER(TMSiDevCardRecCfg)]
+    TMSiSetDeviceCardRecordingConfig.argtype = [
+        c_void_p,
+        POINTER(TMSiDevCardRecCfg),
+    ]
 
-
-    #---
+    # ---
     # @details This command is used to clear the contents of the memory card of the device.
     #
     # @Pre @li \ref TMSiOpenInterface should have been called and returned a valid
@@ -480,13 +513,12 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if factory defaults were set successful.
     # @li Any TMSI_DR*, TMSI_DLL error otherwise.
-    #---
+    # ---
     TMSiResetDeviceCard = ApexSDK.TMSiResetDeviceCard
     TMSiResetDeviceCard.restype = TMSiDeviceRetVal
     TMSiResetDeviceCard.argtype = [c_void_p]
 
-
-    #---
+    # ---
     # @details This command is used to set the device back to its factory defaults.
     #
     # @Pre @li \ref TMSiOpenInterface should have been called and returned a valid
@@ -500,14 +532,12 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if factory defaults were set successful.
     # @li Any TMSI_DR*, TMSI_DLL error otherwise.
-    #---
+    # ---
     TMSiSetDeviceFactoryDefaults = ApexSDK.TMSiSetDeviceFactoryDefaults
     TMSiSetDeviceFactoryDefaults.restype = TMSiDeviceRetVal
     TMSiSetDeviceFactoryDefaults.argtype = [c_void_p]
 
-
-
-    #---
+    # ---
     # @details This command is used to get the sample metadata-header from a device.
     #
     # @Pre @li \ref TMSiOpenInterface should have been called and returned a valid
@@ -523,13 +553,18 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
-    TMSiGetDeviceSampleMetadataHeader = ApexSDK.TMSiGetDeviceSampleMetadataHeader
+    # ---
+    TMSiGetDeviceSampleMetadataHeader = (
+        ApexSDK.TMSiGetDeviceSampleMetadataHeader
+    )
     TMSiGetDeviceSampleMetadataHeader.restype = TMSiDeviceRetVal
-    TMSiGetDeviceSampleMetadataHeader.argtype = [c_void_p, c_uint, POINTER(TMSiSampleMetadataHeader)]
+    TMSiGetDeviceSampleMetadataHeader.argtype = [
+        c_void_p,
+        c_uint,
+        POINTER(TMSiSampleMetadataHeader),
+    ]
 
-
-    #---
+    # ---
     # @details This command is used to get the channel meta data from a device.
     # The metadata of available channels will be returned.
     #
@@ -551,13 +586,21 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiGetDeviceSampleMetadata = ApexSDK.TMSiGetDeviceSampleMetadata
     TMSiGetDeviceSampleMetadata.restype = TMSiDeviceRetVal
-    TMSiGetDeviceSampleMetadata.argtype = [c_void_p, c_uint, POINTER(TMSiChannelMetadata), c_uint, POINTER(c_uint), POINTER(TMSiCyclingStateMetadata), c_uint, POINTER(c_uint)]
+    TMSiGetDeviceSampleMetadata.argtype = [
+        c_void_p,
+        c_uint,
+        POINTER(TMSiChannelMetadata),
+        c_uint,
+        POINTER(c_uint),
+        POINTER(TMSiCyclingStateMetadata),
+        c_uint,
+        POINTER(c_uint),
+    ]
 
-
-    #---
+    # ---
     # @details This command is used to get the impedance meta data from a device.
     #
     # @Pre @li \ref TMSiOpenInterface should have been called and returned a valid
@@ -573,14 +616,17 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiGetDeviceImpedanceMetadata = ApexSDK.TMSiGetDeviceImpedanceMetadata
     TMSiGetDeviceImpedanceMetadata.restype = TMSiDeviceRetVal
-    TMSiGetDeviceImpedanceMetadata.argtype = [c_void_p, POINTER(TMSiImpedanceMetadata), c_uint, POINTER(c_uint)]
+    TMSiGetDeviceImpedanceMetadata.argtype = [
+        c_void_p,
+        POINTER(TMSiImpedanceMetadata),
+        c_uint,
+        POINTER(c_uint),
+    ]
 
-
-
-    #---
+    # ---
     # @details This command is used to control the sampling mode on a TMSi
     # device.
     #
@@ -597,12 +643,15 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiSetDeviceSamplingRequest = ApexSDK.TMSiSetDeviceSamplingRequest
     TMSiSetDeviceSamplingRequest.restype = TMSiDeviceRetVal
-    TMSiSetDeviceSamplingRequest.argtype = [c_void_p, POINTER(TMSiDevSampleRequest)]
+    TMSiSetDeviceSamplingRequest.argtype = [
+        c_void_p,
+        POINTER(TMSiDevSampleRequest),
+    ]
 
-    #---
+    # ---
     # @details This command is used to control the impedance mode on a TMSi
     # device.
     #
@@ -619,12 +668,15 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiSetDeviceImpedanceRequest = ApexSDK.TMSiSetDeviceImpedanceRequest
     TMSiSetDeviceImpedanceRequest.restype = TMSiDeviceRetVal
-    TMSiSetDeviceImpedanceRequest.argtype = [c_void_p, POINTER(TMSiDevImpedanceRequest)]
+    TMSiSetDeviceImpedanceRequest.argtype = [
+        c_void_p,
+        POINTER(TMSiDevImpedanceRequest),
+    ]
 
-    #---
+    # ---
     # @details This command is used to get the device streaming data. The
     # application can retrieve sampledata/impdata from the device. It returns data
     # as 32-bit float values, all data is already processed, meaning it is converted
@@ -655,12 +707,18 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSI_OK Ok, if response received successful.
     # @li Any TMSI_DS*, TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiGetDeviceData = ApexSDK.TMSiGetDeviceData
     TMSiGetDeviceData.restype = TMSiDeviceRetVal
-    TMSiGetDeviceData.argtype = [c_void_p, POINTER(c_float), c_uint, POINTER(c_uint), POINTER(c_int)]
+    TMSiGetDeviceData.argtype = [
+        c_void_p,
+        POINTER(c_float),
+        c_uint,
+        POINTER(c_uint),
+        POINTER(c_int),
+    ]
 
-    #---
+    # ---
     # @details This command is used to get the current status of the streaming
     # databuffer. It returns the current value of the amount of data waiting in the
     # buffer.
@@ -679,10 +737,10 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSI_OK Ok, if response received successful.
     # @li Any TMSI_DLL error received.
-    #---
-    #TMSIDEVICEDLL_API TMSiDeviceRetVal TMSiGetDeviceDataBuffered(void* TMSiDeviceHandle, int32_t* DeviceDataBuffered);
+    # ---
+    # TMSIDEVICEDLL_API TMSiDeviceRetVal TMSiGetDeviceDataBuffered(void* TMSiDeviceHandle, int32_t* DeviceDataBuffered);
 
-    #---
+    # ---
     # @details This command is used to reset the internal data buffer thread for the
     # specified device after it has been stopped sampling.
     #
@@ -699,13 +757,12 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSI_OK Ok, if response received successful.
     # @li Any TMSI_DLL error received.
-    #---
+    # ---
     TMSiResetDeviceDataBuffer = ApexSDK.TMSiResetDeviceDataBuffer
     TMSiResetDeviceDataBuffer.restype = TMSiDeviceRetVal
     TMSiResetDeviceDataBuffer.argtype = [c_void_p]
 
-
-    #---
+    # ---
     # @details This command is used to get the device streaming impedance data. The
     # application can retrieve impedance sample data from the device.
     # The function will return a buffer with a NrOfSets of impedance samples, for each channel one
@@ -727,13 +784,18 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
 
     TMSiGetDeviceImpedanceData = ApexSDK.TMSiGetDeviceImpedanceData
     TMSiGetDeviceImpedanceData.restype = TMSiDeviceRetVal
-    TMSiGetDeviceImpedanceData.argtype = [c_void_p, POINTER(TMSiImpedanceSample), c_uint, POINTER(c_uint)]
+    TMSiGetDeviceImpedanceData.argtype = [
+        c_void_p,
+        POINTER(TMSiImpedanceSample),
+        c_uint,
+        POINTER(c_uint),
+    ]
 
-    #---
+    # ---
     # @details This command is used to get the card status.
     #
     # @Pre @li \ref TMSiOpenInterface should have been called and returned a valid
@@ -748,13 +810,12 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiGetDeviceCardStatus = ApexSDK.TMSiGetDeviceCardStatus
     TMSiGetDeviceCardStatus.restype = TMSiDeviceRetVal
     TMSiGetDeviceCardStatus.argtype = [c_void_p, POINTER(TMSiDevCardStatus)]
 
-
-    #---
+    # ---
     # @details This command is used to get the card recording list.
     #
     # @Pre @li \ref TMSiOpenInterface should have been called and returned a valid
@@ -771,13 +832,17 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiGetDeviceCardFileList = ApexSDK.TMSiGetDeviceCardFileList
     TMSiGetDeviceCardFileList.restype = TMSiDeviceRetVal
-    TMSiGetDeviceCardFileList.argtype = [c_void_p, POINTER(TMSiDevCardFileInfo), c_uint, POINTER(c_uint)]
+    TMSiGetDeviceCardFileList.argtype = [
+        c_void_p,
+        POINTER(TMSiDevCardFileInfo),
+        c_uint,
+        POINTER(c_uint),
+    ]
 
-
-    #---
+    # ---
     # @details This command is used to get the file metadata-header from a file.
     #
     # @Pre @li \ref TMSiOpenInterface should have been called and returned a valid
@@ -791,13 +856,18 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
-    TMSiGetDeviceCardFileMetadataHeader = ApexSDK.TMSiGetDeviceCardFileMetadataHeader
+    # ---
+    TMSiGetDeviceCardFileMetadataHeader = (
+        ApexSDK.TMSiGetDeviceCardFileMetadataHeader
+    )
     TMSiGetDeviceCardFileMetadataHeader.restype = TMSiDeviceRetVal
-    TMSiGetDeviceCardFileMetadataHeader.argtype = [c_void_p, c_ushort, POINTER(TMSiFileMetadataHeader)]
+    TMSiGetDeviceCardFileMetadataHeader.argtype = [
+        c_void_p,
+        c_ushort,
+        POINTER(TMSiFileMetadataHeader),
+    ]
 
-
-    #---
+    # ---
     # @details This command is used to get the sample meta data from a specific card recording.
     # The metadata of available channels within the card recording will be returned.
     #
@@ -823,12 +893,26 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiGetDeviceCardFileMetadata = ApexSDK.TMSiGetDeviceCardFileMetadata
     TMSiGetDeviceCardFileMetadata.restype = TMSiDeviceRetVal
-    TMSiGetDeviceCardFileMetadata.argtype = [c_void_p, c_ushort, POINTER(TMSiDevCardFileDetails), POINTER(TMSiChannelMetadata), c_uint, POINTER(c_uint), POINTER(TMSiCyclingStateMetadata), c_uint, POINTER(c_uint), POINTER(TMSiDevImpReportMetadata), POINTER(TMSiDevImpReport), c_uint, POINTER(c_uint)]
+    TMSiGetDeviceCardFileMetadata.argtype = [
+        c_void_p,
+        c_ushort,
+        POINTER(TMSiDevCardFileDetails),
+        POINTER(TMSiChannelMetadata),
+        c_uint,
+        POINTER(c_uint),
+        POINTER(TMSiCyclingStateMetadata),
+        c_uint,
+        POINTER(c_uint),
+        POINTER(TMSiDevImpReportMetadata),
+        POINTER(TMSiDevImpReport),
+        c_uint,
+        POINTER(c_uint),
+    ]
 
-    #---
+    # ---
     # @details This command is used to control the download of a card recording from a TMSi
     # device.
     #
@@ -845,13 +929,15 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
     TMSiSetDeviceCardFileRequest = ApexSDK.TMSiSetDeviceCardFileRequest
     TMSiSetDeviceCardFileRequest.restype = TMSiDeviceRetVal
-    TMSiSetDeviceCardFileRequest.argtype = [c_void_p, POINTER(TMSiDevSetCardFileReq)]
+    TMSiSetDeviceCardFileRequest.argtype = [
+        c_void_p,
+        POINTER(TMSiDevSetCardFileReq),
+    ]
 
-
-    #---
+    # ---
     # @details This command is used to get the first event fom the event buffer thread.
     #
     # @Pre @li \ref None.
@@ -865,13 +951,12 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if event is present.
     # @li TMSiStatusDllBufferError if no event present.
-    #---
+    # ---
     TMSiGetEvent = ApexSDK.TMSiGetEvent
     TMSiGetEvent.restype = TMSiDeviceRetVal
     TMSiGetEvent.argtype = [POINTER(TMSiEvent)]
 
-
-    #---
+    # ---
     # @details This command is used to get the number of events present in the internal event buffer thread.
     #
     # @Pre @li \ref None.
@@ -884,12 +969,12 @@ if ApexDllAvailable and not ApexDllLocked:
     #
     # @return
     # @li TMSiStatusOK.
-    #---
+    # ---
     TMSiGetEventBuffered = ApexSDK.TMSiGetEventBuffered
     TMSiGetEventBuffered.restype = TMSiDeviceRetVal
     TMSiGetEventBuffered.argtype = [POINTER(c_ushort)]
 
-    #---
+    # ---
     # @details This command is used to reset the internal event buffer thread.
     #
     # @Pre @li \ref None.
@@ -902,12 +987,12 @@ if ApexDllAvailable and not ApexDllLocked:
     #
     # @return
     # @li TMSiStatusOK.
-    #---
+    # ---
     TMSiResetEventBuffer = ApexSDK.TMSiResetEventBuffer
     TMSiResetEventBuffer.restype = TMSiDeviceRetVal
     TMSiResetEventBuffer.argtype = []
 
-    #---
+    # ---
     # @details This command is used to retrieve the device driver version info report.
     #
     # @param[out] DevDrvInfoReport  device driver version info report.
@@ -915,8 +1000,10 @@ if ApexDllAvailable and not ApexDllLocked:
     # @return
     # @li TMSiStatusOK Ok, if response received successful.
     # @li Any TMSI_DR*, TMSI_DLL error received.
-    #---
+    # ---
 
     TMSiGetDeviceDriverVersionInfo = ApexSDK.TMSiGetDeviceDriverVersionInfo
     TMSiGetDeviceDriverVersionInfo.restype = TMSiDeviceRetVal
-    TMSiGetDeviceDriverVersionInfo.argtype = [POINTER(TMSiDeviceDriverVersionInfo)]
+    TMSiGetDeviceDriverVersionInfo.argtype = [
+        POINTER(TMSiDeviceDriverVersionInfo)
+    ]

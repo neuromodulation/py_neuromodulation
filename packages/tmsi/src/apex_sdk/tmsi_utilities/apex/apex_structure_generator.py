@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 import datetime
 
@@ -44,10 +44,10 @@ class ApexStructureGenerator:
         prefix_file_name: str = None,
         start_time: datetime.datetime = None,
         stop_time: datetime.datetime = None,
-        pre_measurement_imp = None,
-        pre_measeurement_imp_seconds = None,
+        pre_measurement_imp=None,
+        pre_measeurement_imp_seconds=None,
         user_string_1: str = None,
-        user_string_2: str = None
+        user_string_2: str = None,
     ) -> ApexStructures.TMSiDevCardRecCfg:
         """Creates the TMSiDevCardRecCfg structure with provided parameters
 
@@ -66,30 +66,38 @@ class ApexStructureGenerator:
         :return: the structure containing provided information
         :rtype: ApexStructures.TMSiDevCardRecCfg
         """
-        
+
         config = device.get_card_recording_config()
         config.StartControl = start_control.value
         if prefix_file_name is not None:
-            converted_str = bytearray(ApexEnums.ApexStringLengths.PrefixFileName.value)
+            converted_str = bytearray(
+                ApexEnums.ApexStringLengths.PrefixFileName.value
+            )
             for character in range(len(prefix_file_name)):
                 converted_str[character] = ord(prefix_file_name[character])
             config.PrefixFileName = bytes(converted_str)
         if user_string_1 is not None:
-            converted_str = bytearray(ApexEnums.ApexStringLengths.UserString.value)
+            converted_str = bytearray(
+                ApexEnums.ApexStringLengths.UserString.value
+            )
             for character in range(len(user_string_1)):
                 converted_str[character] = ord(user_string_1[character])
             config.UserString1 = bytes(converted_str)
         if user_string_2 is not None:
-            converted_str = bytearray(ApexEnums.ApexStringLengths.UserString.value)
+            converted_str = bytearray(
+                ApexEnums.ApexStringLengths.UserString.value
+            )
             for character in range(len(user_string_2)):
                 converted_str[character] = ord(user_string_2[character])
             config.UserString2 = bytes(converted_str)
         if start_time is not None:
             ApexStructureGenerator.from_datetime_to_tmsitime(
-                start_time, config.StartTime)
+                start_time, config.StartTime
+            )
         if stop_time is not None:
             ApexStructureGenerator.from_datetime_to_tmsitime(
-                stop_time, config.StopTime)
+                stop_time, config.StopTime
+            )
         if pre_measurement_imp is not None:
             config.PreImp = pre_measurement_imp
         if pre_measeurement_imp_seconds is not None:
@@ -102,7 +110,7 @@ class ApexStructureGenerator:
         tmsi_time.Hours = qdatetime.time().hour()
         tmsi_time.DayOfMonth = qdatetime.date().day()
         tmsi_time.Month = qdatetime.date().month() - 1
-        tmsi_time.Year = qdatetime.date().year()-1900
+        tmsi_time.Year = qdatetime.date().year() - 1900
         return tmsi_time
 
     def from_datetime_to_tmsitime(date_time, tmsi_time):
@@ -111,10 +119,9 @@ class ApexStructureGenerator:
         tmsi_time.Hours = date_time.time().hour
         tmsi_time.DayOfMonth = date_time.date().day
         tmsi_time.Month = date_time.date().month - 1
-        tmsi_time.Year = date_time.date().year-1900
+        tmsi_time.Year = date_time.date().year - 1900
         return tmsi_time
 
-    
     def from_tmsitime_to_datetime(tmsi_time, date_time):
         date_time = datetime.datetime(
             tmsi_time.Year + 1900,
@@ -122,7 +129,6 @@ class ApexStructureGenerator:
             tmsi_time.DayOfMonth,
             tmsi_time.Hours,
             tmsi_time.Minutes,
-            tmsi_time.Seconds)
+            tmsi_time.Seconds,
+        )
         return date_time
-
-    

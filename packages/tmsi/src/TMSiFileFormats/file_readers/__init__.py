@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 from .poly5reader import Poly5Reader
 from .xdf_reader import Xdf_Reader

@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,8 @@ limitations under the License.
  */
 
 
-'''
+"""
+
 
 class ApexImpedanceChannel:
     def __init__(self, channel_metadata):
@@ -39,7 +40,7 @@ class ApexImpedanceChannel:
 
     def get_channel_unit_name(self):
         return (self.__impedance_re_unit, self.__impedance_im_unit)
-    
+
     def set_device_impedance_channel_metadata(self, channel_metadata):
         self.__channel_index = channel_metadata.ChanIdx
         self.__channel_name = channel_metadata.ChanName.decode()

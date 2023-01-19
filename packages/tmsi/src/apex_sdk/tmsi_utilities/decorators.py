@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 import time
 import os
@@ -48,8 +48,13 @@ def LogPerformances(func):
             tic = time.perf_counter()
             response = func(*args, **kwargs)
             toc = time.perf_counter()
-            TMSiLoggerPerformance().log("{} | {}: {:.3f} ms".format(env, func.__qualname__, (toc - tic)*1_000))
+            TMSiLoggerPerformance().log(
+                "{} | {}: {:.3f} ms".format(
+                    env, func.__qualname__, (toc - tic) * 1_000
+                )
+            )
         else:
             response = func(*args, **kwargs)
         return response
+
     return performance_logger

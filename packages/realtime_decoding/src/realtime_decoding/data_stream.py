@@ -7,6 +7,7 @@ import pathlib
 import signal
 import sys
 import time
+import tkinter
 from typing import Generator
 from pynput.keyboard import Key, Listener
 
@@ -124,9 +125,7 @@ class StreamManager:
     )
 
     def __post_init__(self) -> None:
-        self.queues = self.queue_other + [
-            self.queue_source
-        ]
+        self.queues = self.queue_other + [self.queue_source]
         for q in self.queues:
             q.cancel_join_thread()
 
@@ -240,11 +239,8 @@ def initialize_data_stream(
         int(interval * 1000 * 20)
     )  # seconds * ms/s * s
     queue_raw = multiprocessing.Queue(int(interval * 1000))  # seconds * ms/s
-    queue_emg = multiprocessing.Queue(int(interval * 1000))  # seconds * ms/s
     queue_features = multiprocessing.Queue(1)
-    queue_emg_std = multiprocessing.Queue(1)
     queue_decoding = multiprocessing.Queue(1)
-    queue_events = multiprocessing.Queue(5)
     with open_tmsi_device(config=saga_config) as device:
         # Register the consumer to the TMSiSDK sample data server
         sfreq = device.config.sample_rate
@@ -253,14 +249,12 @@ def initialize_data_stream(
         TMSiSDK.sample_data_server.registerConsumer(device.id, queue_source)
         with open_lsl_stream(device) as stream:
             listener = Listener(on_press=on_press, on_release=on_release)
-            listener.start()
             rawdata_thread = realtime_decoding.RawDataTMSi(
+                interval=interval,
                 sfreq=sfreq,
                 num_channels=num_channels,
-                interval=interval,
                 queue_source=queue_source,
                 queue_raw=queue_raw,
-                queue_emg=queue_emg,
             )
             feature_thread = realtime_decoding.Features(
                 name="Features",
@@ -277,12 +271,13 @@ def initialize_data_stream(
                 line_noise=50,
                 verbose=False,
             )
-            decoding_thread = realtime_decoding.IntentionDecoder(
+            decoding_thread = realtime_decoding.Decoder(
                 queue_decoding=queue_decoding,
                 queue_features=queue_features,
                 interval=interval,
-                out_dir=out_dir
+                out_dir=out_dir,
             )
+            listener.start()
             processes = [
                 decoding_thread,
                 feature_thread,
@@ -291,15 +286,13 @@ def initialize_data_stream(
             stream_manager = StreamManager(
                 device=device,
                 stream=stream,
-                processes = processes,
+                processes=processes,
                 queue_source=queue_source,
                 queue_other=[
                     queue_raw,
-                    queue_emg,
                     queue_features,
-                    queue_emg_std,
                     queue_decoding,
-                    queue_events,]
+                ],
             )
             stream_manager.start()
             return stream_manager

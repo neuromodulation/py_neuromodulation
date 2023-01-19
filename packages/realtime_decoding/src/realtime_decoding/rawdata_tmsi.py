@@ -2,11 +2,9 @@ import math
 import queue
 import time
 import multiprocessing
-import threading
 
 import numpy as np
 import realtime_decoding
-from py_neuromodulation import nm_filter
 
 
 class RawDataTMSi(multiprocessing.Process):  # threading.Thread):
@@ -17,7 +15,6 @@ class RawDataTMSi(multiprocessing.Process):  # threading.Thread):
         num_channels: int,
         queue_source: queue.Queue,
         queue_raw: queue.Queue,
-        queue_emg: queue.Queue,
     ) -> None:
         super().__init__(name="RawTMSiThread", daemon=True)
         print(f"Initializing RawTMSiThread... ")
@@ -26,27 +23,11 @@ class RawDataTMSi(multiprocessing.Process):  # threading.Thread):
 
         self.queue_source = queue_source
         self.queue_raw = queue_raw
-        self.queue_emg = queue_emg
 
         # Output data every *interval* seconds
         self.interval = interval
         self.capacity = math.floor(self.sfreq * self.interval)
         self.buffer = np.empty(shape=(self.num_channels, 0))
-
-        self.notch_filter = nm_filter.IIRFilter(
-            sfreq=self.sfreq,
-            order=2,
-            l_freq=48,
-            h_freq=52,
-            filter_type="bandstop",
-        )
-        self.emg_filter = nm_filter.IIRFilter(
-            sfreq=self.sfreq,
-            order=2,
-            l_freq=15,
-            h_freq=500,
-            filter_type="bandpass",
-        )
 
     def clear_queue(self) -> None:
         realtime_decoding.clear_queue(self.queue_source)
@@ -58,17 +39,12 @@ class RawDataTMSi(multiprocessing.Process):  # threading.Thread):
 
         def put(
             raw_data: np.ndarray | None,
-            emg: np.ndarray | None,
             interval: float,
         ) -> None:
             try:
                 self.queue_raw.put(raw_data, timeout=interval)
             except queue.Full:
                 print("Raw out queue Full. Skipping sample.")
-            try:
-                self.queue_emg.put(emg, timeout=interval)
-            except queue.Full:
-                print("EMG out queue Full. Skipping sample.")
 
         start = time.time()
         while True:
@@ -92,13 +68,11 @@ class RawDataTMSi(multiprocessing.Process):  # threading.Thread):
                     (self.buffer, samples[:, :]), axis=1
                 )
                 if self.buffer.shape[1] >= self.capacity:
-                    data = self.notch_filter.process(self.buffer)
-                    emg = self.emg_filter.process(data.copy())
-                    put(raw_data=data, emg=emg, interval=self.interval)
+                    put(raw_data=self.buffer, interval=self.interval)
                     self.buffer = np.empty(shape=(self.num_channels, 0))
                     # print(f"Time elapsed: {time.time()-start :.4f} sec")
                     start = time.time()
 
-        put(raw_data=None, emg=None, interval=3.0)
+        put(raw_data=None, interval=3.0)
         self.clear_queue()
         print(f"Terminating: {self.name}")

@@ -42,7 +42,6 @@ from . import (
 from . import devices
 
 
-
 def get_config(config_name):
     TMSiSDK_dir = dirname(realpath(__file__))  # directory of this file
     configs_dir = join(TMSiSDK_dir, "configs")

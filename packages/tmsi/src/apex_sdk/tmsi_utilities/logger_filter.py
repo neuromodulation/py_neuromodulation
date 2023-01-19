@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 PERFORMANCE_LOG = 25
 ACTIVITY_LOG = 26
@@ -37,5 +37,6 @@ ACTIVITY_LOG = 26
 class LoggerFilter(object):
     def __init__(self, level):
         self.__level = level
+
     def filter(self, log_record):
         return log_record.levelno == self.__level

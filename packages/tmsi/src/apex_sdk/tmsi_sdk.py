@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,26 +28,29 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 from .tmsi_utilities.singleton import Singleton
 from .device.tmsi_device_enums import *
 from .device.devices.apex.apex_device import ApexDevice
 
 
-class TMSiSDK(metaclass = Singleton):
+class TMSiSDK(metaclass=Singleton):
     """Singleton class which handles the discovery of TMSi devices"""
+
     def __init__(self):
         """Initializes the object."""
         self.__apex_device_list = []
         self.__apex_dongle_list = []
         self.__saga_device_list = []
-        
-    def discover(self, 
-        dev_type = DeviceType.apex, 
-        dr_interface = DeviceInterfaceType.usb, 
-        ds_interface = DeviceInterfaceType.none,
-        num_retries = 3):
+
+    def discover(
+        self,
+        dev_type=DeviceType.apex,
+        dr_interface=DeviceInterfaceType.usb,
+        ds_interface=DeviceInterfaceType.none,
+        num_retries=3,
+    ):
         """Discovers if there are available devices.
 
         :param dev_type: device tipe to search, defaults to DeviceType.apex
@@ -66,8 +69,8 @@ class TMSiSDK(metaclass = Singleton):
             self.__apex_device_list = ApexDevice.get_device_list(dr_interface)
             self.__apex_dongle_list = ApexDevice.get_dongle_list()
             return (self.__apex_device_list, self.__apex_dongle_list)
-    
-    def get_device_list(self, dev_type = DeviceType.apex):
+
+    def get_device_list(self, dev_type=DeviceType.apex):
         """Gets the list of available devices.
 
         :param dev_type: device to get, defaults to DeviceType.apex
@@ -80,7 +83,7 @@ class TMSiSDK(metaclass = Singleton):
         elif dev_type == DeviceType.saga:
             return self.__saga_device_list
 
-    def get_dongle_list(self, dev_type = DeviceType.apex):
+    def get_dongle_list(self, dev_type=DeviceType.apex):
         """Gets the list of available dongles.
 
         :param dev_type: device type dongle to get, defaults to DeviceType.apex
@@ -91,7 +94,7 @@ class TMSiSDK(metaclass = Singleton):
         if dev_type == DeviceType.apex:
             return self.__apex_dongle_list
 
-    def get_driver_version(self, dev_type = DeviceType.apex) -> str:
+    def get_driver_version(self, dev_type=DeviceType.apex) -> str:
         """Gets the driver version
 
         :param dev_type: the device type for the drivers, defaults to DeviceType.apex
@@ -101,8 +104,10 @@ class TMSiSDK(metaclass = Singleton):
         """
         if dev_type == DeviceType.apex:
             version = ApexDevice.get_driver_version()
-            dll_version = "".join([chr(i) for i in version.DllVersionString if i != 0])
-            usb_version = "".join([chr(i) for i in version.LibUsbVersionString if i != 0])
+            dll_version = "".join(
+                [chr(i) for i in version.DllVersionString if i != 0]
+            )
+            usb_version = "".join(
+                [chr(i) for i in version.LibUsbVersionString if i != 0]
+            )
             return (dll_version, usb_version)
-        
-            

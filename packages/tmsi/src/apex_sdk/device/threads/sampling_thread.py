@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,14 +28,14 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 import threading
 import time
 
 
 class SamplingThread(threading.Thread):
-    def __init__(self, sampling_function, pause = 0.01, name = "Sampling Thread"):
+    def __init__(self, sampling_function, pause=0.01, name="Sampling Thread"):
         super().__init__()
         self.__name = name
         self.__sampling_function = sampling_function
@@ -43,7 +43,7 @@ class SamplingThread(threading.Thread):
 
     def get_pause(self):
         return self.__pause
-    
+
     def run(self):
         self.__sampling = True
         while self.__sampling:

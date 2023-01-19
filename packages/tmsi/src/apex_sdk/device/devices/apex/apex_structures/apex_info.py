@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,19 +28,22 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 from ....tmsi_device_enums import *
 
 from .apex_const import ApexConst
 
-class ApexInfo():
-    def __init__(self, 
-        dongle_serial_number = 0,
-        serial_number = 0,
-        id = ApexConst.TMSI_DEVICE_ID_NONE, 
-        dr_interface = DeviceInterfaceType.none,
-        pairing_status = PairingStatus.no_pairing_needed):
+
+class ApexInfo:
+    def __init__(
+        self,
+        dongle_serial_number=0,
+        serial_number=0,
+        id=ApexConst.TMSI_DEVICE_ID_NONE,
+        dr_interface=DeviceInterfaceType.none,
+        pairing_status=PairingStatus.no_pairing_needed,
+    ):
         self.__dr_interface = dr_interface
         self.__dr_serial_number = serial_number
         self.__id = id
@@ -82,7 +85,7 @@ class ApexInfo():
         self.__num_hw_channels = device_info_report.NrOfHWChannels
         self.__num_imp_channels = device_info_report.NrOfImpChannels
         self.__num_cycling_states = device_info_report.NrOfCyclingStates
-        
+
     def set_dongle_id(self, dongle_id):
         self.__dongle_id = dongle_id
 

@@ -16,15 +16,13 @@ import sklearn.dummy
 import sklearn.model_selection
 
 
-
-
 _timezone = timezone.utc
 
 
 _Pathlike = str | os.PathLike
 
 
-class IntentionDecoder(multiprocessing.Process):
+class Decoder(multiprocessing.Process):
     """Decode motor intention in real time."""
 
     def __init__(
@@ -42,33 +40,26 @@ class IntentionDecoder(multiprocessing.Process):
 
         self._threshold: float = 0.5
 
-        self._prediction_buffer_len: pd.Timedelta = pd.Timedelta(seconds=1.0)
-        self._prediction_buffer: pd.DataFrame | None = None
-
         root = tkinter.Tk()
         filename = tkinter.filedialog.askopenfilename(
-            title = 'Select model', 
-            filetypes = (
-                ('pickle files',[ '*.p', "*.pkl", "*.pickle"]),
-                ('All files', '*.*'),
-            )
+            title="Select model",
+            filetypes=(
+                ("pickle files", ["*.p", "*.pkl", "*.pickle"]),
+                ("All files", "*.*"),
+            ),
         )
         root.withdraw()
         self.filename = pathlib.Path(filename)
-        
+
         # self._model = sklearn.dummy.DummyClassifier(strategy="stratified")
         with open(self.filename, "rb") as file:
-            self._model= pickle.load(file)
+            self._model = pickle.load(file)
         self._save_model()
 
-
     def _save_model(self) -> None:
-        with open(
-            self.out_dir / self.filename.name, "wb"
-        ) as file:
+        with open(self.out_dir / self.filename.name, "wb") as file:
             pickle.dump(self._model, file)
 
-        
     def clear_queue(self) -> None:
         for q in (self.queue_feat, self.queue_decoding):
             realtime_decoding.clear_queue(q)
@@ -95,7 +86,6 @@ class IntentionDecoder(multiprocessing.Process):
                 self.queue_decoding.get(block=False)
             except queue.Empty:
                 print("Features queue empty. Skipping sample.")
-
 
         info = pylsl.StreamInfo(
             name="Decoding",

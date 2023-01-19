@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,11 +28,12 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 from .apex_const import ApexConst
 
-class DongleInfo():
+
+class DongleInfo:
     def __init__(self):
         self.TMSiDongleID = ApexConst.TMSI_DONGLE_ID_NONE
         self.SerialNumber = ApexConst.TMSI_DONGLE_ID_NONE

@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,7 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 from enum import Enum
 
@@ -40,45 +40,49 @@ from TMSiSDK.devices.saga.saga_device import SagaDevice
 
 from TMSiSDK import settings
 
+
 class DeviceType(Enum):
     none = 0
     saga = 1
 
+
 def initialize():
     """Initializes the TMSi-SDK environment.
-        This must be done once before starting using the SDK.
+    This must be done once before starting using the SDK.
     """
     settings._initialize()
 
-def create(dev_type, dr_interface, ds_interface = DeviceInterfaceType.none):
+
+def create(dev_type, dr_interface, ds_interface=DeviceInterfaceType.none):
     """Creates a Device-object to interface with a TMSI measurement system.
 
-        Args:
-            dev_type : <DeviceType> The measurement-system type.
-                       Momentarily only the SAGA system is supported.
+    Args:
+        dev_type : <DeviceType> The measurement-system type.
+                   Momentarily only the SAGA system is supported.
 
-            dr_interface : <DeviceInterfaceType> The interface-type between the
-                           data-recorder and docking-station (if the system exists
-                           out of a DS and DR like the SAGA-system) or a PC.
-                           The default interface-type = DeviceInterfaceType.docked
+        dr_interface : <DeviceInterfaceType> The interface-type between the
+                       data-recorder and docking-station (if the system exists
+                       out of a DS and DR like the SAGA-system) or a PC.
+                       The default interface-type = DeviceInterfaceType.docked
 
-            ds_interface : <DeviceInterfaceType> The interface-type between the
-                           docking station and PC.
-                           The default interface-type = DeviceInterfaceType.usb
+        ds_interface : <DeviceInterfaceType> The interface-type between the
+                       docking station and PC.
+                       The default interface-type = DeviceInterfaceType.usb
 
-        Returns:
-            <Device> An object of the system-implementation of the <Device-class>-interface.
-            With this object one can interface with the attached system.
+    Returns:
+        <Device> An object of the system-implementation of the <Device-class>-interface.
+        With this object one can interface with the attached system.
     """
     dev = None
-    if (dev_type == DeviceType.saga):
+    if dev_type == DeviceType.saga:
         dev = SagaDevice(ds_interface, dr_interface)
     else:
         raise TMSiError(TMSiErrorCode.api_incorrect_argument)
 
     return dev
 
-def discover(dev_type, dr_interface, ds_interface = DeviceInterfaceType.none):
+
+def discover(dev_type, dr_interface, ds_interface=DeviceInterfaceType.none):
     """Creates a list with Device-objects to interface with found TMSI measurement systems.
 
     Args:
@@ -101,7 +105,7 @@ def discover(dev_type, dr_interface, ds_interface = DeviceInterfaceType.none):
     """
     discoveryList = []
 
-    if (dev_type == DeviceType.saga):
+    if dev_type == DeviceType.saga:
         discoveryList = saga_device.discover(ds_interface, dr_interface)
 
     return discoveryList

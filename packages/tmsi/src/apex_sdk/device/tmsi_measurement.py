@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 from ctypes import *
 import queue
@@ -40,8 +40,8 @@ from .threads.sampling_thread import SamplingThread
 from .threads.conversion_thread import ConversionThread
 
 
-class TMSiMeasurement():
-    def __init__(self, dev, name = "TMSi Measurement"):
+class TMSiMeasurement:
+    def __init__(self, dev, name="TMSi Measurement"):
         self._dev = dev
         self._name = name
         self._downloaded_samples = 0
@@ -63,11 +63,10 @@ class TMSiMeasurement():
             if channels[i].get_channel_format() == 0x0020:
                 self._float_channels.append(i)
         self._sampling_thread = SamplingThread(
-            sampling_function = self._sampling_function,
-            pause = 0.01)
+            sampling_function=self._sampling_function, pause=0.01
+        )
         self._conversion_thread = ConversionThread(
-            conversion_function = self._conversion_function,
-            pause = 0.01
+            conversion_function=self._conversion_function, pause=0.01
         )
 
     @LogPerformances
@@ -94,7 +93,7 @@ class TMSiMeasurement():
         self._conversion_thread.set_pause(pause)
 
     @LogPerformances
-    def set_download_samples_limit(self, max_number_of_samples = None):
+    def set_download_samples_limit(self, max_number_of_samples=None):
         self._download_samples_limit = max_number_of_samples - 1
 
     @LogPerformances
@@ -104,16 +103,16 @@ class TMSiMeasurement():
 
     @LogPerformances
     def start(self):
-        raise NotImplementedError('method not available for this measurement')
+        raise NotImplementedError("method not available for this measurement")
 
     @LogPerformances
     def stop(self):
-        raise NotImplementedError('method not available for this measurement')
+        raise NotImplementedError("method not available for this measurement")
 
     @LogPerformances
     def _conversion_function(self):
-        raise NotImplementedError('method not available for this measurement')
+        raise NotImplementedError("method not available for this measurement")
 
     @LogPerformances
     def _sampling_function(self):
-        raise NotImplementedError('method not available for this measurement')
+        raise NotImplementedError("method not available for this measurement")

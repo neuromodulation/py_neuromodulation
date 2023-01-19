@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 from .....tmsi_utilities.decorators import LogPerformances
 from ..apex_API_structures import TMSiDevSetCardFileReq
@@ -37,11 +37,19 @@ from .eeg_measurement import EEGMeasurement
 
 
 class DownloadMeasurement(EEGMeasurement):
-    def __init__(self, dev, file_id: int, n_of_samples: int = None, name:str = "Download Measurement"):
+    def __init__(
+        self,
+        dev,
+        file_id: int,
+        n_of_samples: int = None,
+        name: str = "Download Measurement",
+    ):
         super().__init__(dev, name)
         self._file_id = file_id
         if n_of_samples is None:
-            header, metadata = self._dev.get_device_card_file_info(self._file_id)
+            header, metadata = self._dev.get_device_card_file_info(
+                self._file_id
+            )
             self._n_of_samples = metadata.NumberOfSamples
         else:
             self._n_of_samples = n_of_samples

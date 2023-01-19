@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,10 +28,14 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 from .devices.apex import apex_API_enums as ApexEnums
 from .devices.apex import apex_API_structures as ApexStructures
 from .devices.apex.apex_structures.apex_channel import ApexChannel, ChannelType
-from .devices.apex.apex_structures.apex_impedance_channel import ApexImpedanceChannel
-from ..tmsi_utilities.apex.apex_structure_generator import ApexStructureGenerator
+from .devices.apex.apex_structures.apex_impedance_channel import (
+    ApexImpedanceChannel,
+)
+from ..tmsi_utilities.apex.apex_structure_generator import (
+    ApexStructureGenerator,
+)

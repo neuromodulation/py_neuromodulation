@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,22 +28,23 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 from .threads.sampling_thread import SamplingThread
 
+
 class TMSiEventReader:
-    def __init__(self, name = "Event Reader"):
+    def __init__(self, name="Event Reader"):
         self._name = name
         self._reading_thread = SamplingThread(
-            sampling_function = self._reading_function,
-            pause = 0.5)
-    
+            sampling_function=self._reading_function, pause=0.5
+        )
+
     def start(self):
         raise NotImplementedError("method not available for this reader")
 
     def stop(self):
         self._reading_thread.stop()
-        
+
     def _reading_function(self):
         raise NotImplementedError("method not available for this reader")

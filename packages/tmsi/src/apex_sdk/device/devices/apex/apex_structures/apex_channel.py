@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,9 +28,10 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 from ....tmsi_channel import TMSiChannel, ChannelType
+
 
 class ApexChannel(TMSiChannel):
     def set_device_channel_information(self, channel_metadata):
@@ -40,4 +41,4 @@ class ApexChannel(TMSiChannel):
         self._enabled = self._chan_divider != -1
         self._imp_divider = channel_metadata.ImpDivider
         self._exp = channel_metadata.Exp
-        self._unit_name = channel_metadata.UnitName.decode('windows-1252')
+        self._unit_name = channel_metadata.UnitName.decode("windows-1252")

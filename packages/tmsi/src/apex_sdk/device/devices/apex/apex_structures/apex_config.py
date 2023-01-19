@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,14 +28,15 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
 from ..apex_API_enums import *
 
-class ApexConfig():
+
+class ApexConfig:
     def __init__(self):
         self.__base_sample_rate = TMSiBaseSampleRate.Decimal
         self.__channels = []
@@ -48,15 +49,25 @@ class ApexConfig():
         try:
             root = ET.Element("ApexConfig")
             xml_device = ET.SubElement(root, "Device")
-            ET.SubElement(xml_device, "BaseSampleRate").text = str(self.__base_sample_rate)
-            ET.SubElement(xml_device, "ImpedanceLimit").text = str(self.__impedance_limit)
-            ET.SubElement(xml_device, "LiveImpedance").text = str(self.__live_impedance)
+            ET.SubElement(xml_device, "BaseSampleRate").text = str(
+                self.__base_sample_rate
+            )
+            ET.SubElement(xml_device, "ImpedanceLimit").text = str(
+                self.__impedance_limit
+            )
+            ET.SubElement(xml_device, "LiveImpedance").text = str(
+                self.__live_impedance
+            )
             xml_channels = ET.SubElement(root, "Channels")
             for idx, channel in enumerate(self.__channels):
                 xml_channel = ET.SubElement(xml_channels, "Channel")
                 ET.SubElement(xml_channel, "ChanIdx").text = str(idx)
-                ET.SubElement(xml_channel, "AltChanName").text = channel.get_channel_name()
-                ET.SubElement(xml_channel, "ReferenceStatus").text = str(channel.is_reference()) 
+                ET.SubElement(
+                    xml_channel, "AltChanName"
+                ).text = channel.get_channel_name()
+                ET.SubElement(xml_channel, "ReferenceStatus").text = str(
+                    channel.is_reference()
+                )
             xml_data = ApexConfig.__prettify(root)
             xml_file = open(filename, "w")
             xml_file.write(xml_data)
@@ -85,23 +96,27 @@ class ApexConfig():
                                 continue
                             idx = int(idx.text)
                             self.__channels[idx].set_device_channel_names(
-                                alternative_channel_name = subelem.find("AltChanName").text
+                                alternative_channel_name=subelem.find(
+                                    "AltChanName"
+                                ).text
                             )
                             reference = subelem.find("ReferenceStatus").text
-                            if reference != 'None':
-                                self.__channels[idx].set_device_reference(int(reference))
+                            if reference != "None":
+                                self.__channels[idx].set_device_reference(
+                                    int(reference)
+                                )
                             else:
                                 self.__channels[idx].set_device_reference(0)
             return True
         except:
             return False
-    
+
     def get_channels(self):
         return self.__channels
 
     def get_impedance_channels(self):
         return self.__impedance_channels
-    
+
     def get_impedance_limit(self):
         return self.__impedance_limit
 
@@ -113,13 +128,13 @@ class ApexConfig():
 
     def get_sampling_frequency(self):
         return self.__sampling_frequency
-    
+
     def set_channels(self, channels):
         self.__channels = channels
 
     def set_impedance_channels(self, channels):
         self.__impedance_channels = channels
-        
+
     def set_device_sampling_config(self, device_sampling_config):
         self.__base_sample_rate = device_sampling_config.BaseSampleRate
         self.__impedance_limit = device_sampling_config.ImpedanceLimit
@@ -129,9 +144,7 @@ class ApexConfig():
         self.__sampling_frequency = sampling_frequency
 
     def __prettify(elem):
-        """Return a pretty-printed XML string for the Element.
-        """
-        rough_string = ET.tostring(elem, 'utf-8')
+        """Return a pretty-printed XML string for the Element."""
+        rough_string = ET.tostring(elem, "utf-8")
         reparsed = minidom.parseString(rough_string)
         return reparsed.toprettyxml(indent="  ")
-

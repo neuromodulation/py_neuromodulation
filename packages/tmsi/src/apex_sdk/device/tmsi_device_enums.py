@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,11 +28,13 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 from enum import Enum, unique
 from .devices.apex.measurements.eeg_measurement import EEGMeasurement
-from .devices.apex.measurements.impedance_measurement import ImpedanceMeasurement
+from .devices.apex.measurements.impedance_measurement import (
+    ImpedanceMeasurement,
+)
 from .devices.apex.measurements.download_measurement import DownloadMeasurement
 
 
@@ -47,17 +49,20 @@ class DeviceInterfaceType(Enum):
     bluetooth = 6
     serial = 7
 
+
 @unique
 class DeviceState(Enum):
     disconnected = 0
     connected = 1
     sampling = 2
 
+
 @unique
 class PairingStatus(Enum):
     no_pairing_needed = 0
     paired = 1
-    not_paired = 2	
+    not_paired = 2
+
 
 @unique
 class ChannelType(Enum):
@@ -72,10 +77,12 @@ class ChannelType(Enum):
     cycling_status = 8
     all_types = 9
 
+
 @unique
 class ReferenceMethod(Enum):
     common = 0
     average = 1
+
 
 @unique
 class DeviceType(Enum):
@@ -83,13 +90,14 @@ class DeviceType(Enum):
     saga = 1
     apex = 2
 
+
 @unique
 class ReferenceSwitch(Enum):
-    fixed=0
-    auto=1
+    fixed = 0
+    auto = 1
 
-class MeasurementType():
+
+class MeasurementType:
     APEX_EEG = EEGMeasurement
     APEX_IMPEDANCE = ImpedanceMeasurement
     APEX_DOWNLOAD = DownloadMeasurement
-

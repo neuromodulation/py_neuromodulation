@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,8 @@ limitations under the License.
  */
 
 
-'''
+"""
+
 
 def _initialize():
     """
@@ -40,5 +41,5 @@ def _initialize():
     None.
 
     """
-    global _consumer_list # used in <sample_data_server.py> : list of registered
-    _consumer_list = []   # consumer for receipt of sample-data
+    global _consumer_list  # used in <sample_data_server.py> : list of registered
+    _consumer_list = []  # consumer for receipt of sample-data

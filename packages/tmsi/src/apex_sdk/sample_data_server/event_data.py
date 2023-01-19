@@ -1,4 +1,4 @@
-'''
+"""
 (c) 2022 Twente Medical Systems International B.V., Oldenzaal The Netherlands
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,13 +28,15 @@ limitations under the License.
  */
 
 
-'''
+"""
 
 from ..device.devices.apex.apex_API_structures import TMSiEvent
+
 
 class EventData:
     def __init__(self, event: TMSiEvent):
         self.event = event
+
 
 class EventDataConsumer:
     def __init__(self, id, q):
