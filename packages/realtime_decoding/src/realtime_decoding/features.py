@@ -31,8 +31,6 @@ class Features(multiprocessing.Process):
         interval: float,
         queue_raw: multiprocessing.Queue,
         queue_features: multiprocessing.Queue,
-        path_nm_channels: _Pathlike,
-        path_nm_settings: _Pathlike,
         out_dir: _Pathlike,
         verbose: bool,
         path_grids: str | None = None,
@@ -44,8 +42,6 @@ class Features(multiprocessing.Process):
         self.queue_raw = queue_raw
         self.queue_features = queue_features
         self.verbose = verbose
-        self.path_nm_channels = pathlib.Path(path_nm_channels)
-        self.path_nm_settings = pathlib.Path(path_nm_settings)
         self.out_dir = pathlib.Path(out_dir)
         self.finished = multiprocessing.Event()
 

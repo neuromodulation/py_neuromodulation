@@ -11,13 +11,18 @@ call conda activate task_motor_stopping
 
 @REM # Adding "start" opens it in a new window, and processes the next line
 @REM #     without waiting for the program to finish running
-start python ".\motor_stopping_main.py"
-ECHO Running program1
-TIMEOUT /T 10
+@REM start python ".\motor_stopping_main.py"
+@REM start python ".\experiment\motor_stopping.py"
+start realtime_decoding
+ECHO Running realtime decoding
+TIMEOUT /T 5
+start python "tmsi_gui.py"
+ECHO Running TMSi GUI
+TIMEOUT /T 5
+start timeflux "timeflux_decoding.yaml"
+ECHO Running timeflux
+TIMEOUT /T 5
 START http://localhost:8000/monitor/
-TIMEOUT /T 10
-start python ".\experiment\motor_stopping.py"
-ECHO Running program2
 
 @REM # Adding "PAUSE" makes the script wait for you manually type a key to continue,
 @REM #     but it is not required. You can add PAUSE anywhere in the script
