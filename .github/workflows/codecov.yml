@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - main
-      - '*.x'
+      - '**'
     paths-ignore:
       - 'docs/**'
       - '*.md'
@@ -42,3 +42,4 @@ jobs:
       with:
         fail_ci_if_error: true
         name: codecov-umbrella
+        token: ${{ secrets.CODECOV_TOKEN }}

@@ -4,21 +4,24 @@
 Welcome to py_neuromodulation's documentation!
 ==============================================
 
+.. image:: https://mybinder.org/badge_logo.svg
+ :target: https://mybinder.org/v2/gh/neuromodulation/py_neuromodulation/HEAD
+
+The py_neuromodulation toolbox allows for real time capable feature estimatio of invasive electrophysiological data.
+Habe a look at the :ref:`motivation<introduction>` and :ref:`quick-start`!
+
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
+   :caption: Contents
 
-   setup
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Examples
-
+   introduction
+   quickstart
    ParametrizationDefinition
    FeatureEstimationDemo
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Code
+   :maxdepth: 1
+   :caption: Code Documentation
 
    outline_parametrization
    outline_featureestimation
