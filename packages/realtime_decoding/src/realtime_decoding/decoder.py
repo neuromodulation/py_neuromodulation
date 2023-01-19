@@ -12,14 +12,10 @@ import numpy as np
 import pandas as pd
 import realtime_decoding
 import pylsl
-import sklearn.dummy
-import sklearn.model_selection
-
-
-_timezone = timezone.utc
 
 
 _Pathlike = str | os.PathLike
+_timezone = timezone.utc
 
 
 class Decoder(multiprocessing.Process):
@@ -31,11 +27,13 @@ class Decoder(multiprocessing.Process):
         queue_features: multiprocessing.Queue,
         interval: float,
         out_dir: _Pathlike,
+        verbose: bool,
     ) -> None:
         super().__init__(name="DecodingThread")
         self.queue_decoding = queue_decoding
         self.queue_feat = queue_features
         self.interval = interval
+        self.verbose = verbose
         self.out_dir = pathlib.Path(out_dir)
 
         self._threshold: float = 0.5
@@ -65,27 +63,29 @@ class Decoder(multiprocessing.Process):
             realtime_decoding.clear_queue(q)
 
     def run(self) -> None:
+        labels = ["Prediction", "Probability", "Threshold"]
+
         def _predict(data) -> None:
-            y = self._model.predict(data)
+            y = self._model.predict(np.expand_dims(data.to_numpy(), axis=0))
 
             timestamp = np.datetime64(datetime.now(_timezone), "ns")
             output = pd.DataFrame(
                 [[y >= self._threshold, y, self._threshold]],
-                columns=["Prediction", "Probability", "Threshold"],
+                columns=labels,
                 index=[timestamp],
             )
-
-            try:
-                self.queue_decoding.put(output, timeout=self.interval)
-            except queue.Full:
-                print("Features queue Full. Skipping sample.")
             self.outlet.push_sample(
-                x=output.tolist(), timestamp=timestamp.astype(float)
+                x=list(output.to_numpy().squeeze()),
+                timestamp=timestamp.astype(float),
             )
-            try:
-                self.queue_decoding.get(block=False)
-            except queue.Empty:
-                print("Features queue empty. Skipping sample.")
+            # try:
+            #     self.queue_decoding.put(output, timeout=self.interval)
+            # except queue.Full:
+            #     print("Decoding queue Full. Skipping sample.")
+            # try:
+            #     self.queue_decoding.get(block=False)
+            # except queue.Empty:
+            #     print("Decoding queue empty. Skipping sample.")
 
         info = pylsl.StreamInfo(
             name="Decoding",
@@ -94,6 +94,9 @@ class Decoder(multiprocessing.Process):
             channel_format="double64",
             source_id="decoding_1",
         )
+        channels = info.desc().append_child("channels")
+        for label in labels:
+            channels.append_child("channel").append_child_value("label", label)
         self.outlet = pylsl.StreamOutlet(info)
         while True:
             try:
@@ -101,7 +104,8 @@ class Decoder(multiprocessing.Process):
             except queue.Empty:
                 break
             else:
-                print("Got features.")
+                if self.verbose:
+                    print("Got features.")
                 if sample is None:
                     break
                 _predict(sample)

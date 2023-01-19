@@ -2,9 +2,7 @@
     "sampling_rate_features_hz": 10,
     "segment_length_features_ms": 1000,
     "preprocessing": [
-        "re_referencing",
-        "raw_resampling",
-        "notch_filter"
+        "re_referencing"
     ],
     "features": {
         "raw_hjorth": false,
@@ -20,7 +18,7 @@
     },
     "postprocessing": {
         "feature_normalization": true,
-        "project_cortex": true,
+        "project_cortex": false,
         "project_subcortex": false
     },
     "raw_resampling_settings": {

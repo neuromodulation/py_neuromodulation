@@ -157,7 +157,7 @@ class StreamManager:
             return
 
         # Wait for processes to temrinate on their own
-        print(f"Alive processes: {(p.name for p in active_children)}")
+        print(f"Alive processes: {list(p.name for p in active_children)}")
         print("Waiting for processes to finish. Please wait...")
         self.wait(active_children, timeout=5)
         active_children = multiprocessing.active_children()
@@ -215,18 +215,20 @@ class StreamManager:
 
 
 def initialize_data_stream(
-    saga_config: str = "saga_config_sensight_ecog_right",
+    saga_config: str = "saga_config_sensight_lfp_left",
 ) -> StreamManager:
     """Initialize data processing by launching all necessary processes."""
 
     def on_press(key) -> None:
-        print("{0} pressed".format(key))
+        pass
+        # print("{0} pressed".format(key))
 
     def on_release(key) -> bool | None:
-        if key == Key.caps_lock:
+        if key == Key.esc:
             print("Received stop key.")
             # terminating_event.set()
             queue_source.put(None)
+            stream_manager.terminate()
             return False
 
     cwd = pathlib.Path(r"C:\Users\richa\GitHub\py_neuromodulation\data")
@@ -241,47 +243,78 @@ def initialize_data_stream(
     queue_raw = multiprocessing.Queue(int(interval * 1000))  # seconds * ms/s
     queue_features = multiprocessing.Queue(1)
     queue_decoding = multiprocessing.Queue(1)
+    verbose = False
+
+    import PySide2.QtWidgets
+    from TMSiPlotters.gui import PlottingGUI
+    from TMSiPlotters.plotters import PlotterFormat
+
     with open_tmsi_device(config=saga_config) as device:
         # Register the consumer to the TMSiSDK sample data server
         sfreq = device.config.sample_rate
-        num_channels = np.size(device.channels, 0)
+        # num_channels = np.size(device.channels, 0)
         device.start_measurement()
         TMSiSDK.sample_data_server.registerConsumer(device.id, queue_source)
+        # Check if there is already a plotter application in existence
+        plotter_app = PySide2.QtWidgets.QApplication.instance()
+        # Initialise the plotter application if there is no other plotter application
+        if not plotter_app:
+            plotter_app = PySide2.QtWidgets.QApplication(sys.argv)
+
+        # Define the GUI object and show it
+        plot_window = PlottingGUI(
+            plotter_format=PlotterFormat.signal_viewer,
+            figurename="A RealTimePlot",
+            device=device,
+            # channel_selection = [0, 1, 2],
+            # filter_app = filter_appl
+        )
+        plot_window.show()
+
+        # Enter the event loop
+        plotter_app.exec_()
+
+        # Quit and delete the Plotter application
+        PySide2.QtWidgets.QApplication.quit()
+
+        del plotter_app
         with open_lsl_stream(device) as stream:
             listener = Listener(on_press=on_press, on_release=on_release)
-            rawdata_thread = realtime_decoding.RawDataTMSi(
-                interval=interval,
-                sfreq=sfreq,
-                num_channels=num_channels,
-                queue_source=queue_source,
-                queue_raw=queue_raw,
-            )
+            # rawdata_thread = realtime_decoding.RawDataTMSi(
+            #     interval=interval,
+            #     sfreq=sfreq,
+            #     num_channels=num_channels,
+            #     queue_source=queue_source,
+            #     queue_raw=queue_raw,
+            #     verbose=verbose
+            # )
             feature_thread = realtime_decoding.Features(
                 name="Features",
                 source_id="features_1",
                 n_feats=7,
                 sfreq=sfreq,
                 interval=interval,
-                queue_raw=queue_raw,
+                queue_raw=queue_source,
                 queue_features=queue_features,
                 path_nm_channels=cwd / "nm_channels_feat.csv",
                 path_nm_settings=cwd / "nm_settings_feat.json",
                 out_dir=out_dir,
                 path_grids=None,
                 line_noise=50,
-                verbose=False,
+                verbose=verbose,
             )
             decoding_thread = realtime_decoding.Decoder(
                 queue_decoding=queue_decoding,
                 queue_features=queue_features,
                 interval=interval,
                 out_dir=out_dir,
+                verbose=verbose,
             )
             listener.start()
             processes = [
                 decoding_thread,
                 feature_thread,
-                rawdata_thread,
+                # awdata_thread,
             ]
             stream_manager = StreamManager(
                 device=device,
@@ -299,12 +332,12 @@ def initialize_data_stream(
 
 
 if __name__ == "__main__":
-    stream_manager = initialize_data_stream("saga_config_sensight_ecog_right")
-    time.sleep(8)
+    stream_manager = initialize_data_stream("saga_config_sensight_lfp_left")
+    # time.sleep(8)
     # for _ in range(2):
     #     queue_events.put([datetime.now(), "trial_onset"])
     #     time.sleep(2)
     #     queue_events.put([datetime.now(), "emg_onset"])
     #     time.sleep(3)
-    time.sleep(2)
-    stream_manager.terminate()
+    # time.sleep(2)
+    # stream_manager.terminate()

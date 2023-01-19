@@ -129,7 +129,9 @@ class LSLWriter:
                 self._num_sample_sets_per_sample_data_block = int(
                     64000 / size_one_sample_set
                 )
-
+            print(
+                "source_id: ", "tmsi-" + str(self.device.info.dr_serial_number)
+            )
             # provide LSL with metadata
             info = StreamInfo(
                 self._name,

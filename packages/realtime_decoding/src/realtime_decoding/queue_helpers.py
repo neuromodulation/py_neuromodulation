@@ -5,7 +5,7 @@ def clear_queue(q) -> None:
     print("Emptying queue.")
     try:
         while True:
-            q.get()
+            q.get(block=False)
     except queue.Empty:
         print("Queue emptied.")
     except ValueError:  # Queue is already closed

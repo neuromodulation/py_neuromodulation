@@ -356,7 +356,7 @@ class DataProcessor:
         if self.verbose is True:
             print(
                 "Last batch took: "
-                + str(np.round(time() - start_time, 2))
+                + str(np.round(time() - start_time, 3))
                 + " seconds"
             )
 

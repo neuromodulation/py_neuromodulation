@@ -15,11 +15,13 @@ class RawDataTMSi(multiprocessing.Process):  # threading.Thread):
         num_channels: int,
         queue_source: queue.Queue,
         queue_raw: queue.Queue,
+        verbose: bool,
     ) -> None:
         super().__init__(name="RawTMSiThread", daemon=True)
         print(f"Initializing RawTMSiThread... ")
         self.sfreq = sfreq
         self.num_channels = num_channels
+        self.verbose = verbose
 
         self.queue_source = queue_source
         self.queue_raw = queue_raw
@@ -44,7 +46,8 @@ class RawDataTMSi(multiprocessing.Process):  # threading.Thread):
             try:
                 self.queue_raw.put(raw_data, timeout=interval)
             except queue.Full:
-                print("Raw out queue Full. Skipping sample.")
+                # print("Raw out queue Full. Skipping sample.")
+                pass
 
         start = time.time()
         while True:
@@ -53,8 +56,10 @@ class RawDataTMSi(multiprocessing.Process):  # threading.Thread):
             except queue.Empty:
                 break
             else:
-                # self.queue_in.task_done()
-                print("Found raw input sample.")
+                if sd is None:
+                    break
+                if self.verbose:
+                    print("Found raw input sample.")
 
                 # Reshape the samples retrieved from the queue
                 samples = np.reshape(

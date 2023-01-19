@@ -34,15 +34,16 @@ class Features(multiprocessing.Process):
         path_nm_channels: _Pathlike,
         path_nm_settings: _Pathlike,
         out_dir: _Pathlike,
+        verbose: bool,
         path_grids: str | None = None,
         line_noise: int | float | None = None,
-        verbose: bool = True,
     ) -> None:
         super().__init__(name=f"{name}Thread")
         self.interval = interval
         self.sfreq = sfreq
         self.queue_raw = queue_raw
         self.queue_features = queue_features
+        self.verbose = verbose
         self.path_nm_channels = pathlib.Path(path_nm_channels)
         self.path_nm_settings = pathlib.Path(path_nm_settings)
         self.out_dir = pathlib.Path(out_dir)
@@ -50,7 +51,10 @@ class Features(multiprocessing.Process):
 
         root = tkinter.Tk()
         paths = {}
-        for keyword, ftype in (("nm_channels", "csv"), "nm_settings", "json"):
+        for keyword, ftype in (
+            ("nm_channels", "csv"),
+            ("nm_settings", "json"),
+        ):
             filename = tkinter.filedialog.askopenfilename(
                 title=f"Select {keyword} file",
                 filetypes=(("Files", f"*.{ftype}*"),),
@@ -60,11 +64,11 @@ class Features(multiprocessing.Process):
 
         self.processor = nm.nm_run_analysis.DataProcessor(
             sfreq=self.sfreq,
-            settings=path_nm_settings,
-            nm_channels=path_nm_channels,
+            settings=paths["nm_settings"],
+            nm_channels=paths["nm_channels"],
             line_noise=line_noise,
             path_grids=path_grids,
-            verbose=verbose,
+            verbose=self.verbose,
         )
         self.num_channels = len(self.processor.nm_channels)
         self.buffer = RingBuffer(
@@ -94,26 +98,24 @@ class Features(multiprocessing.Process):
         realtime_decoding.clear_queue(self.queue_raw)
 
     def run(self) -> None:
-        info = pylsl.StreamInfo(
-            name=self.name,
-            type="EEG",
-            channel_count=self.n_feats_total,
-            nominal_srate=self.sfreq,
-            channel_format="double64",
-            source_id=self.source_id,
-        )
-        self.outlet = pylsl.StreamOutlet(info)
-
         while True:
             try:
-                data = self.queue_raw.get(timeout=10.0)
+                sd = self.queue_raw.get(timeout=10.0)
+                # data = self.queue_raw.get(timeout=10.0)
             except queue.Empty:
                 break
             else:
                 # print("Got data")
-                if data is None:
+                if sd is None:
                     break
-
+                if self.verbose:
+                    print("Found raw input sample.")
+                # Reshape the samples retrieved from the queue
+                data = np.reshape(
+                    sd.samples,
+                    (sd.num_samples_per_sample_set, sd.num_sample_sets),
+                    order="F",
+                )
                 # data = np.array(samples)  # shape (time, ch)
                 self.buffer.extend(data.T)
                 if not self.buffer.is_full:
@@ -123,15 +125,26 @@ class Features(multiprocessing.Process):
                 try:
                     self.queue_features.put(features, timeout=self.interval)
                 except queue.Full:
-                    print("Features queue Full. Skipping sample.")
+                    if self.verbose:
+                        print("Features queue Full. Skipping sample.")
+                if self.outlet is None:
+                    info = pylsl.StreamInfo(
+                        name=self.name,
+                        type="EEG",
+                        channel_count=self.n_feats_total,
+                        nominal_srate=self.sfreq,
+                        channel_format="double64",
+                        source_id=self.source_id,
+                    )
+                    channels = info.desc().append_child("channels")
+                    for label in features.index:
+                        channels.append_child("channel").append_child_value(
+                            "label", label
+                        )
+                    self.outlet = pylsl.StreamOutlet(info)
                 self.outlet.push_sample(
                     x=features.tolist(), timestamp=timestamp.astype(float)
                 )
-                # try:
-                #     self.queue_features.get(block=False)
-                # except queue.Empty:
-                #     print("Features queue empty. Skipping sample.")
-                #     continue
 
         try:
             self.queue_features.put(None, timeout=3.0)
