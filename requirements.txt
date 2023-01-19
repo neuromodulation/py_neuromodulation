@@ -1,0 +1,6 @@
+timeflux
+timeflux_ui
+black
+-e ".\packages\tmsi"
+-e ".\packages\realtime_decoding"
+-e .
