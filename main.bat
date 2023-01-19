@@ -15,6 +15,7 @@ call conda activate task_motor_stopping
 @REM start python ".\experiment\motor_stopping.py"
 start realtime_decoding
 ECHO Running realtime decoding
+PAUSE
 TIMEOUT /T 5
 start python "tmsi_gui.py"
 ECHO Running TMSi GUI
