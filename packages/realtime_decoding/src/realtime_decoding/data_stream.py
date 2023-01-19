@@ -20,7 +20,7 @@ import realtime_decoding
 
 
 @contextmanager
-def open_tmsi_device(config: str):
+def open_tmsi_device(saga_config: str):
     device = None
     try:
         print("Initializing TMSi device...")
@@ -48,7 +48,7 @@ def open_tmsi_device(config: str):
         device.open()
         print("Connected to device.")
         # cfg_file = r"C:\Users\richa\GitHub\task_motor_stopping\packages\tmsi\src\TMSiSDK\configs\saga_config_medtronic_ecog.xml"
-        cfg_file = TMSiSDK.get_config(config)
+        cfg_file = TMSiSDK.get_config(saga_config)
         device.load_config(cfg_file)
         # device.config.set_sample_rate(TMSiSDK.device.ChannelType.all_types, 1)
         # print("The active channels are : ")
@@ -249,7 +249,7 @@ def initialize_data_stream(
     from TMSiPlotters.gui import PlottingGUI
     from TMSiPlotters.plotters import PlotterFormat
 
-    with open_tmsi_device(config=saga_config) as device:
+    with open_tmsi_device(saga_config=saga_config) as device:
         # Register the consumer to the TMSiSDK sample data server
         sfreq = device.config.sample_rate
         # num_channels = np.size(device.channels, 0)
@@ -276,8 +276,9 @@ def initialize_data_stream(
 
         # Quit and delete the Plotter application
         PySide2.QtWidgets.QApplication.quit()
-
         del plotter_app
+
+
         with open_lsl_stream(device) as stream:
             listener = Listener(on_press=on_press, on_release=on_release)
             # rawdata_thread = realtime_decoding.RawDataTMSi(
