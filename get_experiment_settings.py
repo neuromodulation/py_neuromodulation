@@ -1,5 +1,9 @@
 from dataclasses import dataclass, field
+import json
+import pathlib
+import random
 import tkinter as tk
+import tkinter.filedialog
 from tkinter import ttk
 
 
@@ -14,6 +18,10 @@ class BIDSEntity:
         self.string_var = tk.StringVar(value=self.default_value)
 
     @property
+    def value(self) -> str:
+        return self.string_var.get()
+
+    @property
     def full(self) -> str:
         if self.key == "datatype":
             return self.string_var.get()
@@ -21,8 +29,14 @@ class BIDSEntity:
 
 
 def main() -> None:
+
+    # root = tkinter.Tk()
+    out_root = tkinter.filedialog.askdirectory(
+        title="Select output root for results."
+    )
+    out_root = pathlib.Path(out_root)
+
     root = tk.Tk()
-    # root.geometry("400x300")
     root.title("Enter info")
 
     mainframe = ttk.Frame(root, padding="10 10 30 10")
@@ -30,22 +44,21 @@ def main() -> None:
     root.columnconfigure(0, weight=1)
     root.rowconfigure(0, weight=1)
 
-    entities = (
-        BIDSEntity("Subject", "sub", ""),
-        BIDSEntity("Session", "ses", "EcogLfpMedOff01"),
-        BIDSEntity("Task", "task", "RealtimeDecodingR"),
-        BIDSEntity("Acquisition", "acq", "StimOff"),
-        BIDSEntity("Run", "run", "1"),
-        BIDSEntity("Datatype", "datatype", "ieeg"),
-    )
+    entities = {
+        "sub": BIDSEntity("Subject", "sub", f"{random.randint(0, 999):03d}"),
+        "ses": BIDSEntity("Session", "ses", "EcogLfpMedOff01"),
+        "task": BIDSEntity("Task", "task", "RealtimeDecodingR"),
+        "acq": BIDSEntity("Acquisition", "acq", "StimOff"),
+        "run": BIDSEntity("Run", "run", "1"),
+        "datatype": BIDSEntity("Datatype", "datatype", "ieeg"),
+    }
 
-    for row, entity in enumerate(entities):
+    for row, entity in enumerate(entities.values()):
         tk.Label(mainframe, text=entity.name).grid(
             row=row, column=0, stick="W"
         )
         entry = tk.Entry(mainframe, textvariable=entity.string_var)
         entry.grid(row=row, column=1, sticky="E")
-        # entries[label] = entry
 
     for child in mainframe.winfo_children():
         child.grid_configure(padx=5, pady=5)
@@ -55,8 +68,16 @@ def main() -> None:
 
     root.mainloop()
 
-    filename = "_".join([entity.full for entity in entities])
-    print(filename)
+    out_dir = out_root / entities["sub"].full / entities["ses"].full
+    out_dir.mkdir(exist_ok=True, parents=True)
+    settings = {key: entity.value for key, entity in entities.items()}
+    settings = {"root": str(out_root), "out_dir": str(out_dir)} | settings
+    this_dir = pathlib.Path(__file__).parent
+    with open(this_dir / "bids_settings.json", "w", encoding="utf-8") as file:
+        json.dump(settings, file, indent=4)
+
+    # filename = "_".join([entity.full for entity in entities.values()])
+    # fullpath = out_dir / filename
 
 
 if __name__ == "__main__":
