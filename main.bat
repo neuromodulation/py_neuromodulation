@@ -3,9 +3,8 @@ call conda activate realtime_decoding
 @REM #     the batch file will wait until the training program finishes
 @REM # Adding "start" opens it in a new window, and processes the next line
 @REM #     without waiting for the program to finish running
-@REM start python ".\motor_stopping_main.py"
-@REM start python ".\experiment\motor_stopping.py"
-start realtime_decoding
+
+start python "start_decoding.py"
 ECHO Running realtime decoding
 PAUSE
 TIMEOUT /T 5

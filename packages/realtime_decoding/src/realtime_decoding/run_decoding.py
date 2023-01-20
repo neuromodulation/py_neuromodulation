@@ -280,16 +280,18 @@ def run(
     saga_config: str = "saga_config_sensight_lfp_left",
 ) -> None:
     """Initialize data processing by launching all necessary processes."""
-    with open_tmsi_device(saga_config) as device:
-        with open_lsl_stream(device) as stream:
-            with ProcessManager(
-                device=device,
-                lsl_stream=stream,
-                out_dir=out_dir,
-                timeout=0.05,
-                verbose=False,
-            ) as manager:
-                manager.start()
+    with (
+        open_tmsi_device(saga_config) as device,
+        open_lsl_stream(device) as stream,
+        ProcessManager(
+            device=device,
+            lsl_stream=stream,
+            out_dir=out_dir,
+            timeout=0.05,
+            verbose=False,
+        ) as manager,
+    ):
+        manager.start()
 
 
 # if __name__ == "__main__":
