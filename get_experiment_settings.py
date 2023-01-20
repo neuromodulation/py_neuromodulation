@@ -1,10 +1,12 @@
 from dataclasses import dataclass, field
 import json
 import pathlib
+import pprint
 import random
 import tkinter as tk
 import tkinter.filedialog
 from tkinter import ttk
+import yaml
 
 
 @dataclass
@@ -76,8 +78,19 @@ def main() -> None:
     with open(this_dir / "bids_settings.json", "w", encoding="utf-8") as file:
         json.dump(settings, file, indent=4)
 
-    # filename = "_".join([entity.full for entity in entities.values()])
+    filename = "_".join([entity.full for entity in entities.values()])
     # fullpath = out_dir / filename
+
+    timeflux_yaml = this_dir / "timeflux_decoding.yaml"
+    with open(timeflux_yaml, "r") as file:
+        timeflux_settings = yaml.load(file, yaml.loader.SafeLoader)
+
+    # graph: "DataRecorder", node: "save"
+    saving_settings = timeflux_settings["graphs"][0]["nodes"][0]["params"]
+    saving_settings["filename"] = f"{filename}.hdf5"
+    saving_settings["path"] = str(out_dir)
+
+    pprint.pprint(timeflux_settings)
 
 
 if __name__ == "__main__":
