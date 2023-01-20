@@ -1,26 +1,40 @@
-from contextlib import contextmanager
-from dataclasses import dataclass, field
 import multiprocessing
 import multiprocessing.synchronize
 import os
 import pathlib
+import queue
 import signal
 import sys
 import time
-import tkinter
-from typing import Generator
-from pynput.keyboard import Key, Listener
+from contextlib import contextmanager
+from dataclasses import dataclass, field
+from typing import Any, Generator, Literal
 
-import numpy as np
-
-import TMSiSDK
 import TMSiFileFormats
+import TMSiSDK
+from pynput.keyboard import Key, Listener
 
 import realtime_decoding
 
+from .helpers import _PathLike
+
+
+def clear_queue(q) -> None:
+    print("Emptying queue.")
+    try:
+        while True:
+            q.get(block=False)
+    except queue.Empty:
+        print("Queue emptied.")
+    except ValueError:  # Queue is already closed
+        print("Queue was already closed.")
+
 
 @contextmanager
-def open_tmsi_device(saga_config: str):
+def open_tmsi_device(
+    saga_config: str,
+    verbose: bool = True,
+) -> Generator[TMSiSDK.devices.saga.SagaDevice, None, None]:
     device = None
     try:
         print("Initializing TMSi device...")
@@ -44,41 +58,31 @@ def open_tmsi_device(saga_config: str):
         # Get the handle to the first discovered device.
         device = discovery_list[0]
         print(f"Found device: {device}")
-        # Open a connection to the SAGA-system
         device.open()
         print("Connected to device.")
-        # cfg_file = r"C:\Users\richa\GitHub\task_motor_stopping\packages\tmsi\src\TMSiSDK\configs\saga_config_medtronic_ecog.xml"
         cfg_file = TMSiSDK.get_config(saga_config)
         device.load_config(cfg_file)
-        # device.config.set_sample_rate(TMSiSDK.device.ChannelType.all_types, 1)
-        # print("The active channels are : ")
-        # for idx, ch in enumerate(device.channels):
-        #     print("[{0}] : [{1}] in [{2}]".format(idx, ch.name, ch.unit_name))
-        # pd.DataFrame(
-        #     [ch.name for ch in device.channels],
-        #     columns=[
-        #         "name",
-        #     ],
-        # ).to_csv(
-        #     r"C:\Users\richa\GitHub\task_motor_stopping\channel_names.csv",
-        #     index=False,
-        # )
-        # device.config.base_sample_rate = 4096
-        # device.config.reference_method = (
-        #     TMSiSDK.device.ReferenceMethod.common,
-        #     TMSiSDK.device.ReferenceSwitch.fixed,
-        # )
-        print("Current device configuration:")
-        print(f"Base-sample-rate: \t\t\t{device.config.base_sample_rate} Hz")
-        print(f"Sample-rate: \t\t\t\t{device.config.sample_rate} Hz")
-        print(f"Reference Method: \t\t\t{device.config.reference_method}")
-        print(
-            f"Sync out configuration: \t{device.config.get_sync_out_config()}"
-        )
-
+        if verbose:
+            print("\nThe active channels are : ")
+            for idx, ch in enumerate(device.channels):
+                print(
+                    "[{0}] : [{1}] in [{2}]".format(idx, ch.name, ch.unit_name)
+                )
+            print("\nCurrent device configuration:")
+            print(
+                f"Base-sample-rate: \t\t\t{device.config.base_sample_rate} Hz"
+            )
+            print(f"Sample-rate: \t\t\t\t{device.config.sample_rate} Hz")
+            print(f"Reference Method: \t\t\t{device.config.reference_method}")
+            print(
+                f"Sync out configuration: \t{device.config.get_sync_out_config()}"
+            )
         # TMSiSDK.devices.saga.xml_saga_config.xml_write_config(
         # filename=cfg_file, saga_config=device.config
         # )
+        device.start_measurement()
+        if device is None:
+            raise ValueError("No TMSi device found!")
         yield device
     except TMSiSDK.error.TMSiError as error:
         print("!!! TMSiError !!! : ", error.code)
@@ -100,7 +104,9 @@ def open_tmsi_device(saga_config: str):
 
 
 @contextmanager
-def open_lsl_stream(device) -> Generator:
+def open_lsl_stream(
+    device,
+) -> Generator[TMSiFileFormats.file_writer.FileWriter, None, None]:
     lsl_stream = TMSiFileFormats.file_writer.FileWriter(
         TMSiFileFormats.file_writer.FileFormat.lsl, "SAGA"
     )
@@ -114,28 +120,83 @@ def open_lsl_stream(device) -> Generator:
 
 
 @dataclass
-class StreamManager:
+class ProcessManager:
     device: TMSiSDK.devices.saga.SagaDevice
-    stream: TMSiFileFormats.file_writer.FileWriter
-    processes: list[multiprocessing.Process]
-    queue_source: multiprocessing.Queue
-    queue_other: list[multiprocessing.Queue]
-    queues: list[multiprocessing.Queue] = field(
-        init=False, repr=False, default_factory=list
-    )
+    lsl_stream: TMSiFileFormats.file_writer.FileWriter
+    out_dir: _PathLike
+    timeout: float = 0.05
+    verbose: bool = True
+    _terminated: bool = field(init=False, default=False)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        if not self._terminated:
+            self.terminate()
 
     def __post_init__(self) -> None:
-        self.queues = self.queue_other + [self.queue_source]
+        self.out_dir = pathlib.Path(self.out_dir)
+        self.queue_source = multiprocessing.Queue(
+            int(self.timeout * 1000 * 20)
+        )  # seconds/sample * ms/s * s
+        self.queue_raw = multiprocessing.Queue(int(self.timeout * 1000))
+        self.queue_features = multiprocessing.Queue(1)
+        self.queue_decoding = multiprocessing.Queue(1)
+        self.queues = [
+            self.queue_raw,
+            self.queue_features,
+            self.queue_decoding,
+            self.queue_source,
+        ]
         for q in self.queues:
             q.cancel_join_thread()
 
     def start(self) -> None:
-        for process in self.processes:
+        def on_press(key) -> None:
+            pass
+
+        def on_release(key) -> Literal[False] | None:
+            if key == Key.esc:
+                print("Received stop key.")
+                self.queue_source.put(None)
+                self.terminate()
+                return False
+
+        listener = Listener(on_press=on_press, on_release=on_release)
+        listener.start()
+
+        TMSiSDK.sample_data_server.registerConsumer(
+            self.device.id, self.queue_source
+        )
+        features = realtime_decoding.Features(
+            name="Features",
+            source_id="features_1",
+            n_feats=7,
+            sfreq=self.device.config.sample_rate,
+            interval=self.timeout,
+            queue_raw=self.queue_source,
+            queue_features=self.queue_features,
+            out_dir=self.out_dir,
+            path_grids=None,
+            line_noise=50,
+            verbose=self.verbose,
+        )
+        decoder = realtime_decoding.Decoder(
+            queue_decoding=self.queue_decoding,
+            queue_features=self.queue_features,
+            interval=self.timeout,
+            out_dir=self.out_dir,
+            verbose=self.verbose,
+        )
+        processes = [features, decoder]
+        for process in processes:
             process.start()
-            time.sleep(1)
+            time.sleep(0.5)
 
     def terminate(self) -> None:
         """Terminate all workers."""
+        self._terminated = True
         self.queue_source.put(None)
         print("Set terminating event.")
         TMSiSDK.sample_data_server.unregisterConsumer(
@@ -143,7 +204,7 @@ class StreamManager:
         )
         print("Unregistered consumer.")
 
-        self.stream.close()
+        self.lsl_stream.close()
         if self.device.status.state == TMSiSDK.device.DeviceState.sampling:
             self.device.stop_measurement()
             print("Controlled stopping TMSi measurement...")
@@ -168,7 +229,7 @@ class StreamManager:
         print(f"Alive processes: {(p.name for p in active_children)}")
         print("Flushing all queues. Please wait...")
         for queue_ in self.queues:
-            realtime_decoding.clear_queue(queue_)
+            clear_queue(queue_)
         self.wait(active_children, timeout=5)
         active_children = multiprocessing.active_children()
         if not active_children:
@@ -214,101 +275,22 @@ class StreamManager:
                 pass
 
 
-def initialize_data_stream(
+def run(
+    out_dir: _PathLike,
     saga_config: str = "saga_config_sensight_lfp_left",
-) -> StreamManager:
+) -> None:
     """Initialize data processing by launching all necessary processes."""
-
-    def on_press(key) -> None:
-        pass
-        # print("{0} pressed".format(key))
-
-    def on_release(key) -> bool | None:
-        if key == Key.esc:
-            print("Received stop key.")
-            # terminating_event.set()
-            queue_source.put(None)
-            stream_manager.terminate()
-            return False
-
-    cwd = pathlib.Path(r"C:\Users\richa\GitHub\py_neuromodulation\data")
-    out_dir = pathlib.Path(
-        r"C:\Users\richa\GitHub\py_neuromodulation\data\test"
-    )
-    out_dir.mkdir(exist_ok=True, parents=False)
-    interval = 0.05  # seconds
-    queue_source = multiprocessing.Queue(
-        int(interval * 1000 * 20)
-    )  # seconds * ms/s * s
-    queue_raw = multiprocessing.Queue(int(interval * 1000))  # seconds * ms/s
-    queue_features = multiprocessing.Queue(1)
-    queue_decoding = multiprocessing.Queue(1)
-    verbose = False
-
-    with open_tmsi_device(saga_config=saga_config) as device:
-        # Register the consumer to the TMSiSDK sample data server
-        sfreq = device.config.sample_rate
-        # num_channels = np.size(device.channels, 0)
-        device.start_measurement()
-        TMSiSDK.sample_data_server.registerConsumer(device.id, queue_source)
+    with open_tmsi_device(saga_config) as device:
         with open_lsl_stream(device) as stream:
-            listener = Listener(on_press=on_press, on_release=on_release)
-            # rawdata_thread = realtime_decoding.RawDataTMSi(
-            #     interval=interval,
-            #     sfreq=sfreq,
-            #     num_channels=num_channels,
-            #     queue_source=queue_source,
-            #     queue_raw=queue_raw,
-            #     verbose=verbose
-            # )
-            feature_thread = realtime_decoding.Features(
-                name="Features",
-                source_id="features_1",
-                n_feats=7,
-                sfreq=sfreq,
-                interval=interval,
-                queue_raw=queue_source,
-                queue_features=queue_features,
-                out_dir=out_dir,
-                path_grids=None,
-                line_noise=50,
-                verbose=verbose,
-            )
-            decoding_thread = realtime_decoding.Decoder(
-                queue_decoding=queue_decoding,
-                queue_features=queue_features,
-                interval=interval,
-                out_dir=out_dir,
-                verbose=verbose,
-            )
-            listener.start()
-            processes = [
-                decoding_thread,
-                feature_thread,
-                # awdata_thread,
-            ]
-            stream_manager = StreamManager(
+            with ProcessManager(
                 device=device,
-                stream=stream,
-                processes=processes,
-                queue_source=queue_source,
-                queue_other=[
-                    queue_raw,
-                    queue_features,
-                    queue_decoding,
-                ],
-            )
-            stream_manager.start()
-            return stream_manager
+                lsl_stream=stream,
+                out_dir=out_dir,
+                timeout=0.05,
+                verbose=False,
+            ) as manager:
+                manager.start()
 
 
-if __name__ == "__main__":
-    stream_manager = initialize_data_stream("saga_config_sensight_lfp_left")
-    # time.sleep(8)
-    # for _ in range(2):
-    #     queue_events.put([datetime.now(), "trial_onset"])
-    #     time.sleep(2)
-    #     queue_events.put([datetime.now(), "emg_onset"])
-    #     time.sleep(3)
-    # time.sleep(2)
-    # stream_manager.terminate()
+# if __name__ == "__main__":
+#     stream_manager = run("saga_config_sensight_lfp_left")

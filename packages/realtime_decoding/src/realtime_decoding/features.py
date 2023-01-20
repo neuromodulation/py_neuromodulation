@@ -1,22 +1,20 @@
-from datetime import datetime
 import json
 import multiprocessing
 import multiprocessing.synchronize
 import pathlib
-import os
 import queue
 import tkinter
 import tkinter.filedialog
+from datetime import datetime
 
 import numpy as np
-import realtime_decoding
+import py_neuromodulation as nm
 import pylsl
 from numpy_ringbuffer import RingBuffer
 
-import py_neuromodulation as nm
+import realtime_decoding
 
-
-_Pathlike = str | os.PathLike
+from .helpers import _PathLike
 
 
 class Features(multiprocessing.Process):
@@ -31,7 +29,7 @@ class Features(multiprocessing.Process):
         interval: float,
         queue_raw: multiprocessing.Queue,
         queue_features: multiprocessing.Queue,
-        out_dir: _Pathlike,
+        out_dir: _PathLike,
         verbose: bool,
         path_grids: str | None = None,
         line_noise: int | float | None = None,
