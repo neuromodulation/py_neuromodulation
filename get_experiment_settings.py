@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 import json
 import pathlib
-import pprint
 import random
 import tkinter as tk
 import tkinter.filedialog
@@ -72,17 +71,17 @@ def main() -> None:
 
     out_dir = out_root / entities["sub"].full / entities["ses"].full
     out_dir.mkdir(exist_ok=True, parents=True)
+
+    filename = "_".join([entity.full for entity in entities.values()])
     settings = {key: entity.value for key, entity in entities.items()}
-    settings = {"root": str(out_root), "out_dir": str(out_dir)} | settings
+    settings = {"root": str(out_root), "out_dir": str(out_dir), "filename": filename} | settings
     this_dir = pathlib.Path(__file__).parent
     with open(this_dir / "bids_settings.json", "w", encoding="utf-8") as file:
         json.dump(settings, file, indent=4)
 
-    filename = "_".join([entity.full for entity in entities.values()])
     # fullpath = out_dir / filename
 
-    timeflux_yaml = this_dir / "timeflux_decoding.yaml"
-    with open(timeflux_yaml, "r") as file:
+    with open(this_dir / "timeflux_decoding_template.yaml", "r") as file:
         timeflux_settings = yaml.load(file, yaml.loader.SafeLoader)
 
     # graph: "DataRecorder", node: "save"
@@ -90,7 +89,9 @@ def main() -> None:
     saving_settings["filename"] = f"{filename}.hdf5"
     saving_settings["path"] = str(out_dir)
 
-    pprint.pprint(timeflux_settings)
+    for dir in (this_dir, out_dir):
+        with open(dir / "timeflux_decoding.yaml", "w") as file:
+            yaml.dump(timeflux_settings, file, sort_keys=False)
 
 
 if __name__ == "__main__":

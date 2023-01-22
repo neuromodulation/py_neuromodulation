@@ -1,0 +1,10 @@
+{
+    "root": "C:\\Users\\richa\\GitHub\\py_neuromodulation\\data",
+    "out_dir": "C:\\Users\\richa\\GitHub\\py_neuromodulation\\data\\sub-434\\ses-EcogLfpMedOff01",
+    "sub": "434",
+    "ses": "EcogLfpMedOff01",
+    "task": "RealtimeDecodingR",
+    "acq": "StimOff",
+    "run": "1",
+    "datatype": "ieeg"
+}

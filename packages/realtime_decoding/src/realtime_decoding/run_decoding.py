@@ -6,13 +6,15 @@ import queue
 import signal
 import sys
 import time
+from pynput.keyboard import Key, Listener
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from typing import Any, Generator, Literal
+import tkinter
+import tkinter.filedialog
+from typing import Generator, Literal
 
 import TMSiFileFormats
 import TMSiSDK
-from pynput.keyboard import Key, Listener
 
 import realtime_decoding
 
@@ -32,9 +34,20 @@ def clear_queue(q) -> None:
 
 @contextmanager
 def open_tmsi_device(
-    saga_config: str,
+    out_dir: _PathLike,
     verbose: bool = True,
 ) -> Generator[TMSiSDK.devices.saga.SagaDevice, None, None]:
+    out_dir = pathlib.Path(out_dir)
+    root = tkinter.Tk()
+    cfg_file = tkinter.filedialog.askopenfilename(
+        title="Select TMSi Saga settings file",
+        filetypes=(
+            ("XML files", ["*.xml"]),
+            ("All files", "*.*"),
+        ),
+    )
+    root.withdraw()
+    cfg_file = pathlib.Path(cfg_file)
     device = None
     try:
         print("Initializing TMSi device...")
@@ -60,8 +73,11 @@ def open_tmsi_device(
         print(f"Found device: {device}")
         device.open()
         print("Connected to device.")
-        cfg_file = TMSiSDK.get_config(saga_config)
+        # cfg_file = TMSiSDK.get_config(saga_config)
         device.load_config(cfg_file)
+        TMSiSDK.devices.saga.xml_saga_config.xml_write_config(
+            filename=out_dir / cfg_file.name, saga_config=device.config
+        )
         if verbose:
             print("\nThe active channels are : ")
             for idx, ch in enumerate(device.channels):
@@ -77,9 +93,7 @@ def open_tmsi_device(
             print(
                 f"Sync out configuration: \t{device.config.get_sync_out_config()}"
             )
-        # TMSiSDK.devices.saga.xml_saga_config.xml_write_config(
-        # filename=cfg_file, saga_config=device.config
-        # )
+
         device.start_measurement()
         if device is None:
             raise ValueError("No TMSi device found!")
@@ -119,10 +133,29 @@ def open_lsl_stream(
         raise exception
 
 
+@contextmanager
+def open_poly5_writer(
+    device,
+    out_file: _PathLike,
+) -> Generator[TMSiFileFormats.file_writer.FileWriter, None, None]:
+    out_file = str(out_file)
+    file_writer = TMSiFileFormats.file_writer.FileWriter(
+        TMSiFileFormats.file_writer.FileFormat.poly5, out_file
+    )
+    try:
+        file_writer.open(device)
+        yield file_writer
+    except Exception as exception:
+        print("Closing Poly5 file writer")
+        file_writer.close()
+        raise exception
+
+
 @dataclass
 class ProcessManager:
     device: TMSiSDK.devices.saga.SagaDevice
     lsl_stream: TMSiFileFormats.file_writer.FileWriter
+    file_writer: TMSiFileFormats.file_writer.FileWriter
     out_dir: _PathLike
     timeout: float = 0.05
     verbose: bool = True
@@ -205,6 +238,7 @@ class ProcessManager:
         print("Unregistered consumer.")
 
         self.lsl_stream.close()
+        self.file_writer.close()
         if self.device.status.state == TMSiSDK.device.DeviceState.sampling:
             self.device.stop_measurement()
             print("Controlled stopping TMSi measurement...")
@@ -276,16 +310,19 @@ class ProcessManager:
 
 
 def run(
-    out_dir: _PathLike,
-    saga_config: str = "saga_config_sensight_lfp_left",
+    out_dir: pathlib.Path,
+    filename: str,
+    # saga_config: str = "saga_config_sensight_lfp_left",
 ) -> None:
     """Initialize data processing by launching all necessary processes."""
     with (
-        open_tmsi_device(saga_config) as device,
+        open_tmsi_device(out_dir) as device,
         open_lsl_stream(device) as stream,
+        open_poly5_writer(device, out_dir / filename) as file_writer,
         ProcessManager(
             device=device,
             lsl_stream=stream,
+            file_writer=file_writer,
             out_dir=out_dir,
             timeout=0.05,
             verbose=False,
