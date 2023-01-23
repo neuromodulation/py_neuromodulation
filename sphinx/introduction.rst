@@ -27,14 +27,10 @@ that were stream in a simulated real-time format. The following features are inc
 * line length
 * and more...
 
-With a simple demonstration using random data, the following features can be calculated:
-
-include picture
-
 How can those features be used?
 -------------------------------
 
-The original intention for writing this toolbox was movement decoding from invasive brain signals [1]_.
+The original intention for writing this toolbox was movement decoding from invasive brain signals[1]_.
 The application however could be any neural decoding problem.
 py_neuromodulation offers wrappers around common pratice Machine Learning methods to efficiently analyze the estimated features.
 

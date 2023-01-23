@@ -482,7 +482,7 @@ class Feature_Reader:
     def plot_corr_matrix(
         self,
     ):
-        self.nmplotter.plot_corr_matrix(
+        return nm_plots.plot_corr_matrix(
             self.feature_arr,
         )
 

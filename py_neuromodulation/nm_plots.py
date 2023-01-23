@@ -172,17 +172,17 @@ def plot_bar_performance_per_channel(
 
 def plot_corr_matrix(
     feature: pd.DataFrame,
-    feature_file,
+    feature_file: str = None,
     ch_name: str = None,
     feature_names: list[str] = None,
-    show_plot=False,
+    show_plot=True,
     OUT_PATH: str = None,
     feature_name_plt="Features_corr_matr",
-    save_plot: bool = True,
+    save_plot: bool = False,
     save_plot_name: str = None,
     figsize: tuple[int] = (7, 7),
     title: str = None,
-    cbar_vmin: float = 0.0,
+    cbar_vmin: float = -1,
     cbar_vmax: float = 1.0,
 ):
     # cut out channel name for each column
@@ -204,11 +204,19 @@ def plot_corr_matrix(
         yticklabels=feature_col_name,
         vmin=cbar_vmin,
         vmax=cbar_vmax,
+        cmap="viridis"
     )
     if title is None:
-        plt.title("Features channel: " + str(ch_name))
+        if ch_name is not None:
+            plt.title("Correlation matrix features channel: " + str(ch_name))
+        else:
+            plt.title("Correlation matrix")
     else:
         plt.title(title)
+
+    if len(feature_col_name) > 50:
+        plt.xticks([])
+        plt.yticks([])
 
     if save_plot and save_plot_name is None:
         plt_path = get_plt_path(
@@ -227,7 +235,7 @@ def plot_corr_matrix(
 
     if show_plot is False:
         plt.close()
-
+    return plt.gca()
 
 def plot_feature_series_time(features) -> None:
     plt.imshow(features.T, aspect="auto")

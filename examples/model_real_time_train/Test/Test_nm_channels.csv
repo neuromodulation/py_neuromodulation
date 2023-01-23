@@ -1,9 +1,0 @@
-,name,rereference,used,target,type,status,new_name
-0,FP1,average,0,0,eeg,good,FP1-avgref
-1,FP2,average,0,0,eeg,good,FP2-avgref
-2,C3,average,1,0,eeg,good,C3-avgref
-3,C4,average,1,0,eeg,good,C4-avgref
-4,P7,average,0,0,eeg,good,P7-avgref
-5,P8,average,0,0,eeg,good,P8-avgref
-6,O1,average,0,0,eeg,good,O1-avgref
-7,O2,average,0,0,eeg,good,O2-avgref
