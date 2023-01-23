@@ -141,10 +141,18 @@ class LSLWriter:
                 "float32",
                 "tmsi-" + str(self.device.info.dr_serial_number),
             )
+            chs_appended = []
+            ids_appended = []
             chns = info.desc().append_child("channels")
             for idx, ch in enumerate(self.device.channels):  # active channels
+                ch_name = ch.name
+                print(f"{ch.name = }")
+                if ch_name in chs_appended:
+                    ch_name = f"{ch_name}_2"
+                print(f"{ch_name = }")
+
                 chn = chns.append_child("channel")
-                chn.append_child_value("label", ch.name)
+                chn.append_child_value("label", ch_name)
                 chn.append_child_value("index", str(idx))
                 chn.append_child_value("unit", ch.unit_name)
                 if (
@@ -155,6 +163,9 @@ class LSLWriter:
                     chn.append_child_value(
                         "type", str(ch.type).replace("ChannelType.", "")
                     )
+                chs_appended.append(ch_name)
+                # ids_appended.append(id)
+            print(f"{chs_appended = }")
             info.desc().append_child_value("manufacturer", "TMSi")
             sync = info.desc().append_child("synchronization")
             sync.append_child_value(
@@ -170,6 +181,7 @@ class LSLWriter:
             )
             self._consumer = LSLConsumer(self._outlet)
             sample_data_server.registerConsumer(self.device.id, self._consumer)
+            print("LSL STREAM STARTED")
 
         except:
             raise TMSiError(TMSiErrorCode.file_writer_error)

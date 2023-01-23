@@ -27,7 +27,7 @@
       <AltChanName>STNR02MT</AltChanName>
     </Channel>
     <Channel>
-      <ChanNr>3</ChanNr>
+      <ChanNr>0</ChanNr>
       <ChanDivider>0</ChanDivider>
       <AltChanName>STNR03MT</AltChanName>
     </Channel>

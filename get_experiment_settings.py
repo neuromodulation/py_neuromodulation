@@ -31,13 +31,14 @@ class BIDSEntity:
 
 def main() -> None:
 
-    # root = tkinter.Tk()
     out_root = tkinter.filedialog.askdirectory(
         title="Select output root for results."
     )
     out_root = pathlib.Path(out_root)
 
     root = tk.Tk()
+    root.lift()
+    root.attributes("-topmost", True)
     root.title("Enter info")
 
     mainframe = ttk.Frame(root, padding="10 10 30 10")

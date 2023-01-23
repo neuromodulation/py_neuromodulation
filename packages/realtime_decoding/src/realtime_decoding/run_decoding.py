@@ -130,7 +130,9 @@ def open_poly5_writer(
         TMSiFileFormats.file_writer.FileFormat.poly5, out_file
     )
     try:
+        print("Opening poly5 writer")
         file_writer.open(device)
+        print("Poly 5 writer opened")
         yield file_writer
     except Exception as exception:
         print("Closing Poly5 file writer")
@@ -152,8 +154,12 @@ class ProcessManager:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
-        if not self._terminated:
-            self.terminate()
+        if isinstance(exc_type, BaseException):
+            print("Exception caught!")
+        # if not self._terminated:
+        #     self.terminate()
+            return False
+        print("No exception caught!")
 
     def __post_init__(self) -> None:
         self.out_dir = pathlib.Path(self.out_dir)
@@ -171,7 +177,6 @@ class ProcessManager:
             self.queue_features,
             self.queue_decoding,
             self.queue_source,
-            self.queue_gui,
         ]
         for q in self.queues:
             q.cancel_join_thread()
@@ -183,12 +188,12 @@ class ProcessManager:
         def on_release(key) -> Literal[False] | None:
             if key == Key.esc:
                 print("Received stop key.")
-                self.queue_source.put(None)
                 self.terminate()
                 return False
 
         listener = Listener(on_press=on_press, on_release=on_release)
         listener.start()
+        print("Listener started.")
 
         TMSiSDK.sample_data_server.registerConsumer(
             self.device.id, self.queue_source
@@ -213,19 +218,24 @@ class ProcessManager:
             out_dir=self.out_dir,
             verbose=self.verbose,
         )
-        TMSiSDK.sample_data_server.registerConsumer(
-            self.device.id, self.queue_gui
-        )
-        realtime_decoding.TMSiGUI(self.queue_gui)
         processes = [features, decoder]
         for process in processes:
             process.start()
             time.sleep(0.5)
+        print("Decoding started.")
 
     def terminate(self) -> None:
         """Terminate all workers."""
+        print("Terminating experiment...")
         self._terminated = True
-        self.queue_source.put(None)
+        try:
+            self.queue_source.put(None, block=False)
+        except queue.Full:
+            self.queue_source.get(block=False)
+            try:
+                self.queue_source.put(None, block=False)
+            except queue.Full:
+                pass
         print("Set terminating event.")
         TMSiSDK.sample_data_server.unregisterConsumer(
             self.device.id, self.queue_source
@@ -305,27 +315,34 @@ class ProcessManager:
 
 
 def run(
-    out_dir: pathlib.Path,
+    out_dir: _PathLike,
     filename: str,
     # saga_config: str = "saga_config_sensight_lfp_left",
 ) -> None:
     """Initialize data processing by launching all necessary processes."""
+    out_dir = pathlib.Path(out_dir)
     with (
         open_tmsi_device(out_dir) as device,
-        open_lsl_stream(device) as stream,
         open_poly5_writer(device, out_dir / filename) as file_writer,
-        ProcessManager(
+        open_lsl_stream(device) as stream,
+    ):
+        manager = ProcessManager(
             device=device,
             lsl_stream=stream,
             file_writer=file_writer,
             out_dir=out_dir,
             timeout=0.05,
             verbose=False,
-        ) as manager,
-    ):
+        )
+
         manager.start()
+        # except BaseException as exc:
+        #     manager.terminate()
+        #     raise exc
+        print("Experiment launched")
         raw_gui = realtime_decoding.TMSiGUI(manager.queue_gui, device)
         raw_gui.run()
+
 
 
 # if __name__ == "__main__":

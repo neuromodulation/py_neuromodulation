@@ -6,7 +6,6 @@ call conda activate realtime_decoding
 call python "get_experiment_settings.py"
 start python "start_decoding.py"
 ECHO Running realtime decoding
-PAUSE
 TIMEOUT /T 5
 start python "tmsi_gui.py"
 ECHO Running TMSi GUI

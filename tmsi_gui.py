@@ -16,6 +16,7 @@ def open_tmsi_device(saga_config: str):
         print("Initializing TMSi device...")
         # Initialise the TMSi-SDK first before starting using it
         TMSiSDK.tmsi_device.initialize()
+        print("TMSi Device initialized.")
         # Execute a device discovery. This returns a list of device-objects.
         discovery_list = TMSiSDK.tmsi_device.discover(
             TMSiSDK.tmsi_device.DeviceType.saga,

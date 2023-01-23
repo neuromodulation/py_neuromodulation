@@ -29,7 +29,7 @@ class Decoder(multiprocessing.Process):
         out_dir: _PathLike,
         verbose: bool,
     ) -> None:
-        super().__init__(name="DecodingThread")
+        super().__init__(name="DecodingProcess")
         self.queue_decoding = queue_decoding
         self.queue_feat = queue_features
         self.interval = interval
@@ -105,6 +105,7 @@ class Decoder(multiprocessing.Process):
                 if self.verbose:
                     print("Got features.")
                 if sample is None:
+                    print("Found None value, terminating decoder process.")
                     break
                 _predict(sample)
         try:

@@ -101,6 +101,7 @@ class Features(multiprocessing.Process):
             else:
                 # print("Got data")
                 if sd is None:
+                    print("Found None value, terminating features process.")
                     break
                 if self.verbose:
                     print("Found raw input sample.")
