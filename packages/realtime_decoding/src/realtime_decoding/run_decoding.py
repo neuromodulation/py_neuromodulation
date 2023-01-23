@@ -21,17 +21,6 @@ import realtime_decoding
 from .helpers import _PathLike
 
 
-def clear_queue(q) -> None:
-    print("Emptying queue.")
-    try:
-        while True:
-            q.get(block=False)
-    except queue.Empty:
-        print("Queue emptied.")
-    except ValueError:  # Queue is already closed
-        print("Queue was already closed.")
-
-
 @contextmanager
 def open_tmsi_device(
     out_dir: _PathLike,
@@ -263,7 +252,7 @@ class ProcessManager:
         print(f"Alive processes: {(p.name for p in active_children)}")
         print("Flushing all queues. Please wait...")
         for queue_ in self.queues:
-            clear_queue(queue_)
+            realtime_decoding.clear_queue(queue_)
         self.wait(active_children, timeout=5)
         active_children = multiprocessing.active_children()
         if not active_children:
