@@ -34,7 +34,7 @@ class Features(multiprocessing.Process):
         path_grids: str | None = None,
         line_noise: int | float | None = None,
     ) -> None:
-        super().__init__(name=f"{name}Thread")
+        super().__init__(name=f"{name}Process")
         self.interval = interval
         self.sfreq = sfreq
         self.queue_raw = queue_raw
@@ -68,7 +68,7 @@ class Features(multiprocessing.Process):
             dtype=(float, self.num_channels),  # type: ignore
             allow_overwrite=True,
         )
-        # Channels x Number of different features
+        # Channels * Number of different features
         self.n_feats_total = (
             sum(self.processor.nm_channels["used"] == 1) * n_feats
         )

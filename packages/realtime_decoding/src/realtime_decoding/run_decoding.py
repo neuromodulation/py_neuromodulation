@@ -156,17 +156,14 @@ class ProcessManager:
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         if isinstance(exc_type, BaseException):
             print("Exception caught!")
-        # if not self._terminated:
-        #     self.terminate()
+            # if not self._terminated:
+            #     self.terminate()
             return False
         print("No exception caught!")
 
     def __post_init__(self) -> None:
         self.out_dir = pathlib.Path(self.out_dir)
         self.queue_source = multiprocessing.Queue(
-            int(self.timeout * 1000 * 20)
-        )  # seconds/sample * ms/s * s
-        self.queue_gui = queue.Queue(
             int(self.timeout * 1000 * 20)
         )  # seconds/sample * ms/s * s
         self.queue_raw = multiprocessing.Queue(int(self.timeout * 1000))
@@ -304,10 +301,8 @@ class ProcessManager:
         while True:
             try:
                 if all(not process.is_alive() for process in processes):
-                    # All the workers are dead
                     return
                 if timeout and time.time() - start >= timeout:
-                    # Timeout
                     return
                 time.sleep(0.1)
             except Exception:
@@ -317,7 +312,6 @@ class ProcessManager:
 def run(
     out_dir: _PathLike,
     filename: str,
-    # saga_config: str = "saga_config_sensight_lfp_left",
 ) -> None:
     """Initialize data processing by launching all necessary processes."""
     out_dir = pathlib.Path(out_dir)
@@ -336,14 +330,3 @@ def run(
         )
 
         manager.start()
-        # except BaseException as exc:
-        #     manager.terminate()
-        #     raise exc
-        print("Experiment launched")
-        raw_gui = realtime_decoding.TMSiGUI(manager.queue_gui, device)
-        raw_gui.run()
-
-
-
-# if __name__ == "__main__":
-#     stream_manager = run("saga_config_sensight_lfp_left")

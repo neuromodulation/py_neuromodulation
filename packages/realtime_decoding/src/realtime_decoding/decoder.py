@@ -47,7 +47,6 @@ class Decoder(multiprocessing.Process):
         )
         self.filename = pathlib.Path(filename)
 
-        # self._model = sklearn.dummy.DummyClassifier(strategy="stratified")
         with open(self.filename, "rb") as file:
             self._model = pickle.load(file)
         self._save_model()
@@ -76,14 +75,6 @@ class Decoder(multiprocessing.Process):
                 x=list(output.to_numpy().squeeze()),
                 timestamp=timestamp.astype(float),
             )
-            # try:
-            #     self.queue_decoding.put(output, timeout=self.interval)
-            # except queue.Full:
-            #     print("Decoding queue Full. Skipping sample.")
-            # try:
-            #     self.queue_decoding.get(block=False)
-            # except queue.Empty:
-            #     print("Decoding queue empty. Skipping sample.")
 
         info = pylsl.StreamInfo(
             name="Decoding",
