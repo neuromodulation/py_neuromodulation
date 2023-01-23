@@ -44,7 +44,7 @@ class Features(multiprocessing.Process):
         self.finished = multiprocessing.Event()
 
         root = tkinter.Tk()
-        paths = {}
+        self.paths = {}
         for keyword, ftype in (
             ("nm_channels", "csv"),
             ("nm_settings", "json"),
@@ -53,13 +53,13 @@ class Features(multiprocessing.Process):
                 title=f"Select {keyword} file",
                 filetypes=(("Files", f"*.{ftype}*"),),
             )
-            paths[keyword] = pathlib.Path(filename)
+            self.paths[keyword] = pathlib.Path(filename)
         root.withdraw()
 
         self.processor = nm.nm_run_analysis.DataProcessor(
             sfreq=self.sfreq,
-            settings=paths["nm_settings"],
-            nm_channels=paths["nm_channels"],
+            settings=self.paths["nm_settings"],
+            nm_channels=self.paths["nm_channels"],
             line_noise=line_noise,
             path_grids=path_grids,
             verbose=self.verbose,
@@ -81,10 +81,10 @@ class Features(multiprocessing.Process):
     def _save_settings(self) -> None:
         # print("SAVING DATA ....")
         self.processor.nm_channels.to_csv(
-            self.out_dir / self.path_nm_channels.name, index=False
+            self.out_dir / self.paths["nm_channels"].name, index=False
         )
         with open(
-            self.out_dir / self.path_nm_settings.name, "w", encoding="utf-8"
+            self.out_dir / self.paths["nm_settings"].name, "w", encoding="utf-8"
         ) as outfile:
             json.dump(self.processor.settings, outfile)
 
