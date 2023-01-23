@@ -160,6 +160,9 @@ class ProcessManager:
         self.queue_source = multiprocessing.Queue(
             int(self.timeout * 1000 * 20)
         )  # seconds/sample * ms/s * s
+        self.queue_gui = queue.Queue(
+            int(self.timeout * 1000 * 20)
+        )  # seconds/sample * ms/s * s
         self.queue_raw = multiprocessing.Queue(int(self.timeout * 1000))
         self.queue_features = multiprocessing.Queue(1)
         self.queue_decoding = multiprocessing.Queue(1)
@@ -168,6 +171,7 @@ class ProcessManager:
             self.queue_features,
             self.queue_decoding,
             self.queue_source,
+            self.queue_gui,
         ]
         for q in self.queues:
             q.cancel_join_thread()
@@ -209,6 +213,10 @@ class ProcessManager:
             out_dir=self.out_dir,
             verbose=self.verbose,
         )
+        TMSiSDK.sample_data_server.registerConsumer(
+            self.device.id, self.queue_gui
+        )
+        realtime_decoding.TMSiGUI(self.queue_gui)
         processes = [features, decoder]
         for process in processes:
             process.start()
@@ -316,6 +324,8 @@ def run(
         ) as manager,
     ):
         manager.start()
+        raw_gui = realtime_decoding.TMSiGUI(manager.queue_gui, device)
+        raw_gui.run()
 
 
 # if __name__ == "__main__":
