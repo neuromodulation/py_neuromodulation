@@ -25,7 +25,7 @@ from .helpers import _PathLike
 def open_tmsi_device(
     out_dir: _PathLike,
     verbose: bool = True,
-) -> Generator[TMSiSDK.devices.saga.SagaDevice, None, None]:
+) -> Generator[TMSiSDK.SagaDevice, None, None]:
     out_dir = pathlib.Path(out_dir)
     cfg_file = tkinter.filedialog.askopenfilename(
         title="Select TMSi Saga settings file",
@@ -39,12 +39,12 @@ def open_tmsi_device(
     try:
         print("Initializing TMSi device...")
         # Initialise the TMSi-SDK first before starting using it
-        TMSiSDK.tmsi_device.initialize()
+        TMSiSDK.initialize()
         # Execute a device discovery. This returns a list of device-objects.
-        discovery_list = TMSiSDK.tmsi_device.discover(
-            TMSiSDK.tmsi_device.DeviceType.saga,
-            TMSiSDK.device.DeviceInterfaceType.docked,
-            TMSiSDK.device.DeviceInterfaceType.usb,  # .network
+        discovery_list = TMSiSDK.discover(
+            TMSiSDK.DeviceType.saga,
+            TMSiSDK.DeviceInterfaceType.docked,
+            TMSiSDK.DeviceInterfaceType.usb,  # .network
         )
         if len(discovery_list) == 0:
             raise ValueError(
@@ -62,7 +62,7 @@ def open_tmsi_device(
         print("Connected to device.")
         # cfg_file = TMSiSDK.get_config(saga_config)
         device.load_config(cfg_file)
-        TMSiSDK.devices.saga.xml_saga_config.xml_write_config(
+        TMSiSDK.xml_saga_config.xml_write_config(
             filename=out_dir / cfg_file.name, saga_config=device.config
         )
         if verbose:
@@ -85,20 +85,20 @@ def open_tmsi_device(
         if device is None:
             raise ValueError("No TMSi device found!")
         yield device
-    except TMSiSDK.error.TMSiError as error:
+    except TMSiSDK.TMSiError as error:
         print("!!! TMSiError !!! : ", error.code)
         if (
             device is not None
             and error.code == TMSiSDK.error.TMSiErrorCode.device_error
         ):
             print("  => device error : ", hex(device.status.error))
-            TMSiSDK.error.DeviceErrorLookupTable(hex(device.status.error))
+            TMSiSDK.DeviceErrorLookupTable(hex(device.status.error))
     except Exception as exception:
         if device is not None:
-            if device.status.state == TMSiSDK.device.DeviceState.sampling:
+            if device.status.state == TMSiSDK.DeviceState.sampling:
                 print("Stopping TMSi measurement...")
                 device.stop_measurement()
-            if device.status.state == TMSiSDK.device.DeviceState.connected:
+            if device.status.state == TMSiSDK.DeviceState.connected:
                 print("Closing TMSi device...")
                 device.close()
         raise exception
@@ -107,9 +107,9 @@ def open_tmsi_device(
 @contextmanager
 def open_lsl_stream(
     device,
-) -> Generator[TMSiFileFormats.file_writer.FileWriter, None, None]:
-    lsl_stream = TMSiFileFormats.file_writer.FileWriter(
-        TMSiFileFormats.file_writer.FileFormat.lsl, "SAGA"
+) -> Generator[TMSiFileFormats.FileWriter, None, None]:
+    lsl_stream = TMSiFileFormats.FileWriter(
+        TMSiFileFormats.FileFormat.lsl, "SAGA"
     )
     try:
         lsl_stream.open(device)
@@ -142,9 +142,9 @@ def open_poly5_writer(
 
 @dataclass
 class ProcessManager:
-    device: TMSiSDK.devices.saga.SagaDevice
-    lsl_stream: TMSiFileFormats.file_writer.FileWriter
-    file_writer: TMSiFileFormats.file_writer.FileWriter
+    device: TMSiSDK.SagaDevice
+    lsl_stream: TMSiFileFormats.FileWriter
+    file_writer: TMSiFileFormats.FileWriter
     out_dir: _PathLike
     timeout: float = 0.05
     verbose: bool = True
@@ -241,10 +241,10 @@ class ProcessManager:
 
         self.lsl_stream.close()
         self.file_writer.close()
-        if self.device.status.state == TMSiSDK.device.DeviceState.sampling:
+        if self.device.status.state == TMSiSDK.DeviceState.sampling:
             self.device.stop_measurement()
             print("Controlled stopping TMSi measurement...")
-        if self.device.status.state == TMSiSDK.device.DeviceState.connected:
+        if self.device.status.state == TMSiSDK.DeviceState.connected:
             self.device.close()
             print("Controlled closing TMSi device...")
 

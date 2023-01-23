@@ -40,6 +40,11 @@ from . import (
     tmsi_device,
 )
 from . import devices
+from .device import DeviceInterfaceType, DeviceState
+from .devices.saga import SagaDevice
+from .devices.saga import xml_saga_config
+from .error import TMSiError, TMSiErrorCode, DeviceErrorLookupTable
+from .tmsi_device import DeviceType, discover, initialize
 
 
 def get_config(config_name):
