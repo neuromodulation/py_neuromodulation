@@ -38,7 +38,6 @@ class Decoder(multiprocessing.Process):
 
         self._threshold: float = 0.5
 
-        root = tkinter.Tk()
         filename = tkinter.filedialog.askopenfilename(
             title="Select model",
             filetypes=(
@@ -46,7 +45,6 @@ class Decoder(multiprocessing.Process):
                 ("All files", "*.*"),
             ),
         )
-        root.withdraw()
         self.filename = pathlib.Path(filename)
 
         # self._model = sklearn.dummy.DummyClassifier(strategy="stratified")

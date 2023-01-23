@@ -43,7 +43,6 @@ class Features(multiprocessing.Process):
         self.out_dir = pathlib.Path(out_dir)
         self.finished = multiprocessing.Event()
 
-        root = tkinter.Tk()
         paths = {}
         for keyword, ftype in (
             ("nm_channels", "csv"),
@@ -54,7 +53,6 @@ class Features(multiprocessing.Process):
                 filetypes=(("Files", f"*.{ftype}*"),),
             )
             paths[keyword] = pathlib.Path(filename)
-        root.withdraw()
 
         self.processor = nm.nm_run_analysis.DataProcessor(
             sfreq=self.sfreq,
