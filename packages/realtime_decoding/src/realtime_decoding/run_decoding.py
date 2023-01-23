@@ -27,7 +27,6 @@ def open_tmsi_device(
     verbose: bool = True,
 ) -> Generator[TMSiSDK.devices.saga.SagaDevice, None, None]:
     out_dir = pathlib.Path(out_dir)
-    root = tkinter.Tk()
     cfg_file = tkinter.filedialog.askopenfilename(
         title="Select TMSi Saga settings file",
         filetypes=(
@@ -35,7 +34,6 @@ def open_tmsi_device(
             ("All files", "*.*"),
         ),
     )
-    root.withdraw()
     cfg_file = pathlib.Path(cfg_file)
     device = None
     try:

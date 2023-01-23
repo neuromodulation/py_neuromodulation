@@ -43,7 +43,6 @@ class Features(multiprocessing.Process):
         self.out_dir = pathlib.Path(out_dir)
         self.finished = multiprocessing.Event()
 
-        root = tkinter.Tk()
         self.paths = {}
         for keyword, ftype in (
             ("nm_channels", "csv"),
@@ -54,7 +53,6 @@ class Features(multiprocessing.Process):
                 filetypes=(("Files", f"*.{ftype}*"),),
             )
             self.paths[keyword] = pathlib.Path(filename)
-        root.withdraw()
 
         self.processor = nm.nm_run_analysis.DataProcessor(
             sfreq=self.sfreq,
@@ -84,7 +82,9 @@ class Features(multiprocessing.Process):
             self.out_dir / self.paths["nm_channels"].name, index=False
         )
         with open(
-            self.out_dir / self.paths["nm_settings"].name, "w", encoding="utf-8"
+            self.out_dir / self.paths["nm_settings"].name,
+            "w",
+            encoding="utf-8",
         ) as outfile:
             json.dump(self.processor.settings, outfile)
 
