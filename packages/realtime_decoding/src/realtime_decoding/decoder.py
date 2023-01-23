@@ -1,20 +1,20 @@
-from datetime import datetime, timezone
 import multiprocessing
 import multiprocessing.synchronize
-import os
 import pathlib
 import pickle
 import queue
 import tkinter
 import tkinter.filedialog
+from datetime import datetime, timezone
 
 import numpy as np
 import pandas as pd
-import realtime_decoding
 import pylsl
 
+import realtime_decoding
 
-_Pathlike = str | os.PathLike
+from .helpers import _PathLike
+
 _timezone = timezone.utc
 
 
@@ -26,7 +26,7 @@ class Decoder(multiprocessing.Process):
         queue_decoding: multiprocessing.Queue,
         queue_features: multiprocessing.Queue,
         interval: float,
-        out_dir: _Pathlike,
+        out_dir: _PathLike,
         verbose: bool,
     ) -> None:
         super().__init__(name="DecodingThread")
