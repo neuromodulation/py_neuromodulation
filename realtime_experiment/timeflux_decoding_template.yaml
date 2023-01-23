@@ -67,17 +67,6 @@ graphs:
         value: features_1
         unit: ns
         sync: null
-    - id: rawdata_inlet
-      module: timeflux.nodes.lsl
-      class: Receive
-      params:
-        prop: source_id # name
-        value: tmsi-0 # SAGA #rawdata_1
-        unit: ns
-        sync: null
-    # - id: ui
-    #   module: timeflux.nodes.debug
-    #   class: Display
     - id: ui
       module: timeflux_ui.nodes.ui
       class: UI
@@ -86,7 +75,5 @@ graphs:
         target: ui:MovementDecoding
       - source: feature_inlet
         target: ui:Features
-      - source: rawdata_inlet
-        target: ui:RawData
     rate: 5
 
