@@ -30,49 +30,35 @@ class Features:
                 continue
             match feature:
                 case "raw_hjorth":
-                    self.features.append(
-                        nm_hjorth_raw.Hjorth(s, ch_names, sfreq)
-                    )
+                    FeatureClass = nm_hjorth_raw.Hjorth
                 case "return_raw":
-                    self.features.append(nm_hjorth_raw.Raw(s, ch_names, sfreq))
+                    FeatureClass = nm_hjorth_raw.Raw
                 case "bandpass_filter":
-                    self.features.append(
-                        nm_oscillatory.BandPower(s, ch_names, sfreq)
-                    )
+                    FeatureClass = nm_oscillatory.BandPower
                 case "stft":
-                    self.features.append(
-                        nm_oscillatory.STFT(s, ch_names, sfreq)
-                    )
+                    FeatureClass = nm_oscillatory.STFT
                 case "fft":
-                    self.features.append(
-                        nm_oscillatory.FFT(s, ch_names, sfreq)
-                    )
+                    FeatureClass = nm_oscillatory.FFT
                 case "sharpwave_analysis":
-                    self.features.append(
-                        nm_sharpwaves.SharpwaveAnalyzer(s, ch_names, sfreq)
-                    )
+                    FeatureClass = nm_sharpwaves.SharpwaveAnalyzer
                 case "fooof":
-                    self.features.append(
-                        nm_fooof.FooofAnalyzer(s, ch_names, sfreq)
-                    )
+                    FeatureClass = nm_fooof.FooofAnalyzer
                 case "nolds":
-                    self.features.append(nm_nolds.Nolds(s, ch_names, sfreq))
+                    FeatureClass = nm_nolds.Nolds
                 case "coherence":
-                    self.features.append(
-                        nm_coherence.NM_Coherence(s, ch_names, sfreq)
-                    )
+                    FeatureClass = nm_coherence.NM_Coherence
                 case "bursts":
-                    self.features.append(nm_bursts.Burst(s, ch_names, sfreq))
+                    FeatureClass = nm_bursts.Burst
                 case "linelength":
-                    self.features.append(
-                        nm_linelength.LineLength(s, ch_names, sfreq)
-                    )
+                    FeatureClass = nm_linelength.LineLength
                 case "mne_connectivity":
-                    self.features.append(
-                        nm_mne_connectiviy.MNEConnectivity(s, ch_names, sfreq)
-                    )
+                    FeatureClass = nm_mne_connectiviy.MNEConnectivity
                 case _:
                     raise ValueError(f"Unknown feature found. Got: {feature}.")
+
+            FeatureClass.test_settings(s, ch_names, sfreq)
+            f_obj = FeatureClass(s, ch_names, sfreq)
+            self.features.append(f_obj)
 
     def estimate_features(self, data: np.ndarray) -> dict:
         """Calculate features, as defined in settings.json

@@ -1,4 +1,4 @@
-from abc import ABC, abstractclassmethod, abstractmethod
+from abc import ABC, abstractmethod
 import numpy as np
 from typing import Iterable
 
@@ -6,11 +6,21 @@ from typing import Iterable
 class Feature(ABC):
     @abstractmethod
     def __init__(
-        self, settings: dict, ch_names: Iterable[str], sfreq: float
+        self, settings: dict, ch_names: Iterable[str], sfreq: int | float
     ) -> None:
         pass
 
-    @abstractclassmethod
+    @staticmethod
+    @abstractmethod
+    def test_settings(
+        settings: dict,
+        ch_names: Iterable[str],
+        sfreq: int | float,
+    ):
+        """Method to check passed settings"""
+        pass
+
+    @abstractmethod
     def calc_feature(self, data: np.array, features_compute: dict) -> dict:
         """
         Feature calculation method. Each method needs to loop through all channels

@@ -1,0 +1,423 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>nm_settings &mdash; py_neuromodulation  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> py_neuromodulation
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup.html">py_neuromodulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup.html#setup">Setup</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Code</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../outline_parametrization.html">Parametrization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../outline_featureestimation.html">Feature Estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../outline_analysis.html">Analysis</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">py_neuromodulation</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>nm_settings</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for nm_settings</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module for handling settings.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">py_neuromodulation</span> <span class="kn">import</span> <span class="n">nm_normalization</span><span class="p">,</span> <span class="n">nm_IO</span>
+
+
+<div class="viewcode-block" id="get_default_settings"><a class="viewcode-back" href="../nm_settings.html#nm_settings.get_default_settings">[docs]</a><span class="k">def</span> <span class="nf">get_default_settings</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Read default settings from file.&quot;&quot;&quot;</span>
+    <span class="n">settings_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
+        <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;nm_settings.json&quot;</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">nm_IO</span><span class="o">.</span><span class="n">read_settings</span><span class="p">(</span><span class="n">settings_path</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">reset_settings</span><span class="p">(</span>
+    <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">]:</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">][</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;preprocessing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;postprocessing&quot;</span><span class="p">]:</span>
+        <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;postprocessing&quot;</span><span class="p">][</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">settings</span>
+
+
+<span class="k">def</span> <span class="nf">set_settings_fast_compute</span><span class="p">(</span>
+    <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">reset_settings</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+    <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">][</span><span class="s2">&quot;fft&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;preprocessing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;raw_resampling&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;notch_filter&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;re_referencing&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;postprocessing&quot;</span><span class="p">][</span><span class="s2">&quot;feature_normalization&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;postprocessing&quot;</span><span class="p">][</span><span class="s2">&quot;project_cortex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">settings</span><span class="p">[</span><span class="s2">&quot;postprocessing&quot;</span><span class="p">][</span><span class="s2">&quot;project_subcortex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">settings</span>
+
+
+<div class="viewcode-block" id="test_settings"><a class="viewcode-back" href="../nm_settings.html#nm_settings.test_settings">[docs]</a><span class="k">def</span> <span class="nf">test_settings</span><span class="p">(</span>
+    <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">nm_channels</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Test if settings are specified correctly in nm_settings.json</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    settings: dict</span>
+<span class="sd">        settings to tests</span>
+<span class="sd">    verbose: boolean</span>
+<span class="sd">        set to True if feedback is desired.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">settings</span>
+
+    <span class="n">preprocessing_order</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;preprocessing&quot;</span><span class="p">]</span>
+
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;sampling_rate_features_hz&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;postprocessing&quot;</span><span class="p">][</span><span class="s2">&quot;project_cortex&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">s</span><span class="p">[</span><span class="s2">&quot;project_cortex_settings&quot;</span><span class="p">][</span><span class="s2">&quot;max_dist_mm&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;postprocessing&quot;</span><span class="p">][</span><span class="s2">&quot;project_subcortex&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">s</span><span class="p">[</span><span class="s2">&quot;project_subcortex_settings&quot;</span><span class="p">][</span><span class="s2">&quot;max_dist_mm&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+    <span class="p">),</span> <span class="s2">&quot;features must be a boolean value.&quot;</span>
+    <span class="k">assert</span> <span class="nb">any</span><span class="p">(</span>
+        <span class="n">value</span> <span class="ow">is</span> <span class="kc">True</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+    <span class="p">),</span> <span class="s2">&quot;Set at least one features to True.&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;raw_resampling&quot;</span> <span class="ow">in</span> <span class="n">preprocessing_order</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">s</span><span class="p">[</span><span class="s2">&quot;raw_resampling_settings&quot;</span><span class="p">][</span><span class="s2">&quot;resample_freq_hz&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;preprocessing&quot;</span><span class="p">][</span><span class="s2">&quot;raw_normalization&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">s</span><span class="p">[</span><span class="s2">&quot;raw_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;normalization_time_s&quot;</span><span class="p">],</span>
+            <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;raw_normalization_settings&quot;</span><span class="p">][</span>
+                <span class="s2">&quot;normalization_method&quot;</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="c1"># Check if only one value is set to true.</span>
+        <span class="k">assert</span> <span class="nb">sum</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;raw_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;normalization_method&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span>\
+            <span class="s2">&quot;Please set only one method in raw normalization settings to true&quot;</span>
+
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">s</span><span class="p">[</span><span class="s2">&quot;raw_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;clip&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;postprocessing&quot;</span><span class="p">][</span><span class="s2">&quot;feature_normalization&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">s</span><span class="p">[</span><span class="s2">&quot;feature_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;normalization_time_s&quot;</span><span class="p">],</span>
+            <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">s</span><span class="p">[</span><span class="s2">&quot;feature_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;clip&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;feature_normalization_settings&quot;</span><span class="p">][</span>
+                <span class="s2">&quot;normalization_method&quot;</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="c1"># Check if only one value is set to true.</span>
+        <span class="k">assert</span> <span class="nb">sum</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;feature_normalization_settings&quot;</span><span class="p">][</span><span class="s2">&quot;normalization_method&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span>\
+            <span class="s2">&quot;Please set only one method in feature normalization settings to true&quot;</span>
+
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">s</span><span class="p">[</span><span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;kalman_filter&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span>
+        <span class="ow">or</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;stft_settings&quot;</span><span class="p">][</span><span class="s2">&quot;kalman_filter&quot;</span><span class="p">]</span>
+        <span class="ow">or</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;fft_settings&quot;</span><span class="p">][</span><span class="s2">&quot;kalman_filter&quot;</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;kalman_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;Tp&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;kalman_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;sigma_w&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;kalman_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;sigma_v&quot;</span><span class="p">],</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;kalman_filter_settings&quot;</span><span class="p">][</span>
+            <span class="s2">&quot;frequency_bands&quot;</span>
+        <span class="p">],</span> <span class="s2">&quot;No frequency bands specified for Kalman filter.&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">s</span><span class="p">[</span><span class="s2">&quot;kalman_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_bands&quot;</span><span class="p">],</span> <span class="nb">list</span>
+        <span class="p">),</span> <span class="s2">&quot;Frequency bands for Kalman filter must be specified as a list.&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">item</span>
+            <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_ranges_hz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;kalman_filter_settings&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_bands&quot;</span><span class="p">]</span>
+        <span class="p">),</span> <span class="p">(</span>
+            <span class="s2">&quot;Frequency bands for Kalman filter must also be specified in &quot;</span>
+            <span class="s2">&quot;bandpass_filter_settings.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">][</span><span class="s2">&quot;bandpass_filter&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="s2">&quot;frequency_ranges_hz&quot;</span><span class="p">],</span> <span class="nb">dict</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;frequency_ranges_hz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;frequency_ranges_hz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">list</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;frequency_ranges_hz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;frequency_ranges_hz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;frequency_ranges_hz&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span>
+                <span class="s2">&quot;bandpower_features&quot;</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="n">value</span> <span class="ow">is</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;bandpass_filter_settings&quot;</span><span class="p">][</span>
+                <span class="s2">&quot;bandpower_features&quot;</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">),</span> <span class="s2">&quot;Set at least one bandpower_feature to True.&quot;</span>
+    <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">][</span><span class="s2">&quot;sharpwave_analysis&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">filter_range</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;sharpwave_analysis_settings&quot;</span><span class="p">][</span>
+            <span class="s2">&quot;filter_ranges_hz&quot;</span>
+        <span class="p">]:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">filter_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">filter_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">assert</span> <span class="n">filter_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">filter_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># check if all features are also enbled via an estimator</span>
+        <span class="n">used_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;sharpwave_analysis_settings&quot;</span><span class="p">][</span>
+            <span class="s2">&quot;sharpwave_features&quot;</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">used_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">feature_name</span><span class="p">)</span>
+                <span class="n">fun_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">used_feature</span> <span class="ow">in</span> <span class="n">used_features</span><span class="p">:</span>
+            <span class="n">estimator_list_feature</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">[]</span>
+            <span class="p">)</span>  <span class="c1"># one feature can have multiple estimators</span>
+            <span class="k">for</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">est_features</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;sharpwave_analysis_settings&quot;</span><span class="p">][</span>
+                <span class="s2">&quot;estimator&quot;</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">est_features</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">est_feature</span> <span class="ow">in</span> <span class="n">est_features</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">used_feature</span> <span class="o">==</span> <span class="n">est_feature</span><span class="p">:</span>
+                            <span class="n">estimator_list_feature</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">estimator_list_feature</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;add estimator key for </span><span class="si">{</span><span class="n">used_feature</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">fun_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">estimator_list_feature</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">][</span><span class="s2">&quot;coherence&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">ch_coh</span> <span class="ow">in</span> <span class="n">nm_channels</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">ch_coh</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;coherence&quot;</span><span class="p">][</span><span class="s2">&quot;channels&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">f_band_coh</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;frequency_ranges_hz&quot;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">f_band_coh</span> <span class="ow">in</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;coherence&quot;</span><span class="p">][</span><span class="s2">&quot;frequency_bands&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No Error occurred when testing the settings.&quot;</span><span class="p">)</span>
+    <span class="k">return</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Timon Merk
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

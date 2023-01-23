@@ -1,0 +1,5 @@
+nm_settings.py
+=============
+
+.. autoclass:: nm_settings
+      :members:

@@ -16,6 +16,26 @@ class NORM_METHODS(Enum):
     MINMAX = "minmax"
 
 
+def test_normalization_settings(
+    normalization_time_s: int | float, normalization_method: str, clip: bool
+):
+    assert isinstance(
+        normalization_time_s,
+        (float, int),
+    )
+
+    assert isinstance(
+        normalization_method, str
+    ), "normalization method needs to be of type string"
+
+    assert normalization_method in [e.value for e in NORM_METHODS], (
+        f"select a valid normalization method, got {normalization_method}, "
+        f"valid options are {[e.value for e in NORM_METHODS]}"
+    )
+
+    assert isinstance(clip, (float, int, bool))
+
+
 class RawNormalizer:
     def __init__(
         self,
@@ -38,6 +58,9 @@ class RawNormalizer:
         clip : int | float, optional
             value at which to clip after normalization
         """
+
+        test_normalization_settings(normalization_time_s, normalization_method, clip)
+
         self.method = normalization_method
         self.clip = clip
         self.num_samples_normalize = int(normalization_time_s * sfreq)
@@ -86,6 +109,9 @@ class FeatureNormalizer:
         clip : int | float, optional
             value at which to clip after normalization
         """
+
+        test_normalization_settings(normalization_time_s, normalization_method, clip)
+
         self.method = normalization_method
         self.clip = clip
         self.num_samples_normalize = int(
@@ -143,8 +169,8 @@ def _normalize_and_clip(
         if len(current.shape) == 1:
             current = (
                 preprocessing.QuantileTransformer(n_quantiles=300)
-                    .fit(np.nan_to_num(previous))
-                    .transform(np.expand_dims(current, axis=0))[0, :]
+                .fit(np.nan_to_num(previous))
+                .transform(np.expand_dims(current, axis=0))[0, :]
             )
         else:
             current = (
@@ -156,41 +182,41 @@ def _normalize_and_clip(
         if len(current.shape) == 1:
             current = (
                 preprocessing.RobustScaler()
-                    .fit(np.nan_to_num(previous))
-                    .transform(np.expand_dims(current, axis=0))[0, :]
+                .fit(np.nan_to_num(previous))
+                .transform(np.expand_dims(current, axis=0))[0, :]
             )
         else:
             current = (
                 preprocessing.RobustScaler()
-                    .fit(np.nan_to_num(previous))
-                    .transform(current)
+                .fit(np.nan_to_num(previous))
+                .transform(current)
             )
 
     elif method == NORM_METHODS.MINMAX.value:
         if len(current.shape) == 1:
             current = (
                 preprocessing.MinMaxScaler()
-                    .fit(np.nan_to_num(previous))
-                    .transform(np.expand_dims(current, axis=0))[0, :]
+                .fit(np.nan_to_num(previous))
+                .transform(np.expand_dims(current, axis=0))[0, :]
             )
         else:
             current = (
                 preprocessing.MinMaxScaler()
-                    .fit(np.nan_to_num(previous))
-                    .transform(current)
+                .fit(np.nan_to_num(previous))
+                .transform(current)
             )
     elif method == NORM_METHODS.POWER.value:
         if len(current.shape) == 1:
             current = (
                 preprocessing.PowerTransformer()
-                    .fit(np.nan_to_num(previous))
-                    .transform(np.expand_dims(current, axis=0))[0, :]
+                .fit(np.nan_to_num(previous))
+                .transform(np.expand_dims(current, axis=0))[0, :]
             )
         else:
             current = (
                 preprocessing.PowerTransformer()
-                    .fit(np.nan_to_num(previous))
-                    .transform(current)
+                .fit(np.nan_to_num(previous))
+                .transform(current)
             )
     else:
         raise ValueError(

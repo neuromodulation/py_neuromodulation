@@ -33,7 +33,7 @@ dependencies = [
   "fooof",
   "imbalanced-learn",
   "matplotlib >= 3.3.4",
-  "mne >= 0.23.0",
+  "mne",
   "mne-bids >= 0.8",
   "mne-connectivity",
   "mrmr-selection",
@@ -49,7 +49,7 @@ dependencies = [
   "scikit-optimize",
   "scipy >= 1.7.1",
   "seaborn >= 0.11",
-  "xgboost",
+  "xgboost >= 1.6.1",
 ]
 
 [project.optional-dependencies]

@@ -19,6 +19,64 @@ class OscillatoryFeature(nm_features_abc.Feature):
         self.fband_names = list(settings["frequency_ranges_hz"].keys())
         self.f_ranges = list(settings["frequency_ranges_hz"].values())
 
+    @staticmethod
+    def test_settings_osc(
+        s: dict,
+        ch_names: Iterable[str],
+        sfreq: int | float,
+        osc_feature_name: str,
+    ):
+        assert (
+            fb[0] < sfreq / 2 and fb[1] < sfreq / 2
+            for fb in s["frequency_ranges_hz"].values()
+        ), (
+            "the frequency band ranges need to be smaller than the nyquist frequency"
+            f"got sfreq = {sfreq} and fband ranges {s['frequency_ranges_hz']}"
+        )
+
+        if osc_feature_name != "bandpass_filter_settings":
+            assert isinstance(
+                s[osc_feature_name]["windowlength_ms"], int
+            ), f"windowlength_ms needs to be type int, got {s[osc_feature_name]['windowlength_ms']}"
+        else:
+            for seg_length in s[osc_feature_name][
+                "segment_lengths_ms"
+            ].values():
+                assert isinstance(
+                    seg_length, int
+                ), f"segment length has to be type int, got {seg_length}"
+        assert isinstance(
+            s[osc_feature_name]["log_transform"], bool
+        ), f"log_transform needs to be type bool, got {s[osc_feature_name]['log_transform']}"
+        assert isinstance(
+            s[osc_feature_name]["kalman_filter"], bool
+        ), f"kalman_filter needs to be type bool, got {s[osc_feature_name]['kalman_filter']}"
+
+        if s[osc_feature_name]["kalman_filter"] is True:
+            nm_kalmanfilter.test_kf_settings(s, ch_names, sfreq)
+
+        assert isinstance(s["frequency_ranges_hz"], dict)
+
+        assert (
+            isinstance(value, list)
+            for value in s["frequency_ranges_hz"].values()
+        )
+        assert (len(value) == 2 for value in s["frequency_ranges_hz"].values())
+
+        assert (
+            isinstance(value[0], list)
+            for value in s["frequency_ranges_hz"].values()
+        )
+
+        assert (
+            len(value[0]) == 2 for value in s["frequency_ranges_hz"].values()
+        )
+
+        assert (
+            isinstance(value[1], (float, int))
+            for value in s["frequency_ranges_hz"].values()
+        )
+
     def init_KF(self, feature: str) -> None:
         for f_band in self.s["kalman_filter_settings"]["frequency_bands"]:
             for channel in self.ch_names:
@@ -67,6 +125,10 @@ class FFT(OscillatoryFeature):
                 feature_name = "_".join([ch_name, "fft", fband])
                 self.feature_params.append((ch_idx, feature_name, idx_range))
 
+    @staticmethod
+    def test_settings(s: dict, ch_names: Iterable[str], sfreq: int | float):
+        OscillatoryFeature.test_settings_osc(s, ch_names, sfreq, "fft_settings")
+
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         data = data[:, self.window_samples :]
         Z = np.abs(fft.rfft(data))
@@ -103,6 +165,12 @@ class STFT(OscillatoryFeature):
                 feature_name = "_".join([ch_name, "stft", fband])
                 self.feature_params.append((ch_idx, feature_name, f_range))
 
+    @staticmethod
+    def test_settings(s: dict, ch_names: Iterable[str], sfreq: int | float):
+        OscillatoryFeature.test_settings_osc(
+            s, ch_names, sfreq, "stft_settings"
+        )
+
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         f, _, Zxx = signal.stft(
             data,
@@ -127,7 +195,11 @@ class STFT(OscillatoryFeature):
 
 class BandPower(OscillatoryFeature):
     def __init__(
-        self, settings: dict, ch_names: Iterable[str], sfreq: float, use_kf: bool = None
+        self,
+        settings: dict,
+        ch_names: Iterable[str],
+        sfreq: float,
+        use_kf: bool = None,
     ) -> None:
         super().__init__(settings, ch_names, sfreq)
         bp_settings = self.s["bandpass_filter_settings"]
@@ -141,7 +213,9 @@ class BandPower(OscillatoryFeature):
 
         self.log_transform = bp_settings["log_transform"]
 
-        if use_kf is True or (use_kf is None and bp_settings["kalman_filter"] is True):
+        if use_kf is True or (
+            use_kf is None and bp_settings["kalman_filter"] is True
+        ):
             self.init_KF("bandpass_activity")
 
         bp_features = ["activity", "mobility", "complexity"]
@@ -170,6 +244,43 @@ class BandPower(OscillatoryFeature):
                                 feature_name,
                             )
                         )
+
+    @staticmethod
+    def test_settings(s: dict, ch_names: Iterable[str], sfreq: int | float):
+        OscillatoryFeature.test_settings_osc(
+            s, ch_names, sfreq, "bandpass_filter_settings"
+        )
+
+        assert (
+            isinstance(value, bool)
+            for value in s["bandpass_filter_settings"][
+                "bandpower_features"
+            ].values()
+        )
+
+        assert any(
+            value is True
+            for value in s["bandpass_filter_settings"][
+                "bandpower_features"
+            ].values()
+        ), "Set at least one bandpower_feature to True."
+
+        for fband_name, seg_length_fband in s["bandpass_filter_settings"]["segment_lengths_ms"].items():
+            assert isinstance(seg_length_fband, int), (
+                f"bandpass segment_lengths_ms for {fband_name} "
+                f"needs to be of type int, got {seg_length_fband}"
+            )
+
+            assert seg_length_fband <= s["segment_length_features_ms"], (
+                f"segment length {seg_length_fband} needs to be smaller than "
+                f" s['segment_length_features_ms'] = {s['segment_length_features_ms']}"
+            )
+ 
+        for fband_name in list(s["frequency_ranges_hz"].keys()):
+            assert fband_name in list(s["bandpass_filter_settings"]["segment_lengths_ms"].keys()), (
+                f"frequency range {fband_name} "
+                "needs to be defined in s['bandpass_filter_settings']['segment_lengths_ms']"
+            )
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
 

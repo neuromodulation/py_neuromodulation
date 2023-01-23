@@ -23,8 +23,10 @@ _PathLike = str | os.PathLike
 
 class Preprocessor(Protocol):
     def process(self, data: np.ndarray) -> np.ndarray:
-        ...
+        pass
 
+    def test_settings(self, settings: dict):
+        ...
 
 _PREPROCESSING_CONSTRUCTORS = [
     "notch_filter",

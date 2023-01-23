@@ -118,9 +118,7 @@ class Feature_Reader:
                 if self.sidecar["sess_right"] is True and "LEFT" in target_:
                     target = target_
                     continue
-                elif (
-                    self.sidecar["sess_right"] is False and "RIGHT" in target_
-                ):
+                elif self.sidecar["sess_right"] is False and "RIGHT" in target_:
                     target = target_
                     continue
                 if target_ == target_clean[-1]:
@@ -193,15 +191,17 @@ class Feature_Reader:
     def set_target_ch(self, ch_name: str) -> None:
         self.label = ch_name
 
-    def normalize_features(self, ) -> pd.DataFrame:
+    def normalize_features(
+        self,
+    ) -> pd.DataFrame:
         """Normalize feature_arr feature columns
 
         Returns:
             pd.DataFrame: z-scored feature_arr
         """
-        cols_norm = [c for c in self.feature_arr.columns if 'time' not in c]
+        cols_norm = [c for c in self.feature_arr.columns if "time" not in c]
         feature_arr_norm = stats.zscore(self.feature_arr[cols_norm])
-        feature_arr_norm['time'] = self.feature_arr['time']
+        feature_arr_norm["time"] = self.feature_arr["time"]
         return feature_arr_norm
 
     def plot_cort_projection(self) -> None:
@@ -310,14 +310,21 @@ class Feature_Reader:
         time_limit_high_s: float = None,
         normalize: bool = True,
         save: bool = False,
-        title='all_feature_plt.pdf',
+        title="all_feature_plt.pdf",
         ytick_labelsize: int = 10,
         clim_low: float = None,
         clim_high: float = None,
-        ):
+    ):
 
         if ch_used is not None:
-            col_used = [c for c in self.feature_arr.columns if c.startswith(ch_used) or c == 'time' or 'LABEL' in c or 'MOV' in c]
+            col_used = [
+                c
+                for c in self.feature_arr.columns
+                if c.startswith(ch_used)
+                or c == "time"
+                or "LABEL" in c
+                or "MOV" in c
+            ]
             df = self.feature_arr[col_used[::-1]]
         else:
             df = self.feature_arr[self.feature_arr.columns[::-1]]
@@ -333,14 +340,11 @@ class Feature_Reader:
             feature_file=self.feature_file,
             OUT_PATH=self.feature_dir,
             clim_low=clim_low,
-            clim_high=clim_high
+            clim_high=clim_high,
         )
 
-
     @staticmethod
-    def get_performace_sub_strip(
-        performance_sub: dict, plt_grid: bool = False
-    ):
+    def get_performace_sub_strip(performance_sub: dict, plt_grid: bool = False):
 
         ecog_strip_performance = []
         ecog_coords_strip = []
@@ -357,9 +361,7 @@ class Feature_Reader:
                 )
             elif plt_grid is True and "gridcortex_" in ch:
                 cortex_grid.append(performance_sub[ch]["coord"])
-                grid_performance.append(
-                    performance_sub[ch]["performance_test"]
-                )
+                grid_performance.append(performance_sub[ch]["performance_test"])
 
         if len(ecog_coords_strip) > 0:
             ecog_coords_strip = np.vstack(ecog_coords_strip)
@@ -849,9 +851,7 @@ class Feature_Reader:
                 len([key_ for key_ in obj_read.keys() if "InnerCV_" in key_])
                 > 0
             ):
-                read_ML_performances(
-                    obj_read, obj_write, set_inner_CV_res=True
-                )
+                read_ML_performances(obj_read, obj_write, set_inner_CV_res=True)
 
         if read_channels:
 
@@ -872,9 +872,9 @@ class Feature_Reader:
                                 self.sidecar["coords"][cortex_loc]["ch_names"]
                             ):
                                 if ch.startswith(ch_name_coord):
-                                    coords = self.sidecar["coords"][
-                                        cortex_loc
-                                    ]["positions"][ch_name_coord_idx]
+                                    coords = self.sidecar["coords"][cortex_loc][
+                                        "positions"
+                                    ][ch_name_coord_idx]
                                     coords_exist = True  # optimally break out of the two loops...
                         if coords_exist is False:
                             coords = None
