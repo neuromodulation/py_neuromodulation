@@ -129,9 +129,6 @@ class LSLWriter:
                 self._num_sample_sets_per_sample_data_block = int(
                     64000 / size_one_sample_set
                 )
-            print(
-                "source_id: ", "tmsi-" + str(self.device.info.dr_serial_number)
-            )
             # provide LSL with metadata
             info = StreamInfo(
                 self._name,
@@ -142,14 +139,11 @@ class LSLWriter:
                 "tmsi-" + str(self.device.info.dr_serial_number),
             )
             chs_appended = []
-            ids_appended = []
             chns = info.desc().append_child("channels")
             for idx, ch in enumerate(self.device.channels):  # active channels
                 ch_name = ch.name
-                print(f"{ch.name = }")
                 if ch_name in chs_appended:
                     ch_name = f"{ch_name}_2"
-                print(f"{ch_name = }")
 
                 chn = chns.append_child("channel")
                 chn.append_child_value("label", ch_name)
@@ -164,8 +158,6 @@ class LSLWriter:
                         "type", str(ch.type).replace("ChannelType.", "")
                     )
                 chs_appended.append(ch_name)
-                # ids_appended.append(id)
-            print(f"{chs_appended = }")
             info.desc().append_child_value("manufacturer", "TMSi")
             sync = info.desc().append_child("synchronization")
             sync.append_child_value(
