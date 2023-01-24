@@ -142,3 +142,5 @@ dmypy.json
 *.p
 
 .pdf
+
+sphinx/sub/*

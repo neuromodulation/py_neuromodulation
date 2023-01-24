@@ -4,8 +4,7 @@
     "preprocessing": [
         "raw_resampling",
         "notch_filter",
-        "re_referencing",
-        "raw_normalization"
+        "re_referencing"
     ],
     "documentation_preprocessing_options": [
         "raw_resampling",
@@ -29,8 +28,8 @@
     },
     "postprocessing": {
         "feature_normalization": true,
-        "project_cortex": true,
-        "project_subcortex": true
+        "project_cortex": false,
+        "project_subcortex": false
     },
     "raw_resampling_settings": {
         "resample_freq_hz": 1000

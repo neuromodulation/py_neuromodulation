@@ -1,0 +1,280 @@
+{
+    "sampling_rate_features_hz": 10,
+    "segment_length_features_ms": 1000,
+    "preprocessing": [
+        "notch_filter",
+        "re_referencing"
+    ],
+    "documentation_preprocessing_options": [
+        "raw_resampling",
+        "notch_filter",
+        "re_referencing",
+        "raw_normalization"
+    ],
+    "features": {
+        "raw_hjorth": false,
+        "return_raw": false,
+        "bandpass_filter": false,
+        "stft": false,
+        "fft": true,
+        "sharpwave_analysis": false,
+        "coherence": false,
+        "fooof": false,
+        "nolds": false,
+        "bursts": false,
+        "linelength": false,
+        "mne_connectivity": false
+    },
+    "postprocessing": {
+        "feature_normalization": true,
+        "project_cortex": false,
+        "project_subcortex": false
+    },
+    "raw_resampling_settings": {
+        "resample_freq_hz": 1000
+    },
+    "documentation_normalization_options": [
+        "mean",
+        "median",
+        "zscore",
+        "zscore-median",
+        "quantile",
+        "power",
+        "robust",
+        "minmax"
+    ],
+    "raw_normalization_settings": {
+        "normalization_time_s": 30,
+        "normalization_method": "zscore",
+        "clip": 3
+    },
+    "feature_normalization_settings": {
+        "normalization_time_s": 30,
+        "normalization_method": "zscore",
+        "clip": 3
+    },
+    "frequency_ranges_hz": {
+        "theta": [
+            4,
+            8
+        ],
+        "alpha": [
+            8,
+            12
+        ],
+        "low beta": [
+            13,
+            20
+        ],
+        "high beta": [
+            20,
+            35
+        ],
+        "low gamma": [
+            60,
+            80
+        ],
+        "high gamma": [
+            90,
+            200
+        ],
+        "HFA": [
+            200,
+            400
+        ]
+    },
+    "fft_settings": {
+        "windowlength_ms": 1000,
+        "log_transform": true,
+        "kalman_filter": false
+    },
+    "stft_settings": {
+        "windowlength_ms": 500,
+        "log_transform": true,
+        "kalman_filter": false
+    },
+    "bandpass_filter_settings": {
+        "segment_lengths_ms": {
+            "theta": 1000,
+            "alpha": 500,
+            "low beta": 333,
+            "high beta": 333,
+            "low gamma": 100,
+            "high gamma": 100,
+            "HFA": 100
+        },
+        "bandpower_features": {
+            "activity": true,
+            "mobility": false,
+            "complexity": false
+        },
+        "log_transform": true,
+        "kalman_filter": false
+    },
+    "kalman_filter_settings": {
+        "Tp": 0.1,
+        "sigma_w": 0.7,
+        "sigma_v": 1,
+        "frequency_bands": [
+            "theta",
+            "alpha",
+            "low beta",
+            "high beta",
+            "low gamma",
+            "high gamma",
+            "HFA"
+        ]
+    },
+    "burst_settings": {
+        "threshold": 75,
+        "time_duration_s": 30,
+        "frequency_bands": [
+            "low beta",
+            "high beta",
+            "low gamma"
+        ],
+        "burst_features": {
+            "duration": true,
+            "amplitude": true,
+            "burst_rate_per_s": true,
+            "in_burst": true
+        }
+    },
+    "sharpwave_analysis_settings": {
+        "sharpwave_features": {
+            "peak_left": false,
+            "peak_right": false,
+            "trough": false,
+            "width": true,
+            "prominence": true,
+            "interval": true,
+            "decay_time": true,
+            "rise_time": true,
+            "sharpness": true,
+            "rise_steepness": true,
+            "decay_steepness": true,
+            "slope_ratio": true
+        },
+        "filter_ranges_hz": [
+            [
+                5,
+                80
+            ],
+            [
+                5,
+                30
+            ]
+        ],
+        "detect_troughs": {
+            "estimate": true,
+            "distance_troughs_ms": 10,
+            "distance_peaks_ms": 5
+        },
+        "detect_peaks": {
+            "estimate": true,
+            "distance_troughs_ms": 5,
+            "distance_peaks_ms": 10
+        },
+        "estimator": {
+            "mean": [
+                "width",
+                "decay_time",
+                "rise_time",
+                "rise_steepness",
+                "decay_steepness",
+                "sharpness",
+                "prominence",
+                "interval",
+                "slope_ratio"
+            ],
+            "median": null,
+            "max": [
+                "sharpness",
+                "prominence"
+            ],
+            "min": null,
+            "var": [
+                "width",
+                "decay_time",
+                "rise_time",
+                "rise_steepness",
+                "decay_steepness",
+                "sharpness",
+                "prominence",
+                "interval",
+                "slope_ratio"
+            ]
+        },
+        "apply_estimator_between_peaks_and_troughs": true
+    },
+    "project_cortex_settings": {
+        "max_dist_mm": 20
+    },
+    "project_subcortex_settings": {
+        "max_dist_mm": 5
+    },
+    "coherence": {
+        "channels": [
+            [
+                "STN_RIGHT_0",
+                "ECOG_RIGHT_0"
+            ]
+        ],
+        "frequency_bands": [
+            "high beta"
+        ],
+        "features": {
+            "mean_fband": true,
+            "max_fband": true,
+            "max_allfbands": true
+        },
+        "method": {
+            "coh": true,
+            "icoh": true
+        }
+    },
+    "fooof": {
+        "aperiodic": {
+            "exponent": true,
+            "offset": true
+        },
+        "periodic": {
+            "center_frequency": false,
+            "band_width": false,
+            "height_over_ap": false
+        },
+        "windowlength_ms": 800,
+        "peak_width_limits": [
+            0.5,
+            12
+        ],
+        "max_n_peaks": 3,
+        "min_peak_height": 0,
+        "peak_threshold": 2,
+        "freq_range_hz": [
+            2,
+            40
+        ],
+        "knee": true
+    },
+    "nolds_features": {
+        "sample_entropy": true,
+        "correlation_dimension": true,
+        "lyapunov_exponent": true,
+        "hurst_exponent": true,
+        "detrended_fluctutaion_analysis": true,
+        "data": {
+            "raw": true,
+            "frequency_bands": [
+                "theta",
+                "alpha",
+                "low beta",
+                "high gamma"
+            ]
+        }
+    },
+    "mne_connectiviy": {
+        "method": "plv",
+        "mode": "multitaper"
+    }
+}
