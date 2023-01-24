@@ -260,6 +260,9 @@ class Feature_Reader:
         normalize_data: bool = True,
         show_plot: bool = True,
         title: str = "Movement aligned features",
+        ytick_labelsize=None,
+        figsize_x: float = 8,
+        figsize_y: float = 8,
     ) -> None:
         # TODO: This does not work properly when we have bipolar rereferencing
 
@@ -268,7 +271,7 @@ class Feature_Reader:
             filtered_df = self.feature_arr[
                 self.filter_features(
                     self.feature_arr.columns, ch, list_feature_keywords
-                )
+                )[::-1]
             ]
         else:
             filtered_df = self.feature_arr[features_to_plt]
@@ -301,6 +304,9 @@ class Feature_Reader:
             OUT_PATH=self.feature_dir,
             feature_file=self.feature_file,
             str_title=title,
+            ytick_labelsize=ytick_labelsize,
+            figsize_x=figsize_x,
+            figsize_y=figsize_y
         )
 
     def plot_all_features(

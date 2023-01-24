@@ -222,9 +222,9 @@
             "offset": true
         },
         "periodic": {
-            "center_frequency": true,
-            "band_width": true,
-            "height_over_ap": true
+            "center_frequency": false,
+            "band_width": false,
+            "height_over_ap": false
         },
         "windowlength_ms": 800,
         "peak_width_limits": [

@@ -113,7 +113,7 @@ class Decoder:
         use_nested_cv: bool = False,
         threshold_score=True,
         mov_detection_threshold: float = 0.5,
-        TRAIN_VAL_SPLIT: bool = True,
+        TRAIN_VAL_SPLIT: bool = False,
         RUN_BAY_OPT: bool = False,
         STACK_FEATURES_N_SAMPLES: bool = False,
         time_stack_n_samples: int = 5,

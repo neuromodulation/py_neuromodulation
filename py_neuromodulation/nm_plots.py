@@ -2,6 +2,7 @@ from scipy import stats
 import os
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib import gridspec
 from typing import Optional
 import seaborn as sb
 import pandas as pd
@@ -69,7 +70,7 @@ def plot_df_subjects(
             bbox_inches="tight",
         )
     # plt.show()
-
+    return plt.gca() 
 
 def plot_epoch(
     X_epoch: np.array,
@@ -80,6 +81,7 @@ def plot_epoch(
     sfreq: int = 10,
     str_title: str = None,
     str_label: str = None,
+    ytick_labelsize: float = None
 ):
     if z_score is None:
         X_epoch = stats.zscore(
@@ -89,7 +91,11 @@ def plot_epoch(
     plt.figure(figsize=(6, 6))
     plt.subplot(211)
     plt.imshow(X_epoch, aspect="auto")
-    plt.yticks(np.arange(0, len(feature_names), 1), feature_names)
+    plt.yticks(
+        np.arange(0, len(feature_names), 1),
+        feature_names,
+        size=ytick_labelsize
+    )
     plt.xticks(
         np.arange(0, X_epoch.shape[1], 1),
         np.round(np.arange(-epoch_len / 2, epoch_len / 2, 1 / sfreq), 2),
@@ -110,7 +116,7 @@ def plot_epoch(
         label="mean target",
     )
     plt.legend()
-    plt.ylabel("target")
+    plt.ylabel("Target")
     plt.title(str_label)
     plt.xticks(
         np.arange(0, X_epoch.shape[1], 1),
@@ -214,9 +220,9 @@ def plot_corr_matrix(
     else:
         plt.title(title)
 
-    if len(feature_col_name) > 50:
-        plt.xticks([])
-        plt.yticks([])
+    #if len(feature_col_name) > 50:
+    #    plt.xticks([])
+    #    plt.yticks([])
 
     if save_plot and save_plot_name is None:
         plt_path = get_plt_path(
@@ -304,6 +310,9 @@ def plot_epochs_avg(
     OUT_PATH: str = None,
     feature_file: str = None,
     str_title: str = "Movement aligned features",
+    ytick_labelsize=None,
+    figsize_x: float = 8,
+    figsize_y: float = 8,
 ) -> None:
     # cut channel name of for axis + "_" for more dense plot
     if feature_names is None:
@@ -324,10 +333,11 @@ def plot_epochs_avg(
     if len(X_epoch_mean.shape) == 1:
         X_epoch_mean = np.expand_dims(X_epoch_mean, axis=0)
 
-    plt.figure(figsize=(6, 6))
-    plt.subplot(211)
+    plt.figure(figsize=(figsize_x, figsize_y))
+    gs = gridspec.GridSpec(2, 1, height_ratios=[2.5, 1]) 
+    plt.subplot(gs[0])
     plt.imshow(X_epoch_mean, aspect="auto")
-    plt.yticks(np.arange(0, len(feature_names), 1), feature_names)
+    plt.yticks(np.arange(0, len(feature_names), 1), feature_names, size=ytick_labelsize)
     plt.xticks(
         np.arange(0, X_epoch.shape[1], int(X_epoch.shape[1] / 10)),
         np.round(np.arange(-epoch_len / 2, epoch_len / 2, epoch_len / 10), 2),
@@ -339,7 +349,7 @@ def plot_epochs_avg(
         str_title += f" channel: {ch_name}"
     plt.title(str_title)
 
-    plt.subplot(212)
+    plt.subplot(gs[1])
     for i in range(y_epoch.shape[0]):
         plt.plot(y_epoch[i, :], color="black", alpha=0.4)
     plt.plot(
@@ -350,7 +360,7 @@ def plot_epochs_avg(
         label="mean target",
     )
     plt.legend()
-    plt.ylabel("target")
+    plt.ylabel("Target")
     plt.title(label_name)
     plt.xticks(
         np.arange(0, X_epoch.shape[1], int(X_epoch.shape[1] / 10)),
