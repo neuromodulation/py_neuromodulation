@@ -16,7 +16,7 @@ graphs:
         prop: source_id
         value: tmsi-0
         unit: ns
-        sync: null
+        sync: local
         channels: null
         max_samples: 10000
     - id: features_inlet
