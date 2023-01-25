@@ -155,11 +155,9 @@ class ProcessManager:
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         if isinstance(exc_type, BaseException):
-            print("Exception caught!")
-            # if not self._terminated:
-            #     self.terminate()
+            if not self._terminated:
+                self.terminate()
             return False
-        print("No exception caught!")
 
     def __post_init__(self) -> None:
         self.out_dir = pathlib.Path(self.out_dir)
@@ -239,8 +237,14 @@ class ProcessManager:
         )
         print("Unregistered consumer.")
 
-        self.lsl_stream.close()
-        self.file_writer.close()
+        try:
+            self.lsl_stream.close()
+        except Exception:
+            pass
+        try:
+            self.file_writer.close()
+        except Exception:
+            pass
         if self.device.status.state == TMSiSDK.DeviceState.sampling:
             self.device.stop_measurement()
             print("Controlled stopping TMSi measurement...")
@@ -251,7 +255,8 @@ class ProcessManager:
         # Check if all processes have terminated
         active_children = multiprocessing.active_children()
         if not active_children:
-            return
+            print("No alive processes found.")
+            sys.exit()
 
         # Wait for processes to temrinate on their own
         print(f"Alive processes: {list(p.name for p in active_children)}")
@@ -259,7 +264,8 @@ class ProcessManager:
         self.wait(active_children, timeout=5)
         active_children = multiprocessing.active_children()
         if not active_children:
-            return
+            print("No alive processes found.")
+            sys.exit()
 
         # Try flushing all queues
         print(f"Alive processes: {(p.name for p in active_children)}")
@@ -269,7 +275,8 @@ class ProcessManager:
         self.wait(active_children, timeout=5)
         active_children = multiprocessing.active_children()
         if not active_children:
-            return
+            print("No alive processes found.")
+            sys.exit()
 
         # Try killing all processes gracefully
         print(f"Alive processes: {(p.name for p in active_children)}")
@@ -283,7 +290,8 @@ class ProcessManager:
         self.wait(active_children, timeout=5)
         active_children = multiprocessing.active_children()
         if not active_children:
-            return
+            print("No alive processes found.")
+            sys.exit()
 
         # Try forcefully terminating processes
         print(f"Alive processes: {(p.name for p in active_children)}")
@@ -291,6 +299,7 @@ class ProcessManager:
         for process in active_children:
             if process.is_alive():
                 process.terminate()
+        sys.exit()
 
     @staticmethod
     def wait(processes, timeout=None) -> None:
