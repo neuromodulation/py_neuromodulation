@@ -19,7 +19,7 @@ _timezone = timezone.utc
 
 
 class Decoder(multiprocessing.Process):
-    """Decode motor intention in real time."""
+    """Make predictions in real time."""
 
     def __init__(
         self,
@@ -62,20 +62,6 @@ class Decoder(multiprocessing.Process):
     def run(self) -> None:
         labels = ["Prediction", "Probability", "Threshold"]
 
-        def _predict(data) -> None:
-            y = self._model.predict(np.expand_dims(data.to_numpy(), axis=0))
-
-            timestamp = np.datetime64(datetime.now(_timezone), "ns")
-            output = pd.DataFrame(
-                [[y >= self._threshold, y, self._threshold]],
-                columns=labels,
-                index=[timestamp],
-            )
-            self.outlet.push_sample(
-                x=list(output.to_numpy().squeeze()),
-                timestamp=timestamp.astype(float),
-            )
-
         info = pylsl.StreamInfo(
             name="Decoding",
             type="EEG",
@@ -86,7 +72,7 @@ class Decoder(multiprocessing.Process):
         channels = info.desc().append_child("channels")
         for label in labels:
             channels.append_child("channel").append_child_value("label", label)
-        self.outlet = pylsl.StreamOutlet(info)
+        outlet = pylsl.StreamOutlet(info)
         while True:
             try:
                 sample = self.queue_feat.get(timeout=10.0)
@@ -98,7 +84,19 @@ class Decoder(multiprocessing.Process):
                 if sample is None:
                     print("Found None value, terminating decoder process.")
                     break
-                _predict(sample)
+
+                # Predict
+                y = self._model.predict(np.expand_dims(sample.to_numpy(), 0))
+                timestamp = np.datetime64(datetime.now(_timezone), "ns")
+                output = pd.DataFrame(
+                    [[y >= self._threshold, y, self._threshold]],
+                    columns=labels,
+                    index=[timestamp],
+                )
+                outlet.push_sample(
+                    x=list(output.to_numpy().squeeze()),
+                    timestamp=timestamp.astype(float),
+                )
         try:
             self.queue_decoding.put(None, timeout=3.0)
         except queue.Full:
