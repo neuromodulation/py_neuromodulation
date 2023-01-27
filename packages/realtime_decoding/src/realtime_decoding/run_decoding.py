@@ -205,6 +205,7 @@ class ProcessManager:
             path_grids=None,
             line_noise=50,
             verbose=self.verbose,
+            training_enabled=True
         )
         decoder = realtime_decoding.Decoder(
             queue_decoding=self.queue_decoding,
