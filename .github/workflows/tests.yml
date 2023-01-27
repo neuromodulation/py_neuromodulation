@@ -1,4 +1,6 @@
 name: Tests
+env:
+  APP_DATA: NONE_VAL
 on:
   push:
     branches:
