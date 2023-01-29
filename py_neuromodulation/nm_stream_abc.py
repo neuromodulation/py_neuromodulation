@@ -30,6 +30,8 @@ class PNStream(ABC):
     model: base.BaseEstimator | None
     sess_right: bool | None
     verbose: bool
+    PATH_OUT: _PathLike | None
+    PATH_OUT_folder_name: _PathLike | None
 
     def __init__(
         self,
@@ -152,6 +154,8 @@ class PNStream(ABC):
         if os.path.exists(os.path.join(out_path_root, folder_name)) is False:
             os.makedirs(os.path.join(out_path_root, folder_name))
 
+        self.PATH_OUT = out_path_root
+        self.PATH_OUT_folder_name = folder_name
         self.save_sidecar(out_path_root, folder_name)
 
         if feature_arr is not None:

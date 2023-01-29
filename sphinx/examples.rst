@@ -8,5 +8,3 @@ Examples
    example_BIDS
    param
    example_gridPointProjection
-   example_normalization
-   example_rereferencing

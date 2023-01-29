@@ -37,7 +37,7 @@ Resampling
 Notch Filtering
 ~~~~~~~~~~~~~~~
 
-**notch_filer** is a simple setting that filters at the specified *line_noise* frequency supplied to *Stream* class.
+**notch_filer** is a simple setting that filters at the specified *line_noise* frequency supplied to the *Stream* class.
 
 Rereferencing
 ~~~~~~~~~~~~~
@@ -96,23 +96,23 @@ The *normalization_time* allows to specify a **past** time window that will be u
 Features
 ^^^^^^^^
 
-Features can be enabled and disabled in the *features* key: 
+Features can be enabled and disabled using the *features* key: 
 
 .. code-block:: json
 
    "features": 
    {
+           "fft": true,
+           "stft": true,
+           "bandpass_filter": true,
+           "sharpwave_analysis": true,
            "raw_hjorth": true,
            "return_raw": true,
-           "bandpass_filter": true,
-           "stft": true,
-           "fft": true,
-           "sharpwave_analysis": true,
            "coherence": true,
            "fooof": true,
-           "nolds": true,
            "bursts": true,
            "linelength": true,
+           "nolds": true,
            "mne_connectivity": true
    }
 
@@ -179,9 +179,12 @@ The settings can be specified as follows:
            ]
        }
 
-Individual frequency bands (specified in the *frequency_ranges_hz*\ ) can be selected for Kalman Filtering (see `"Real-time epileptic seizure prediction using AR models and support vector machines" <https://pubmed.ncbi.nlm.nih.gov/20172805/>`_ (Chisci et al 10) fir and example). 
+Individual frequency bands (specified in the *frequency_ranges_hz*\ ) can be selected for Kalman Filtering (see `Chisci et al '10 <https://pubmed.ncbi.nlm.nih.gov/20172805/>`_ for an example). 
 
-**bandpass_filter** enables band power feature estimation through precomputation of a FIR filter using the `mne.filter.create_filter <https://mne.tools/dev/generated/mne.filter.create_filter.html>`_ function. Settings are defined in such manner: 
+Bandpass filter
+"""""""""""""""
+
+**bandpass_filter** enables band power feature estimation through precomputation of a FIR filter using the `mne.filter.create_filter <https://mne.tools/dev/generated/mne.filter.create_filter.html>`_ function.
 
 .. code-block:: json
 
@@ -204,10 +207,13 @@ Individual frequency bands (specified in the *frequency_ranges_hz*\ ) can be sel
        "kalman_filter": false
    }
 
-The *segment_length_ms* parameter defines a time range in which FIR filtered data is used for feature estimation. Here for the theta frequency band the previous 1000 ms are used to estimate features based on the FIR filtered signal. This might be beneficial when using shorter frequency bands, e.g. gamma, where estimating band power in a range of e.g. 100 ms might result in a temporal more specified feature calculation. 
-A common way to estimate band power is to take the variance of FIR filtered data. This is equavilent to the activity `Hjorth <https://en.wikipedia.org/wiki/Hjorth_parameters>`_ parameter. The last key in the *bandpass_filter_settings* allows to take the *activity*\ , *mobility* and *complexity* Hjorth parameters as well. For estimating Hjorth parameters of the raw unfiltered signal, the **raw_hjorth** method can be enabled. 
+The *segment_length_ms* parameter defines a time range in which FIR filtered data is used for feature estimation. In this example, for the theta frequency band the previous 1000 ms are used to estimate features based on the FIR filtered signal. This might be beneficial when using shorter frequency bands, e.g. gamma, where estimating band power in a range of e.g. 100 ms might result in a temporal more specified feature calculation. 
+A common way to estimate band power is to take the variance of FIR filtered data. This is equavilent to the activity `Hjorth <https://en.wikipedia.org/wiki/Hjorth_parameters>`_ parameter. The Hjorth parameter *activity*\ , *mobility* and *complexity* can be computed on bandpass filtered data as well. For estimating all Hjorth parameters of the raw unfiltered signal, the **raw_hjorth** method can be enabled. 
 
-**sharpwave_analysis** allows for calculation of temporal sharpwave features. See `"Brain Oscillations and the Importance of Waveform Shape" <https://www.sciencedirect.com/science/article/abs/pii/S1364661316302182>`_ Cole et al 17 for a great motivation to use these features. Here, sharpwave features are estimated using a prior bandpass filter  between *filter_low_cutoff* and *filter_high_cutoff*. The sharpwave peak and trough features can be calculated, defined by the *estimate* key. According to a current data batch one or more sharpwaves can be detected. The subsequent feature is returned rather by the *mean, median, maximum, minimum or variance* as defined by the *estimator*. 
+Analyzing temporal waveform shape
+"""""""""""""""""""""""""""""""""
+
+**sharpwave_analysis** allows for calculation of temporal sharpwave features. See `"Brain Oscillations and the Importance of Waveform Shape" <https://www.sciencedirect.com/science/article/abs/pii/S1364661316302182>`_ Cole et al 17 for a great motivation to use these features. Here, sharpwave features are estimated using a prior bandpass filter  between within the *filter_low_cutoff* and *filter_high_cutoff* ranges. The sharpwave peak and trough features can be calculated, defined by the *estimate* key. According to a current data batch one or more temporal waveform events can be detected. The subsequent feature is returned rather by the *mean, median, maximum, minimum or variance* as defined by the *estimator*. 
 
 .. code-block:: json
 
@@ -263,11 +269,146 @@ A common way to estimate band power is to take the variance of FIR filtered data
 
 A separate tutorial on sharpwave features is provided in the documentation. 
 
-Next, raw signals can be returned, specifed by the **return_raw** method.
+Raw signals
+~~~~~~~~~~~
+
+Next, raw signals can be returned, specifed by the **return_raw** method. This can be useful for using e.g. normalizing, rereferencing or resampling before feeding data to a deep learining model.
+
+Characterization of spectral aperiodic component
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+There is also a wrapper around the `*\ *fooof* <https://fooof-tools.github.io/fooof/>`_ toolbox for characterizing the periodic and aperiodic fits. The periodic components will be reuturned with a *peak_idx*\ , the respective center frequency, bandwith, and height over the aperiodic component can be returned. fooof specific parameters, e.g. *knee* or *max_n_peaks* are passed to the fooof object as well:
+
+.. code-block:: json
+
+   "fooof": {
+       "aperiodic": {
+           "exponent": true,
+           "offset": true
+       },
+       "periodic": {
+           "center_frequency": false,
+           "band_width": false,
+           "height_over_ap": false
+       },
+       "windowlength_ms": 800,
+       "peak_width_limits": [
+           0.5,
+           12
+       ],
+       "max_n_peaks": 3,
+       "min_peak_height": 0,
+       "peak_threshold": 2,
+       "freq_range_hz": [
+           2,
+           40
+       ],
+       "knee": true
+   }
+
+Nonlinear measres for dynamical systems (nolds)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**nolds** *eatures are estimates as a direct wrapper around the nolds toolbox: https://github.com/CSchoel/nolds. Features can be estimated for raw data, or data being filtered in different frequency bands. The computations time for this feature modality is however very high. For real time applications it is currently not advised.  
+
+.. code-block:: json
+
+       "nolds_features": {
+           "sample_entropy": true,
+           "correlation_dimension": true,
+           "lyapunov_exponent": true,
+           "hurst_exponent": true,
+           "detrended_fluctutaion_analysis": true,
+           "data": {
+               "raw": true,
+               "frequency_bands": [
+                   "theta",
+                   "alpha",
+                   "low beta",
+                   "high beta",
+                   "low gamma",
+                   "high gamma",
+                   "HFA"
+               ]
+           }
+       }
+
+coherence
+~~~~~~~~~
+
+**coherence** can be calculated for channel pairs that are passed as a list of lists. Each list contains the in *nm_channels* specified channels. The mean and/or maximum in a specific frequency band can be calculated for a specific frequency band. The maximum for all frequency bands can also be estimated:
+
+.. code-block:: json
+
+   "coherence": {
+       "channels": [
+           [
+               "STN_RIGHT_0",
+               "ECOG_RIGHT_0"
+           ]
+       ],
+       "frequency_bands": [
+           "high beta"
+       ],
+       "features": {
+           "mean_fband": true,
+           "max_fband": true,
+           "max_allfbands": true
+       },
+       "method": {
+           "coh": true,
+           "icoh": true
+       }
+   }
+
+Bursts
+~~~~~~
+
+**bursting** features are strongly investigated in the context of invasive electrophysiology. Here different burst features for different frequency bands with a different time duration for threshold estimation can be specified:
+
+.. code-block:: json
+
+   "burst_settings": {
+       "threshold": 75,
+       "time_duration_s": 30,
+       "frequency_bands": [
+           "low beta",
+           "high beta",
+           "low gamma"
+       ],
+       "burst_features": {
+           "duration": true,
+           "amplitude": true,
+           "burst_rate_per_s": true,
+           "in_burst": true
+       }
+   }
+
+MNE-connectivity
+~~~~~~~~~~~~~~~~
+
+**MNE-connectivity** is a direct wrapper around the mne_connectivity `spectral_connectivity_epochs <https://mne.tools/mne-connectivity/stable/generated/mne_connectivity.spectral_connectivity_epochs.html>`_ function.
+
+.. code-block:: json
+
+   "mne_connectiviy": {
+       "method": "plv",
+       "mode": "multitaper"
+   }
 
 Postprocessing
 ^^^^^^^^^^^^^^
 
-**projection_cortex** and **projection_subcortex** allows then feature projection of individual channels to a common subcortical or cortical grid, defined by *grid_cortex.tsv* and *subgrid_cortex.tsv*. For both projections a *max_dist* parameter needs to be specified, in which data is linearly interpolated, weighted by their inverse grid point distance. 
+Projection
+~~~~~~~~~~
 
-Additionally **pdc** and **dtf** enable partical directed coherence and direct transfer function, to enable connectiviy features for certain *frequency_bands* between specific channels. 
+**projection_cortex** and **projection_subcortex** allows feature projection of individual channels to a common subcortical or cortical grid, defined by *grid_cortex.tsv* and *subgrid_cortex.tsv* files. For both projections a *max_dist_mm* parameter needs to be specified, in which data is linearly interpolated, weighted by their inverse grid point distance. 
+
+.. code-block:: json
+
+   "project_cortex_settings": {
+       "max_dist_mm": 20
+   },
+   "project_subcortex_settings": {
+       "max_dist_mm": 5
+   }
