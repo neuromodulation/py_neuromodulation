@@ -21,7 +21,6 @@ def setup_osc_settings(
 
     return settings
 
-
 def test_fft_wrong_logtransform_param_init():
 
     ch_names = ["ch1", "ch2", "ch3", "ch4"]

@@ -59,6 +59,36 @@ class Burst(nm_features_abc.Feature):
 
         self.data_buffer = init_ch_fband_dict()
 
+    def test_settings(
+        settings: dict,
+        ch_names: Iterable[str],
+        sfreq: int | float,
+    ):
+        assert (
+            isinstance(settings["burst_settings"]["threshold"], (float, int))
+        ), f"burst settings threshold needs to be type int or float, got: {settings['burst_settings']['threshold']}"
+        assert (
+            0 < settings["burst_settings"]["threshold"] < 100
+        ), f"burst setting threshold needs to be between 0 and 100, got: {settings['burst_settings']['threshold']}"
+        assert (
+            isinstance(settings["burst_settings"]["time_duration_s"], (float, int))
+        ), f"burst settings time_duration_s needs to be type int or float, got: {settings['burst_settings']['time_duration_s']}"
+        assert (
+            settings["burst_settings"]["time_duration_s"] > 0
+        ), f"burst setting time_duration_s needs to be greater than 0, got: {settings['burst_settings']['time_duration_s']}"
+
+        for fband_burst in settings["burst_settings"]["frequency_bands"]:
+            assert (
+                fband_burst in list(settings["frequency_ranges_hz"].keys())
+            ), f"bursting {fband_burst} needs to be defined in settings['frequency_ranges_hz']"
+
+        for burst_feature in settings["burst_settings"]["burst_features"].keys():
+            assert isinstance(
+                settings["burst_settings"]["burst_features"][burst_feature], bool
+            ), (
+                f"bursting feature {burst_feature} needs to be type bool, "
+                f"got: {settings['burst_settings']['burst_features'][burst_feature]}"
+            )
     def calc_feature(self, data: np.array, features_compute: dict) -> dict:
 
         # filter_data returns (n_channels, n_fbands, n_samples)
