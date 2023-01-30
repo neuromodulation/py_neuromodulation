@@ -33,6 +33,8 @@ class Features(multiprocessing.Process):
         verbose: bool,
         path_grids: str | None = None,
         line_noise: int | float | None = None,
+        training_samples: int = 60,
+        training_enabled: bool = False,
     ) -> None:
         super().__init__(name=f"{name}Process")
         self.interval = interval
@@ -76,6 +78,12 @@ class Features(multiprocessing.Process):
         self.outlet = None
         self._save_settings()
 
+        if training_enabled is True:
+            self.training_enabled = training_enabled
+            self.training_counter = 0
+            self.training_samples = training_samples
+            self.training_class = "MOVE"
+
     def _save_settings(self) -> None:
         # print("SAVING DATA ....")
         self.processor.nm_channels.to_csv(
@@ -117,6 +125,24 @@ class Features(multiprocessing.Process):
                     continue
                 features = self.processor.process(self.buffer[:].T)
                 timestamp = np.datetime64(datetime.utcnow(), "ns")
+
+                if self.training_enabled is True:
+                    self.training_counter += 1
+                    if self.training_counter < (self.training_samples) / 2:
+                        self.training_counter = 0
+                        self.training_class = "REST"
+                    elif (
+                        self.training_counter < (self.training_samples) / 2
+                        and self.training_class == "REST"
+                    ):
+                        # save features and cancel session
+                        # self.queue_features.put(None, timeout=3.0) ?
+                        # self.clear_queue() ?
+                        print(f"Terminating: {self.name} - Training finished")
+                        break
+                    else:
+                        print(self.training_class)
+                        features["label"] = self.training_class
                 try:
                     self.queue_features.put(features, timeout=self.interval)
                 except queue.Full:
