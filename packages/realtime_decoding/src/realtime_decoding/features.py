@@ -78,11 +78,16 @@ class Features(multiprocessing.Process):
         self.outlet = None
         self._save_settings()
 
+        print(f"value of training enabled: {training_enabled}")
+        self.training_enabled = training_enabled
         if training_enabled is True:
-            self.training_enabled = training_enabled
+            print("training is enabled")
             self.training_counter = 0
             self.training_samples = training_samples
-            self.training_class = "MOVE"
+            self.training_class = 0 # REST
+
+            # the labels are sent as an additional LSL channel
+            self.n_feats_total = self.n_feats_total + 1
 
     def _save_settings(self) -> None:
         # print("SAVING DATA ....")
@@ -128,21 +133,28 @@ class Features(multiprocessing.Process):
 
                 if self.training_enabled is True:
                     self.training_counter += 1
-                    if self.training_counter < (self.training_samples) / 2:
+                    if (self.training_counter > (self.training_samples) / 2
+                        and self.training_class == 0
+                    ):
+                        # REST
                         self.training_counter = 0
-                        self.training_class = "REST"
+                        self.training_class = 1
                     elif (
-                        self.training_counter < (self.training_samples) / 2
-                        and self.training_class == "REST"
+                        self.training_counter > (self.training_samples) / 2
+                        and self.training_class == 1
                     ):
                         # save features and cancel session
                         # self.queue_features.put(None, timeout=3.0) ?
                         # self.clear_queue() ?
+                        # MOVE
                         print(f"Terminating: {self.name} - Training finished")
                         break
+                    if self.training_class == 0:
+                        print("REST")
                     else:
-                        print(self.training_class)
-                        features["label"] = self.training_class
+                        print("MOV")
+                    print(f"training counter: {self.training_counter}")
+                    features["label_train"] = self.training_class
                 try:
                     self.queue_features.put(features, timeout=self.interval)
                 except queue.Full:
