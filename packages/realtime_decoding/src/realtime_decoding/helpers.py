@@ -1,4 +1,7 @@
+import os
 import queue
+
+_PathLike = str | os.PathLike
 
 
 def clear_queue(q) -> None:

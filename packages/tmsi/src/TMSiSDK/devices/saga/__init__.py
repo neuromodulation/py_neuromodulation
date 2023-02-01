@@ -30,4 +30,5 @@ limitations under the License.
 
 """
 from .saga_device import SagaDevice
+from .xml_saga_config import xml_write_config, xml_read_config
 from . import saga_device, saga_types, xml_saga_config

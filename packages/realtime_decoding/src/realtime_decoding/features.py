@@ -1,22 +1,20 @@
-from datetime import datetime
 import json
 import multiprocessing
 import multiprocessing.synchronize
 import pathlib
-import os
 import queue
 import tkinter
 import tkinter.filedialog
+from datetime import datetime
 
 import numpy as np
-import realtime_decoding
+import py_neuromodulation as nm
 import pylsl
 from numpy_ringbuffer import RingBuffer
 
-import py_neuromodulation as nm
+import realtime_decoding
 
-
-_Pathlike = str | os.PathLike
+from .helpers import _PathLike
 
 
 class Features(multiprocessing.Process):
@@ -31,12 +29,14 @@ class Features(multiprocessing.Process):
         interval: float,
         queue_raw: multiprocessing.Queue,
         queue_features: multiprocessing.Queue,
-        out_dir: _Pathlike,
+        out_dir: _PathLike,
         verbose: bool,
         path_grids: str | None = None,
         line_noise: int | float | None = None,
+        training_samples: int = 60,
+        training_enabled: bool = False,
     ) -> None:
-        super().__init__(name=f"{name}Thread")
+        super().__init__(name=f"{name}Process")
         self.interval = interval
         self.sfreq = sfreq
         self.queue_raw = queue_raw
@@ -45,8 +45,7 @@ class Features(multiprocessing.Process):
         self.out_dir = pathlib.Path(out_dir)
         self.finished = multiprocessing.Event()
 
-        root = tkinter.Tk()
-        paths = {}
+        self.paths = {}
         for keyword, ftype in (
             ("nm_channels", "csv"),
             ("nm_settings", "json"),
@@ -55,13 +54,12 @@ class Features(multiprocessing.Process):
                 title=f"Select {keyword} file",
                 filetypes=(("Files", f"*.{ftype}*"),),
             )
-            paths[keyword] = pathlib.Path(filename)
-        root.withdraw()
+            self.paths[keyword] = pathlib.Path(filename)
 
         self.processor = nm.nm_run_analysis.DataProcessor(
             sfreq=self.sfreq,
-            settings=paths["nm_settings"],
-            nm_channels=paths["nm_channels"],
+            settings=self.paths["nm_settings"],
+            nm_channels=self.paths["nm_channels"],
             line_noise=line_noise,
             path_grids=path_grids,
             verbose=self.verbose,
@@ -72,7 +70,7 @@ class Features(multiprocessing.Process):
             dtype=(float, self.num_channels),  # type: ignore
             allow_overwrite=True,
         )
-        # Channels x Number of different features
+        # Channels * Number of different features
         self.n_feats_total = (
             sum(self.processor.nm_channels["used"] == 1) * n_feats
         )
@@ -80,13 +78,26 @@ class Features(multiprocessing.Process):
         self.outlet = None
         self._save_settings()
 
+        print(f"value of training enabled: {training_enabled}")
+        self.training_enabled = training_enabled
+        if training_enabled is True:
+            print("training is enabled")
+            self.training_counter = 0
+            self.training_samples = training_samples
+            self.training_class = 0 # REST
+
+            # the labels are sent as an additional LSL channel
+            self.n_feats_total = self.n_feats_total + 1
+
     def _save_settings(self) -> None:
         # print("SAVING DATA ....")
         self.processor.nm_channels.to_csv(
-            self.out_dir / self.path_nm_channels.name, index=False
+            self.out_dir / self.paths["nm_channels"].name, index=False
         )
         with open(
-            self.out_dir / self.path_nm_settings.name, "w", encoding="utf-8"
+            self.out_dir / self.paths["nm_settings"].name,
+            "w",
+            encoding="utf-8",
         ) as outfile:
             json.dump(self.processor.settings, outfile)
 
@@ -103,6 +114,7 @@ class Features(multiprocessing.Process):
             else:
                 # print("Got data")
                 if sd is None:
+                    print("Found None value, terminating features process.")
                     break
                 if self.verbose:
                     print("Found raw input sample.")
@@ -118,6 +130,31 @@ class Features(multiprocessing.Process):
                     continue
                 features = self.processor.process(self.buffer[:].T)
                 timestamp = np.datetime64(datetime.utcnow(), "ns")
+
+                if self.training_enabled is True:
+                    self.training_counter += 1
+                    if (self.training_counter > (self.training_samples) / 2
+                        and self.training_class == 0
+                    ):
+                        # REST
+                        self.training_counter = 0
+                        self.training_class = 1
+                    elif (
+                        self.training_counter > (self.training_samples) / 2
+                        and self.training_class == 1
+                    ):
+                        # save features and cancel session
+                        # self.queue_features.put(None, timeout=3.0) ?
+                        # self.clear_queue() ?
+                        # MOVE
+                        print(f"Terminating: {self.name} - Training finished")
+                        break
+                    if self.training_class == 0:
+                        print("REST")
+                    else:
+                        print("MOV")
+                    print(f"training counter: {self.training_counter}")
+                    features["label_train"] = self.training_class
                 try:
                     self.queue_features.put(features, timeout=self.interval)
                 except queue.Full:
