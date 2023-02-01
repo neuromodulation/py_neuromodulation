@@ -132,29 +132,10 @@ class Features(multiprocessing.Process):
                 timestamp = np.datetime64(datetime.utcnow(), "ns")
 
                 if self.training_enabled is True:
-                    self.training_counter += 1
-                    if (self.training_counter > (self.training_samples) / 2
-                        and self.training_class == 0
-                    ):
-                        # REST
-                        self.training_counter = 0
-                        self.training_class = 1
-                    elif (
-                        self.training_counter > (self.training_samples) / 2
-                        and self.training_class == 1
-                    ):
-                        # save features and cancel session
-                        # self.queue_features.put(None, timeout=3.0) ?
-                        # self.clear_queue() ?
-                        # MOVE
-                        print(f"Terminating: {self.name} - Training finished")
-                        break
-                    if self.training_class == 0:
-                        print("REST")
-                    else:
-                        print("MOV")
-                    print(f"training counter: {self.training_counter}")
-                    features["label_train"] = self.training_class
+
+                    # the analog channel data is stored in self.buffer
+                    # this channel can be added to the calculated features, and simply finished with escape
+                    features["label_train"] = self.buffer[24]  # get index from analog 
                 try:
                     self.queue_features.put(features, timeout=self.interval)
                 except queue.Full:

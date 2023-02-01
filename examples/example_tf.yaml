@@ -1,0 +1,12 @@
+graphs:
+  - id: OneMoreNode
+    nodes:
+    - id: random
+      module: timeflux.nodes.random
+      class: Random
+    - id: display_before
+      module: timeflux.nodes.debug
+      class: Display
+    edges:
+    - source: random
+      target: display_before

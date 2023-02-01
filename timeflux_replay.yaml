@@ -1,0 +1,25 @@
+graphs:
+  - id: ReplayGraph
+    nodes:
+    - id: ReplayNode
+      module: timeflux.nodes.hdf5
+      class: Replay
+      params:
+        filename: "sub-749_ses-EcogLfpMedOff01_task-RealtimeDecodingR_acq-StimOff_run-1_ieeg.hdf5"
+        speed: 1
+        resync: False
+        keys:
+         - "/prediction"
+        #  - "/prediction"
+    - id: ui
+      module: timeflux_ui.nodes.ui
+      class: UI
+    - id: debug
+      module: timeflux.nodes.debug
+      class: Display
+    edges:
+      - source: ReplayNode
+        target: ui:features
+      - source: ReplayNode
+        target: debug
+    rate: 1

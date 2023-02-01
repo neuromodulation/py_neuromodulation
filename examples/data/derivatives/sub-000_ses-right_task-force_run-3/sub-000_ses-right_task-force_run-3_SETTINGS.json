@@ -2,6 +2,7 @@
     "sampling_rate_features_hz": 10,
     "segment_length_features_ms": 1000,
     "preprocessing": [
+        "raw_resampling",
         "notch_filter",
         "re_referencing"
     ],
@@ -17,11 +18,11 @@
         "bandpass_filter": false,
         "stft": false,
         "fft": true,
-        "sharpwave_analysis": false,
-        "coherence": false,
+        "sharpwave_analysis": true,
+        "coherence": true,
         "fooof": false,
         "nolds": false,
-        "bursts": false,
+        "bursts": true,
         "linelength": false,
         "mne_connectivity": false
     },
@@ -142,9 +143,9 @@
     },
     "sharpwave_analysis_settings": {
         "sharpwave_features": {
-            "peak_left": false,
-            "peak_right": false,
-            "trough": false,
+            "peak_left": true,
+            "peak_right": true,
+            "trough": true,
             "width": true,
             "prominence": true,
             "interval": true,
@@ -177,33 +178,26 @@
         },
         "estimator": {
             "mean": [
+                "peak_left",
+                "peak_right",
+                "trough",
                 "width",
-                "decay_time",
-                "rise_time",
-                "rise_steepness",
-                "decay_steepness",
-                "sharpness",
                 "prominence",
                 "interval",
+                "decay_time",
+                "rise_time",
+                "sharpness",
+                "rise_steepness",
+                "decay_steepness",
                 "slope_ratio"
             ],
             "median": null,
             "max": [
-                "sharpness",
-                "prominence"
+                "prominence",
+                "sharpness"
             ],
             "min": null,
-            "var": [
-                "width",
-                "decay_time",
-                "rise_time",
-                "rise_steepness",
-                "decay_steepness",
-                "sharpness",
-                "prominence",
-                "interval",
-                "slope_ratio"
-            ]
+            "var": null
         },
         "apply_estimator_between_peaks_and_troughs": true
     },
@@ -216,12 +210,13 @@
     "coherence": {
         "channels": [
             [
-                "STN_RIGHT_0",
+                "LFP_RIGHT_0",
                 "ECOG_RIGHT_0"
             ]
         ],
         "frequency_bands": [
-            "high beta"
+            "high beta",
+            "low gamma"
         ],
         "features": {
             "mean_fband": true,
@@ -269,7 +264,10 @@
                 "theta",
                 "alpha",
                 "low beta",
-                "high gamma"
+                "high beta",
+                "low gamma",
+                "high gamma",
+                "HFA"
             ]
         }
     },
