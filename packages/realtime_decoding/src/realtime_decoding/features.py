@@ -135,7 +135,9 @@ class Features(multiprocessing.Process):
 
                     # the analog channel data is stored in self.buffer
                     # this channel can be added to the calculated features, and simply finished with escape
-                    features["label_train"] = self.buffer[24]  # get index from analog 
+                    #print(self.buffer[:].T)
+                    #print(f"buffer shape: {self.buffer.shape}")
+                    features["label_train"] = np.mean(self.buffer[-409:, 24])  # get index from analog 
                 try:
                     self.queue_features.put(features, timeout=self.interval)
                 except queue.Full:

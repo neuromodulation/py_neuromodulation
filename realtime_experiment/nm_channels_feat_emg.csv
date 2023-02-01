@@ -16,8 +16,8 @@ EEGCzTM,None,0,0,dbs,good,EEG_Cz_TM
 EEGFzTM,None,0,0,dbs,good,EEG_Fz_TM
 EMGRBRTM,None,0,0,dbs,good,EMG_R_BR_TM
 EMGLBRTM,None,0,0,dbs,good,EMG_L_BR_TM
-ECG,None,0,0,dbs,good,ECG
-X,None,1,0,dbs,good,ACC_R_X_D2_TM
+ECG,None,1,0,dbs,good,ECG
+X,None,0,0,dbs,good,ACC_R_X_D2_TM
 Y,None,0,0,dbs,good,ACC_R_Y_D2_TM
 Z,None,0,0,dbs,good,ACC_R_Z_D2_TM
 X,None,0,0,dbs,good,ACC_L_X_D2_TM
