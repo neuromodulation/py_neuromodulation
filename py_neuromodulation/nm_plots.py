@@ -17,9 +17,10 @@ def plot_df_subjects(
     hue=None,
     title="channel specific performances",
     PATH_SAVE: str = None,
+    figsize_tuple: tuple = (5, 3),
 ):
     alpha_box = 0.4
-    plt.figure(figsize=(5, 3), dpi=300)
+    plt.figure(figsize=figsize_tuple, dpi=300)
     sb.boxplot(
         x=x_col,
         y=y_col,
@@ -70,7 +71,8 @@ def plot_df_subjects(
             bbox_inches="tight",
         )
     # plt.show()
-    return plt.gca() 
+    return plt.gca()
+
 
 def plot_epoch(
     X_epoch: np.array,
@@ -81,7 +83,7 @@ def plot_epoch(
     sfreq: int = 10,
     str_title: str = None,
     str_label: str = None,
-    ytick_labelsize: float = None
+    ytick_labelsize: float = None,
 ):
     if z_score is None:
         X_epoch = stats.zscore(
@@ -92,9 +94,7 @@ def plot_epoch(
     plt.subplot(211)
     plt.imshow(X_epoch, aspect="auto")
     plt.yticks(
-        np.arange(0, len(feature_names), 1),
-        feature_names,
-        size=ytick_labelsize
+        np.arange(0, len(feature_names), 1), feature_names, size=ytick_labelsize
     )
     plt.xticks(
         np.arange(0, X_epoch.shape[1], 1),
@@ -210,7 +210,7 @@ def plot_corr_matrix(
         yticklabels=feature_col_name,
         vmin=cbar_vmin,
         vmax=cbar_vmax,
-        cmap="viridis"
+        cmap="viridis",
     )
     if title is None:
         if ch_name is not None:
@@ -220,7 +220,7 @@ def plot_corr_matrix(
     else:
         plt.title(title)
 
-    #if len(feature_col_name) > 50:
+    # if len(feature_col_name) > 50:
     #    plt.xticks([])
     #    plt.yticks([])
 
@@ -242,6 +242,7 @@ def plot_corr_matrix(
     if show_plot is False:
         plt.close()
     return plt.gca()
+
 
 def plot_feature_series_time(features) -> None:
     plt.imshow(features.T, aspect="auto")
@@ -334,10 +335,12 @@ def plot_epochs_avg(
         X_epoch_mean = np.expand_dims(X_epoch_mean, axis=0)
 
     plt.figure(figsize=(figsize_x, figsize_y))
-    gs = gridspec.GridSpec(2, 1, height_ratios=[2.5, 1]) 
+    gs = gridspec.GridSpec(2, 1, height_ratios=[2.5, 1])
     plt.subplot(gs[0])
     plt.imshow(X_epoch_mean, aspect="auto")
-    plt.yticks(np.arange(0, len(feature_names), 1), feature_names, size=ytick_labelsize)
+    plt.yticks(
+        np.arange(0, len(feature_names), 1), feature_names, size=ytick_labelsize
+    )
     plt.xticks(
         np.arange(0, X_epoch.shape[1], int(X_epoch.shape[1] / 10)),
         np.round(np.arange(-epoch_len / 2, epoch_len / 2, epoch_len / 10), 2),
@@ -408,9 +411,7 @@ def plot_grid_elec_3d(
 
     if ecog_strip is not None:
         strip_color = (
-            np.ones(ecog_strip.shape[0])
-            if strip_color is None
-            else strip_color
+            np.ones(ecog_strip.shape[0]) if strip_color is None else strip_color
         )
         _ = ax.scatter(
             ecog_strip[:, 0],
@@ -423,6 +424,7 @@ def plot_grid_elec_3d(
             marker="o",
         )
 
+
 def plot_all_features(
     df: pd.DataFrame,
     time_limit_low_s: float = None,
@@ -432,38 +434,34 @@ def plot_all_features(
     clim_low: float = None,
     clim_high: float = None,
     save: bool = False,
-    title='all_feature_plt.pdf',
-    OUT_PATH:str=None,
-    feature_file:str=None,
+    title="all_feature_plt.pdf",
+    OUT_PATH: str = None,
+    feature_file: str = None,
 ):
 
     if time_limit_high_s is not None:
-        df = df[df['time'] < time_limit_high_s*1000]
+        df = df[df["time"] < time_limit_high_s * 1000]
     if time_limit_low_s is not None:
-        df = df[df['time'] > time_limit_low_s*1000]
+        df = df[df["time"] > time_limit_low_s * 1000]
 
-    cols_plt = [c for c in df.columns if c != 'time']
+    cols_plt = [c for c in df.columns if c != "time"]
     if normalize is True:
         data_plt = stats.zscore(df[cols_plt])
     else:
         data_plt = df[cols_plt]
 
-    plt.figure(figsize=(7,5), dpi=300)
-    plt.imshow(data_plt.T, aspect='auto')
+    plt.figure(figsize=(7, 5), dpi=300)
+    plt.imshow(data_plt.T, aspect="auto")
     plt.xlabel("Time [s]")
     plt.ylabel("Feature Names")
-    plt.yticks(
-        np.arange(len(cols_plt)),
-        cols_plt,
-        size =ytick_labelsize
-    )
+    plt.yticks(np.arange(len(cols_plt)), cols_plt, size=ytick_labelsize)
 
     tick_num = np.arange(0, df.shape[0], int(df.shape[0] / 10))
-    tick_labels = np.array(np.rint(df['time'].iloc[tick_num]/1000), dtype=int)
+    tick_labels = np.array(np.rint(df["time"].iloc[tick_num] / 1000), dtype=int)
     plt.xticks(tick_num, tick_labels)
 
     plt.title(f"Feature Plot {feature_file}")
-    
+
     if clim_low is not None:
         plt.clim(vmin=clim_low)
     if clim_high is not None:
@@ -477,7 +475,6 @@ def plot_all_features(
 
 
 class NM_Plot:
-
     def __init__(
         self,
         ecog_strip: np.ndarray | None = None,
@@ -510,9 +507,7 @@ class NM_Plot:
 
     def plot_grid_elec_3d(self) -> None:
 
-        plot_grid_elec_3d(
-            np.array(self.grid_cortex), np.array(self.ecog_strip)
-        )
+        plot_grid_elec_3d(np.array(self.grid_cortex), np.array(self.ecog_strip))
 
     def plot_cortex(
         self,

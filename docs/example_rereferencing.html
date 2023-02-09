@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notebook for rereferencing, example with bipolar, CAR and iterable rereference (user defined number of channels). &mdash; py_neuromodulation  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Parametrization" href="outline_parametrization.html" />
+    <link rel="prev" title="Example notebook for different normalization techniques" href="example_normalization.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> py_neuromodulation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="examples.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="first_demo.html">First Demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_BIDS.html">ECoG Movement decoding example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="param.html">ParametrizationDefinition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_gridPointProjection.html">Grid Point Projection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_normalization.html">Example notebook for different normalization techniques</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Notebook for rereferencing, example with bipolar, CAR and iterable rereference (user defined number of channels).</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Default">Default</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Use-common-averaging-re-reference">Use common averaging re-reference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#No-re-referencing">No re-referencing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#User-provided-channels-for-re-referencing">User provided channels for re-referencing</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#Compare-movement-alligned-feature-plot-for-different-re-referencing-schemes-in-ECOG-channels">Compare movement alligned feature plot for different re-referencing schemes in ECOG channels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Compare-movement-alligned-feature-plot-for-different-re-referencing-schemes-in-LFP-channels">Compare movement alligned feature plot for different re-referencing schemes in LFP channels</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Compare-decoding-performances">Compare decoding performances</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Compare decoding performances</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Code Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="outline_parametrization.html">Parametrization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="outline_featureestimation.html">Feature Estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="outline_analysis.html">Analysis</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">py_neuromodulation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="examples.html">Examples</a></li>
+      <li class="breadcrumb-item active">Notebook for rereferencing, example with bipolar, CAR and iterable rereference (user defined number of channels).</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/example_rereferencing.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars and line breaks on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+    white-space: pre;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+.jp-RenderedHTMLCommon thead,
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+.jp-RenderedHTMLCommon th,
+div.rendered_html th {
+  font-weight: bold;
+}
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+.jp-RenderedHTMLCommon tbody tr:hover,
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="Notebook-for-rereferencing,-example-with-bipolar,-CAR-and-iterable-rereference-(user-defined-number-of-channels).">
+<h1>Notebook for rereferencing, example with bipolar, CAR and iterable rereference (user defined number of channels).<a class="headerlink" href="#Notebook-for-rereferencing,-example-with-bipolar,-CAR-and-iterable-rereference-(user-defined-number-of-channels)." title="Permalink to this heading"></a></h1>
+<p>In this notebook we will explore different re-referencing methods and observe how they impact the estimated features. Only STN-LFP data is going to be used, and we will visualize the features for the cases with:</p>
+<ul class="simple">
+<li><p>no re-referencing</p></li>
+<li><p>bipolar re-referecing: we subtract from a given the channel the averaged signal of the channel below it, in default mode it’s done for LFP channels. Eg. LFP channel 2 is the reference for LFP channel 1</p></li>
+<li><p>CAR -&gt; common averaging re-referencing: we subtract from all channels their common average.</p></li>
+</ul>
+<p>We will also show how the user can set up the list of channels in which respect the re-reference is performed.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">py_neuromodulation</span> <span class="k">as</span> <span class="nn">nm</span>
+<span class="kn">import</span> <span class="nn">xgboost</span>
+<span class="kn">from</span> <span class="nn">py_neuromodulation</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">nm_analysis</span><span class="p">,</span>
+    <span class="n">nm_decode</span><span class="p">,</span>
+    <span class="n">nm_define_nmchannels</span><span class="p">,</span>
+    <span class="n">nm_IO</span><span class="p">,</span>
+    <span class="n">nm_plots</span><span class="p">,</span>
+    <span class="n">nm_stats</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">model_selection</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="c1"># change root directory of the project</span>
+<span class="n">SCRIPT_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">))</span>
+<span class="k">if</span> <span class="n">SCRIPT_DIR</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;py_neuromodulation&quot;</span><span class="p">:</span>
+    <span class="c1"># this check is necessary, so we can also run the script from the root directory</span>
+    <span class="n">SCRIPT_DIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SCRIPT_DIR</span><span class="p">,</span> <span class="s2">&quot;examples&quot;</span><span class="p">)</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">SCRIPT_DIR</span><span class="p">))</span>
+
+<span class="c1"># Reload imports to get changes in other scripts</span>
+<span class="o">%</span><span class="k">load_ext</span> autoreload
+<span class="o">%</span><span class="k">autoreload</span> 2
+</pre></div>
+</div>
+</div>
+<p>We will use the same data available here: <a class="reference external" href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/IO2FLM">https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/IO2FLM</a>, but this time with the full recording.</p>
+<p>To be able to run this notebook, please download the data of subject-000 and replace <code class="docutils literal notranslate"><span class="pre">PATH_BIDS</span></code> with the path to your downloaded data. Remember to make sure the downloaded data is in the BIDS format. For another format, please look at <code class="docutils literal notranslate"><span class="pre">example_SimulatedData.ipynb</span></code>.</p>
+<p>Look Issue for cell below nm_IO.py</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">sub</span> <span class="o">=</span> <span class="s2">&quot;000&quot;</span>
+<span class="n">ses</span> <span class="o">=</span> <span class="s2">&quot;right&quot;</span>
+<span class="n">task</span> <span class="o">=</span> <span class="s2">&quot;force&quot;</span>
+<span class="n">run</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">datatype</span> <span class="o">=</span> <span class="s2">&quot;ieeg&quot;</span>
+
+<span class="c1"># Define run name and access paths in the BIDS format.</span>
+<span class="n">RUN_NAME</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;sub-</span><span class="si">{</span><span class="n">sub</span><span class="si">}</span><span class="s2">_ses-</span><span class="si">{</span><span class="n">ses</span><span class="si">}</span><span class="s2">_task-</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">_run-</span><span class="si">{</span><span class="n">run</span><span class="si">}</span><span class="s2">&quot;</span>
+
+<span class="n">PATH_RUN</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SCRIPT_DIR</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">)),</span>
+    <span class="sa">f</span><span class="s2">&quot;sub-</span><span class="si">{</span><span class="n">sub</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="sa">f</span><span class="s2">&quot;ses-</span><span class="si">{</span><span class="n">ses</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">datatype</span><span class="p">,</span>
+    <span class="n">RUN_NAME</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">PATH_BIDS</span> <span class="o">=</span> <span class="s2">&quot;/home/lauraflyra/Documents/BCCN/Pittsburgh_dataset_ECoG_LFP&quot;</span>
+
+<span class="p">(</span>
+    <span class="n">raw</span><span class="p">,</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">sfreq</span><span class="p">,</span>
+    <span class="n">line_noise</span><span class="p">,</span>
+    <span class="n">coord_list</span><span class="p">,</span>
+    <span class="n">coord_names</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">=</span> <span class="n">nm_IO</span><span class="o">.</span><span class="n">read_BIDS_data</span><span class="p">(</span>
+    <span class="n">PATH_RUN</span><span class="o">=</span><span class="n">PATH_RUN</span><span class="p">,</span> <span class="n">BIDS_PATH</span><span class="o">=</span><span class="n">PATH_BIDS</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="n">datatype</span><span class="p">,</span> <span class="c1">#line_noise=60</span>
+<span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Extracting parameters from /home/lauraflyra/Documents/BCCN/Pittsburgh_dataset_ECoG_LFP/sub-000/ses-right/ieeg/sub-000_ses-right_task-force_run-3_ieeg.vhdr...
+Setting channel info structure...
+Reading channel info from /home/lauraflyra/Documents/BCCN/Pittsburgh_dataset_ECoG_LFP/sub-000/ses-right/ieeg/sub-000_ses-right_task-force_run-3_channels.tsv.
+Reading electrode coords from /home/lauraflyra/Documents/BCCN/Pittsburgh_dataset_ECoG_LFP/sub-000/ses-right/ieeg/sub-000_ses-right_task-force_run-3_space-mni_electrodes.tsv.
+</pre></div></div>
+</div>
+<section id="Default">
+<h2>Default<a class="headerlink" href="#Default" title="Permalink to this heading"></a></h2>
+<p>Reference must be either ‘default’, ‘None’ or an iterable with the desired re-referencing for each channel. This iterable needs to be the same length as <code class="docutils literal notranslate"><span class="pre">ch_names</span></code>. We start with default, which is what was done in all other examples:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Provide a path for the output data. Each re-referencing method has their PATH_OUT</span>
+<span class="n">PATH_OUT</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SCRIPT_DIR</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;derivatives&quot;</span><span class="p">,</span> <span class="s2">&quot;rereferencing&quot;</span><span class="p">,</span> <span class="s2">&quot;default&quot;</span><span class="p">)</span>
+<span class="n">nm_channels_default</span> <span class="o">=</span> <span class="n">nm_define_nmchannels</span><span class="o">.</span><span class="n">set_channels</span><span class="p">(</span>
+    <span class="n">ch_names</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">ch_names</span><span class="p">,</span>
+    <span class="n">ch_types</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">get_channel_types</span><span class="p">(),</span>
+    <span class="n">reference</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">,</span>
+    <span class="n">bads</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;bads&quot;</span><span class="p">],</span>
+    <span class="n">new_names</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+    <span class="n">used_types</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;ecog&quot;</span><span class="p">,</span> <span class="s2">&quot;dbs&quot;</span><span class="p">,</span> <span class="s2">&quot;seeg&quot;</span><span class="p">),</span>
+    <span class="n">target_keywords</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;MOV_LEFT_CLEAN&quot;</span><span class="p">,),</span>
+<span class="p">)</span>
+
+<span class="n">stream_default</span> <span class="o">=</span> <span class="n">nm</span><span class="o">.</span><span class="n">Stream</span><span class="p">(</span>
+    <span class="n">settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">nm_channels</span><span class="o">=</span><span class="n">nm_channels_default</span><span class="p">,</span>
+    <span class="n">path_grids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">stream_default</span><span class="o">.</span><span class="n">set_settings_fast_compute</span><span class="p">()</span>
+
+<span class="n">stream_default</span><span class="o">.</span><span class="n">init_stream</span><span class="p">(</span>
+    <span class="n">sfreq</span><span class="o">=</span><span class="n">sfreq</span><span class="p">,</span>
+    <span class="n">line_noise</span><span class="o">=</span><span class="n">line_noise</span><span class="p">,</span>
+    <span class="n">coord_list</span><span class="o">=</span><span class="n">coord_list</span><span class="p">,</span>
+    <span class="n">coord_names</span><span class="o">=</span><span class="n">coord_names</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">stream_default</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+    <span class="n">out_path_root</span><span class="o">=</span><span class="n">PATH_OUT</span><span class="p">,</span>
+    <span class="n">folder_name</span><span class="o">=</span><span class="n">RUN_NAME</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+No Error occurred when testing the settings.
+No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
+Setting up band-stop filter
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandstop filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower transition bandwidth: 7.50 Hz
+- Upper transition bandwidth: 7.50 Hz
+- Filter length: 999 samples (0.999 sec)
+
+_SIDECAR.json saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/default/sub-000_ses-right_task-force_run-3/sub-000_ses-right_task-force_run-3_SIDECAR.json
+FEATURES.csv saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/default/sub-000_ses-right_task-force_run-3/sub-000_ses-right_task-force_run-3_FEATURES.csv
+settings.json saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/default/sub-000_ses-right_task-force_run-3/sub-000_ses-right_task-force_run-3_SETTINGS.json
+nm_channels.csv saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/default/sub-000_ses-right_task-force_run-3/sub-000_ses-right_task-force_run-3_nm_channels.csv
+</pre></div></div>
+</div>
+</section>
+<section id="Use-common-averaging-re-reference">
+<h2>Use common averaging re-reference<a class="headerlink" href="#Use-common-averaging-re-reference" title="Permalink to this heading"></a></h2>
+<p>As we want to re-reference all LFP channels, but no re-referencing for the rest, we do:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">PATH_OUT_avg</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SCRIPT_DIR</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;derivatives&quot;</span><span class="p">,</span> <span class="s2">&quot;rereferencing&quot;</span><span class="p">,</span> <span class="s2">&quot;avg&quot;</span><span class="p">)</span>
+<span class="n">ch_names</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">ch_names</span>
+<span class="n">ref</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;average&quot;</span> <span class="k">if</span> <span class="s2">&quot;STN&quot;</span> <span class="ow">in</span> <span class="n">item</span> <span class="k">else</span> <span class="s2">&quot;None&quot;</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">ch_names</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<p>We need to define the <code class="docutils literal notranslate"><span class="pre">nm_channels</span></code> again and then <code class="docutils literal notranslate"><span class="pre">stream.run</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">nm_channels_avg</span> <span class="o">=</span> <span class="n">nm_define_nmchannels</span><span class="o">.</span><span class="n">set_channels</span><span class="p">(</span>
+    <span class="n">ch_names</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">ch_names</span><span class="p">,</span>
+    <span class="n">ch_types</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">get_channel_types</span><span class="p">(),</span>
+    <span class="n">reference</span><span class="o">=</span><span class="n">ref</span><span class="p">,</span>
+    <span class="n">bads</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;bads&quot;</span><span class="p">],</span>
+    <span class="n">new_names</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+    <span class="n">used_types</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;ecog&quot;</span><span class="p">,</span> <span class="s2">&quot;dbs&quot;</span><span class="p">,</span> <span class="s2">&quot;seeg&quot;</span><span class="p">),</span>  <span class="c1"># We focus only on LFP data</span>
+    <span class="n">target_keywords</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;MOV_LEFT_CLEAN&quot;</span><span class="p">,),</span>
+<span class="p">)</span>
+<span class="n">stream_avg</span> <span class="o">=</span> <span class="n">nm</span><span class="o">.</span><span class="n">Stream</span><span class="p">(</span>
+    <span class="n">settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">nm_channels</span><span class="o">=</span><span class="n">nm_channels_avg</span><span class="p">,</span>
+    <span class="n">path_grids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">stream_avg</span><span class="o">.</span><span class="n">set_settings_fast_compute</span><span class="p">()</span>
+
+<span class="n">stream_avg</span><span class="o">.</span><span class="n">init_stream</span><span class="p">(</span>
+    <span class="n">sfreq</span><span class="o">=</span><span class="n">sfreq</span><span class="p">,</span>
+    <span class="n">line_noise</span><span class="o">=</span><span class="n">line_noise</span><span class="p">,</span>
+    <span class="n">coord_list</span><span class="o">=</span><span class="n">coord_list</span><span class="p">,</span>
+    <span class="n">coord_names</span><span class="o">=</span><span class="n">coord_names</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">stream_avg</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+    <span class="n">out_path_root</span><span class="o">=</span><span class="n">PATH_OUT_avg</span><span class="p">,</span>
+    <span class="n">folder_name</span><span class="o">=</span><span class="n">RUN_NAME</span><span class="p">,</span>
+<span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+No Error occurred when testing the settings.
+No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
+Setting up band-stop filter
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandstop filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower transition bandwidth: 7.50 Hz
+- Upper transition bandwidth: 7.50 Hz
+- Filter length: 999 samples (0.999 sec)
+
+_SIDECAR.json saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/avg/sub-000_ses-right_task-force_run-3/sub-000_ses-right_task-force_run-3_SIDECAR.json
+FEATURES.csv saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/avg/sub-000_ses-right_task-force_run-3/sub-000_ses-right_task-force_run-3_FEATURES.csv
+settings.json saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/avg/sub-000_ses-right_task-force_run-3/sub-000_ses-right_task-force_run-3_SETTINGS.json
+nm_channels.csv saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/avg/sub-000_ses-right_task-force_run-3/sub-000_ses-right_task-force_run-3_nm_channels.csv
+</pre></div></div>
+</div>
+<section id="No-re-referencing">
+<h3>No re-referencing<a class="headerlink" href="#No-re-referencing" title="Permalink to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">PATH_OUT_None</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SCRIPT_DIR</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;derivatives&quot;</span><span class="p">,</span> <span class="s2">&quot;rereferencing&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">)</span>
+<span class="n">ch_names</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">ch_names</span>
+<span class="n">ref_None</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;None&quot;</span> <span class="k">if</span> <span class="s2">&quot;STN&quot;</span> <span class="ow">in</span> <span class="n">item</span> <span class="k">else</span> <span class="s2">&quot;None&quot;</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">ch_names</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">nm_channels_None</span> <span class="o">=</span> <span class="n">nm_define_nmchannels</span><span class="o">.</span><span class="n">set_channels</span><span class="p">(</span>
+    <span class="n">ch_names</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">ch_names</span><span class="p">,</span>
+    <span class="n">ch_types</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">get_channel_types</span><span class="p">(),</span>
+    <span class="n">reference</span><span class="o">=</span><span class="n">ref_None</span><span class="p">,</span>
+    <span class="n">bads</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;bads&quot;</span><span class="p">],</span>
+    <span class="n">new_names</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+    <span class="n">used_types</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;ecog&quot;</span><span class="p">,</span> <span class="s2">&quot;dbs&quot;</span><span class="p">,</span> <span class="s2">&quot;seeg&quot;</span><span class="p">),</span>  <span class="c1"># We focus only on LFP data</span>
+    <span class="n">target_keywords</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;MOV_LEFT_CLEAN&quot;</span><span class="p">,),</span>
+<span class="p">)</span>
+<span class="n">stream_None</span> <span class="o">=</span> <span class="n">nm</span><span class="o">.</span><span class="n">Stream</span><span class="p">(</span>
+    <span class="n">settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">nm_channels</span><span class="o">=</span><span class="n">nm_channels_None</span><span class="p">,</span>
+    <span class="n">path_grids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">stream_None</span><span class="o">.</span><span class="n">set_settings_fast_compute</span><span class="p">()</span>
+
+<span class="n">stream_None</span><span class="o">.</span><span class="n">init_stream</span><span class="p">(</span>
+    <span class="n">sfreq</span><span class="o">=</span><span class="n">sfreq</span><span class="p">,</span>
+    <span class="n">line_noise</span><span class="o">=</span><span class="n">line_noise</span><span class="p">,</span>
+    <span class="n">coord_list</span><span class="o">=</span><span class="n">coord_list</span><span class="p">,</span>
+    <span class="n">coord_names</span><span class="o">=</span><span class="n">coord_names</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">stream_None</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+    <span class="n">out_path_root</span><span class="o">=</span><span class="n">PATH_OUT_None</span><span class="p">,</span>
+    <span class="n">folder_name</span><span class="o">=</span><span class="n">RUN_NAME</span><span class="p">,</span>
+<span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+No Error occurred when testing the settings.
+No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
+Setting up band-stop filter
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandstop filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower transition bandwidth: 7.50 Hz
+- Upper transition bandwidth: 7.50 Hz
+- Filter length: 999 samples (0.999 sec)
+
+_SIDECAR.json saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/none/sub-000_ses-right_task-force_run-3/sub-000_ses-right_task-force_run-3_SIDECAR.json
+FEATURES.csv saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/none/sub-000_ses-right_task-force_run-3/sub-000_ses-right_task-force_run-3_FEATURES.csv
+settings.json saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/none/sub-000_ses-right_task-force_run-3/sub-000_ses-right_task-force_run-3_SETTINGS.json
+nm_channels.csv saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/none/sub-000_ses-right_task-force_run-3/sub-000_ses-right_task-force_run-3_nm_channels.csv
+</pre></div></div>
+</div>
+</section>
+<section id="User-provided-channels-for-re-referencing">
+<h3>User provided channels for re-referencing<a class="headerlink" href="#User-provided-channels-for-re-referencing" title="Permalink to this heading"></a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">PATH_OUT_userRef</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SCRIPT_DIR</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;derivatives&quot;</span><span class="p">,</span> <span class="s2">&quot;rereferencing&quot;</span><span class="p">,</span> <span class="s2">&quot;userRef&quot;</span><span class="p">)</span>
+<span class="n">ref_userRef</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;STN_RIGHT_1&quot;</span><span class="p">,</span><span class="s2">&quot;STN_RIGHT_2&quot;</span><span class="p">,</span><span class="s2">&quot;STN_RIGHT_1&quot;</span><span class="p">,</span><span class="s2">&quot;ECOG_RIGHT_1&quot;</span><span class="p">,</span><span class="s2">&quot;ECOG_RIGHT_2&quot;</span><span class="p">,</span><span class="s2">&quot;ECOG_RIGHT_1&quot;</span><span class="p">,</span><span class="s2">&quot;ECOG_RIGHT_1&quot;</span><span class="p">,</span><span class="s2">&quot;ECOG_RIGHT_1&quot;</span><span class="p">,</span><span class="s2">&quot;ECOG_RIGHT_1&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">nm_channels_userRef</span> <span class="o">=</span> <span class="n">nm_define_nmchannels</span><span class="o">.</span><span class="n">set_channels</span><span class="p">(</span>
+    <span class="n">ch_names</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">ch_names</span><span class="p">,</span>
+    <span class="n">ch_types</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">get_channel_types</span><span class="p">(),</span>
+    <span class="n">reference</span><span class="o">=</span><span class="n">ref_userRef</span><span class="p">,</span>
+    <span class="n">bads</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s2">&quot;bads&quot;</span><span class="p">],</span>
+    <span class="n">new_names</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+    <span class="n">used_types</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;ecog&quot;</span><span class="p">,</span> <span class="s2">&quot;dbs&quot;</span><span class="p">,</span> <span class="s2">&quot;seeg&quot;</span><span class="p">),</span>  <span class="c1"># We focus only on LFP data</span>
+    <span class="n">target_keywords</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;MOV_LEFT_CLEAN&quot;</span><span class="p">,),</span>
+<span class="p">)</span>
+<span class="n">stream_userRef</span> <span class="o">=</span> <span class="n">nm</span><span class="o">.</span><span class="n">Stream</span><span class="p">(</span>
+    <span class="n">settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">nm_channels</span><span class="o">=</span><span class="n">nm_channels_userRef</span><span class="p">,</span>
+    <span class="n">path_grids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">stream_userRef</span><span class="o">.</span><span class="n">set_settings_fast_compute</span><span class="p">()</span>
+
+<span class="n">stream_userRef</span><span class="o">.</span><span class="n">init_stream</span><span class="p">(</span>
+    <span class="n">sfreq</span><span class="o">=</span><span class="n">sfreq</span><span class="p">,</span>
+    <span class="n">line_noise</span><span class="o">=</span><span class="n">line_noise</span><span class="p">,</span>
+    <span class="n">coord_list</span><span class="o">=</span><span class="n">coord_list</span><span class="p">,</span>
+    <span class="n">coord_names</span><span class="o">=</span><span class="n">coord_names</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">stream_userRef</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+    <span class="n">out_path_root</span><span class="o">=</span><span class="n">PATH_OUT_userRef</span><span class="p">,</span>
+    <span class="n">folder_name</span><span class="o">=</span><span class="n">RUN_NAME</span><span class="p">,</span>
+<span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+No Error occurred when testing the settings.
+No data specified. Sanity checks related to the length of the signal relative to the filter order will be skipped.
+Setting up band-stop filter
+
+FIR filter parameters
+---------------------
+Designing a one-pass, zero-phase, non-causal bandstop filter:
+- Windowed time-domain design (firwin) method
+- Hamming window with 0.0194 passband ripple and 53 dB stopband attenuation
+- Lower transition bandwidth: 7.50 Hz
+- Upper transition bandwidth: 7.50 Hz
+- Filter length: 999 samples (0.999 sec)
+
+_SIDECAR.json saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/userRef/sub-000_ses-right_task-force_run-3/sub-000_ses-right_task-force_run-3_SIDECAR.json
+FEATURES.csv saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/userRef/sub-000_ses-right_task-force_run-3/sub-000_ses-right_task-force_run-3_FEATURES.csv
+settings.json saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/userRef/sub-000_ses-right_task-force_run-3/sub-000_ses-right_task-force_run-3_SETTINGS.json
+nm_channels.csv saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/userRef/sub-000_ses-right_task-force_run-3/sub-000_ses-right_task-force_run-3_nm_channels.csv
+</pre></div></div>
+</div>
+</section>
+</section>
+<section id="Compare-movement-alligned-feature-plot-for-different-re-referencing-schemes-in-ECOG-channels">
+<h2>Compare movement alligned feature plot for different re-referencing schemes in ECOG channels<a class="headerlink" href="#Compare-movement-alligned-feature-plot-for-different-re-referencing-schemes-in-ECOG-channels" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="c1"># init analyzer for default reref</span>
+<span class="n">feature_reader_default</span> <span class="o">=</span> <span class="n">nm_analysis</span><span class="o">.</span><span class="n">Feature_Reader</span><span class="p">(</span>
+    <span class="n">feature_dir</span><span class="o">=</span><span class="n">PATH_OUT</span><span class="p">,</span> <span class="n">feature_file</span><span class="o">=</span><span class="n">RUN_NAME</span>
+<span class="p">)</span>
+
+<span class="c1"># plot for a single channel</span>
+<span class="n">ch_used</span> <span class="o">=</span> <span class="s2">&quot;ECOG_RIGHT_3&quot;</span>
+
+<span class="n">feature_used_default</span> <span class="o">=</span> <span class="s2">&quot;fft&quot;</span>
+
+<span class="n">feature_reader_default</span><span class="o">.</span><span class="n">plot_target_averaged_channel</span><span class="p">(</span>
+    <span class="n">ch</span><span class="o">=</span><span class="n">ch_used</span><span class="p">,</span>
+    <span class="n">list_feature_keywords</span><span class="o">=</span><span class="p">[</span><span class="n">feature_used_default</span><span class="p">],</span>
+    <span class="n">epoch_len</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>   <span class="c1"># Length of epoch in seconds</span>
+    <span class="n">threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="c1"># Threshold to be used for identifying events</span>
+    <span class="n">show_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Movement aligned features default reref </span><span class="se">\n</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="c1">#---------------------------------------</span>
+<span class="c1"># init analyzer for CAR reref</span>
+<span class="n">feature_reader_avg</span> <span class="o">=</span> <span class="n">nm_analysis</span><span class="o">.</span><span class="n">Feature_Reader</span><span class="p">(</span>
+    <span class="n">feature_dir</span><span class="o">=</span><span class="n">PATH_OUT_avg</span><span class="p">,</span> <span class="n">feature_file</span><span class="o">=</span><span class="n">RUN_NAME</span>
+<span class="p">)</span>
+
+<span class="c1"># plot for a single channel</span>
+<span class="n">ch_used_avg</span> <span class="o">=</span> <span class="s2">&quot;ECOG_RIGHT_3&quot;</span>
+
+<span class="n">feature_used_avg</span> <span class="o">=</span> <span class="s2">&quot;fft&quot;</span>
+
+<span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">plot_target_averaged_channel</span><span class="p">(</span>
+    <span class="n">ch</span><span class="o">=</span><span class="n">ch_used_avg</span><span class="p">,</span>
+    <span class="n">list_feature_keywords</span><span class="o">=</span><span class="p">[</span><span class="n">feature_used_avg</span><span class="p">],</span>
+    <span class="n">epoch_len</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>   <span class="c1"># Length of epoch in seconds</span>
+    <span class="n">threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="c1"># Threshold to be used for identifying events</span>
+    <span class="n">show_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Movement aligned features CAR reref </span><span class="se">\n</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="c1">#--------------------------------------------------</span>
+<span class="c1"># init analyzer NO reref</span>
+<span class="n">feature_reader_None</span> <span class="o">=</span> <span class="n">nm_analysis</span><span class="o">.</span><span class="n">Feature_Reader</span><span class="p">(</span>
+    <span class="n">feature_dir</span><span class="o">=</span><span class="n">PATH_OUT_None</span><span class="p">,</span> <span class="n">feature_file</span><span class="o">=</span><span class="n">RUN_NAME</span>
+<span class="p">)</span>
+
+<span class="c1"># plot for a single channel</span>
+<span class="n">ch_used_None</span> <span class="o">=</span> <span class="s2">&quot;ECOG_RIGHT_3&quot;</span>
+
+<span class="n">feature_used_None</span> <span class="o">=</span> <span class="s2">&quot;fft&quot;</span>
+
+<span class="n">feature_reader_None</span><span class="o">.</span><span class="n">plot_target_averaged_channel</span><span class="p">(</span>
+    <span class="n">ch</span><span class="o">=</span><span class="n">ch_used_None</span><span class="p">,</span>
+    <span class="n">list_feature_keywords</span><span class="o">=</span><span class="p">[</span><span class="n">feature_used_None</span><span class="p">],</span>
+    <span class="n">epoch_len</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>   <span class="c1"># Length of epoch in seconds</span>
+    <span class="n">threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="c1"># Threshold to be used for identifying events</span>
+    <span class="n">show_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Movement aligned features NO reref </span><span class="se">\n</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+
+<span class="c1">#-----------------------------------------------</span>
+<span class="c1"># init analyzer user reref</span>
+<span class="n">feature_reader_userRef</span> <span class="o">=</span> <span class="n">nm_analysis</span><span class="o">.</span><span class="n">Feature_Reader</span><span class="p">(</span>
+    <span class="n">feature_dir</span><span class="o">=</span><span class="n">PATH_OUT_userRef</span><span class="p">,</span> <span class="n">feature_file</span><span class="o">=</span><span class="n">RUN_NAME</span>
+<span class="p">)</span>
+
+<span class="c1"># plot for a single channel</span>
+<span class="n">ch_used_userRef</span> <span class="o">=</span> <span class="s2">&quot;ECOG_RIGHT_3&quot;</span>
+
+<span class="n">feature_used_userRef</span> <span class="o">=</span> <span class="s2">&quot;fft&quot;</span>
+
+<span class="n">feature_reader_userRef</span><span class="o">.</span><span class="n">plot_target_averaged_channel</span><span class="p">(</span>
+    <span class="n">ch</span><span class="o">=</span><span class="n">ch_used_userRef</span><span class="p">,</span>
+    <span class="n">list_feature_keywords</span><span class="o">=</span><span class="p">[</span><span class="n">feature_used_userRef</span><span class="p">],</span>
+    <span class="n">epoch_len</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>   <span class="c1"># Length of epoch in seconds</span>
+    <span class="n">threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="c1"># Threshold to be used for identifying events</span>
+    <span class="n">show_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Movement aligned features user reref </span><span class="se">\n</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Feature epoch average figure saved to: /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/default/sub-000_ses-right_task-force_run-3/MOV_aligned_features_ch_ECOG_RIGHT_3_fft.png
+Feature epoch average figure saved to: /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/avg/sub-000_ses-right_task-force_run-3/MOV_aligned_features_ch_ECOG_RIGHT_3_fft.png
+Feature epoch average figure saved to: /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/none/sub-000_ses-right_task-force_run-3/MOV_aligned_features_ch_ECOG_RIGHT_3_fft.png
+Feature epoch average figure saved to: /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/userRef/sub-000_ses-right_task-force_run-3/MOV_aligned_features_ch_ECOG_RIGHT_3_fft.png
+</pre></div></div>
+</div>
+<div><p><img alt="8dd7d18ef5e64b2db06405d4fcbddc42" class="no-scaled-link" src="data/comparison_diff_rereferencing_methods.png" style="width: 800px;" /></p>
+</div></section>
+<section id="Compare-movement-alligned-feature-plot-for-different-re-referencing-schemes-in-LFP-channels">
+<h2>Compare movement alligned feature plot for different re-referencing schemes in LFP channels<a class="headerlink" href="#Compare-movement-alligned-feature-plot-for-different-re-referencing-schemes-in-LFP-channels" title="Permalink to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="c1"># init analyzer for default reref</span>
+<span class="n">feature_reader_default</span> <span class="o">=</span> <span class="n">nm_analysis</span><span class="o">.</span><span class="n">Feature_Reader</span><span class="p">(</span>
+    <span class="n">feature_dir</span><span class="o">=</span><span class="n">PATH_OUT</span><span class="p">,</span> <span class="n">feature_file</span><span class="o">=</span><span class="n">RUN_NAME</span>
+<span class="p">)</span>
+
+<span class="c1"># plot for a single channel</span>
+<span class="n">ch_used</span> <span class="o">=</span> <span class="s2">&quot;STN_RIGHT_0-STN_RIGHT_2&quot;</span>
+
+<span class="n">feature_used_default</span> <span class="o">=</span> <span class="s2">&quot;fft&quot;</span>
+
+<span class="n">feature_reader_default</span><span class="o">.</span><span class="n">plot_target_averaged_channel</span><span class="p">(</span>
+    <span class="n">ch</span><span class="o">=</span><span class="n">ch_used</span><span class="p">,</span>
+    <span class="n">list_feature_keywords</span><span class="o">=</span><span class="p">[</span><span class="n">feature_used_default</span><span class="p">],</span>
+    <span class="n">epoch_len</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>   <span class="c1"># Length of epoch in seconds</span>
+    <span class="n">threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="c1"># Threshold to be used for identifying events</span>
+    <span class="n">show_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Movement aligned features default reref </span><span class="se">\n</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="c1">#---------------------------------------</span>
+<span class="c1"># init analyzer for CAR reref</span>
+<span class="n">feature_reader_avg</span> <span class="o">=</span> <span class="n">nm_analysis</span><span class="o">.</span><span class="n">Feature_Reader</span><span class="p">(</span>
+    <span class="n">feature_dir</span><span class="o">=</span><span class="n">PATH_OUT_avg</span><span class="p">,</span> <span class="n">feature_file</span><span class="o">=</span><span class="n">RUN_NAME</span>
+<span class="p">)</span>
+
+<span class="c1"># plot for a single channel</span>
+<span class="n">ch_used_avg</span> <span class="o">=</span> <span class="s2">&quot;STN_RIGHT_0&quot;</span>
+
+<span class="n">feature_used_avg</span> <span class="o">=</span> <span class="s2">&quot;fft&quot;</span>
+
+<span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">plot_target_averaged_channel</span><span class="p">(</span>
+    <span class="n">ch</span><span class="o">=</span><span class="n">ch_used_avg</span><span class="p">,</span>
+    <span class="n">list_feature_keywords</span><span class="o">=</span><span class="p">[</span><span class="n">feature_used_avg</span><span class="p">],</span>
+    <span class="n">epoch_len</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>   <span class="c1"># Length of epoch in seconds</span>
+    <span class="n">threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="c1"># Threshold to be used for identifying events</span>
+    <span class="n">show_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Movement aligned features CAR reref </span><span class="se">\n</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="c1">#--------------------------------------------------</span>
+<span class="c1"># init analyzer NO reref</span>
+<span class="n">feature_reader_None</span> <span class="o">=</span> <span class="n">nm_analysis</span><span class="o">.</span><span class="n">Feature_Reader</span><span class="p">(</span>
+    <span class="n">feature_dir</span><span class="o">=</span><span class="n">PATH_OUT_None</span><span class="p">,</span> <span class="n">feature_file</span><span class="o">=</span><span class="n">RUN_NAME</span>
+<span class="p">)</span>
+
+<span class="c1"># plot for a single channel</span>
+<span class="n">ch_used_None</span> <span class="o">=</span> <span class="s2">&quot;STN_RIGHT_0&quot;</span>
+
+<span class="n">feature_used_None</span> <span class="o">=</span> <span class="s2">&quot;fft&quot;</span>
+
+<span class="n">feature_reader_None</span><span class="o">.</span><span class="n">plot_target_averaged_channel</span><span class="p">(</span>
+    <span class="n">ch</span><span class="o">=</span><span class="n">ch_used_None</span><span class="p">,</span>
+    <span class="n">list_feature_keywords</span><span class="o">=</span><span class="p">[</span><span class="n">feature_used_None</span><span class="p">],</span>
+    <span class="n">epoch_len</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>   <span class="c1"># Length of epoch in seconds</span>
+    <span class="n">threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="c1"># Threshold to be used for identifying events</span>
+    <span class="n">show_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Movement aligned features NO reref </span><span class="se">\n</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+
+<span class="c1">#-----------------------------------------------</span>
+<span class="c1"># init analyzer user reref</span>
+<span class="n">feature_reader_userRef</span> <span class="o">=</span> <span class="n">nm_analysis</span><span class="o">.</span><span class="n">Feature_Reader</span><span class="p">(</span>
+    <span class="n">feature_dir</span><span class="o">=</span><span class="n">PATH_OUT_userRef</span><span class="p">,</span> <span class="n">feature_file</span><span class="o">=</span><span class="n">RUN_NAME</span>
+<span class="p">)</span>
+
+<span class="c1"># plot for a single channel</span>
+<span class="n">ch_used_userRef</span> <span class="o">=</span> <span class="s2">&quot;STN_RIGHT_0&quot;</span>
+
+<span class="n">feature_used_userRef</span> <span class="o">=</span> <span class="s2">&quot;fft&quot;</span>
+
+<span class="n">feature_reader_userRef</span><span class="o">.</span><span class="n">plot_target_averaged_channel</span><span class="p">(</span>
+    <span class="n">ch</span><span class="o">=</span><span class="n">ch_used_userRef</span><span class="p">,</span>
+    <span class="n">list_feature_keywords</span><span class="o">=</span><span class="p">[</span><span class="n">feature_used_userRef</span><span class="p">],</span>
+    <span class="n">epoch_len</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>   <span class="c1"># Length of epoch in seconds</span>
+    <span class="n">threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="c1"># Threshold to be used for identifying events</span>
+    <span class="n">show_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Movement aligned features user reref </span><span class="se">\n</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Feature epoch average figure saved to: /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/default/sub-000_ses-right_task-force_run-3/MOV_aligned_features_ch_STN_RIGHT_0-STN_RIGHT_2_fft.png
+Feature epoch average figure saved to: /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/avg/sub-000_ses-right_task-force_run-3/MOV_aligned_features_ch_STN_RIGHT_0_fft.png
+Feature epoch average figure saved to: /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/none/sub-000_ses-right_task-force_run-3/MOV_aligned_features_ch_STN_RIGHT_0_fft.png
+Feature epoch average figure saved to: /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/userRef/sub-000_ses-right_task-force_run-3/MOV_aligned_features_ch_STN_RIGHT_0_fft.png
+</pre></div></div>
+</div>
+<div><p>&lt;img src=“./data/comparison_diff_rereferencing_methods_STNLFP.png”, width=“800”/&gt;</p>
+</div><div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">nm_plots</span><span class="o">.</span><span class="n">plot_corr_matrix</span><span class="p">(</span>
+        <span class="n">feature</span> <span class="o">=</span> <span class="n">feature_reader_default</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">regex</span><span class="o">=</span><span class="s1">&#39;ECOG&#39;</span><span class="p">),</span>
+        <span class="n">OUT_PATH</span><span class="o">=</span> <span class="n">PATH_OUT</span><span class="p">,</span>
+        <span class="n">feature_names</span><span class="o">=</span><span class="n">feature_reader_default</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">regex</span><span class="o">=</span><span class="s1">&#39;ECOG&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
+        <span class="n">feature_file</span><span class="o">=</span><span class="n">feature_reader_default</span><span class="o">.</span><span class="n">feature_file</span><span class="p">,</span>
+        <span class="n">show_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">15</span><span class="p">),</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Correlation matrix for all ECOG fft features, default re-referencing&quot;</span><span class="p">,</span>
+        <span class="n">save_plot_name</span><span class="o">=</span><span class="s2">&quot;rereferencing_example_LFP_default.png&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Correlation matrix figure saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/default/rereferencing_example_LFP_default.png
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/example_rereferencing_24_1.png" src="_images/example_rereferencing_24_1.png" />
+</div>
+</div>
+<p>correlation plots for high beta, make same colobar lims</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">nm_plots</span><span class="o">.</span><span class="n">plot_corr_matrix</span><span class="p">(</span>
+        <span class="n">feature</span> <span class="o">=</span> <span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">regex</span><span class="o">=</span><span class="s1">&#39;ECOG&#39;</span><span class="p">),</span>
+        <span class="n">OUT_PATH</span><span class="o">=</span> <span class="n">PATH_OUT_avg</span><span class="p">,</span>
+        <span class="n">feature_names</span><span class="o">=</span><span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">regex</span><span class="o">=</span><span class="s1">&#39;ECOG&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
+        <span class="n">feature_file</span><span class="o">=</span><span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">feature_file</span><span class="p">,</span>
+        <span class="n">show_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">15</span><span class="p">),</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Correlation matrix for all ECOG fft features, CAR re-referencing&quot;</span><span class="p">,</span>
+        <span class="n">save_plot_name</span><span class="o">=</span><span class="s2">&quot;rereferencing_example_LFP_avgref.png&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Correlation matrix figure saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/avg/rereferencing_example_LFP_avgref.png
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/example_rereferencing_26_1.png" src="_images/example_rereferencing_26_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">feature_reader_None</span><span class="o">.</span><span class="n">feature_arr</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>STN_RIGHT_0_fft_theta</th>
+      <th>STN_RIGHT_0_fft_alpha</th>
+      <th>STN_RIGHT_0_fft_low beta</th>
+      <th>STN_RIGHT_0_fft_high beta</th>
+      <th>STN_RIGHT_0_fft_low gamma</th>
+      <th>STN_RIGHT_0_fft_high gamma</th>
+      <th>STN_RIGHT_0_fft_HFA</th>
+      <th>STN_RIGHT_1_fft_theta</th>
+      <th>STN_RIGHT_1_fft_alpha</th>
+      <th>STN_RIGHT_1_fft_low beta</th>
+      <th>...</th>
+      <th>ECOG_RIGHT_4_fft_HFA</th>
+      <th>ECOG_RIGHT_5_fft_theta</th>
+      <th>ECOG_RIGHT_5_fft_alpha</th>
+      <th>ECOG_RIGHT_5_fft_low beta</th>
+      <th>ECOG_RIGHT_5_fft_high beta</th>
+      <th>ECOG_RIGHT_5_fft_low gamma</th>
+      <th>ECOG_RIGHT_5_fft_high gamma</th>
+      <th>ECOG_RIGHT_5_fft_HFA</th>
+      <th>time</th>
+      <th>MOV_LEFT_CLEAN</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2.183806</td>
+      <td>2.107142</td>
+      <td>2.121652</td>
+      <td>1.930448</td>
+      <td>1.555546</td>
+      <td>1.479334</td>
+      <td>1.308312</td>
+      <td>2.334145</td>
+      <td>2.200198</td>
+      <td>2.234459</td>
+      <td>...</td>
+      <td>1.164457</td>
+      <td>2.622174</td>
+      <td>2.516845</td>
+      <td>2.581931</td>
+      <td>2.319617</td>
+      <td>1.523098</td>
+      <td>1.299717</td>
+      <td>1.013127</td>
+      <td>1000.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>...</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1100.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>...</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1200.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>...</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1300.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.945170</td>
+      <td>0.937777</td>
+      <td>0.947476</td>
+      <td>0.953702</td>
+      <td>0.973194</td>
+      <td>0.974793</td>
+      <td>0.991394</td>
+      <td>0.943083</td>
+      <td>0.949556</td>
+      <td>0.941537</td>
+      <td>...</td>
+      <td>0.943825</td>
+      <td>0.933698</td>
+      <td>0.930696</td>
+      <td>0.924066</td>
+      <td>0.942554</td>
+      <td>0.993832</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1400.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>2805</th>
+      <td>0.614326</td>
+      <td>0.431427</td>
+      <td>0.422482</td>
+      <td>0.304217</td>
+      <td>0.500398</td>
+      <td>0.796630</td>
+      <td>0.796916</td>
+      <td>0.364926</td>
+      <td>0.444041</td>
+      <td>0.000000</td>
+      <td>...</td>
+      <td>0.537579</td>
+      <td>0.566729</td>
+      <td>0.745448</td>
+      <td>0.524791</td>
+      <td>0.609333</td>
+      <td>0.565604</td>
+      <td>0.570468</td>
+      <td>0.663291</td>
+      <td>281500.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>2806</th>
+      <td>0.603241</td>
+      <td>0.423939</td>
+      <td>0.432353</td>
+      <td>0.258818</td>
+      <td>0.476025</td>
+      <td>0.737762</td>
+      <td>0.698191</td>
+      <td>0.305609</td>
+      <td>0.411641</td>
+      <td>0.003076</td>
+      <td>...</td>
+      <td>0.420425</td>
+      <td>0.579652</td>
+      <td>0.747177</td>
+      <td>0.520524</td>
+      <td>0.612667</td>
+      <td>0.622886</td>
+      <td>0.747776</td>
+      <td>0.816770</td>
+      <td>281600.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>2807</th>
+      <td>0.590240</td>
+      <td>0.428749</td>
+      <td>0.442079</td>
+      <td>0.217818</td>
+      <td>0.472005</td>
+      <td>0.711601</td>
+      <td>0.600755</td>
+      <td>0.286046</td>
+      <td>0.449402</td>
+      <td>0.008338</td>
+      <td>...</td>
+      <td>0.632573</td>
+      <td>0.586643</td>
+      <td>0.726141</td>
+      <td>0.550540</td>
+      <td>0.610827</td>
+      <td>0.601087</td>
+      <td>0.705423</td>
+      <td>0.796198</td>
+      <td>281700.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>2808</th>
+      <td>0.589076</td>
+      <td>0.460154</td>
+      <td>0.448967</td>
+      <td>0.177019</td>
+      <td>0.437505</td>
+      <td>0.706044</td>
+      <td>0.566156</td>
+      <td>0.267300</td>
+      <td>0.475865</td>
+      <td>0.018506</td>
+      <td>...</td>
+      <td>0.537867</td>
+      <td>0.594823</td>
+      <td>0.694603</td>
+      <td>0.587730</td>
+      <td>0.607017</td>
+      <td>0.615202</td>
+      <td>0.663632</td>
+      <td>0.763400</td>
+      <td>281800.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>2809</th>
+      <td>0.580121</td>
+      <td>0.475108</td>
+      <td>0.452497</td>
+      <td>0.118278</td>
+      <td>0.441346</td>
+      <td>0.723912</td>
+      <td>0.511587</td>
+      <td>0.251249</td>
+      <td>0.505138</td>
+      <td>0.039944</td>
+      <td>...</td>
+      <td>0.484631</td>
+      <td>0.621631</td>
+      <td>0.687303</td>
+      <td>0.623109</td>
+      <td>0.618511</td>
+      <td>0.606319</td>
+      <td>0.602226</td>
+      <td>0.701627</td>
+      <td>281900.0</td>
+      <td>0.0</td>
+    </tr>
+  </tbody>
+</table>
+<p>2810 rows × 65 columns</p>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">nm_plots</span><span class="o">.</span><span class="n">plot_corr_matrix</span><span class="p">(</span>
+        <span class="n">feature</span> <span class="o">=</span> <span class="n">feature_reader_None</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">regex</span><span class="o">=</span><span class="s1">&#39;STN&#39;</span><span class="p">),</span>
+        <span class="n">OUT_PATH</span><span class="o">=</span> <span class="n">PATH_OUT_None</span><span class="p">,</span>
+        <span class="n">feature_names</span><span class="o">=</span><span class="n">feature_reader_None</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">regex</span><span class="o">=</span><span class="s1">&#39;STN&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
+        <span class="n">feature_file</span><span class="o">=</span><span class="n">feature_reader_None</span><span class="o">.</span><span class="n">feature_file</span><span class="p">,</span>
+        <span class="n">show_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">15</span><span class="p">),</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Correlation matrix for all LFP fft features, NO re-referencing&quot;</span><span class="p">,</span>
+        <span class="n">save_plot_name</span><span class="o">=</span><span class="s2">&quot;rereferencing_example_LFP_None.png&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Correlation matrix figure saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/none/rereferencing_example_LFP_None.png
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/example_rereferencing_28_1.png" src="_images/example_rereferencing_28_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">nm_plots</span><span class="o">.</span><span class="n">plot_corr_matrix</span><span class="p">(</span>
+        <span class="n">feature</span> <span class="o">=</span> <span class="n">feature_reader_default</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">regex</span><span class="o">=</span><span class="s1">&#39;STN&#39;</span><span class="p">),</span>
+        <span class="n">OUT_PATH</span><span class="o">=</span> <span class="n">PATH_OUT_userRef</span><span class="p">,</span>
+        <span class="n">feature_names</span><span class="o">=</span><span class="n">feature_reader_default</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">regex</span><span class="o">=</span><span class="s1">&#39;STN&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
+        <span class="n">feature_file</span><span class="o">=</span><span class="n">feature_reader_default</span><span class="o">.</span><span class="n">feature_file</span><span class="p">,</span>
+        <span class="n">show_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">15</span><span class="p">),</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Correlation matrix for all LFP fft features, default re-referencing&quot;</span><span class="p">,</span>
+        <span class="n">save_plot_name</span><span class="o">=</span><span class="s2">&quot;rereferencing_example_LFP_default.png&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Correlation matrix figure saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/userRef/rereferencing_example_LFP_default.png
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/example_rereferencing_29_1.png" src="_images/example_rereferencing_29_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">nm_plots</span><span class="o">.</span><span class="n">plot_corr_matrix</span><span class="p">(</span>
+        <span class="n">feature</span> <span class="o">=</span> <span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">regex</span><span class="o">=</span><span class="s1">&#39;STN&#39;</span><span class="p">),</span>
+        <span class="n">OUT_PATH</span><span class="o">=</span> <span class="n">PATH_OUT_userRef</span><span class="p">,</span>
+        <span class="n">feature_names</span><span class="o">=</span><span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">regex</span><span class="o">=</span><span class="s1">&#39;STN&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
+        <span class="n">feature_file</span><span class="o">=</span><span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">feature_file</span><span class="p">,</span>
+        <span class="n">show_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">15</span><span class="p">),</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Correlation matrix for all LFP fft features, CAR re-referencing&quot;</span><span class="p">,</span>
+        <span class="n">save_plot_name</span><span class="o">=</span><span class="s2">&quot;rereferencing_example_LFP_CAR.png&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Correlation matrix figure saved to /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/userRef/rereferencing_example_LFP_CAR.png
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/example_rereferencing_30_1.png" src="_images/example_rereferencing_30_1.png" />
+</div>
+</div>
+</section>
+<section id="Compare-decoding-performances">
+<h2>Compare decoding performances<a class="headerlink" href="#Compare-decoding-performances" title="Permalink to this heading"></a></h2>
+<p>We will run the decoding pipeline for both CAR and bipolar re-referenced cases and compare the performances. Since the default settings for LFP data correspond to bipolar re-referencing, we will use the variables <code class="docutils literal notranslate"><span class="pre">_default</span></code> and compare them to <code class="docutils literal notranslate"><span class="pre">_avg</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">XGBClassifier</span><span class="p">(</span><span class="n">use_label_encoder</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+
+<span class="n">feature_reader_default</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="n">nm_decode</span><span class="o">.</span><span class="n">Decoder</span><span class="p">(</span>
+    <span class="n">features</span><span class="o">=</span><span class="n">feature_reader_default</span><span class="o">.</span><span class="n">feature_arr</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="n">feature_reader_default</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
+    <span class="n">label_name</span><span class="o">=</span><span class="n">feature_reader_default</span><span class="o">.</span><span class="n">label_name</span><span class="p">,</span>
+    <span class="n">used_chs</span><span class="o">=</span><span class="n">feature_reader_default</span><span class="o">.</span><span class="n">used_chs</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+    <span class="n">eval_method</span><span class="o">=</span><span class="n">metrics</span><span class="o">.</span><span class="n">balanced_accuracy_score</span><span class="p">,</span>
+    <span class="n">cv_method</span><span class="o">=</span><span class="n">model_selection</span><span class="o">.</span><span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">get_movement_detection_rate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">min_consequent_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">TRAIN_VAL_SPLIT</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">RUN_BAY_OPT</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">use_nested_cv</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">sfreq</span><span class="o">=</span><span class="n">feature_reader_default</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sampling_rate_features_hz&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="n">performances_default</span> <span class="o">=</span> <span class="n">feature_reader_default</span><span class="o">.</span><span class="n">run_ML_model</span><span class="p">(</span>
+    <span class="n">estimate_channels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">estimate_gridpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">estimate_all_channels_combined</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">save_results</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">df_per_default</span> <span class="o">=</span> <span class="n">feature_reader_default</span><span class="o">.</span><span class="n">get_dataframe_performances</span><span class="p">(</span><span class="n">performances_default</span><span class="p">)</span>
+
+<span class="n">nm_plots</span><span class="o">.</span><span class="n">plot_df_subjects</span><span class="p">(</span>
+    <span class="n">df_per_default</span><span class="p">,</span> <span class="n">x_col</span><span class="o">=</span><span class="s2">&quot;sub&quot;</span><span class="p">,</span> <span class="n">y_col</span><span class="o">=</span><span class="s2">&quot;performance_test&quot;</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;ch_type&quot;</span><span class="p">,</span>
+    <span class="n">PATH_SAVE</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_OUT</span><span class="p">,</span> <span class="n">RUN_NAME</span><span class="p">,</span> <span class="n">RUN_NAME</span> <span class="o">+</span> <span class="s2">&quot;_decoding_performance_default.png&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+model being saved to: /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/default/sub-000_ses-right_task-force_run-3/sub-000_ses-right_task-force_run-3_LM_ML_RES.p
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/example_rereferencing_32_1.png" src="_images/example_rereferencing_32_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">XGBClassifier</span><span class="p">(</span><span class="n">use_label_encoder</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+
+<span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="n">nm_decode</span><span class="o">.</span><span class="n">Decoder</span><span class="p">(</span>
+    <span class="n">features</span><span class="o">=</span><span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">feature_arr</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
+    <span class="n">label_name</span><span class="o">=</span><span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">label_name</span><span class="p">,</span>
+    <span class="n">used_chs</span><span class="o">=</span><span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">used_chs</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+    <span class="n">eval_method</span><span class="o">=</span><span class="n">metrics</span><span class="o">.</span><span class="n">balanced_accuracy_score</span><span class="p">,</span>
+    <span class="n">cv_method</span><span class="o">=</span><span class="n">model_selection</span><span class="o">.</span><span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">get_movement_detection_rate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">min_consequent_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">TRAIN_VAL_SPLIT</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">RUN_BAY_OPT</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">use_nested_cv</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">sfreq</span><span class="o">=</span><span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sampling_rate_features_hz&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="n">performances_avg</span> <span class="o">=</span> <span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">run_ML_model</span><span class="p">(</span>
+    <span class="n">estimate_channels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">estimate_gridpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">estimate_all_channels_combined</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">save_results</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">df_per_avg</span> <span class="o">=</span> <span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">get_dataframe_performances</span><span class="p">(</span><span class="n">performances_avg</span><span class="p">)</span>
+
+<span class="n">nm_plots</span><span class="o">.</span><span class="n">plot_df_subjects</span><span class="p">(</span>
+    <span class="n">df_per_avg</span><span class="p">,</span> <span class="n">x_col</span><span class="o">=</span><span class="s2">&quot;sub&quot;</span><span class="p">,</span> <span class="n">y_col</span><span class="o">=</span><span class="s2">&quot;performance_test&quot;</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;ch_type&quot;</span><span class="p">,</span>
+    <span class="n">PATH_SAVE</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_OUT_avg</span><span class="p">,</span> <span class="n">RUN_NAME</span><span class="p">,</span> <span class="n">RUN_NAME</span> <span class="o">+</span> <span class="s2">&quot;_decoding_performance_avg.png&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+model being saved to: /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/avg/sub-000_ses-right_task-force_run-3/sub-000_ses-right_task-force_run-3_LM_ML_RES.p
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/example_rereferencing_33_1.png" src="_images/example_rereferencing_33_1.png" />
+</div>
+</div>
+</section>
+<section id="id1">
+<h2>Compare decoding performances<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h2>
+<p>We will run the decoding pipeline for both CAR and bipolar re-referenced cases and compare the performances. Since the default settings for LFP data correspond to bipolar re-referencing, we will use the variables <code class="docutils literal notranslate"><span class="pre">_default</span></code> and compare them to <code class="docutils literal notranslate"><span class="pre">_avg</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">XGBClassifier</span><span class="p">(</span><span class="n">use_label_encoder</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+
+<span class="n">feature_reader_default</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="n">nm_decode</span><span class="o">.</span><span class="n">Decoder</span><span class="p">(</span>
+    <span class="n">features</span><span class="o">=</span><span class="n">feature_reader_default</span><span class="o">.</span><span class="n">feature_arr</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="n">feature_reader_default</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
+    <span class="n">label_name</span><span class="o">=</span><span class="n">feature_reader_default</span><span class="o">.</span><span class="n">label_name</span><span class="p">,</span>
+    <span class="n">used_chs</span><span class="o">=</span><span class="n">feature_reader_default</span><span class="o">.</span><span class="n">used_chs</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+    <span class="n">eval_method</span><span class="o">=</span><span class="n">metrics</span><span class="o">.</span><span class="n">balanced_accuracy_score</span><span class="p">,</span>
+    <span class="n">cv_method</span><span class="o">=</span><span class="n">model_selection</span><span class="o">.</span><span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">get_movement_detection_rate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">min_consequent_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">TRAIN_VAL_SPLIT</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">RUN_BAY_OPT</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">use_nested_cv</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">sfreq</span><span class="o">=</span><span class="n">feature_reader_default</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sampling_rate_features_hz&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="n">performances_default</span> <span class="o">=</span> <span class="n">feature_reader_default</span><span class="o">.</span><span class="n">run_ML_model</span><span class="p">(</span>
+    <span class="n">estimate_channels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">estimate_gridpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">estimate_all_channels_combined</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">save_results</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">df_per_default</span> <span class="o">=</span> <span class="n">feature_reader_default</span><span class="o">.</span><span class="n">get_dataframe_performances</span><span class="p">(</span><span class="n">performances_default</span><span class="p">)</span>
+
+<span class="n">nm_plots</span><span class="o">.</span><span class="n">plot_df_subjects</span><span class="p">(</span>
+    <span class="n">df_per_default</span><span class="p">,</span> <span class="n">x_col</span><span class="o">=</span><span class="s2">&quot;sub&quot;</span><span class="p">,</span> <span class="n">y_col</span><span class="o">=</span><span class="s2">&quot;performance_test&quot;</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;ch_type&quot;</span><span class="p">,</span>
+    <span class="n">PATH_SAVE</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_OUT</span><span class="p">,</span> <span class="n">RUN_NAME</span><span class="p">,</span> <span class="n">RUN_NAME</span> <span class="o">+</span> <span class="s2">&quot;_decoding_performance_default.png&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+model being saved to: /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/default/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_LM_ML_RES.p
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/example_rereferencing_35_1.png" src="_images/example_rereferencing_35_1.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">xgboost</span><span class="o">.</span><span class="n">XGBClassifier</span><span class="p">(</span><span class="n">use_label_encoder</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+
+<span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="n">nm_decode</span><span class="o">.</span><span class="n">Decoder</span><span class="p">(</span>
+    <span class="n">features</span><span class="o">=</span><span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">feature_arr</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
+    <span class="n">label_name</span><span class="o">=</span><span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">label_name</span><span class="p">,</span>
+    <span class="n">used_chs</span><span class="o">=</span><span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">used_chs</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+    <span class="n">eval_method</span><span class="o">=</span><span class="n">metrics</span><span class="o">.</span><span class="n">balanced_accuracy_score</span><span class="p">,</span>
+    <span class="n">cv_method</span><span class="o">=</span><span class="n">model_selection</span><span class="o">.</span><span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+    <span class="n">get_movement_detection_rate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">min_consequent_count</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">TRAIN_VAL_SPLIT</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">RUN_BAY_OPT</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">use_nested_cv</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">sfreq</span><span class="o">=</span><span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s2">&quot;sampling_rate_features_hz&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+
+<span class="n">performances_avg</span> <span class="o">=</span> <span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">run_ML_model</span><span class="p">(</span>
+    <span class="n">estimate_channels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">estimate_gridpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">estimate_all_channels_combined</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">save_results</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">df_per_avg</span> <span class="o">=</span> <span class="n">feature_reader_avg</span><span class="o">.</span><span class="n">get_dataframe_performances</span><span class="p">(</span><span class="n">performances_avg</span><span class="p">)</span>
+
+<span class="n">nm_plots</span><span class="o">.</span><span class="n">plot_df_subjects</span><span class="p">(</span>
+    <span class="n">df_per_avg</span><span class="p">,</span> <span class="n">x_col</span><span class="o">=</span><span class="s2">&quot;sub&quot;</span><span class="p">,</span> <span class="n">y_col</span><span class="o">=</span><span class="s2">&quot;performance_test&quot;</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;ch_type&quot;</span><span class="p">,</span>
+    <span class="n">PATH_SAVE</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PATH_OUT_avg</span><span class="p">,</span> <span class="n">RUN_NAME</span><span class="p">,</span> <span class="n">RUN_NAME</span> <span class="o">+</span> <span class="s2">&quot;_decoding_performance_avg.png&quot;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+model being saved to: /home/lauraflyra/Documents/BCCN/Lab_Rotation_DBS_Decoding/Code/py_neuromodulation/examples/data/derivatives/rereferencing/avg/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0/sub-testsub_ses-EphysMedOff_task-buttonpress_run-0_LM_ML_RES.p
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/example_rereferencing_36_1.png" src="_images/example_rereferencing_36_1.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython2 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="example_normalization.html" class="btn btn-neutral float-left" title="Example notebook for different normalization techniques" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="outline_parametrization.html" class="btn btn-neutral float-right" title="Parametrization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Timon Merk.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,5 +1,0 @@
-nm_oscillatory.py
-=============
-
-.. automodule:: nm_oscillatory.FFT
-      :members:
