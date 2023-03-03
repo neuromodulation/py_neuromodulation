@@ -15,13 +15,13 @@
     "features": {
         "raw_hjorth": true,
         "return_raw": true,
-        "bandpass_filter": true,
-        "stft": true,
+        "bandpass_filter": false,
+        "stft": false,
         "fft": true,
         "sharpwave_analysis": true,
-        "coherence": true,
-        "fooof": true,
-        "nolds": true,
+        "coherence": false,
+        "fooof": false,
+        "nolds": false,
         "bursts": true,
         "linelength": true,
         "mne_connectivity": true
@@ -241,21 +241,15 @@
         "knee": true
     },
     "nolds_features": {
-        "sample_entropy": true,
-        "correlation_dimension": true,
+        "sample_entropy": false,
+        "correlation_dimension": false,
         "lyapunov_exponent": true,
-        "hurst_exponent": true,
-        "detrended_fluctutaion_analysis": true,
+        "hurst_exponent": false,
+        "detrended_fluctutaion_analysis": false,
         "data": {
             "raw": true,
             "frequency_bands": [
-                "theta",
-                "alpha",
-                "low beta",
-                "high beta",
-                "low gamma",
-                "high gamma",
-                "HFA"
+                "low beta"
             ]
         }
     },

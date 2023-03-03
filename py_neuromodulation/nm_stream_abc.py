@@ -38,7 +38,7 @@ class PNStream(ABC):
         sfreq: int | float,
         nm_channels: pd.DataFrame | _PathLike,
         settings: dict | _PathLike | None = None,
-        line_noise: int | float | None = None,
+        line_noise: int | float | None = 50,
         path_grids: _PathLike | None = None,
         coords: dict | None = None,
         coord_names: list | None = None,

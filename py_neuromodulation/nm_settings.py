@@ -7,7 +7,7 @@ from py_neuromodulation import nm_IO
 
 
 def get_default_settings() -> dict:
-    """Read default settings from file."""
+    """Read default settings from nm_settings.json"""
     settings_path = str(
         pathlib.Path(__file__).parent.resolve() / "nm_settings.json"
     )
@@ -43,8 +43,6 @@ def set_settings_fast_compute(
 
 def test_settings(
     settings: dict,
-    nm_channels: pd.DataFrame,
-    verbose: bool = True,
 ) -> None:
     """Test if settings are specified correctly in nm_settings.json
     Parameters

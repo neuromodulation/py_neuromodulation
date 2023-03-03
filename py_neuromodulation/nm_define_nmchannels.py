@@ -246,9 +246,27 @@ def _get_default_references(
 def get_default_channels_from_data(
         data: np.array, car_rereferencing:bool=True,
 ):
-    """
-    From data array with shape (n_channels, n_time) get default dataframe with
-    ecog datatype, no bad channels, no targets, common average rereferencing
+    """Return default nm_channels dataframe with
+    ecog datatype, no bad channels, no targets, common average rereferencing 
+
+    Parameters
+    ----------
+    data : np.array
+        Data array in shape (n_channels, n_time)
+    car_rereferencing : bool, optional
+        use common average rereferencing, by default True
+
+    Returns
+    -------
+    pd.DataFrame
+        nm_channel dataframe containing columns: 
+         - name
+         - rereference
+         - used
+         - target
+         - type
+         - status
+         - new_name
     """
 
     ch_name = [f"ch{idx}" for idx in range(data.shape[0])]

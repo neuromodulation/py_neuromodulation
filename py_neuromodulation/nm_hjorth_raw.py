@@ -56,3 +56,12 @@ class Raw(nm_features_abc.Feature):
             features_compute["_".join([ch_name, "raw"])] = data[ch_idx, -1]
 
         return features_compute
+
+    @staticmethod
+    def test_settings(
+        settings: dict,
+        ch_names: Iterable[str],
+        sfreq: int | float,
+    ):
+        # no settings to test
+        pass

@@ -47,6 +47,7 @@ class Nolds(nm_features_abc.Feature):
         features_compute: dict,
     ) -> dict:
 
+        data = np.nan_to_num(data)
         if self.s["nolds_features"]["data"]["raw"]:
             features_compute = self.calc_nolds(data, features_compute)
         if len(self.s["nolds_features"]["data"]["frequency_bands"]) > 0:
@@ -66,25 +67,27 @@ class Nolds(nm_features_abc.Feature):
     ) -> dict:
 
         for ch_idx, ch_name in enumerate(self.ch_names):
+            dat = data[ch_idx, :]
+            empty_arr = dat.sum() == 0
             if self.s["nolds_features"]["sample_entropy"]:
                 features_compute[
                     f"{ch_name}_nolds_sample_entropy"
-                ] = nolds.sampen(data[ch_idx, :])
+                ] = nolds.sampen(dat) if not empty_arr else 0
             if self.s["nolds_features"]["correlation_dimension"]:
                 features_compute[
                     f"{ch_name}_nolds_correlation_dimension_{data_str}"
-                ] = nolds.corr_dim(data[ch_idx, :], emb_dim=2)
+                ] = nolds.corr_dim(dat, emb_dim=2) if not empty_arr else 0
             if self.s["nolds_features"]["lyapunov_exponent"]:
                 features_compute[
                     f"{ch_name}_nolds_lyapunov_exponent_{data_str}"
-                ] = nolds.lyap_r(data[ch_idx, :])
+                ] = nolds.lyap_r(dat) if not empty_arr else 0
             if self.s["nolds_features"]["hurst_exponent"]:
                 features_compute[
                     f"{ch_name}_nolds_hurst_exponent_{data_str}"
-                ] = nolds.hurst_rs(data[ch_idx, :])
+                ] = nolds.hurst_rs(dat) if not empty_arr else 0
             if self.s["nolds_features"]["detrended_fluctutaion_analysis"]:
                 features_compute[
                     f"{ch_name}_nolds_detrended_fluctutaion_analysis_{data_str}"
-                ] = nolds.dfa(data[ch_idx, :])
+                ] = nolds.dfa(dat) if not empty_arr else 0
 
         return features_compute

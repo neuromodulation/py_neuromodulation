@@ -73,7 +73,7 @@ class _OfflineStream(nm_stream_abc.PNStream):
         data: np.ndarray,
         out_path_root: _PathLike | None = None,
         folder_name: str = "sub",
-    ) -> None:
+    ) -> pd.DataFrame:
         generator = nm_generator.raw_data_generator(
             data=data,
             settings=self.settings,
@@ -99,7 +99,10 @@ class _OfflineStream(nm_stream_abc.PNStream):
         feature_df = pd.DataFrame(features)
         feature_df = self._add_labels(features=feature_df, data=data)
 
-        self.save_after_stream(out_path_root, folder_name, feature_df)
+        if out_path_root is not None:
+            self.save_after_stream(out_path_root, folder_name, feature_df)
+
+        return feature_df
 
 
 class Stream(_OfflineStream):
@@ -108,9 +111,25 @@ class Stream(_OfflineStream):
         data: np.ndarray | pd.DataFrame,
         out_path_root: _PathLike | None = None,
         folder_name: str = "sub",
-    ) -> None:
-        """Does not need to run in parallel."""
+    ) -> pd.DataFrame:
+        """Call run function for offline stream. 
+
+        Parameters
+        ----------
+        data : np.ndarray | pd.DataFrame
+            shape (n_channels, n_time)
+        out_path_root : _PathLike | None, optional
+            Full path to store estimated features, by default None
+            If None, data is simply returned and not saved
+        folder_name : str, optional
+             folder output name, commonly subject or run name, by default "sub"
+
+        Returns
+        -------
+        pd.DataFrame
+            feature DataFrame
+        """
 
         data = self._handle_data(data)
 
-        self._run_offline(data, out_path_root, folder_name)
+        return self._run_offline(data, out_path_root, folder_name)
