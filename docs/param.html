@@ -18,10 +18,12 @@
         <script src="_static/doctools.js"></script>
         <script src="_static/sphinx_highlight.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Grid Point Projection" href="example_gridPointProjection.html" />
+    <link rel="next" title="Analyzing sharpwave temporal features" href="example_sharpwave_analysis.html" />
     <link rel="prev" title="ECoG Movement decoding example" href="example_BIDS.html" /> 
 </head>
 
@@ -71,7 +73,9 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="example_sharpwave_analysis.html">Analyzing sharpwave temporal features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="example_gridPointProjection.html">Grid Point Projection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rmap_decoding.html">Across patient decoding using R-Map optimal connectivity</a></li>
 </ul>
 </li>
 </ul>
@@ -274,17 +278,10 @@ $X_{norm} = frac{X - median(X)}{median(X)}$</p>
 </section>
 <section id="kalman-filtering">
 <h4>Kalman filtering<a class="headerlink" href="#kalman-filtering" title="Permalink to this heading"></a></h4>
-<p><strong>kalman_filter</strong> can be enabled for all oscillatory features and is motivated by filtering estimated band power features using the white noise acceleration model (see <a class="reference external" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6927801/">“Improved detection of Parkinsonian resting tremor with feature engineering and Kalman filtering”</a> Yao et al 19) for a great reference. The white noise acceleration model get’s specified by the $T_p$ prediction interval (Hz), and the process noise is then defined by $sigma_w$ and $sigma_v$:</p>
-<dl>
-<dt>$</dt><dd><p>Q=
-left[ {begin{array}{cc}</p>
-<blockquote>
-<div><p>sigma_w^2frac{T_p^{3}}{3} &amp; sigma_w^2frac{T_p^2}{2}sigma_w^2frac{T_p^2}{3} &amp; sigma_w^2T_p</p>
-</div></blockquote>
-<p>end{array} } right]</p>
-</dd>
-</dl>
-<p>$</p>
+<p><strong>kalman_filter</strong> can be enabled for all oscillatory features and is motivated by filtering estimated band power features using the white noise acceleration model (see <a class="reference external" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6927801/">“Improved detection of Parkinsonian resting tremor with feature engineering and Kalman filtering”</a> Yao et al 19) for a great reference. The white noise acceleration model get’s specified by the <span class="math notranslate nohighlight">\(T_p\)</span> prediction interval (Hz), and the process noise is then defined by <span class="math notranslate nohighlight">\(\sigma_w\)</span> and <span class="math notranslate nohighlight">\(\sigma_v\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}Q = \begin{bmatrix} \sigma_w^2 \frac{T_p^{3}}{3} &amp; \sigma_w^2 \frac{T_p^2}{2}\\
+   \sigma_w^2 \frac{T_p^2}{3} &amp; \sigma_w^2T_p\ \end{bmatrix}\end{split}\]</div>
 <p>The settings can be specified as follows:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;kalman_filter_settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;Tp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span>
@@ -522,7 +519,7 @@ A common way to estimate band power is to take the variance of FIR filtered data
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="example_BIDS.html" class="btn btn-neutral float-left" title="ECoG Movement decoding example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="example_gridPointProjection.html" class="btn btn-neutral float-right" title="Grid Point Projection" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="example_sharpwave_analysis.html" class="btn btn-neutral float-right" title="Analyzing sharpwave temporal features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

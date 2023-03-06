@@ -400,7 +400,7 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">KF_dict</span> <span class="ow">and</span> <span class="p">(</span><span class="n">bp_feature</span> <span class="o">==</span> <span class="s2">&quot;activity&quot;</span><span class="p">):</span>
                 <span class="n">feature_calc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_KF</span><span class="p">(</span><span class="n">feature_calc</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">)</span>
 
-            <span class="n">features_compute</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature_calc</span>
+            <span class="n">features_compute</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">feature_calc</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">features_compute</span></div></div>
 </pre></div>

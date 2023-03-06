@@ -154,15 +154,14 @@ Fast Fourier Transform and Short-Time Fourier Transform are both specified using
 Kalman filtering
 """"""""""""""""
 
-**kalman_filter** can be enabled for all oscillatory features and is motivated by filtering estimated band power features using the white noise acceleration model (see `"Improved detection of Parkinsonian resting tremor with feature engineering and Kalman filtering" <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6927801/>`_ Yao et al 19) for a great reference. The white noise acceleration model get's specified by the $T_p$ prediction interval (Hz), and the process noise is then defined by $\sigma_w$ and $\sigma_v$: 
+**kalman_filter** can be enabled for all oscillatory features and is motivated by filtering estimated band power features using the white noise acceleration model (see `"Improved detection of Parkinsonian resting tremor with feature engineering and Kalman filtering" <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6927801/>`_ Yao et al 19) for a great reference. The white noise acceleration model get's specified by the :math:`T_p` prediction interval (Hz), and the process noise is then defined by :math:`\sigma_w` and :math:`\sigma_v`: 
 
-$
-  Q=
-  \left[ {\begin{array}{cc}
-   \sigma_w^2\frac{T_p^{3}}{3} & \sigma_w^2\frac{T_p^2}{2}\
-   \sigma_w^2\frac{T_p^2}{3} & \sigma_w^2T_p\
-  \end{array} } \right]
-$
+.. math::
+
+  Q = \begin{bmatrix} \sigma_w^2 \frac{T_p^{3}}{3} & \sigma_w^2 \frac{T_p^2}{2}\\
+     \sigma_w^2 \frac{T_p^2}{3} & \sigma_w^2T_p\ \end{bmatrix}
+    
+
 
 The settings can be specified as follows:
 

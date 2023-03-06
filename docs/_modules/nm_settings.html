@@ -84,7 +84,7 @@
 
 
 <div class="viewcode-block" id="get_default_settings"><a class="viewcode-back" href="../nm_settings.html#nm_settings.get_default_settings">[docs]</a><span class="k">def</span> <span class="nf">get_default_settings</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read default settings from file.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read default settings from nm_settings.json&quot;&quot;&quot;</span>
     <span class="n">settings_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
         <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;nm_settings.json&quot;</span>
     <span class="p">)</span>
@@ -120,8 +120,6 @@
 
 <div class="viewcode-block" id="test_settings"><a class="viewcode-back" href="../nm_settings.html#nm_settings.test_settings">[docs]</a><span class="k">def</span> <span class="nf">test_settings</span><span class="p">(</span>
     <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-    <span class="n">nm_channels</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test if settings are specified correctly in nm_settings.json</span>
 <span class="sd">    Parameters</span>

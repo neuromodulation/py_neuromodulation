@@ -4,6 +4,7 @@ import numpy as np
 import os
 from numba import jit
 from scipy import stats
+import pandas as pd
 
 from py_neuromodulation import nm_plots
 
