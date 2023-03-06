@@ -11,7 +11,7 @@ class Hjorth(nm_features_abc.Feature):
     ) -> None:
         self.s = settings
         self.ch_names = ch_names
-    
+
     @staticmethod
     def test_settings(
         settings: dict,
@@ -25,18 +25,24 @@ class Hjorth(nm_features_abc.Feature):
         for ch_idx, ch_name in enumerate(self.ch_names):
             features_compute[
                 "_".join([ch_name, "RawHjorth_Activity"])
-            ] = np.var(data[ch_idx, :])
-            deriv_variance = np.var(np.diff(data[ch_idx, :]))
-            mobility = np.sqrt(deriv_variance / np.var(data[ch_idx, :]))
+            ] = np.nan_to_num(np.var(data[ch_idx, :]))
+            deriv_variance = np.nan_to_num(np.var(np.diff(data[ch_idx, :])))
+            mobility = np.nan_to_num(
+                np.sqrt(deriv_variance / np.var(data[ch_idx, :]))
+            )
             features_compute[
                 "_".join([ch_name, "RawHjorth_Mobility"])
             ] = mobility
 
-            dat_deriv_2_var = np.var(np.diff(np.diff(data[ch_idx, :])))
-            deriv_mobility = np.sqrt(dat_deriv_2_var / deriv_variance)
-            features_compute["_".join([ch_name, "RawHjorth_Complexity"])] = (
-                deriv_mobility / mobility
+            dat_deriv_2_var = np.nan_to_num(
+                np.var(np.diff(np.diff(data[ch_idx, :])))
             )
+            deriv_mobility = np.nan_to_num(
+                np.sqrt(dat_deriv_2_var / deriv_variance)
+            )
+            features_compute[
+                "_".join([ch_name, "RawHjorth_Complexity"])
+            ] = np.nan_to_num(deriv_mobility / mobility)
 
         return features_compute
 

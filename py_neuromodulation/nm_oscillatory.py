@@ -323,6 +323,6 @@ class BandPower(OscillatoryFeature):
             if self.KF_dict and (bp_feature == "activity"):
                 feature_calc = self.update_KF(feature_calc, feature_name)
 
-            features_compute[feature_name] = feature_calc
+            features_compute[feature_name] = np.nan_to_num(feature_calc)
 
         return features_compute

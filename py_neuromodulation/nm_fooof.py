@@ -80,14 +80,14 @@ class FooofAnalyzer(nm_features_abc.Feature):
                 print(f"failing spectrum: {spectrum}")
             if self.settings_fooof["aperiodic"]["exponent"]:
                 features_compute[f"{ch_name}_fooof_a_exp"] = (
-                    self.fm.get_params("aperiodic_params", "exponent")
+                    np.nan_to_num(self.fm.get_params("aperiodic_params", "exponent"))
                     if self.fm.fooofed_spectrum_ is not None
                     else None
                 )
 
             if self.settings_fooof["aperiodic"]["offset"]:
                 features_compute[f"{ch_name}_fooof_a_offset"] = (
-                    self.fm.get_params("aperiodic_params", "offset")
+                    np.nan_to_num(self.fm.get_params("aperiodic_params", "offset"))
                     if self.fm.fooofed_spectrum_ is not None
                     else None
                 )

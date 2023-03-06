@@ -15,16 +15,16 @@
     "features": {
         "raw_hjorth": true,
         "return_raw": true,
-        "bandpass_filter": false,
-        "stft": false,
+        "bandpass_filter": true,
+        "stft": true,
         "fft": true,
         "sharpwave_analysis": true,
-        "coherence": false,
-        "fooof": false,
-        "nolds": false,
+        "fooof": true,
         "bursts": true,
         "linelength": true,
-        "mne_connectivity": true
+        "coherence": false,
+        "nolds": false,
+        "mne_connectivity": false
     },
     "postprocessing": {
         "feature_normalization": true,
