@@ -5,6 +5,7 @@ import numpy as np
 
 from py_neuromodulation import nm_normalization
 
+
 def test_raw_normalization_init():
 
     with pytest.raises(Exception):
@@ -13,8 +14,9 @@ def test_raw_normalization_init():
             sampling_rate_features_hz=500,
             normalization_method="meann",
             normalization_time_s=30,
-            clip=3
+            clip=3,
         )
+
 
 def test_feature_normalization_init():
 
@@ -23,8 +25,9 @@ def test_feature_normalization_init():
             sampling_rate_features_hz=500,
             normalization_method="meann",
             normalization_time_s=30,
-            clip=3
+            clip=3,
         )
+
 
 def test_process_norm_features():
 
@@ -32,7 +35,7 @@ def test_process_norm_features():
         sampling_rate_features_hz=500,
         normalization_method="mean",
         normalization_time_s=30,
-        clip=3
+        clip=3,
     )
     data = np.ones([1, 5])
     data_normed = norm.process(data)
@@ -41,13 +44,14 @@ def test_process_norm_features():
 
     assert np.all(np.equal(data, norm.previous) == 1)
 
+
 def test_previous_size_FeatureNorm():
 
     norm = nm_normalization.FeatureNormalizer(
         sampling_rate_features_hz=10,
         normalization_method="zscore",
         normalization_time_s=10,
-        clip=3
+        clip=3,
     )
 
     num_features = 5
@@ -56,13 +60,14 @@ def test_previous_size_FeatureNorm():
         data = norm.process(np.random.random([1, num_features]))
 
     assert norm.previous.shape[0] < norm.num_samples_normalize
-    
-def test_zscore_feature_analysis():    
+
+
+def test_zscore_feature_analysis():
     norm = nm_normalization.FeatureNormalizer(
         sampling_rate_features_hz=10,
         normalization_method="zscore",
         normalization_time_s=30,
-        clip=False
+        clip=False,
     )
 
     num_features = 5
@@ -71,9 +76,13 @@ def test_zscore_feature_analysis():
         data_to_norm = np.random.random([1, num_features])
         data_normed = norm.process(data_to_norm)
 
-    expect_res = norm.previous[:, 0].std() * data_normed[0, 0] + norm.previous[:, 0].mean()
+    expect_res = (
+        norm.previous[:, 0].std() * data_normed[0, 0]
+        + norm.previous[:, 0].mean()
+    )
 
     assert pytest.approx(expect_res, 0.1) == data_to_norm[0, 0]
+
 
 def test_zscore_raw_analysis():
 
@@ -82,7 +91,7 @@ def test_zscore_raw_analysis():
         normalization_method="zscore",
         normalization_time_s=30,
         sfreq=10,
-        clip=False
+        clip=False,
     )
 
     num_samples = 100
@@ -91,9 +100,15 @@ def test_zscore_raw_analysis():
         data_to_norm = np.random.random([1, num_samples])
         data_normed = norm.process(data_to_norm)
 
-    expect_res = norm.previous[:, 0].std() * data_normed[0, 0] + norm.previous[:, 0].mean()
+    expect_res = (
+        norm.previous[:, 0].std() * data_normed[0, 0]
+        + norm.previous[:, 0].mean()
+    )
 
-    np.testing.assert_allclose(expect_res, data_to_norm[0, 0], rtol=0.1, atol=0.1)
+    np.testing.assert_allclose(
+        expect_res, data_to_norm[0, 0], rtol=0.1, atol=0.1
+    )
+
 
 def test_all_norm_methods_raw():
 
@@ -103,7 +118,7 @@ def test_all_norm_methods_raw():
             normalization_method=norm_method,
             normalization_time_s=30,
             sfreq=10,
-            clip=False
+            clip=False,
         )
 
         num_samples = 10
@@ -114,6 +129,7 @@ def test_all_norm_methods_raw():
 
         assert np.all(np.isfinite(data_normed) == True)
 
+
 def test_all_norm_methods_feature():
 
     for norm_method in [e.value for e in nm_normalization.NORM_METHODS]:
@@ -121,7 +137,7 @@ def test_all_norm_methods_feature():
             sampling_rate_features_hz=10,
             normalization_method=norm_method,
             normalization_time_s=30,
-            clip=False
+            clip=False,
         )
 
         num_samples = 10

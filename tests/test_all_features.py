@@ -6,8 +6,9 @@ from py_neuromodulation import (
     nm_settings,
     nm_stream_offline,
     nm_define_nmchannels,
-    nm_stream_abc
+    nm_stream_abc,
 )
+
 
 def get_example_stream(test_arr: np.array) -> nm_stream_abc.PNStream:
     settings = nm_settings.get_default_settings()
@@ -27,12 +28,10 @@ def get_example_stream(test_arr: np.array) -> nm_stream_abc.PNStream:
     nm_channels = nm_define_nmchannels.get_default_channels_from_data(test_arr)
 
     stream = nm_stream_offline.Stream(
-        sfreq=1000,
-        nm_channels=nm_channels,
-        settings=settings,
-        verbose=True
+        sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )
     return stream
+
 
 def test_all_features_random_array():
 
@@ -42,7 +41,13 @@ def test_all_features_random_array():
     df = stream.run(arr)
 
     # data CAN contain None's
-    assert df.shape[1] == df.apply(lambda s: pd.to_numeric(s, errors='coerce').notnull().all()).sum()
+    assert (
+        df.shape[1]
+        == df.apply(
+            lambda s: pd.to_numeric(s, errors="coerce").notnull().all()
+        ).sum()
+    )
+
 
 def test_all_features_zero_array():
 
@@ -50,6 +55,7 @@ def test_all_features_zero_array():
     stream = get_example_stream(arr)
 
     df = stream.run(arr)
+
 
 def test_all_features_NaN_array():
 
