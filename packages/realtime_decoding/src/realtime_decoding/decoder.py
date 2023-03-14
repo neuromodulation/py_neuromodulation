@@ -82,7 +82,8 @@ class Decoder(multiprocessing.Process):
                 # Predict
                 sample_ = sample[[i for i in sample.index if i != "label_train"]]
 
-                y = self._model.predict_proba(np.expand_dims(sample_.to_numpy(), 0))
+                y = float(self._model.predict_proba(np.expand_dims(sample_.to_numpy(), 0))[0, 1])
+                print(f"pr: {y}")
 
                 timestamp = np.datetime64(datetime.now(_timezone), "ns")
 

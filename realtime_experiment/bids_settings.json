@@ -1,8 +1,8 @@
 {
     "root": "C:\\CODE\\py_neuromodulation\\realtime_experiment\\data",
-    "out_dir": "C:\\CODE\\py_neuromodulation\\realtime_experiment\\data\\sub-792\\ses-EcogLfpMedOff01",
-    "filename": "sub-792_ses-EcogLfpMedOff01_task-RealtimeDecodingR_acq-StimOff_run-1_ieeg",
-    "sub": "792",
+    "out_dir": "C:\\CODE\\py_neuromodulation\\realtime_experiment\\data\\sub-649\\ses-EcogLfpMedOff01",
+    "filename": "sub-649_ses-EcogLfpMedOff01_task-RealtimeDecodingR_acq-StimOff_run-1_ieeg",
+    "sub": "649",
     "ses": "EcogLfpMedOff01",
     "task": "RealtimeDecodingR",
     "acq": "StimOff",
