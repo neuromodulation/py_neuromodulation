@@ -1,0 +1,13 @@
+PATH_OUT_DIR: data
+PATH_XML_CONFIG: saga_confif_sensight_ecog.xml
+
+PATH_MODEL_PREDICT: trained_model_STN_best_ch.p
+PATH_pynm_SETTINGS: nm_settings_feat.json
+PATH_pynm_CHANNELS: nm_channels_feat.csv
+
+sub: testsub
+task: rotameter
+ses: EcogLfpMedOff01
+acq: StimOff
+datatype: ieeg
+run:  1

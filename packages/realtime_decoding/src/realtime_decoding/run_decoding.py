@@ -24,17 +24,13 @@ from .helpers import _PathLike
 @contextmanager
 def open_tmsi_device(
     out_dir: _PathLike,
+    tmsi_cfg_file: _PathLike,
     verbose: bool = True,
 ) -> Generator[TMSiSDK.SagaDevice, None, None]:
+
     out_dir = pathlib.Path(out_dir)
-    cfg_file = tkinter.filedialog.askopenfilename(
-        title="Select TMSi Saga settings file",
-        filetypes=(
-            ("XML files", ["*.xml"]),
-            ("All files", "*.*"),
-        ),
-    )
-    cfg_file = pathlib.Path(cfg_file)
+
+    tmsi_cfg_file = pathlib.Path(tmsi_cfg_file)
     device = None
     try:
         print("Initializing TMSi device...")
@@ -61,9 +57,9 @@ def open_tmsi_device(
         device.open()
         print("Connected to device.")
         # cfg_file = TMSiSDK.get_config(saga_config)
-        device.load_config(cfg_file)
+        device.load_config(tmsi_cfg_file)
         TMSiSDK.xml_saga_config.xml_write_config(
-            filename=out_dir / cfg_file.name, saga_config=device.config
+            filename=out_dir / tmsi_cfg_file.name, saga_config=device.config
         )
         if verbose:
             print("\nThe active channels are : ")
@@ -149,6 +145,7 @@ class ProcessManager:
     timeout: float = 0.05
     verbose: bool = True
     _terminated: bool = field(init=False, default=False)
+    settings: dict
 
     def __enter__(self):
         return self
@@ -201,6 +198,8 @@ class ProcessManager:
             interval=self.timeout,
             queue_raw=self.queue_source,
             queue_features=self.queue_features,
+            path_nm_settings=self.settings["PATH_pynm_SETTINGS"],
+            path_nm_channels=self.settings["PATH_pynm_CHANNELS"],
             out_dir=self.out_dir,
             path_grids=None,
             line_noise=50,
@@ -214,6 +213,7 @@ class ProcessManager:
             interval=self.timeout,
             out_dir=self.out_dir,
             verbose=self.verbose,
+            model_path=self.settings["PATH_MODEL_PREDICT"]
         )
         processes = [features, decoder]
         for process in processes:
@@ -321,14 +321,15 @@ class ProcessManager:
 
 
 def run(
-    out_dir: _PathLike,
-    filename: str,
+    config_settings: dict,
 ) -> None:
     """Initialize data processing by launching all necessary processes."""
-    out_dir = pathlib.Path(out_dir)
+    out_dir = pathlib.Path(config_settings["PATH_OUT_DIR"])
+    file_name = config_settings["filename"]
+
     with (
-        open_tmsi_device(out_dir) as device,
-        open_poly5_writer(device, out_dir / filename) as file_writer,
+        open_tmsi_device(out_dir, config_settings["PATH_XML_CONFIG"]) as device,
+        open_poly5_writer(device, out_dir / file_name) as file_writer,
         open_lsl_stream(device) as stream,
     ):
         manager = ProcessManager(
@@ -338,6 +339,7 @@ def run(
             out_dir=out_dir,
             timeout=0.05,
             verbose=False,
+            config_settings
         )
 
         manager.start()

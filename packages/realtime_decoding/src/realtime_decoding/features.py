@@ -29,6 +29,8 @@ class Features(multiprocessing.Process):
         interval: float,
         queue_raw: multiprocessing.Queue,
         queue_features: multiprocessing.Queue,
+        path_nm_settings: _PathLike,
+        path_nm_channels: _PathLike,
         out_dir: _PathLike,
         verbose: bool,
         path_grids: str | None = None,
@@ -44,22 +46,13 @@ class Features(multiprocessing.Process):
         self.verbose = verbose
         self.out_dir = pathlib.Path(out_dir)
         self.finished = multiprocessing.Event()
-
-        self.paths = {}
-        for keyword, ftype in (
-            ("nm_channels", "csv"),
-            ("nm_settings", "json"),
-        ):
-            filename = tkinter.filedialog.askopenfilename(
-                title=f"Select {keyword} file",
-                filetypes=(("Files", f"*.{ftype}*"),),
-            )
-            self.paths[keyword] = pathlib.Path(filename)
+        self.path_nm_settings = path_nm_settings
+        self.path_nm_channels = path_nm_channels
 
         self.processor = nm.nm_run_analysis.DataProcessor(
             sfreq=self.sfreq,
-            settings=self.paths["nm_settings"],
-            nm_channels=self.paths["nm_channels"],
+            settings=path_nm_settings,
+            nm_channels=path_nm_channels,
             line_noise=line_noise,
             path_grids=path_grids,
             verbose=self.verbose,
@@ -92,10 +85,10 @@ class Features(multiprocessing.Process):
     def _save_settings(self) -> None:
         # print("SAVING DATA ....")
         self.processor.nm_channels.to_csv(
-            self.out_dir / self.paths["nm_channels"].name, index=False
+            self.out_dir / self.path_nm_channels, index=False
         )
         with open(
-            self.out_dir / self.paths["nm_settings"].name,
+            self.out_dir / self.path_nm_settings,
             "w",
             encoding="utf-8",
         ) as outfile:
