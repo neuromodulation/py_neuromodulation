@@ -6,6 +6,7 @@ import queue
 import tkinter
 import tkinter.filedialog
 from datetime import datetime
+import keyboard
 
 import numpy as np
 import py_neuromodulation as nm
@@ -117,10 +118,19 @@ class Features(multiprocessing.Process):
                     (sd.num_samples_per_sample_set, sd.num_sample_sets),
                     order="F",
                 )
-                # data = np.array(samples)  # shape (time, ch)
+
                 self.buffer.extend(data.T)
                 if not self.buffer.is_full:
                     continue
+
+                margin = 0.2
+                if self.buffer[-1:, 24] > 1.2 + margin:
+                    keyboard.send("right", do_release=False)
+                elif self.buffer[-1:, 24] < 1.2 - margin:
+                    keyboard.press_and_release("left", do_release=False)
+                else:
+                    keyboard.release("left")
+                    keyboard.release("right")
                 features = self.processor.process(self.buffer[:].T)
                 timestamp = np.datetime64(datetime.utcnow(), "ns")
 

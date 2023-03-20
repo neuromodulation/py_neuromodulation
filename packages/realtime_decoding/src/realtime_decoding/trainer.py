@@ -6,13 +6,22 @@ import pickle
 import pandas as pd
 import os
 import numpy as np
+
+from TMSiFileFormats.file_readers import Poly5Reader
+
 #from matplotlib import pyplot as plt
 
 if __name__ == "__main__":
 
-    sub = "654"
+    # read data for rotameter amplitude investigation:
+
+    data = Poly5Reader(r"C:\CODE\py_neuromodulation\realtime_experiment\data\testsub\EcogLfpMedOff01\sub_ses_task_acq_run_datatype-20230320_145212.poly5")
 
     PATH_HDF5_FEATURES = rf"C:\CODE\py_neuromodulation\realtime_experiment\data\sub-{sub}\ses-EcogLfpMedOff01\sub-{sub}_ses-EcogLfpMedOff01_task-RealtimeDecodingR_acq-StimOff_run-1_ieeg.hdf5"
+
+
+    
+    sub = "654"
     PATH_MODEL_SAVE = os.path.join(
         rf"C:\CODE\py_neuromodulation\realtime_experiment\data\sub-{sub}\ses-EcogLfpMedOff01",
         "model_trained.p"
