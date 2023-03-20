@@ -28,6 +28,7 @@ class Decoder(multiprocessing.Process):
         interval: float,
         out_dir: _PathLike,
         verbose: bool,
+        model_path: _PathLike,
     ) -> None:
         super().__init__(name="DecodingProcess")
         self.queue_decoding = queue_decoding
@@ -38,14 +39,7 @@ class Decoder(multiprocessing.Process):
 
         self._threshold: float = 0.5
 
-        filename = tkinter.filedialog.askopenfilename(
-            title="Select model",
-            filetypes=(
-                ("pickle files", ["*.p", "*.pkl", "*.pickle"]),
-                ("All files", "*.*"),
-            ),
-        )
-        self.filename = pathlib.Path(filename)
+        self.filename = pathlib.Path(model_path)
 
         with open(self.filename, "rb") as file:
             self._model = pickle.load(file)
