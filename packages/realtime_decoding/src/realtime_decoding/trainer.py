@@ -10,7 +10,7 @@ import numpy as np
 
 if __name__ == "__main__":
 
-    sub = "487_train"
+    sub = "654"
 
     PATH_HDF5_FEATURES = rf"C:\CODE\py_neuromodulation\realtime_experiment\data\sub-{sub}\ses-EcogLfpMedOff01\sub-{sub}_ses-EcogLfpMedOff01_task-RealtimeDecodingR_acq-StimOff_run-1_ieeg.hdf5"
     PATH_MODEL_SAVE = os.path.join(
@@ -29,8 +29,8 @@ if __name__ == "__main__":
     #plt.plot(y)
     #plt.show()
 
-    X_lim = X.iloc[850:, :]
-    y_lim = y[850:]
+    X_lim = X.iloc[570:, :]
+    y_lim = y[570:]
 
 
     model = linear_model.LogisticRegression()

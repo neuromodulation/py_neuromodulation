@@ -60,12 +60,12 @@ class Decoder(multiprocessing.Process):
             realtime_decoding.clear_queue(q)
 
     def run(self) -> None:
-        labels = ["Prediction", "Probability", "Threshold"]
+        labels = ["Prediction", "Probability"]  # "Threshold"
 
         info = pylsl.StreamInfo(
             name="Decoding",
             type="EEG",
-            channel_count=3,
+            channel_count=2,
             channel_format="double64",
             source_id="decoding_1",
         )
@@ -94,7 +94,7 @@ class Decoder(multiprocessing.Process):
                 timestamp = np.datetime64(datetime.now(_timezone), "ns")
 
                 output = pd.DataFrame(
-                    [[y >= self._threshold, y, self._threshold]],
+                    [[y >= self._threshold, y]],  # self._threshold
                     columns=labels,
                     index=[timestamp],
                 )
