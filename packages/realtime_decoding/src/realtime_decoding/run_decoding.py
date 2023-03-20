@@ -142,10 +142,10 @@ class ProcessManager:
     lsl_stream: TMSiFileFormats.FileWriter
     file_writer: TMSiFileFormats.FileWriter
     out_dir: _PathLike
+    settings: dict
     timeout: float = 0.05
     verbose: bool = True
     _terminated: bool = field(init=False, default=False)
-    settings: dict
 
     def __enter__(self):
         return self
@@ -339,7 +339,7 @@ def run(
             out_dir=out_dir,
             timeout=0.05,
             verbose=False,
-            config_settings
+            settings=config_settings
         )
 
         manager.start()

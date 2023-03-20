@@ -1,9 +1,9 @@
-PATH_OUT_DIR: data
-PATH_XML_CONFIG: saga_confif_sensight_ecog.xml
+PATH_OUT_DIR: C:\\code\\py_neuromodulation\\realtime_experiment\\data
+PATH_XML_CONFIG: C:\\code\\py_neuromodulation\\realtime_experiment\\saga_confif_sensight_ecog.xml
 
-PATH_MODEL_PREDICT: trained_model_STN_best_ch.p
-PATH_pynm_SETTINGS: nm_settings_feat.json
-PATH_pynm_CHANNELS: nm_channels_feat.csv
+PATH_MODEL_PREDICT: C:\\code\\py_neuromodulation\\realtime_experiment\\trained_model_STN_best_ch.p
+PATH_pynm_SETTINGS: C:\\code\\py_neuromodulation\\realtime_experiment\\nm_settings_feat.json
+PATH_pynm_CHANNELS: C:\\code\\py_neuromodulation\\realtime_experiment\\nm_channels_feat.csv
 
 sub: testsub
 task: rotameter
