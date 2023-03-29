@@ -13,7 +13,7 @@
   <Channels>
     <Channel>
       <ChanNr>0</ChanNr>
-      <ChanDivider>-1</ChanDivider>
+      <ChanDivider>0</ChanDivider>
       <AltChanName>CREF</AltChanName>
     </Channel>
     <Channel>
@@ -64,67 +64,67 @@
     <Channel>
       <ChanNr>10</ChanNr>
       <ChanDivider>0</ChanDivider>
-      <AltChanName>STNL234MT</AltChanName>
+      <AltChanName>STNL02MT</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>11</ChanNr>
       <ChanDivider>0</ChanDivider>
-      <AltChanName>STNL567MT</AltChanName>
+      <AltChanName>STNL03MT</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>12</ChanNr>
       <ChanDivider>0</ChanDivider>
-      <AltChanName>STNL08MT</AltChanName>
+      <AltChanName>STNL04MT</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>13</ChanNr>
-      <ChanDivider>-1</ChanDivider>
+      <ChanDivider>0</ChanDivider>
       <AltChanName>STNL05MT</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>14</ChanNr>
-      <ChanDivider>-1</ChanDivider>
+      <ChanDivider>0</ChanDivider>
       <AltChanName>STNL06MT</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>15</ChanNr>
-      <ChanDivider>-1</ChanDivider>
+      <ChanDivider>0</ChanDivider>
       <AltChanName>STNL07MT</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>16</ChanNr>
-      <ChanDivider>-1</ChanDivider>
-      <AltChanName>STNLXXMT</AltChanName>
+      <ChanDivider>0</ChanDivider>
+      <AltChanName>STNL08MT</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>17</ChanNr>
-      <ChanDivider>-1</ChanDivider>
-      <AltChanName>ECXL01SMA</AltChanName>
+      <ChanDivider>0</ChanDivider>
+      <AltChanName>ECXR01SMA</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>18</ChanNr>
-      <ChanDivider>-1</ChanDivider>
-      <AltChanName>ECXL02SMA</AltChanName>
+      <ChanDivider>0</ChanDivider>
+      <AltChanName>ECXR02SMA</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>19</ChanNr>
-      <ChanDivider>-1</ChanDivider>
-      <AltChanName>ECXL03SMA</AltChanName>
+      <ChanDivider>0</ChanDivider>
+      <AltChanName>ECXR03SMA</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>20</ChanNr>
-      <ChanDivider>-1</ChanDivider>
-      <AltChanName>ECXL04SMA</AltChanName>
+      <ChanDivider>0</ChanDivider>
+      <AltChanName>ECXR04SMA</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>21</ChanNr>
-      <ChanDivider>-1</ChanDivider>
-      <AltChanName>ECXL05SMA</AltChanName>
+      <ChanDivider>0</ChanDivider>
+      <AltChanName>ECXR05SMA</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>22</ChanNr>
-      <ChanDivider>-1</ChanDivider>
-      <AltChanName>ECXL06SMA</AltChanName>
+      <ChanDivider>0</ChanDivider>
+      <AltChanName>ECXR06SMA</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>23</ChanNr>

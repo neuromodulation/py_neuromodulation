@@ -162,9 +162,9 @@ class ProcessManager:
             int(self.timeout * 1000 * 20)
         )  # seconds/sample * ms/s * s
         
-        self.queue_source_game = multiprocessing.Queue(
-            int(self.timeout * 1000 * 20)
-        )  # seconds/sample * ms/s * s
+        #self.queue_source_game = multiprocessing.Queue(
+        #    int(self.timeout * 1000 * 20)
+        #)  # seconds/sample * ms/s * s
         
         self.queue_raw = multiprocessing.Queue(int(self.timeout * 1000))
         self.queue_features = multiprocessing.Queue(1)
@@ -197,9 +197,9 @@ class ProcessManager:
             self.device.id, self.queue_source
         )
 
-        TMSiSDK.sample_data_server.registerConsumer(
-            self.device.id, self.queue_source_game
-        )
+        #TMSiSDK.sample_data_server.registerConsumer(
+        #    self.device.id, self.queue_source_game
+        #)
 
         features = realtime_decoding.Features(
             name="Features",

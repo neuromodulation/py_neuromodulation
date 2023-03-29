@@ -71,6 +71,7 @@ class Decoder(multiprocessing.Process):
             try:
                 sample = self.queue_feat.get(timeout=10.0)
             except queue.Empty:
+                print("No features found for 10 seconds.")
                 break
             else:
                 if self.verbose:

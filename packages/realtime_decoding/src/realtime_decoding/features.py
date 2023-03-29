@@ -38,6 +38,7 @@ class Features(multiprocessing.Process):
         line_noise: int | float | None = None,
         training_samples: int = 60,
         training_enabled: bool = False,
+        keyboard_type_game: bool = False
     ) -> None:
         super().__init__(name=f"{name}Process")
         self.interval = interval
@@ -49,6 +50,7 @@ class Features(multiprocessing.Process):
         self.finished = multiprocessing.Event()
         self.path_nm_settings = path_nm_settings
         self.path_nm_channels = path_nm_channels
+        self.keyboard_type_game = keyboard_type_game
 
         self.processor = nm.nm_run_analysis.DataProcessor(
             sfreq=self.sfreq,
@@ -104,6 +106,7 @@ class Features(multiprocessing.Process):
                 sd = self.queue_raw.get(timeout=10.0)
                 # data = self.queue_raw.get(timeout=10.0)
             except queue.Empty:
+                print("No raw data found for 10 seconds.")
                 break
             else:
                 # print("Got data")
@@ -123,14 +126,15 @@ class Features(multiprocessing.Process):
                 if not self.buffer.is_full:
                     continue
 
-                margin = 0.2
-                if self.buffer[-1:, 24] > 1.2 + margin:
-                    keyboard.send("right", do_release=False)
-                elif self.buffer[-1:, 24] < 1.2 - margin:
-                    keyboard.press_and_release("left", do_release=False)
-                else:
-                    keyboard.release("left")
-                    keyboard.release("right")
+                if self.keyboard_type_game is True:
+                    margin = 0.2
+                    if self.buffer[-1:, 24] > 1.2 + margin:
+                        keyboard.send("right", do_release=False)
+                    elif self.buffer[-1:, 24] < 1.2 - margin:
+                        keyboard.press_and_release("left", do_release=False)
+                    else:
+                        keyboard.release("left")
+                        keyboard.release("right")
                 features = self.processor.process(self.buffer[:].T)
                 timestamp = np.datetime64(datetime.utcnow(), "ns")
 
@@ -140,7 +144,7 @@ class Features(multiprocessing.Process):
                     # this channel can be added to the calculated features, and simply finished with escape
                     #print(self.buffer[:].T)
                     #print(f"buffer shape: {self.buffer.shape}")
-                    features["label_train"] = np.mean(self.buffer[-409:, 24])  # get index from analog 
+                    features["label_train"] = np.mean(self.buffer[-409:, 34])  # get index from analog 
                 try:
                     self.queue_features.put(features, timeout=self.interval)
                 except queue.Full:

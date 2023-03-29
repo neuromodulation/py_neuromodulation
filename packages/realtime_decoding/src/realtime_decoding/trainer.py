@@ -7,7 +7,7 @@ import pandas as pd
 import os
 import numpy as np
 
-from TMSiFileFormats.file_readers import Poly5Reader
+#from TMSiFileFormats.file_readers import Poly5Reader
 
 #from matplotlib import pyplot as plt
 
@@ -15,15 +15,14 @@ if __name__ == "__main__":
 
     # read data for rotameter amplitude investigation:
 
-    data = Poly5Reader(r"C:\CODE\py_neuromodulation\realtime_experiment\data\testsub\EcogLfpMedOff01\sub_ses_task_acq_run_datatype-20230320_145212.poly5")
+    #data = Poly5Reader(r"C:\CODE\py_neuromodulation\realtime_experiment\data\testsub\EcogLfpMedOff01\sub_ses_task_acq_run_datatype-20230320_145212.poly5")
 
-    PATH_HDF5_FEATURES = rf"C:\CODE\py_neuromodulation\realtime_experiment\data\sub-{sub}\ses-EcogLfpMedOff01\sub-{sub}_ses-EcogLfpMedOff01_task-RealtimeDecodingR_acq-StimOff_run-1_ieeg.hdf5"
+    sub = "testsub4"
+    run = 1
+    PATH_HDF5_FEATURES = rf"C:\CODE\py_neuromodulation\realtime_experiment\data\{sub}\EcogLfpMedOff01\{sub}_EcogLfpMedOff01_rotameter_StimOff_{str(run)}_ieeg.hdf5"
 
-
-    
-    sub = "654"
     PATH_MODEL_SAVE = os.path.join(
-        rf"C:\CODE\py_neuromodulation\realtime_experiment\data\sub-{sub}\ses-EcogLfpMedOff01",
+        rf"C:\CODE\py_neuromodulation\realtime_experiment\data\{sub}\EcogLfpMedOff01",
         "model_trained.p"
     )
 
@@ -32,19 +31,22 @@ if __name__ == "__main__":
     y = np.abs(np.diff(df["label_train"]))
     X = df[[f for f in df.columns if "time" not in f and "label" not in f]].iloc[1:, :]
 
-    #from matplotlib import pyplot as plt
-    #plt.figure()
-    #plt.plot(np.array(df["label_train"]))
-    #plt.plot(y)
-    #plt.show()
 
-    X_lim = X.iloc[570:, :]
-    y_lim = y[570:]
+    # put here in debug line
+    from matplotlib import pyplot as plt
+    plt.figure()
+    plt.plot(np.array(df["label_train"]))
+    plt.plot(y)
+    plt.show()
+
+    LIM_ = 550
+    X_lim = X.iloc[LIM_:, :]
+    y_lim = y[LIM_:]
 
 
     model = linear_model.LogisticRegression()
 
-    model = model.fit(X, y>0.01)
+    #model = model.fit(X, y>0.01)
     model = model.fit(X_lim, y_lim>0.01)
 
     with open(PATH_MODEL_SAVE, "wb") as fid:

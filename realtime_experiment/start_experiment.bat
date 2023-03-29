@@ -11,7 +11,6 @@ TIMEOUT /T 10
 start timeflux -d timeflux_decoding.yaml
 ECHO Running timeflux
 TIMEOUT /T 5
-
 START http://localhost:8000/monitor/
 TIMEOUT /T 5
 call conda activate bsl

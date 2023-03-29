@@ -1,11 +1,11 @@
 PATH_OUT_DIR: C:\\CODE\\py_neuromodulation\\realtime_experiment\\data
-PATH_XML_CONFIG: C:\\CODE\\py_neuromodulation\\realtime_experiment\\saga_config_sensight_lfp_left.xml
+PATH_XML_CONFIG: C:\\CODE\\py_neuromodulation\\realtime_experiment\\saga_config_sensight_ecog.xml
 
-PATH_MODEL_PREDICT: C:\\CODE\\py_neuromodulation\\realtime_experiment\\model_STN_best_ch_all_sub_ALL.p
+PATH_MODEL_PREDICT: C:\CODE\py_neuromodulation\realtime_experiment\data\testsub4\EcogLfpMedOff01\model_trained.p
 PATH_pynm_SETTINGS: C:\\CODE\\py_neuromodulation\\realtime_experiment\\nm_settings_feat.json
-PATH_pynm_CHANNELS: C:\\CODE\\py_neuromodulation\\realtime_experiment\\nm_channels_feat.csv
+PATH_pynm_CHANNELS: C:\\CODE\\py_neuromodulation\\realtime_experiment\\nm_channels_feat_ecog.csv
 
-sub: testsub
+sub: testsub5
 task: rotameter
 ses: EcogLfpMedOff01
 acq: StimOff
