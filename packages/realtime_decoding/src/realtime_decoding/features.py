@@ -144,7 +144,7 @@ class Features(multiprocessing.Process):
                     # this channel can be added to the calculated features, and simply finished with escape
                     #print(self.buffer[:].T)
                     #print(f"buffer shape: {self.buffer.shape}")
-                    features["label_train"] = np.mean(self.buffer[-409:, 34])  # get index from analog 
+                    features["ROTAMETER_MOVEMENT"] = np.mean(self.buffer[-409:, 34])  # get index from analog 
                 try:
                     self.queue_features.put(features, timeout=self.interval)
                 except queue.Full:

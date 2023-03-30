@@ -81,7 +81,7 @@ class Decoder(multiprocessing.Process):
                     break
 
                 # Predict
-                sample_ = sample[[i for i in sample.index if i != "label_train"]]
+                sample_ = sample[[i for i in sample.index if i != "ROTAMETER_MOVEMENT"]]
 
                 dat_pr = np.nan_to_num(np.expand_dims(sample_.to_numpy(), 0))
                 y = float(self._model.predict_proba(dat_pr)[0, 1])

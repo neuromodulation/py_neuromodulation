@@ -5,8 +5,8 @@ graphs:
     module: timeflux.nodes.hdf5
     class: Save
     params:
-      filename: testsub5_EcogLfpMedOff01_rotameter_StimOff_1_ieeg.hdf5
-      path: C:\CODE\py_neuromodulation\realtime_experiment\data\testsub5\EcogLfpMedOff01
+      filename: 559NB58_2_EcogLfpMedOn01_SelfpRotaL_StimOff_1_ieeg.hdf5
+      path: C:\CODE\py_neuromodulation\realtime_experiment\data\559NB58_2\EcogLfpMedOn01
       min_itemsize: null
   - id: raw_inlet
     module: timeflux.nodes.lsl

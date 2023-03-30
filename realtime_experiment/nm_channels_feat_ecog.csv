@@ -18,13 +18,13 @@ STNL07MT,None,0,0,dbs,good,LFP_R_07_STN_MT
 STNL08MT,STNL01MT,0,0,dbs,good,LFP_L_01-08_STN_MT
 ECXR01SMA,average,0,0,ecog,good,ECOG_R_1-avgref
 ECXR02SMA,average,0,0,ecog,good,ECOG_R_2-avgref
-ECXR03SMA,average,0,0,ecog,good,ECOG_R_3-avgref
+ECXR03SMA,average,1,0,ecog,good,ECOG_R_3-avgref
 ECXR04SMA,average,0,0,ecog,good,ECOG_R_4-avgref
 ECXR05SMA,average,0,0,ecog,good,ECOG_R_5-avgref
 ECXR06SMA,average,0,0,ecog,good,ECOG_R_6-avgref
 EEGCzTM,None,0,0,dbs,good,EEG_Cz_TM
 EEGFzTM,None,0,0,dbs,good,EEG_Fz_TM
-EMGRBRTM,None,1,0,dbs,good,EMG_R_BR_TM
+EMGRBRTM,None,0,0,dbs,good,EMG_R_BR_TM
 EMGLBRTM,None,0,0,dbs,good,EMG_L_BR_TM
 ECG,None,0,0,dbs,good,ECG
 X,None,0,0,dbs,good,ACC_R_X_D2_TM

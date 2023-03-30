@@ -17,29 +17,29 @@ if __name__ == "__main__":
 
     #data = Poly5Reader(r"C:\CODE\py_neuromodulation\realtime_experiment\data\testsub\EcogLfpMedOff01\sub_ses_task_acq_run_datatype-20230320_145212.poly5")
 
-    sub = "testsub4"
+    sub = "559NB58"
     run = 1
-    PATH_HDF5_FEATURES = rf"C:\CODE\py_neuromodulation\realtime_experiment\data\{sub}\EcogLfpMedOff01\{sub}_EcogLfpMedOff01_rotameter_StimOff_{str(run)}_ieeg.hdf5"
+    PATH_HDF5_FEATURES = rf"C:\CODE\py_neuromodulation\realtime_experiment\data\{sub}\EcogLfpMedOn01\{sub}_EcogLfpMedOn01_SelfpRotaL_StimOff_{str(run)}_ieeg.hdf5"
 
     PATH_MODEL_SAVE = os.path.join(
-        rf"C:\CODE\py_neuromodulation\realtime_experiment\data\{sub}\EcogLfpMedOff01",
+        rf"C:\CODE\py_neuromodulation\realtime_experiment\data\{sub}\EcogLfpMedOn01",
         "model_trained.p"
     )
 
     df = pd.read_hdf(PATH_HDF5_FEATURES, key="features")
 
-    y = np.abs(np.diff(df["label_train"]))
-    X = df[[f for f in df.columns if "time" not in f and "label" not in f]].iloc[1:, :]
+    y = np.abs(np.diff(df["ROTAMETER_MOVEMENT"]))
+    X = df[[f for f in df.columns if "time" not in f and "ROTAMETER_MOVEMENT" not in f]].iloc[1:, :]
 
 
     # put here in debug line
     from matplotlib import pyplot as plt
     plt.figure()
-    plt.plot(np.array(df["label_train"]))
+    plt.plot(np.array(df["ROTAMETER_MOVEMENT"]))
     plt.plot(y)
     plt.show()
 
-    LIM_ = 550
+    LIM_ = 200
     X_lim = X.iloc[LIM_:, :]
     y_lim = y[LIM_:]
 
