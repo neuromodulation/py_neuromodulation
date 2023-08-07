@@ -374,7 +374,7 @@ div.rendered_html tbody tr:hover {
 </style>
 <section id="First-Demo">
 <h1>First Demo<a class="headerlink" href="#First-Demo" title="Permalink to this heading"></a></h1>
-<p>This Demo will showcase the feature estimation and examplar analysis using simulated data.</p>
+<p>This demo will showcase the feature estimation and example analysis using simulated data.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
@@ -454,11 +454,11 @@ Text(0.5, 1.0, &#39;Example random walk data&#39;)
 <img alt="_images/first_demo_5_1.png" src="_images/first_demo_5_1.png" />
 </div>
 </div>
-<p>Now let’s define the necessary setup files will be use for data preprocessing and feature estimation. Py_neuromodualtion is based on two parametrization files: the <em>nm_channels.tsv</em> and the <em>nm_setting.json</em>.</p>
+<p>Now let’s define the necessary setup files will be use for data preprocessing and feature estimation. Py_neuromodulation is based on two parametrization files: the <em>nm_channels.tsv</em> and the <em>nm_setting.json</em>.</p>
 </section>
 <section id="nm_channels">
 <h2>nm_channels<a class="headerlink" href="#nm_channels" title="Permalink to this heading"></a></h2>
-<p>The <em>nm_channel</em> dataframe. This dataframe contains the columns</p>
+<p>The <em>nm_channel</em> dataframedataframe contains the following columns:</p>
 <table class="docutils align-default">
 <colgroup>
 <col style="width: 50%" />
@@ -474,13 +474,13 @@ Text(0.5, 1.0, &#39;Example random walk data&#39;)
 <td><p>name of the channel</p></td>
 </tr>
 <tr class="row-odd"><td><p><strong>rereference</strong></p></td>
-<td><p>different channel name for bipolar rereferencing, or avereage for commono average rereferencing</p></td>
+<td><p>different channel name for bipolar rereferencing, or average for common average rereferencing</p></td>
 </tr>
 <tr class="row-even"><td><p><strong>used</strong></p></td>
 <td><p>0 or 1, channel selection</p></td>
 </tr>
 <tr class="row-odd"><td><p><strong>target</strong></p></td>
-<td><p>0 or 1, for some decoding applications we can define target chanenls, e.g. EMG channels</p></td>
+<td><p>0 or 1, for some decoding applications we can define target channels, e.g. EMG channels</p></td>
 </tr>
 <tr class="row-even"><td><p><strong>type</strong></p></td>
 <td><p>channel type according to the mne-python toolbox (<a class="reference external" href="https://mne.tools/stable/auto_tutorials/raw/10_raw_overview.html#sphx-glr-auto-tutorials-raw-10-raw-overview-py">https://mne.tools/stable/auto_tutorials/raw/10_raw_overview.html#sphx-glr-auto-tutorials-raw-10-raw-overview-py</a>), e.g. ecog, eeg, ecg, emg, dbs, seeg etc.</p></td>
@@ -783,7 +783,7 @@ Text(0.5, 1.0, &#39;Example random walk data&#39;)
 </pre></div>
 </div>
 </div>
-<p>We are now ready to go to instantiate the <em>Stream</em> and call the <em>run</em> method for feature estimation:</p>
+<p>We are now ready to go to instantiate the <em>Stream</em> and call the <em>run</em> method for feature estimation. The run method can also be given supplied parameters specifying where the output, that we will need for later analysis, is saved.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
@@ -796,7 +796,9 @@ Text(0.5, 1.0, &#39;Example random walk data&#39;)
     <span class="n">line_noise</span><span class="o">=</span><span class="mi">50</span>
 <span class="p">)</span>
 
-<span class="n">stream</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="n">stream</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">data</span><span class="p">,)</span><span class="p"></span>
+    <span class="n">out_path_root</span><span class="o">=</span><span class="n">"sphinx"</span>
+<span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -894,14 +896,14 @@ nm_channels.csv saved to /Users/hi/Documents/py_neuromodulation/sphinx/sub/sub_n
 </section>
 <section id="Feature-Analysis">
 <h2>Feature Analysis<a class="headerlink" href="#Feature-Analysis" title="Permalink to this heading"></a></h2>
-<p>Ok, so there is a lot of output, which we could omit by verbose beinng False, but let’s have a look what was being computed. We will therefore use the nm_analysis class to showcase some functions. For multi-run or subject analyze we will pass here the feature_file “sub” default directory:</p>
+<p>Ok, so there is a lot of output, which we could omit by verbose being False, but let’s have a look what was being computed. We will therefore use the nm_analysis class to showcase some functions. For multi-run or subject analyze we will pass here the feature_file “sub” default directory:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">analyzer</span> <span class="o">=</span> <span class="n">nm_analysis</span><span class="o">.</span><span class="n">Feature_Reader</span><span class="p">(</span>
-    <span class="n">feature_dir</span><span class="o">=</span><span class="n">stream</span><span class="o">.</span><span class="n">PATH_OUT</span><span class="p">,</span>
-    <span class="n">feature_file</span><span class="o">=</span><span class="n">stream</span><span class="o">.</span><span class="n">PATH_OUT_folder_name</span>
+    <span class="n">feature_dir</span><span class="o">=</span><span class="n">stream</span><span class="o">.</span><span class="n">"sphinx"</span><span class="p">,</span>
+    <span class="n">feature_file</span><span class="o">=</span><span class="n">stream</span><span class="o">.</span><span class="n">"sub"</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -1208,7 +1210,7 @@ nm_channels.csv saved to /Users/hi/Documents/py_neuromodulation/sphinx/sub/sub_n
 </div></div>
 </div>
 <p>Seems like a lot of features were calculated. The ‘time’ columns tells us about each row time index. For the 6 specified channels, it is each 31 features. We can now use some in-built plotting functions for visualization.</p>
-<p>Note: Due to the simulation data, some of the features have constant values, which are not displayed throught the image normalization.</p>
+<p>Note: Due to the simulation data, some of the features have constant values, which are not displayed due to the image normalization.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>

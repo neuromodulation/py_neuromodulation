@@ -89,6 +89,7 @@ class Decoder:
     ch_ind_results: dict = {}
     gridpoint_ind_results: dict = {}
     all_ch_results: dict = {}
+    ch_comb_results: dict = {}
 
     class ClassMissingException(Exception):
         def __init__(
@@ -192,6 +193,7 @@ class Decoder:
         self.ch_ind_results = {}
         self.gridpoint_ind_results = {}
         self.all_ch_results = {}
+        self.ch_comb_results = {}
         self.columns_names_single_ch = None
 
         if undersampling:
@@ -228,9 +230,22 @@ class Decoder:
                     ]
                 )
             )
+    def set_data_comb_channels(self):
+        """specified combined channel data"""
+        self.ch_comb_data = np.nan_to_num(
+            np.array(
+                self.features[
+                    [
+                        col
+                        for col in self.features.columns
+                        if col.startswith(tuple(self.used_chs))
+                    ]
+                ]
+            )
+        )
 
     def set_CV_results(self, attr_name, contact_point=None):
-        """set CV results in respectie nm_decode attributes
+        """set CV results in respective nm_decode attributes
         The reference is first stored in obj_set, and the used lateron
 
         Parameters
@@ -305,6 +320,7 @@ class Decoder:
         """
         valid_feature_contacts = [
             "ind_channels",
+            "comb_channels",
             "all_channels_combined",
             "grid_points",
         ]
@@ -327,6 +343,12 @@ class Decoder:
                 self.run_CV(self.ch_ind_data[ch], self.label)
                 self.set_CV_results("ch_ind_results", contact_point=ch)
             return self.ch_ind_results
+
+        if feature_contacts == "comb_channels":
+            self.ch_name_tested = '+'.join(self.used_chs)
+            self.run_CV(self.ch_comb_data, self.label)
+            self.set_CV_results("ch_comb_results", contact_point=None)
+            return self.ch_comb_results
 
         if feature_contacts == "all_channels_combined":
             dat_combined = np.array(self.data)
@@ -699,7 +721,7 @@ class Decoder:
 
         if self.mrmr_select is True:
             if len(self.feature_names) > X_train.shape[1]:
-                # analyze induvidual ch
+                # analyze individual ch
                 columns_names = [
                     col
                     for col in self.feature_names

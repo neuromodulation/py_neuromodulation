@@ -609,6 +609,7 @@ class Feature_Reader:
         estimate_gridpoints: bool = False,
         estimate_channels: bool = True,
         estimate_all_channels_combined: bool = False,
+        estimate_comb_channels: bool = False,
         output_name: str = "LM",
         save_results: bool = True,
     ):
@@ -647,6 +648,9 @@ class Feature_Reader:
         if estimate_channels:
             self.decoder.set_data_ind_channels()
             _ = self.decoder.run_CV_caller("ind_channels")
+        if estimate_comb_channels:
+            self.decoder.set_data_comb_channels()
+            _ = self.decoder.run_CV_caller("comb_channels")
         if estimate_all_channels_combined:
             _ = self.decoder.run_CV_caller("all_channels_combined")
 
@@ -662,6 +666,7 @@ class Feature_Reader:
         return self.read_results(
             read_grid_points=estimate_gridpoints,
             read_all_combined=estimate_all_channels_combined,
+            read_comb_ch = estimate_comb_channels,
             read_channels=estimate_channels,
             ML_model_name=output_name,
             read_mov_detection_rates=self.decoder.get_movement_detection_rate,
@@ -677,6 +682,7 @@ class Feature_Reader:
         DEFAULT_PERFORMANCE: float = 0.5,
         read_grid_points: bool = True,
         read_channels: bool = True,
+        read_comb_ch: bool = False,
         read_all_combined: bool = False,
         ML_model_name: str = "LM",
         read_mov_detection_rates: bool = False,
@@ -897,6 +903,14 @@ class Feature_Reader:
             write_CV_res_in_performance_dict(
                 ML_res.all_ch_results,
                 performance_dict[subject_name]["all_ch_combined"],
+                read_mov_detection_rates=read_mov_detection_rates,
+                read_bay_opt_params=read_bay_opt_params,
+            )
+        if read_comb_ch:
+            performance_dict[subject_name]['+'.join(self.used_chs)] = {}
+            write_CV_res_in_performance_dict(
+                ML_res.ch_comb_results,
+                performance_dict[subject_name]['+'.join(self.used_chs)],
                 read_mov_detection_rates=read_mov_detection_rates,
                 read_bay_opt_params=read_bay_opt_params,
             )
