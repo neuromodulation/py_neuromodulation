@@ -21,7 +21,7 @@ import pandas as pd
 import os
 import json
 import numpy as np
-from numba import jit
+#from numba import jit
 import xgboost
 from copy import deepcopy
 
@@ -479,8 +479,8 @@ class Decoder:
             model_save=self.model_save,
         )
 
-    @staticmethod
-    @jit(nopython=True)
+    # @staticmethod
+    # @jit(nopython=True)
     def append_previous_n_samples(X: np.ndarray, y: np.ndarray, n: int = 5):
         """
         stack feature vector for n samples
