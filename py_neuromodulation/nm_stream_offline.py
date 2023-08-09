@@ -99,8 +99,7 @@ class _OfflineStream(nm_stream_abc.PNStream):
         feature_df = pd.DataFrame(features)
         feature_df = self._add_labels(features=feature_df, data=data)
 
-        if out_path_root is not None:
-            self.save_after_stream(out_path_root, folder_name, feature_df)
+        self.save_after_stream(out_path_root, folder_name, feature_df)
 
         return feature_df
 

@@ -1,0 +1,7 @@
+,name,rereference,used,target,type,status,new_name
+0,ch0,average,1,0,ecog,good,ch0-avgref
+1,ch1,average,1,0,ecog,good,ch1-avgref
+2,ch2,average,1,0,ecog,good,ch2-avgref
+3,ch3,average,1,0,ecog,good,ch3-avgref
+4,ch4,average,1,0,ecog,good,ch4-avgref
+5,ch5,average,1,0,ecog,good,ch5-avgref
