@@ -26,3 +26,4 @@ seaborn
 sphinx-gallery
 nbsphinx_link
 pydata-sphinx-theme
+seaborn
