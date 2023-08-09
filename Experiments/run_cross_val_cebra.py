@@ -96,27 +96,28 @@ def run_CV(val_approach,curtime,model_params):
 
                 X_train_comb = []
                 y_train_comb = []
+                nr_embeddings = 0
                 for cohort_train in list(cohorts_train.keys()):
                     for sub_train in cohorts_train[cohort_train]:
-
+                        nr_embeddings += 1
                         X_train, y_train = get_data_channels(
                             sub_train, cohort_train, df_rmap=df_best_rmap
                         )
+                        ### Currently needed as discrete is not possible
+                        y_train = gaussian_filter1d(np.array(y_train, dtype=float), sigma=1.5)
 
-                        X_train_comb.append(X_train)
-                        y_train_comb.append(y_train)
+                        X_train_comb.append(np.squeeze(X_train))
+                        y_train_comb.append(np.squeeze(y_train))
                 if len(X_train_comb) > 1:
                     X_train = np.concatenate(X_train_comb, axis=0)
                     y_train = np.concatenate(y_train_comb, axis=0)
                 else:
                     X_train = X_train_comb[0]
                     y_train = X_train_comb[0]
-
-
                 # X_train, y_train, X_test, y_test = self.decoder.append_samples_val(X_train, y_train, X_test, y_test, 5)
 
                 # Why a Gaussian instead of just turning it into a 0 - 1 training signal (i.e. how is continuous auxillary used)
-                y_train_cont = gaussian_filter1d(np.array(y_train, dtype=float), sigma=1.5)
+                #y_train_cont = gaussian_filter1d(np.array(y_train, dtype=float), sigma=1.5)
 
                 #cebra.models.get_options()
 
@@ -133,27 +134,44 @@ def run_CV(val_approach,curtime,model_params):
                     verbose = True,
                 )
                 # fits only once per cohort for leave cohort out
-                cebra_model.fit(X_train, y_train_cont)
-                X_train_emb = cebra_model.transform(X_train)
+                if model_params['true_msess']:
+                    cebra_model.fit(X_train_comb, y_train_comb)
+                else:
+                    cebra_model.fit(X_train, y_train)
+
+                if model_params['true_msess']:
+                    X_train_emb = cebra_model.transform(X_train_comb[0],session_id=0)
+                else:
+                    X_train_emb = cebra_model.transform(X_train, session_id=0)
+                if model_params['all_embeddings']:
+                    for i_emb in range(1,nr_embeddings):
+                        X_train_emb = np.concatenate((X_train_emb, cebra_model.transform(X_train_comb[i_emb],session_id=i_emb)))
 
                 # Get the loss and temperature plots
                 loss = cebra_model.state_dict_["loss"]
+
+
+
+                #decoder = neighbors.KNeighborsClassifier(
+                #    n_neighbors=model_params['n_neighbors'], metric=model_params['metric'],
+                #    n_jobs=model_params['n_jobs'])
+                #decoder.fit(X_train_emb, np.array(y_train, dtype=int))
+
+                decoder = linear_model.LogisticRegression(class_weight="balanced")
+                decoder.fit(X_train_emb, y_train)
+
                 for i in range(len(loss)):
                     writer.add_scalar('Loss/train',loss[i],i)
                     writer.add_scalar('Temperature',cebra_model.state_dict_["log"]["temperature"][i],i)
+                # decoder = linear_model.LogisticRegression(class_weight="balanced")
+                # decoder.fit(X_train_emb, y_train)
 
-            X_test_emb = cebra_model.transform(X_test)
+            # Might make sense to then also change this to be a majority vote across session models
+            X_test_emb = cebra_model.transform(X_test,session_id=0)
 
-
-            decoder = neighbors.KNeighborsClassifier(
-                n_neighbors=model_params['n_neighbors'], metric=model_params['metric'], n_jobs=model_params['n_jobs'])
-            decoder.fit(X_train_emb, np.array(y_train, dtype=int))
-
-            decoder = linear_model.LogisticRegression(class_weight="balanced")
-            decoder.fit(X_train_emb, y_train)
             y_test_pr =  decoder.predict(X_test_emb)
             ba = metrics.balanced_accuracy_score(y_test, y_test_pr)
-
+            print(ba)
             # ba = metrics.balanced_accuracy_score(np.array(y_test, dtype=int), decoder.predict(X_test_emb))
 
             # cebra.plot_loss(cebra_model)
@@ -183,7 +201,7 @@ curtime = datetime.now().strftime("%Y_%m_%d-%H_%M")
 experiment = "All_channels"
 for val_approach in ["leave_1_cohort_out", "leave_1_sub_out_across_coh", "leave_1_sub_out_within_coh"]:
     model_params = {'model_architecture':'offset10-model',
-                'batch_size': 100,
+                'batch_size': 50,
                 'temperature_mode':"auto",
                 'learning_rate': 0.005,
                 'max_iterations': 100,  # 50000
@@ -192,6 +210,8 @@ for val_approach in ["leave_1_cohort_out", "leave_1_sub_out_across_coh", "leave_
                 'decoder': 'KNN',
                 'n_neighbors': 3,
                 'metric': "cosine",
-                'n_jobs': 20}
+                'n_jobs': 20,
+                'all_embeddings':False,
+                'true_msess':False}
     writer = SummaryWriter(log_dir=f"D:\Glenn\CEBRA_logs\{val_approach}\{curtime}")
     run_CV(val_approach, curtime, model_params)
