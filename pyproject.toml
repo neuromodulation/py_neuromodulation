@@ -38,7 +38,6 @@ dependencies = [
   "mne-connectivity",
   "mrmr-selection",
   "nolds",
-  "numba",
   "numpy >= 1.21.2",
   "pandas >= 1.2.2",
   "pip",

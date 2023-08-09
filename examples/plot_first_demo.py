@@ -9,7 +9,6 @@ import py_neuromodulation as py_nm
 
 from py_neuromodulation import (
     nm_analysis,
-    nm_decode,
     nm_define_nmchannels,
     nm_plots
     

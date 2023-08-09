@@ -2,15 +2,16 @@
 Analyzing sharpwave temporal features
 =====================================
 
-Time series data can be characterized using oscillatory components, but assumptions of sinusoidality are for real data rarely fulfilled. See *"Brain Oscillations and the Importance of Waveform Shape"* Cole et al 2017 (https://doi.org/10.1016/j.tics.2016.12.008) for a great motivation.
-We implemented here temporal characterstics based on individual trough and peak relations, based on the scipy *find_peaks* function (https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html). The function parameter *distance* can be specified in the *nm_settings.json*. Temporal features can be calculated twice for troughs and peaks. In the settings, this can be specified by setting *estimate* to true in *detect_troughs* and/or *detect_peaks*. A statistical measure (e.g. mean, max, median, var) can be defined as a resulting feature from the peak and trough estimates using the *apply_estimator_between_peaks_and_troughs* setting.
-
-In py_neuromodulation the following characteristics are implemted:
-
-*Note that that the nomenclature is written for sharpwave troughs, but detection of peak characteristics can be computed in the same way*:
 """
 
 # %%
+# Time series data can be characterized using oscillatory components, but assumptions of sinusoidality are for real data rarely fulfilled. See *"Brain Oscillations and the Importance of Waveform Shape"* `Cole et al 2017 <https://doi.org/10.1016/j.tics.2016.12.008>`_ for a great motivation.
+# We implemented here temporal characterstics based on individual trough and peak relations, based on the scipy `find_peaks <https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html>`_ function. The function parameter *distance* can be specified in the *nm_settings.json*. Temporal features can be calculated twice for troughs and peaks. In the settings, this can be specified by setting *estimate* to true in *detect_troughs* and/or *detect_peaks*. A statistical measure (e.g. mean, max, median, var) can be defined as a resulting feature from the peak and trough estimates using the *apply_estimator_between_peaks_and_troughs* setting.
+# 
+# In py_neuromodulation the following characteristics are implemted:
+# 
+# *Note that that the nomenclature is written for sharpwave troughs, but detection of peak characteristics can be computed in the same way*:
+# 
 # -  prominence:
 #    :math:`V_{prominence} = |\frac{V_{peak-left} + V_{peak-right}}{2}| - V_{trough}`
 # -  sharpness:
@@ -183,6 +184,11 @@ plt.ylabel("a.u.")
 settings = nm_settings.get_default_settings()
 settings = nm_settings.reset_settings(settings)
 settings["features"]["sharpwave_analysis"] = True
+settings["sharpwave_analysis_settings"]["interval"] = False
+settings["sharpwave_analysis_settings"]["filter_ranges"] = [[5, 80]]
+
+nm_channels["used"] = 0  # set only two ECoG channels for faster computation to true
+nm_channels.loc[[3, 8], "used"] = 1
 
 stream = nm.Stream(
     sfreq=sfreq,
@@ -191,14 +197,10 @@ stream = nm.Stream(
     line_noise=line_noise,
     coord_list=coord_list,
     coord_names=coord_names,
-    verbose=False,
+    verbose=True,
 )
 
-df_features = stream.run(
-    data=data,
-    out_path_root=None,
-    folder_name=None,
-)
+df_features = stream.run(data=data)
 
 # %%
 # We can then plot two examplary features, prominence and interval, and see that the movement amplitude can be clustered with those two features alone:
@@ -207,7 +209,7 @@ plt.figure(figsize=(4, 3), dpi=300)
 plt.scatter(
     df_features["ECOG_RIGHT_0-avgref_Sharpwave_Max_prominence_range_5_80"],
     df_features["ECOG_RIGHT_5-avgref_Sharpwave_Mean_interval_range_5_80"],
-    c=df_features["MOV_LEFT_CLEAN"], alpha=0.8
+    c=df_features["MOV_LEFT_CLEAN"], alpha=1, s=3.5
 )
 cbar = plt.colorbar()
 cbar.set_label("Movement amplitude")

@@ -2,18 +2,19 @@
 ECoG Movement decoding example 
 ==============================
 
-This example notebook read openly accessible data from the publication 
-*Electrocorticography is superior to subthalamic local field potentials 
-for movement decoding in Parkinson’s disease* 
-([Merk et al. 2022](https://elifesciences.org/articles/75126)). 
-The dataset is available [here](https://doi.org/10.7910/DVN/IO2FLM).
-
-For simplicity one example subject is automatically shipped within 
-this repo at the *examples/data* folder, stored in 
-[iEEG BIDS](https://www.nature.com/articles/s41597-019-0105-7) format.
 """
 
 # %%
+# This example notebook read openly accessible data from the publication 
+# *Electrocorticography is superior to subthalamic local field potentials 
+# for movement decoding in Parkinson’s disease* 
+# ([Merk et al. 2022](https://elifesciences.org/articles/75126)). 
+# The dataset is available [here](https://doi.org/10.7910/DVN/IO2FLM).
+# 
+# For simplicity one example subject is automatically shipped within 
+# this repo at the *examples/data* folder, stored in 
+# [iEEG BIDS](https://www.nature.com/articles/s41597-019-0105-7) format.
+# 
 # .. note::
 # In order to run this example you either have to clone the repository from the `github page <https://github.com/neuromodulation/py_neuromodulation/tree/main/examples/data>`_,
 # or download the respective BIDS example subject folder, which will be referenced below.
@@ -131,7 +132,7 @@ for sw_feature in list(
 # grid point projection.
 settings["postprocessing"]["project_cortex"] = True
 
-settings = nm_settings.set_settings_fast_compute(settings)  # uncomment for full documentation
+# settings = nm_settings.set_settings_fast_compute(settings)  # uncomment for full documentation
 
 # %%
 stream = nm.Stream(
@@ -141,7 +142,7 @@ stream = nm.Stream(
     line_noise=line_noise,
     coord_list=coord_list,
     coord_names=coord_names,
-    verbose=False,
+    verbose=True,
 )
 
 # %%

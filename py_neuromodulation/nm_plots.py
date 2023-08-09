@@ -241,6 +241,9 @@ def plot_corr_matrix(
 
     if show_plot is False:
         plt.close()
+
+    plt.tight_layout()
+
     return plt.gca()
 
 
@@ -468,6 +471,7 @@ def plot_all_features(
         plt.clim(vmax=clim_high)
 
     plt.colorbar()
+    plt.tight_layout()
 
     if save is True:
         plt_path = os.path.join(OUT_PATH, feature_file, title)

@@ -2,24 +2,22 @@
 Grid Point Projection
 =====================
 
-In ECoG datasets the electrode locations are usually different. For this reason, we established a grid with a set of points defined in a standardized MNI brain. Data is then interpolated to this grid, such that they are common across patients, which allows across patient decoding use cases.
-
-In this notebook, we will plot these grid points and see how the features extracted from our data can be projected into this grid space.
-
-In order to do so, we'll read saved features that were computed in the ECoG movement notebook. Please note that in order to do so, when running the feature estimation, the settings
-
-```
-stream.settings['postprocessing']['project_cortex'] = True
-stream.settings['postprocessing']['project_subcortex'] = True
-```
-need to be set to ```True``` for a cortical and/or subcortical projection.
-
 """
 
 # %%
-import os
-import sys
-import py_neuromodulation as nm
+# In ECoG datasets the electrode locations are usually different. For this reason, we established a grid with a set of points defined in a standardized MNI brain. Data is then interpolated to this grid, such that they are common across patients, which allows across patient decoding use cases.
+# 
+# In this notebook, we will plot these grid points and see how the features extracted from our data can be projected into this grid space.
+# 
+# In order to do so, we'll read saved features that were computed in the ECoG movement notebook. Please note that in order to do so, when running the feature estimation, the settings
+# 
+# ```
+# stream.settings['postprocessing']['project_cortex'] = True
+# stream.settings['postprocessing']['project_subcortex'] = True
+# ```
+# need to be set to ```True``` for a cortical and/or subcortical projection.
+
+# %%
 from py_neuromodulation import (
     nm_analysis,
     nm_plots,
