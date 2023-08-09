@@ -143,3 +143,11 @@ dmypy.json
 .pdf
 
 sphinx/sub/*
+
+docs/build/*
+docs/previous/*
+docs/source/auto_examples/*
+docs/source/data/*
+
+examples/data/derivatives/*
+examples/other_examples/*
