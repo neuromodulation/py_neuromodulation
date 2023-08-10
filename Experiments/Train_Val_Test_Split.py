@@ -3,3 +3,11 @@
 # rotate through the training set (splitting a part in test)
 
 # Thus: need consistent seperated test indices and then in the run_cross_val do K-Fold
+import numpy as np
+import os
+
+ch_all = np.load(
+    os.path.join(r"D:\Glenn", "channel_all_fft.npy"),
+    allow_pickle="TRUE",
+).item()
+
