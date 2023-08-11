@@ -33,13 +33,9 @@ from pathlib import Path
 
 import py_neuromodulation as nm
 from py_neuromodulation import (
-    nm_analysis,
-    nm_decode,
     nm_define_nmchannels,
     nm_IO,
-    nm_plots,
     nm_settings,
-    nm_stats
 )
 
 # %%
@@ -200,7 +196,7 @@ stream = nm.Stream(
     verbose=True,
 )
 
-df_features = stream.run(data=data)
+df_features = stream.run(data=data[:, :30000])
 
 # %%
 # We can then plot two examplary features, prominence and interval, and see that the movement amplitude can be clustered with those two features alone:

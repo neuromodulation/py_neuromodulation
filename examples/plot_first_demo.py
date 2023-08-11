@@ -2,7 +2,8 @@
 First Demo
 ==========
 
-This Demo will showcase the feature estimation and examplar analysis using simulated data.
+This Demo will showcase the feature estimation and
+examplar analysis using simulated data.
 """
 
 import py_neuromodulation as py_nm
@@ -15,11 +16,13 @@ from py_neuromodulation import (
 )
 import numpy as np
 from matplotlib import pyplot as plt
+import panel
+panel.extension('ace', 'jsoneditor')
 
 # %%
 # Data Simulation
 # ---------------
-# We will now generate some example data of 5 seconds, for 6 channels with a sample rate of 1kHz. 
+# We will now generate some exemplar data with 5 second duration for 6 channels with a sample rate of 1 kHz. 
 
 def generate_random_walk(NUM_CHANNELS, TIME_DATA_SAMPLES):
     # from https://towardsdatascience.com/random-walks-with-python-8420981bc4bc
@@ -44,6 +47,7 @@ for ch_idx in range(data.shape[0]):
 plt.xlabel("Time [s]")
 plt.ylabel("Amplitude")
 plt.title("Example random walk data")
+plt.show()
 
 # %%
 # Now let’s define the necessary setup files will be use for data
@@ -72,11 +76,11 @@ plt.title("Example random walk data")
 # |                                   | chanenls, e.g. EMG channels       |
 # +-----------------------------------+-----------------------------------+
 # | **type**                          | channel type according to the     |
-# |                                   | mne-python toolbox                |
-# |                                   | (https://mne.to                   |
-# |                                   | ols/stable/auto_tutorials/raw/10_ |
-# |                                   | raw_overview.html#sphx-glr-auto-t |
-# |                                   | utorials-raw-10-raw-overview-py), |
+# |                                   | `mne-python`_ toolbox             |
+# |                                   |                                   |
+# |                                   |                                   |
+# |                                   |                                   |
+# |                                   |                                   |
 # |                                   | e.g. ecog, eeg, ecg, emg, dbs,    |
 # |                                   | seeg etc.                         |
 # +-----------------------------------+-----------------------------------+
@@ -88,6 +92,7 @@ plt.title("Example random walk data")
 # |                                   | rereferncing scheme               |
 # +-----------------------------------+-----------------------------------+
 # 
+# .. _mne-python: https://mne.tools/stable/auto_tutorials/raw/10_raw_overview.html#sphx-glr-auto-tutorials-raw-10-raw-overview-py
 # The nm_stream can either created as a *.tsv* text file, or as a pandas
 # dataframe. There are some helper function that let you create the
 # nm_channels without much effort:
@@ -103,7 +108,20 @@ nm_channels
 
 settings = py_nm.nm_settings.get_default_settings()
 settings = py_nm.nm_settings.reset_settings(settings)
-settings
+#panel.extension()
+#import json
+#settings_panel = panel.pane.JSON(settings, name="JSON")
+
+##%%
+# .. pyodide::
+#    json_editor = panel.widgets.JSONEditor(value=settings, width=400)
+#    json_editor
+
+##%%
+# .. pyodide::
+#    settings_panel
+
+
 # %%
 # The settings itself is a .json file which contains the parametrization for processing, feature estimation, postprocessing and definition which which sampling sampling rate features are being calculated. In this example 'sampling_rate_features_hz' is specified to be 10 Hz, so every 100ms a new set of features is calculated.
 # 

@@ -21,8 +21,11 @@ Grid Point Projection
 from py_neuromodulation import (
     nm_analysis,
     nm_plots,
-    nm_IO
+    nm_IO,
+    nm_settings,
+    nm_define_nmchannels
 )
+import py_neuromodulation as nm
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
@@ -31,7 +34,7 @@ from pathlib import Path
 # %%
 # Read features from BIDS data
 # ----------------------------
-# Here we will read the features that were estimated in example_BIDS.py. In order to do so, we need to provide the same paths to the data. In order to save time, we can use the function from `nm_IO.get_paths_example_data`.
+# We first estimate features, with the `grid_point` projection settings enabled for cortex. 
 
 
 # %%
@@ -57,6 +60,36 @@ datatype = "ieeg"
         BIDS_PATH=PATH_BIDS, datatype=datatype
 )
 
+settings = nm_settings.get_default_settings()
+settings = nm_settings.set_settings_fast_compute(settings)
+
+settings["postprocessing"]["project_cortex"] = True
+
+nm_channels = nm_define_nmchannels.set_channels(
+    ch_names=raw.ch_names,
+    ch_types=raw.get_channel_types(),
+    reference="default",
+    bads=raw.info["bads"],
+    new_names="default",
+    used_types=("ecog", "dbs", "seeg"),
+    target_keywords=["MOV_RIGHT_CLEAN","MOV_LEFT_CLEAN"]
+)
+
+stream = nm.Stream(
+    sfreq=sfreq,
+    nm_channels=nm_channels,
+    settings=settings,
+    line_noise=line_noise,
+    coord_list=coord_list,
+    coord_names=coord_names,
+    verbose=True,
+)
+
+stream.run(
+    data=data[:, :int(sfreq*5)],
+    out_path_root=PATH_OUT,
+    folder_name=RUN_NAME,
+)
 
 # %%
 # From nm_analysis.py, we use the ```Feature_Reader``` class to load the data.
@@ -86,7 +119,8 @@ grid_plotter = nm_plots.NM_Plot(
     grid_cortex=np.array(feature_reader.sidecar["grid_cortex"]),
     # grid_subcortex=np.array(feature_reader.sidecar["grid_subcortex"]),
     sess_right=feature_reader.sidecar["sess_right"],
-    proj_matrix_cortex=np.array(feature_reader.sidecar["proj_matrix_cortex"]))
+    proj_matrix_cortex=np.array(feature_reader.sidecar["proj_matrix_cortex"])
+)
 
 # %%
 grid_plotter.plot_cortex(

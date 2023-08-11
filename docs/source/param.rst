@@ -9,6 +9,12 @@ Here the following two parametrization files are explained:
 * ``nm_settings.json``
 * ``nm_channels.csv``
 
+.. pyodide::
+   import panel
+   settings = {"key1" : 5, "key2" : 45}
+   settings_panel = panel.pane.JSON(settings, name="JSON")
+   settings_panel
+
 Preprocessing
 ^^^^^^^^^^^^^
 

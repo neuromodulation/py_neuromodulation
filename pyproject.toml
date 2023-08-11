@@ -48,7 +48,8 @@ dependencies = [
   "scikit-optimize",
   "scipy >= 1.7.1",
   "seaborn >= 0.11",
-  "xgboost",
+  "notebook",
+  "ipython"
 ]
 
 [project.optional-dependencies]
