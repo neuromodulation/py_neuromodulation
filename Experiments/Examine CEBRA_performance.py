@@ -3,6 +3,7 @@ import os
 import pandas as pd
 
 import seaborn as sns
+import matplotlib.pyplot as plt
 
 leaveacross = False
 
@@ -43,3 +44,4 @@ for cohort in ['Beijing','Pittsburgh','Berlin']:
 sns.catplot(data=df, x="Validation", y="Performance", kind="box",color="0.9")
 sns.swarmplot(x="Validation", y="Performance", data=df, hue="Cohort",
               size=4, edgecolor="black",dodge=True).set_title(f"{suffix}")
+plt.ylim(0.3, 1)
