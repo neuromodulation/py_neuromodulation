@@ -26,6 +26,7 @@ class PNStream(ABC):
     features: nm_features.Features
     coords: dict
     sfreq: int | float
+    sfreq_feature: int | float = None
     path_grids: _PathLike | None
     model: base.BaseEstimator | None
     sess_right: bool | None
@@ -39,22 +40,45 @@ class PNStream(ABC):
         nm_channels: pd.DataFrame | _PathLike,
         settings: dict | _PathLike | None = None,
         line_noise: int | float | None = 50,
+        sampling_rate_features_hz: int | float | None = None,
         path_grids: _PathLike | None = None,
-        coords: dict | None = None,
         coord_names: list | None = None,
         coord_list: list | None = None,
         verbose: bool = True,
     ) -> None:
+        """Stream initialization
+
+        Parameters
+        ----------
+        sfreq : int | float
+            sampling frequency of data in Hertz
+        nm_channels : pd.DataFrame | _PathLike
+            parametrization of channels (see nm_define_channels.py for initialization)
+        settings : dict | _PathLike | None, optional
+            features settings can be a dictionary or path to the nm_settings.json, by default the py_neuromodulation/nm_settings.json are read
+        line_noise : int | float | None, optional
+            line noise, by default 50
+        sampling_rate_features_hz : int | float | None, optional
+            feature sampling rate, by default None
+        path_grids : _PathLike | None, optional
+            path to grid_cortex.tsv and/or gird_subcortex.tsv, by default Non
+        coord_names : list | None, optional
+            coordinate name in the form [coord_1_name, coord_2_name, etc], by default None
+        coord_list : list | None, optional
+            coordinates in the form [[coord_1_x, coord_1_y, coord_1_z], [coord_2_x, coord_2_y, coord_2_z],], by default None
+        verbose : bool, optional
+            print out stream computation time information, by default True
+        """
         self.settings = self._load_settings(settings)
+
+        if sampling_rate_features_hz is not None:
+            self.settings["sampling_rate_features_hz"] = sampling_rate_features_hz
+
         self.nm_channels = self._load_nm_channels(nm_channels)
         if path_grids is None:
             path_grids = pathlib.Path(__file__).parent.resolve()
         self.path_grids = path_grids
         self.verbose = verbose
-        if coords is None:
-            self.coords = {}
-        else:
-            self.coords = coords
         self.sfreq = sfreq
         self.sess_right = None
         self.projection = None
@@ -118,27 +142,6 @@ class PNStream(ABC):
         """Load sklearn model, that utilizes predict"""
         with open(model_name, "rb") as fid:
             self.model = cPickle.load(fid)
-
-    def plot_cortical_projection(self) -> None:
-        """plot projection of cortical grid electrodes on cortex"""
-        ecog_strip = None
-        if self.projection is not None:
-            ecog_strip = self.projection.ecog_strip
-
-        grid_cortex = None
-        if self.projection is not None:
-            grid_cortex = self.projection.grid_cortex
-
-        sess_right = None
-        if self.projection is not None:
-            sess_right = self.projection.sess_right
-
-        nmplotter = nm_plots.NM_Plot(
-            ecog_strip=ecog_strip,
-            grid_cortex=grid_cortex,
-            sess_right=sess_right,
-        )
-        nmplotter.plot_cortex(set_clim=False)
 
     def save_after_stream(
         self,

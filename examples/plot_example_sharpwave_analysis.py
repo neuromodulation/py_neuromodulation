@@ -43,7 +43,7 @@ from py_neuromodulation import (
 
 RUN_NAME = "sub-000_ses-right_task-force_run-3_ieeg"
 
-PATH_BIDS = Path.cwd() / "data"
+PATH_BIDS = Path(__file__).absolute().parent / "data"
 
 PATH_RUN = PATH_BIDS / "sub-000" / "sess-right" / "ieeg" / (RUN_NAME + ".vhdr")
 

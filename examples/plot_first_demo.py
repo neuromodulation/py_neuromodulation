@@ -45,7 +45,6 @@ for ch_idx in range(data.shape[0]):
 plt.xlabel("Time [s]")
 plt.ylabel("Amplitude")
 plt.title("Example random walk data")
-plt.show()
 
 # %%
 # Now let’s define the necessary setup files will be use for data
