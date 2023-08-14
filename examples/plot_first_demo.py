@@ -16,8 +16,6 @@ from py_neuromodulation import (
 )
 import numpy as np
 from matplotlib import pyplot as plt
-import panel
-panel.extension('ace', 'jsoneditor')
 
 # %%
 # Data Simulation
@@ -108,18 +106,6 @@ nm_channels
 
 settings = py_nm.nm_settings.get_default_settings()
 settings = py_nm.nm_settings.reset_settings(settings)
-#panel.extension()
-#import json
-#settings_panel = panel.pane.JSON(settings, name="JSON")
-
-##%%
-# .. pyodide::
-#    json_editor = panel.widgets.JSONEditor(value=settings, width=400)
-#    json_editor
-
-##%%
-# .. pyodide::
-#    settings_panel
 
 
 # %%

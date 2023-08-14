@@ -13,7 +13,7 @@ Have a look at the :ref:`motivation<introduction>` and :ref:`installation`!
 
    introduction
    installation
-   param
+   usage
    examples
 
 .. toctree::

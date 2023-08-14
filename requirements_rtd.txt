@@ -28,5 +28,3 @@ pydata-sphinx-theme
 seaborn
 notebook
 ipython
-panel
-nbsite

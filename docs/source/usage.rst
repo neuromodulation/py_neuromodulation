@@ -1,6 +1,49 @@
+Usage
+=====
 
-ParametrizationDefinition
--------------------------
+We will here explain the basic usage of py_neuromodulation. Also check out the :doc:`examples <examples>`.
+
+In general only a time series is required with a specific sampling frequency.
+
+Here is the definition of a minimalistic example:
+
+.. code-block:: python
+    
+    import py_neuromodulation as pn
+    
+    NUM_CHANNELS = 5
+    NUM_DATA = 10000
+    sfreq = 1000  # Hz
+    feature_freq = 10  # Hz
+
+    data = np.random.random([10, 10000])
+
+    stream = pn.Stream(data, sfreq, feature_freq)
+    features = stream.run()
+
+In this example default the default signal processing pipeline was estimated. An offline data-stream is being initialized. The raw data is common-average re-referenced, FFT 
+features with a sampling frequency of 10 Hz are calculated, and subsequently z-score normalized.
+
+We can however further define channel-specific parametrization such as re-referencing, channel selection, target definition, 
+and also select and define features for computation. py_neuromodualtion currently supports a set of additional features such as temporal waveform shape, `fooof <https://fooof-tools.github.io/fooof/>`_, bursts and more.
+
+In the following sections we will discuss how additional parametrization can be enabled.
+
+Parametrization
+---------------
+
+In the example above default channel and feature parametrization was enabled.
+
+When setting up the :py:class:`~py_neuromodulation.nm_decode.Decoder`, `nm_settings` and `nm_channels` can further be defined and passed to initialize the stream object:
+
+.. code-block:: python
+
+    from py_neurmodulation import nm_define_nmchannels, nm_settings
+
+    channels = nm_define_nmchannels.get_default_channels_from_data(data, car_rereferencing=True)
+    settings = nm_settings.get_default_settings()  # potentially reset the settings
+
+
 
 In order to estimate multimodal features of neurophysiological data, certain parametrization steps are required. 
 Here the following two parametrization files are explained: 
@@ -9,11 +52,12 @@ Here the following two parametrization files are explained:
 * ``nm_settings.json``
 * ``nm_channels.csv``
 
-.. pyodide::
-   import panel
-   settings = {"key1" : 5, "key2" : 45}
-   settings_panel = panel.pane.JSON(settings, name="JSON")
-   settings_panel
+..
+    .. pyodide::
+       import panel
+       settings = {"key1" : 5, "key2" : 45}
+       settings_panel = panel.pane.JSON(settings, name="JSON")
+       settings_panel
 
 Preprocessing
 ^^^^^^^^^^^^^
@@ -314,7 +358,7 @@ There is also a wrapper around the `*\ *fooof* <https://fooof-tools.github.io/fo
 Nonlinear measres for dynamical systems (nolds)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**nolds** *eatures are estimates as a direct wrapper around the nolds toolbox: https://github.com/CSchoel/nolds. Features can be estimated for raw data, or data being filtered in different frequency bands. The computations time for this feature modality is however very high. For real time applications it is currently not advised.  
+**nolds** features are estimates as a direct wrapper around the `nolds toolbox: <https://github.com/CSchoel/nolds>`_. Features can be estimated for raw data, or data being filtered in different frequency bands. The computations time for this feature modality is however very high. For real time applications it is currently not advised.  
 
 .. code-block:: json
 

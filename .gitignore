@@ -152,3 +152,7 @@ docs/source/data/*
 
 examples/data/derivatives/*
 examples/other_examples/*
+
+examples/sub/*
+
+sub/
