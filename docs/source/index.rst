@@ -4,7 +4,7 @@
 Welcome to py_neuromodulation's documentation!
 ==============================================
 
-The py_neuromodulation toolbox allows for real time capable feature estimatio of invasive electrophysiological data.
+The py_neuromodulation toolbox allows for real time capable feature estimation of invasive electrophysiological data.
 Have a look at the :ref:`motivation<introduction>` and :ref:`installation`!
 
 .. toctree::

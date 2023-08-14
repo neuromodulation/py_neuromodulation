@@ -34,6 +34,7 @@ from sklearn import metrics, model_selection, linear_model
 
 import matplotlib.pyplot as plt
 from pathlib import Path
+import os
 
 # %%
 # Let's read the example using [mne_bids](https://mne.tools/mne-bids/stable/index.html). The resulting raw object in of type [mne.RawArray](https://mne.tools/stable/generated/mne.io.RawArray.html). We can use the properties such as sampling frequency, channel names, channel types all from the mne array and create the *nm_channels* dataframe:
@@ -42,7 +43,9 @@ from pathlib import Path
 
 RUN_NAME = "sub-000_ses-right_task-force_run-3_ieeg"
 
-PATH_BIDS = Path(__file__).absolute().parent / "data"
+# PATH_BIDS = Path(__file__).absolute().parent / "data"
+
+PATH_BIDS = Path(os.path.dirname(os.path.abspath("__file__"))).absolute() / "data"
 
 PATH_RUN = PATH_BIDS / "sub-000" / "sess-right" / "ieeg" / (RUN_NAME + ".vhdr")
 

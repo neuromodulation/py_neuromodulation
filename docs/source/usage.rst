@@ -3,29 +3,33 @@ Usage
 
 We will here explain the basic usage of py_neuromodulation. Also check out the :doc:`examples <examples>`.
 
-In general only a time series is required with a specific sampling frequency.
+In general only a time series is required with a specified sampling frequency.
 
 Here is the definition of a minimalistic example:
 
 .. code-block:: python
     
     import py_neuromodulation as pn
+    import numpy as np
     
     NUM_CHANNELS = 5
     NUM_DATA = 10000
     sfreq = 1000  # Hz
-    feature_freq = 10  # Hz
+    feature_freq = 3  # Hz
 
     data = np.random.random([10, 10000])
 
-    stream = pn.Stream(data, sfreq, feature_freq)
+    stream = pn.Stream(sfreq=sfreq, data=data, sampling_rate_features_hz=sampling_rate_features_hz)
     features = stream.run()
 
-In this example default the default signal processing pipeline was estimated. An offline data-stream is being initialized. The raw data is common-average re-referenced, FFT 
-features with a sampling frequency of 10 Hz are calculated, and subsequently z-score normalized.
+`features` will be dictionary containing the computed features for each channel. In this example default the default signal processing pipeline was estimated.
+An offline data-stream was initialized with raw data common-average re-referenced, FFT, bursting features and temporal waveform shape computed. 
+Features were calculated with a *sampling_rate_features_hz* of 3 Hz and subsequently *z-score* normalized.
 
 We can however further define channel-specific parametrization such as re-referencing, channel selection, target definition, 
-and also select and define features for computation. py_neuromodualtion currently supports a set of additional features such as temporal waveform shape, `fooof <https://fooof-tools.github.io/fooof/>`_, bursts and more.
+and also select and define many additional features for computation.
+
+Check out the example :doc:`plot_example_first_demo` for a first introduction.
 
 In the following sections we will discuss how additional parametrization can be enabled.
 
@@ -38,7 +42,7 @@ When setting up the :py:class:`~py_neuromodulation.nm_decode.Decoder`, `nm_setti
 
 .. code-block:: python
 
-    from py_neurmodulation import nm_define_nmchannels, nm_settings
+    from py_neuromodulation import nm_define_nmchannels, nm_settings
 
     channels = nm_define_nmchannels.get_default_channels_from_data(data, car_rereferencing=True)
     settings = nm_settings.get_default_settings()  # potentially reset the settings
@@ -321,7 +325,7 @@ A separate tutorial on sharpwave features is provided in the documentation.
 Raw signals
 ~~~~~~~~~~~
 
-Next, raw signals can be returned, specifed by the **return_raw** method. This can be useful for using e.g. normalizing, rereferencing or resampling before feeding data to a deep learining model.
+Next, raw signals can be returned, specified by the **return_raw** method. This can be useful for using e.g. normalizing, rereferencing or resampling before feeding data to a deep learining model.
 
 Characterization of spectral aperiodic component
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

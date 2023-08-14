@@ -29,6 +29,7 @@ import py_neuromodulation as nm
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
+import os
 
 
 # %%
@@ -40,7 +41,8 @@ from pathlib import Path
 # %%
 RUN_NAME = "sub-000_ses-right_task-force_run-3_ieeg"
 
-PATH_BIDS = Path(__file__).absolute().parent / "data"
+# PATH_BIDS = Path(__file__).absolute().parent / "data"
+PATH_BIDS = Path(os.path.dirname(os.path.abspath("__file__"))).absolute() / "data"
 
 PATH_RUN = PATH_BIDS / "sub-000" / "sess-right" / "ieeg" / (RUN_NAME + ".vhdr")
 

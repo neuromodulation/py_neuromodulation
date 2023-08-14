@@ -8,5 +8,5 @@ Examples
    auto_examples/plot_first_demo
    auto_examples/plot_example_BIDS
    auto_examples/plot_example_sharpwave_analysis
-..   auto_examples/plot_example_gridPointProjection
+   auto_examples/plot_example_gridPointProjection
 

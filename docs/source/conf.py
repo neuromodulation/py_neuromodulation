@@ -8,7 +8,6 @@
 import sys
 import os
 import json
-import panel
 import re
 
 import py_neuromodulation
