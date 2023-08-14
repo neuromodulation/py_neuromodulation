@@ -46,7 +46,6 @@ extensions = [
     'sphinx_gallery.gen_gallery',
     'nbsphinx',
     'recommonmark',
-    'nbsite.pyodide'
 ]
 
 source_suffix = ['.rst', '.md', ]
