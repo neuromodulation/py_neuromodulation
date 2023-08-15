@@ -13,6 +13,13 @@ import matplotlib.pyplot as plt
 from torch.utils.tensorboard.summary import hparams
 from sklearn.svm import SVC
 from sklearn.metrics.pairwise import cosine_similarity
+import faiss
+import plotly
+import plotly.graph_objects as go
+import plotly.express as px
+import xgboost
+from sklearn.utils import class_weight
+from knn_bpp import kNN_BPP
 
 ch_all = np.load(
     os.path.join(r"D:\Glenn", "train_channel_all_fft.npy"),
@@ -99,7 +106,50 @@ def plot_results(perflist,val_approach, cohorts, save=False):
     if save:
         writer.add_figure('Performance_Figure', plt.gcf(), 0)
 
-def run_CV(val_approach,curtime,model_params):
+def plotly_embeddings(X_train_emb,X_test_emb,y_train_discr,y_test,aux=None,type='none'):
+#    Plot together with the test embedding (For coh auxillary)
+    symbollist = ['circle', 'cross', 'diamond', 'square', 'x']
+    if type == 'coh':
+        colorlist = px.colors.qualitative.D3
+        plotly.offline.plot({'data': [go.Scatter3d(
+            x=np.append(X_train_emb[:, 0],X_test_emb[:, 0]),
+            y=np.append(X_train_emb[:, 1],X_test_emb[:, 1]),
+            z=np.append(X_train_emb[:, 2],X_test_emb[:, 2]),
+            mode='markers',
+            marker=dict(
+                size=2,
+                color=np.array(colorlist)[np.array(np.append(y_train_discr,np.array(y_test,dtype=int)+2), dtype=int)],
+                symbol=np.array(symbollist)[np.array(np.append(aux,np.repeat(max(aux)+1,len(y_test))), dtype=int)],
+                # set color to an array/list of desired values
+                opacity=0.8))]}, auto_open=True)
+    elif type == 'sub':
+        colorlist = px.colors.qualitative.Light24  # Light24 might work for sub (# of colours) and D3 works well for coh_aux
+        plotly.offline.plot({'data': [go.Scatter3d(
+            x=np.append(X_train_emb[:, 0],X_test_emb[:, 0]),
+            y=np.append(X_train_emb[:, 1],X_test_emb[:, 1]),
+            z=np.append(X_train_emb[:, 2],X_test_emb[:, 2]),
+            mode='markers',
+            marker=dict(
+                size=2,
+                color=np.array(colorlist)[np.array(np.append(aux,np.repeat(max(aux)+1,len(y_test))), dtype=int)],
+                symbol=np.array(symbollist)[np.array(np.append(y_train_discr,np.array(y_test,dtype=int)), dtype=int)],
+                # set color to an array/list of desired values
+                opacity=0.8))]}, auto_open=True)
+    elif type == 'none':
+        colorlist = px.colors.qualitative.D3
+        plotly.offline.plot({'data': [go.Scatter3d(
+            x=np.append(X_train_emb[:, 0], X_test_emb[:, 0]),
+            y=np.append(X_train_emb[:, 1], X_test_emb[:, 1]),
+            z=np.append(X_train_emb[:, 2], X_test_emb[:, 2]),
+            mode='markers',
+            marker=dict(
+                size=2,
+                color=np.array(colorlist)[np.array(np.append(y_train_discr, np.array(y_test, dtype=int) + 2), dtype=int)],
+                symbol=np.array(symbollist)[np.array(np.append(np.repeat(0,len(y_train_discr)), np.repeat(1, len(y_test))), dtype=int)],
+                # set color to an array/list of desired values
+                opacity=0.8))]}, auto_open=True)
+
+def run_CV(val_approach,curtime,model_params,show_embedding=False):
     data_select = ch_all
     p_ = {}
     batotal = []
@@ -177,6 +227,7 @@ def run_CV(val_approach,curtime,model_params):
                     time_offsets = model_params['time_offsets'],
                     output_dimension = model_params['output_dimension'],
                     device = "cuda",
+                    distance='cosine',
                     conditional='time_delta',
                     verbose = True
                 )
@@ -217,11 +268,38 @@ def run_CV(val_approach,curtime,model_params):
                     decoder = linear_model.LogisticRegression(class_weight="balanced")
                 elif model_params['decoder'] == 'SVM':
                     decoder = SVC(kernel=cosine_similarity)
+                elif model_params['decoder'] == 'FAISS':
+                    print('Not implemented')
+                elif model_params['decoder'] == 'MLP':
+                    print('Not implemented')
+                elif model_params['decoder'] == 'XGB':
+                    decoder = xgboost.sklearn.XGBClassifier()
+                    #decoder.set_params(**{'lambda':2})
+                    classes_weights = class_weight.compute_sample_weight(
+                        class_weight="balanced", y=y_train_discr
+                    )
+                    decoder.set_params(eval_metric="logloss")
+                    decoder.fit(
+                        X_train_emb,
+                        y_train_discr,
+                        sample_weight=classes_weights,
+                    )
+                elif model_params['decoder'] == 'KNN_BPP':
+                    decoder = kNN_BPP(n_neighbors=model_params['n_neighbors'])
 
-                # Fitting is always done on the true discrete data
+
+                # Fitting of classifier is always done on the true discrete data
                 decoder.fit(X_train_emb, np.array(y_train_discr, dtype=int))
 
-            X_test_emb = cebra_model.transform(X_test,session_id=0)
+            # Needed for training once per across cohort
+            cohort_prev_it = cohort_test
+            rng = np.random.default_rng()
+
+            X_test_emb = cebra_model.transform(rng.permutation(X_test,axis=1),session_id=0)
+
+            ### Embeddings are plotted here
+            if show_embedding:
+                plotly_embeddings(X_train_emb,X_test_emb,y_train_discr,y_test,aux=coh_aux,type='coh')
 
             y_test_pr = decoder.predict(X_test_emb)
             ba = metrics.balanced_accuracy_score(y_test, y_test_pr)
@@ -240,10 +318,11 @@ def run_CV(val_approach,curtime,model_params):
             # Save some performance metrics
             bacohort.append(ba)
             batotal.append(ba)
-            # Needed for training once per across cohort
-            cohort_prev_it = cohort_test
+
         # After all subjects
         bacohortlist.append(np.mean(bacohort))
+        mean_ba = np.mean(batotal)
+        print(f'running mean balanced accuracy: {mean_ba}')
     # Save the output if it was not a debug run
     if not model_params['debug']:
         # After the run
@@ -253,7 +332,6 @@ def run_CV(val_approach,curtime,model_params):
         )
         plot_results(p_, val_approach, cohorts, save=True)
         # Calculate some final performance metric and save to TensorBoard
-        mean_ba = np.mean(batotal)
         metric_dict = {'mean_accuracy': mean_ba}
         # Calculate the mean of means (i.e. the performance mean ignoring imbalances in cohort sizes)
         ba_mean_ba = np.mean(bacohortlist)
@@ -286,13 +364,13 @@ for val_approach in val_approaches:
                 'batch_size': 512, # Ideally as large as fits on the GPU, min recommended = 512
                 'temperature_mode':"auto",
                 'learning_rate': 0.005, # Set this in accordance to loss function progression in TensorBoard
-                'max_iterations': 3000,  # 50000, Set this in accordance to the loss functions in TensorBoard
+                'max_iterations': 5000,  # 5000, Set this in accordance to the loss functions in TensorBoard
                 'time_offsets': 1, # Time offset between samples (Ideally set larger than receptive field according to docs)
                 'output_dimension': 3, # Nr of output dimensions of the CEBRA model
-                'decoder': 'SVM', # Choose from "KNN" or "Logistic"
-                'n_neighbors': 3, # KNN setting
-                'metric': "cosine", # KNN setting
-                'n_jobs': 20, # KNN setting
+                'decoder': 'KNN_BPP', # Choose from "KNN", "Logistic", "SVM", "KNN_BPP"
+                'n_neighbors': 35, # KNN & KNN_BPP setting (# of neighbours to consider)
+                'metric': "euclidean", # KNN setting (For L2 normalized vectors, the ordering of Euclidean and Cosine should be the same)
+                'n_jobs': 20, # KNN setting for parallelization
                 'all_embeddings':False, # If you want to combine all the embeddings (only when true_msess = True !), currently 1 model is used for the test set --> Make majority
                 'true_msess':False, # Make a single model will be made for every subject (Usefull if feature dimension different between subjects)
                 'discreteMov':False, # Turn pseudoDiscr to False if you want to test true discrete movement labels (Otherwise this setting will do nothing)
@@ -303,28 +381,68 @@ for val_approach in val_approaches:
     if not model_params['debug']:
         writer = SummaryWriter(log_dir=f"D:\Glenn\CEBRA_logs\{val_approach}\{curtime}")
 
-    run_CV(val_approach, curtime, model_params)
+    run_CV(val_approach, curtime, model_params,show_embedding=False)
 
+# Note: 2 CEBRA models trained to convergence should be the same up to a linear transformation (given enough data)
+
+### Code improvements
+##### 14/08:
+# DONE: Look at the embeddings (In single session and in multi-session cases, and with different auxillary variables
+##### 15/08:
+# DONE: Implement bagging KNN with cosine metric --> Not needed as for L2 normalized vectors the ordering of Euclidean and Cosine should be the same
+# TODO: (Look at dataset size / distribution and (no)movement distribution)
+# DONE: Test what happens upon shuffling the test set features
+##### 16/08:
+# TODO: Implement K-Fold strategy
+# TODO: Try one of the lower hanging fruits multi-channel ideas (prob. one of the R-map correlator ones)
+# TODO: OR: Look into true multi-session performance
+
+# GENERAL:
 ### Code improvements
 # TODO: Look into implementing a K-fold strategy (i.e. leave 2 out instead of 1, especially for across cohort to speed up without much reduced training set)
 # TODO: ? Save the standard deviations as well.
-# TODO: ? Would a loss plot per cohort be better (assuming that there are differences between cohorts)
+# TODO: ?? Would a loss plot per cohort be better (assuming that there are differences between cohorts)
+
 ### Tests to perform
-# DONE: Test the difference between using a discrete auxillary, no auxillary and a continuous auxillary
-# TODO: Check what happens upon changing the way auxillary is made continuous (AMPLITUDE & SIGMA)
-# DONE: Investigate adding subject information as discrete auxillary
-# TODO: Look into adding multiple channels (either as feature dim, or concatenated with labels)
+# TODO: MULTI-CHANNEL IDEAS:
+#   1. -Train: True Multi-session with all (or top x) channels as SEPARATE sessions
+#       --> Class model per embedding (weigh embeddings by Corr to R-Map (or just channel R performance))
+#      -Test: ?
+#      -Problems: What model and channels do you use from the test subject / A LOT OF COMPUTE NEEDED
+#   2. -Train: True Multi-session per brain region (diff channels as features) --> Class. model per brain region (and subject which can be combined for the class model)
+#      -Test: Apply brain region models to channels in respective brain regions, and (?weighted R-map?) Majority vote
+#      -Problems: Problem when test subject diff # of channels in brain region w.r.t. all train subjects --> No model available / Also some COMPUTE
+#   3. -Train: Single-session per brain region (diff. channels over time axis) --> Class. model per brain region
+#      -Test: Apply brain region models to channels in respective brain regions
+#               Combine: Based on average brain region - R score single channel) or using val set to test best combi
+#      -Problems: Having more channels in brain region will bias the sampling towards that subject
+#      -Solution: Auxillary label per brain ID (and maybe combined with cohort?)
+#   4. -Train: Single-session with top x correlators to R-map (either as feature (ordered) or over time)
+#   5. -Train: Single-session with all (or most) channels sorted in feature dimension on their correlation to the R-map (Might provide some structure for the model to expect)
 # TODO: Test different model architectures (with 2dConv to integrate info over the channels?)
-# TODO: --> Might require the loader to supply data differently (Or make a custom implementation)
-# TODO: Look at the embeddings (In single session and in multi-session cases
-# TODO: Implement FAISS KNN
-# TODO: Look at dataset size / distribution and (no)movement distribution
+# TODO: Include more features
+# TODO: Hyperparameter search
+# TODO: Look into performance difference treating as single session vs TRUE multisession (+ combining embeddings)
 
+# DONE: Test the difference between using a discrete auxillary, no auxillary and a continuous auxillary
+# TODO: Check what happens upon changing the way auxillary is made continuous (AMPLITUDE & SIGMA) (pot. not that useful)
+# DONE: Investigate adding subject information as discrete auxillary
+# TODO: Test different model architectures (with 2dConv to integrate info over the channels?)
+#   --> Might require the loader to supply data differently (Or make a custom implementation)
 
-# TODO: Embedding for each channel & Use Class. score as weight for the embeddings (???) Which model for test then ? --> Correlation to R-map could be used
-# TODO: Seems like a good idea, but need A LOT of compute
+# TODO: Inclusion of UPDRS-III ?
 
-# TODO: Idea is, by sampling uniformly it becomes invariant to that; might add UPDRS score in a way
+# QUESTION: How much is R-MAP correlation correlated to R-score. Maybe a machine learning model to predict R score based on (resting state) signal + R-map corr + brain region
+#   might be better than only using the R-MAP
+
 ### Findings
 # Psuedodiscrete auxillary works as good or better than the gaussian filtered one, but full discrete does not work well
 # Preliminary findings: Including subject ID makes the performance worse for all datasets except marginally Pittsburgh
+
+# KNN_BPP Can work almost as well as Logregression (but still a bit worse). Perhaps for higher dimension usefull.
+# XGB is was also not that bad (Have to try more)
+
+# The test embedding IS dependent on the ordering of the features, and thus will also be on the ordering of channels potentially
+# Therefore, some ordering here is required, or look into true multisess / time concatenation
+
+#
