@@ -242,7 +242,7 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
                     if not model_params['pseudoDiscr']:
                         cebra_model.fit(X_train, y_train)
                     else: # Pretend the integer y_train is floating
-                        cebra_model.fit(X_train, np.array(y_train, dtype=float), coh_aux)
+                        cebra_model.fit(X_train, np.array(y_train,dtype=float), coh_aux)
 
                 if model_params['true_msess']:
                     X_train_emb = cebra_model.transform(X_train_comb[0],session_id=0)
@@ -362,13 +362,15 @@ val_approaches = ["leave_1_cohort_out"]#, "leave_1_sub_out_within_coh"]
 for val_approach in val_approaches:
     model_params = {'model_architecture':'offset10-model',
                 'batch_size': 512, # Ideally as large as fits on the GPU, min recommended = 512
-                'temperature_mode':"auto",
+                'temperature_mode':'constant', # Constant or auto
+                'temperature':1,
+                'min_temperature':0.1, # If temperature mode = auto this should be set in the desired expected range
                 'learning_rate': 0.005, # Set this in accordance to loss function progression in TensorBoard
                 'max_iterations': 5000,  # 5000, Set this in accordance to the loss functions in TensorBoard
                 'time_offsets': 1, # Time offset between samples (Ideally set larger than receptive field according to docs)
                 'output_dimension': 3, # Nr of output dimensions of the CEBRA model
                 'decoder': 'KNN_BPP', # Choose from "KNN", "Logistic", "SVM", "KNN_BPP"
-                'n_neighbors': 35, # KNN & KNN_BPP setting (# of neighbours to consider)
+                'n_neighbors': 35, # KNN & KNN_BPP setting (# of neighbours to consider) 35 works well for 3 output dimensions
                 'metric': "euclidean", # KNN setting (For L2 normalized vectors, the ordering of Euclidean and Cosine should be the same)
                 'n_jobs': 20, # KNN setting for parallelization
                 'all_embeddings':False, # If you want to combine all the embeddings (only when true_msess = True !), currently 1 model is used for the test set --> Make majority
