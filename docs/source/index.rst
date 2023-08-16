@@ -15,14 +15,13 @@ Have a look at the :ref:`motivation<introduction>` and :ref:`installation`!
    installation
    usage
    examples
+   api_documentation
 
 .. toctree::
    :maxdepth: 1
    :caption: Code Documentation
 
-   outline_parametrization
-   outline_featureestimation
-   outline_analysis
+   api_documentation
 
 Indices and tables
 ==================

@@ -38,6 +38,7 @@ from py_neuromodulation import (
     nm_settings,
 )
 import os
+import sys
 
 # %%
 # We will first read the examples/data ECoG data and plot the identified features on the filtered time series. 
@@ -45,7 +46,10 @@ import os
 RUN_NAME = "sub-000_ses-right_task-force_run-3_ieeg"
 
 # PATH_BIDS = Path(__file__).absolute().parent / "data"
-PATH_BIDS = Path(os.path.dirname(os.path.abspath("__file__"))).absolute() / "data"
+if len(sys.argv) > 1:
+    PATH_BIDS = Path(sys.argv[1]) / "data"
+else:
+    PATH_BIDS = Path().resolve() / "data"
 
 PATH_RUN = PATH_BIDS / "sub-000" / "sess-right" / "ieeg" / (RUN_NAME + ".vhdr")
 

@@ -22,30 +22,73 @@ Here is the definition of a minimalistic example:
     stream = pn.Stream(sfreq=sfreq, data=data, sampling_rate_features_hz=sampling_rate_features_hz)
     features = stream.run()
 
-`features` will be dictionary containing the computed features for each channel. In this example default the default signal processing pipeline was estimated.
-An offline data-stream was initialized with raw data common-average re-referenced, FFT, bursting features and temporal waveform shape computed. 
+`features` will be a dictionary containing the computed features for each channel. In this example the default signal processing pipeline is estimated.
+An offline data-stream was initialized with raw data being common-average re-referenced, FFT, bursting features and temporal waveform shape computed. 
 Features were calculated with a *sampling_rate_features_hz* of 3 Hz and subsequently *z-score* normalized.
 
 We can however further define channel-specific parametrization such as re-referencing, channel selection, target definition, 
-and also select and define many additional features for computation.
+and also select and define additional features.
 
-Check out the example :doc:`plot_example_first_demo` for a first introduction.
+Check out the example :ref:`/auto_examples/plot_first_demo.rst` for a first introduction.
 
-In the following sections we will discuss how additional parametrization can be enabled.
-
-Parametrization
----------------
-
-In the example above default channel and feature parametrization was enabled.
-
-When setting up the :py:class:`~py_neuromodulation.nm_decode.Decoder`, `nm_settings` and `nm_channels` can further be defined and passed to initialize the stream object:
+The following sections discuss additional parametrization. In a nutshell, the a **settings** dictionary and a **channels** dataframe is used for parametrization.
+The above example implicitly used the default settings and channels. However, we can also define our own settings and channels:
 
 .. code-block:: python
 
     from py_neuromodulation import nm_define_nmchannels, nm_settings
 
     channels = nm_define_nmchannels.get_default_channels_from_data(data, car_rereferencing=True)
-    settings = nm_settings.get_default_settings()  # potentially reset the settings
+    settings = nm_settings.get_default_settings()
+
+Channel parametrization
+-----------------------
+
+The channel parametrization is defined in a :class:`~pandas.DataFrame`. The following columns are required:
+
++-----------------------------------+-----------------------------------+
+| Column name                       | Description                       |
++===================================+===================================+
+| **name**                          | name of the channel               |
++-----------------------------------+-----------------------------------+
+| **rereference**                   | different channel name for        |
+|                                   | bipolar rereferencing, or         |
+|                                   | avereage for commono average      |
+|                                   | rereferencing                     |
++-----------------------------------+-----------------------------------+
+| **used**                          | 0 or 1, channel selection         |
++-----------------------------------+-----------------------------------+
+| **target**                        | 0 or 1, for some decoding         |
+|                                   | applications we can define target |
+|                                   | chanenls, e.g. EMG channels       |
++-----------------------------------+-----------------------------------+
+| **type**                          | `mne-python`_ supported channel   |
+|                                   |  types                            |
+|                                   | e.g. ecog, eeg, ecg, emg, dbs,    |
+|                                   | seeg etc.                         |
++-----------------------------------+-----------------------------------+
+| **status**                        | good or bad, used for channel     |
+|                                   | quality indication                |
++-----------------------------------+-----------------------------------+
+| **new_name**                      | this keyword can be specified to  |
+|                                   | indicate for example the used     |
+|                                   | rereferncing scheme               |
++-----------------------------------+-----------------------------------+
+
+.. _mne-python: https://mne.tools/stable/glossary.html#term-data-channels
+
+In the example above default channel and feature parametrization was enabled.
+The **nm_channels** can either created as a *.tsv* text file, or as a pandas dataframe.
+There are some helper function that let you create the nm_channels without much effort:
+
+.. code-block:: python
+
+    nm_channels = nm_define_nmchannels.get_default_channels_from_data(data, car_rereferencing=True)
+
+
+When setting up the :class:`~py_neuromodulation.`, `nm_settings` and `nm_channels` can further be defined and passed to initialize the stream object:
+
+
 
 
 

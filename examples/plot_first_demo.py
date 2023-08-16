@@ -3,7 +3,7 @@ First Demo
 ==========
 
 This Demo will showcase the feature estimation and
-examplar analysis using simulated data.
+exemplar analysis using simulated data.
 """
 
 import py_neuromodulation as py_nm

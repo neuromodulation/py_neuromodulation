@@ -49,6 +49,7 @@ extensions = [
 ]
 
 source_suffix = ['.rst', '.md', ]
+
 autosummary_generate = True
 
 sphinx_gallery_conf = {
@@ -62,4 +63,17 @@ exclude_patterns = []
 
 html_theme = "pydata_sphinx_theme"
 html_static_path = ['_static']
+
+
+# -- Intersphinx configuration -----------------------------------------------
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy", None),
+    "matplotlib": ("https://matplotlib.org/stable", None),
+    "numba": ("https://numba.readthedocs.io/en/latest", None),
+    "mne": ("https://mne.tools/stable", None),
+    "pandas" : ("https://pandas.pydata.org/docs", None),
+}
 
