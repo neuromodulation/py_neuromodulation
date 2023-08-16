@@ -1,7 +1,6 @@
 import numpy as np
 import os
 import pandas as pd
-import cebra
 from cebra import CEBRA
 from scipy.ndimage import gaussian_filter1d
 from sklearn import metrics, neighbors
@@ -13,13 +12,12 @@ import matplotlib.pyplot as plt
 from torch.utils.tensorboard.summary import hparams
 from sklearn.svm import SVC
 from sklearn.metrics.pairwise import cosine_similarity
-import faiss
 import plotly
 import plotly.graph_objects as go
 import plotly.express as px
 import xgboost
 from sklearn.utils import class_weight
-from knn_bpp import kNN_BPP
+from Experiments.utils.knn_bpp import kNN_BPP
 
 ch_all = np.load(
     os.path.join(r"D:\Glenn", "train_channel_all_fft.npy"),
@@ -392,12 +390,16 @@ for val_approach in val_approaches:
 # DONE: Look at the embeddings (In single session and in multi-session cases, and with different auxillary variables
 ##### 15/08:
 # DONE: Implement bagging KNN with cosine metric --> Not needed as for L2 normalized vectors the ordering of Euclidean and Cosine should be the same
-# TODO: (Look at dataset size / distribution and (no)movement distribution)
 # DONE: Test what happens upon shuffling the test set features
 ##### 16/08:
-# TODO: Implement K-Fold strategy
-# TODO: Try one of the lower hanging fruits multi-channel ideas (prob. one of the R-map correlator ones)
-# TODO: OR: Look into true multi-session performance
+# DONE: Compute brain regions (Using Thomas's code) and did some analysis
+#### 17/08:
+# TODO: Continue working on brain region model; Check proper selection to not throw away full cohorts
+#   Multiple ideas: Either just select brain regions that >x% of the subject have electrode in and then add region as aux
+#                   --> Lets the model itself choose a best match for each sample and map
+#                   Could potentially include some imbalance in channels per brain regions (aux might balance sampling) ?
+#                   OR: Embedding per brain region, would probably want more balance, at least per cohort
+# TODO: (Look at dataset size / distribution (time axis) and (no)movement distribution)
 
 # GENERAL:
 ### Code improvements
@@ -447,4 +449,7 @@ for val_approach in val_approaches:
 # The test embedding IS dependent on the ordering of the features, and thus will also be on the ordering of channels potentially
 # Therefore, some ordering here is required, or look into true multisess / time concatenation
 
-#
+# Combining cohort and sub as cont. auxillary with movement as discrete does not work well. In general movement as discrete works a bit worse.
+# NEED to try: Both cohort and movement as continuous.
+
+# Try cohort as multisess (1 sess per cohort)
