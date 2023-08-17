@@ -240,7 +240,7 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
                     if not model_params['pseudoDiscr']:
                         cebra_model.fit(X_train, y_train)
                     else: # Pretend the integer y_train is floating
-                        cebra_model.fit(X_train, np.array(y_train,dtype=float), coh_aux)
+                        cebra_model.fit(X_train, np.array(y_train,dtype=float),coh_aux)
 
                 if model_params['true_msess']:
                     X_train_emb = cebra_model.transform(X_train_comb[0],session_id=0)
@@ -381,7 +381,7 @@ for val_approach in val_approaches:
     if not model_params['debug']:
         writer = SummaryWriter(log_dir=f"D:\Glenn\CEBRA_logs\{val_approach}\{curtime}")
 
-    run_CV(val_approach, curtime, model_params,show_embedding=False)
+    run_CV(val_approach, curtime, model_params,show_embedding=True)
 
 # Note: 2 CEBRA models trained to convergence should be the same up to a linear transformation (given enough data)
 
