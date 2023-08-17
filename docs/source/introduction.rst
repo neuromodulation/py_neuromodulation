@@ -6,16 +6,16 @@ Introduction
 Why py_neuromodulation?
 -----------------------
 
-Analzing neural data can be a troublesome, trial and error prone,
-and beginner unfriendly process. *py_neurmodulation* allows using a simple
-interface extraction of established features and includes common applied pre -and postprocessing methods.
+Analyzing neural data can be a troublesome, trial and error prone,
+and beginner unfriendly process. *py_neuromodulation* allows using a simple
+interface for extraction of established features and includes common applied pre -and postprocessing methods.
 
 Basically only **time series data** with a corresponding **sampling frequency** are required.
 
-The output will be a dataframe including different time-resolved computed features. Internally a **stream** get's initialized,
-which resembles an *online* data-stream can be be used with a hardware acquisition system. 
+The output will be a pandas DataFrame including different time-resolved computed features. Internally a **stream** get's initialized,
+which resembles an *online* data-stream that can in theory also be be used with a hardware acquisition system.
 
-The following features are included:
+The following features are currently included:
 
 * oscillatory: fft, stft or bandpass filtered band power
 * temporal waveform shape
@@ -31,7 +31,7 @@ How can those features be used?
 
 The original intention for writing this toolbox was movement decoding from invasive brain signals[1]_.
 The application however could be any neural decoding problem.
-py_neuromodulation offers wrappers around common practise Machine Learning methods for efficient analysis.
+*py_neuromodulation* offers wrappers around common practice machine learning methods for efficient analysis.
 
 References
 ----------

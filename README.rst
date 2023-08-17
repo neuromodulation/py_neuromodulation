@@ -1,64 +1,89 @@
 py_neuromodulation
 ==================
 
-.. image:: https://app.travis-ci.com/neuromodulation/py_neuromodulation.svg?branch=main
-    :target: https://app.travis-ci.com/neuromodulation/py_neuromodulation
+Analyzing neural data can be a troublesome, trial and error prone,
+and beginner unfriendly process. *py_neuromodulation* allows using a simple
+interface for extraction of established neurophysiological features and includes commonly applied pre -and postprocessing methods.
 
-Click this button to run the "example_BIDS.ipynb":
+Only **time series data** with a corresponding **sampling frequency** are required for feature extraction.
 
-.. image:: https://mybinder.org/badge_logo.svg
- :target: https://mybinder.org/v2/gh/neuromodulation/py_neuromodulation/HEAD
+The output will be a `pandas.DataFrame<https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html>`_ including different time-resolved computed features. Internally a **stream** get's initialized,
+which resembles an *online* data-stream that can in theory also be be used with a hardware acquisition system. 
 
-The py_neuromodulation toolbox allows for real time capable processing of multimodal electrophysiological data. The primary use is movement prediction for `adaptive deep brain stimulation <https://pubmed.ncbi.nlm.nih.gov/30607748/>`_.
+The following features are currently included:
 
-Find the documentation here https://neuromodulation.github.io/py_neuromodulation/ for example usage and parametrization.
+* oscillatory: fft, stft or bandpass filtered band power
+* `temporal waveform shape<https://www.sciencedirect.com/science/article/pii/S1364661316302182>`_
+* `fooof<https://fooof-tools.github.io/fooof/>`_
+* `mne_connectivity estimates<https://mne.tools/mne-connectivity/stable/index.html>`_ 
+* `Hjorth parameter<https://en.wikipedia.org/wiki/Hjorth_parameters>`_
+* `non-linear dynamical estimates<https://nolds.readthedocs.io/en/latest/>`_
+* various burst features
+* line length 
+* and more...
 
-Setup
-=====
 
-For running this toolbox first create a new virtual conda environment and activate it:
+The original intention for writing this toolbox was movement decoding from invasive brain signals[1]_.
+The application however could be any neural decoding problem.
+*py_neuromodulation* offers wrappers around common practice machine learning methods for efficient analysis.
+
+Find the documentation here http://py-neuromodulation.readthedocs.io for example usage and parametrization.
+
+Installation
+============
+
+For installation, clone the repository and create a new virtual conda environment with at least python 3.10:
 
 .. code-block::
 
     conda create -n pynm-test python=3.10
     conda activate pynm-test
 
-Then install the packages listed in the `pyproject.toml`.
+Then install the packages listed in the `pyproject.toml` with.
 
 .. code-block::
 
     pip install .[dev]
-    pytest -v .
 
 
-Optionally the ipython kernel can be specified to installed for the pynm-test conda environment:
+Optionally the ipython kernel can be specified for the installed pynm-test conda environment:
 
 .. code-block::
 
     ipython kernel install --user --name=pynm-test
 
-Then py_neuromodulation can be imported via:
+Then *py_neuromodulation* can be imported via:
 
 .. code-block::
 
     import py_neuromodulation as py_nm
 
-The main modules include running real time enabled feature preprocessing based on `iEEG BIDS <https://www.nature.com/articles/s41597-019-0105-7>`_ data.
+Basic Usage
+===========
 
-Different features can be enabled/disabled and parametrized in the `https://github.com/neuromodulation/py_neuromodulation/blob/main/pyneuromodulation/nm_settings.json>`_.
+.. code-block:: python
+    
+    import py_neuromodulation as pn
+    import numpy as np
+    
+    NUM_CHANNELS = 5
+    NUM_DATA = 10000
+    sfreq = 1000  # Hz
+    feature_freq = 3  # Hz
 
-The current implementation mainly focuses band power and `sharpwave <https://www.sciencedirect.com/science/article/abs/pii/S1364661316302182>`_ feature estimation.
+    data = np.random.random([NUM_CHANNELS, NUM_DATA])
 
-An example folder with a mock subject and derivate `feature <https://github.com/neuromodulation/py_neuromodulation/tree/main/examples/data>`_ set was estimated.
+    stream = pn.Stream(sfreq=sfreq, data=data, sampling_rate_features_hz=sampling_rate_features_hz)
+    features = stream.run()
 
-To run feature estimation given the example BIDS data run in root directory.
+Check the `Usage <https://py-neuromodulation.readthedocs.io/en/latest/usage.html>`_ and `First examples <https://py-neuromodulation.readthedocs.io/en/latest/auto_examples/plot_first_demo.html>`_ for further introduction.
 
-.. code-block::
+Contact information
+-------------------
+For any question or suggestion please find my contact
+information at `my GitHub profile <https://github.com/timonmerk>`_.
 
-    python examples/example_BIDS.py
+References
+----------
 
-
-This will write a feature_arr.csv and different sidecar files in the 'examples/data/derivatives' folder.
-
-For further documentation view `ParametrizationDefinition <ParametrizationDefinition.html#>`_ for description of necessary parametrization files.
-`FeatureEstimationDemo <FeatureEstimationDemo.html#>`_ walks through an example feature estimation and explains sharpwave estimation.
+.. [1] Merk, T. et al. *Electrocorticography is superior to subthalamic local field potentials for movement decoding in Parkinson’s disease*. Elife 11, e75126, `https://doi.org/10.7554/eLife.75126` (2022).

@@ -46,6 +46,8 @@ RUN_NAME = "sub-000_ses-right_task-force_run-3_ieeg"
 
 #PATH_BIDS = Path(__file__).absolute().parent / "data"
 
+PATH_BIDS = Path(nm.__file__).parent / "examples" / "data"
+
 if len(sys.argv) > 1:
     PATH_BIDS = Path(sys.argv[1]) / "data"
 else:

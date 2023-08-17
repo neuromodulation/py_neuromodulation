@@ -17,7 +17,7 @@ Here is the definition of a minimalistic example:
     sfreq = 1000  # Hz
     feature_freq = 3  # Hz
 
-    data = np.random.random([10, 10000])
+    data = np.random.random([NUM_CHANNELS, NUM_DATA])
 
     stream = pn.Stream(sfreq=sfreq, data=data, sampling_rate_features_hz=sampling_rate_features_hz)
     features = stream.run()
@@ -491,6 +491,15 @@ MNE-connectivity
        "method": "plv",
        "mode": "multitaper"
    }
+
+MNE-connectivity
+~~~~~~~~~~~~~~~~
+
+**linelength** is a very simple features that calculates in the specified bath the sum of the absolute signal of a channel *x*:
+
+.. math::
+    
+   LineLength(x) = \sum_{i=0}^{Batch length} |x_i|
 
 Postprocessing
 ^^^^^^^^^^^^^^

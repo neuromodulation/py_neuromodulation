@@ -1,0 +1,3 @@
+participant_id	age	sex	center_ID	disease	center	curator	UPDRS_total	UPDRS_left	UPDRS_right	line_noise	Length_of_diagnosis_prior_to_surgery	hand
+sub-000	n/a	F	DBS4017	PD	UPMC	Richardson	28	11	9	60	10.7	n/a
+
