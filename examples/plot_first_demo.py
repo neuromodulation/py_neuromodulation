@@ -6,6 +6,9 @@ This Demo will showcase the feature estimation and
 exemplar analysis using simulated data.
 """
 
+import numpy as np
+from matplotlib import pyplot as plt
+
 import py_neuromodulation as py_nm
 
 from py_neuromodulation import (
@@ -14,8 +17,6 @@ from py_neuromodulation import (
     nm_plots
     
 )
-import numpy as np
-from matplotlib import pyplot as plt
 
 # %%
 # Data Simulation
@@ -146,7 +147,7 @@ features = stream.run(data)
 # Feature Analysis
 # ----------------
 
-# Ok, so there is a lot of output, which we could omit by verbose beinng False, but let's have a look what was being computed. We will therefore use the nm_analysis class to showcase some functions. For multi-run or subject analyze we will pass here the feature_file "sub" default directory:
+# Ok, so there is a lot of output, which we could omit by verbose being False, but let's have a look what was being computed. We will therefore use the nm_analysis class to showcase some functions. For multi-run or subject analyze we will pass here the feature_file "sub" default directory:
 
 analyzer = nm_analysis.Feature_Reader(
     feature_dir=stream.PATH_OUT,
@@ -161,7 +162,7 @@ analyzer.feature_arr.iloc[:10, :7]
 # %%
 # Seems like a lot of features were calculated. The 'time' columns tells us about each row time index. For the 6 specified channels, it is each 31 features. We can now use some in-built plotting functions for visualization.
 # 
-# Note: Due to the simulation data, some of the features have constant values, which are not displayed throught the image normalization.
+# Note: Due to the simulation data, some of the features have constant values, which are not displayed through the image normalization.
 
 analyzer.plot_all_features(ch_used="ch1")
 

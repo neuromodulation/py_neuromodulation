@@ -7,23 +7,23 @@ interface for extraction of established neurophysiological features and includes
 
 Only **time series data** with a corresponding **sampling frequency** are required for feature extraction.
 
-The output will be a `pandas.DataFrame<https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html>`_ including different time-resolved computed features. Internally a **stream** get's initialized,
+The output will be a `pandas.DataFrame <https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html>`_ including different time-resolved computed features. Internally a **stream** get's initialized,
 which resembles an *online* data-stream that can in theory also be be used with a hardware acquisition system. 
 
 The following features are currently included:
 
 * oscillatory: fft, stft or bandpass filtered band power
-* `temporal waveform shape<https://www.sciencedirect.com/science/article/pii/S1364661316302182>`_
-* `fooof<https://fooof-tools.github.io/fooof/>`_
-* `mne_connectivity estimates<https://mne.tools/mne-connectivity/stable/index.html>`_ 
-* `Hjorth parameter<https://en.wikipedia.org/wiki/Hjorth_parameters>`_
-* `non-linear dynamical estimates<https://nolds.readthedocs.io/en/latest/>`_
+* `temporal waveform shape <https://www.sciencedirect.com/science/article/pii/S1364661316302182>`_
+* `fooof <https://fooof-tools.github.io/fooof/>`_
+* `mne_connectivity estimates <https://mne.tools/mne-connectivity/stable/index.html>`_ 
+* `Hjorth parameter <https://en.wikipedia.org/wiki/Hjorth_parameters>`_
+* `non-linear dynamical estimates <https://nolds.readthedocs.io/en/latest/>`_
 * various burst features
 * line length 
 * and more...
 
 
-The original intention for writing this toolbox was movement decoding from invasive brain signals[1]_.
+The original intention for writing this toolbox was movement decoding from invasive brain signals [1]_.
 The application however could be any neural decoding problem.
 *py_neuromodulation* offers wrappers around common practice machine learning methods for efficient analysis.
 

@@ -11,13 +11,18 @@ Grid Point Projection
 # 
 # In order to do so, we'll read saved features that were computed in the ECoG movement notebook. Please note that in order to do so, when running the feature estimation, the settings
 # 
-# ```
-# stream.settings['postprocessing']['project_cortex'] = True
-# stream.settings['postprocessing']['project_subcortex'] = True
-# ```
-# need to be set to ```True``` for a cortical and/or subcortical projection.
+# .. code-block:: python
+# 
+#     stream.settings['postprocessing']['project_cortex'] = True
+#     stream.settings['postprocessing']['project_subcortex'] = True
+# 
+# need to be set to `True` for a cortical and/or subcortical projection.
 
 # %%
+import numpy as np
+import matplotlib.pyplot as plt
+
+import py_neuromodulation as nm
 from py_neuromodulation import (
     nm_analysis,
     nm_plots,
@@ -25,12 +30,6 @@ from py_neuromodulation import (
     nm_settings,
     nm_define_nmchannels
 )
-import py_neuromodulation as nm
-import numpy as np
-import matplotlib.pyplot as plt
-from pathlib import Path
-import os
-import sys
 
 
 # %%
@@ -40,15 +39,7 @@ import sys
 
 
 # %%
-RUN_NAME = "sub-testsub_ses-EphysMedOff_task-gripforce_run-0_ieeg"
-
-PATH_BIDS = Path(nm.__file__).parent / "data"  # example data get's shipped with the package 
-
-PATH_RUN = PATH_BIDS / "sub-testsub" / "sess-EphysMedOff" / "ieeg" / (RUN_NAME + ".vhdr")
-
-PATH_OUT = PATH_BIDS / "derivatives"
-
-datatype = "ieeg"
+RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data()
 
 (
     raw,
@@ -87,7 +78,7 @@ stream = nm.Stream(
     verbose=True,
 )
 
-stream.run(
+features = stream.run(
     data=data[:, :int(sfreq*5)],
     out_path_root=PATH_OUT,
     folder_name=RUN_NAME,
@@ -178,7 +169,7 @@ plt.title("Matrix mapping from ECoG to grid")
 df = feature_reader.feature_arr
 
 # %%
-df
+df.iloc[:5, :5]
 
 # %%
 # Then we filter for only 'avgref_fft_theta', which gives us the value for fft_theta in all 6 ECoG channels over all time points. Then I take only the 6th time point - as an arbitrary choice.

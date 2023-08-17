@@ -123,7 +123,11 @@ class PNStream(ABC):
         nm_channels: pd.DataFrame | _PathLike,
     ) -> pd.DataFrame:
         if not isinstance(nm_channels, pd.DataFrame):
-            return nm_IO.load_nm_channels(nm_channels)
+            nm_channels =  nm_IO.load_nm_channels(nm_channels)
+        
+        if nm_channels.query("used == 1 and target == 0").shape[0]  == 0:
+            raise ValueError("No channels selected for analysis that have column 'used' = 1 and 'target' = 0. Please check your nm_channels")
+
         return nm_channels
 
     @staticmethod

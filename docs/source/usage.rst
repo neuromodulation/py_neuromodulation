@@ -46,34 +46,33 @@ Channel parametrization
 
 The channel parametrization is defined in a :class:`~pandas.DataFrame`. The following columns are required:
 
-+-----------------------------------+-----------------------------------+
-| Column name                       | Description                       |
-+===================================+===================================+
-| **name**                          | name of the channel               |
-+-----------------------------------+-----------------------------------+
-| **rereference**                   | different channel name for        |
-|                                   | bipolar rereferencing, or         |
-|                                   | avereage for commono average      |
-|                                   | rereferencing                     |
-+-----------------------------------+-----------------------------------+
-| **used**                          | 0 or 1, channel selection         |
-+-----------------------------------+-----------------------------------+
-| **target**                        | 0 or 1, for some decoding         |
-|                                   | applications we can define target |
-|                                   | chanenls, e.g. EMG channels       |
-+-----------------------------------+-----------------------------------+
-| **type**                          | `mne-python`_ supported channel   |
-|                                   |  types                            |
-|                                   | e.g. ecog, eeg, ecg, emg, dbs,    |
-|                                   | seeg etc.                         |
-+-----------------------------------+-----------------------------------+
-| **status**                        | good or bad, used for channel     |
-|                                   | quality indication                |
-+-----------------------------------+-----------------------------------+
-| **new_name**                      | this keyword can be specified to  |
-|                                   | indicate for example the used     |
-|                                   | rereferncing scheme               |
-+-----------------------------------+-----------------------------------+
++-----------------------------------+----------------------------------------+
+| Column name                       | Description                            |
++===================================+========================================+
+| **name**                          | name of the channel                    |
++-----------------------------------+----------------------------------------+
+| **rereference**                   | different channel name for             |
+|                                   | bipolar rereferencing, or              |
+|                                   | avereage for commono average           |
+|                                   | rereferencing                          |
++-----------------------------------+----------------------------------------+
+| **used**                          | 0 or 1, channel selection              |
++-----------------------------------+----------------------------------------+
+| **target**                        | 0 or 1, for some decoding              |
+|                                   | applications we can define target      |
+|                                   | chanenls, e.g. EMG channels            |
++-----------------------------------+----------------------------------------+
+| **type**                          | `mne-python`_ supported channel types  |
+|                                   | e.g. ecog, eeg, ecg, emg, dbs,         |
+|                                   | seeg etc.                              |
++-----------------------------------+----------------------------------------+
+| **status**                        | good or bad, used for channel          |
+|                                   | quality indication                     |
++-----------------------------------+----------------------------------------+
+| **new_name**                      | this keyword can be specified to       |
+|                                   | indicate for example the used          |
+|                                   | rereferncing scheme                    |
++-----------------------------------+----------------------------------------+
 
 .. _mne-python: https://mne.tools/stable/glossary.html#term-data-channels
 

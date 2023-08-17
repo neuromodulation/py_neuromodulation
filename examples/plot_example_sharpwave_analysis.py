@@ -25,12 +25,9 @@ Analyzing sharpwave temporal features
 # Additionally, different filter ranges can be parametrized using the *filter_ranges_Hz* setting. Filtering is necessary to remove high frequent signal fluctuations, but limits also the true estimation of sharpness and prominence due to signal smoothing.
 
 import seaborn as sb
-import pandas as pd
 from matplotlib import pyplot as plt
 from scipy import signal
 import numpy as np
-from sklearn import linear_model, model_selection, metrics
-from pathlib import Path
 
 import py_neuromodulation as nm
 from py_neuromodulation import (
@@ -38,21 +35,12 @@ from py_neuromodulation import (
     nm_IO,
     nm_settings,
 )
-import os
-import sys
+
 
 # %%
 # We will first read the example data ECoG data and plot the identified features on the filtered time series. 
 
-RUN_NAME = "sub-testsub_ses-EphysMedOff_task-gripforce_run-0_ieeg"
-
-PATH_BIDS = Path(nm.__file__).parent / "data"  # example data get's shipped with the package 
-
-PATH_RUN = PATH_BIDS / "sub-testsub" / "sess-EphysMedOff" / "ieeg" / (RUN_NAME + ".vhdr")
-
-PATH_OUT = PATH_BIDS / "derivatives"
-
-datatype = "ieeg"
+RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data()
 
 (
     raw,

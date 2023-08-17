@@ -453,7 +453,7 @@ def plot_all_features(
     else:
         data_plt = df[cols_plt]
 
-    plt.figure(figsize=(7, 5), dpi=300)
+    plt.figure()  # figsize=(7, 5), dpi=300
     plt.imshow(data_plt.T, aspect="auto")
     plt.xlabel("Time [s]")
     plt.ylabel("Feature Names")

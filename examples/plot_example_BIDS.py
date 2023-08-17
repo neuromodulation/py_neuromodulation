@@ -21,6 +21,11 @@ ECoG Movement decoding example
 
 
 # %%
+from sklearn import metrics, model_selection, linear_model
+
+import matplotlib.pyplot as plt
+
+
 import py_neuromodulation as nm
 from py_neuromodulation import (
     nm_analysis,
@@ -30,27 +35,11 @@ from py_neuromodulation import (
     nm_plots,
     nm_settings,
 )
-from sklearn import metrics, model_selection, linear_model
-
-import matplotlib.pyplot as plt
-from pathlib import Path
-import os
-import sys
 
 # %%
 # Let's read the example using [mne_bids](https://mne.tools/mne-bids/stable/index.html). The resulting raw object in of type [mne.RawArray](https://mne.tools/stable/generated/mne.io.RawArray.html). We can use the properties such as sampling frequency, channel names, channel types all from the mne array and create the *nm_channels* dataframe:
 
-# replace that, the data needs to be loaded directly
-
-RUN_NAME = "sub-testsub_ses-EphysMedOff_task-gripforce_run-0_ieeg"
-
-PATH_BIDS = Path(nm.__file__).parent / "data"  # example data get's shipped with the package 
-
-PATH_RUN = PATH_BIDS / "sub-testsub" / "sess-EphysMedOff" / "ieeg" / (RUN_NAME + ".vhdr")
-
-PATH_OUT = PATH_BIDS / "derivatives"
-
-datatype = "ieeg"
+RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data()
 
 (
     raw,
@@ -128,7 +117,7 @@ stream = nm.Stream(
 )
 
 # %%
-stream.run(
+features = stream.run(
     data=data,
     out_path_root=PATH_OUT,
     folder_name=RUN_NAME,
@@ -148,7 +137,10 @@ feature_reader.label_name = "MOV_RIGHT"
 feature_reader.label = feature_reader.feature_arr["MOV_RIGHT"]
 
 # %%
-feature_reader.feature_arr
+feature_reader.feature_arr.iloc[100:108, :8]
+
+# %%
+print(feature_reader.feature_arr.shape)
 
 # %%
 feature_reader._get_target_ch()
@@ -233,7 +225,9 @@ ax = nm_plots.plot_df_subjects(
     y_col="performance_test",
     hue="ch_type",
     PATH_SAVE=PATH_OUT / RUN_NAME / (RUN_NAME + "_decoding_performance.png"),
+    figsize_tuple=(8, 5)
 )
 ax.set_ylabel(r"$R^2$ Correlation")
 ax.set_xlabel("Subject 000")
 ax.set_title("Performance comparison Movement decoding")
+plt.tight_layout()

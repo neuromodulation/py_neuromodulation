@@ -170,6 +170,7 @@ class NotchFilter:
             phase="zero",
             fir_window="hamming",
             fir_design="firwin",
+            verbose=False
         )
 
     def process(self, data: np.ndarray) -> np.ndarray:
