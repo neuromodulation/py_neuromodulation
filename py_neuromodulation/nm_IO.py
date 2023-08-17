@@ -393,17 +393,12 @@ def get_paths_example_data():
     dataset used in most examples.
     """
 
-    SCRIPT_DIR = Path(__file__).parent.parent.absolute()
-    if os.path.basename(SCRIPT_DIR) == "py_neuromodulation":
-        # this check is necessary, so we can also run the script from the root directory
-        SCRIPT_DIR = os.path.join(SCRIPT_DIR, "examples")
+    SCRIPT_DIR = Path(__file__).parent.absolute()
 
-    sys.path.append(os.path.dirname(SCRIPT_DIR))
-
-    sub = "000"
-    ses = "right"
-    task = "force"
-    run = 3
+    sub = "testsub"
+    ses = "EphysMedOff"
+    task = "gripforce"
+    run = 0
     datatype = "ieeg"
 
     # Define run name and access paths in the BIDS format.

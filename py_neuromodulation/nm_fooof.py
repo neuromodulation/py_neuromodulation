@@ -40,6 +40,7 @@ class FooofAnalyzer(nm_features_abc.Feature):
     ):
         assert isinstance(s["fooof"]["aperiodic"]["exponent"], bool)
         assert isinstance(s["fooof"]["aperiodic"]["offset"], bool)
+        assert isinstance(s["fooof"]["aperiodic"]["knee"], bool)
         assert isinstance(s["fooof"]["periodic"]["center_frequency"], bool)
         assert isinstance(s["fooof"]["periodic"]["band_width"], bool)
         assert isinstance(s["fooof"]["periodic"]["height_over_ap"], bool)
@@ -88,6 +89,13 @@ class FooofAnalyzer(nm_features_abc.Feature):
             if self.settings_fooof["aperiodic"]["offset"]:
                 features_compute[f"{ch_name}_fooof_a_offset"] = (
                     np.nan_to_num(self.fm.get_params("aperiodic_params", "offset"))
+                    if self.fm.fooofed_spectrum_ is not None
+                    else None
+                )
+            
+            if self.settings_fooof["aperiodic"]["knee"]:
+                features_compute[f"{ch_name}_fooof_a_knee"] = (
+                    np.nan_to_num(self.fm.get_params("aperiodic_params", "knee"))
                     if self.fm.fooofed_spectrum_ is not None
                     else None
                 )
