@@ -5,14 +5,9 @@
 # Or would one of the Julich-Brains work (Cytoarchitectonically defined regions)
 import siibra
 import numpy as np
-import os
 import pandas as pd
-from nilearn import plotting
 
-ch_all = np.load(
-    os.path.join(r"D:\Glenn", "train_channel_all_fft.npy"),
-    allow_pickle="TRUE",
-).item()
+
 df_info = pd.read_csv(r"D:\Glenn\df_ch_performances_regions.csv")
 
 difumo = siibra.get_map(
@@ -40,11 +35,11 @@ for input in range(df_info.shape[0]):
             try:
                 point = siibra.Point(pointlist[input], space='mni152',sigma_mm=sigma)
                 assign = difumo.assign(point)
-                assign = assign.sort_values(by='correlation',ascending=False).iloc[0]
+                assign = assign.sort_values(by='correlation',ascending=False).iloc[[0]]
                 assign['input structure'] = input
                 assignments = pd.concat([assignments.iloc[:rownr+1], assign, assignments.iloc[rownr+1:]]).reset_index(drop=True)
             except:
-                sigma = sigma+1
+                sigma = sigma+2
                 continue
             else:
                 # When no exception occured break the loop

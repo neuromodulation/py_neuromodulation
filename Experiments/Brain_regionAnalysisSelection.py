@@ -1,12 +1,6 @@
-import numpy as np
-import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-ch_all = np.load(
-    os.path.join(r"D:\Glenn", "train_channel_all_fft.npy"),
-    allow_pickle="TRUE",
-).item()
 df_info = pd.read_csv(r"D:\Glenn\df_ch_performances_regions.csv")
 
 plotting = True

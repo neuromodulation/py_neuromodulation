@@ -1,12 +1,8 @@
 import numpy as np
-import os
 import pandas as pd
 from mni_to_atlas import AtlasBrowser
 
-ch_all = np.load(
-    os.path.join(r"D:\Glenn", "train_channel_all_fft.npy"),
-    allow_pickle="TRUE",
-).item()
+
 df_info = pd.read_csv(r"D:\Glenn\df_ch_performances.csv")
 
 ### Adapted script that takes undefined regions and finds the closest (euclidean) brain region
