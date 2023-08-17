@@ -42,27 +42,15 @@ import sys
 
 # replace that, the data needs to be loaded directly
 
-RUN_NAME = "sub-000_ses-right_task-force_run-3_ieeg"
+RUN_NAME = "sub-testsub_ses-EphysMedOff_task-gripforce_run-0_ieeg"
 
-#PATH_BIDS = Path(__file__).absolute().parent / "data"
+PATH_BIDS = Path(nm.__file__).parent / "data"  # example data get's shipped with the package 
 
-PATH_BIDS = Path(nm.__file__).parent / "examples" / "data"
-
-if len(sys.argv) > 1:
-    PATH_BIDS = Path(sys.argv[1]) / "data"
-else:
-    PATH_BIDS = Path().resolve() / "data"
-
-print(f"PATH BIDS: {PATH_BIDS}")
-
-# PATH_BIDS = Path(os.path.dirname(os.path.abspath("__file__"))).absolute() / "data"
-
-PATH_RUN = PATH_BIDS / "sub-000" / "sess-right" / "ieeg" / (RUN_NAME + ".vhdr")
+PATH_RUN = PATH_BIDS / "sub-testsub" / "sess-EphysMedOff" / "ieeg" / (RUN_NAME + ".vhdr")
 
 PATH_OUT = PATH_BIDS / "derivatives"
 
 datatype = "ieeg"
-
 
 (
     raw,
@@ -82,7 +70,7 @@ nm_channels = nm_define_nmchannels.set_channels(
     bads=raw.info["bads"],
     new_names="default",
     used_types=("ecog", "dbs", "seeg"),
-    target_keywords=["MOV_RIGHT_CLEAN", "MOV_LEFT_CLEAN"],
+    target_keywords=["MOV_RIGHT"],
 )
 
 nm_channels
@@ -92,7 +80,7 @@ nm_channels
 
 plt.figure(figsize=(12, 4), dpi=300)
 plt.subplot(121)
-plt.plot(raw.times, data[-2, :])
+plt.plot(raw.times, data[-1, :])
 plt.xlabel("Time [s]")
 plt.ylabel("a.u.")
 plt.title("Movement label")
@@ -141,7 +129,7 @@ stream = nm.Stream(
 
 # %%
 stream.run(
-    data=data[:, : int(sfreq * 20)],
+    data=data,
     out_path_root=PATH_OUT,
     folder_name=RUN_NAME,
 )
@@ -156,8 +144,8 @@ feature_reader = nm_analysis.Feature_Reader(
     feature_dir=PATH_OUT,
     feature_file=RUN_NAME,
 )
-feature_reader.label_name = "MOV_LEFT_CLEAN"
-feature_reader.label = feature_reader.feature_arr["MOV_LEFT_CLEAN"]
+feature_reader.label_name = "MOV_RIGHT"
+feature_reader.label = feature_reader.feature_arr["MOV_RIGHT"]
 
 # %%
 feature_reader.feature_arr

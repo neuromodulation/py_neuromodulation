@@ -6,9 +6,10 @@ Analyzing sharpwave temporal features
 
 # %%
 # Time series data can be characterized using oscillatory components, but assumptions of sinusoidality are for real data rarely fulfilled. See *"Brain Oscillations and the Importance of Waveform Shape"* `Cole et al 2017 <https://doi.org/10.1016/j.tics.2016.12.008>`_ for a great motivation.
-# We implemented here temporal characterstics based on individual trough and peak relations, based on the scipy `find_peaks <https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html>`_ function. The function parameter *distance* can be specified in the *nm_settings.json*. Temporal features can be calculated twice for troughs and peaks. In the settings, this can be specified by setting *estimate* to true in *detect_troughs* and/or *detect_peaks*. A statistical measure (e.g. mean, max, median, var) can be defined as a resulting feature from the peak and trough estimates using the *apply_estimator_between_peaks_and_troughs* setting.
+# We implemented here temporal characteristics based on individual trough and peak relations, 
+# based on the :meth:~`scipy.signal.find_peaks <scipy.signal.find_peaks>` method. The function parameter *distance* can be specified in the *nm_settings.json*. Temporal features can be calculated twice for troughs and peaks. In the settings, this can be specified by setting *estimate* to true in *detect_troughs* and/or *detect_peaks*. A statistical measure (e.g. mean, max, median, var) can be defined as a resulting feature from the peak and trough estimates using the *apply_estimator_between_peaks_and_troughs* setting.
 # 
-# In py_neuromodulation the following characteristics are implemted:
+# In py_neuromodulation the following characteristics are implemented:
 # 
 # *Note that that the nomenclature is written for sharpwave troughs, but detection of peak characteristics can be computed in the same way*:
 # 
@@ -41,17 +42,13 @@ import os
 import sys
 
 # %%
-# We will first read the examples/data ECoG data and plot the identified features on the filtered time series. 
+# We will first read the example data ECoG data and plot the identified features on the filtered time series. 
 
-RUN_NAME = "sub-000_ses-right_task-force_run-3_ieeg"
+RUN_NAME = "sub-testsub_ses-EphysMedOff_task-gripforce_run-0_ieeg"
 
-# PATH_BIDS = Path(__file__).absolute().parent / "data"
-if len(sys.argv) > 1:
-    PATH_BIDS = Path(sys.argv[1]) / "data"
-else:
-    PATH_BIDS = Path().resolve() / "data"
+PATH_BIDS = Path(nm.__file__).parent / "data"  # example data get's shipped with the package 
 
-PATH_RUN = PATH_BIDS / "sub-000" / "sess-right" / "ieeg" / (RUN_NAME + ".vhdr")
+PATH_RUN = PATH_BIDS / "sub-testsub" / "sess-EphysMedOff" / "ieeg" / (RUN_NAME + ".vhdr")
 
 PATH_OUT = PATH_BIDS / "derivatives"
 
@@ -92,7 +89,7 @@ nm_channels = nm_define_nmchannels.set_channels(
     bads=raw.info["bads"],
     new_names="default",
     used_types=("ecog", "dbs", "seeg"),
-    target_keywords=["MOV_RIGHT_CLEAN","MOV_LEFT_CLEAN"]
+    target_keywords=["MOV_RIGHT"]
 )
 
 stream = nm.Stream(
@@ -108,7 +105,7 @@ sw_analyzer = stream.run_analysis.features.features[1]
 
 # %%
 # The plotted example time series, visualized on a short time scale, shows the relation of identified peaks, troughs, and estimated features:
-data_plt = data[5, 28000:30000]
+data_plt = data[5, 1000:4000]
 
 
 sw_analyzer._initialize_sw_features()
@@ -128,7 +125,7 @@ sw_analyzer.analyze_waveform()
 WIDTH = BAR_WIDTH = 4
 BAR_OFFSET = 50
 OFFSET_TIME_SERIES = -100
-SCALE_TIMESERIES = 3
+SCALE_TIMESERIES = 1
 
 hue_colors = sb.color_palette("viridis_r", 6)
 
@@ -139,41 +136,44 @@ plt.plot(OFFSET_TIME_SERIES + filtered_dat*SCALE_TIMESERIES, linewidth=0.5, colo
 plt.plot(peaks, OFFSET_TIME_SERIES + filtered_dat[peaks]*SCALE_TIMESERIES, "x", label="peaks",markersize=3, color="darkgray")
 plt.plot(troughs, OFFSET_TIME_SERIES + filtered_dat[troughs]*SCALE_TIMESERIES, "x", label="troughs", markersize=3, color="lightgray")
 
-plt.bar(troughs[:-1]+BAR_WIDTH, np.array(sw_analyzer.prominence)*4, bottom=BAR_OFFSET, width=WIDTH, color=hue_colors[0], label="Prominence", alpha=0.5)
-plt.bar(troughs[:-1]+BAR_WIDTH*2, -np.array(sw_analyzer.sharpness)*6, bottom=BAR_OFFSET, width=WIDTH, color=hue_colors[1], label="Sharpness", alpha=0.5)
-plt.bar(troughs[:-1]+BAR_WIDTH*3, np.array(sw_analyzer.interval)*5, bottom=BAR_OFFSET, width=WIDTH, color=hue_colors[2], label="Interval", alpha=0.5)
-plt.bar(troughs[:-1]+BAR_WIDTH*4, np.array(sw_analyzer.rise_time)*5, bottom=BAR_OFFSET, width=WIDTH, color=hue_colors[3], label="Rise time", alpha=0.5)
+plt.bar(troughs+BAR_WIDTH, np.array(sw_analyzer.prominence)*4, bottom=BAR_OFFSET, width=WIDTH, color=hue_colors[0], label="Prominence", alpha=0.5)
+plt.bar(troughs+BAR_WIDTH*2, -np.array(sw_analyzer.sharpness)*6, bottom=BAR_OFFSET, width=WIDTH, color=hue_colors[1], label="Sharpness", alpha=0.5)
+plt.bar(troughs+BAR_WIDTH*3, np.array(sw_analyzer.interval)*5, bottom=BAR_OFFSET, width=WIDTH, color=hue_colors[2], label="Interval", alpha=0.5)
+plt.bar(troughs+BAR_WIDTH*4, np.array(sw_analyzer.rise_time)*5, bottom=BAR_OFFSET, width=WIDTH, color=hue_colors[3], label="Rise time", alpha=0.5)
 
-plt.xticks(np.arange(0, 2000, 200), np.round(np.arange(0, 2, 0.2), 2))
+plt.xticks(np.arange(0, data_plt.shape[0], 200), np.round(np.arange(0, int(data_plt.shape[0]/1000), 0.2), 2))
 plt.xlabel("Time [s]")
 plt.title("Temporal waveform shape features")
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-plt.ylim(-450, 700)
+plt.ylim(-550, 700)
 plt.xlim(0, 200)
 plt.ylabel("a.u.")
+plt.tight_layout()
 
 # %%
 # See in the following example a time series example, that is aligned to movement. With movement onset the promince, sharpness, and interval features are reduced:
-plt.figure(figsize=(5, 3), dpi=300)
+plt.figure(figsize=(8, 5), dpi=300)
 plt.plot(OFFSET_TIME_SERIES + data_plt, color="gray", linewidth=0.5, alpha=0.5, label="original ECoG data")
 plt.plot(OFFSET_TIME_SERIES + filtered_dat*SCALE_TIMESERIES, linewidth=0.5, color="black", label="[5-30]Hz filtered data")
 
 plt.plot(peaks, OFFSET_TIME_SERIES + filtered_dat[peaks]*SCALE_TIMESERIES, "x", label="peaks",markersize=3, color="darkgray")
 plt.plot(troughs, OFFSET_TIME_SERIES + filtered_dat[troughs]*SCALE_TIMESERIES, "x", label="troughs", markersize=3, color="lightgray")
 
-plt.bar(troughs[:-1]+BAR_WIDTH, np.array(sw_analyzer.prominence)*4, bottom=BAR_OFFSET, width=WIDTH, color=hue_colors[0], label="Prominence", alpha=0.5)
-plt.bar(troughs[:-1]+BAR_WIDTH*2, -np.array(sw_analyzer.sharpness)*6, bottom=BAR_OFFSET, width=WIDTH, color=hue_colors[1], label="Sharpness", alpha=0.5)
-plt.bar(troughs[:-1]+BAR_WIDTH*3, np.array(sw_analyzer.interval)*5, bottom=BAR_OFFSET, width=WIDTH, color=hue_colors[2], label="Interval", alpha=0.5)
-plt.bar(troughs[:-1]+BAR_WIDTH*4, np.array(sw_analyzer.rise_time)*5, bottom=BAR_OFFSET, width=WIDTH, color=hue_colors[3], label="Rise time", alpha=0.5)
+plt.bar(troughs+BAR_WIDTH, np.array(sw_analyzer.prominence)*4, bottom=BAR_OFFSET, width=WIDTH, color=hue_colors[0], label="Prominence", alpha=0.5)
+plt.bar(troughs+BAR_WIDTH*2, -np.array(sw_analyzer.sharpness)*6, bottom=BAR_OFFSET, width=WIDTH, color=hue_colors[1], label="Sharpness", alpha=0.5)
+plt.bar(troughs+BAR_WIDTH*3, np.array(sw_analyzer.interval)*5, bottom=BAR_OFFSET, width=WIDTH, color=hue_colors[2], label="Interval", alpha=0.5)
+plt.bar(troughs+BAR_WIDTH*4, np.array(sw_analyzer.rise_time)*5, bottom=BAR_OFFSET, width=WIDTH, color=hue_colors[3], label="Rise time", alpha=0.5)
 
-plt.axvline(x=800, label="Movement start", color="red")
+plt.axvline(x=1500, label="Movement start", color="red")
 
-plt.xticks(np.arange(0, 2000, 200), np.round(np.arange(0, 2, 0.2), 2))
+#plt.xticks(np.arange(0, 2000, 200), np.round(np.arange(0, 2, 0.2), 2))
+plt.xticks(np.arange(0, data_plt.shape[0], 200), np.round(np.arange(0, int(data_plt.shape[0]/1000), 0.2), 2))
 plt.xlabel("Time [s]")
 plt.title("Temporal waveform shape features")
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 plt.ylim(-450, 400)
 plt.ylabel("a.u.")
+plt.tight_layout()
 
 # %%
 # In the *sharpwave_analysis_settings* the *estimator* keyword further specifies which statistics is computed based on the individual features in one batch. The "global" setting *segment_length_features_ms* specifies the time duration for feature computation. Since there can be a different number of identified waveform shape features for different batches (i.e. different number of peaks/troughs), taking a stastical measure (e.g. the maximum or mean) will be necessary for feature comparison. 
@@ -207,15 +207,15 @@ df_features = stream.run(data=data[:, :30000])
 # %%
 # We can then plot two examplary features, prominence and interval, and see that the movement amplitude can be clustered with those two features alone:
 
-plt.figure(figsize=(4, 3), dpi=300)
+plt.figure(figsize=(5, 3), dpi=300)
 plt.scatter(
     df_features["ECOG_RIGHT_0-avgref_Sharpwave_Max_prominence_range_5_80"],
     df_features["ECOG_RIGHT_5-avgref_Sharpwave_Mean_interval_range_5_80"],
-    c=df_features["MOV_LEFT_CLEAN"], alpha=1, s=3.5
+    c=df_features["MOV_RIGHT"], alpha=0.8, s=30
 )
 cbar = plt.colorbar()
 cbar.set_label("Movement amplitude")
 plt.xlabel("Prominence a.u.")
 plt.ylabel("Interval a.u.")
 plt.title("Temporal features predict movement amplitude")
-
+plt.tight_layout()

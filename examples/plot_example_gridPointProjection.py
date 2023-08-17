@@ -40,16 +40,11 @@ import sys
 
 
 # %%
-RUN_NAME = "sub-000_ses-right_task-force_run-3_ieeg"
+RUN_NAME = "sub-testsub_ses-EphysMedOff_task-gripforce_run-0_ieeg"
 
-# PATH_BIDS = Path(__file__).absolute().parent / "data"
+PATH_BIDS = Path(nm.__file__).parent / "data"  # example data get's shipped with the package 
 
-if len(sys.argv) > 1:
-    PATH_BIDS = Path(sys.argv[1]) / "data"
-else:
-    PATH_BIDS = Path().resolve() / "data"
-
-PATH_RUN = PATH_BIDS / "sub-000" / "sess-right" / "ieeg" / (RUN_NAME + ".vhdr")
+PATH_RUN = PATH_BIDS / "sub-testsub" / "sess-EphysMedOff" / "ieeg" / (RUN_NAME + ".vhdr")
 
 PATH_OUT = PATH_BIDS / "derivatives"
 

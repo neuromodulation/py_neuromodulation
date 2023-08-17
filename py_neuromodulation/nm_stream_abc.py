@@ -96,12 +96,8 @@ class PNStream(ABC):
 
     @abstractmethod
     def run(self):
-        """In this function data is first acquired iteratively
-        1. self.get_data()
-        2. data processing is called:
-        self.run_analysis.process_data(data) to calculate features
-        3. optional postprocessing
-        e.g. plotting, ML estimation is done
+        """function that will be called when data streaming (offline or online) will be started.
+        Internally a data loader should be initialized. 
         """
 
     @abstractmethod
@@ -187,7 +183,7 @@ class PNStream(ABC):
         self.run_analysis.save_settings(out_path_root, folder_name)
 
     def save_sidecar(self, out_path_root: _PathLike, folder_name: str) -> None:
-        """Save sidecar incuding fs, coords, sess_right to
+        """Save sidecar incduing fs, coords, sess_right to
         out_path_root and subfolder 'folder_name'"""
         additional_args = {"sess_right": self.sess_right}
         self.run_analysis.save_sidecar(

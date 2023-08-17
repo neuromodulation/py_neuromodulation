@@ -1,0 +1,11 @@
+﻿name	type	units	low_cutoff	high_cutoff	description	sampling_frequency	status	status_description
+LFP_RIGHT_0	DBS	µV	0.0	500.0	Deep Brain Stimulation	1000.0	good	n/a
+LFP_RIGHT_1	DBS	µV	0.0	500.0	Deep Brain Stimulation	1000.0	good	n/a
+LFP_RIGHT_2	DBS	µV	0.0	500.0	Deep Brain Stimulation	1000.0	good	n/a
+ECOG_RIGHT_0	ECOG	µV	0.0	500.0	Electrocorticography	1000.0	good	n/a
+ECOG_RIGHT_1	ECOG	µV	0.0	500.0	Electrocorticography	1000.0	good	n/a
+ECOG_RIGHT_2	ECOG	µV	0.0	500.0	Electrocorticography	1000.0	good	n/a
+ECOG_RIGHT_3	ECOG	µV	0.0	500.0	Electrocorticography	1000.0	good	n/a
+ECOG_RIGHT_4	ECOG	µV	0.0	500.0	Electrocorticography	1000.0	good	n/a
+ECOG_RIGHT_5	ECOG	µV	0.0	500.0	Electrocorticography	1000.0	good	n/a
+MOV_RIGHT	MISC	µV	0.0	500.0	Miscellaneous	1000.0	good	n/a
