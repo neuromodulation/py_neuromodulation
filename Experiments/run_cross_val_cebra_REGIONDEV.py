@@ -23,11 +23,11 @@ ch_all = np.load(
     os.path.join(r"D:\Glenn", "train_channel_all_fft.npy"),
     allow_pickle="TRUE",
 ).item()
-df_best_rmap = pd.read_csv(r"D:\Glenn\df_best_func_rmap_ch.csv")
+df_full = pd.read_csv(r"D:\Glenn\df_ch_performances_regions.csv")
 
 
 cohorts = ["Beijing", "Pittsburgh", "Berlin", ]  # "Washington"
-
+Atlas = 'DiFuMo128'
 def get_patients_train_dict(sub_test, cohort_test, val_approach: str, data_select: dict):
     cohorts_train = {}
     for cohort in cohorts:
@@ -76,14 +76,148 @@ def get_data_sub_ch(channel_all, cohort, sub, ch):
 
     return X_train, y_train
 
-def get_data_channels(sub_test: str, cohort_test: str, df_rmap: list):
-    ch_test = df_rmap.query("cohort == @cohort_test and sub == @sub_test")[
-        "ch"
-    ].iloc[0]
-    X_test, y_test = get_data_sub_ch(
-        ch_all, cohort_test, sub_test, ch_test
-    )
-    return X_test, y_test
+def get_data_channels(sub_test: str, cohort_test: str, df_all, test: bool, model_params: dict):
+    # TODO: seperate if statement for test data --> Use all channels in brain region OR best R-map OR concat of # R-maps
+    ### Is it fair to select best single channel performers for the regions
+    brain_aux = [] # In order for it to exist always and return, but is empty when not needed
+    if model_params['Regions']: # Check if something in the list --> Use regions
+        if test: # If test select all channels from the brain regions
+            X_test = []
+            y_test = []
+            for regionit in range(len(model_params['Regions'])):  # Go through the regions and put in separate dimension
+                X_test_reg = []
+                y_test_reg = []
+                curregion = model_params['Regions'][regionit]
+                ch_test_list = df_all.query(f"cohort == @cohort_test and sub == @sub_test and {Atlas} == @curregion")[
+                    "ch"]
+                for i in range(len(ch_test_list)): # For test select all channels
+                    ch_test = ch_test_list.iloc[i]
+
+                    X_test_temp, y_test_temp = get_data_sub_ch(
+                        ch_all, cohort_test, sub_test, ch_test
+                    )
+                    X_test_reg.append(X_test_temp)
+                    y_test_reg.append(y_test_temp)
+                # Not sure of this is needed or not but it should concat the mult. channel per region
+                if len(X_test) > 1:
+                    X_test_reg = np.concatenate(X_test_reg, axis=0)
+                    y_test_reg = np.concatenate(y_test_reg, axis=0)
+                else:
+                    X_test_reg = X_test_reg[0]
+                    y_test_reg = y_test_reg[0]
+                # Append regions to full list --> dimension of # brain regions, containing their signal
+                X_test.append(X_test_reg)
+                y_test.append(y_test_reg)
+            if model_params['TimeConcat']:  # Remove the region dimension and concatenate (also create region aux)
+                if len(X_test) > 1:
+                    X_test = np.concatenate(X_test, axis=0)
+                    y_test = np.concatenate(y_test, axis=0)
+                else:
+                    X_test = X_test[0]
+                    y_test = y_test[0]
+        else:
+            X_test = []
+            y_test = []
+            for regionit in range(len(model_params['Regions'])): # Go through the regions and put in separate dimension
+                X_test_reg = []
+                y_test_reg = []
+                curregion = model_params['Regions'][regionit]
+                ch_test_list = df_all.query(f"cohort == @cohort_test and sub == @sub_test and {Atlas} == @curregion").sort_values(
+                    by='performance', ascending=False)[
+                    "ch"]
+                for i in range(model_params['nrchannels'][regionit]):  # Loop over how many channels
+                    ch_test = ch_test_list.iloc[i]
+
+                    X_test_temp, y_test_temp = get_data_sub_ch(
+                        ch_all, cohort_test, sub_test, ch_test
+                    )
+                    X_test_reg.append(X_test_temp)
+                    y_test_reg.append(y_test_temp)
+                # Not sure of this is needed or not but it should concat the mult. channel per region
+                if len(X_test) > 1:
+                    X_test_reg = np.concatenate(X_test_reg, axis=0)
+                    y_test_reg = np.concatenate(y_test_reg, axis=0)
+                else:
+                    X_test_reg = X_test_reg[0]
+                    y_test_reg = y_test_reg[0]
+                # Make a brain region auxillary variable
+                if model_params['TimeConcat']:
+                    brain_aux.append(np.repeat(regionit, len(X_test_reg)))
+                # Append regions to full list --> dimension of # brain regions, containing their signal
+                X_test.append(X_test_reg)
+                y_test.append(y_test_reg)
+            if model_params['TimeConcat']: # Remove the region dimension and concatenate (also create region aux)
+                if len(X_test) > 1:
+                    X_test = np.concatenate(X_test, axis=0)
+                    y_test = np.concatenate(y_test, axis=0)
+                    brain_aux = np.concatenate(brain_aux, axis=0)
+                else:
+                    X_test = X_test[0]
+                    y_test = y_test[0]
+                    brain_aux = brain_aux[0]
+
+    else: # No regions were supplied --> Use R-Map
+        if test:
+            if model_params['TimeConcat']:  # Append multiple R-maps according to Nrchannels
+                X_test = []
+                y_test = []
+                ch_test_list = \
+                df_all.query("cohort == @cohort_test and sub == @sub_test").sort_values(by='r_func', ascending=False)[
+                    "ch"]
+                for i in range(model_params['nrtestR']):  # Loop over how many R-maps we want to concatenate
+                    ch_test = ch_test_list.iloc[i]
+
+                    X_test_temp, y_test_temp = get_data_sub_ch(
+                        ch_all, cohort_test, sub_test, ch_test
+                    )
+                    X_test.append(X_test_temp)
+                    y_test.append(y_test_temp)
+                # Not sure of this is needed or not but it should concat them
+                if len(X_test) > 1:
+                    X_test = np.concatenate(X_test, axis=0)
+                    y_test = np.concatenate(y_test, axis=0)
+
+                else:
+                    X_test = X_test[0]
+                    y_test = y_test[0]
+            else:  # 1-Channel R-map case
+                ch_test = \
+                df_all.query("cohort == @cohort_test and sub == @sub_test").sort_values(by='r_func', ascending=False)[
+                    "ch"].iloc[0]
+
+                X_test, y_test = get_data_sub_ch(
+                    ch_all, cohort_test, sub_test, ch_test
+                )
+        else:
+            if model_params['TimeConcat']: # Append multiple R-maps according to Nrchannels
+                X_test = []
+                y_test = []
+                ch_test_list = df_all.query("cohort == @cohort_test and sub == @sub_test").sort_values(by='r_func', ascending=False)[
+                    "ch"]
+                for i in range(model_params['nrchannels'][0]): # Loop over how many R-maps we want to concatenate
+                    ch_test = ch_test_list.iloc[i]
+
+                    X_test_temp, y_test_temp = get_data_sub_ch(
+                        ch_all, cohort_test, sub_test, ch_test
+                    )
+                    X_test.append(X_test_temp)
+                    y_test.append(y_test_temp)
+                # Not sure of this is needed or not but it should concat them
+                if len(X_test) > 1:
+                    X_test = np.concatenate(X_test, axis=0)
+                    y_test = np.concatenate(y_test, axis=0)
+
+                else:
+                    X_test = X_test[0]
+                    y_test = y_test[0]
+            else: # 1-Channel R-map case
+                ch_test = df_all.query("cohort == @cohort_test and sub == @sub_test").sort_values(by='r_func', ascending=False)[
+                    "ch"].iloc[0]
+
+                X_test, y_test = get_data_sub_ch(
+                    ch_all, cohort_test, sub_test, ch_test
+                )
+        return X_test, y_test, brain_aux
 
 def plot_results(perflist,val_approach, cohorts, save=False):
     listofdicts = perflist
@@ -163,8 +297,8 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
             print('Val approach, cohort, subject:', val_approach, cohort_test, sub_test)
             if sub_test not in p_[cohort_test]:
                 p_[cohort_test][sub_test] = {}
-            X_test, y_test = get_data_channels(
-                sub_test, cohort_test, df_rmap=df_best_rmap
+            X_test, y_test, brain_aux = get_data_channels(
+                sub_test, cohort_test, df_all=df_full, test=True, model_params=model_params
             )
 
             # if statement to keep the same model for all subjects of leave 1 out cohort
@@ -184,8 +318,8 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
                 for cohort_train in list(cohorts_train.keys()):
                     for sub_train in cohorts_train[cohort_train]:
                         nr_embeddings += 1
-                        X_train, y_train = get_data_channels(
-                            sub_train, cohort_train, df_rmap=df_best_rmap
+                        X_train, y_train, brain_aux = get_data_channels(
+                            sub_train, cohort_train, df_all=df_full, test=False, model_params=model_params
                         )
                         sub_aux = np.tile(sub_counter,len(y_train))
 
@@ -240,7 +374,7 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
                     if not model_params['pseudoDiscr']:
                         cebra_model.fit(X_train, y_train)
                     else: # Pretend the integer y_train is floating
-                        cebra_model.fit(X_train, np.array(y_train,dtype=float), coh_aux)
+                        cebra_model.fit(X_train, np.array(y_train,dtype=float),coh_aux)
 
                 if model_params['true_msess']:
                     X_train_emb = cebra_model.transform(X_train_comb[0],session_id=0)
@@ -360,26 +494,32 @@ val_approaches = ["leave_1_cohort_out"]#, "leave_1_sub_out_within_coh"]
 
 
 for val_approach in val_approaches:
-    model_params = {'model_architecture':'offset10-model',
-                'batch_size': 512, # Ideally as large as fits on the GPU, min recommended = 512
-                'temperature_mode':'auto', # Constant or auto
-                'temperature':1,
-                'min_temperature':0.1, # If temperature mode = auto this should be set in the desired expected range
-                'learning_rate': 0.005, # Set this in accordance to loss function progression in TensorBoard
-                'max_iterations': 5000,  # 5000, Set this in accordance to the loss functions in TensorBoard
-                'time_offsets': 1, # Time offset between samples (Ideally set larger than receptive field according to docs)
-                'output_dimension': 3, # Nr of output dimensions of the CEBRA model
-                'decoder': 'Logistic', # Choose from "KNN", "Logistic", "SVM", "KNN_BPP"
-                'n_neighbors': 35, # KNN & KNN_BPP setting (# of neighbours to consider) 35 works well for 3 output dimensions
-                'metric': "euclidean", # KNN setting (For L2 normalized vectors, the ordering of Euclidean and Cosine should be the same)
-                'n_jobs': 20, # KNN setting for parallelization
-                'all_embeddings':False, # If you want to combine all the embeddings (only when true_msess = True !), currently 1 model is used for the test set --> Make majority
-                'true_msess':False, # Make a single model will be made for every subject (Usefull if feature dimension different between subjects)
-                'discreteMov':False, # Turn pseudoDiscr to False if you want to test true discrete movement labels (Otherwise this setting will do nothing)
-                'pseudoDiscr': True, # Pseudodiscrete meaning direct conversion from int to float
-                'gaussSigma':1.5, # Set pseuodDiscr to False for this to take effect and assuming a Gaussian for the movement distribution
-                'additional_comment':'Cohort_auxillary',
-                'debug': True} # Debug = True; stops saving the results unnecessarily
+    model_params = {
+        'model_architecture':'offset10-model',
+        'batch_size': 512, # Ideally as large as fits on the GPU, min recommended = 512
+        'temperature_mode':'auto', # Constant or auto
+        'temperature':1,
+        'min_temperature':0.1, # If temperature mode = auto this should be set in the desired expected range
+        'learning_rate': 0.005, # Set this in accordance to loss function progression in TensorBoard
+        'max_iterations': 5000,  # 5000, Set this in accordance to the loss functions in TensorBoard
+        'time_offsets': 1, # Time offset between samples (Ideally set larger than receptive field according to docs)
+        'output_dimension': 3, # Nr of output dimensions of the CEBRA model
+        'decoder': 'KNN_BPP', # Choose from "KNN", "Logistic", "KNN_BPP"
+        'n_neighbors': 35, # KNN & KNN_BPP setting (# of neighbours to consider) 35 works well for 3 output dimensions
+        'metric': "euclidean", # KNN setting (For L2 normalized vectors, the ordering of Euclidean and Cosine should be the same)
+        'n_jobs': 20, # KNN setting for parallelization
+        'all_embeddings':False, # If you want to combine all the embeddings (only when true_msess = True !), currently 1 model is used for the test set --> Make majority
+        'true_msess':False, # Make a single model will be made for every subject (Usefull if feature dimension different between subjects)
+        'discreteMov':False, # Turn pseudoDiscr to False if you want to test true discrete movement labels (Otherwise this setting will do nothing)
+        'pseudoDiscr': True, # Pseudodiscrete meaning direct conversion from int to float
+        'gaussSigma':1.5, # Set pseuodDiscr to False for this to take effect and assuming a Gaussian for the movement distribution
+        'Regions': [], # Set (list of) desired regions to analyze OR leave empty if you do not want to use regions (uses best R-map as default)
+        'nrchannels': [2], # Nr of channels to use in train for each region (based on own analysis for balance) OR for in combination with TimeConcat=True & R-Map, how many channels in train + test
+        'TimeConcat': True, # Set True if you want to either combine the regions in 1 embedding over time (with auxillary); or use multiple R-map channels
+        'nrtestR': 1, # In case of TimeConcat True and Regions empty --> Set how many test channels you want to use (ordered on R-map corr)
+        'additional_comment': 'Cohort_auxillary',
+        'debug': True # Set to True will stop saving model outputs
+        }
     if not model_params['debug']:
         writer = SummaryWriter(log_dir=f"D:\Glenn\CEBRA_logs\{val_approach}\{curtime}")
 
@@ -410,7 +550,6 @@ for val_approach in val_approaches:
 #### 19/08:
 # TODO: (Look at dataset size / distribution (time axis) and (no)movement distribution)
 # TODO: !!!! Implement that regions are unpacked before running in multi-region runs and create separate embeddings, decoders and test separately !!!
-
 # GENERAL:
 ### Code improvements
 # TODO: Look into implementing a K-fold strategy (i.e. leave 2 out instead of 1, especially for across cohort to speed up without much reduced training set)
@@ -453,12 +592,11 @@ for val_approach in val_approaches:
 # Psuedodiscrete auxillary works as good or better than the gaussian filtered one, but full discrete does not work well
 # Preliminary findings: Including subject ID makes the performance worse for all datasets except marginally Pittsburgh
 
-# KNN_BPP Can work almost as well as Logregression (but still a bit worse). Perhaps for higher dimension usefull.
-# XGB is was also not that bad (Have to try more)
+# KNN_BPP Can work almost as well as Logregression (but still a bit worse). Perhaps for higher dimension useful.
+# XGB was also not that bad (Have to try more)
 
 # The test embedding IS dependent on the ordering of the features, and thus will also be on the ordering of channels potentially
 # Therefore, some ordering here is required, or look into true multisess / time concatenation
-# Performance is still above chance though (Prob due to correlations in the features ~0.57 0.54)
 
 # Combining cohort and sub as cont. auxillary with movement as discrete does not work well. In general movement as discrete works a bit worse.
 # NEED to try: Both cohort and movement as continuous.
