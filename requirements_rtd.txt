@@ -28,3 +28,4 @@ pydata-sphinx-theme
 seaborn
 notebook
 ipython
+pypandoc

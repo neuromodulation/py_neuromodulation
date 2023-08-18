@@ -1,8 +1,8 @@
-"""Module for calculating features."""
 import numpy as np
 
 from py_neuromodulation import (
     nm_hjorth_raw,
+    nm_mne_connectivity,
     nm_sharpwaves,
     nm_coherence,
     nm_fooof,
@@ -11,7 +11,6 @@ from py_neuromodulation import (
     nm_oscillatory,
     nm_bursts,
     nm_linelength,
-    nm_mne_connectiviy,
 )
 
 
@@ -52,7 +51,7 @@ class Features:
                 case "linelength":
                     FeatureClass = nm_linelength.LineLength
                 case "mne_connectivity":
-                    FeatureClass = nm_mne_connectiviy.MNEConnectivity
+                    FeatureClass = nm_mne_connectivity.MNEConnectivity
                 case _:
                     raise ValueError(f"Unknown feature found. Got: {feature}.")
 

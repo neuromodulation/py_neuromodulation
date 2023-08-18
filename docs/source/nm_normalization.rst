@@ -1,5 +1,5 @@
 nm_normalization.py
 ===================
 
-.. automodule:: nm_normalization.FeatureNormalizer
+.. automodule:: nm_normalization
       :members:
