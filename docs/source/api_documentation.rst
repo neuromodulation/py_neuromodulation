@@ -30,7 +30,7 @@ Feature Estimation
    nm_filter
    nm_oscillatory
    nm_fooof
-   nm_kalmanfilter
+   nm_kalmanfilter 
    nm_hjorth
    nm_sharpwaves
    nm_bursts

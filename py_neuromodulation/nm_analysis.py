@@ -157,7 +157,7 @@ class Feature_Reader:
 
         Returns
         -------
-        list
+        features : list
             column list that suffice the ch_name and list_feature_keywords
         """
 
@@ -514,9 +514,9 @@ class Feature_Reader:
 
         Returns
         -------
-        epoch_ np.ndarray
+        epoch_ : np.ndarray
             array of epoched ieeg data with shape (epochs,samples,channels,features)
-        y_arr np.ndarray
+        y_arr : np.ndarray
             array of epoched event label data with shape (epochs,samples)
         """
 
@@ -635,7 +635,7 @@ class Feature_Reader:
             saving name, by default "LM"
         TRAIN_VAL_SPLIT : bool, optional
             data is split into further validation for early stopping, by default False
-        save_coef (boolean):
+        save_coef : boolean
             if true, save model._coef trained coefficients
         """
         if feature_file is None:
@@ -712,8 +712,8 @@ class Feature_Reader:
             if True, read movement detection rates, as well as fpr's and tpr's
         Returns
         -------
-        dictionary
-            performance_dict
+        performance_dict : dictionary
+            
         """
 
         if ".vhdr" in self.feature_file:

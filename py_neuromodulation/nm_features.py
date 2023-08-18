@@ -15,13 +15,30 @@ from py_neuromodulation import (
 
 
 class Features:
+    """Class for calculating features."""
 
     features: list[nm_features_abc.Feature] = []
 
     def __init__(
         self, s: dict, ch_names: list[str], sfreq: int | float
     ) -> None:
-        """Class for calculating features."""
+        """_summary_
+
+        Parameters
+        ----------
+        s : dict
+            _description_
+        ch_names : list[str]
+            _description_
+        sfreq : int | float
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
+
         self.features = []
 
         for feature in s["features"]:
@@ -70,8 +87,7 @@ class Features:
 
         Returns
         -------
-        dat (dict) with naming convention:
-            channel_method_feature_(f_band)
+        dat (dict): naming convention : channel_method_feature_(f_band)
         """
 
         features_compute = {}

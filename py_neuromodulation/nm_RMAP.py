@@ -9,6 +9,7 @@ import pandas as pd
 from py_neuromodulation import nm_plots
 
 class RMAPChannelSelector:
+
     def __init__(self) -> None:
         pass
 
