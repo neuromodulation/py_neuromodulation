@@ -134,6 +134,7 @@ def test_fft_beta_osc():
 
     beta_wave = np.sin(2 * np.pi * beta_freq * time_points)
 
+    np.random.seed(0)
     data = np.random.random([len(ch_names), sfreq]) + beta_wave
 
     features_out = fft_obj.calc_feature(data, {})
@@ -209,6 +210,7 @@ def test_stft_beta_osc():
 
     beta_wave = np.sin(2 * np.pi * beta_freq * time_points)
 
+    np.random.seed(0)
     data = np.random.random([len(ch_names), sfreq]) + beta_wave
 
     features_out = stft_obj.calc_feature(data, {})
@@ -337,6 +339,7 @@ def test_bp_random_data():
     stft_obj = nm_oscillatory.BandPower(settings, ch_names, sfreq)
     stft_obj.test_settings(settings, ch_names, sfreq)
 
+    np.random.seed(0)
     data = np.random.random([len(ch_names), sfreq])
     features_out = stft_obj.calc_feature(data, {})
 
@@ -371,6 +374,7 @@ def test_bp_beta_osc():
 
     beta_wave = np.sin(2 * np.pi * beta_freq * time_points)
 
+    np.random.seed(0)
     data = np.random.random([len(ch_names), sfreq]) + beta_wave
 
     features_out = bp_obj.calc_feature(data, {})

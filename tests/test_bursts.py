@@ -65,6 +65,7 @@ def test_init_wrong_burst_feature_init():
 
 
 def test_bursting_duration():
+    np.random.seed(0)
     settings = nm_settings.get_default_settings()
     settings["features"]["bursts"] = True
     settings["postprocessing"]["feature_normalization"] = False
@@ -81,9 +82,11 @@ def test_bursting_duration():
     bursts = nm_bursts.Burst(settings, ch_names, sfreq)
 
     for _ in range(10):
+        np.random.seed(0)
         data = np.random.random([NUM_CH, 1 * sfreq])
         f = bursts.calc_feature(data, {})
 
+    np.random.seed(0)
     f_burst = bursts.calc_feature(
         beta_wave + np.random.random([NUM_CH, 1 * sfreq]), {}
     )

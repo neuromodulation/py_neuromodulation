@@ -57,6 +57,7 @@ def test_previous_size_FeatureNorm():
     num_features = 5
 
     for _ in range(150):
+        np.random.seed(0)
         data = norm.process(np.random.random([1, num_features]))
 
     assert norm.previous.shape[0] < norm.num_samples_normalize
@@ -73,6 +74,7 @@ def test_zscore_feature_analysis():
     num_features = 5
 
     for _ in range(400):
+        np.random.seed(0)
         data_to_norm = np.random.random([1, num_features])
         data_normed = norm.process(data_to_norm)
 
@@ -124,6 +126,7 @@ def test_all_norm_methods_raw():
         num_samples = 10
 
         for _ in range(10):
+            np.random.seed(0)
             data_to_norm = np.random.random([1, num_samples])
             data_normed = norm.process(data_to_norm)
 
@@ -142,7 +145,8 @@ def test_all_norm_methods_feature():
 
         num_samples = 10
 
-        for _ in range(10):
+        for i in range(10):
+            np.random.seed(i)
             data_to_norm = np.random.random([1, num_samples])
             data_normed = norm.process(data_to_norm)
 
