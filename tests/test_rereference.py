@@ -26,23 +26,8 @@ def setup():
         settings_wrapper (settings.py): settings.json
         fs (float): example sampling frequency
     """
-    sub = "000"
-    ses = "right"
-    task = "force"
-    run = 3
-    datatype = "ieeg"
 
-    # Define run name and access paths in the BIDS format.
-    RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}_{datatype}.vhdr"
-
-    PATH_RUN = os.path.join(
-        os.path.abspath(os.path.join("examples", "data")),
-        f"sub-{sub}",
-        f"ses-{ses}",
-        datatype,
-        RUN_NAME,
-    )
-    PATH_BIDS = os.path.abspath(os.path.join("examples", "data"))
+    RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data()
 
     (
         raw,
@@ -83,7 +68,7 @@ def test_rereference_not_used_channels_no_reref(setup):
         bads=bads,
         new_names="default",
         used_types=("ecog", "dbs", "seeg"),
-        target_keywords=("SQUARED_ROTATION",),
+        target_keywords=("MOV_RIGHT",),
     )
     
     re_referencer = ReReferencer(1, nm_channels)
@@ -108,7 +93,7 @@ def test_rereference_car(setup):
         bads=bads,
         new_names="default",
         used_types=("ecog", "dbs", "seeg"),
-        target_keywords=("SQUARED_ROTATION",),
+        target_keywords=("MOV_RIGHT",),
     )
     
     re_referencer = ReReferencer(1, nm_channels)
@@ -138,7 +123,7 @@ def test_rereference_bp(setup):
         bads=bads,
         new_names="default",
         used_types=("ecog", "dbs", "seeg"),
-        target_keywords=("SQUARED_ROTATION",),
+        target_keywords=("MOV_RIGHT",),
     )
     
     re_referencer = ReReferencer(1, nm_channels)
@@ -189,7 +174,7 @@ def test_rereference_muliple_channels(setup):
         bads=bads,
         new_names="default",
         used_types=("ecog", "dbs", "seeg"),
-        target_keywords=("SQUARED_ROTATION",),
+        target_keywords=("MOV_RIGHT",),
     )
     
     nm_channels.loc[0, "rereference"] = "LFP_RIGHT_1&LFP_RIGHT_2"
@@ -201,3 +186,23 @@ def test_rereference_muliple_channels(setup):
         ref_dat[0, :], 
         data_batch[0, :] - (data_batch[1, :] + data_batch[2, :])/2
     )
+
+def test_rereference_same_channel(setup):
+
+    ch_names, ch_types, bads, data_batch = setup
+
+    nm_channels = nm_define_nmchannels.set_channels(
+        ch_names=ch_names,
+        ch_types=ch_types,
+        reference="default",
+        bads=bads,
+        new_names="default",
+        used_types=("ecog", "dbs", "seeg"),
+        target_keywords=("MOV_RIGHT",),
+    )
+
+    nm_channels.loc[0, "rereference"] = nm_channels.loc[0, "name"]
+    
+    with pytest.raises(Exception):
+        re_referencer = ReReferencer(1, nm_channels)
+    
