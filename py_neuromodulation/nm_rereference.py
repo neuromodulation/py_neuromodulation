@@ -4,6 +4,10 @@ import pandas as pd
 
 
 class ReReferencer:
+
+    ref_matrix: np.ndarray
+
+
     def __init__(
         self,
         sfreq: int | float,
@@ -27,6 +31,11 @@ class ReReferencer:
         (channels_used,) = np.where((nm_channels.used == 1))
 
         ch_names = nm_channels["name"].tolist()
+
+        if len(ch_names) == 1:
+            self.ref_matrix = None
+            return
+
         ch_types = nm_channels["type"]
         refs = nm_channels["rereference"]
 
@@ -78,5 +87,7 @@ class ReReferencer:
             reref_data (numpy ndarray): 
             shape(n_channels, n_samples) - rereferenced data
         """
-        return self.ref_matrix @ data
-        
+        if self.ref_matrix is not None:
+            return self.ref_matrix @ data
+        else:
+            return data
