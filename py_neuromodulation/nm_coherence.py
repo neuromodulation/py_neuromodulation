@@ -182,7 +182,7 @@ class NM_Coherence(nm_features_abc.Feature):
         assert (
             s["frequency_ranges_hz"][fb][0] < sfreq / 2
             and s["frequency_ranges_hz"][fb][1] < sfreq / 2
-            for fb in s["coherence"]["frequency_bands"].values()
+            for fb in s["coherence"]["frequency_bands"]
         ), (
             "the coherence frequency band ranges need to be smaller than the nyquist frequency"
             f"got sfreq = {sfreq} and fband ranges {s['coherence']['frequency_bands']}"

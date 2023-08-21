@@ -15,16 +15,16 @@
     "features": {
         "raw_hjorth": true,
         "return_raw": true,
-        "bandpass_filter": true,
-        "stft": true,
+        "bandpass_filter": false,
+        "stft": false,
         "fft": true,
         "sharpwave_analysis": true,
-        "coherence": true,
-        "fooof": true,
-        "nolds": true,
+        "fooof": false,
         "bursts": true,
         "linelength": true,
-        "mne_connectivity": true
+        "coherence": false,
+        "nolds": false,
+        "mne_connectivity": false
     },
     "postprocessing": {
         "feature_normalization": true,
@@ -219,12 +219,13 @@
     "fooof": {
         "aperiodic": {
             "exponent": true,
-            "offset": true
+            "offset": true,
+            "knee": true
         },
         "periodic": {
-            "center_frequency": true,
-            "band_width": true,
-            "height_over_ap": true
+            "center_frequency": false,
+            "band_width": false,
+            "height_over_ap": false
         },
         "windowlength_ms": 800,
         "peak_width_limits": [
@@ -241,21 +242,15 @@
         "knee": true
     },
     "nolds_features": {
-        "sample_entropy": true,
-        "correlation_dimension": true,
+        "sample_entropy": false,
+        "correlation_dimension": false,
         "lyapunov_exponent": true,
-        "hurst_exponent": true,
-        "detrended_fluctutaion_analysis": true,
+        "hurst_exponent": false,
+        "detrended_fluctutaion_analysis": false,
         "data": {
             "raw": true,
             "frequency_bands": [
-                "theta",
-                "alpha",
-                "low beta",
-                "high beta",
-                "low gamma",
-                "high gamma",
-                "HFA"
+                "low beta"
             ]
         }
     },

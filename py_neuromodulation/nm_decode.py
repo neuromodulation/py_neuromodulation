@@ -21,8 +21,8 @@ import pandas as pd
 import os
 import json
 import numpy as np
-from numba import jit
-import xgboost
+#from numba import jit
+#import xgboost
 from copy import deepcopy
 
 from mrmr import mrmr_classif
@@ -113,7 +113,7 @@ class Decoder:
         use_nested_cv: bool = False,
         threshold_score=True,
         mov_detection_threshold: float = 0.5,
-        TRAIN_VAL_SPLIT: bool = True,
+        TRAIN_VAL_SPLIT: bool = False,
         RUN_BAY_OPT: bool = False,
         STACK_FEATURES_N_SAMPLES: bool = False,
         time_stack_n_samples: int = 5,
@@ -479,8 +479,8 @@ class Decoder:
             model_save=self.model_save,
         )
 
-    @staticmethod
-    @jit(nopython=True)
+    # @staticmethod
+    # @jit(nopython=True)
     def append_previous_n_samples(X: np.ndarray, y: np.ndarray, n: int = 5):
         """
         stack feature vector for n samples
@@ -515,45 +515,45 @@ class Decoder:
             if y_train.sum() == 0 or y_val.sum(0) == 0:
                 raise Decoder.ClassMissingException
 
-            if type(model) is xgboost.sklearn.XGBClassifier:
-                classes_weights = class_weight.compute_sample_weight(
-                    class_weight="balanced", y=y_train
-                )
-                model.set_params(eval_metric="logloss")
-                model.fit(
-                    X_train,
-                    y_train,
-                    eval_set=[(X_val, y_val)],
-                    early_stopping_rounds=7,
-                    sample_weight=classes_weights,
-                    verbose=self.VERBOSE,
-                )
-            elif type(model) is xgboost.sklearn.XGBRegressor:
-                # might be necessary to adapt for other classifiers
-
-                def evalerror(preds, dtrain):
-                    labels = dtrain.get_label()
-                    # return a pair metric_name, result. The metric name must not contain a
-                    # colon (:) or a space since preds are margin(before logistic
-                    # transformation, cutoff at 0)
-
-                    r2 = metrics.r2_score(labels, preds)
-
-                    if r2 < 0:
-                        r2 = 0
-
-                    return "r2", -r2
-
-                model.set_params(eval_metric=evalerror)
-                model.fit(
-                    X_train,
-                    y_train,
-                    eval_set=[(X_val, y_val)],
-                    early_stopping_rounds=10,
-                    verbose=self.VERBOSE,
-                )
-            else:
-                model.fit(X_train, y_train, eval_set=[(X_val, y_val)])
+            # if type(model) is xgboost.sklearn.XGBClassifier:
+            #     classes_weights = class_weight.compute_sample_weight(
+            #         class_weight="balanced", y=y_train
+            #     )
+            #     model.set_params(eval_metric="logloss")
+            #     model.fit(
+            #         X_train,
+            #         y_train,
+            #         eval_set=[(X_val, y_val)],
+            #         early_stopping_rounds=7,
+            #         sample_weight=classes_weights,
+            #         verbose=self.VERBOSE,
+            #     )
+            # elif type(model) is xgboost.sklearn.XGBRegressor:
+            #     # might be necessary to adapt for other classifiers
+            # 
+            #     def evalerror(preds, dtrain):
+            #         labels = dtrain.get_label()
+            #         # return a pair metric_name, result. The metric name must not contain a
+            #         # colon (:) or a space since preds are margin(before logistic
+            #         # transformation, cutoff at 0)
+            # 
+            #         r2 = metrics.r2_score(labels, preds)
+            # 
+            #         if r2 < 0:
+            #             r2 = 0
+            # 
+            #         return "r2", -r2
+            # 
+            #     model.set_params(eval_metric=evalerror)
+            #     model.fit(
+            #         X_train,
+            #         y_train,
+            #         eval_set=[(X_val, y_val)],
+            #         early_stopping_rounds=10,
+            #         verbose=self.VERBOSE,
+            #     )
+            # else:
+            #     model.fit(X_train, y_train, eval_set=[(X_val, y_val)])
         else:
 
             # check for LDA; and apply rebalancing
@@ -562,11 +562,11 @@ class Decoder:
             if self.undersampling:
                 X_train, y_train = self.rus.fit_resample(X_train, y_train)
 
-            if type(model) is xgboost.sklearn.XGBClassifier:
-                model.set_params(eval_metric="logloss")
-                model.fit(X_train, y_train)
-            else:
-                model.fit(X_train, y_train)
+            #if type(model) is xgboost.sklearn.XGBClassifier:
+            #    model.set_params(eval_metric="logloss")
+            #    model.fit(X_train, y_train)
+            #else:
+            model.fit(X_train, y_train)
 
         return model
 

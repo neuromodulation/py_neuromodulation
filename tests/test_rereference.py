@@ -3,6 +3,7 @@ import os
 import numpy as np
 from numpy.testing import assert_allclose
 import pandas as pd
+import pytest
 
 from py_neuromodulation.nm_rereference import ReReferencer
 from py_neuromodulation import (
@@ -12,208 +13,196 @@ from py_neuromodulation import (
     nm_define_nmchannels,
 )
 
+@pytest.fixture
+def setup():
+    """This test function sets a data batch and automatic initialized M1 datafram
 
-class ReReferencerOld:
-    def __init__(
-        self,
-        sfreq: int | float,
-        nm_channels: pd.DataFrame,
-    ) -> None:
-        """Initialize real-time rereference information.
+    Args:
+        PATH_PYNEUROMODULATION (string): Path to py_neuromodulation repository
 
-        Parameters
-        ----------
-        nm_channels : Pandas DataFrame
-            Dataframe containing information about rereferencing, as
-            specified in nm_channels.csv.
+    Returns:
+        ieeg_batch (np.ndarray): (channels, samples)
+        df_M1 (pd Dataframe): auto intialized table for rereferencing
+        settings_wrapper (settings.py): settings.json
+        fs (float): example sampling frequency
+    """
 
+    RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data()
 
-        Raises:
-            ValueError: rereferencing using undefined channel
-            ValueError: rereferencing according to same channel
-        """
-        (self.channels_used,) = np.where((nm_channels.used == 1))
-        (self.channels_not_used,) = np.where((nm_channels.used != 1))
+    (
+        raw,
+        data,
+        sfreq,
+        line_noise,
+        coord_list,
+        coord_names,
+    ) = nm_IO.read_BIDS_data(
+        PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype
+    )
 
-        ch_names = nm_channels["name"].tolist()
-        ch_types = nm_channels.type
-        refs = nm_channels["rereference"]
+    settings = nm_settings.get_default_settings()
+    settings = nm_settings.set_settings_fast_compute(
+        settings
+    )
 
-        type_map = {}
-        for ch_type in nm_channels.type.unique():
-            type_map[ch_type] = np.where(
-                (ch_types == ch_type) & (nm_channels.status == "good")
-            )[0]
+    generator = nm_generator.raw_data_generator(
+        data, settings, math.floor(sfreq)
+    )
+    data_batch = next(generator, None)
+    
+    return [
+        raw.ch_names,
+        raw.get_channel_types(),
+        raw.info["bads"],
+        data_batch
+    ]
 
-        self.ref_map = {}
-        for ch_idx in self.channels_used:
-            ref = refs[ch_idx]
-            if ref.lower() == "none" or pd.isnull(ref):
-                ref_idx = None
-            elif ref == "average":
-                ch_type = ch_types[ch_idx]
-                ref_idx = type_map[ch_type][type_map[ch_type] != ch_idx]
-            else:
-                ref_idx = []
-                ref_channels = ref.split("&")
-                for ref_chan in ref_channels:
-                    if ref_chan not in ch_names:
-                        raise ValueError(
-                            "One or more of the reference channels are not"
-                            " part of the recording channels. First missing"
-                            f" channel: {ref_chan}."
-                        )
-                    if ref_chan == ch_names[ch_idx]:
-                        raise ValueError(
-                            "You cannot rereference to the same channel."
-                            f" Channel: {ref_chan}."
-                        )
-                    ref_idx.append(ch_names.index(ref_chan))
-            self.ref_map[ch_idx] = ref_idx
+def test_rereference_not_used_channels_no_reref(setup):
 
-    def process(self, data: np.ndarray) -> np.ndarray:
+    ch_names, ch_types, bads, data_batch = setup
 
-        """Rereference data according to the initialized ReReferencer class.
+    nm_channels = nm_define_nmchannels.set_channels(
+        ch_names=ch_names,
+        ch_types=ch_types,
+        reference="default",
+        bads=bads,
+        new_names="default",
+        used_types=("ecog", "dbs", "seeg"),
+        target_keywords=("MOV_RIGHT",),
+    )
+    
+    re_referencer = ReReferencer(1, nm_channels)
+    ref_dat = re_referencer.process(data_batch)
 
-        Args:
-            ieeg_batch (numpy ndarray) :
-                shape(n_channels, n_samples) - data to be rereferenced.
-
-        Returns:
-            reref_data (numpy ndarray): rereferenced data
-        """
-
-        new_data = []
-        for ch_idx in self.channels_used:
-            ref_idx = self.ref_map[ch_idx]
-            if ref_idx is None:
-                new_data_ch = data[ch_idx, :]
-            else:
-                ref_data = data[ref_idx, :]
-                new_data_ch = data[ch_idx, :] - np.mean(ref_data, axis=0)
-            new_data.append(new_data_ch)
-
-        reref_data = np.empty_like(data)
-        reref_data[self.channels_used, :] = np.vstack(new_data)
-        reref_data[self.channels_not_used, :] = data[self.channels_not_used]
-
-        return reref_data
-
-
-class TestReReference:
-    def setUp(self) -> None:
-        """This test function sets a data batch and automatic initialized M1 datafram
-
-        Args:
-            PATH_PYNEUROMODULATION (string): Path to py_neuromodulation repository
-
-        Returns:
-            ieeg_batch (np.ndarray): (channels, samples)
-            df_M1 (pd Dataframe): auto intialized table for rereferencing
-            settings_wrapper (settings.py): settings.json
-            fs (float): example sampling frequency
-        """
-        sub = "000"
-        ses = "right"
-        task = "force"
-        run = 3
-        datatype = "ieeg"
-
-        # Define run name and access paths in the BIDS format.
-        RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}_{datatype}.vhdr"
-
-        PATH_RUN = os.path.join(
-            os.path.abspath(os.path.join("examples", "data")),
-            f"sub-{sub}",
-            f"ses-{ses}",
-            datatype,
-            RUN_NAME,
-        )
-        PATH_BIDS = os.path.abspath(os.path.join("examples", "data"))
-
-        (
-            raw,
-            data,
-            sfreq,
-            line_noise,
-            coord_list,
-            coord_names,
-        ) = nm_IO.read_BIDS_data(
-            PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype
+    for no_ref_idx in np.where(
+        (nm_channels.rereference == "None") & nm_channels.used
+        == 1
+    )[0]:
+        assert_allclose(
+            ref_dat[no_ref_idx, :], data_batch[no_ref_idx, :]
         )
 
-        self.nm_channels = nm_define_nmchannels.set_channels(
-            ch_names=raw.ch_names,
-            ch_types=raw.get_channel_types(),
-            reference="default",
-            bads=raw.info["bads"],
-            new_names="default",
-            used_types=("ecog", "dbs", "seeg"),
-            target_keywords=("SQUARED_ROTATION",),
+def test_rereference_car(setup):
+
+    ch_names, ch_types, bads, data_batch = setup
+
+    nm_channels = nm_define_nmchannels.set_channels(
+        ch_names=ch_names,
+        ch_types=ch_types,
+        reference="default",
+        bads=bads,
+        new_names="default",
+        used_types=("ecog", "dbs", "seeg"),
+        target_keywords=("MOV_RIGHT",),
+    )
+    
+    re_referencer = ReReferencer(1, nm_channels)
+    ref_dat = re_referencer.process(data_batch)
+
+    for ecog_ch_idx in np.where(
+        (nm_channels["type"] == "ecog")
+        & (nm_channels.rereference == "average")
+    )[0]:
+        assert_allclose(
+            ref_dat[ecog_ch_idx, :],
+            data_batch[ecog_ch_idx, :]
+            - data_batch[
+                (nm_channels["type"] == "ecog")
+                & (nm_channels.index != ecog_ch_idx)
+            ].mean(axis=0),
         )
 
-        settings = nm_settings.get_default_settings()
-        settings = nm_settings.set_settings_fast_compute(
-            settings
-        )  # includes rereference features
+def test_rereference_bp(setup):
 
-        generator = nm_generator.raw_data_generator(
-            data, settings, math.floor(sfreq)
+    ch_names, ch_types, bads, data_batch = setup
+
+    nm_channels = nm_define_nmchannels.set_channels(
+        ch_names=ch_names,
+        ch_types=ch_types,
+        reference="default",
+        bads=bads,
+        new_names="default",
+        used_types=("ecog", "dbs", "seeg"),
+        target_keywords=("MOV_RIGHT",),
+    )
+    
+    re_referencer = ReReferencer(1, nm_channels)
+    ref_dat = re_referencer.process(data_batch)
+
+    for bp_reref_idx in [
+        ch_idx
+        for ch_idx, ch in enumerate(nm_channels.rereference)
+        if ch in list(nm_channels.name)
+    ]:
+        # bp_reref_idx is the channel index of the rereference anode
+        # referenced_bp_channel is the channel index which is the rereference cathode
+        referenced_bp_channel = np.where(
+            nm_channels.iloc[bp_reref_idx]["rereference"]
+            == nm_channels.name
+        )[0][0]
+        assert_allclose(
+            ref_dat[bp_reref_idx, :],
+            data_batch[bp_reref_idx, :]
+            - data_batch[referenced_bp_channel, :],
         )
-        self.data_batch = next(generator, None)
-        self.re_referencer = ReReferencer(sfreq, self.nm_channels)
-        self.re_referencer_old = ReReferencerOld(sfreq, self.nm_channels)
 
-    def test_rereference(self) -> None:
-        """
-        Args:
-            ref_here (RT_rereference): Rereference initialized object
-            ieeg_batch (np.ndarray): sample data
-            df_M1 (pd.Dataframe): rereferencing dataframe
-        """
-        self.setUp()
-        ref_dat = self.re_referencer.process(self.data_batch)
+def test_rereference_wrong_rererference_column_name(setup):
+    ch_names, ch_types, bads, data_batch = setup
 
-        print("Testing channels which are used but not rereferenced.")
-        for no_ref_idx in np.where(
-            (self.nm_channels.rereference == "None") & self.nm_channels.used
-            == 1
-        )[0]:
-            assert_allclose(
-                ref_dat[no_ref_idx, :], self.data_batch[no_ref_idx, :]
-            )
+    nm_channels = nm_define_nmchannels.set_channels(
+        ch_names=ch_names,
+        ch_types=ch_types,
+        reference="default",
+        bads=bads,
+        new_names="default",
+        used_types=("ecog", "dbs", "seeg"),
+        target_keywords=("SQUARED_ROTATION",),
+    )
+    
+    nm_channels.loc[0, "rereference"] = "hallo"
+    with pytest.raises(Exception) as e_info:
+        re_referencer = ReReferencer(1, nm_channels)
 
-        print("Testing ECOG average reference.")
-        for ecog_ch_idx in np.where(
-            (self.nm_channels["type"] == "ecog")
-            & (self.nm_channels.rereference == "average")
-        )[0]:
-            assert_allclose(
-                ref_dat[ecog_ch_idx, :],
-                self.data_batch[ecog_ch_idx, :]
-                - self.data_batch[
-                    (self.nm_channels["type"] == "ecog")
-                    & (self.nm_channels.index != ecog_ch_idx)
-                ].mean(axis=0),
-            )
+def test_rereference_muliple_channels(setup):
 
-        print("Testing bipolar reference.")
-        for bp_reref_idx in [
-            ch_idx
-            for ch_idx, ch in enumerate(self.nm_channels.rereference)
-            if ch in list(self.nm_channels.name)
-        ]:
-            # bp_reref_idx is the channel index of the rereference anode
-            # referenced_bp_channel is the channel index which is the rereference cathode
-            referenced_bp_channel = np.where(
-                self.nm_channels.iloc[bp_reref_idx]["rereference"]
-                == self.nm_channels.name
-            )[0][0]
-            assert_allclose(
-                ref_dat[bp_reref_idx, :],
-                self.data_batch[bp_reref_idx, :]
-                - self.data_batch[referenced_bp_channel, :],
-            )
+    ch_names, ch_types, bads, data_batch = setup
 
-        ref_dat_old = self.re_referencer_old.process(self.data_batch)
-        assert_allclose(ref_dat, ref_dat_old, rtol=1e-7, equal_nan=False)
+    nm_channels = nm_define_nmchannels.set_channels(
+        ch_names=ch_names,
+        ch_types=ch_types,
+        reference="default",
+        bads=bads,
+        new_names="default",
+        used_types=("ecog", "dbs", "seeg"),
+        target_keywords=("MOV_RIGHT",),
+    )
+    
+    nm_channels.loc[0, "rereference"] = "LFP_RIGHT_1&LFP_RIGHT_2"
+
+    re_referencer = ReReferencer(1, nm_channels)
+    ref_dat = re_referencer.process(data_batch)
+
+    assert_allclose(
+        ref_dat[0, :], 
+        data_batch[0, :] - (data_batch[1, :] + data_batch[2, :])/2
+    )
+
+def test_rereference_same_channel(setup):
+
+    ch_names, ch_types, bads, data_batch = setup
+
+    nm_channels = nm_define_nmchannels.set_channels(
+        ch_names=ch_names,
+        ch_types=ch_types,
+        reference="default",
+        bads=bads,
+        new_names="default",
+        used_types=("ecog", "dbs", "seeg"),
+        target_keywords=("MOV_RIGHT",),
+    )
+
+    nm_channels.loc[0, "rereference"] = nm_channels.loc[0, "name"]
+    
+    with pytest.raises(Exception):
+        re_referencer = ReReferencer(1, nm_channels)
+    

@@ -157,7 +157,7 @@ class Feature_Reader:
 
         Returns
         -------
-        list
+        features : list
             column list that suffice the ch_name and list_feature_keywords
         """
 
@@ -260,6 +260,9 @@ class Feature_Reader:
         normalize_data: bool = True,
         show_plot: bool = True,
         title: str = "Movement aligned features",
+        ytick_labelsize=None,
+        figsize_x: float = 8,
+        figsize_y: float = 8,
     ) -> None:
         # TODO: This does not work properly when we have bipolar rereferencing
 
@@ -268,7 +271,7 @@ class Feature_Reader:
             filtered_df = self.feature_arr[
                 self.filter_features(
                     self.feature_arr.columns, ch, list_feature_keywords
-                )
+                )[::-1]
             ]
         else:
             filtered_df = self.feature_arr[features_to_plt]
@@ -301,6 +304,9 @@ class Feature_Reader:
             OUT_PATH=self.feature_dir,
             feature_file=self.feature_file,
             str_title=title,
+            ytick_labelsize=ytick_labelsize,
+            figsize_x=figsize_x,
+            figsize_y=figsize_y
         )
 
     def plot_all_features(
@@ -508,9 +514,9 @@ class Feature_Reader:
 
         Returns
         -------
-        epoch_ np.ndarray
+        epoch_ : np.ndarray
             array of epoched ieeg data with shape (epochs,samples,channels,features)
-        y_arr np.ndarray
+        y_arr : np.ndarray
             array of epoched event label data with shape (epochs,samples)
         """
 
@@ -629,7 +635,7 @@ class Feature_Reader:
             saving name, by default "LM"
         TRAIN_VAL_SPLIT : bool, optional
             data is split into further validation for early stopping, by default False
-        save_coef (boolean):
+        save_coef : boolean
             if true, save model._coef trained coefficients
         """
         if feature_file is None:
@@ -706,8 +712,8 @@ class Feature_Reader:
             if True, read movement detection rates, as well as fpr's and tpr's
         Returns
         -------
-        dictionary
-            performance_dict
+        performance_dict : dictionary
+            
         """
 
         if ".vhdr" in self.feature_file:

@@ -2,12 +2,14 @@ import enum
 import nibabel as nib
 import numpy as np
 import os
-from numba import jit
+#from numba import jit
 from scipy import stats
+import pandas as pd
 
 from py_neuromodulation import nm_plots
 
 class RMAPChannelSelector:
+
     def __init__(self) -> None:
         pass
 
@@ -88,7 +90,7 @@ class RMAPChannelSelector:
         return r
 
     @staticmethod
-    @jit(nopython=True)
+    #@jit(nopython=True)
     def calculate_RMap_numba(fp, performances):
         # The RMap also needs performances; for every fingerprint / channel
         # Save the corresponding performance
@@ -110,7 +112,7 @@ class RMAPChannelSelector:
         return RMAP
 
     @staticmethod
-    @jit(nopython=True)
+    #@jit(nopython=True)
     def get_corr_numba(fp, fp_test):
         val = np.corrcoef(fp_test, fp)[0][1]
         return val

@@ -26,33 +26,59 @@ class PNStream(ABC):
     features: nm_features.Features
     coords: dict
     sfreq: int | float
+    sfreq_feature: int | float = None
     path_grids: _PathLike | None
     model: base.BaseEstimator | None
     sess_right: bool | None
     verbose: bool
+    PATH_OUT: _PathLike | None
+    PATH_OUT_folder_name: _PathLike | None
 
     def __init__(
         self,
         sfreq: int | float,
         nm_channels: pd.DataFrame | _PathLike,
         settings: dict | _PathLike | None = None,
-        line_noise: int | float | None = None,
+        line_noise: int | float | None = 50,
+        sampling_rate_features_hz: int | float | None = None,
         path_grids: _PathLike | None = None,
-        coords: dict | None = None,
         coord_names: list | None = None,
         coord_list: list | None = None,
         verbose: bool = True,
     ) -> None:
+        """Stream initialization
+
+        Parameters
+        ----------
+        sfreq : int | float
+            sampling frequency of data in Hertz
+        nm_channels : pd.DataFrame | _PathLike
+            parametrization of channels (see nm_define_channels.py for initialization)
+        settings : dict | _PathLike | None, optional
+            features settings can be a dictionary or path to the nm_settings.json, by default the py_neuromodulation/nm_settings.json are read
+        line_noise : int | float | None, optional
+            line noise, by default 50
+        sampling_rate_features_hz : int | float | None, optional
+            feature sampling rate, by default None
+        path_grids : _PathLike | None, optional
+            path to grid_cortex.tsv and/or gird_subcortex.tsv, by default Non
+        coord_names : list | None, optional
+            coordinate name in the form [coord_1_name, coord_2_name, etc], by default None
+        coord_list : list | None, optional
+            coordinates in the form [[coord_1_x, coord_1_y, coord_1_z], [coord_2_x, coord_2_y, coord_2_z],], by default None
+        verbose : bool, optional
+            print out stream computation time information, by default True
+        """
         self.settings = self._load_settings(settings)
+
+        if sampling_rate_features_hz is not None:
+            self.settings["sampling_rate_features_hz"] = sampling_rate_features_hz
+
         self.nm_channels = self._load_nm_channels(nm_channels)
         if path_grids is None:
             path_grids = pathlib.Path(__file__).parent.resolve()
         self.path_grids = path_grids
         self.verbose = verbose
-        if coords is None:
-            self.coords = {}
-        else:
-            self.coords = coords
         self.sfreq = sfreq
         self.sess_right = None
         self.projection = None
@@ -70,12 +96,8 @@ class PNStream(ABC):
 
     @abstractmethod
     def run(self):
-        """In this function data is first acquired iteratively
-        1. self.get_data()
-        2. data processing is called:
-        self.run_analysis.process_data(data) to calculate features
-        3. optional postprocessing
-        e.g. plotting, ML estimation is done
+        """function that will be called when data streaming (offline or online) will be started.
+        Internally a data loader should be initialized. 
         """
 
     @abstractmethod
@@ -101,7 +123,11 @@ class PNStream(ABC):
         nm_channels: pd.DataFrame | _PathLike,
     ) -> pd.DataFrame:
         if not isinstance(nm_channels, pd.DataFrame):
-            return nm_IO.load_nm_channels(nm_channels)
+            nm_channels =  nm_IO.load_nm_channels(nm_channels)
+        
+        if nm_channels.query("used == 1 and target == 0").shape[0]  == 0:
+            raise ValueError("No channels selected for analysis that have column 'used' = 1 and 'target' = 0. Please check your nm_channels")
+
         return nm_channels
 
     @staticmethod
@@ -117,27 +143,6 @@ class PNStream(ABC):
         with open(model_name, "rb") as fid:
             self.model = cPickle.load(fid)
 
-    def plot_cortical_projection(self) -> None:
-        """plot projection of cortical grid electrodes on cortex"""
-        ecog_strip = None
-        if self.projection is not None:
-            ecog_strip = self.projection.ecog_strip
-
-        grid_cortex = None
-        if self.projection is not None:
-            grid_cortex = self.projection.grid_cortex
-
-        sess_right = None
-        if self.projection is not None:
-            sess_right = self.projection.sess_right
-
-        nmplotter = nm_plots.NM_Plot(
-            ecog_strip=ecog_strip,
-            grid_cortex=grid_cortex,
-            sess_right=sess_right,
-        )
-        nmplotter.plot_cortex(set_clim=False)
-
     def save_after_stream(
         self,
         out_path_root: _PathLike | None = None,
@@ -152,6 +157,8 @@ class PNStream(ABC):
         if os.path.exists(os.path.join(out_path_root, folder_name)) is False:
             os.makedirs(os.path.join(out_path_root, folder_name))
 
+        self.PATH_OUT = out_path_root
+        self.PATH_OUT_folder_name = folder_name
         self.save_sidecar(out_path_root, folder_name)
 
         if feature_arr is not None:
@@ -180,7 +187,7 @@ class PNStream(ABC):
         self.run_analysis.save_settings(out_path_root, folder_name)
 
     def save_sidecar(self, out_path_root: _PathLike, folder_name: str) -> None:
-        """Save sidecar incuding fs, coords, sess_right to
+        """Save sidecar incduing fs, coords, sess_right to
         out_path_root and subfolder 'folder_name'"""
         additional_args = {"sess_right": self.sess_right}
         self.run_analysis.save_sidecar(

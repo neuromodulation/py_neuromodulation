@@ -12,7 +12,6 @@ from sklearn.base import clone
 from sklearn import model_selection
 from sklearn.utils import class_weight
 from scipy.ndimage import binary_dilation, binary_erosion, label
-import xgboost
 import _pickle as cPickle
 from scipy import io
 from matplotlib import pyplot as plt

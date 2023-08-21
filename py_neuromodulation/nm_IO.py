@@ -9,6 +9,8 @@ import numpy as np
 import pandas as pd
 from scipy import io
 
+import py_neuromodulation
+
 _PathLike = str | os.PathLike
 
 
@@ -24,15 +26,18 @@ def load_nm_channels(
     target_keywords (list)
     reference Union[list, str]
     """
+
+    
     if isinstance(nm_channels, pd.DataFrame):
-        return nm_channels
-    if nm_channels:
+        nm_ch_return = nm_channels
+    elif nm_channels:
         if not os.path.isfile(nm_channels):
             raise ValueError(
                 "PATH_NM_CHANNELS is not a valid file. Got: " f"{nm_channels}"
             )
-    return pd.read_csv(nm_channels)
+        nm_ch_return = pd.read_csv(nm_channels)
 
+    return nm_ch_return
 
 def read_BIDS_data(
     PATH_RUN: _PathLike | mne_bids.BIDSPath,
@@ -101,14 +106,12 @@ def get_coord_list(
 def read_grid(PATH_GRIDS: _PathLike | None, grid_str: str) -> pd.DataFrame:
     if PATH_GRIDS is None:
         grid = pd.read_csv(
-            os.path.join(
-                Path(__file__).parent, "grid_" + grid_str.lower() + ".tsv"
-            ),
+            Path(__file__).parent / ("grid_" + grid_str.lower() + ".tsv"),
             sep="\t",
         )
     else:
         grid = pd.read_csv(
-            os.path.join(PATH_GRIDS, "grid_" + grid_str.lower() + ".tsv"),
+            Path(PATH_GRIDS) / ("grid_" + grid_str.lower() + ".tsv"),
             sep="\t",
         )
     return grid
@@ -120,9 +123,7 @@ def get_annotations(
 
     try:
         annot = mne.read_annotations(
-            os.path.join(
-                PATH_ANNOTATIONS, os.path.basename(PATH_RUN)[:-5] + ".txt"
-            )
+            Path(PATH_ANNOTATIONS) / (os.path.basename(PATH_RUN)[:-5] + ".txt")
         )
         raw_arr.set_annotations(annot)
 
@@ -133,16 +134,14 @@ def get_annotations(
         print(
             "expected location: "
             + str(
-                os.path.join(
-                    PATH_ANNOTATIONS, os.path.basename(PATH_RUN)[:-5] + ".txt"
-                )
+                Path(PATH_ANNOTATIONS) / (os.path.basename(PATH_RUN)[:-5] + ".txt")
             )
         )
     return annot, annot_data, raw_arr
 
 
 def read_plot_modules(
-    PATH_PLOT=os.path.join(Path(__file__).absolute().parent, "plots")
+    PATH_PLOT: _PathLike = Path(__file__).absolute().parent / "plots"
 ):
     """Read required .mat files for plotting
 
@@ -393,33 +392,23 @@ def get_paths_example_data():
     dataset used in most examples.
     """
 
-    SCRIPT_DIR = Path(__file__).parent.parent.absolute()
-    if os.path.basename(SCRIPT_DIR) == "py_neuromodulation":
-        # this check is necessary, so we can also run the script from the root directory
-        SCRIPT_DIR = os.path.join(SCRIPT_DIR, "examples")
+    SCRIPT_DIR = Path(py_neuromodulation.__file__).parent.absolute()
 
-    sys.path.append(os.path.dirname(SCRIPT_DIR))
-
-    sub = "000"
-    ses = "right"
-    task = "force"
-    run = 3
+    sub = "testsub"
+    ses = "EphysMedOff"
+    task = "gripforce"
+    run = 0
     datatype = "ieeg"
 
     # Define run name and access paths in the BIDS format.
     RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}"
 
-    PATH_RUN = os.path.join(
-        (os.path.join(SCRIPT_DIR, "data")),
-        f"sub-{sub}",
-        f"ses-{ses}",
-        datatype,
-        RUN_NAME,
-    )
-    PATH_BIDS = os.path.join(SCRIPT_DIR, "data")
+    PATH_BIDS = Path(SCRIPT_DIR) / "data"
+
+    PATH_RUN = Path(SCRIPT_DIR) / "data" / f"sub-{sub}" / f"ses-{ses}" / datatype / RUN_NAME
 
     # Provide a path for the output data.
-    PATH_OUT = os.path.join(SCRIPT_DIR, "data", "derivatives")
+    PATH_OUT = PATH_BIDS / "derivatives"
 
     return RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype
 

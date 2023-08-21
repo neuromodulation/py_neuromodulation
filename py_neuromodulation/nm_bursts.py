@@ -1,13 +1,13 @@
+import enum
 import numpy as np
 from typing import Iterable
-import warnings
 
 from py_neuromodulation import nm_features_abc, nm_filter
 
 
 class Burst(nm_features_abc.Feature):
     def __init__(
-        self, settings: dict, ch_names: Iterable[str], sfreq: int | float
+        self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:
 
         self.s = settings
@@ -59,24 +59,36 @@ class Burst(nm_features_abc.Feature):
 
         self.data_buffer = init_ch_fband_dict()
 
-    @staticmethod
-    def test_settings(s: dict, ch_names: Iterable[str], sfreq: int | float):
-        assert isinstance(
-            s["burst_settings"]["threshold"], (int, float)
-        ), f'threshold for burst setting must be either float or int, got {s["burst_settings"]["threshold"]}'
-        assert isinstance(
-            s["burst_settings"]["time_duration_s"], (int, float)
-        ), f'time_duration_s for burst setting must be either float or int, got {s["burst_settings"]["time_duration_s"]}'
+    def test_settings(
+        settings: dict,
+        ch_names: Iterable[str],
+        sfreq: int | float,
+    ):
         assert (
-            fb in s["burst_settings"]["frequency_ranges_hz"].values()
-            for fb in s["burst_settings"]["frequency_bands"]
-        ), 'frequency band names have to be defined in s["frequency_ranges_hz"]'
+            isinstance(settings["burst_settings"]["threshold"], (float, int))
+        ), f"burst settings threshold needs to be type int or float, got: {settings['burst_settings']['threshold']}"
+        assert (
+            0 < settings["burst_settings"]["threshold"] < 100
+        ), f"burst setting threshold needs to be between 0 and 100, got: {settings['burst_settings']['threshold']}"
+        assert (
+            isinstance(settings["burst_settings"]["time_duration_s"], (float, int))
+        ), f"burst settings time_duration_s needs to be type int or float, got: {settings['burst_settings']['time_duration_s']}"
+        assert (
+            settings["burst_settings"]["time_duration_s"] > 0
+        ), f"burst setting time_duration_s needs to be greater than 0, got: {settings['burst_settings']['time_duration_s']}"
 
-        if sum(s["burst_settings"]["burst_features"].values()) == 0:
-            warnings.warn(
-                "Burst feature enabled, but no burst_settings['burst_features'] enabled"
+        for fband_burst in settings["burst_settings"]["frequency_bands"]:
+            assert (
+                fband_burst in list(settings["frequency_ranges_hz"].keys())
+            ), f"bursting {fband_burst} needs to be defined in settings['frequency_ranges_hz']"
+
+        for burst_feature in settings["burst_settings"]["burst_features"].keys():
+            assert isinstance(
+                settings["burst_settings"]["burst_features"][burst_feature], bool
+            ), (
+                f"bursting feature {burst_feature} needs to be type bool, "
+                f"got: {settings['burst_settings']['burst_features'][burst_feature]}"
             )
-
     def calc_feature(self, data: np.array, features_compute: dict) -> dict:
 
         # filter_data returns (n_channels, n_fbands, n_samples)
@@ -118,7 +130,7 @@ class Burst(nm_features_abc.Feature):
                     f"{ch_name}_bursts_{fband_name}_amplitude_max"
                 ] = (
                     np.max([np.max(a) for a in burst_amplitude])
-                    if len(burst_length) != 0
+                    if len(burst_amplitude) != 0
                     else 0
                 )
 
@@ -155,8 +167,8 @@ class Burst(nm_features_abc.Feature):
         burst_amplitude = []
         burst_start = 0
 
-        for index, i in enumerate(deriv):
-            if i == True:
+        for index, burst_state in enumerate(deriv):
+            if burst_state == True:
                 if isburst == True:
                     burst_length.append(index - burst_start)
                     burst_amplitude.append(beta_averp_norm[burst_start:index])
@@ -165,8 +177,10 @@ class Burst(nm_features_abc.Feature):
                 else:
                     burst_start = index
                     isburst = True
-        if isburst:
-            burst_length.append(index + 1 - burst_start)
+
+        # the last burst length (in case isburst == True) is omitted,
+        # since the true burst length cannot be estimated
+
         burst_length = np.array(burst_length) / sfreq
 
         return burst_amplitude, burst_length

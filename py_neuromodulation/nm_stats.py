@@ -2,7 +2,7 @@ import random
 import copy
 
 import matplotlib.pyplot as plt
-from numba import njit
+# from numba import njit
 import numpy as np
 import pandas as pd
 import scipy.stats as stats
@@ -183,7 +183,7 @@ def permutationTest_relative(x, y, plot_=True, x_unit=None, p=5000):
     return gT, p_val
 
 
-@njit
+# @njit
 def permutation_numba_onesample(x, y, n_perm, two_tailed=True):
     """Perform permutation test with one-sample distribution.
 
@@ -232,7 +232,7 @@ def permutation_numba_onesample(x, y, n_perm, two_tailed=True):
     return z, (np.sum(p >= z)) / n_perm
 
 
-@njit
+# @njit
 def permutation_numba_twosample(x, y, n_perm, two_tailed=True):
     """Perform permutation test.
 
@@ -352,7 +352,7 @@ def cluster_wise_p_val_correction(p_arr, p_sig=0.05, num_permutations=10000):
     return p, p_min_index
 
 
-@njit
+# @njit
 def cluster_wise_p_val_correction_numba(p_arr, p_sig, n_perm):
     """Calculate significant clusters and their corresponding p-values.
 

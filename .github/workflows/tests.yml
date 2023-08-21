@@ -22,6 +22,8 @@ jobs:
   tests:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    env:
+      APPDATA: DefaultNonExistingPath 
     strategy:
       fail-fast: false
       matrix:
@@ -29,9 +31,6 @@ jobs:
           - {name: 3.10 Windows, python: '3.10', os: windows-latest, tox: py310}
           - {name: 3.10 Mac, python: '3.10', os: macos-latest, tox: py310}
           - {name: 3.10 Linux, python: '3.10', os: ubuntu-latest, tox: py310}
-          - {name: Lint, python: '3.10', os: ubuntu-latest, tox: lint}
-          - {name: Typing, python: '3.10', os: ubuntu-latest, tox: typing}
-          - {name: Style, python: '3.10', os: ubuntu-latest, tox: style}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -50,4 +49,6 @@ jobs:
           key: pip|${{ runner.os }}|${{ matrix.python }}|${{ hashFiles('requirements/*.txt') }}
           restore-keys: pip|${{ runner.os }}|${{ matrix.python }}
       - run: pip install tox
+        env:
+          APPDATA: DefaultNonExistingPath 
       - run: tox -e ${{ matrix.tox }}

@@ -1,8 +1,8 @@
-"""Module for calculating features."""
 import numpy as np
 
 from py_neuromodulation import (
     nm_hjorth_raw,
+    nm_mne_connectivity,
     nm_sharpwaves,
     nm_coherence,
     nm_fooof,
@@ -11,18 +11,34 @@ from py_neuromodulation import (
     nm_oscillatory,
     nm_bursts,
     nm_linelength,
-    nm_mne_connectiviy,
 )
 
 
 class Features:
+    """Class for calculating features."""
 
     features: list[nm_features_abc.Feature] = []
 
     def __init__(
         self, s: dict, ch_names: list[str], sfreq: int | float
     ) -> None:
-        """Class for calculating features."""
+        """_summary_
+
+        Parameters
+        ----------
+        s : dict
+            _description_
+        ch_names : list[str]
+            _description_
+        sfreq : int | float
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
+
         self.features = []
 
         for feature in s["features"]:
@@ -52,7 +68,7 @@ class Features:
                 case "linelength":
                     FeatureClass = nm_linelength.LineLength
                 case "mne_connectivity":
-                    FeatureClass = nm_mne_connectiviy.MNEConnectivity
+                    FeatureClass = nm_mne_connectivity.MNEConnectivity
                 case _:
                     raise ValueError(f"Unknown feature found. Got: {feature}.")
 
@@ -71,8 +87,7 @@ class Features:
 
         Returns
         -------
-        dat (dict) with naming convention:
-            channel_method_feature_(f_band)
+        dat (dict): naming convention : channel_method_feature_(f_band)
         """
 
         features_compute = {}
