@@ -13,7 +13,7 @@
   <Channels>
     <Channel>
       <ChanNr>0</ChanNr>
-      <ChanDivider>-1</ChanDivider>
+      <ChanDivider>0</ChanDivider>
       <AltChanName>CREF</AltChanName>
     </Channel>
     <Channel>
@@ -27,7 +27,7 @@
       <AltChanName>STNR02MT</AltChanName>
     </Channel>
     <Channel>
-      <ChanNr>0</ChanNr>
+      <ChanNr>3</ChanNr>
       <ChanDivider>0</ChanDivider>
       <AltChanName>STNR03MT</AltChanName>
     </Channel>
@@ -359,42 +359,42 @@
     <Channel>
       <ChanNr>69</ChanNr>
       <ChanDivider>0</ChanDivider>
-      <AltChanName>ACCRXD2TM</AltChanName>
+      <AltChanName>X</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>70</ChanNr>
       <ChanDivider>0</ChanDivider>
-      <AltChanName>ACCRYD2TM</AltChanName>
+      <AltChanName>Y</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>71</ChanNr>
       <ChanDivider>0</ChanDivider>
-      <AltChanName>ACCRZD2TM</AltChanName>
+      <AltChanName>Z</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>72</ChanNr>
       <ChanDivider>0</ChanDivider>
-      <AltChanName>ACCLXD2TM</AltChanName>
+      <AltChanName>X</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>73</ChanNr>
       <ChanDivider>0</ChanDivider>
-      <AltChanName>ACCLYD2TM</AltChanName>
+      <AltChanName>Y</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>74</ChanNr>
       <ChanDivider>0</ChanDivider>
-      <AltChanName>ACCLZD2TM</AltChanName>
+      <AltChanName>Z</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>75</ChanNr>
       <ChanDivider>0</ChanDivider>
-      <AltChanName>ALGROTCH</AltChanName>
+      <AltChanName>ISO aux</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>76</ChanNr>
       <ChanDivider>-1</ChanDivider>
-      <AltChanName>AUX 3-2</AltChanName>
+      <AltChanName>ISO aux</AltChanName>
     </Channel>
     <Channel>
       <ChanNr>77</ChanNr>

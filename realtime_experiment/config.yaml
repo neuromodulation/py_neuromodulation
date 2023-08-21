@@ -1,0 +1,14 @@
+PATH_OUT_DIR: C:\\CODE\\py_neuromodulation\\realtime_experiment\\data
+PATH_XML_CONFIG: C:\\CODE\\py_neuromodulation\\realtime_experiment\\saga_config_sensight_ecog.xml
+
+PATH_MODEL_PREDICT: C:\CODE\py_neuromodulation\realtime_experiment\models\best_single_ch_ecog_MedOn.p
+#PATH_MODEL_PREDICT: C:\CODE\py_neuromodulation\realtime_experiment\data\559NB58\EcogLfpMedOn01\model_trained.p
+PATH_pynm_SETTINGS: C:\\CODE\\py_neuromodulation\\realtime_experiment\\nm_settings_feat.json
+PATH_pynm_CHANNELS: C:\\CODE\\py_neuromodulation\\realtime_experiment\\nm_channels_feat_ecog.csv
+
+sub: 559NB58_2
+task: SelfpRotaL
+ses: EcogLfpMedOn01
+acq: StimOff
+datatype: ieeg
+run:  1

@@ -28,6 +28,7 @@ class Decoder(multiprocessing.Process):
         interval: float,
         out_dir: _PathLike,
         verbose: bool,
+        model_path: _PathLike,
     ) -> None:
         super().__init__(name="DecodingProcess")
         self.queue_decoding = queue_decoding
@@ -38,14 +39,7 @@ class Decoder(multiprocessing.Process):
 
         self._threshold: float = 0.5
 
-        filename = tkinter.filedialog.askopenfilename(
-            title="Select model",
-            filetypes=(
-                ("pickle files", ["*.p", "*.pkl", "*.pickle"]),
-                ("All files", "*.*"),
-            ),
-        )
-        self.filename = pathlib.Path(filename)
+        self.filename = pathlib.Path(model_path)
 
         with open(self.filename, "rb") as file:
             self._model = pickle.load(file)
@@ -60,12 +54,12 @@ class Decoder(multiprocessing.Process):
             realtime_decoding.clear_queue(q)
 
     def run(self) -> None:
-        labels = ["Prediction", "Probability", "Threshold"]
+        labels = ["Prediction", "Probability"]  # "Threshold"
 
         info = pylsl.StreamInfo(
             name="Decoding",
             type="EEG",
-            channel_count=3,
+            channel_count=2,
             channel_format="double64",
             source_id="decoding_1",
         )
@@ -77,6 +71,7 @@ class Decoder(multiprocessing.Process):
             try:
                 sample = self.queue_feat.get(timeout=10.0)
             except queue.Empty:
+                print("No features found for 10 seconds.")
                 break
             else:
                 if self.verbose:
@@ -86,11 +81,16 @@ class Decoder(multiprocessing.Process):
                     break
 
                 # Predict
-                sample_ = sample[[i for i in sample.index if i != "label_train"]]
-                y = self._model.predict(np.expand_dims(sample_.to_numpy(), 0))
+                sample_ = sample[[i for i in sample.index if i != "ROTAMETER_MOVEMENT"]]
+
+                dat_pr = np.nan_to_num(np.expand_dims(sample_.to_numpy(), 0))
+                y = float(self._model.predict_proba(dat_pr)[0, 1])
+                print(f"pr: {y}")
+
                 timestamp = np.datetime64(datetime.now(_timezone), "ns")
+
                 output = pd.DataFrame(
-                    [[y >= self._threshold, y, self._threshold]],
+                    [[y >= self._threshold, y]],  # self._threshold
                     columns=labels,
                     index=[timestamp],
                 )

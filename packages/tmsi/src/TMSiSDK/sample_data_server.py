@@ -29,7 +29,7 @@ limitations under the License.
 
 
 """
-
+import queue
 from TMSiSDK import settings
 from copy import copy
 
@@ -96,4 +96,9 @@ def putSampleData(id, data):
     num_consumers = len(settings._consumer_list)
     for i in range(num_consumers):
         if settings._consumer_list[i].id == id:
-            settings._consumer_list[i].q.put(data)
+            try:
+                settings._consumer_list[i].q.put(data, timeout=5)
+            except TypeError:
+                settings._consumer_list[i].q.put(data)
+            except:
+                print(f"Failed to put raw data. Queue full: ", id)

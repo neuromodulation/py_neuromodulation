@@ -1,0 +1,36 @@
+1. Check signals using TMSi Polybench  --> rotameter signal looks fine? (super small µV range)
+2. Check camera adjustments, both cameras enough storage
+3. Check screen recording (OBS studio) --> unten rechts Aufnahme starten; Videos werden in /Videos gespeichert
+4. Decide based on TMSi Polybench which signal to choose for decoding
+5. Adjust nm_channels.tsv channel
+6. Select always realtime_decoding/nm_settings_feat.json
+6.1 should be only rereferencing; and fft enabled
+6.2 normalization might be critical factor: 30s realtime z-scoring
+
+Patient-individual model
+7. Start with individual training model: Explain task to patient; a couple of minutes selpaced movements; tell when to stop
+7.1 enable in packages/realtime_decoding/src/realtime_decoding/run_decoding.py Line 208: training_enabled to True
+7.2 conda activate realtime_decoding environment 
+7.3 start script in powershell console in folder /realtime_experiment with .\start_experiment.bat
+7.4 select output folder: C:\CODE\py_neuromodulation\realtime_experiment\data
+7.5 name subject
+7.6 select TMSi SAGA settings file: "C:\CODE\py_neuromodulation\realtime_experiment\saga_config_sensight_lfp_left.xml"
+7.7 train model: start /packages/realtime_decoding/src/realtime_decoding/trainer.py in debug mode
+7.7.1 check prediction ranges, and see where predictions make sense
+--> IF no further prompt is shown: Cancel LSL terminal and prompt in VSCode with pressing ESC and repeat from 7.1 
+
+Now predict model
+7.8 Run script again, but check new model
+
+Across-patient training model
+Start with model_STN_best_ch_all_sub_ALL.p; 
+
+
+Note:
+ - Cancle TMSi Polytestbench in order to use the .dll!
+ - when LSL stream does not display features: reconnect USB
+ - additionally, when stream does not diplay: select new subject
+
+
+
+
