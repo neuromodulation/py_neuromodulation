@@ -233,14 +233,20 @@ def _get_default_references(
         lfp_r[i - 1] if i > 0 else lfp_r[-1] for i, _ in enumerate(lfp_r)
     ]
     ref_idx = list(df.columns).index("rereference")
-    for ecog_ch in ecog_chs:
-        df.iloc[df[df["name"] == ecog_ch].index[0], ref_idx] = "average"
-    for i, lfp in enumerate(lfp_l):
-        df.iloc[df[df["name"] == lfp].index[0], ref_idx] = lfp_l_refs[i]
-    for i, lfp in enumerate(lfp_r):
-        df.iloc[df[df["name"] == lfp].index[0], ref_idx] = lfp_r_refs[i]
+    if len(ecog_chs) > 1:
+        for ecog_ch in ecog_chs:
+            df.iloc[df[df["name"] == ecog_ch].index[0], ref_idx] = "average"
+    if len(lfp_l) > 1:  # if there is only a single channel, the channel would be subtracted from itself
+        for i, lfp in enumerate(lfp_l):
+            df.iloc[df[df["name"] == lfp].index[0], ref_idx] = lfp_l_refs[i]
+    if len(lfp_r) > 1:
+        for i, lfp in enumerate(lfp_r):
+            df.iloc[df[df["name"] == lfp].index[0], ref_idx] = lfp_r_refs[i]
     for other_ch in other_chs:
         df.iloc[df[df["name"] == other_ch].index[0], ref_idx] = "None"
+    
+    df = df.replace(np.nan, "None")
+
     return df
 
 def get_default_channels_from_data(
