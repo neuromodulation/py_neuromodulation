@@ -18,16 +18,18 @@ import plotly.express as px
 import xgboost
 from sklearn.utils import class_weight
 from Experiments.utils.knn_bpp import kNN_BPP
+import scipy.stats
 
 ch_all = np.load(
     os.path.join(r"D:\Glenn", "train_channel_all_fft.npy"),
     allow_pickle="TRUE",
 ).item()
-df_full = pd.read_csv(r"D:\Glenn\df_ch_performances_regions.csv")
+df_full = pd.read_csv(r"D:\Glenn\df_ch_performances_regions_4.csv")
 
 
 cohorts = ["Beijing", "Pittsburgh", "Berlin", ]  # "Washington"
 Atlas = 'DiFuMo128'
+dfregions = df_full[Atlas].unique()
 def get_patients_train_dict(sub_test, cohort_test, val_approach: str, data_select: dict):
     cohorts_train = {}
     for cohort in cohorts:
@@ -90,21 +92,25 @@ def get_data_channels(sub_test: str, cohort_test: str, df_all, test: bool, model
                 curregion = model_params['Regions'][regionit]
                 ch_test_list = df_all.query(f"cohort == @cohort_test and sub == @sub_test and {Atlas} == @curregion")[
                     "ch"]
-                for i in range(len(ch_test_list)): # For test select all channels
-                    ch_test = ch_test_list.iloc[i]
+                if len(ch_test_list) > 0:
+                    for i in range(len(ch_test_list)): # For test select all channels
+                        ch_test = ch_test_list.iloc[i]
 
-                    X_test_temp, y_test_temp = get_data_sub_ch(
-                        ch_all, cohort_test, sub_test, ch_test
-                    )
-                    X_test_reg.append(X_test_temp)
-                    y_test_reg.append(y_test_temp)
-                # Not sure of this is needed or not but it should concat the mult. channel per region
-                if len(X_test) > 1:
-                    X_test_reg = np.concatenate(X_test_reg, axis=0)
-                    y_test_reg = np.concatenate(y_test_reg, axis=0)
-                else:
-                    X_test_reg = X_test_reg[0]
-                    y_test_reg = y_test_reg[0]
+                        X_test_temp, y_test_temp = get_data_sub_ch(
+                            ch_all, cohort_test, sub_test, ch_test
+                        )
+                        X_test_reg.append(X_test_temp)
+                        y_test_reg.append(y_test_temp)
+                    # Not sure of this is needed or not but it should concat the mult. channel per region
+                    if len(X_test) > 1:
+                        X_test_reg = np.concatenate(X_test_reg, axis=0)
+                        y_test_reg = np.concatenate(y_test_reg, axis=0)
+                    else:
+                        X_test_reg = X_test_reg[0]
+                        y_test_reg = y_test_reg[0]
+                else: # Test subject does not have this region
+                    X_test_reg = []
+                    y_test_reg = []
                 # Append regions to full list --> dimension of # brain regions, containing their signal
                 X_test.append(X_test_reg)
                 y_test.append(y_test_reg)
@@ -112,7 +118,7 @@ def get_data_channels(sub_test: str, cohort_test: str, df_all, test: bool, model
                 if len(X_test) > 1:
                     X_test = np.concatenate(X_test, axis=0)
                     y_test = np.concatenate(y_test, axis=0)
-                else:
+                elif len(X_test) == 1:
                     X_test = X_test[0]
                     y_test = y_test[0]
         else:
@@ -122,24 +128,34 @@ def get_data_channels(sub_test: str, cohort_test: str, df_all, test: bool, model
                 X_test_reg = []
                 y_test_reg = []
                 curregion = model_params['Regions'][regionit]
-                ch_test_list = df_all.query(f"cohort == @cohort_test and sub == @sub_test and {Atlas} == @curregion").sort_values(
-                    by='performance', ascending=False)[
-                    "ch"]
-                for i in range(model_params['nrchannels'][regionit]):  # Loop over how many channels
-                    ch_test = ch_test_list.iloc[i]
 
-                    X_test_temp, y_test_temp = get_data_sub_ch(
-                        ch_all, cohort_test, sub_test, ch_test
-                    )
-                    X_test_reg.append(X_test_temp)
-                    y_test_reg.append(y_test_temp)
-                # Not sure of this is needed or not but it should concat the mult. channel per region
-                if len(X_test) > 1:
-                    X_test_reg = np.concatenate(X_test_reg, axis=0)
-                    y_test_reg = np.concatenate(y_test_reg, axis=0)
-                else:
-                    X_test_reg = X_test_reg[0]
-                    y_test_reg = y_test_reg[0]
+                ch_test_list = df_all.query(f"cohort == @cohort_test and sub == @sub_test and {Atlas} == @curregion").sort_values(
+                    by='performance_test', ascending=False)[
+                    "ch"]
+                if len(ch_test_list) > 0:
+                    if len(ch_test_list) < model_params['nrchannels'][regionit]:
+                        print(f'Current train subject has less channels in region than desired {len(ch_test_list)}<{model_params["nrchannels"][regionit]}')
+                        looprange = len(ch_test_list)
+                    else:
+                        looprange = model_params["nrchannels"][regionit]
+                    for i in range(looprange):  # Loop over how many channels in the region
+                        ch_test = ch_test_list.iloc[i]
+
+                        X_test_temp, y_test_temp = get_data_sub_ch(
+                            ch_all, cohort_test, sub_test, ch_test
+                        )
+                        X_test_reg.append(X_test_temp)
+                        y_test_reg.append(y_test_temp)
+                    # Not sure of this is needed or not but it should concat the mult. channel per region
+                    if len(X_test) > 1:
+                        X_test_reg = np.concatenate(X_test_reg, axis=0)
+                        y_test_reg = np.concatenate(y_test_reg, axis=0)
+                    else:
+                        X_test_reg = X_test_reg[0]
+                        y_test_reg = y_test_reg[0]
+                else: # No channels for this brain region --> Give empty
+                    X_test_reg = np.array([], dtype=np.int64).reshape(0,7) # Adapt to nr of features used
+                    y_test_reg = []
                 # Make a brain region auxillary variable
                 if model_params['TimeConcat']:
                     brain_aux.append(np.repeat(regionit, len(X_test_reg)))
@@ -151,11 +167,10 @@ def get_data_channels(sub_test: str, cohort_test: str, df_all, test: bool, model
                     X_test = np.concatenate(X_test, axis=0)
                     y_test = np.concatenate(y_test, axis=0)
                     brain_aux = np.concatenate(brain_aux, axis=0)
-                else:
+                elif len(X_test) == 1:
                     X_test = X_test[0]
                     y_test = y_test[0]
                     brain_aux = brain_aux[0]
-
     else: # No regions were supplied --> Use R-Map
         if test:
             if model_params['TimeConcat']:  # Append multiple R-maps according to Nrchannels
@@ -217,7 +232,7 @@ def get_data_channels(sub_test: str, cohort_test: str, df_all, test: bool, model
                 X_test, y_test = get_data_sub_ch(
                     ch_all, cohort_test, sub_test, ch_test
                 )
-        return X_test, y_test, brain_aux
+    return X_test, y_test, brain_aux
 
 def plot_results(perflist,val_approach, cohorts, save=False):
     listofdicts = perflist
@@ -321,7 +336,6 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
                         X_train, y_train, brain_aux = get_data_channels(
                             sub_train, cohort_train, df_all=df_full, test=False, model_params=model_params
                         )
-                        sub_aux = np.tile(sub_counter,len(y_train))
 
                         y_train_discr_comb.append(np.squeeze(y_train)) # Save the true labels
                         if (not model_params['discreteMov']) and (not model_params['pseudoDiscr']):
@@ -329,9 +343,14 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
                                                         sigma=model_params['gaussSigma'])
                         X_train_comb.append(np.squeeze(X_train))
                         y_train_comb.append(np.squeeze(y_train))
-                        sub_aux_comb.append(np.squeeze(sub_aux))
-                        sub_counter += 1
-                        coh_aux = np.tile(coh_counter, len(y_train))
+                        if len(np.squeeze(y_train)) != 0: # If there was no data, do not up the counter (might create strange sampling otherwise)
+                            sub_aux = np.tile(sub_counter, len(np.squeeze(y_train)))
+                            sub_aux_comb.append(np.squeeze(sub_aux))
+                            sub_counter += 1
+                        else:
+                            sub_aux = np.array([])
+                            sub_aux_comb.append(sub_aux)
+                        coh_aux = np.tile(coh_counter, len(np.squeeze(y_train)))
                         coh_aux_comb.append(np.squeeze(coh_aux))
                     coh_counter += 1
 
@@ -428,16 +447,36 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
             # TEST PERMUTATION OF FEATURES
             # rng = np.random.default_rng()
             # X_test_emb = cebra_model.transform(rng.permutation(X_test,axis=1),session_id=0)
+            if model_params['Regions']:
+                y_test_predicts = []
+                for i in range(len(X_test)): # loop over regions
+                    if len(X_test[i]) == 0: # i.e. brain region was not in test subject
+                        continue
+                    else:
+                        X_test_emb = cebra_model.transform(X_test[i],session_id=0)
+                        ### Embeddings are plotted here
+                        if show_embedding:
+                            plotly_embeddings(X_train_emb,X_test_emb,y_train_discr,y_test[i],aux=coh_aux,type='coh')
+                        y_test_pr = decoder.predict(X_test_emb)
+                        y_test_predicts.append(y_test_pr)
+                newarray = np.array(y_test_predicts)
+                if np.shape(newarray)[0] > 1:
+                    majorityvote = scipy.stats.mode(newarray,axis=1) # On equal chooses 0 (no movement?)
+                    ba = metrics.balanced_accuracy_score(y_test[0], majorityvote)
+                else:
+                    print(y_test)
+                    print(newarray)
+                    ba = metrics.balanced_accuracy_score(y_test[0], newarray[0])
+                print(ba)
+            else:
+                X_test_emb = cebra_model.transform(X_test, session_id=0)
+                ### Embeddings are plotted here
+                if show_embedding:
+                    plotly_embeddings(X_train_emb,X_test_emb,y_train_discr,y_test,aux=coh_aux,type='coh')
 
-            X_test_emb = cebra_model.transform(X_test,session_id=0)
-
-            ### Embeddings are plotted here
-            if show_embedding:
-                plotly_embeddings(X_train_emb,X_test_emb,y_train_discr,y_test,aux=coh_aux,type='coh')
-
-            y_test_pr = decoder.predict(X_test_emb)
-            ba = metrics.balanced_accuracy_score(y_test, y_test_pr)
-            print(ba)
+                y_test_pr = decoder.predict(X_test_emb)
+                ba = metrics.balanced_accuracy_score(y_test, y_test_pr)
+                print(ba)
             # ba = metrics.balanced_accuracy_score(np.array(y_test, dtype=int), decoder.predict(X_test_emb))
 
             # cebra.plot_embedding(embedding, cmap="viridis", markersize=10, alpha=0.5, embedding_labels=y_train_cont)
@@ -501,7 +540,7 @@ for val_approach in val_approaches:
         'temperature':1,
         'min_temperature':0.1, # If temperature mode = auto this should be set in the desired expected range
         'learning_rate': 0.005, # Set this in accordance to loss function progression in TensorBoard
-        'max_iterations': 5000,  # 5000, Set this in accordance to the loss functions in TensorBoard
+        'max_iterations': 10,  # 5000, Set this in accordance to the loss functions in TensorBoard
         'time_offsets': 1, # Time offset between samples (Ideally set larger than receptive field according to docs)
         'output_dimension': 3, # Nr of output dimensions of the CEBRA model
         'decoder': 'KNN_BPP', # Choose from "KNN", "Logistic", "KNN_BPP"
@@ -513,13 +552,17 @@ for val_approach in val_approaches:
         'discreteMov':False, # Turn pseudoDiscr to False if you want to test true discrete movement labels (Otherwise this setting will do nothing)
         'pseudoDiscr': True, # Pseudodiscrete meaning direct conversion from int to float
         'gaussSigma':1.5, # Set pseuodDiscr to False for this to take effect and assuming a Gaussian for the movement distribution
-        'Regions': [], # Set (list of) desired regions to analyze OR leave empty if you do not want to use regions (uses best R-map as default)
-        'nrchannels': [2], # Nr of channels to use in train for each region (based on own analysis for balance) OR for in combination with TimeConcat=True & R-Map, how many channels in train + test
-        'TimeConcat': True, # Set True if you want to either combine the regions in 1 embedding over time (with auxillary); or use multiple R-map channels
+        'Regions': ['Cerebrospinal fluid (superior of Central sulcus)'], # Set (list of) desired regions to analyze OR leave empty if you do not want to use regions (uses best R-map as default)
+        'nrchannels': [1], # Nr of channels to use in train for each region (based on own analysis for balance) OR for in combination with TimeConcat=True & R-Map, how many channels in train + test
+        'TimeConcat': False, # Set True if you want to either combine the regions in 1 embedding over time (with auxillary); or use multiple R-map channels
         'nrtestR': 1, # In case of TimeConcat True and Regions empty --> Set how many test channels you want to use (ordered on R-map corr)
         'additional_comment': 'Cohort_auxillary',
         'debug': True # Set to True will stop saving model outputs
         }
+    # Sanity check:
+    if model_params['Regions']:
+        if not set(model_params['Regions']).issubset(dfregions):
+            raise Exception('The supplied region(s) are not in the dataframe (Check spelling)')
     if not model_params['debug']:
         writer = SummaryWriter(log_dir=f"D:\Glenn\CEBRA_logs\{val_approach}\{curtime}")
 

@@ -7,7 +7,7 @@ df_info = pd.read_csv(r"D:\Glenn\df_ch_performances_regions_4.csv")
 plotting = True
 removeLR = True
 
-atlas = 'DiFuMo256'
+atlas = 'DiFuMo128'
 # Plot the distribution of brain regions where electrodes are for the dataset
 if removeLR:
     newname = []
