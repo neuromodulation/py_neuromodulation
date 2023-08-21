@@ -16,11 +16,11 @@ This demo explains the TMSi and LabStreamingLayer setup.
 # Given the raw data, data can be analyzed using *py_neuromodulation*. Preprocessing methods, such as re-referencing and normalization, 
 # feature computation and decoding can be performed then in real-time.
 # 
-# For online as well as as offline analysis, the :class:`~py_neuromodulation.nm_stream_abc.py` class needs to be instantiated.
+# For online as well as as offline analysis, the :class:`~nm_stream_abc` class needs to be instantiated.
 # Here the `nm_settings` and `nm_channels` are required to be defined.
-# Previously for the offline analysis, an offline :class:`~py_neuromodulation.nm_generator.py` object was defined that periodically yielded data.
-# For online data, the :meth:`~py_neuromodulation.nm_stream.run()` function therefore needs to be overwritten, which first acquires data and then calls 
-# the :meth:`~py_neuromodulation.nm_stream.run_analysis.process()` function.
+# Previously for the offline analysis, an offline :class:`~nm_generator` object was defined that periodically yielded data.
+# For online data, the :meth:`~nm_stream_abc.run` function therefore needs to be overwritten, which first acquires data and then calls 
+# the :meth:`~nm_run_analysis.process` function.
 # 
 # The following illustrates in pseudo-code how such a stream could be initialized:
 #
@@ -80,7 +80,7 @@ print(f"{np.round(timeit.timeit(lambda: stream.run_analysis.process(data), numbe
 
 
 # %%
-# Those results show that the computation time for a typical pipeline (FFT, re-referencing, notch-filtering, featurenormalization)
+# Those results show that the computation time for a typical pipeline (FFT, re-referencing, notch-filtering, feature normalization)
 # is well below 10 ms, which is fast enough for real-time analysis with feature sampling rates below 100 Hz.
 # Computation of more complex features could still result in feature sampling rates of more than 30 Hz.
 # 
@@ -89,9 +89,10 @@ print(f"{np.round(timeit.timeit(lambda: stream.run_analysis.process(data), numbe
 # 
 # In the following example, we will show how to setup a real-time movement decoding experiment using the TMSi-SAGA amplifier.
 # First, we relied on different software modules for data streaming and visualization.
-# `LabStreamingLayer` <https://labstreaminglayer.org>`_ allows for real-time data streaming and synchronization across multiple devices.
+# `LabStreamingLayer <https://labstreaminglayer.org>`_ allows for real-time data streaming and synchronization across multiple devices.
 # We additionally used `timeflux <https://timeflux.io>`_ for real-time data visualization of features, decoded output.
 # For raw data visualization we used `Brain Streaming Layer <https://fcbg-hnp-meeg.github.io/bsl/dev/index.html>`_.
 # 
 # The code for real-time movement decoding is added in the GitHub branch `realtime_decoding <https://github.com/neuromodulation/py_neuromodulation/tree/realtime_decoding>`_.
 # Here we relied on the `TMSI SAGA Python interface <https://gitlab.com/tmsi/tmsi-python-interface>`_.
+# 
