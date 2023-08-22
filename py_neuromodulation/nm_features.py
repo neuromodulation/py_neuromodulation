@@ -76,6 +76,16 @@ class Features:
             f_obj = FeatureClass(s, ch_names, sfreq)
             self.features.append(f_obj)
 
+    def register_new_feature(self, feature: nm_features_abc.Feature) -> None:
+        """Register new feature.
+
+        Parameters
+        ----------
+        feature : nm_features_abc.Feature
+            New feature to add to feature list
+        """
+        self.features.append(feature)
+
     def estimate_features(self, data: np.ndarray) -> dict:
         """Calculate features, as defined in settings.json
         Features are based on bandpower, raw Hjorth parameters and sharp wave
