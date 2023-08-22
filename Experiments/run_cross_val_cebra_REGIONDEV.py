@@ -322,11 +322,14 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
                     sub_test, cohort_test, val_approach=val_approach, data_select=data_select
                 )
 
-                X_train_comb = []
-                y_train_comb = []
-                y_train_discr_comb = []
-                coh_aux_comb = []
-                sub_aux_comb = []
+                X_train_comb = [ [] for _ in range(len(X_test)) ]
+                y_train_comb = [ [] for _ in range(len(X_test)) ]
+                X_train = [ [] for _ in range(len(X_test)) ]
+                y_train = [ [] for _ in range(len(X_test)) ]
+                y_train_discr = [ [] for _ in range(len(X_test)) ]
+                y_train_discr_comb = [ [] for _ in range(len(X_test)) ]
+                coh_aux_comb = [ [] for _ in range(len(X_test)) ]
+                sub_aux_comb = [ [] for _ in range(len(X_test)) ]
                 nr_embeddings = 0
                 sub_counter = 0
                 coh_counter = 0
@@ -337,146 +340,149 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
                             sub_train, cohort_train, df_all=df_full, test=False, model_params=model_params
                         )
 
-                        y_train_discr_comb.append(np.squeeze(y_train)) # Save the true labels
-                        if (not model_params['discreteMov']) and (not model_params['pseudoDiscr']):
-                            y_train = gaussian_filter1d(np.array(y_train, dtype=float),
+                        for i in range(len(X_train)): # X_train now always arrays in array (for multireg)
+                            # Do per region, data in x_train concatenation of data
+                            y_train_discr_comb[i].append(np.squeeze(y_train[i])) # Save the true labels
+                            if (not model_params['discreteMov']) and (not model_params['pseudoDiscr']):
+                                y_train = gaussian_filter1d(np.array(y_train[i], dtype=float),
                                                         sigma=model_params['gaussSigma'])
-                        X_train_comb.append(np.squeeze(X_train))
-                        y_train_comb.append(np.squeeze(y_train))
-                        if len(np.squeeze(y_train)) != 0: # If there was no data, do not up the counter (might create strange sampling otherwise)
-                            sub_aux = np.tile(sub_counter, len(np.squeeze(y_train)))
-                            sub_aux_comb.append(np.squeeze(sub_aux))
-                            sub_counter += 1
-                        else:
-                            sub_aux = np.array([])
-                            sub_aux_comb.append(sub_aux)
-                        coh_aux = np.tile(coh_counter, len(np.squeeze(y_train)))
-                        coh_aux_comb.append(np.squeeze(coh_aux))
+                            X_train_comb[i].append(np.squeeze(X_train[i]))
+                            y_train_comb[i].append(np.squeeze(y_train[i]))
+                            if len(np.squeeze(y_train[0])) != 0: # If there was no data, do not up the counter and do not create an auxillary
+                                sub_aux = np.tile(sub_counter, len(np.squeeze(y_train[i])))
+                                sub_aux_comb[i].append(np.squeeze(sub_aux))
+                                coh_aux = np.tile(coh_counter, len(np.squeeze(y_train[i])))
+                                coh_aux_comb[i].append(np.squeeze(coh_aux))
+                                sub_counter += 1
+                            else:
+                                continue
                     coh_counter += 1
-
-                if len(X_train_comb) > 1:
-                    X_train = np.concatenate(X_train_comb, axis=0)
-                    y_train = np.concatenate(y_train_comb, axis=0)
-                    y_train_discr = np.concatenate(y_train_discr_comb, axis=0)
-                    sub_aux = np.concatenate(sub_aux_comb, axis=0)
-                    coh_aux = np.concatenate(coh_aux_comb, axis=0)
-                else:
-                    X_train = X_train_comb[0]
-                    y_train = X_train_comb[0]
-                    y_train_discr = X_train_comb[0]
-                    sub_aux = sub_aux_comb[0]
-                    coh_aux = coh_aux_comb[0]
-
-                # X_train, y_train, X_test, y_test = self.decoder.append_samples_val(X_train, y_train, X_test, y_test, 5)
-
-                cebra_model = CEBRA(
-                    model_architecture = model_params['model_architecture'], # previously used: offset1-model-v2'
-                    batch_size = model_params['batch_size'],
-                    temperature_mode=model_params['temperature_mode'],
-                    learning_rate = model_params['learning_rate'],
-                    max_iterations = model_params['max_iterations'],  # 50000
-                    time_offsets = model_params['time_offsets'],
-                    output_dimension = model_params['output_dimension'],
-                    device = "cuda",
-                    distance='cosine',
-                    conditional='time_delta',
-                    verbose = True
-                )
-
-                ### Add auxillary variables here
-                if model_params['true_msess']:
-                    if not model_params['pseudoDiscr']:
-                        cebra_model.fit(X_train_comb, y_train_comb)
+                # ALMOST FULL CODE IS BELOW THIS LOOP (1 embedding per region)
+                # Might wanna save the predictions or something to do a majority vote or something
+                for i in range(len(X_train_comb)):
+                    if len(X_train_comb[i]) > 1:
+                        X_train = np.concatenate(X_train_comb[i], axis=0)
+                        y_train = np.concatenate(y_train_comb[i], axis=0)
+                        y_train_discr = np.concatenate(y_train_discr_comb[i], axis=0)
+                        sub_aux = np.concatenate(sub_aux_comb[i], axis=0)
+                        coh_aux = np.concatenate(coh_aux_comb[i], axis=0)
                     else:
-                        cebra_model.fit(X_train_comb, np.array(y_train_comb, dtype=float))
-                else:
-                    if not model_params['pseudoDiscr']:
-                        cebra_model.fit(X_train, y_train)
-                    else: # Pretend the integer y_train is floating
-                        cebra_model.fit(X_train, np.array(y_train,dtype=float),coh_aux)
+                        X_train = X_train_comb[i][0]
+                        y_train = X_train_comb[i][0]
+                        y_train_discr = X_train_comb[i][0]
+                        sub_aux = sub_aux_comb[i][0]
+                        coh_aux = coh_aux_comb[i][0]
 
-                if model_params['true_msess']:
-                    X_train_emb = cebra_model.transform(X_train_comb[0],session_id=0)
-                else:
-                    X_train_emb = cebra_model.transform(X_train, session_id=0)
-                if model_params['all_embeddings']:
-                    for i_emb in range(1,nr_embeddings):
-                        X_train_emb = np.concatenate((X_train_emb, cebra_model.transform(X_train_comb[i_emb],session_id=i_emb)))
+                    # X_train, y_train, X_test, y_test = self.decoder.append_samples_val(X_train, y_train, X_test, y_test, 5)
 
-                # Get the loss and temperature plots
-                if type(alllosses) == int:
-                    alllosses = np.array(np.expand_dims(cebra_model.state_dict_["loss"],axis=0))
-                    alltemps = np.array(np.expand_dims(cebra_model.state_dict_["log"]["temperature"],axis=0))
-                else:
-                    alllosses = np.concatenate((alllosses,np.expand_dims(cebra_model.state_dict_["loss"],axis=0)),axis=0)
-                    alltemps = np.concatenate((alltemps, np.expand_dims(cebra_model.state_dict_["log"]["temperature"],axis=0)),axis=0)
-
-                if model_params['decoder'] == 'KNN':
-                    decoder = neighbors.KNeighborsClassifier(
-                        n_neighbors=model_params['n_neighbors'], metric=model_params['metric'],
-                        n_jobs=model_params['n_jobs'])
-                elif model_params['decoder'] == 'Logistic':
-                    decoder = linear_model.LogisticRegression(class_weight="balanced")
-                elif model_params['decoder'] == 'SVM':
-                    decoder = SVC(kernel=cosine_similarity)
-                elif model_params['decoder'] == 'FAISS':
-                    print('Not implemented')
-                elif model_params['decoder'] == 'MLP':
-                    print('Not implemented')
-                elif model_params['decoder'] == 'XGB':
-                    decoder = xgboost.sklearn.XGBClassifier()
-                    #decoder.set_params(**{'lambda':2})
-                    classes_weights = class_weight.compute_sample_weight(
-                        class_weight="balanced", y=y_train_discr
+                    cebra_model = CEBRA(
+                        model_architecture = model_params['model_architecture'], # previously used: offset1-model-v2'
+                        batch_size = model_params['batch_size'],
+                        temperature_mode=model_params['temperature_mode'],
+                        learning_rate = model_params['learning_rate'],
+                        max_iterations = model_params['max_iterations'],  # 50000
+                        time_offsets = model_params['time_offsets'],
+                        output_dimension = model_params['output_dimension'],
+                        device = "cuda",
+                        distance='cosine',
+                        conditional='time_delta',
+                        verbose = True
                     )
-                    decoder.set_params(eval_metric="logloss")
-                    decoder.fit(
-                        X_train_emb,
-                        y_train_discr,
-                        sample_weight=classes_weights,
-                    )
-                elif model_params['decoder'] == 'KNN_BPP':
-                    decoder = kNN_BPP(n_neighbors=model_params['n_neighbors'])
+
+                    ### Add auxillary variables here
+                    if model_params['true_msess']:
+                        if not model_params['pseudoDiscr']:
+                            cebra_model.fit(X_train_comb[i], y_train_comb[i])
+                        else:
+                            cebra_model.fit(X_train_comb[i], np.array(y_train_comb[i], dtype=float))
+                    else:
+                        if not model_params['pseudoDiscr']:
+                            cebra_model.fit(X_train, y_train)
+                        else: # Pretend the integer y_train is floating
+                            cebra_model.fit(X_train, np.array(y_train,dtype=float),coh_aux)
+
+                    if model_params['true_msess']:
+                        X_train_emb = cebra_model.transform(X_train_comb[i][0],session_id=0)
+                    else:
+                        X_train_emb = cebra_model.transform(X_train, session_id=0)
+                    if model_params['all_embeddings']:
+                        for i_emb in range(1,nr_embeddings):
+                            X_train_emb = np.concatenate((X_train_emb, cebra_model.transform(X_train_comb[i][i_emb],session_id=i_emb)))
+
+                    # Get the loss and temperature plots
+                    if type(alllosses) == int:
+                        alllosses = np.array(np.expand_dims(cebra_model.state_dict_["loss"],axis=0))
+                        alltemps = np.array(np.expand_dims(cebra_model.state_dict_["log"]["temperature"],axis=0))
+                    else:
+                        alllosses = np.concatenate((alllosses,np.expand_dims(cebra_model.state_dict_["loss"],axis=0)),axis=0)
+                        alltemps = np.concatenate((alltemps, np.expand_dims(cebra_model.state_dict_["log"]["temperature"],axis=0)),axis=0)
+
+                    if model_params['decoder'] == 'KNN':
+                        decoder = neighbors.KNeighborsClassifier(
+                            n_neighbors=model_params['n_neighbors'], metric=model_params['metric'],
+                            n_jobs=model_params['n_jobs'])
+                    elif model_params['decoder'] == 'Logistic':
+                        decoder = linear_model.LogisticRegression(class_weight="balanced")
+                    elif model_params['decoder'] == 'SVM':
+                        decoder = SVC(kernel=cosine_similarity)
+                    elif model_params['decoder'] == 'FAISS':
+                        print('Not implemented')
+                    elif model_params['decoder'] == 'MLP':
+                        print('Not implemented')
+                    elif model_params['decoder'] == 'XGB':
+                        decoder = xgboost.sklearn.XGBClassifier()
+                        #decoder.set_params(**{'lambda':2})
+                        classes_weights = class_weight.compute_sample_weight(
+                            class_weight="balanced", y=y_train_discr
+                        )
+                        decoder.set_params(eval_metric="logloss")
+                        decoder.fit(
+                            X_train_emb,
+                            y_train_discr,
+                            sample_weight=classes_weights,
+                        )
+                    elif model_params['decoder'] == 'KNN_BPP':
+                        decoder = kNN_BPP(n_neighbors=model_params['n_neighbors'])
 
 
-                # Fitting of classifier is always done on the true discrete data
-                decoder.fit(X_train_emb, np.array(y_train_discr, dtype=int))
+                    # Fitting of classifier is always done on the true discrete data
+                    decoder.fit(X_train_emb, np.array(y_train_discr, dtype=int))
 
             # Needed for training once per across cohort
             cohort_prev_it = cohort_test
             # TEST PERMUTATION OF FEATURES
             # rng = np.random.default_rng()
             # X_test_emb = cebra_model.transform(rng.permutation(X_test,axis=1),session_id=0)
-            if model_params['Regions']:
-                y_test_predicts = []
-                for i in range(len(X_test)): # loop over regions
-                    if len(X_test[i]) == 0: # i.e. brain region was not in test subject
-                        continue
-                    else:
-                        X_test_emb = cebra_model.transform(X_test[i],session_id=0)
-                        ### Embeddings are plotted here
-                        if show_embedding:
-                            plotly_embeddings(X_train_emb,X_test_emb,y_train_discr,y_test[i],aux=coh_aux,type='coh')
-                        y_test_pr = decoder.predict(X_test_emb)
-                        y_test_predicts.append(y_test_pr)
-                newarray = np.array(y_test_predicts)
-                if np.shape(newarray)[0] > 1:
-                    majorityvote = scipy.stats.mode(newarray,axis=1) # On equal chooses 0 (no movement?)
-                    ba = metrics.balanced_accuracy_score(y_test[0], majorityvote)
-                else:
-                    print(y_test)
-                    print(newarray)
-                    ba = metrics.balanced_accuracy_score(y_test[0], newarray[0])
-                print(ba)
-            else:
-                X_test_emb = cebra_model.transform(X_test, session_id=0)
-                ### Embeddings are plotted here
-                if show_embedding:
-                    plotly_embeddings(X_train_emb,X_test_emb,y_train_discr,y_test,aux=coh_aux,type='coh')
 
-                y_test_pr = decoder.predict(X_test_emb)
-                ba = metrics.balanced_accuracy_score(y_test, y_test_pr)
-                print(ba)
+            y_test_predicts = []
+            for i in range(len(X_test)): # loop over regions
+                if len(X_test[i]) == 0: # i.e. brain region was not in test subject
+                    continue
+                else:
+                    X_test_emb = cebra_model.transform(X_test[i],session_id=0)
+                    ### Embeddings are plotted here
+                    if show_embedding:
+                        plotly_embeddings(X_train_emb,X_test_emb,y_train_discr,y_test[i],aux=coh_aux,type='coh')
+                    y_test_pr = decoder.predict(X_test_emb)
+                    y_test_predicts.append(y_test_pr)
+            newarray = np.array(y_test_predicts)
+            if np.shape(newarray)[0] > 1:
+                majorityvote = scipy.stats.mode(newarray,axis=1) # On equal chooses 0 (no movement?)
+                ba = metrics.balanced_accuracy_score(y_test[0], majorityvote)
+            else:
+                print(y_test)
+                print(newarray)
+                ba = metrics.balanced_accuracy_score(y_test[0], newarray[0])
+            print(ba)
+        else:
+            X_test_emb = cebra_model.transform(X_test, session_id=0)
+            ### Embeddings are plotted here
+            if show_embedding:
+                plotly_embeddings(X_train_emb,X_test_emb,y_train_discr,y_test,aux=coh_aux,type='coh')
+
+            y_test_pr = decoder.predict(X_test_emb)
+            ba = metrics.balanced_accuracy_score(y_test, y_test_pr)
+            print(ba)
             # ba = metrics.balanced_accuracy_score(np.array(y_test, dtype=int), decoder.predict(X_test_emb))
 
             # cebra.plot_embedding(embedding, cmap="viridis", markersize=10, alpha=0.5, embedding_labels=y_train_cont)
@@ -554,7 +560,7 @@ for val_approach in val_approaches:
         'gaussSigma':1.5, # Set pseuodDiscr to False for this to take effect and assuming a Gaussian for the movement distribution
         'Regions': ['Cerebrospinal fluid (superior of Central sulcus)'], # Set (list of) desired regions to analyze OR leave empty if you do not want to use regions (uses best R-map as default)
         'nrchannels': [1], # Nr of channels to use in train for each region (based on own analysis for balance) OR for in combination with TimeConcat=True & R-Map, how many channels in train + test
-        'TimeConcat': False, # Set True if you want to either combine the regions in 1 embedding over time (with auxillary); or use multiple R-map channels
+        'TimeConcat': True, # Set True if you want to either combine the regions in 1 embedding over time (with auxillary); or use multiple R-map channels
         'nrtestR': 1, # In case of TimeConcat True and Regions empty --> Set how many test channels you want to use (ordered on R-map corr)
         'additional_comment': 'Cohort_auxillary',
         'debug': True # Set to True will stop saving model outputs
