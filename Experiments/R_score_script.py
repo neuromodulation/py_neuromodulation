@@ -52,8 +52,8 @@ for cohort in ch_all.keys():
                     scores = cross_val_score(model, x_concat, np.array(y_concat, dtype=int), cv=kf, scoring = bascorer)
                     performancedict[cohort][sub][channel]['ba'][features[featureidx]] = np.mean(scores)
                     performancedict[cohort][sub][channel]['95%CI'][features[featureidx]] = np.std(scores)*2
-            performancedict[cohort][sub]['explength'] = len(y_concat)
-            performancedict[cohort][sub]['movsamples'] = np.sum(y_concat)
+                performancedict[cohort][sub][channel]['explength'] = len(y_concat)
+                performancedict[cohort][sub][channel]['movsamples'] = np.sum(y_concat)
         elif cohort == 'Berlin' and sub == '014':
             for channel in list(ch_all[cohort][sub].keys())[:-1]:
                 performancedict[cohort][sub][channel] = {}
@@ -70,8 +70,8 @@ for cohort in ch_all.keys():
                     scores = cross_val_score(model, x_concat, np.array(y_concat, dtype=int), cv=kf, scoring = bascorer)
                     performancedict[cohort][sub][channel]['ba'][features[featureidx]] = np.mean(scores)
                     performancedict[cohort][sub][channel]['95%CI'][features[featureidx]] = np.std(scores)*2
-            performancedict[cohort][sub]['explength'] = len(y_concat)
-            performancedict[cohort][sub]['movsamples'] = np.sum(y_concat)
+                performancedict[cohort][sub][channel]['explength'] = len(y_concat)
+                performancedict[cohort][sub][channel]['movsamples'] = np.sum(y_concat)
         elif cohort == 'Berlin' and sub == 'EL015':
             continue
         elif cohort == 'Berlin' and sub == 'EL016':
@@ -94,8 +94,8 @@ for cohort in ch_all.keys():
                         scores = cross_val_score(model, x_concat, np.array(y_concat, dtype=int), cv=kf, scoring = bascorer)
                         performancedict[cohort][sub][channel]['ba'][features[featureidx]] = np.mean(scores)
                         performancedict[cohort][sub][channel]['95%CI'][features[featureidx]] = np.std(scores)*2
-                    performancedict[cohort][sub]['explength'] = len(y_concat)
-                    performancedict[cohort][sub]['movsamples'] = np.sum(y_concat)
+                    performancedict[cohort][sub][channel]['explength'] = len(y_concat)
+                    performancedict[cohort][sub][channel]['movsamples'] = np.sum(y_concat)
                 except:
                     del performancedict[cohort][sub][channel]
         else:
@@ -114,10 +114,10 @@ for cohort in ch_all.keys():
                     scores = cross_val_score(model, x_concat, np.array(y_concat, dtype=int), cv=kf, scoring = bascorer)
                     performancedict[cohort][sub][channel]['ba'][features[featureidx]] = np.mean(scores)
                     performancedict[cohort][sub][channel]['95%CI'][features[featureidx]] = np.std(scores)*2
-            performancedict[cohort][sub]['explength'] = len(y_concat)
-            performancedict[cohort][sub]['movsamples'] = np.sum(y_concat)
+                performancedict[cohort][sub][channel]['explength'] = len(y_concat)
+                performancedict[cohort][sub][channel]['movsamples'] = np.sum(y_concat)
 
-np.save(r'D:\Glenn\AllfeaturesPerformances.npy', performancedict)
+np.save(r'D:\Glenn\AllfeaturesPerformances_correctlength.npy', performancedict)
 
 # TODO: Leave out MedOn for subject 14 of Berlin, the run that does not have movement (due to left arm being used for rotation instead of right)
 # TODO: Leave ALL OF sub EL015 --> Also no movement in label for MedOn and MedOff

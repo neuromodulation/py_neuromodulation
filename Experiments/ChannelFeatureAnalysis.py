@@ -21,11 +21,31 @@ meanofmeans = meanperfpercohort.mean()
 # Plot and save tables
 ##### Boxplots
 # boxplot over all channels
-ax = sns.boxplot(data = df.melt(id_vars='cohort',value_vars=baonly), x = 'variable', y = 'value', hue='cohort')
+ax = sns.boxplot(data = df.melt(id_vars='cohort',value_vars=baonly, var_name=''
+                                       , value_name='balanced accuracy'), x = '', y = 'balanced accuracy', hue='cohort')
+ax.set(title='Performance of features (all channels)')
+ax.axhline(0.5,ls='--')
 # Boxplot over best channels per subject
 idxofmax = list(df.groupby('sub')['ba_combined'].idxmax())
 maxpersub = df.iloc[idxofmax][['cohort','ba_Hjorth', 'ba_Sharpwave', 'ba_fooof', 'ba_bursts','ba_fft', 'ba_combined']]
-ax = sns.boxplot(data = maxpersub.melt(id_vars='cohort',value_vars=baonly), x = 'variable', y = 'value', hue='cohort')
+ax = sns.boxplot(data = maxpersub.melt(id_vars='cohort',value_vars=baonly, var_name=''
+                                       , value_name='balanced accuracy'), x = '', y = 'balanced accuracy', hue='cohort')
+ax.set(title='Performance of features (best channel per subject)')
+ax.axhline(0.5, ls='--')
+
+# ba_combined ECOG vs LFP over best channel per subject (per cohort)
+f, axes = plt.subplots(1, 2)
+idxofmax_ECOG = list(df.groupby(['type','sub'])['ba_combined'].idxmax().T['ECOG'])
+idxofmax_LFP = list(df.groupby(['type','sub'])['ba_combined'].idxmax().T['LFP'])
+maxpersub_ECOG = df.iloc[idxofmax_ECOG][['cohort','type', 'ba_combined']]
+maxpersub_LFP = df.iloc[idxofmax_LFP][['cohort','type', 'ba_combined']]
+
+sns.boxplot(data = maxpersub_ECOG.melt(id_vars='cohort',value_vars='ba_combined', var_name='ECOG', value_name='balanced accuracy'), x = 'ECOG',
+            y = 'balanced accuracy', hue='cohort', ax=axes[0]).set(title='Best ECOG channels')
+sns.boxplot(data = maxpersub_LFP.melt(id_vars='cohort',value_vars='ba_combined', var_name='LFP', value_name='balanced accuracy'), x = 'LFP',
+            y = 'balanced accuracy', hue='cohort', ax=axes[1]).set(title='Best LFP channels')
+axes[0].set(ylim=[0.5, 1])
+axes[1].set(ylim=[0.5, 1])
 
 ##### Stats over the best performing channels (per sub)
 idxofmax = list(df.groupby('sub')['ba_combined'].idxmax())

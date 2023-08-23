@@ -356,7 +356,7 @@ curtime = datetime.now().strftime("%Y_%m_%d-%H_%M")
 experiment = "All_channels"
 longcompute = "leave_1_sub_out_across_coh"
 perflist = []
-val_approaches = ["leave_1_cohort_out"]#, "leave_1_sub_out_within_coh"]
+val_approaches = ["leave_1_cohort_out","leave_1_sub_out_across_coh"
 
 
 for val_approach in val_approaches:
@@ -379,7 +379,7 @@ for val_approach in val_approaches:
                 'pseudoDiscr': True, # Pseudodiscrete meaning direct conversion from int to float
                 'gaussSigma':1.5, # Set pseuodDiscr to False for this to take effect and assuming a Gaussian for the movement distribution
                 'additional_comment':'Cohort_auxillary',
-                'debug': True} # Debug = True; stops saving the results unnecessarily
+                'debug': False} # Debug = True; stops saving the results unnecessarily
     if not model_params['debug']:
         writer = SummaryWriter(log_dir=f"D:\Glenn\CEBRA_logs\{val_approach}\{curtime}")
 
@@ -435,6 +435,8 @@ for val_approach in val_approaches:
 #   5. -Train: Single-session with all (or most) channels sorted in feature dimension on their correlation to the R-map (Might provide some structure for the model to expect)
 # TODO: Test different model architectures (with 2dConv to integrate info over the channels?)
 # TODO: Include more features
+#       And also look into combining 1 ECOG and 1 LFP channel (Assuming LFP signals are similar to eachother, would not mess with ordering)
+# TODO: Test multichannel concat over feature axis.
 # TODO: Hyperparameter search
 # TODO: Look into performance difference treating as single session vs TRUE multisession (+ combining embeddings)
 
