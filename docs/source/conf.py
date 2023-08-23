@@ -52,9 +52,14 @@ source_suffix = ['.rst', '.md', ]
 
 autosummary_generate = True
 
+
 sphinx_gallery_conf = {
     "examples_dirs": "../../examples",
     "gallery_dirs": "auto_examples",
+    'plot_gallery': 'True',  # Avoid annoying Unicode/bool default warning
+    'thumbnail_size': (160, 112),
+    'image_scrapers': ("matplotlib", ),
+    'show_memory': True,
 }
 
 templates_path = ["_templates"]
@@ -64,6 +69,15 @@ exclude_patterns = []
 html_theme = "pydata_sphinx_theme"
 html_static_path = ['_static']
 
+html_theme_options = {
+    "icon_links": [
+        dict(
+            name="GitHub",
+            url="https://github.com/neuromodulation/py_neuromodulation",
+            icon="fa-brands fa-square-github",
+        )
+    ],
+}
 
 # -- Intersphinx configuration -----------------------------------------------
 

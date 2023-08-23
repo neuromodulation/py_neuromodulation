@@ -29,3 +29,4 @@ seaborn
 notebook
 ipython
 pypandoc
+memory_profiler

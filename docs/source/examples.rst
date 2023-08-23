@@ -11,4 +11,5 @@ Examples
    auto_examples/plot_example_gridPointProjection
    auto_examples/plot_real_time_demo
    auto_examples/plot_example_add_feature
+   auto_examples/plot_example_rmap_computing
 
