@@ -26,7 +26,7 @@ def raw_data_generator(
     offset_start = np.ceil(offset_time / 1000 * sfreq).astype(int)
 
     cnt_fsnew = 0
-    for cnt in range(data.shape[1]):
+    for cnt in range(data.shape[1]+1):  # shape + 1 guarantees that the last sample is also included
         if cnt < offset_start:
             cnt_fsnew += 1
             continue

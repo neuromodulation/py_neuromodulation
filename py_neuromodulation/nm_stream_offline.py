@@ -89,7 +89,11 @@ class _OfflineStream(nm_stream_abc.PNStream):
         )
         features = []
         sample_add = int(self.sfreq / self.run_analysis.sfreq_features)
-        cnt_samples = int(self.sfreq)
+
+        offset_time = self.settings["segment_length_features_ms"]
+        offset_start = np.ceil(offset_time / 1000 * self.sfreq).astype(int)
+
+        cnt_samples = offset_start
 
         while True:
             data_batch = next(generator, None)
