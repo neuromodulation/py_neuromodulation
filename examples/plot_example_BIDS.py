@@ -16,8 +16,9 @@ ECoG Movement decoding example
 # [iEEG BIDS](https://www.nature.com/articles/s41597-019-0105-7) format.
 #
 # .. note::
-# In order to run this example you either have to clone the repository from the `github page <https://github.com/neuromodulation/py_neuromodulation/tree/main/examples/data>`_,
-# or download the respective BIDS example subject folder, which will be referenced below.
+#
+#   In order to run this example you either have to clone the repository from the `github page <https://github.com/neuromodulation/py_neuromodulation/tree/main/examples/data>`_,
+#   or download the respective BIDS example subject folder, which will be referenced below.
 
 
 # %%

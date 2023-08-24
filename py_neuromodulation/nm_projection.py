@@ -130,6 +130,7 @@ class Projection:
         coord_array: np.ndarray,
     ) -> np.ndarray:
         """Calculate projection matrix."""
+
         channels = coord_array.shape[0]
         distance_matrix = np.zeros([grid.shape[1], channels])
 
@@ -155,13 +156,13 @@ class Projection:
         return proj_matrix
 
     def calc_projection_matrix(self) -> np.ndarray:
-        """Calculates a projection matrix based on the used coordiniate arrays
+        """Calculates a projection matrix based on the used coordinate arrays
         Returns
         -------
         proj_matrix_cortex (np.array)
             cortical projection_matrix in shape [grid contacts, channel contact] defaults to None
         proj_matrix_subcortex (np.array)
-            subcortical rojection_matrix in shape [grid contacts, channel contact] defaults to None
+            subcortical projection_matrix in shape [grid contacts, channel contact] defaults to None
         """
 
         proj_matrix_run = np.empty(2, dtype=object)

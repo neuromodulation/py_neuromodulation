@@ -22,7 +22,6 @@ R-Map computation
 # 
 # 
 # .. image:: RMAP_figure.png
-#    :target: RMAP_figure.png
 #    :alt: R-Map and grid point approach for decoding without patient-individual training
 # 
 # 

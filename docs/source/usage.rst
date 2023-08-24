@@ -491,7 +491,7 @@ MNE-connectivity
        "mode": "multitaper"
    }
 
-MNE-connectivity
+MNE Connectivity 
 ~~~~~~~~~~~~~~~~
 
 **linelength** is a very simple features that calculates in the specified bath the sum of the absolute signal of a channel *x*:

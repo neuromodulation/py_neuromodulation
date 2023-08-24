@@ -142,11 +142,11 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
         Parameters
         ----------
         data (np.ndarray): 2d data array with shape [num_channels, samples]
-        features_ (dict): Features.py estimated features
+        features_compute (dict): Features.py estimated features
 
         Returns
         -------
-        features_ (dict): set features for Features.py object
+        features_compute (dict): set features for Features.py object
         """
         for ch_idx, ch_name in enumerate(self.ch_names):
             for filter_name, filter in self.list_filter:

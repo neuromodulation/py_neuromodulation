@@ -40,14 +40,14 @@ def zscore(data):
     return (data - data.mean()) / data.std()
 
 
-def permutationTestSpearmansRho(x, y, plot_=True, x_unit=None, p=5000):
+def permutationTestSpearmansRho(x, y, plot_distr=True, x_unit=None, p=5000):
     """
     Calculate permutation test for multiple repetitions of Spearmans Rho
     https://towardsdatascience.com/how-to-assess-statistical-significance-in-your-data-with-permutation-tests-8bb925b2113d
 
     x (np array) : first distibution e.g. R^2
     y (np array) : second distribution e.g. UPDRS
-    plot_ (boolean) : if True: permutation histplot and ground truth will be
+    plot_distr (boolean) : if True: permutation histplot and ground truth will be
     plotted
     x_unit (str) : histplot xlabel
     p (int): number of permutations
@@ -80,7 +80,7 @@ def permutationTestSpearmansRho(x, y, plot_=True, x_unit=None, p=5000):
     else:
         p_val = len(np.where(pD >= gT)[0])/p
 
-    if plot_ is True:
+    if plot_distr is True:
         plt.hist(pD, bins=30, label="permutation results")
         plt.axvline(gT, color="orange", label="ground truth")
         plt.title("ground truth " + x_unit + "="+str(gT) + " p=" + str(p_val))
@@ -90,14 +90,14 @@ def permutationTestSpearmansRho(x, y, plot_=True, x_unit=None, p=5000):
     return gT, p_val
 
 
-def permutationTest(x, y, plot_=True, x_unit=None, p=5000):
+def permutationTest(x, y, plot_distr=True, x_unit=None, p=5000):
     """
     Calculate permutation test
     https://towardsdatascience.com/how-to-assess-statistical-significance-in-your-data-with-permutation-tests-8bb925b2113d
 
     x (np array) : first distr.
     y (np array) : first distr.
-    plot_ (boolean) : if True: plot permutation histplot and ground truth
+    plot_distr (boolean) : if True: plot permutation histplot and ground truth
     x_unit (str) : histplot xlabel
     p (int): number of permutations
 
@@ -129,7 +129,7 @@ def permutationTest(x, y, plot_=True, x_unit=None, p=5000):
     else:
         p_val = len(np.where(pD >= gT)[0])/p
 
-    if plot_ is True:
+    if plot_distr is True:
         plt.hist(pD, bins=30, label="permutation results")
         plt.axvline(gT, color="orange", label="ground truth")
         plt.title("ground truth "+x_unit+"="+str(gT)+" p="+str(p_val))
@@ -139,14 +139,14 @@ def permutationTest(x, y, plot_=True, x_unit=None, p=5000):
     return gT, p_val
 
 
-def permutationTest_relative(x, y, plot_=True, x_unit=None, p=5000):
+def permutationTest_relative(x, y, plot_distr=True, x_unit=None, p=5000):
     """
     Calculate permutation test
     https://towardsdatascience.com/how-to-assess-statistical-significance-in-your-data-with-permutation-tests-8bb925b2113d
 
     x (np array) : first distr.
     y (np array) : first distr.
-    plot_ (boolean) : if True: plot permutation histplot and ground truth
+    plot_distr (boolean) : if True: plot permutation histplot and ground truth
     x_unit (str) : histplot xlabel
     p (int): number of permutations
 
@@ -172,7 +172,7 @@ def permutationTest_relative(x, y, plot_=True, x_unit=None, p=5000):
     else:
         p_val = len(np.where(pD >= gT)[0])/p
 
-    if plot_ is True:
+    if plot_distr is True:
         plt.hist(pD, bins=30, label="permutation results")
         plt.axvline(gT, color="orange", label="ground truth")
         plt.title("ground truth "+x_unit+"="+str(gT)+" p="+str(p_val))
