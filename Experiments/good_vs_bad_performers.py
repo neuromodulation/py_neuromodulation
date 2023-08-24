@@ -5,14 +5,15 @@ from sklearn import tree
 import os
 import matplotlib.pyplot as plt
 
+############ LOAD in the data ##################
 df = pd.read_csv(r"D:\Glenn\df_all_features.csv")
 
 ch_all = np.load(
     os.path.join(r"D:\Glenn", "channel_all.npy"),
     allow_pickle="TRUE",
 ).item()
-# For looking into Berlin 001 (removing the 1 fooof)
-features = ['raw','Hjorth','Sharpwave', 'fooof', 'bursts','fft', 'combined']
+############# Specify features to create the feature indexlist to exclude the fooof knee from analysis ################
+features = ['Hjorth','raw','fft','Sharpwave', 'fooof', 'bursts', 'combined']
 performances = []
 featuredim = ch_all['Berlin']['002']['ECOG_L_1_SMC_AT-avgref']['sub-002_ses-EcogLfpMedOff01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg']['feature_names']
 featuredim001 = ch_all['Berlin']['001']['ECOG_L_1_2_SMC_AT-avgref']['sub-001_ses-EcogLfpMedOn01_task-SelfpacedForceWheel_acq-StimOff_run-01_ieeg']['feature_names']
@@ -23,11 +24,11 @@ for i in range(len(features)-1):
     idxlist.append(idx_i)
 # Add the combined feature idx list (and one for special case subject 001 Berlin
 idxlist_Berlin_001 = idxlist.copy()
-idxlist_Berlin_001[3] = np.add(idxlist_Berlin_001[3],1)
+idxlist_Berlin_001[5] = np.add(idxlist_Berlin_001[5],1)
 idxlist.append(np.concatenate(idxlist))
 idxlist_Berlin_001.append(np.concatenate(idxlist_Berlin_001))
 
-
+################### Find the best channel per subject ##################################
 idxofmax = list(df.groupby('sub')['ba_combined'].idxmax())
 cohsubchmax = df.iloc[idxofmax][['cohort','sub','ch']]
 ba_combined = df.iloc[idxofmax]['ba_combined']
@@ -48,7 +49,7 @@ for i in range(len(cohsubchmax)):
     best_ch.append(x_concat)
     targets.append(y_concat)
 
-### First part: Get the bottom x percent and the top x percent performers (best channel)
+#####################  Get the bottom x percent and the top x percent subjects from Berlin #####################
 Berlindata = [best_ch[i] for i in np.where(cohsubchmax['cohort'].values == 'Berlin')[0]]
 Berlintargets = [targets[i] for i in np.where(cohsubchmax['cohort'].values == 'Berlin')[0]]
 Berlinba = list(ba_combined.iloc[np.where(cohsubchmax['cohort'].values == 'Berlin')[0]])
@@ -59,36 +60,49 @@ Berlinhigh = [Berlindata[i] for i in np.where(Berlinba>=highperf)[0]]
 targlow = [Berlintargets[i] for i in np.where(Berlinba<=lowperf)[0]]
 targhigh = [Berlintargets[i] for i in np.where(Berlinba>=highperf)[0]]
 
-# Look into stats --> Means, variance etc. Recording length, # movements. ALSO LOCATION (are the top performers maybe in a different location)
+###################### Analyze the movement information for differences ####################
 nrmovlow = [np.sum(i) for i in targlow]
 nrmovhigh = [np.sum(i) for i in targhigh]
+nrrestlow = [len(targlow[i])-nrmovlow[i] for i in range(len(targlow))]
+nrresthigh = [len(targhigh[i])-nrmovhigh[i] for i in range(len(targhigh))]
+
 # Boxplot of the number of movements for best and worst performing subjects
-plt.boxplot([nrmovhigh,nrmovlow])
+plt.boxplot([nrmovlow,nrmovhigh])
+plt.show()
+
+plt.boxplot([nrrestlow,nrresthigh])
 plt.show()
 
 meanmovlenlow = []
+nrdiscrmovlow = []
 stdmovlenlow = []
 for i in range(len(targlow)):
     m = targlow[i] != (np.r_[np.nan, targlow[i][:-1]])
     _, c = np.unique(m.cumsum(), return_index=True)
     out = np.diff(np.r_[c, len(targlow[i])])
+    nrdiscrmovlow.append(len(c))
     meanmovlenlow.append(np.mean(out))
     stdmovlenlow.append(np.std(out))
+nrdiscrmovhigh = []
 meanmovlenhigh = []
 stdmovlenhigh = []
 for i in range(len(targhigh)):
     m = targhigh[i] != (np.r_[np.nan, targhigh[i][:-1]])
     _, c = np.unique(m.cumsum(), return_index=True)
+    nrdiscrmovhigh.append(len(c))
     out = np.diff(np.r_[c, len(targhigh[i])])
     meanmovlenhigh.append(np.mean(out))
     stdmovlenhigh.append(np.std(out))
 # Boxplot of the mean movement lengths of best and lowest subjects + standard deviation in movement length (might be proxy for EMG quality)
-plt.boxplot([meanmovlenhigh,meanmovlenlow])
+plt.boxplot([nrdiscrmovlow,nrdiscrmovhigh])
 plt.show()
-plt.boxplot([stdmovlenhigh,stdmovlenlow])
+plt.boxplot([meanmovlenlow,meanmovlenhigh])
+plt.show()
+plt.boxplot([stdmovlenlow,stdmovlenhigh])
 plt.show()
 
-# Variation in recording signal
+################## Analysis of features differences (mean, std over all time / during movement & during rest) ###########################
+# All time
 stdperfeatlow = []
 meanperfeatlow = []
 for i in range(len(Berlinlow)):
@@ -113,7 +127,6 @@ for i in range(len(stdperfeathigh[0])):
     plt.title(f'{featuredim[i]}')
     plt.suptitle('Mean of features of low vs high performers')
 
-# Analyze feature values (and variance) separately for movement and rest
 # Variation in recording signal during movement
 stdperfeatlow = []
 meanperfeatlow = []
@@ -138,6 +151,7 @@ for i in range(len(stdperfeathigh[0])):
     plt.boxplot([[item[i] for item in meanperfeatlow],[item[i] for item in meanperfeathigh]])
     plt.title(f'{featuredim[i]}')
     plt.suptitle('Mean of features during movement of low vs high performers')
+
 # Variation in recording signal during rest
 stdperfeatlow = []
 meanperfeatlow = []
@@ -164,7 +178,7 @@ for i in range(len(stdperfeathigh[0])):
     plt.suptitle('Mean of features during rest of low vs high performers')
 
 
-# Compare their movement related features --> Mean feature profile around movement --> Prob most helpful
+################### Compare their movement related features --> Mean feature profile around movement ################
 
 
 ### Second part: Train a model to predict performance output (all best channels) and check what features it looks for (if the model works)
@@ -176,3 +190,5 @@ tree.fit(best_ch,ba_combined)
 # --> This seems to correlate to UPDRS
 
 # TODO: Potentially use an interpretable RNN to see what features predict the balanced accuracy score of a channel
+
+# TODO: Different between movement and rest feature values per subject --> See Cohort effect

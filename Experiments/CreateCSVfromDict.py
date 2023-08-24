@@ -5,7 +5,7 @@ import sys
 
 # import the data
 ch_all = np.load(
-    os.path.join(r"D:\Glenn", "AllfeaturesPerformances.npy"),
+    os.path.join(r"D:\Glenn", "AllfeaturesPerformances_correctlength.npy"),
     allow_pickle="TRUE",
 ).item()
 
@@ -30,12 +30,12 @@ for cohort in ch_all.keys():
                     rowlist.append('ECOG')
                 else:
                     rowlist.append('LFP')
-                for metric in ch_all[cohort][sub][channel].keys():
+                for metric in list(ch_all[cohort][sub][channel].keys())[:-2]:
                     for features in ch_all[cohort][sub][channel][metric].keys():
                         rowlist.append(ch_all[cohort][sub][channel][metric][features])
                 # Write the channel
-                rowlist.append(ch_all[cohort][sub]['explength'])
-                rowlist.append(ch_all[cohort][sub]['movsamples'])
+                rowlist.append(ch_all[cohort][sub][channel]['explength'])
+                rowlist.append(ch_all[cohort][sub][channel]['movsamples'])
                 w.writerow(rowlist)
 
 f.close()

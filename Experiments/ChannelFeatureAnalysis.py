@@ -47,6 +47,14 @@ sns.boxplot(data = maxpersub_LFP.melt(id_vars='cohort',value_vars='ba_combined',
 axes[0].set(ylim=[0.5, 1])
 axes[1].set(ylim=[0.5, 1])
 
+# Pie chart of ECOG vs LFP best performers
+idxofmax = list(df.groupby('sub')['ba_combined'].idxmax())
+total = len(idxofmax)
+def formatter(x):
+    return f"{total*x/100:.0f} ({x:.2f})%"
+typeofmax = df.iloc[idxofmax]['type'].value_counts().plot(kind='pie',autopct=formatter)
+typeofmax.set(title='Type of the best performing channel')
+
 ##### Stats over the best performing channels (per sub)
 idxofmax = list(df.groupby('sub')['ba_combined'].idxmax())
 maxpersub = df.iloc[idxofmax][baonly]

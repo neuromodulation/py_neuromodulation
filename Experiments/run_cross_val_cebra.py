@@ -356,7 +356,7 @@ curtime = datetime.now().strftime("%Y_%m_%d-%H_%M")
 experiment = "All_channels"
 longcompute = "leave_1_sub_out_across_coh"
 perflist = []
-val_approaches = ["leave_1_cohort_out","leave_1_sub_out_across_coh"
+val_approaches = ["leave_1_cohort_out","leave_1_sub_out_across_coh"]
 
 
 for val_approach in val_approaches:
