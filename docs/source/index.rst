@@ -4,11 +4,10 @@
 Welcome to py_neuromodulation's documentation!
 ==============================================
 
-The py_neuromodulation toolbox allows for real time capable feature estimation of invasive electrophysiological data.
-Have a look at the :ref:`installation`, :ref:`usage` and :ref:`examples`.
+The *py_neuromodulation* toolbox allows for real time capable feature estimation of invasive electrophysiological data.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Contents
 
    installation
@@ -21,12 +20,12 @@ Why py_neuromodulation?
 
 Analyzing neural data can be a troublesome, trial and error prone,
 and beginner unfriendly process. *py_neuromodulation* allows using a simple
-interface for extraction of established features and includes common applied pre -and postprocessing methods.
+interface for extraction of established features and includes commonly applied pre -and postprocessing methods.
 
 Basically only **time series data** with a corresponding **sampling frequency** are required.
 
 The output will be a pandas DataFrame including different time-resolved computed features. Internally a **stream** get's initialized,
-which resembles an *online* data-stream that can in theory also be be used with a hardware acquisition system.
+which simulates an *online* data-stream that can also be be used for real-time analysis.
 
 The following features are currently included:
 
@@ -44,7 +43,7 @@ How can those features be used?
 -------------------------------
 
 The original intention for writing this toolbox was movement decoding from invasive brain signals [1]_.
-The application however could be any neural decoding problem.
+The application however could be any neural decoding and analysis problem.
 *py_neuromodulation* offers wrappers around common practice machine learning methods for efficient analysis.
 
 References

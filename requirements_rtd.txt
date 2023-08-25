@@ -30,3 +30,4 @@ notebook
 ipython
 pypandoc
 memory_profiler
+sphinx_togglebutton

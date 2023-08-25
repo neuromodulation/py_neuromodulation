@@ -21,7 +21,7 @@ R-Map computation
 # The approach was also explained in the :ref:`/auto_examples/plot_example_gridPointProjection.rst` notebook.
 # 
 # 
-# .. image:: RMAP_figure.png
+# .. image:: ../_static/RMAP_figure.png
 #    :alt: R-Map and grid point approach for decoding without patient-individual training
 # 
 # 

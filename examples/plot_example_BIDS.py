@@ -20,6 +20,7 @@ ECoG Movement decoding example
 #   In order to run this example you either have to clone the repository from the `github page <https://github.com/neuromodulation/py_neuromodulation/tree/main/examples/data>`_,
 #   or download the respective BIDS example subject folder, which will be referenced below.
 
+# sphinx_gallery_thumbnail_path = '_static/RMAP_figure.png'
 
 # %%
 from sklearn import metrics, model_selection, linear_model

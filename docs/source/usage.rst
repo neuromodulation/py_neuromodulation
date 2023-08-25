@@ -1,17 +1,18 @@
 Usage
 =====
 
-We will here explain the basic usage of py_neuromodulation. Also check out the :doc:`examples <examples>`.
+
+We will explain here the basic usage of py_neuromodulation. Check out the :doc:`examples <examples>` for directly following along.
 
 In general only a time series is required with a specified sampling frequency.
 
 Here is the definition of a minimalistic example:
 
 .. code-block:: python
-    
+
     import py_neuromodulation as pn
     import numpy as np
-    
+
     NUM_CHANNELS = 5
     NUM_DATA = 10000
     sfreq = 1000  # Hz
@@ -23,16 +24,16 @@ Here is the definition of a minimalistic example:
     features = stream.run()
 
 `features` will be a dictionary containing the computed features for each channel. In this example the default signal processing pipeline is estimated.
-An offline data-stream was initialized with raw data being common-average re-referenced, FFT, bursting features and temporal waveform shape computed. 
+An offline data-stream was initialized with raw data being common-average re-referenced. FFT, bursting features and temporal waveform-shape were computed.
 Features were calculated with a *sampling_rate_features_hz* of 3 Hz and subsequently *z-score* normalized.
 
-We can however further define channel-specific parametrization such as re-referencing, channel selection, target definition, 
+We can however further define channel-specific parametrization such as re-referencing, channel selection, target definition,
 and also select and define additional features.
 
 Check out the example :ref:`/auto_examples/plot_first_demo.rst` for a first introduction.
 
-The following sections discuss additional parametrization. In a nutshell, the a **settings** dictionary and a **channels** dataframe is used for parametrization.
-The above example implicitly used the default settings and channels. However, we can also define our own settings and channels:
+The following sections discuss additional parametrization. In a nutshell, the **settings** dictionary and a **channels** dataframe are used for parametrization.
+The above example implicitly used the default settings and channels. However, we can also define directly specific settings and channels:
 
 .. code-block:: python
 
@@ -49,61 +50,88 @@ The channel parametrization is defined in a :class:`~pandas.DataFrame`. The foll
 +-----------------------------------+----------------------------------------+
 | Column name                       | Description                            |
 +===================================+========================================+
-| **name**                          | name of the channel                    |
+| **name** (string)                 | name of the channel                    |
 +-----------------------------------+----------------------------------------+
-| **rereference**                   | different channel name for             |
+| **rereference** (string)          | different channel name for             |
 |                                   | bipolar rereferencing, or              |
-|                                   | avereage for commono average           |
-|                                   | rereferencing                          |
+|                                   | *average* for common average           |
+|                                   | re-referencing                         |
 +-----------------------------------+----------------------------------------+
-| **used**                          | 0 or 1, channel selection              |
+| **used** (int)                    | 0 or 1, channel selection              |
 +-----------------------------------+----------------------------------------+
-| **target**                        | 0 or 1, for some decoding              |
+| **target** (int)                  | 0 or 1, for some decoding              |
 |                                   | applications we can define target      |
-|                                   | chanenls, e.g. EMG channels            |
+|                                   | chanenls, e.g. EMG channels.           |
+|                                   | Target channels are not used for       |
+|                                   | feature computation.                   |
 +-----------------------------------+----------------------------------------+
-| **type**                          | `mne-python`_ supported channel types  |
+| **type** (string)                 | `mne-python`_ supported channel types  |
 |                                   | e.g. ecog, eeg, ecg, emg, dbs,         |
 |                                   | seeg etc.                              |
 +-----------------------------------+----------------------------------------+
-| **status**                        | good or bad, used for channel          |
+| **status** (string)               | *good* or *bad*, used for channel      |
 |                                   | quality indication                     |
 +-----------------------------------+----------------------------------------+
-| **new_name**                      | this keyword can be specified to       |
-|                                   | indicate for example the used          |
-|                                   | rereferncing scheme                    |
+| **new_name** (string)             | this keyword can be specified to       |
+|                                   | indicate the used                      |
+|                                   | re-referncing scheme                   |
 +-----------------------------------+----------------------------------------+
 
 .. _mne-python: https://mne.tools/stable/glossary.html#term-data-channels
 
-In the example above default channel and feature parametrization was enabled.
-The **nm_channels** can either created as a *.tsv* text file, or as a pandas dataframe.
-There are some helper function that let you create the nm_channels without much effort:
+
+**rereferencing** constitutes an important aspect of electrophysiological signal processing. 
+Most commonly bipolar and common average re-referencing are applied for separate channel modalities. 
+The following possible parametrization option are available:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Rereference Type
+     - Description
+     - Example
+   * - average
+     - common average rereference (across a channel type, e.g. ecog or eeg)
+     - *average*
+   * - bipolar
+     - bipolar rereferencing, specified by the channel name to rereference to
+     - *LFP_RIGHT_0*
+   * - *combination*
+     - combination of different channels separated by "&"
+     - *LFP_RIGHT_0&LFP_RIGHT_1*
+   * - none
+     - no rereferencing being used for the particular channel
+     - *none*
+
+The **nm_channels** can either be created as a *.tsv* file, or as a pandas DataFrame.
+There are some helper functions that let you create the nm_channels without much effort:
 
 .. code-block:: python
 
     nm_channels = nm_define_nmchannels.get_default_channels_from_data(data, car_rereferencing=True)
 
+When setting up the :class:`~nm_stream_abc`, `nm_settings` and `nm_channels` can also be defined and passed to the init function:
 
-When setting up the :class:`~py_neuromodulation.`, `nm_settings` and `nm_channels` can further be defined and passed to initialize the stream object:
+.. code-block:: python
 
+    import py_neuromodulation as nm
+    
+    stream = nm.Stream(
+        sfreq=sfreq,
+        nm_channels=nm_channels,
+        settings=settings,
+    )
 
+Setting definition
+------------------
 
+The *nm_settings* allow for parametrization of all features. Default settings are passed from the `nm_settings.json` file:
 
+.. toggle::
 
-In order to estimate multimodal features of neurophysiological data, certain parametrization steps are required. 
-Here the following two parametrization files are explained: 
-
-
-* ``nm_settings.json``
-* ``nm_channels.csv``
-
-..
-    .. pyodide::
-       import panel
-       settings = {"key1" : 5, "key2" : 45}
-       settings_panel = panel.pane.JSON(settings, name="JSON")
-       settings_panel
+    .. literalinclude:: ../../py_neuromodulation/nm_settings.json
+        :language: json
+ 
 
 Preprocessing
 ^^^^^^^^^^^^^
@@ -122,7 +150,7 @@ The following preprocessing options can be written in the *preprocessing* field,
 Resampling
 ~~~~~~~~~~
 
-**raw_resampling** defines a resampling rate to which the original data is downsampled to. This can be of advantage, since high sampling frequencies automatically require usually more computational cost. In the method specific settings the resampling frequency can be defined: 
+**raw_resampling** defines a resampling rate to which the original data is downsampled to. This can be of advantage, since high sampling frequencies automatically require usually more computational cost. In the method specific settings the resampling frequency can be defined:
 
 .. code-block:: json
 
@@ -133,38 +161,12 @@ Resampling
 Notch Filtering
 ~~~~~~~~~~~~~~~
 
-**notch_filer** is a simple setting that filters at the specified *line_noise* frequency supplied to the *Stream* class.
-
-Rereferencing
-~~~~~~~~~~~~~
-
-**rereferencing** constitutes an important aspect of electrophysiological signal processing. Most commonly bipolar and common average rereferencing are applied for separate channel modalities. The channel specific *rereferencing* is specified in the  *nm_channels* dataframe in the *rereference* column, with the following possible combinations:
-
-.. list-table::
-   :header-rows: 1
-
-   * - Rereference Type
-     - Description
-     - Example
-   * - average
-     - common average rereference (across a channel type, e.g. ecog or eeg)
-     - *average*
-   * - bipolar
-     - bipolar rereferencing, by specifying the channel name to rereference to
-     - *LFP_RIGHT_0*
-   * - combination
-     - combination of different channels separated by "&" can also be used
-     - *LFP_RIGHT_0&LFP_RIGHT_1*
-   * - none
-     - no rereferencing being used for this particular channel
-     - *none*
-
+**notch_filer** can be enabled with the *line_noise* frequency supplied as a init parameter to :class:`~nm_stream_abc`.
 
 Normalization
 ~~~~~~~~~~~~~
 
-**normalization** allows for normalizing the past *normalization_time* according to the following options:
-
+**normalization** allows for normalizing the past *normalization_time * in seconds according to the following options:
 
 * mean
 * median
@@ -177,8 +179,7 @@ Normalization
 
 The latter four options are obtained via wrappers around the `scikit-learn preprocessing <https://scikit-learn.org/stable/modules/classes.html#module-sklearn.preprocessing>`_ modules.
 
-*zscore-median* is implemented using the following equation:
-$X_{norm} = \frac{X - median(X)}{median(X)}$
+*zscore-median* is implemented using the following equation: :math:`X_{norm} = \frac{X - median(X)}{median(X)}`
 
 The *normalization_time* allows to specify a **past** time window that will be used for normalization. The setting specification for *raw* and *feature* normalization is specified in the same manner:
 
@@ -192,11 +193,11 @@ The *normalization_time* allows to specify a **past** time window that will be u
 Features
 ^^^^^^^^
 
-Features can be enabled and disabled using the *features* key: 
+Features can be enabled and disabled using the *features* key:
 
 .. code-block:: json
 
-   "features": 
+   "features":
    {
            "fft": true,
            "stft": true,
@@ -212,13 +213,14 @@ Features can be enabled and disabled using the *features* key:
            "mne_connectivity": true
    }
 
-Oscillatory Features
+Oscillatory features
 ~~~~~~~~~~~~~~~~~~~~
 
-Frequency Band specification
+Frequency band specification
 """"""""""""""""""""""""""""
 
-Frequency bands are specified in the settings within a dictionary of frequency band names and a list of lower and upper band ranges. The supplied frequency ranges can be utilized by different feature modalities, e.g. fft, coherence, sharpwave etc.
+Frequency bands are specified in the settings within a dictionary of frequency band names and a list of lower and upper band ranges.
+The supplied frequency ranges can be utilized by different feature modalities, e.g. fft, coherence, sharpwave etc.
 
 .. code-block:: json
 
@@ -250,13 +252,16 @@ Fast Fourier Transform and Short-Time Fourier Transform are both specified using
 Kalman filtering
 """"""""""""""""
 
-**kalman_filter** can be enabled for all oscillatory features and is motivated by filtering estimated band power features using the white noise acceleration model (see `"Improved detection of Parkinsonian resting tremor with feature engineering and Kalman filtering" <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6927801/>`_ Yao et al 19) for a great reference. The white noise acceleration model get's specified by the :math:`T_p` prediction interval (Hz), and the process noise is then defined by :math:`\sigma_w` and :math:`\sigma_v`: 
+**kalman_filter** can be enabled for all oscillatory features and is motivated by filtering estimated band power features
+using the white noise acceleration model 
+(see `"Improved detection of Parkinsonian resting tremor with feature engineering and Kalman filtering" <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6927801/>`_ Yao et al 19).
+The white noise acceleration model get's specified by the :math:`T_p` prediction interval (Hz), and the process noise is then defined by :math:`\sigma_w` and :math:`\sigma_v`:
 
 .. math::
 
   Q = \begin{bmatrix} \sigma_w^2 \frac{T_p^{3}}{3} & \sigma_w^2 \frac{T_p^2}{2}\\
      \sigma_w^2 \frac{T_p^2}{3} & \sigma_w^2T_p\ \end{bmatrix}
-    
+
 
 
 The settings can be specified as follows:
@@ -274,12 +279,13 @@ The settings can be specified as follows:
            ]
        }
 
-Individual frequency bands (specified in the *frequency_ranges_hz*\ ) can be selected for Kalman Filtering (see `Chisci et al '10 <https://pubmed.ncbi.nlm.nih.gov/20172805/>`_ for an example). 
+Individual frequency bands (specified in the *frequency_ranges_hz*\ ) can be selected for Kalman Filtering (see `Chisci et al 2010 <https://pubmed.ncbi.nlm.nih.gov/20172805/>`_ for an example).
 
 Bandpass filter
 """""""""""""""
 
-**bandpass_filter** enables band power feature estimation through precomputation of a FIR filter using the `mne.filter.create_filter <https://mne.tools/dev/generated/mne.filter.create_filter.html>`_ function.
+**bandpass_filter** enables band power feature estimation through precomputation of a FIR filter 
+using the `mne.filter.create_filter <https://mne.tools/dev/generated/mne.filter.create_filter.html>`_ function.
 
 .. code-block:: json
 
@@ -302,84 +308,104 @@ Bandpass filter
        "kalman_filter": false
    }
 
-The *segment_length_ms* parameter defines a time range in which FIR filtered data is used for feature estimation. In this example, for the theta frequency band the previous 1000 ms are used to estimate features based on the FIR filtered signal. This might be beneficial when using shorter frequency bands, e.g. gamma, where estimating band power in a range of e.g. 100 ms might result in a temporal more specified feature calculation. 
-A common way to estimate band power is to take the variance of FIR filtered data. This is equavilent to the activity `Hjorth <https://en.wikipedia.org/wiki/Hjorth_parameters>`_ parameter. The Hjorth parameter *activity*\ , *mobility* and *complexity* can be computed on bandpass filtered data as well. For estimating all Hjorth parameters of the raw unfiltered signal, the **raw_hjorth** method can be enabled. 
+The *segment_length_ms* parameter defines a time range in which FIR filtered data is used for feature estimation.
+In this example for the theta frequency band the previous 1000 ms are used to estimate features based
+on the FIR filtered signal. This might be beneficial when using shorter frequency bands, e.g. gamma, 
+where estimating band power in a range of e.g. 100 ms might result in a temporal more specific feature calculation.
+A common way to estimate band power is to take the variance of FIR filtered data. This is equivalent to
+the activity `Hjorth <https://en.wikipedia.org/wiki/Hjorth_parameters>`_ parameter.
+The Hjorth parameters *activity*\ , *mobility* and *complexity* can be computed on bandpass filtered data as well.
+For estimating all Hjorth parameters of the raw unfiltered signal, **raw_hjorth** can be enabled.
 
 Analyzing temporal waveform shape
 """""""""""""""""""""""""""""""""
 
-**sharpwave_analysis** allows for calculation of temporal sharpwave features. See `"Brain Oscillations and the Importance of Waveform Shape" <https://www.sciencedirect.com/science/article/abs/pii/S1364661316302182>`_ Cole et al 17 for a great motivation to use these features. Here, sharpwave features are estimated using a prior bandpass filter  between within the *filter_low_cutoff* and *filter_high_cutoff* ranges. The sharpwave peak and trough features can be calculated, defined by the *estimate* key. According to a current data batch one or more temporal waveform events can be detected. The subsequent feature is returned rather by the *mean, median, maximum, minimum or variance* as defined by the *estimator*. 
+**sharpwave_analysis** allows for calculation of temporal waveform features. 
+See `"Brain Oscillations and the Importance of Waveform Shape" <https://www.sciencedirect.com/science/article/abs/pii/S1364661316302182>`_
+Cole et al 17 for a great motivation to use these features. Here, sharpwave features are estimated using a prior bandpass filter 
+between the *filter_low_cutoff* and *filter_high_cutoff* ranges.
+The sharpwave peak and trough features can be calculated, defined by the *estimate* key.
+According to a current data batch one or more temporal waveform events
+can be detected. The subsequent feature is returned as the *mean, median, maximum, minimum* or *variance*
+of all events in the feature computation batch, defined by the *estimator*.
+For further introduction see the example notebook :ref:`/auto_examples/plot_example_sharpwave_analysis.rst`.
 
-.. code-block:: json
+Here the full parametrization in the *nm_settings*:
 
-   "sharpwave_analysis_settings": {
-       "sharpwave_features": {
-           "peak_left": false,
-           "peak_right": false,
-           "trough": false,
-           "width": false,
-           "prominence": true,
-           "interval": true,
-           "decay_time": false,
-           "rise_time": false,
-           "sharpness": true,
-           "rise_steepness": false,
-           "decay_steepness": false,
-           "slope_ratio": false
-       },
-       "filter_ranges_hz": [
-           [
-               5,
-               80
-           ],
-           [
-               5,
-               30
-           ]
-       ],
-       "detect_troughs": {
-           "estimate": true,
-           "distance_troughs_ms": 10,
-           "distance_peaks_ms": 5
-       },
-       "detect_peaks": {
-           "estimate": true,
-           "distance_troughs_ms": 5,
-           "distance_peaks_ms": 10
-       },
-       "estimator": {
-           "mean": [
-               "interval"
-           ],
-           "median": null,
-           "max": [
-               "prominence",
-               "sharpness"
-           ],
-           "min": null,
-           "var": null
-       },
-       "apply_estimator_between_peaks_and_troughs": true
-   }
+.. toggle::
 
-A separate tutorial on sharpwave features is provided in the documentation. 
+    .. code-block:: json
+
+        "sharpwave_analysis_settings": {
+            "sharpwave_features": {
+                "peak_left": false,
+                "peak_right": false,
+                "trough": false,
+                "width": false,
+                "prominence": true,
+                "interval": true,
+                "decay_time": false,
+                "rise_time": false,
+                "sharpness": true,
+                "rise_steepness": false,
+                "decay_steepness": false,
+                "slope_ratio": false
+            },
+            "filter_ranges_hz": [
+                [
+                    5,
+                    80
+                ],
+                [
+                    5,
+                    30
+                ]
+            ],
+            "detect_troughs": {
+                "estimate": true,
+                "distance_troughs_ms": 10,
+                "distance_peaks_ms": 5
+            },
+            "detect_peaks": {
+                "estimate": true,
+                "distance_troughs_ms": 5,
+                "distance_peaks_ms": 10
+            },
+            "estimator": {
+                "mean": [
+                    "interval"
+                ],
+                "median": null,
+                "max": [
+                    "prominence",
+                    "sharpness"
+                ],
+                "min": null,
+                "var": null
+            },
+            "apply_estimator_between_peaks_and_troughs": true
+        }
 
 Raw signals
 ~~~~~~~~~~~
 
-Next, raw signals can be returned, specified by the **return_raw** method. This can be useful for using e.g. normalizing, rereferencing or resampling before feeding data to a deep learining model.
+Next, raw signals can be returned, specified by the **return_raw** method. This can be useful for using e.g. 
+normalization, rereferencing or resampling before feeding data to a deep learning model.
 
 Characterization of spectral aperiodic component
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-There is also a wrapper around the `*\ *fooof* <https://fooof-tools.github.io/fooof/>`_ toolbox for characterizing the periodic and aperiodic fits. The periodic components will be reuturned with a *peak_idx*\ , the respective center frequency, bandwith, and height over the aperiodic component can be returned. fooof specific parameters, e.g. *knee* or *max_n_peaks* are passed to the fooof object as well:
+There is also a wrapper around the `fooof <https://fooof-tools.github.io/fooof/>`_ toolbox for characterization of the periodic and aperiodic components.
+Periodic components will be returned with a *peak_idx*\ , the respective center frequency, bandwith, and height over the
+aperiodic component. *fooof* specific parameters, e.g. *knee* or *max_n_peaks* are passed to the fooof object as well:
 
 .. code-block:: json
 
    "fooof": {
        "aperiodic": {
            "exponent": true,
-           "offset": true
+           "offset": true,
+           "knee": true
        },
        "periodic": {
            "center_frequency": false,
@@ -401,10 +427,14 @@ There is also a wrapper around the `*\ *fooof* <https://fooof-tools.github.io/fo
        "knee": true
    }
 
-Nonlinear measres for dynamical systems (nolds)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Nonlinear measures for dynamical systems (nolds)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**nolds** features are estimates as a direct wrapper around the `nolds toolbox: <https://github.com/CSchoel/nolds>`_. Features can be estimated for raw data, or data being filtered in different frequency bands. The computations time for this feature modality is however very high. For real time applications it is currently not advised.  
+**nolds** features are estimates as a direct wrapper around the `nolds toolbox <https://github.com/CSchoel/nolds>`_.
+Features can be estimated from raw data directly, or data being filtered in different frequency bands.
+
+.. warning::
+    The computation time for this feature modality is however very high. For real time applications we tested it was not applicable.
 
 .. code-block:: json
 
@@ -428,10 +458,13 @@ Nonlinear measres for dynamical systems (nolds)
            }
        }
 
-coherence
+Coherence
 ~~~~~~~~~
 
-**coherence** can be calculated for channel pairs that are passed as a list of lists. Each list contains the in *nm_channels* specified channels. The mean and/or maximum in a specific frequency band can be calculated for a specific frequency band. The maximum for all frequency bands can also be estimated:
+**coherence** can be calculated for channel pairs that are passed as a list of lists.
+Each list contains the channels specified in *nm_channels*.
+The mean and/or maximum in a specific frequency band can be calculated.
+The maximum for all frequency bands can also be estimated.
 
 .. code-block:: json
 
@@ -459,7 +492,8 @@ coherence
 Bursts
 ~~~~~~
 
-**bursting** features are strongly investigated in the context of invasive electrophysiology. Here different burst features for different frequency bands with a different time duration for threshold estimation can be specified:
+**bursting** features were previously often investigated in invasive electrophysiology.
+Here burst features for different frequency bands with specified *time_duration_s* and *threshold* can be estimated:
 
 .. code-block:: json
 
@@ -491,14 +525,14 @@ MNE-connectivity
        "mode": "multitaper"
    }
 
-MNE Connectivity 
-~~~~~~~~~~~~~~~~
+Line length
+~~~~~~~~~~~
 
-**linelength** is a very simple features that calculates in the specified bath the sum of the absolute signal of a channel *x*:
+**linelength** is a very simple features that calculates in the specified batch the sum of the absolute signal of a channel *x*:
 
 .. math::
-    
-   LineLength(x) = \sum_{i=0}^{Batch length} |x_i|
+
+   LineLength(x) = \sum_{i=0}^{Batch\ Length} |x_i|
 
 Postprocessing
 ^^^^^^^^^^^^^^
@@ -506,7 +540,11 @@ Postprocessing
 Projection
 ~~~~~~~~~~
 
-**projection_cortex** and **projection_subcortex** allows feature projection of individual channels to a common subcortical or cortical grid, defined by *grid_cortex.tsv* and *subgrid_cortex.tsv* files. For both projections a *max_dist_mm* parameter needs to be specified, in which data is linearly interpolated, weighted by their inverse grid point distance. 
+**projection_cortex** and **projection_subcortex** allow for feature projection of individual channels to a common subcortical
+or cortical grid, defined by the *grid_cortex.tsv* and *subgrid_cortex.tsv* files. 
+Example *.tsv* files can be found in the shipped py_neuromodulation package.
+For both projections a *max_dist_mm* parameter needs to be specified, in which data is linearly interpolated, weighted by their inverse grid point distance.
+For further motivation see the example notebook :ref:`/auto_examples/plot_example_gridPointProjection.rst`.
 
 .. code-block:: json
 

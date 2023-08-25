@@ -46,6 +46,7 @@ extensions = [
     'sphinx_gallery.gen_gallery',
     'nbsphinx',
     'recommonmark',
+    'sphinx_togglebutton',
 ]
 
 source_suffix = ['.rst', '.md', ]
@@ -56,10 +57,11 @@ autosummary_generate = True
 sphinx_gallery_conf = {
     "examples_dirs": "../../examples",
     "gallery_dirs": "auto_examples",
-    'plot_gallery': 'True',  # Avoid annoying Unicode/bool default warning
+    'plot_gallery': True,  # Avoid annoying Unicode/bool default warning
     'thumbnail_size': (160, 112),
     'image_scrapers': ("matplotlib", ),
     'show_memory': True,
+    'notebook_images': 'https://py-neuromodulation.readthedocs.io/en/latest/',
 }
 
 templates_path = ["_templates"]
@@ -70,6 +72,7 @@ html_theme = "pydata_sphinx_theme"
 html_static_path = ['_static']
 
 html_theme_options = {
+    "show_nav_level": 4,
     "icon_links": [
         dict(
             name="GitHub",
