@@ -25,16 +25,18 @@ R-Map computation
 #    :alt: R-Map and grid point approach for decoding without patient-individual training
 # 
 # 
-# The R-Map decoding approach relies on the other hand on computation of whole brain connectivity. The electrode MNI space locations need to be known, then the following steps can then be performed for decoding without patient individual training:
+# The R-Map decoding approach relies on the other hand on computation of whole brain connectivity. The electrode MNI space locations need to be known,
+# then the following steps can be performed for decoding without patient individual training:
 # 
-# #. Using the `wjn_toolbox <https://github.com/neuromodulation/wjn_toolbox>`_ *wjn_specrical_roi* function, the MNI coordinates can be transformed into NIFTI (.nii) files, containing the electrode contact region of interest (ROI):
+# #. Using the `wjn_toolbox <https://github.com/neuromodulation/wjn_toolbox>`_ *wjn_specrical_roi* function, the MNI coordinates can be transformed into NIFTI (.nii) files,
+# containing the electrode contact region of interest (ROI):
 # 
 #    .. code-block:: python
 # 
-#      wjn_spherical_roi(roiname,mni,4)
+#      wjn_spherical_roi(roiname, mni, 4)
 # 
-# #. For the given *ROI.nii* files, the LeadDBS `LeadMapper <https://netstim.gitbook.io/leaddbs/connectomics/lead-mapper>`_ tool can be used for functional or structual connectivity estimation. 
-# #. The py_neuromodulation *nm_RMAP.py* module can then compute the R-Map given the contact-individual connectivity fingerprints:
+# #. For the given *ROI.nii* files, the LeadDBS `LeadMapper <https://netstim.gitbook.io/leaddbs/connectomics/lead-mapper>`_ tool can be used for functional or structural connectivity estimation. 
+# #. The py_neuromodulation :class:`~nm_RMAP.py` module can then compute the R-Map given the contact-individual connectivity fingerprints:
 # 
 #    .. code-block:: python
 # 
@@ -46,13 +48,14 @@ R-Map computation
 # 
 #       nm_RMAP.get_corr_numba(fp, fp_test)
 # 
-# #. The channel with highest correlation can then be selected for decoding without individual training. *nm_RMAP* contains aleady leave one channel and leave one patient out cross validation functions:
+# #. The channel with highest correlation can then be selected for decoding without individual training. :class:`~nm_RMAP.py` contain already leave one channel
+#  and leave one patient out cross validation functions:
 # 
 #    .. code-block:: python
 # 
 #       nm_RMAP.leave_one_sub_out_cv(l_fps_names, l_fps_dat, l_per, sub_list)
 # 
-# #. The obtained R-Map correlations can then be estimated statistically, and plotted agains true correlates:
+# #. The obtained R-Map correlations can then be estimated statistically and plotted against true correlates:
 # 
 #    .. code-block:: python
 # 

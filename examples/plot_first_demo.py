@@ -21,7 +21,7 @@ from py_neuromodulation import (
 # %%
 # Data Simulation
 # ---------------
-# We will now generate some exemplar data with 5 second duration for 6 channels with a sample rate of 1 kHz. 
+# We will now generate some exemplar data with 10 second duration for 6 channels with a sample rate of 1 kHz. 
 
 def generate_random_walk(NUM_CHANNELS, TIME_DATA_SAMPLES):
     # from https://towardsdatascience.com/random-walks-with-python-8420981bc4bc
@@ -36,7 +36,7 @@ def generate_random_walk(NUM_CHANNELS, TIME_DATA_SAMPLES):
 
 NUM_CHANNELS = 6
 sfreq = 1000
-TIME_DATA_SAMPLES = 5 * sfreq
+TIME_DATA_SAMPLES = 10 * sfreq
 data = generate_random_walk(NUM_CHANNELS, TIME_DATA_SAMPLES)
 time = np.arange(0, TIME_DATA_SAMPLES/sfreq, 1/sfreq)
 
@@ -48,7 +48,7 @@ plt.ylabel("Amplitude")
 plt.title("Example random walk data")
 
 # %%
-# Now let’s define the necessary setup files will be use for data
+# Now let’s define the necessary setup files we will be using for data
 # preprocessing and feature estimation. Py_neuromodualtion is based on two
 # parametrization files: the *nm_channels.tsv* and the *nm_setting.json*.
 # 
@@ -63,15 +63,15 @@ plt.title("Example random walk data")
 # | **name**                          | name of the channel               |
 # +-----------------------------------+-----------------------------------+
 # | **rereference**                   | different channel name for        |
-# |                                   | bipolar rereferencing, or         |
-# |                                   | avereage for commono average      |
-# |                                   | rereferencing                     |
+# |                                   | bipolar re-referencing, or        |
+# |                                   | average for common average        |
+# |                                   | re-referencing                    |
 # +-----------------------------------+-----------------------------------+
 # | **used**                          | 0 or 1, channel selection         |
 # +-----------------------------------+-----------------------------------+
 # | **target**                        | 0 or 1, for some decoding         |
 # |                                   | applications we can define target |
-# |                                   | chanenls, e.g. EMG channels       |
+# |                                   | channels, e.g. EMG channels       |
 # +-----------------------------------+-----------------------------------+
 # | **type**                          | channel type according to the     |
 # |                                   | `mne-python`_ toolbox             |
@@ -91,15 +91,18 @@ plt.title("Example random walk data")
 # +-----------------------------------+-----------------------------------+
 # 
 # .. _mne-python: https://mne.tools/stable/auto_tutorials/raw/10_raw_overview.html#sphx-glr-auto-tutorials-raw-10-raw-overview-py
-# The nm_stream can either created as a *.tsv* text file, or as a pandas
-# dataframe. There are some helper function that let you create the
+# The :class:`~nm_stream_abc` can either be created as a *.tsv* text file, or as a pandas
+# DataFrame. There are some helper functions that let you create the
 # nm_channels without much effort:
 
 nm_channels = nm_define_nmchannels.get_default_channels_from_data(data, car_rereferencing=True)
 
 nm_channels
 
-# %% Using this function default channel names and a common average rereference scheme is specified. Alternatively the *nm_define_nmchannels.set_channels* function can be used to pass each column values.
+# %%
+# Using this function default channel names and a common average re-referencing scheme is specified.
+# Alternatively the *nm_define_nmchannels.set_channels* function can be used to pass each column values.
+# 
 # nm_settings
 # -----------
 # Next, we will initialize the nm_settings dictionary and use the default settings, reset them, and enable a subset of features:
@@ -109,9 +112,11 @@ settings = py_nm.nm_settings.reset_settings(settings)
 
 
 # %%
-# The settings itself is a .json file which contains the parametrization for processing, feature estimation, postprocessing and definition which which sampling sampling rate features are being calculated. In this example 'sampling_rate_features_hz' is specified to be 10 Hz, so every 100ms a new set of features is calculated.
+# The setting itself is a .json file which contains the parametrization for preprocessing, feature estimation, postprocessing and 
+# definition with which sampling rate features are being calculated. 
+# In this example `sampling_rate_features_hz` is specified to be 10 Hz, so every 100ms a new set of features is calculated.
 # 
-# For many features the 'segment_length_features_ms' specifies the time dimension of the raw signal being used for feature calculation. Here it is specified to be 1000 ms.
+# For many features the `segment_length_features_ms` specifies the time dimension of the raw signal being used for feature calculation. Here it is specified to be 1000 ms.
 # 
 # We will now enable the features:
 # 
@@ -146,8 +151,9 @@ features = stream.run(data)
 # %%
 # Feature Analysis
 # ----------------
-
-# Ok, so there is a lot of output, which we could omit by verbose being False, but let's have a look what was being computed. We will therefore use the nm_analysis class to showcase some functions. For multi-run or subject analyze we will pass here the feature_file "sub" default directory:
+# 
+# There is a lot of output, which we could omit by verbose being False, but let's have a look what was being computed.
+# We will therefore use the :class:`~nm_analysis` class to showcase some functions. For multi-run -or subject analysis we will pass here the feature_file "sub" as default directory:
 
 analyzer = nm_analysis.Feature_Reader(
     feature_dir=stream.PATH_OUT,
@@ -155,14 +161,20 @@ analyzer = nm_analysis.Feature_Reader(
 )
 
 # %% 
-# Let's have a look at the resulting dataframe, lying in the "feature_arr" dataframe: 
+# Let's have a look at the resulting "feature_arr" DataFrame: 
 
 analyzer.feature_arr.iloc[:10, :7]
 
 # %%
-# Seems like a lot of features were calculated. The 'time' columns tells us about each row time index. For the 6 specified channels, it is each 31 features. We can now use some in-built plotting functions for visualization.
+# Seems like a lot of features were calculated. The `time` column tells us about each row time index.
+# For the 6 specified channels, it is each 31 features. 
+# We can now use some in-built plotting functions for visualization.
 # 
-# Note: Due to the simulation data, some of the features have constant values, which are not displayed through the image normalization.
+# .. note::
+#
+#     Due to the nature of simulated data, some of the features have constant values, which are not displayed through the image normalization.
+#
+#
 
 analyzer.plot_all_features(ch_used="ch1")
 

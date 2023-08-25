@@ -5,13 +5,18 @@ Analyzing sharpwave temporal features
 """
 
 # %%
-# Time series data can be characterized using oscillatory components, but assumptions of sinusoidality are for real data rarely fulfilled. See *"Brain Oscillations and the Importance of Waveform Shape"* `Cole et al 2017 <https://doi.org/10.1016/j.tics.2016.12.008>`_ for a great motivation.
+# Time series data can be characterized using oscillatory components, but assumptions of sinusoidality are for real data rarely fulfilled.
+# See *"Brain Oscillations and the Importance of Waveform Shape"* `Cole et al 2017 <https://doi.org/10.1016/j.tics.2016.12.008>`_ for a great motivation.
 # We implemented here temporal characteristics based on individual trough and peak relations, 
-# based on the :meth:~`scipy.signal.find_peaks <scipy.signal.find_peaks>` method. The function parameter *distance* can be specified in the *nm_settings.json*. Temporal features can be calculated twice for troughs and peaks. In the settings, this can be specified by setting *estimate* to true in *detect_troughs* and/or *detect_peaks*. A statistical measure (e.g. mean, max, median, var) can be defined as a resulting feature from the peak and trough estimates using the *apply_estimator_between_peaks_and_troughs* setting.
+# based on the :meth:~`scipy.signal.find_peaks` method. The function parameter *distance* can be specified in the *nm_settings.json*.
+# Temporal features can be calculated twice for troughs and peaks. In the settings, this can be specified by setting *estimate* to true
+# in *detect_troughs* and/or *detect_peaks*. A statistical measure (e.g. mean, max, median, var) can be defined as a resulting feature from the peak and 
+# trough estimates using the *apply_estimator_between_peaks_and_troughs* setting.
 # 
 # In py_neuromodulation the following characteristics are implemented:
 # 
-# *Note that that the nomenclature is written for sharpwave troughs, but detection of peak characteristics can be computed in the same way*:
+# .. note::
+#     The nomenclature is written here for sharpwave troughs, but detection of peak characteristics can be computed in the same way.
 # 
 # -  prominence:
 #    :math:`V_{prominence} = |\frac{V_{peak-left} + V_{peak-right}}{2}| - V_{trough}`
@@ -22,7 +27,8 @@ Analyzing sharpwave temporal features
 # -  width (between left and right peaks)
 # -  interval (between troughs)
 # 
-# Additionally, different filter ranges can be parametrized using the *filter_ranges_Hz* setting. Filtering is necessary to remove high frequent signal fluctuations, but limits also the true estimation of sharpness and prominence due to signal smoothing.
+# Additionally, different filter ranges can be parametrized using the *filter_ranges_hz* setting.
+# Filtering is necessary to remove high frequent signal fluctuations, but limits also the true estimation of sharpness and prominence due to signal smoothing.
 
 import seaborn as sb
 from matplotlib import pyplot as plt
@@ -38,7 +44,7 @@ from py_neuromodulation import (
 
 
 # %%
-# We will first read the example data ECoG data and plot the identified features on the filtered time series. 
+# We will first read the example ECoG data and plot the identified features on the filtered time series. 
 
 RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data()
 
@@ -139,7 +145,8 @@ plt.ylabel("a.u.")
 plt.tight_layout()
 
 # %%
-# See in the following example a time series example, that is aligned to movement. With movement onset the promince, sharpness, and interval features are reduced:
+# See in the following example a time series example, that is aligned to movement. With movement onset the prominence, sharpness, and interval features are reduced:
+
 plt.figure(figsize=(8, 5), dpi=300)
 plt.plot(OFFSET_TIME_SERIES + data_plt, color="gray", linewidth=0.5, alpha=0.5, label="original ECoG data")
 plt.plot(OFFSET_TIME_SERIES + filtered_dat*SCALE_TIMESERIES, linewidth=0.5, color="black", label="[5-30]Hz filtered data")
@@ -164,7 +171,10 @@ plt.ylabel("a.u.")
 plt.tight_layout()
 
 # %%
-# In the *sharpwave_analysis_settings* the *estimator* keyword further specifies which statistics is computed based on the individual features in one batch. The "global" setting *segment_length_features_ms* specifies the time duration for feature computation. Since there can be a different number of identified waveform shape features for different batches (i.e. different number of peaks/troughs), taking a stastical measure (e.g. the maximum or mean) will be necessary for feature comparison. 
+# In the *sharpwave_analysis_settings* the *estimator* keyword further specifies which statistic is computed based on the individual
+# features in one batch. The "global" setting *segment_length_features_ms* specifies the time duration for feature computation.
+# Since there can be a different number of identified waveform shape features for different batches (i.e. different number of peaks/troughs),
+# taking a statistical measure (e.g. the maximum or mean) will be necessary for feature comparison. 
 
 # %%
 # Example time series computation for movement decoding
@@ -193,7 +203,7 @@ stream = nm.Stream(
 df_features = stream.run(data=data[:, :30000])
 
 # %%
-# We can then plot two examplary features, prominence and interval, and see that the movement amplitude can be clustered with those two features alone:
+# We can then plot two exemplary features, prominence and interval, and see that the movement amplitude can be clustered with those two features alone:
 
 plt.figure(figsize=(5, 3), dpi=300)
 plt.scatter(

@@ -8,25 +8,16 @@ ECoG Movement decoding example
 # This example notebook read openly accessible data from the publication
 # *Electrocorticography is superior to subthalamic local field potentials
 # for movement decoding in Parkinson’s disease*
-# ([Merk et al. 2022](https://elifesciences.org/articles/75126)).
-# The dataset is available [here](https://doi.org/10.7910/DVN/IO2FLM).
+# (`Merk et al. 2022 <https://elifesciences.org/articles/75126>_`).
+# The dataset is available `here <https://doi.org/10.7910/DVN/IO2FLM>`_.
 #
 # For simplicity one example subject is automatically shipped within
-# this repo at the *examples/data* folder, stored in
-# [iEEG BIDS](https://www.nature.com/articles/s41597-019-0105-7) format.
-#
-# .. note::
-#
-#   In order to run this example you either have to clone the repository from the `github page <https://github.com/neuromodulation/py_neuromodulation/tree/main/examples/data>`_,
-#   or download the respective BIDS example subject folder, which will be referenced below.
-
-# sphinx_gallery_thumbnail_path = '_static/RMAP_figure.png'
+# this repo at the *py_neuromodulation/data* folder, stored in
+# `iEEG BIDS <https://www.nature.com/articles/s41597-019-0105-7>`_ format.
 
 # %%
 from sklearn import metrics, model_selection, linear_model
-
 import matplotlib.pyplot as plt
-
 
 import py_neuromodulation as nm
 from py_neuromodulation import (
@@ -39,7 +30,9 @@ from py_neuromodulation import (
 )
 
 # %%
-# Let's read the example using [mne_bids](https://mne.tools/mne-bids/stable/index.html). The resulting raw object in of type [mne.RawArray](https://mne.tools/stable/generated/mne.io.RawArray.html). We can use the properties such as sampling frequency, channel names, channel types all from the mne array and create the *nm_channels* dataframe:
+# Let's read the example using `mne_bids <https://mne.tools/mne-bids/stable/index.html>`_.
+# The resulting raw object is of type `mne.RawArray <https://mne.tools/stable/generated/mne.io.RawArray.html>`_.
+# We can use the properties such as sampling frequency, channel names, channel types all from the mne array and create the *nm_channels* DataFrame:
 
 RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data()
 
@@ -67,7 +60,8 @@ nm_channels = nm_define_nmchannels.set_channels(
 nm_channels
 
 # %%
-# This example contains the force grip movement traces, we'll use the *MOV_RIGHT_CLEAN* channel as a decoding target channel. Let's check some of the raw feature and time series traces:
+# This example contains the grip force movement traces, we'll use the *MOV_RIGHT_CLEAN* channel as a decoding target channel.
+# Let's check some of the raw feature and time series traces:
 
 plt.figure(figsize=(12, 4), dpi=300)
 plt.subplot(121)
@@ -126,11 +120,11 @@ features = stream.run(
 )
 
 # %%
-# Featue Analysis
-# ---------------
-# The obtained performances can now be read and visualized using the *nm_analysis.Featuer_Reader*.
+# Feature Analysis
+# ----------------
+# The obtained performances can now be read and visualized using the :class:`nm_analysis.Feature_Reader`.
 
-# init analyzer
+# initialize analyzer
 feature_reader = nm_analysis.Feature_Reader(
     feature_dir=PATH_OUT,
     feature_file=RUN_NAME,
@@ -139,7 +133,7 @@ feature_reader.label_name = "MOV_RIGHT"
 feature_reader.label = feature_reader.feature_arr["MOV_RIGHT"]
 
 # %%
-feature_reader.feature_arr.iloc[100:108, :8]
+feature_reader.feature_arr.iloc[100:108, -6:]
 
 # %%
 print(feature_reader.feature_arr.shape)
@@ -185,13 +179,17 @@ nm_plots.plot_corr_matrix(
 # %%
 # Decoding
 # --------
-# The main focus of the py_neuromodulation pipeline is the feature estimation. Nevertheless, the user can also use the pipeline for Machine Learning decoding. It can be used for regression and classification problems, and also using unsupervised methods, such as PCA and CCA.
 #
-# Here we show an example using the XGBOOST Classifier. The labels used come from the continuous grip force movement target, namedd "MOV_LEFT_CLEAN".
+# The main focus of the *py_neuromodulation* pipeline is feature estimation.
+# Nevertheless, the user can also use the pipeline for machine learning decoding.
+# It can be used for regression and classification problems and also dimensionality reduction such as PCA and CCA.
 #
-# First we initialize the *nm_decode.Decoder* class, which the specified *validation method*, here being a simple 3-fold cross validation, the evaluation metric, the used machine learning model, and the used channels we want to evaluate performances for.
+# Here, we show an example using the XGBOOST classifier. The used labels came from a continuous grip force movement target, named "MOV_LEFT_CLEAN".
 #
-# There are are many more implemented methods, but we will here limit here to the ones presented.
+# First we initialize the :class:`~nm_decode.Decoder` class, which the specified *validation method*, here being a simple 3-fold cross validation, 
+# the evaluation metric, used machine learning model, and the channels we want to evaluate performances for.
+#
+# There are many more implemented methods, but we will here limit it to the ones presented.
 
 model = linear_model.LinearRegression()
 
@@ -214,7 +212,7 @@ performances = feature_reader.run_ML_model(
 )
 
 # %%
-# The performances is a dictionary, that we will now transform into a dataframe:
+# The performances are a dictionary that can be transformed into a DataFrame:
 
 df_per = feature_reader.get_dataframe_performances(performances)
 

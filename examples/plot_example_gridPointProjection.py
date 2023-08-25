@@ -5,18 +5,24 @@ Grid Point Projection
 """
 
 # %%
-# In ECoG datasets the electrode locations are usually different. For this reason, we established a grid with a set of points defined in a standardized MNI brain. Data is then interpolated to this grid, such that they are common across patients, which allows across patient decoding use cases.
+# In ECoG datasets the electrode locations are usually different. For this reason, we established a grid
+# with a set of points defined in a standardized MNI brain.
+# Data is then interpolated to this grid, such that they are common across patients, which allows across patient decoding use cases.
 # 
 # In this notebook, we will plot these grid points and see how the features extracted from our data can be projected into this grid space.
 # 
-# In order to do so, we'll read saved features that were computed in the ECoG movement notebook. Please note that in order to do so, when running the feature estimation, the settings
+# In order to do so, we'll read saved features that were computed in the ECoG movement notebook.
+# Please note that in order to do so, when running the feature estimation, the settings
 # 
-# .. code-block:: python
+# .. note::
+#
+#     .. code-block:: python
 # 
-#     stream.settings['postprocessing']['project_cortex'] = True
-#     stream.settings['postprocessing']['project_subcortex'] = True
+#         stream.settings['postprocessing']['project_cortex'] = True
+#         stream.settings['postprocessing']['project_subcortex'] = True
 # 
-# need to be set to `True` for a cortical and/or subcortical projection.
+#     need to be set to `True` for a cortical and/or subcortical projection.
+# 
 
 # %%
 import numpy as np
@@ -35,6 +41,7 @@ from py_neuromodulation import (
 # %%
 # Read features from BIDS data
 # ----------------------------
+#
 # We first estimate features, with the `grid_point` projection settings enabled for cortex. 
 
 
@@ -85,7 +92,7 @@ features = stream.run(
 )
 
 # %%
-# From nm_analysis.py, we use the ```Feature_Reader``` class to load the data.
+# From nm_analysis.py, we use the :class:~`nm_analysis.FeatureReader` class to load the data.
 
 # init analyzer
 feature_reader = nm_analysis.Feature_Reader(
@@ -93,14 +100,19 @@ feature_reader = nm_analysis.Feature_Reader(
 )
 
 # %%
-# To perform the grid projection, for all computed features we check for every grid point if there is any electrode channel within the spatial range ```max_dist_mm```, and weight this electrode contact by the inverse distance and normalize across all electrode distances within the maximum distance range. This gives us a projection matrix that we can can apply to streamed data, to tranform the feature-channel matrix (n_features, n_channels) into the grid point matrix (n_features, n_gridpoints).
+# To perform the grid projection, for all computed features we check for every grid point if there is any electrode channel within the spatial range ```max_dist_mm```, and weight 
+# this electrode contact by the inverse distance and normalize across all electrode distances within the maximum distance range.
+# This gives us a projection matrix that we can apply to streamed data, to transform the feature-channel matrix *(n_features, n_channels)* into the grid point matrix *(n_features, n_gridpoints)*.
 # 
 # To save computation time, this projection matrix is precomputed before the real time run computation. 
-# The cortical grid is stored in py_neuromodulation/grid_cortex.tsv and the electrodes coordinates are stored in *_space-mni_electrodes.tsv* in a BIDS dataset.
+# The cortical grid is stored in *py_neuromodulation/grid_cortex.tsv* and the electrodes coordinates are stored in *_space-mni_electrodes.tsv* in a BIDS dataset.
 # 
-# One remark is that our cortical and subcortical grids are defined for the **left** hemisphere of the brain and, therefore, electrode contacts are mapped to the left hemisphere.
+# .. note::
+#
+#     One remark is that our cortical and subcortical grids are defined for the **left** hemisphere of the brain and, therefore, electrode contacts are mapped to the left hemisphere.
 # 
-# From the analyzer, the user can plot the cortical projection with the function below, displaying the grid points as dots and the ECoG electrodes are crosses. The yellow grid points are the ones that are active for that specific ECoG electrode location. The inactive grid points are shown in purple.
+# From the analyzer, the user can plot the cortical projection with the function below, display the grid points and ECoG electrodes are crosses.
+# The yellow grid points are the ones that are active for that specific ECoG electrode location. The inactive grid points are shown in purple.
 
 feature_reader.plot_cort_projection()
 
@@ -152,7 +164,10 @@ feature_reader.nmplotter.plot_cortex(
 # %%
 # The Projection Matrix
 # ---------------------
-# To go from the feature-channel matrix (n_features, n_channels) to the grid point matrix (n_features, n_gridpoints) we need a projection matrix that has the shape (n_channels, n_gridpoints). It maps the strengths of the signals in each ECoG channel to the correspondent ones in the cortical grid. In the cell below we plot this matrix, that has the property that the column sum over channels for each grid point is either 1 or 0.
+# To go from the feature-channel matrix *(n_features, n_channels)* to the grid point matrix *(n_features, n_gridpoints)*
+# we need a projection matrix that has the shape *(n_channels, n_gridpoints)*.
+# It maps the strengths of the signals in each ECoG channel to the correspondent ones in the cortical grid.
+# In the cell below we plot this matrix, that has the property that the column sum over channels for each grid point is either 1 or 0.
 
 plt.figure(figsize=(8,5))
 plt.imshow(np.array(feature_reader.sidecar['proj_matrix_cortex']), aspect = 'auto')
@@ -164,7 +179,7 @@ plt.title("Matrix mapping from ECoG to grid")
 # %%
 # Feature Plot in the Grid: An Example of Post-processing
 # -------------------------------------------------------
-# First I take the dataframe with all the features in all time points.
+# First we take the dataframe with all the features in all time points.
 
 df = feature_reader.feature_arr
 
@@ -172,13 +187,14 @@ df = feature_reader.feature_arr
 df.iloc[:5, :5]
 
 # %%
-# Then we filter for only 'avgref_fft_theta', which gives us the value for fft_theta in all 6 ECoG channels over all time points. Then I take only the 6th time point - as an arbitrary choice.
+# Then we filter for only 'avgref_fft_theta', which gives us the value for fft_theta in all 6 ECoG channels over all time points. Then we take only the 6th time point - as an arbitrary choice.
 
 fft_theta_oneTimePoint = np.asarray(df[df.columns[df.columns.str.contains(pat = 'avgref_fft_theta')]].iloc[5])
 fft_theta_oneTimePoint
 
 # %%
-# Then the projection of the features into the grid is gonna be the color of the grid points in the plot_cortex function. That is, what I call color is the matrix multiplication of the projection matrix of the cortex and the 6 values for the fft_theta feature above.
+# Then the projection of the features into the grid is gonna be the color of the grid points in the *plot_cortex* function.
+# That is the matrix multiplication of the projection matrix of the cortex and 6 values for the *fft_theta* feature above.
 
 grid_fft_Theta = np.array(feature_reader.sidecar["proj_matrix_cortex"]) @ fft_theta_oneTimePoint
 

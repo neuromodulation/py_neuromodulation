@@ -2,7 +2,6 @@
 Real-time feature estimation
 ============================
 
-This demo explains the TMSi and LabStreamingLayer setup.
 """
 
 # %%
@@ -10,8 +9,8 @@ This demo explains the TMSi and LabStreamingLayer setup.
 # ---------------------------------------
 #
 # *py_neuromodulation* was optimized for computation of real-time data streams.
-# There are however center -and lab specific hardware acquisition systems. Therefore, each experiment requires modules to interact with hardware platforms.
-# which periodically acquires data.
+# There are however center -and lab specific hardware acquisition systems. Therefore, each experiment requires modules to interact with hardware platforms
+# which periodically acquire data.
 # 
 # Given the raw data, data can be analyzed using *py_neuromodulation*. Preprocessing methods, such as re-referencing and normalization, 
 # feature computation and decoding can be performed then in real-time.
@@ -87,10 +86,10 @@ print(f"{np.round(timeit.timeit(lambda: stream.run_analysis.process(data), numbe
 # Real-time movement decoding using the TMSi-SAGA amplifier
 # ---------------------------------------------------------
 # 
-# In the following example, we will show how to setup a real-time movement decoding experiment using the TMSi-SAGA amplifier.
+# In the following example, we will show how we setup a real-time movement decoding experiment using the TMSi-SAGA amplifier.
 # First, we relied on different software modules for data streaming and visualization.
 # `LabStreamingLayer <https://labstreaminglayer.org>`_ allows for real-time data streaming and synchronization across multiple devices.
-# We additionally used `timeflux <https://timeflux.io>`_ for real-time data visualization of features, decoded output.
+# We used `timeflux <https://timeflux.io>`_ for real-time data visualization of features, decoded output.
 # For raw data visualization we used `Brain Streaming Layer <https://fcbg-hnp-meeg.github.io/bsl/dev/index.html>`_.
 # 
 # The code for real-time movement decoding is added in the GitHub branch `realtime_decoding <https://github.com/neuromodulation/py_neuromodulation/tree/realtime_decoding>`_.

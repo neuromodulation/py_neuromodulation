@@ -24,6 +24,9 @@ sys.path.append(SCRIPT_DIR)
 print(sys.path)
 
 
+exclude_patterns = ["_build", "_templates"]
+
+
 # -- Project information -----------------------------------------------------
 project = 'py_neuromodulation'
 copyright = '2021, Timon Merk'
@@ -57,11 +60,12 @@ autosummary_generate = True
 sphinx_gallery_conf = {
     "examples_dirs": "../../examples",
     "gallery_dirs": "auto_examples",
-    'plot_gallery': True,  # Avoid annoying Unicode/bool default warning
+    #'plot_gallery': True,
     'thumbnail_size': (160, 112),
     'image_scrapers': ("matplotlib", ),
     'show_memory': True,
     'notebook_images': 'https://py-neuromodulation.readthedocs.io/en/latest/',
+    'default_thumb_file': os.path.join('_static', 'RMAP_figure.png'),
 }
 
 templates_path = ["_templates"]
