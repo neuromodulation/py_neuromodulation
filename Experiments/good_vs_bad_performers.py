@@ -77,7 +77,7 @@ meanmovlenlow = []
 nrdiscrmovlow = []
 stdmovlenlow = []
 for i in range(len(targlow)):
-    m = targlow[i] != (np.r_[np.nan, targlow[i][:-1]])
+    m = targlow[i] != (np.r_[False, targlow[i][:-1]])
     _, c = np.unique(m.cumsum(), return_index=True)
     out = np.diff(np.r_[c, len(targlow[i])])
     nrdiscrmovlow.append(len(c))

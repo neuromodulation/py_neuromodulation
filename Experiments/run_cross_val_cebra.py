@@ -2,6 +2,10 @@ import numpy as np
 import os
 import pandas as pd
 from cebra import CEBRA
+from torch import nn
+import cebra.models
+import cebra.data
+from cebra.models.model import _OffsetModel, ConvolutionalModelMixin, cebra_layers
 from scipy.ndimage import gaussian_filter1d
 from sklearn import metrics, neighbors
 from sklearn import linear_model
@@ -18,15 +22,45 @@ import plotly.express as px
 import xgboost
 from sklearn.utils import class_weight
 from Experiments.utils.knn_bpp import kNN_BPP
+# from einops.layers.torch import Rearrange # --> Can add to the model to reshape to fit 2dConv maybe
 
 ch_all = np.load(
     os.path.join(r"D:\Glenn", "train_channel_all_fft.npy"),
+    allow_pickle="TRUE",
+).item()
+ch_all_feat = np.load(
+    os.path.join(r"D:\Glenn", "channel_all_noraw.npy"),
     allow_pickle="TRUE",
 ).item()
 df_best_rmap = pd.read_csv(r"D:\Glenn\df_best_func_rmap_ch.csv")
 
 
 cohorts = ["Beijing", "Pittsburgh", "Berlin", ]  # "Washington"
+
+# offset9 should be better than offset 10, as the selected index will always cause class majority in the receptive field
+# In contrast to offset 10 where equality between classes can be had if selected value on edge
+# TODO: Select receptive field based on statistics of the dataset
+@cebra.models.register("offset9-model") # --> add that line to register the model!
+class MyModel(_OffsetModel, ConvolutionalModelMixin):
+
+    def __init__(self, num_neurons, num_units, num_output, normalize=True):
+        super().__init__(
+            nn.Conv1d(num_neurons, num_units, 2),
+            nn.GELU(),
+            cebra_layers._Skip(nn.Conv1d(num_units, num_units, 3), nn.GELU()),
+            cebra_layers._Skip(nn.Conv1d(num_units, num_units, 3), nn.GELU()),
+            cebra_layers._Skip(nn.Conv1d(num_units, num_units, 3), nn.GELU()),
+            nn.Conv1d(num_units, num_output, 3),
+            num_input=num_neurons,
+            num_output=num_output,
+            normalize=normalize,
+        )
+
+    # ... and you can also redefine the forward method,
+    # as you would for a typical pytorch model
+
+    def get_offset(self):
+        return cebra.data.Offset(4, 5)
 
 def get_patients_train_dict(sub_test, cohort_test, val_approach: str, data_select: dict):
     cohorts_train = {}
@@ -238,7 +272,7 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
                         cebra_model.fit(X_train_comb, np.array(y_train_comb, dtype=float))
                 else:
                     if not model_params['pseudoDiscr']:
-                        cebra_model.fit(X_train, y_train)
+                        cebra_model.fit(X_train, np.array(y_train,dtype=int))
                     else: # Pretend the integer y_train is floating
                         cebra_model.fit(X_train, np.array(y_train,dtype=float), coh_aux)
 
@@ -262,14 +296,17 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
                     decoder = neighbors.KNeighborsClassifier(
                         n_neighbors=model_params['n_neighbors'], metric=model_params['metric'],
                         n_jobs=model_params['n_jobs'])
+                    decoder.fit(X_train_emb, np.array(y_train_discr, dtype=int))
                 elif model_params['decoder'] == 'Logistic':
                     decoder = linear_model.LogisticRegression(class_weight="balanced")
+                    decoder.fit(X_train_emb, np.array(y_train_discr, dtype=int))
                 elif model_params['decoder'] == 'SVM':
                     decoder = SVC(kernel=cosine_similarity)
+                    decoder.fit(X_train_emb, np.array(y_train_discr, dtype=int))
                 elif model_params['decoder'] == 'FAISS':
-                    print('Not implemented')
+                    raise Exception('Not implemented')
                 elif model_params['decoder'] == 'MLP':
-                    print('Not implemented')
+                    raise Exception('Not implemented')
                 elif model_params['decoder'] == 'XGB':
                     decoder = xgboost.sklearn.XGBClassifier()
                     #decoder.set_params(**{'lambda':2})
@@ -284,10 +321,7 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
                     )
                 elif model_params['decoder'] == 'KNN_BPP':
                     decoder = kNN_BPP(n_neighbors=model_params['n_neighbors'])
-
-
-                # Fitting of classifier is always done on the true discrete data
-                decoder.fit(X_train_emb, np.array(y_train_discr, dtype=int))
+                    decoder.fit(X_train_emb, np.array(y_train_discr, dtype=int))
 
             # Needed for training once per across cohort
             cohort_prev_it = cohort_test
@@ -356,11 +390,11 @@ curtime = datetime.now().strftime("%Y_%m_%d-%H_%M")
 experiment = "All_channels"
 longcompute = "leave_1_sub_out_across_coh"
 perflist = []
-val_approaches = ["leave_1_cohort_out","leave_1_sub_out_across_coh"]
+val_approaches = ["leave_1_cohort_out"]#,"leave_1_sub_out_across_coh"]
 
 
 for val_approach in val_approaches:
-    model_params = {'model_architecture':'offset10-model',
+    model_params = {'model_architecture':'offset9-model',
                 'batch_size': 512, # Ideally as large as fits on the GPU, min recommended = 512
                 'temperature_mode':'auto', # Constant or auto
                 'temperature':1,
@@ -375,10 +409,10 @@ for val_approach in val_approaches:
                 'n_jobs': 20, # KNN setting for parallelization
                 'all_embeddings':False, # If you want to combine all the embeddings (only when true_msess = True !), currently 1 model is used for the test set --> Make majority
                 'true_msess':False, # Make a single model will be made for every subject (Usefull if feature dimension different between subjects)
-                'discreteMov':False, # Turn pseudoDiscr to False if you want to test true discrete movement labels (Otherwise this setting will do nothing)
-                'pseudoDiscr': True, # Pseudodiscrete meaning direct conversion from int to float
+                'discreteMov':True, # Turn pseudoDiscr to False if you want to test true discrete movement labels (Otherwise this setting will do nothing)
+                'pseudoDiscr': False, # Pseudodiscrete meaning direct conversion from int to float
                 'gaussSigma':1.5, # Set pseuodDiscr to False for this to take effect and assuming a Gaussian for the movement distribution
-                'additional_comment':'Cohort_auxillary',
+                'additional_comment':'Empirical_DiscreteMov',
                 'debug': False} # Debug = True; stops saving the results unnecessarily
     if not model_params['debug']:
         writer = SummaryWriter(log_dir=f"D:\Glenn\CEBRA_logs\{val_approach}\{curtime}")
