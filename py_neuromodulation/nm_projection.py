@@ -155,15 +155,16 @@ class Projection:
                 ) / sum_distances
         return proj_matrix
 
-    def calc_projection_matrix(self) -> np.ndarray:
+    def calc_projection_matrix(self):
         """Calculates a projection matrix based on the used coordinate arrays
+
         Returns
         -------
         proj_matrix_cortex (np.array)
             cortical projection_matrix in shape [grid contacts, channel contact] defaults to None
         proj_matrix_subcortex (np.array)
             subcortical projection_matrix in shape [grid contacts, channel contact] defaults to None
-        """
+        """        
 
         proj_matrix_run = np.empty(2, dtype=object)
 
@@ -217,6 +218,7 @@ class Projection:
 
     def _initialize_channels(self) -> None:
         """Initialize channel names via nm_channel new_name column"""
+
         if self.project_cortex:
             self.ecog_channels = self.nm_channels.query(
                 '(type=="ecog") and (used == 1) and (status=="good")'

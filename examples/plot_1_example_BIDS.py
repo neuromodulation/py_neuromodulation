@@ -120,8 +120,8 @@ features = stream.run(
 )
 
 # %%
-# Feature Analysis
-# ----------------
+# Feature Analysis Movement
+# -------------------------
 # The obtained performances can now be read and visualized using the :class:`nm_analysis.Feature_Reader`.
 
 # initialize analyzer

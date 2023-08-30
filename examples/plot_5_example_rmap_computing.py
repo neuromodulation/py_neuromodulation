@@ -50,8 +50,7 @@ R-Map computation
 # 
 #       nm_RMAP.get_corr_numba(fp, fp_test)
 # 
-# #. The channel with highest correlation can then be selected for decoding without individual training. :class:`~nm_RMAP.py` contain already leave one channel
-#  and leave one patient out cross validation functions:
+# #. The channel with highest correlation can then be selected for decoding without individual training. :class:`~nm_RMAP.py` contain already leave one channel and leave one patient out cross validation functions:
 # 
 #    .. code-block:: python
 # 

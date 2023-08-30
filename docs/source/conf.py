@@ -9,8 +9,8 @@ import sys
 import os
 import json
 import re
-#from sphinx_gallery.sorting import ExplicitOrder
-
+from sphinx_gallery.sorting import FileNameSortKey
+import sphinx_gallery
 import py_neuromodulation
 
 print("CURRENT WORKING DIRECTORY")
@@ -59,13 +59,15 @@ PYDEVD_DISABLE_FILE_VALIDATION=1
 sphinx_gallery_conf = {
     "examples_dirs": "../../examples",
     "gallery_dirs": "auto_examples",
-    #"subsection_order" : ExplicitOrder(["../../examples/plot_first_demo", 
-    #                                    "../../examples/plot_example_BIDS",
-    #                                    "../../examples/plot_example_add_feature",
-    #                                    "../../examples/plot_example_sharpwave_analysis",
-    #                                    "../../examples/plot_example_gridPointProjection",
-    #                                    "../../examples/plot_example_rmap_computing",
-    #                                    "../../examples/plot_real_time_demo"])
+    "subsection_order" : sphinx_gallery.sorting.FileNameSortKey
+    #    "subsection_order" : ExplicitOrder(["../../examples/plot_0_first_demo", 
+#                                        "../../examples/plot_1_example_BIDS",
+#                                        "../../examples/plot_2_example_add_feature",
+#                                        "../../examples/plot_3_example_sharpwave_analysis",
+#                                        "../../examples/plot_4_example_gridPointProjection",
+#                                        "../../examples/plot_5_example_rmap_computing",
+#                                        "../../examples/plot_6_real_time_demo"])
+     # FileNameSortKey
 }
 
 #sphinx_gallery_conf = {

@@ -50,9 +50,9 @@ def set_channels(
             new_names : list of str | None, default: 'default'
                 new channel names that should be used when writing out the
                 features and results. Useful when applying re-referencing. Set to
-                `None` if no renaming should be performed. 'default' will infer
+                'None' if no renaming should be performed. 'default' will infer
                 channel renaming from re-referencing information. If a list is
-                given, it should be in the same order as `ch_names`.
+                given, it should be in the same order as 'ch_names'.
             ECOG_ONLY : boolean, default: False
                 if True, set only 'ecog' channel type to used
             used_types : iterable of str | None, default : ("ecog", "dbs", "seeg")
@@ -60,7 +60,7 @@ def set_channels(
                 types.
             target_keywords : iterable of str | None, default : ("ecog", "dbs", "seeg")
                 keywords for target channels
-    .
+
         Returns
         -------
             df: DataFrame in nm_channels format
