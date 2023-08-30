@@ -43,12 +43,9 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
     'sphinx.ext.mathjax',
-    'numpydoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.autosectionlabel',
     'sphinx_gallery.gen_gallery',
-    'nbsphinx',
-    'recommonmark',
     'sphinx_togglebutton',
 ]
 
@@ -56,17 +53,23 @@ source_suffix = ['.rst', '.md', ]
 
 autosummary_generate = True
 
+PYDEVD_DISABLE_FILE_VALIDATION=1
 
 sphinx_gallery_conf = {
     "examples_dirs": "../../examples",
     "gallery_dirs": "auto_examples",
-    #'plot_gallery': True,
-    'thumbnail_size': (160, 112),
-    'image_scrapers': ("matplotlib", ),
-    'show_memory': True,
-    'notebook_images': 'https://py-neuromodulation.readthedocs.io/en/latest/',
-    'default_thumb_file': os.path.join('_static', 'RMAP_figure.png'),
 }
+
+#sphinx_gallery_conf = {
+#    "examples_dirs": "../../examples",
+#    "gallery_dirs": "auto_examples",
+#    #'plot_gallery': True,
+#    'thumbnail_size': (160, 112),
+#    'image_scrapers': ("matplotlib", ),
+#    'show_memory': True,
+#    'notebook_images': 'https://py-neuromodulation.readthedocs.io/en/latest/',
+#    'default_thumb_file': os.path.join('_static', 'RMAP_figure.png'),
+#}
 
 templates_path = ["_templates"]
 exclude_patterns = []

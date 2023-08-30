@@ -154,5 +154,6 @@ examples/data/derivatives/*
 examples/other_examples/*
 
 examples/sub/*
+examples/utils/*
 
 sub/

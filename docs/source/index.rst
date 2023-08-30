@@ -12,7 +12,7 @@ The *py_neuromodulation* toolbox allows for real time capable feature estimation
 
    installation
    usage
-   examples
+   auto_examples/index
    api_documentation
 
 Why py_neuromodulation?

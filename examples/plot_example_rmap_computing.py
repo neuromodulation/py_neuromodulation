@@ -3,6 +3,8 @@ R-Map computation
 =================
 
 """
+# %%
+# sphinx_gallery_thumbnail_path = '_static/RMAP_figure.png'
 
 # %%
 # Across patient decoding using R-Map optimal connectivity
@@ -20,10 +22,8 @@ R-Map computation
 # Data from individual grid points is then interpolated onto those common grid points. 
 # The approach was also explained in the :ref:`/auto_examples/plot_example_gridPointProjection.rst` notebook.
 # 
-# 
 # .. image:: ../_static/RMAP_figure.png
-#    :alt: R-Map and grid point approach for decoding without patient-individual training
-# 
+#     :alt: R-Map and grid point approach for decoding without patient-individual training 
 # 
 # The R-Map decoding approach relies on the other hand on computation of whole brain connectivity. The electrode MNI space locations need to be known,
 # then the following steps can be performed for decoding without patient individual training:
