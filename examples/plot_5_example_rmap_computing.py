@@ -18,6 +18,7 @@ R-Map computation
 # * grid-point decoding
 # * optimal connectivity channel decoding
 # 
+#
 # First, the grid-point decoding approach relies on definition of a cortical or subcortical grid. 
 # Data from individual grid points is then interpolated onto those common grid points. 
 # The approach was also explained in the :ref:`/auto_examples/plot_example_gridPointProjection.rst` notebook.
@@ -36,6 +37,7 @@ R-Map computation
 #      wjn_spherical_roi(roiname, mni, 4)
 # 
 # #. For the given *ROI.nii* files, the LeadDBS `LeadMapper <https://netstim.gitbook.io/leaddbs/connectomics/lead-mapper>`_ tool can be used for functional or structural connectivity estimation. 
+#
 # #. The py_neuromodulation :class:`~nm_RMAP.py` module can then compute the R-Map given the contact-individual connectivity fingerprints:
 # 
 #    .. code-block:: python
@@ -61,3 +63,4 @@ R-Map computation
 # 
 #       nm_RMAP.plot_performance_prediction_correlation(per_left_out, per_predict, out_path_save)
 # 
+#

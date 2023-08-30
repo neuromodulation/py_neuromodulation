@@ -47,6 +47,9 @@ class Feature_Reader:
             Path to py_neuromodulation estimated feature runs, where each feature is a folder,
         feature_file : str, optional
             specific feature run, if None it is set to the first feature folder in feature_dir
+        binarize_label : bool
+            binarize label, by default True
+            
         """
         self.feature_dir = feature_dir
         self.feature_list = nm_IO.get_run_list_indir(self.feature_dir)
@@ -132,6 +135,24 @@ class Feature_Reader:
         binarize: bool = True,
         binarize_th: float = 0.3,
     ) -> None:
+        """_summary_
+
+        Parameters
+        ----------
+        feature_arr : pd.DataFrame
+            _description_
+        label_name : str
+            _description_
+        binarize : bool, optional
+            _description_, by default True
+        binarize_th : float, optional
+            _description_, by default 0.3
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
 
         label = np.nan_to_num(np.array(feature_arr[label_name]))
         if binarize:
@@ -205,6 +226,9 @@ class Feature_Reader:
         return feature_arr_norm
 
     def plot_cort_projection(self) -> None:
+        """_summary_
+        """
+
         if self.sidecar["sess_right"]:
             ecog_strip = np.array(
                 self.sidecar["coords"]["cortex_right"]["positions"]
@@ -238,6 +262,12 @@ class Feature_Reader:
         ----------
         ch_names_ECOG : list, optional
             list of ECoG channel to plot features for, by default None
+        list_feature_keywords : list[str], optional
+            keywords to plot, by default ["stft"]
+        epoch_len : int, optional
+            epoch length in seconds, by default 4
+        threshold : float, optional
+            threshold for event detection, by default 0.1
         """
 
         if ch_names_ECOG is None:
@@ -264,6 +294,34 @@ class Feature_Reader:
         figsize_x: float = 8,
         figsize_y: float = 8,
     ) -> None:
+        """_summary_
+
+        Parameters
+        ----------
+        ch : str, optional
+            _description_, by default None
+        list_feature_keywords : Optional[list[str]], optional
+            _description_, by default None
+        features_to_plt : list, optional
+            _description_, by default None
+        epoch_len : int, optional
+            _description_, by default 4
+        threshold : float, optional
+            _description_, by default 0.1
+        normalize_data : bool, optional
+            _description_, by default True
+        show_plot : bool, optional
+            _description_, by default True
+        title : str, optional
+            _description_, by default "Movement aligned features"
+        ytick_labelsize : _type_, optional
+            _description_, by default None
+        figsize_x : float, optional
+            _description_, by default 8
+        figsize_y : float, optional
+            _description_, by default 8
+        """
+
         # TODO: This does not work properly when we have bipolar rereferencing
 
         if features_to_plt is None:
@@ -321,6 +379,29 @@ class Feature_Reader:
         clim_low: float = None,
         clim_high: float = None,
     ):
+        """_summary_
+
+        Parameters
+        ----------
+        ch_used : str, optional
+            _description_, by default None
+        time_limit_low_s : float, optional
+            _description_, by default None
+        time_limit_high_s : float, optional
+            _description_, by default None
+        normalize : bool, optional
+            _description_, by default True
+        save : bool, optional
+            _description_, by default False
+        title : str, optional
+            _description_, by default "all_feature_plt.pdf"
+        ytick_labelsize : int, optional
+            _description_, by default 10
+        clim_low : float, optional
+            _description_, by default None
+        clim_high : float, optional
+            _description_, by default None
+        """
 
         if ch_used is not None:
             col_used = [
@@ -351,6 +432,20 @@ class Feature_Reader:
 
     @staticmethod
     def get_performace_sub_strip(performance_sub: dict, plt_grid: bool = False):
+        """_summary_
+
+        Parameters
+        ----------
+        performance_sub : dict
+            _description_
+        plt_grid : bool, optional
+            _description_, by default False
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
 
         ecog_strip_performance = []
         ecog_coords_strip = []
@@ -493,7 +588,7 @@ class Feature_Reader:
         )
 
     @staticmethod
-    def get_epochs(data, y_, epoch_len, sfreq, threshold=0):
+    def get_epochs(data, y_, epoch_len, sfreq, threshold=0) -> (np.ndarray, np.ndarray):
         """Return epoched data.
 
         Parameters
@@ -503,10 +598,10 @@ class Feature_Reader:
         y_ : np.ndarray
             array of labels e.g. ones for movement and zeros for
             no movement or baseline corr. rotameter data
-        sfreq : int/float
-            sampling frequency of data
         epoch_len : int
             length of epoch in seconds
+        sfreq : int/float
+            sampling frequency of data
         threshold : int/float
             (Optional) threshold to be used for identifying events
             (default=0 for y_tr with only ones
@@ -633,9 +728,7 @@ class Feature_Reader:
             valdation strategy, by default model_selection.KFold(n_splits=3, shuffle=False)
         output_name : str, optional
             saving name, by default "LM"
-        TRAIN_VAL_SPLIT : bool, optional
-            data is split into further validation for early stopping, by default False
-        save_coef : boolean
+        save_results : boolean
             if true, save model._coef trained coefficients
         """
         if feature_file is None:
@@ -696,8 +789,6 @@ class Feature_Reader:
             dictionary including decoding performances, by default dictionary
         subject_name : string, optional
             subject name, by default None
-        feature_file : string, optional
-            feature file, by default None
         DEFAULT_PERFORMANCE : float, optional
             chance performance, by default 0.5
         read_grid_points : bool, optional
@@ -710,6 +801,14 @@ class Feature_Reader:
             machine learning model name, by default 'LM'
         read_mov_detection_rates : boolean, by defaulte False
             if True, read movement detection rates, as well as fpr's and tpr's
+        read_bay_opt_params : boolean, by default False
+        read_mrmr : boolean, by default False
+        model_save : boolean, by default False
+        save_results : boolean, by default False
+        PATH_OUT : string, by default None
+        folder_name : string, by default None
+        str_add : string, by default None
+        
         Returns
         -------
         performance_dict : dictionary

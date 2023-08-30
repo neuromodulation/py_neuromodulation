@@ -9,6 +9,7 @@ import sys
 import os
 import json
 import re
+#from sphinx_gallery.sorting import ExplicitOrder
 
 import py_neuromodulation
 
@@ -58,6 +59,13 @@ PYDEVD_DISABLE_FILE_VALIDATION=1
 sphinx_gallery_conf = {
     "examples_dirs": "../../examples",
     "gallery_dirs": "auto_examples",
+    #"subsection_order" : ExplicitOrder(["../../examples/plot_first_demo", 
+    #                                    "../../examples/plot_example_BIDS",
+    #                                    "../../examples/plot_example_add_feature",
+    #                                    "../../examples/plot_example_sharpwave_analysis",
+    #                                    "../../examples/plot_example_gridPointProjection",
+    #                                    "../../examples/plot_example_rmap_computing",
+    #                                    "../../examples/plot_real_time_demo"])
 }
 
 #sphinx_gallery_conf = {

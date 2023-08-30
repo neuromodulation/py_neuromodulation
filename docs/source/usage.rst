@@ -2,7 +2,7 @@ Usage
 =====
 
 
-We will explain here the basic usage of py_neuromodulation. Check out the :doc:`examples <examples>` for directly following along.
+We will explain here the basic usage of py_neuromodulation. Check out the :doc:`examples <auto_examples/index>` for directly following along.
 
 In general only a time series is required with a specified sampling frequency.
 
@@ -30,7 +30,7 @@ Features were calculated with a *sampling_rate_features_hz* of 3 Hz and subseque
 We can however further define channel-specific parametrization such as re-referencing, channel selection, target definition,
 and also select and define additional features.
 
-Check out the example :ref:`/auto_examples/plot_first_demo.rst` for a first introduction.
+Check out the example :ref:`auto_examples/plot_0_first_demo.rst` for a first introduction.
 
 The following sections discuss additional parametrization. In a nutshell, the **settings** dictionary and a **channels** dataframe are used for parametrization.
 The above example implicitly used the default settings and channels. However, we can also define directly specific settings and channels:
@@ -166,7 +166,7 @@ Notch Filtering
 Normalization
 ~~~~~~~~~~~~~
 
-**normalization** allows for normalizing the past *normalization_time * in seconds according to the following options:
+**normalization** allows for normalizing the past *normalization_time* in seconds according to the following options:
 
 * mean
 * median
@@ -328,7 +328,7 @@ The sharpwave peak and trough features can be calculated, defined by the *estima
 According to a current data batch one or more temporal waveform events
 can be detected. The subsequent feature is returned as the *mean, median, maximum, minimum* or *variance*
 of all events in the feature computation batch, defined by the *estimator*.
-For further introduction see the example notebook :ref:`/auto_examples/plot_example_sharpwave_analysis.rst`.
+For further introduction see the example notebook :ref:`/auto_examples/plot_3_example_sharpwave_analysis.rst`.
 
 Here the full parametrization in the *nm_settings*:
 

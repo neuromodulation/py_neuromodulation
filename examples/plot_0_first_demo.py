@@ -91,6 +91,7 @@ plt.title("Example random walk data")
 # +-----------------------------------+-----------------------------------+
 # 
 # .. _mne-python: https://mne.tools/stable/auto_tutorials/raw/10_raw_overview.html#sphx-glr-auto-tutorials-raw-10-raw-overview-py
+# 
 # The :class:`~nm_stream_abc` can either be created as a *.tsv* text file, or as a pandas
 # DataFrame. There are some helper functions that let you create the
 # nm_channels without much effort:
