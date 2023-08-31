@@ -65,15 +65,16 @@ for i in range(len(targets)):
     meanmovlen.append(np.mean(out))
     movlen.append(out)
     stdmovlen.append(np.std(out))
-    movlen_flat.append(out[0])
+    movlen_flat.append(out)
     if any(betw>800):
         print(i)
         print(betw)
     timebetween.append(betw)
     meantimebetween.append(np.mean(betw))
     stdtimebetween.append(np.std(betw))
-    timebetw_flat.append(betw[0])
-
+    timebetw_flat.append(betw)
+movlen_flat = np.concatenate(movlen_flat,axis=None)
+timebetw_flat = np.concatenate(timebetw_flat,axis=None)
 plt.figure()
 plt.boxplot(meanmovlen)
 plt.title('mean movement duration per subject (samples)')
@@ -97,6 +98,32 @@ plt.boxplot(movlen_flat)
 plt.title('movement duration for all subjects (samples)')
 plt.show()
 plt.figure()
-plt.boxplot(timebetw_flat)
+plt.boxplot(timebetw_flat,showfliers=False)
 plt.title('time between movement for all subjects (samples)')
 plt.show()
+
+plt.figure()
+movlen_percentile = []
+percentiles = np.linspace(0,100,1000)
+for i in percentiles:
+    movlen_percentile.append(np.percentile(movlen_flat,i))
+plt.plot(percentiles,movlen_percentile)
+plt.xlabel('Percentile')
+plt.ylabel('Movement duration')
+
+# Let say we are satisfied with between small majority and 70% coverage of movement in 80% of cases (example)
+# Receptive field is x --> Need mov duration >0.7*x --> percentile of this is 0.2 (find)
+# So x can be 1/0.7 * mov_dur@20th percentile
+coverage = 0.7 # >70% of the receptive field covered by movement
+certainty = 0.75 # >75% of the cases
+receptive_field = movlen_percentile[int((100-certainty*100)*10)]*1/coverage
+lowerboundcov = 0.9
+lowerbound = receptive_field*lowerboundcov
+lowerbpercentile = np.argmin(abs(movlen_percentile-lowerbound))
+print(f'The receptive field size to be to covered up to {coverage*100}% movement in >{certainty*100}% of cases is: {receptive_field}')
+print(f'You will get maximum coverage of {lowerboundcov*100}% in {100-lowerbpercentile/10}% of cases')
+
+# Actually will always get majority movement with unbalanced receptive field --> Until (RF-1)/2>movlen
+Maj = 0.9 # Always get majority in 90% of cases
+RF = movlen_percentile[int((100-Maj*100)*10)]*2+1
+print(f'Receptive field to keep a majority of RF movement in {Maj*100}% of cases: {RF}')

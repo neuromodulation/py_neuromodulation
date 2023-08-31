@@ -26,7 +26,7 @@ ax = sns.boxplot(data = df.melt(id_vars='cohort',value_vars=baonly, var_name=''
 ax.set(title='Performance of features (all channels)')
 ax.axhline(0.5,ls='--')
 # Boxplot over best channels per subject
-idxofmax = list(df.groupby('sub')['ba_combined'].idxmax())
+idxofmax = np.sort(list(df.groupby(['sub', 'cohort'])['ba_combined'].idxmax()))
 maxpersub = df.iloc[idxofmax][['cohort','ba_Hjorth', 'ba_Sharpwave', 'ba_fooof', 'ba_bursts','ba_fft', 'ba_combined']]
 ax = sns.boxplot(data = maxpersub.melt(id_vars='cohort',value_vars=baonly, var_name=''
                                        , value_name='balanced accuracy'), x = '', y = 'balanced accuracy', hue='cohort')
@@ -35,8 +35,8 @@ ax.axhline(0.5, ls='--')
 
 # ba_combined ECOG vs LFP over best channel per subject (per cohort)
 f, axes = plt.subplots(1, 2)
-idxofmax_ECOG = list(df.groupby(['type','sub'])['ba_combined'].idxmax().T['ECOG'])
-idxofmax_LFP = list(df.groupby(['type','sub'])['ba_combined'].idxmax().T['LFP'])
+idxofmax_ECOG = np.sort(list(df.groupby(['type','sub','cohort'])['ba_combined'].idxmax().T['ECOG']))
+idxofmax_LFP = np.sort(list(df.groupby(['type','sub','cohort'])['ba_combined'].idxmax().T['LFP']))
 maxpersub_ECOG = df.iloc[idxofmax_ECOG][['cohort','type', 'ba_combined']]
 maxpersub_LFP = df.iloc[idxofmax_LFP][['cohort','type', 'ba_combined']]
 
@@ -48,7 +48,6 @@ axes[0].set(ylim=[0.5, 1])
 axes[1].set(ylim=[0.5, 1])
 
 # Pie chart of ECOG vs LFP best performers
-idxofmax = list(df.groupby('sub')['ba_combined'].idxmax())
 total = len(idxofmax)
 def formatter(x):
     return f"{total*x/100:.0f} ({x:.2f})%"
@@ -56,7 +55,6 @@ typeofmax = df.iloc[idxofmax]['type'].value_counts().plot(kind='pie',autopct=for
 typeofmax.set(title='Type of the best performing channel')
 
 ##### Stats over the best performing channels (per sub)
-idxofmax = list(df.groupby('sub')['ba_combined'].idxmax())
 maxpersub = df.iloc[idxofmax][baonly]
 subject = df.iloc[idxofmax]['sub']
 ax = sns.heatmap(maxpersub,yticklabels= subject,annot=maxpersub,cmap="viridis")
@@ -66,9 +64,9 @@ ax.set_xticks(ax.get_xticks())
 ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='left')
 
 # Sort also on fft to check if that changes some subjects
-idxofmax = list(df.groupby('sub')['ba_fft'].idxmax())
-maxpersub = df.iloc[idxofmax][baonly]
-subject = df.iloc[idxofmax]['sub']
+idxofmaxfft = np.sort(list(df.groupby(['sub', 'cohort'])['ba_fft'].idxmax()))
+maxpersub = df.iloc[idxofmaxfft][baonly]
+subject = df.iloc[idxofmaxfft]['sub']
 ax = sns.heatmap(maxpersub,yticklabels= subject,annot=maxpersub,cmap="viridis")
 ax.set(xlabel="", ylabel="")
 ax.xaxis.tick_top()

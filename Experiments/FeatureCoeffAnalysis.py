@@ -35,15 +35,19 @@ allfields = fields+ corrfeaturedim
 
 cohorts = ["Beijing", "Pittsburgh", "Berlin", "Washington"]
 
-idxofmax = list(df_perf.groupby('sub')['ba_combined'].idxmax())
+idxofmax = np.sort(list(df_perf.groupby(['cohort','sub'])['ba_combined'].idxmax()))
 
 ## Heatmap of the importance per feature (relative color per subject (row))
 plt.figure()
 maxpersub = df.iloc[idxofmax][corrfeaturedim]
+negatives = maxpersub<0 # Find negative values
+absolutes = maxpersub.abs()
 maxpersub_n = maxpersub.div(maxpersub.max(axis=1), axis=0)
 maxpersub_n = maxpersub.subtract(maxpersub.mean(axis=1),axis=0).div(maxpersub.std(axis=1),axis=0)
+maxpersub_01 = absolutes.subtract(absolutes.min(axis=1),axis=0).div(absolutes.max(axis=1).subtract(absolutes.min(axis=1)),axis=0)
+maxpersub_01 = maxpersub_01* (negatives*-2+1)
 subject = df.iloc[idxofmax]['sub']
-ax = sns.heatmap(maxpersub_n,yticklabels= subject,annot=maxpersub,cmap="mako")
+ax = sns.heatmap(maxpersub_01,yticklabels= subject,annot=maxpersub_01,cmap="coolwarm")
 ax.set(xlabel="", ylabel="")
 ax.set_xticks(list(range(len(corrfeaturedim))))
 ax.set_xticklabels(corrfeaturedim)

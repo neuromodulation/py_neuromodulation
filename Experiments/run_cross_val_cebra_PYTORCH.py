@@ -3,8 +3,10 @@ import os
 import pandas as pd
 from cebra import CEBRA
 from torch import nn
+import torch
 import cebra.models
 import cebra.data
+import cebra.distributions
 from cebra.models.model import _OffsetModel, ConvolutionalModelMixin, cebra_layers
 from scipy.ndimage import gaussian_filter1d
 from sklearn import metrics, neighbors
@@ -23,6 +25,8 @@ import xgboost
 from sklearn.utils import class_weight
 from Experiments.utils.knn_bpp import kNN_BPP
 # from einops.layers.torch import Rearrange # --> Can add to the model to reshape to fit 2dConv maybe
+from Experiments.utils.cebracustom import CohortDiscreteDataLoader
+
 
 ch_all = np.load(
     os.path.join(r"D:\Glenn", "train_channel_all_fft.npy"),
@@ -61,6 +65,7 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
 
     def get_offset(self):
         return cebra.data.Offset(4, 5)
+
 
 def get_patients_train_dict(sub_test, cohort_test, val_approach: str, data_select: dict):
     cohorts_train = {}
@@ -138,7 +143,7 @@ def plot_results(perflist,val_approach, cohorts, save=False):
     if save:
         writer.add_figure('Performance_Figure', plt.gcf(), 0)
 
-def plotly_embeddings(X_train_emb,X_test_emb,y_train_discr,y_test,aux=None,type='none'):
+def plotly_embeddings(X_train_emb,X_test_emb,y_train_discr,y_test,aux=None,type='none',grad=False):
 #    Plot together with the test embedding (For coh auxillary)
     symbollist = ['circle', 'cross', 'diamond', 'square', 'x']
     if type == 'coh':
@@ -178,6 +183,30 @@ def plotly_embeddings(X_train_emb,X_test_emb,y_train_discr,y_test,aux=None,type=
                 size=2,
                 color=np.array(colorlist)[np.array(np.append(y_train_discr, np.array(y_test, dtype=int) + 2), dtype=int)],
                 symbol=np.array(symbollist)[np.array(np.append(np.repeat(0,len(y_train_discr)), np.repeat(1, len(y_test))), dtype=int)],
+                # set color to an array/list of desired values
+                opacity=0.8))]}, auto_open=True)
+    # Also make 1 plot showing the movement gradient
+    if grad:
+        m0 = np.ones(y_train_discr.shape, dtype=int)
+        mask = y_train_discr # In example True for value you want to give a number
+        idx = np.flatnonzero(mask[::-1]) # len 1 iff mask true
+        if len(idx) > 0:
+            idx[1:] = idx[:-1]
+            idx[0] = -1
+            m0[idx[1:]] = idx[:-1] - idx[1:] + 1
+        out = np.full(y_train_discr.shape, np.nan, dtype=float)
+        out = np.cumsum(m0,axis=0)[::-1]
+        out[mask] = 0
+        plotly.offline.plot({'data': [go.Scatter3d(
+            x=np.append(X_train_emb[:, 0], X_test_emb[:, 0]),
+            y=np.append(X_train_emb[:, 1], X_test_emb[:, 1]),
+            z=np.append(X_train_emb[:, 2], X_test_emb[:, 2]),
+            mode='markers',
+            marker=dict(
+                size=2,
+                color=out,
+                symbol=np.array(symbollist)[
+                    np.array(np.append(np.repeat(0, len(y_train_discr)), np.repeat(1, len(y_test))), dtype=int)],
                 # set color to an array/list of desired values
                 opacity=0.8))]}, auto_open=True)
 
@@ -248,49 +277,37 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
                     sub_aux = sub_aux_comb[0]
                     coh_aux = coh_aux_comb[0]
 
-                # X_train, y_train, X_test, y_test = self.decoder.append_samples_val(X_train, y_train, X_test, y_test, 5)
+                # Put in TensorDataset with 2d discrete in order cohort - movement
+                CohortAuxData = cebra.data.TensorDataset(torch.from_numpy(X_train).type(torch.FloatTensor),
+                                                         discrete=torch.from_numpy(np.array([coh_aux,y_train],dtype=int).T).type(torch.LongTensor)).to('cuda')
+                neural_model = cebra.models.init(
+                    name=model_params['model_architecture'],
+                    num_neurons=CohortAuxData.input_dimension,
+                    num_units=32,
+                    num_output=model_params['output_dimension']
+                ).to('cuda')
 
-                cebra_model = CEBRA(
-                    model_architecture = model_params['model_architecture'], # previously used: offset1-model-v2'
-                    batch_size = model_params['batch_size'],
-                    temperature_mode=model_params['temperature_mode'],
-                    learning_rate = model_params['learning_rate'],
-                    max_iterations = model_params['max_iterations'],  # 50000
-                    time_offsets = model_params['time_offsets'],
-                    output_dimension = model_params['output_dimension'],
-                    device = "cuda",
-                    distance='cosine',
-                    conditional='time_delta',
-                    verbose = True
-                )
+                CohortAuxData.configure_for(neural_model)
+                Crit = cebra.models.criterions.LearnableCosineInfoNCE(temperature=model_params['temperature'],
+                                                                      min_temperature=model_params[
+                                                                          'min_temperature']).to('cuda')
 
-                ### Add auxillary variables here
-                if model_params['true_msess']:
-                    if not model_params['pseudoDiscr']:
-                        cebra_model.fit(X_train_comb, y_train_comb)
-                    else:
-                        cebra_model.fit(X_train_comb, np.array(y_train_comb, dtype=float))
-                else:
-                    if not model_params['pseudoDiscr']:
-                        cebra_model.fit(X_train, np.array(y_train,dtype=int))
-                    else: # Pretend the integer y_train is floating
-                        cebra_model.fit(X_train, np.array(y_train,dtype=float), coh_aux)
-
-                if model_params['true_msess']:
-                    X_train_emb = cebra_model.transform(X_train_comb[0],session_id=0)
-                else:
-                    X_train_emb = cebra_model.transform(X_train, session_id=0)
-                if model_params['all_embeddings']:
-                    for i_emb in range(1,nr_embeddings):
-                        X_train_emb = np.concatenate((X_train_emb, cebra_model.transform(X_train_comb[i_emb],session_id=i_emb)))
-
+                Opt = torch.optim.Adam(list(neural_model.parameters()) + list(Crit.parameters()), lr=model_params['learning_rate'])
+                cebra_model = cebra.solver.init(name="single-session", model=neural_model, criterion=Crit, optimizer=Opt).to(
+                    'cuda')
+                Loader = CohortDiscreteDataLoader(dataset=CohortAuxData, num_steps=model_params['max_iterations'],
+                                                  batch_size=model_params['batch_size'], prior='uniform', cond='cohmov')
+                cebra_model.fit(Loader)
+                TrainBatches = np.lib.stride_tricks.sliding_window_view(X_train,9,axis=0)
+                X_train_emb = cebra_model.transform(torch.from_numpy(TrainBatches[:]).type(torch.FloatTensor).to('cuda')).to('cuda')
+                X_train_emb = X_train_emb.cpu().detach().numpy()
                 # Get the loss and temperature plots
                 if type(alllosses) == int:
-                    alllosses = np.array(np.expand_dims(cebra_model.state_dict_["loss"],axis=0))
-                    alltemps = np.array(np.expand_dims(cebra_model.state_dict_["log"]["temperature"],axis=0))
+                    alllosses = np.array(np.expand_dims(cebra_model.state_dict()["loss"],axis=0))
+                    alltemps = np.array(np.expand_dims(cebra_model.state_dict()["log"]["temperature"],axis=0))
                 else:
-                    alllosses = np.concatenate((alllosses,np.expand_dims(cebra_model.state_dict_["loss"],axis=0)),axis=0)
-                    alltemps = np.concatenate((alltemps, np.expand_dims(cebra_model.state_dict_["log"]["temperature"],axis=0)),axis=0)
+                    alllosses = np.concatenate((alllosses,np.expand_dims(cebra_model.state_dict()["loss"],axis=0)),axis=0)
+                    alltemps = np.concatenate((alltemps, np.expand_dims(cebra_model.state_dict()["log"]["temperature"],axis=0)),axis=0)
 
                 if model_params['decoder'] == 'KNN':
                     decoder = neighbors.KNeighborsClassifier(
@@ -299,7 +316,7 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
                     decoder.fit(X_train_emb, np.array(y_train_discr, dtype=int))
                 elif model_params['decoder'] == 'Logistic':
                     decoder = linear_model.LogisticRegression(class_weight="balanced")
-                    decoder.fit(X_train_emb, np.array(y_train_discr, dtype=int))
+                    decoder.fit(X_train_emb, np.array(y_train_discr[4:-4], dtype=int))
                 elif model_params['decoder'] == 'SVM':
                     decoder = SVC(kernel=cosine_similarity)
                     decoder.fit(X_train_emb, np.array(y_train_discr, dtype=int))
@@ -328,28 +345,27 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
             # TEST PERMUTATION OF FEATURES
             # rng = np.random.default_rng()
             # X_test_emb = cebra_model.transform(rng.permutation(X_test,axis=1),session_id=0)
-
-            X_test_emb = cebra_model.transform(X_test,session_id=0)
+            TestBatches = np.lib.stride_tricks.sliding_window_view(X_test,9,axis=0)
+            X_test_emb = cebra_model.transform(torch.from_numpy(TestBatches).type(torch.FloatTensor).to('cuda')).to('cuda')
+            X_test_emb = X_test_emb.cpu().detach().numpy()
 
             ### Embeddings are plotted here
             if show_embedding:
-                plotly_embeddings(X_train_emb,X_test_emb,y_train_discr,y_test,aux=coh_aux,type='coh')
+                plotly_embeddings(X_train_emb,X_test_emb,y_train_discr[4:-4],y_test[4:-4],aux=coh_aux,type='coh', grad=True)
 
             y_test_pr = decoder.predict(X_test_emb)
-            ba = metrics.balanced_accuracy_score(y_test, y_test_pr)
-            #confusion = metrics.confusion_matrix(y_test,y_test_pr)
+            ba = metrics.balanced_accuracy_score(y_test[4:-4], y_test_pr)
             print(ba)
-            #print(confusion)
             # ba = metrics.balanced_accuracy_score(np.array(y_test, dtype=int), decoder.predict(X_test_emb))
 
             # cebra.plot_embedding(embedding, cmap="viridis", markersize=10, alpha=0.5, embedding_labels=y_train_cont)
             p_[cohort_test][sub_test] = {}
             p_[cohort_test][sub_test]["performance"] = ba
             #p_[cohort_test][sub_test]["X_test_emb"] = X_test_emb
-            p_[cohort_test][sub_test]["y_test"] = y_test
+            p_[cohort_test][sub_test]["y_test"] = y_test[4:-4]
             p_[cohort_test][sub_test]["y_test_pr"] = y_test_pr
-            p_[cohort_test][sub_test]["loss"] = cebra_model.state_dict_["loss"]
-            p_[cohort_test][sub_test]["temp"] = cebra_model.state_dict_["log"]["temperature"]
+            p_[cohort_test][sub_test]["loss"] = cebra_model.state_dict()["loss"]
+            p_[cohort_test][sub_test]["temp"] = cebra_model.state_dict()["log"]["temperature"]
 
             # Save some performance metrics
             bacohort.append(ba)
@@ -402,103 +418,22 @@ for val_approach in val_approaches:
                 'temperature':1,
                 'min_temperature':0.1, # If temperature mode = auto this should be set in the desired expected range
                 'learning_rate': 0.005, # Set this in accordance to loss function progression in TensorBoard
-                'max_iterations': 100,  # 5000, Set this in accordance to the loss functions in TensorBoard
+                'max_iterations': 200,  # 5000, Set this in accordance to the loss functions in TensorBoard
                 'time_offsets': 1, # Time offset between samples (Ideally set larger than receptive field according to docs)
-                'output_dimension': 8, # Nr of output dimensions of the CEBRA model
+                'output_dimension': 3, # Nr of output dimensions of the CEBRA model
                 'decoder': 'Logistic', # Choose from "KNN", "Logistic", "SVM", "KNN_BPP"
                 'n_neighbors': 35, # KNN & KNN_BPP setting (# of neighbours to consider) 35 works well for 3 output dimensions
                 'metric': "euclidean", # KNN setting (For L2 normalized vectors, the ordering of Euclidean and Cosine should be the same)
                 'n_jobs': 20, # KNN setting for parallelization
                 'all_embeddings':False, # If you want to combine all the embeddings (only when true_msess = True !), currently 1 model is used for the test set --> Make majority
                 'true_msess':False, # Make a single model will be made for every subject (Usefull if feature dimension different between subjects)
-                'discreteMov':False, # Turn pseudoDiscr to False if you want to test true discrete movement labels (Otherwise this setting will do nothing)
-                'pseudoDiscr': True, # Pseudodiscrete meaning direct conversion from int to float
+                'discreteMov':True, # Turn pseudoDiscr to False if you want to test true discrete movement labels (Otherwise this setting will do nothing)
+                'pseudoDiscr': False, # Pseudodiscrete meaning direct conversion from int to float
                 'gaussSigma':1.5, # Set pseuodDiscr to False for this to take effect and assuming a Gaussian for the movement distribution
-                'additional_comment':'CohAux',
+                'additional_comment':'PYTORCH_CohMovDiscrete_cohmov',
                 'debug': True} # Debug = True; stops saving the results unnecessarily
     if not model_params['debug']:
         writer = SummaryWriter(log_dir=f"D:\Glenn\CEBRA_logs\{val_approach}\{curtime}")
 
-    run_CV(val_approach, curtime, model_params,show_embedding=False)
+    run_CV(val_approach, curtime, model_params,show_embedding=True)
 
-# Note: 2 CEBRA models trained to convergence should be the same up to a linear transformation (given enough data)
-
-### Code improvements
-##### 14/08:
-# DONE: Look at the embeddings (In single session and in multi-session cases, and with different auxillary variables
-##### 15/08:
-# DONE: Implement bagging KNN with cosine metric --> Not needed as for L2 normalized vectors the ordering of Euclidean and Cosine should be the same
-# DONE: Test what happens upon shuffling the test set features
-##### 16/08:
-# DONE: Compute brain regions (Using Thomas's code) and did some analysis
-#### 17/08:
-# UNFINISHED: Continue working on brain region model; Check proper selection to not throw away full cohorts
-#   Multiple ideas: Either just select brain regions that >x% of the subject have electrode in and then add region as aux
-#                   --> Lets the model itself choose a best match for each sample and map
-#                   Could potentially include some imbalance in channels per brain regions (aux might balance sampling) ?
-#                   OR: Embedding per brain region, would probably want more balance, at least per cohort
-# TODO: (Look at dataset size / distribution (time axis) and (no)movement distribution)
-#### 18/08:
-# DONE: Run DiFuMo 64, 128 & 256 and analyze subject distribution
-# DONE: Adapt this code (run_cross_val_cebra) to be able to run, concat. brain regions with aux var & model per brain region
-#       --> Which channels to select (if choice), random vs highest performance ones (in train), in test prob. all available channels.
-# DONE: Expand the Train_Val_Test_Split script to handle multi channel per subject
-#### 19/08:
-# TODO: (Look at dataset size / distribution (time axis) and (no)movement distribution)
-# TODO: !!!! Implement that regions are unpacked before running in multi-region runs and create separate embeddings, decoders and test separately !!!
-
-# GENERAL:
-### Code improvements
-# TODO: Look into implementing a K-fold strategy (i.e. leave 2 out instead of 1, especially for across cohort to speed up without much reduced training set)
-# TODO: ? Save the standard deviations as well.
-# TODO: ?? Would a loss plot per cohort be better (assuming that there are differences between cohorts)
-
-### Tests to perform
-# TODO: MULTI-CHANNEL IDEAS:
-#   1. -Train: True Multi-session with all (or top x) channels as SEPARATE sessions
-#       --> Class model per embedding (weigh embeddings by Corr to R-Map (or just channel R performance))
-#      -Test: ?
-#      -Problems: What model and channels do you use from the test subject / A LOT OF COMPUTE NEEDED
-#   2. -Train: True Multi-session per brain region (diff channels as features) --> Class. model per brain region (and subject which can be combined for the class model)
-#      -Test: Apply brain region models to channels in respective brain regions, and (?weighted R-map?) Majority vote
-#      -Problems: Problem when test subject diff # of channels in brain region w.r.t. all train subjects --> No model available / Also some COMPUTE
-#   3. -Train: Single-session per brain region (diff. channels over time axis) --> Class. model per brain region
-#      -Test: Apply brain region models to channels in respective brain regions
-#               Combine: Based on average brain region - R score single channel) or using val set to test best combi
-#      -Problems: Having more channels in brain region will bias the sampling towards that subject
-#      -Solution: Auxillary label per brain ID (and maybe combined with cohort?)
-#   4. -Train: Single-session with top x correlators to R-map (either as feature (ordered) or over time)
-#   5. -Train: Single-session with all (or most) channels sorted in feature dimension on their correlation to the R-map (Might provide some structure for the model to expect)
-# TODO: Test different model architectures (with 2dConv to integrate info over the channels?)
-# TODO: Include more features
-#       And also look into combining 1 ECOG and 1 LFP channel (Assuming LFP signals are similar to eachother, would not mess with ordering)
-# TODO: Test multichannel concat over feature axis.
-# TODO: Hyperparameter search
-# TODO: Look into performance difference treating as single session vs TRUE multisession (+ combining embeddings)
-
-# DONE: Test the difference between using a discrete auxillary, no auxillary and a continuous auxillary
-# TODO: Check what happens upon changing the way auxillary is made continuous (AMPLITUDE & SIGMA) (pot. not that useful)
-# DONE: Investigate adding subject information as discrete auxillary
-# TODO: Test different model architectures (with 2dConv to integrate info over the channels?)
-#   --> Might require the loader to supply data differently (Or make a custom implementation)
-
-# TODO: Inclusion of UPDRS-III ?
-
-# QUESTION: How much is R-MAP correlation correlated to R-score. Maybe a machine learning model to predict R score based on (resting state) signal + R-map corr + brain region
-#   might be better than only using the R-MAP
-
-### Findings
-# Psuedodiscrete auxillary works as good or better than the gaussian filtered one, but full discrete does not work well
-# Preliminary findings: Including subject ID makes the performance worse for all datasets except marginally Pittsburgh
-
-# KNN_BPP Can work almost as well as Logregression (but still a bit worse). Perhaps for higher dimension usefull.
-# XGB is was also not that bad (Have to try more)
-
-# The test embedding IS dependent on the ordering of the features, and thus will also be on the ordering of channels potentially
-# Therefore, some ordering here is required, or look into true multisess / time concatenation
-# Performance is still above chance though (Prob due to correlations in the features ~0.57 0.54)
-
-# Combining cohort and sub as cont. auxillary with movement as discrete does not work well. In general movement as discrete works a bit worse.
-# NEED to try: Both cohort and movement as continuous.
-
-# Try cohort as multisess (1 sess per cohort)
