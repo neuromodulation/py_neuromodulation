@@ -1,6 +1,6 @@
 """
-Analyzing sharpwave temporal features
-=====================================
+Analyzing temporal features
+===========================
 
 """
 

@@ -59,15 +59,15 @@ PYDEVD_DISABLE_FILE_VALIDATION=1
 sphinx_gallery_conf = {
     "examples_dirs": "../../examples",
     "gallery_dirs": "auto_examples",
-    "subsection_order" : sphinx_gallery.sorting.FileNameSortKey
-    #    "subsection_order" : ExplicitOrder(["../../examples/plot_0_first_demo", 
-#                                        "../../examples/plot_1_example_BIDS",
-#                                        "../../examples/plot_2_example_add_feature",
-#                                        "../../examples/plot_3_example_sharpwave_analysis",
-#                                        "../../examples/plot_4_example_gridPointProjection",
-#                                        "../../examples/plot_5_example_rmap_computing",
-#                                        "../../examples/plot_6_real_time_demo"])
-     # FileNameSortKey
+    "subsection_order" : sphinx_gallery.sorting.FileNameSortKey,
+    #"subsection_order" : sphinx_gallery.sorting.ExplicitOrder([
+    #                                    "../../examples/plot_0_first_demo", 
+    #                                    "../../examples/plot_1_example_BIDS",
+    #                                    "../../examples/plot_2_example_add_feature",
+    #                                    "../../examples/plot_3_example_sharpwave_analysis",
+    #                                    "../../examples/plot_4_example_gridPointProjection",
+    #                                    "../../examples/plot_5_example_rmap_computing",
+    #                                    "../../examples/plot_6_real_time_demo"])
 }
 
 #sphinx_gallery_conf = {

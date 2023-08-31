@@ -30,7 +30,7 @@ Features were calculated with a *sampling_rate_features_hz* of 3 Hz and subseque
 We can however further define channel-specific parametrization such as re-referencing, channel selection, target definition,
 and also select and define additional features.
 
-Check out the example :ref:`auto_examples/plot_0_first_demo.rst` for a first introduction.
+Check out the example :doc:`auto_examples/plot_0_first_demo.rst` for a first introduction.
 
 The following sections discuss additional parametrization. In a nutshell, the **settings** dictionary and a **channels** dataframe are used for parametrization.
 The above example implicitly used the default settings and channels. However, we can also define directly specific settings and channels:
@@ -328,7 +328,7 @@ The sharpwave peak and trough features can be calculated, defined by the *estima
 According to a current data batch one or more temporal waveform events
 can be detected. The subsequent feature is returned as the *mean, median, maximum, minimum* or *variance*
 of all events in the feature computation batch, defined by the *estimator*.
-For further introduction see the example notebook :ref:`/auto_examples/plot_3_example_sharpwave_analysis.rst`.
+For further introduction see the example notebook :doc:`auto_examples/plot_3_example_sharpwave_analysis`.
 
 Here the full parametrization in the *nm_settings*:
 
@@ -544,7 +544,7 @@ Projection
 or cortical grid, defined by the *grid_cortex.tsv* and *subgrid_cortex.tsv* files. 
 Example *.tsv* files can be found in the shipped py_neuromodulation package.
 For both projections a *max_dist_mm* parameter needs to be specified, in which data is linearly interpolated, weighted by their inverse grid point distance.
-For further motivation see the example notebook :ref:`/auto_examples/plot_example_gridPointProjection.rst`.
+For further motivation see the example notebook :doc:`auto_examples/plot_example_gridPointProjection.rst`.
 
 .. code-block:: json
 
