@@ -157,3 +157,5 @@ examples/sub/*
 examples/utils/*
 
 sub/
+
+py_neuromodulation/data/derivatives/*

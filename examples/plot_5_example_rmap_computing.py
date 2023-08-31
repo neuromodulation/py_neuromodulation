@@ -21,7 +21,7 @@ R-Map computation
 #
 # First, the grid-point decoding approach relies on definition of a cortical or subcortical grid. 
 # Data from individual grid points is then interpolated onto those common grid points. 
-# The approach was also explained in the :ref:`/auto_examples/plot_example_gridPointProjection.rst` notebook.
+# The approach was also explained in the :doc:`plot_4_example_gridPointProjection` notebook.
 # 
 # .. image:: ../_static/RMAP_figure.png
 #     :alt: R-Map and grid point approach for decoding without patient-individual training 
@@ -29,8 +29,7 @@ R-Map computation
 # The R-Map decoding approach relies on the other hand on computation of whole brain connectivity. The electrode MNI space locations need to be known,
 # then the following steps can be performed for decoding without patient individual training:
 # 
-# #. Using the `wjn_toolbox <https://github.com/neuromodulation/wjn_toolbox>`_ *wjn_specrical_roi* function, the MNI coordinates can be transformed into NIFTI (.nii) files,
-# containing the electrode contact region of interest (ROI):
+# #. Using the `wjn_toolbox <https://github.com/neuromodulation/wjn_toolbox>`_ *wjn_specrical_roi* function, the MNI coordinates can be transformed into NIFTI (.nii) files, containing the electrode contact region of interest (ROI):
 # 
 #    .. code-block:: python
 # 
