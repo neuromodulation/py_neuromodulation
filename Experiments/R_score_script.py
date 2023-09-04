@@ -1,4 +1,4 @@
-from sklearn import metrics, model_selection, linear_model
+from sklearn import metrics, model_selection, linear_model, svm
 import numpy as np
 import os
 import matplotlib.pyplot as plt
@@ -26,13 +26,14 @@ idxlist.append(np.concatenate(idxlist))
 idxlist_Berlin_001.append(np.concatenate(idxlist_Berlin_001))
 
 kf = KFold(n_splits = 3, shuffle = False)
-model = linear_model.LogisticRegression(class_weight="balanced", max_iter=1000)
+model = linear_model.LogisticRegression(class_weight="balanced", penalty='l1',solver='liblinear',tol=0.1)
 bascorer = metrics.make_scorer(metrics.balanced_accuracy_score)
 # loop over all channels
 performancedict = {}
 
-coef = False
+coef = True
 coefdict = {} # Will just be empty otherwise
+features = ['combined']
 for cohort in ch_all.keys():
     print(cohort)
     performancedict[cohort] = {}
@@ -83,7 +84,7 @@ for cohort in ch_all.keys():
                     x_concat = []
                     y_concat = []
                     for runs in [list(ch_all[cohort][sub][channel].keys())[0]]: # Only include med on (which should be first in the keylist)
-                        x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data'][:,idxlist[featureidx]]))
+                        x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data'][:,idxlist[5]]))
                         y_concat.append(ch_all[cohort][sub][channel][runs]['label'])
                     x_concat = np.concatenate(x_concat, axis=0)
                     y_concat = np.concatenate(y_concat, axis=0)
@@ -118,7 +119,7 @@ for cohort in ch_all.keys():
                         y_concat = []
                         for runs in ch_all[cohort][sub][channel].keys(): # Only include med on (which should be first in the keylist)
                             if np.char.find(runs, 'MedOn') != -1:
-                                x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data'][:,idxlist[featureidx]]))
+                                x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data'][:,idxlist[5]]))
                                 y_concat.append(ch_all[cohort][sub][channel][runs]['label'])
                             else:
                                 continue
@@ -152,7 +153,7 @@ for cohort in ch_all.keys():
                     x_concat = []
                     y_concat = []
                     for runs in ch_all[cohort][sub][channel].keys():
-                        x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data'][:,idxlist[featureidx]]))
+                        x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data'][:,idxlist[5]]))
                         y_concat.append(ch_all[cohort][sub][channel][runs]['label'])
                     x_concat = np.concatenate(x_concat,axis=0)
                     y_concat = np.concatenate(y_concat,axis=0)
@@ -172,7 +173,7 @@ for cohort in ch_all.keys():
                 performancedict[cohort][sub][channel]['explength'] = len(y_concat)
                 performancedict[cohort][sub][channel]['movsamples'] = np.sum(y_concat)
 
-np.save(r'D:\Glenn\AllfeaturesPerformances_XGB.npy', performancedict)
+np.save(r'D:\Glenn\AllfeaturesPerformances_l1.npy', performancedict)
 if coef:
     np.save(r'D:\Glenn\modelcoeffs_l1.npy', coefdict)
 

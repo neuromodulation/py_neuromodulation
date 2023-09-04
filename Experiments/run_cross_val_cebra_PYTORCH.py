@@ -143,7 +143,7 @@ def plot_results(perflist,val_approach, cohorts, save=False):
     if save:
         writer.add_figure('Performance_Figure', plt.gcf(), 0)
 
-def plotly_embeddings(X_train_emb,X_test_emb,y_train_discr,y_test,aux=None,type='none',grad=False):
+def plotly_embeddings(X_train_emb,X_test_emb,y_train_discr,y_test,aux=None,type='none',grad=False, nearest=True):
 #    Plot together with the test embedding (For coh auxillary)
     symbollist = ['circle', 'cross', 'diamond', 'square', 'x']
     if type == 'coh':
@@ -185,18 +185,28 @@ def plotly_embeddings(X_train_emb,X_test_emb,y_train_discr,y_test,aux=None,type=
                 symbol=np.array(symbollist)[np.array(np.append(np.repeat(0,len(y_train_discr)), np.repeat(1, len(y_test))), dtype=int)],
                 # set color to an array/list of desired values
                 opacity=0.8))]}, auto_open=True)
-    # Also make 1 plot showing the movement gradient
+    # Also make 1 plot showing the movement gradient (time to next movement onset)
     if grad:
         m0 = np.ones(y_train_discr.shape, dtype=int)
-        mask = y_train_discr # In example True for value you want to give a number
-        idx = np.flatnonzero(mask[::-1]) # len 1 iff mask true
-        if len(idx) > 0:
-            idx[1:] = idx[:-1]
-            idx[0] = -1
-            m0[idx[1:]] = idx[:-1] - idx[1:] + 1
+        mask = y_train_discr  # In example True for value you want to give a number
+        idx = np.flatnonzero(mask[::-1])  # len 1 iff mask true
+        m0[idx[0]] = 0 - idx[0]
+        m0[idx[1:]] = idx[:-1] - idx[1:] + 1
         out = np.full(y_train_discr.shape, np.nan, dtype=float)
-        out = np.cumsum(m0,axis=0)[::-1]
+        out = np.cumsum(m0, axis=0)[::-1]
         out[mask] = 0
+        if nearest:
+            m02 = np.ones(y_train_discr.shape, dtype=int)
+            idx2 = np.flatnonzero(mask)  # len 1 iff mask true
+            m02[idx2[0]] = 0 - idx2[0]
+            m02[idx2[1:]] = idx2[:-1] - idx2[1:] + 1
+            out2 = np.full(y_train_discr.shape, np.nan, dtype=float)
+            out2 = np.cumsum(m02, axis=0)
+            out2[mask] = 0
+            outfull = np.full(y_train_discr.shape, np.nan, dtype=float)
+            outfull[:idx2[0]] = out[:idx2[0]]
+            outfull[idx2[0]:] = np.min([out[idx2[0]:],out2[idx2[0]:]],axis=0)
+            out = outfull
         plotly.offline.plot({'data': [go.Scatter3d(
             x=np.append(X_train_emb[:, 0], X_test_emb[:, 0]),
             y=np.append(X_train_emb[:, 1], X_test_emb[:, 1]),
@@ -204,7 +214,11 @@ def plotly_embeddings(X_train_emb,X_test_emb,y_train_discr,y_test,aux=None,type=
             mode='markers',
             marker=dict(
                 size=2,
-                color=out,
+                color=np.log(out+1),
+                showscale= True,
+                colorscale="Viridis_r",
+                #cmin=0,
+                #cmax=20,
                 symbol=np.array(symbollist)[
                     np.array(np.append(np.repeat(0, len(y_train_discr)), np.repeat(1, len(y_test))), dtype=int)],
                 # set color to an array/list of desired values
@@ -351,7 +365,7 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
 
             ### Embeddings are plotted here
             if show_embedding:
-                plotly_embeddings(X_train_emb,X_test_emb,y_train_discr[4:-4],y_test[4:-4],aux=coh_aux,type='coh', grad=True)
+                plotly_embeddings(X_train_emb,X_test_emb,y_train_discr[4:-4],y_test[4:-4],aux=coh_aux,type='coh', grad=False, nearest=False)
 
             y_test_pr = decoder.predict(X_test_emb)
             ba = metrics.balanced_accuracy_score(y_test[4:-4], y_test_pr)
@@ -408,7 +422,7 @@ curtime = datetime.now().strftime("%Y_%m_%d-%H_%M")
 experiment = "All_channels"
 longcompute = "leave_1_sub_out_across_coh"
 perflist = []
-val_approaches = ["leave_1_cohort_out"]#,"leave_1_sub_out_across_coh"]
+val_approaches = ["leave_1_cohort_out","leave_1_sub_out_across_coh"]
 
 
 for val_approach in val_approaches:
@@ -435,5 +449,5 @@ for val_approach in val_approaches:
     if not model_params['debug']:
         writer = SummaryWriter(log_dir=f"D:\Glenn\CEBRA_logs\{val_approach}\{curtime}")
 
-    run_CV(val_approach, curtime, model_params,show_embedding=True)
+    run_CV(val_approach, curtime, model_params,show_embedding=False)
 
