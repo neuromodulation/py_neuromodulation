@@ -8,11 +8,11 @@ import xgboost
 
 # import the data
 ch_all = np.load(
-    os.path.join(r"D:\Glenn", "channel_all.npy"),
+    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "channel_all.npy"),
     allow_pickle="TRUE",
 ).item()
 
-df_perf = pd.read_csv(r"D:\Glenn\df_all_features.csv")
+df_perf = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_all_features.csv")
 
 
 # set features to use (do fft separately, as not every has to be computed)
@@ -49,12 +49,17 @@ for cohort in ch_all.keys():
 
         if cohort == 'Berlin' and sub == '001':
             allchannels = ch_all[cohort][sub].keys()
-            bestLFP = df_perf.query(f"cohort == @cohort and sub == @sub and type == LFP").sort_values(
+            bestLFP = df_perf.query(f"cohort == @cohort and sub == @sub and type == 'LFP'").sort_values(
                     by='ba_combined', ascending=False)[
                     "ch"].iloc[0]
+            ECOGranked = df_perf.query(f"cohort == @cohort and sub == @sub and type == 'ECOG'").sort_values(
+                by='ba_combined', ascending=False)[
+                "ch"]
             # Create set of the runs contained
-            # Find best ECOG
+            runset = set(ch_all[cohort][sub][bestLFP].keys())
             # Select those channels that LFP also had
+            for i in range(len(ECOGranked)):
+                bestECOG = ECOGranked.iloc[i]
             # Run estimator --> Maybe with a feature selector protocol?
             for channel in ch_all[cohort][sub].keys():
                 performancedict[cohort][sub][channel] = {}

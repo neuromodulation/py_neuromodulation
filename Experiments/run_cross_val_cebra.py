@@ -25,14 +25,14 @@ from Experiments.utils.knn_bpp import kNN_BPP
 # from einops.layers.torch import Rearrange # --> Can add to the model to reshape to fit 2dConv maybe
 
 ch_all = np.load(
-    os.path.join(r"D:\Glenn", "train_channel_all_fft.npy"),
+    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "train_channel_all_fft.npy"),
     allow_pickle="TRUE",
 ).item()
 ch_all_feat = np.load(
-    os.path.join(r"D:\Glenn", "channel_all_noraw.npy"),
+    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "channel_all_noraw.npy"),
     allow_pickle="TRUE",
 ).item()
-df_best_rmap = pd.read_csv(r"D:\Glenn\df_best_func_rmap_ch.csv")
+df_best_rmap = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_best_func_rmap_ch.csv")
 
 
 cohorts = ["Beijing", "Pittsburgh", "Berlin", ]  # "Washington"

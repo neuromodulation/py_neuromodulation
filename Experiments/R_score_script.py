@@ -7,7 +7,7 @@ import xgboost
 
 # import the data
 ch_all = np.load(
-    os.path.join(r"D:\Glenn", "channel_all.npy"),
+    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "channel_all.npy"),
     allow_pickle="TRUE",
 ).item()
 
