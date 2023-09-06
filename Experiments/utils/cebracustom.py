@@ -76,7 +76,7 @@ class CohortDiscrete(CustomConditionalDistribution, abc_.HasGenerator):
         self._set_data(samples)
         # self.sorted_idx = torch.from_numpy(np.argsort(self.samples))
         self.sorted_idx = torch.from_numpy(np.lexsort((self.samples[:,1],self.samples[:,0]))) # Multi dim version --> Sort first by 0th (cohort), then by movement 1st)
-        self.movsorted_idx = torch.from_numpy(np.argsort(self.samples[:,0])) # Multi dim version --> Sort first by 0th (cohort), then by movement 1st)
+        self.movsorted_idx = torch.from_numpy(np.argsort(self.samples[:,1])) # Multi dim version --> Sort indices by movement)
         self._init_transform()
 
     def _set_data(self, samples: torch.Tensor):
@@ -181,6 +181,25 @@ class CohortDiscrete(CustomConditionalDistribution, abc_.HasGenerator):
         idx = idx.astype(int)
 
         return self.movsorted_idx[idx]
+    def sample_invconditional_mov(self, reference_index: torch.Tensor) -> torch.Tensor:
+        """Draw samples conditional on template samples.
+
+        Args:
+            samples: batch of indices, typically drawn from a
+                prior distribution. Conditional samples will match
+                the values of these indices
+
+        Returns:
+            batch of indices, whose values match the values
+            corresponding to the given indices.
+        """
+        reference_index = self._to_numpy_int(reference_index[:,1])
+        idx = np.random.uniform(0, 1, len(reference_index))
+        idx *= self.cdfmov[np.abs(reference_index-1) + 1] - self.cdfmov[np.abs(reference_index-1)]
+        idx += self.cdfmov[reference_index]
+        idx = idx.astype(int)
+
+        return self.movsorted_idx[idx]
 
 class CohortDiscreteUniform(CohortDiscrete, abc_.PriorDistribution):
     """Re-sample the given indices and produce samples from a uniform distribution."""
@@ -266,6 +285,7 @@ class CohortDiscreteDataLoader(cebra_data.Loader):
         negative_idx = reference_idx[num_samples:]
         reference_idx = reference_idx[:num_samples]
         reference = self.index[reference_idx]
+        #negative_idx = self.distribution.sample_invconditional_mov(reference)
         if self.cond == 'cohmov':
             positive_idx = self.distribution.sample_conditional_cohmov(reference)
         elif self.cond == 'mov':

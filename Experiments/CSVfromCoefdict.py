@@ -10,7 +10,7 @@ ch_full = np.load(
 ).item()
 
 ch_all = np.load(
-    os.path.join(r"D:\Glenn", "modelcoeffs_l1.npy"),
+    os.path.join(r"D:\Glenn", "modelcoeffs_l1_2.npy"),
     allow_pickle="TRUE",
 ).item()
 
@@ -25,7 +25,7 @@ idxlist_Berlin_001 = idxlist.copy()
 idxlist_Berlin_001[3] = np.add(idxlist_Berlin_001[3],1)
 idxlist.append(np.concatenate(idxlist))
 idxlist_Berlin_001.append(np.concatenate(idxlist_Berlin_001))
-f = open(r'D:\Glenn\coeff_l1.csv', 'w',newline="")
+f = open(r'D:\Glenn\coeff_l1_2.csv', 'w',newline="")
 w = csv.writer(f)
 
 fields = ['cohort', 'sub', 'ch', 'type']

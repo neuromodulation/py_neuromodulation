@@ -39,7 +39,7 @@ ch_all_feat = np.load(
 df_best_rmap = pd.read_csv(r"D:\Glenn\df_best_func_rmap_ch.csv")
 
 
-cohorts = ["Beijing", "Pittsburgh", "Berlin", ]  # "Washington"
+cohorts = ["Beijing", "Pittsburgh", "Berlin"] # "Washington"]
 
 # offset9 should be better than offset 10, as the selected index will always cause class majority in the receptive field
 # In contrast to offset 10 where equality between classes can be had if selected value on edge
@@ -65,7 +65,27 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
 
     def get_offset(self):
         return cebra.data.Offset(4, 5)
+@cebra.models.register("kernel9-model") # --> add that line to register the model!
+class MyModel2(_OffsetModel, ConvolutionalModelMixin):
 
+    def __init__(self, num_neurons, num_units, num_output, normalize=True):
+        super().__init__(
+            nn.Conv1d(num_neurons, num_units, 9),
+            nn.GELU(),
+            nn.Conv1d(num_units, num_units, 7), nn.GELU(),
+            nn.Conv1d(num_units, num_units, 5), nn.GELU(),
+            nn.Conv1d(num_units, num_units, 5), nn.GELU(),
+            nn.Conv1d(num_units, num_output, 5),
+            num_input=num_neurons,
+            num_output=num_output,
+            normalize=normalize,
+        )
+
+    # ... and you can also redefine the forward method,
+    # as you would for a typical pytorch model
+
+    def get_offset(self):
+        return cebra.data.Offset(4+9, 5+9) # such that the full kernel can go on the full mov data >90% of times (90% at least 9 samples)
 
 def get_patients_train_dict(sub_test, cohort_test, val_approach: str, data_select: dict):
     cohorts_train = {}
@@ -310,9 +330,9 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
                 cebra_model = cebra.solver.init(name="single-session", model=neural_model, criterion=Crit, optimizer=Opt).to(
                     'cuda')
                 Loader = CohortDiscreteDataLoader(dataset=CohortAuxData, num_steps=model_params['max_iterations'],
-                                                  batch_size=model_params['batch_size'], prior='uniform', cond='cohmov')
+                                                  batch_size=model_params['batch_size'], prior=model_params['prior'], cond=model_params['conditional'])
                 cebra_model.fit(Loader)
-                TrainBatches = np.lib.stride_tricks.sliding_window_view(X_train,9,axis=0)
+                TrainBatches = np.lib.stride_tricks.sliding_window_view(X_train,neural_model.get_offset().__len__(),axis=0)
                 X_train_emb = cebra_model.transform(torch.from_numpy(TrainBatches[:]).type(torch.FloatTensor).to('cuda')).to('cuda')
                 X_train_emb = X_train_emb.cpu().detach().numpy()
                 # Get the loss and temperature plots
@@ -327,13 +347,13 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
                     decoder = neighbors.KNeighborsClassifier(
                         n_neighbors=model_params['n_neighbors'], metric=model_params['metric'],
                         n_jobs=model_params['n_jobs'])
-                    decoder.fit(X_train_emb, np.array(y_train_discr, dtype=int))
+                    decoder.fit(X_train_emb, np.array(y_train_discr[neural_model.get_offset().left:-neural_model.get_offset().right+1], dtype=int))
                 elif model_params['decoder'] == 'Logistic':
-                    decoder = linear_model.LogisticRegression(class_weight="balanced")
-                    decoder.fit(X_train_emb, np.array(y_train_discr[4:-4], dtype=int))
+                    decoder = linear_model.LogisticRegression(class_weight="balanced", penalty=None)
+                    decoder.fit(X_train_emb, np.array(y_train_discr[neural_model.get_offset().left:-neural_model.get_offset().right+1], dtype=int))
                 elif model_params['decoder'] == 'SVM':
                     decoder = SVC(kernel=cosine_similarity)
-                    decoder.fit(X_train_emb, np.array(y_train_discr, dtype=int))
+                    decoder.fit(X_train_emb, np.array(y_train_discr[neural_model.get_offset().left:-neural_model.get_offset().right+1], dtype=int))
                 elif model_params['decoder'] == 'FAISS':
                     raise Exception('Not implemented')
                 elif model_params['decoder'] == 'MLP':
@@ -347,28 +367,29 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
                     decoder.set_params(eval_metric="logloss")
                     decoder.fit(
                         X_train_emb,
-                        y_train_discr,
+                        np.array(y_train_discr[neural_model.get_offset().left:-neural_model.get_offset().right+1], dtype=int),
                         sample_weight=classes_weights,
                     )
                 elif model_params['decoder'] == 'KNN_BPP':
                     decoder = kNN_BPP(n_neighbors=model_params['n_neighbors'])
-                    decoder.fit(X_train_emb, np.array(y_train_discr, dtype=int))
+                    decoder.fit(X_train_emb, np.array(y_train_discr[neural_model.get_offset().left:-neural_model.get_offset().right+1], dtype=int))
 
             # Needed for training once per across cohort
             cohort_prev_it = cohort_test
             # TEST PERMUTATION OF FEATURES
             # rng = np.random.default_rng()
             # X_test_emb = cebra_model.transform(rng.permutation(X_test,axis=1),session_id=0)
-            TestBatches = np.lib.stride_tricks.sliding_window_view(X_test,9,axis=0)
+            TestBatches = np.lib.stride_tricks.sliding_window_view(X_test,neural_model.get_offset().__len__(),axis=0)
             X_test_emb = cebra_model.transform(torch.from_numpy(TestBatches).type(torch.FloatTensor).to('cuda')).to('cuda')
             X_test_emb = X_test_emb.cpu().detach().numpy()
 
             ### Embeddings are plotted here
             if show_embedding:
-                plotly_embeddings(X_train_emb,X_test_emb,y_train_discr[4:-4],y_test[4:-4],aux=coh_aux,type='coh', grad=False, nearest=False)
+                plotly_embeddings(X_train_emb,X_test_emb,y_train_discr[neural_model.get_offset().left:-neural_model.get_offset().right+1],
+                                  y_test[neural_model.get_offset().left:-neural_model.get_offset().right+1],aux=coh_aux,type='coh', grad=False, nearest=False)
 
             y_test_pr = decoder.predict(X_test_emb)
-            ba = metrics.balanced_accuracy_score(y_test[4:-4], y_test_pr)
+            ba = metrics.balanced_accuracy_score(y_test[neural_model.get_offset().left:-neural_model.get_offset().right+1], y_test_pr)
             print(ba)
             # ba = metrics.balanced_accuracy_score(np.array(y_test, dtype=int), decoder.predict(X_test_emb))
 
@@ -376,7 +397,7 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
             p_[cohort_test][sub_test] = {}
             p_[cohort_test][sub_test]["performance"] = ba
             #p_[cohort_test][sub_test]["X_test_emb"] = X_test_emb
-            p_[cohort_test][sub_test]["y_test"] = y_test[4:-4]
+            p_[cohort_test][sub_test]["y_test"] = y_test[neural_model.get_offset().left:-neural_model.get_offset().right+1]
             p_[cohort_test][sub_test]["y_test_pr"] = y_test_pr
             p_[cohort_test][sub_test]["loss"] = cebra_model.state_dict()["loss"]
             p_[cohort_test][sub_test]["temp"] = cebra_model.state_dict()["log"]["temperature"]
@@ -422,7 +443,7 @@ curtime = datetime.now().strftime("%Y_%m_%d-%H_%M")
 experiment = "All_channels"
 longcompute = "leave_1_sub_out_across_coh"
 perflist = []
-val_approaches = ["leave_1_cohort_out","leave_1_sub_out_across_coh"]
+val_approaches = ["leave_1_cohort_out"] #"leave_1_sub_out_across_coh"]
 
 
 for val_approach in val_approaches:
@@ -444,6 +465,8 @@ for val_approach in val_approaches:
                 'discreteMov':True, # Turn pseudoDiscr to False if you want to test true discrete movement labels (Otherwise this setting will do nothing)
                 'pseudoDiscr': False, # Pseudodiscrete meaning direct conversion from int to float
                 'gaussSigma':1.5, # Set pseuodDiscr to False for this to take effect and assuming a Gaussian for the movement distribution
+                'prior': 'uniform', # Set to empirical or uniform to either sample random or uniform across coh and movement
+                'conditional':'cohmov', # Set to mov or cohmov to either equalize reference-positive in movement or coherenceandmovement
                 'additional_comment':'PYTORCH_CohMovDiscrete_cohmov',
                 'debug': True} # Debug = True; stops saving the results unnecessarily
     if not model_params['debug']:

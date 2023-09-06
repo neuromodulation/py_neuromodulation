@@ -1,6 +1,7 @@
 from sklearn import metrics, model_selection, linear_model, svm
 import numpy as np
 import os
+import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import KFold, cross_validate, cross_val_score
 import xgboost
@@ -10,6 +11,9 @@ ch_all = np.load(
     os.path.join(r"D:\Glenn", "channel_all.npy"),
     allow_pickle="TRUE",
 ).item()
+
+df_perf = pd.read_csv(r"D:\Glenn\df_all_features.csv")
+
 
 # set features to use (do fft separately, as not every has to be computed)
 features = ['Hjorth', 'Sharpwave', 'fooof', 'bursts','fft', 'combined']
@@ -26,7 +30,7 @@ idxlist.append(np.concatenate(idxlist))
 idxlist_Berlin_001.append(np.concatenate(idxlist_Berlin_001))
 
 kf = KFold(n_splits = 3, shuffle = False)
-model = linear_model.LogisticRegression(class_weight="balanced", penalty='l1',solver='liblinear',tol=0.1)
+model = linear_model.LogisticRegression(class_weight="balanced",max_iter=1000)
 bascorer = metrics.make_scorer(metrics.balanced_accuracy_score)
 # loop over all channels
 performancedict = {}
@@ -44,6 +48,14 @@ for cohort in ch_all.keys():
         coefdict[cohort][sub] = {}
 
         if cohort == 'Berlin' and sub == '001':
+            allchannels = ch_all[cohort][sub].keys()
+            bestLFP = df_perf.query(f"cohort == @cohort and sub == @sub and type == LFP").sort_values(
+                    by='ba_combined', ascending=False)[
+                    "ch"].iloc[0]
+            # Create set of the runs contained
+            # Find best ECOG
+            # Select those channels that LFP also had
+            # Run estimator --> Maybe with a feature selector protocol?
             for channel in ch_all[cohort][sub].keys():
                 performancedict[cohort][sub][channel] = {}
                 performancedict[cohort][sub][channel]['ba'] = {}

@@ -28,6 +28,7 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
         return cebra.data.Offset(4, 5)
 
 
+
 session1 = torch.randn((1000, 30))
 session2 = torch.randn((1000, 50))
 index1 = torch.randn((1000, 4))
@@ -69,7 +70,7 @@ Datasingle.configure_for(modelsingle)
 #cebra.datasets.init('demo-continuous')
 
 Loader = CohortDiscreteDataLoader(dataset=Datasingle,num_steps=100,batch_size=25)
-
+cebra.data.DiscreteDataLoader
 solver.fit(Loader)
 batches = np.lib.stride_tricks.sliding_window_view(session1,9,axis=0)
 embedding = solver.transform(torch.from_numpy(batches[:]).to('cuda')).to('cuda')
