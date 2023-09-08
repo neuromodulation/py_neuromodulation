@@ -81,6 +81,6 @@ def test_fooof_features(setup_stream):
     data_batch = next(generator, None)
     feature_series = stream.run_analysis.process(data_batch)
     # since the settings can define searching for "max_n_peaks" peaks
-    # there will be None's in the feature_series
-    # with a non successful fit, aperiod features can also be None
+    # there can be None's in the feature_series
+    # with a non successful fit, aperiodic features can also be None
     assert feature_series is not None

@@ -361,11 +361,11 @@ class DataProcessor:
             )
 
         # check for all features, where the channel had a NaN, that the feature is also put to NaN
-
-        for ch in list(np.array(self.ch_names_used)[nan_channels]):
-            features_current.loc[
-                features_current.index.str.contains(ch)
-            ] = np.nan
+        if nan_channels.sum() > 0:
+            for ch in list(np.array(self.ch_names_used)[nan_channels]):
+                features_current.loc[
+                    features_current.index.str.contains(ch)
+                ] = np.nan
 
         if self.verbose is True:
             print(
