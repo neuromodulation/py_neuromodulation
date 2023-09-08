@@ -44,6 +44,18 @@ class CustomConditionalDistribution(abc.ABC):
             distribution.
         """
         raise NotImplementedError()
+    def sample_invconditional_mov(self, query: torch.Tensor) -> torch.Tensor:
+        """Return indices for the conditional distribution samples
+
+        Args:
+            query: Indices of reference samples
+
+        Returns:
+            A tensor of indices. Indexing the dataset with these
+            indices will return samples from the desired conditional
+            distribution.
+        """
+        raise NotImplementedError()
 class CohortDiscrete(CustomConditionalDistribution, abc_.HasGenerator):
     """Resample multi-dimensional discrete data.
 
@@ -155,13 +167,13 @@ class CohortDiscrete(CustomConditionalDistribution, abc_.HasGenerator):
             batch of indices, whose values match the values
             corresponding to the given indices.
         """
-        reference_index = self._to_numpy_int(2*reference_index[:,0] + reference_index[:,1])
-        idx = np.random.uniform(0, 1, len(reference_index))
-        idx *= self.cdf[reference_index + 1] - self.cdf[reference_index]
-        idx += self.cdf[reference_index]
-        idx = idx.astype(int)
+        reference_index1 = self._to_numpy_int(2*reference_index[:,0] + reference_index[:,1])
+        idx1 = np.random.uniform(0, 1, len(reference_index1))
+        idx1 *= self.cdf[reference_index1 + 1] - self.cdf[reference_index1]
+        idx1 += self.cdf[reference_index1]
+        idx1 = idx1.astype(int)
 
-        return self.sorted_idx[idx]
+        return self.sorted_idx[idx1]
     def sample_conditional_mov(self, reference_index: torch.Tensor) -> torch.Tensor:
         """Draw samples conditional on template samples.
 
@@ -174,13 +186,32 @@ class CohortDiscrete(CustomConditionalDistribution, abc_.HasGenerator):
             batch of indices, whose values match the values
             corresponding to the given indices.
         """
-        reference_index = self._to_numpy_int(reference_index[:,1])
-        idx = np.random.uniform(0, 1, len(reference_index))
-        idx *= self.cdfmov[reference_index + 1] - self.cdfmov[reference_index]
-        idx += self.cdfmov[reference_index]
-        idx = idx.astype(int)
+        reference_index2 = self._to_numpy_int(reference_index[:,1])
+        idx2 = np.random.uniform(0, 1, len(reference_index2))
+        idx2 *= self.cdfmov[reference_index2 + 1] - self.cdfmov[reference_index2]
+        idx2 += self.cdfmov[reference_index2]
+        idx2 = idx2.astype(int)
 
-        return self.movsorted_idx[idx]
+        return self.movsorted_idx[idx2]
+    def sample_invconditional_mov(self, reference_index: torch.Tensor) -> torch.Tensor:
+        """Draw samples conditional on template samples.
+
+        Args:
+            samples: batch of indices, typically drawn from a
+                prior distribution. Conditional samples will match
+                the values of these indices
+
+        Returns:
+            batch of indices, whose values match the values
+            corresponding to the given indices.
+        """
+        reference_index3 = self._to_numpy_int(reference_index[:,1])
+        idx3 = np.random.uniform(0, 1, len(reference_index3))
+        idx3 *= self.cdfmov[np.abs(reference_index3-1) + 1] - self.cdfmov[np.abs(reference_index3-1)]
+        idx3 += self.cdfmov[np.abs(reference_index3-1)]
+        idx3 = idx3.astype(int)
+
+        return self.movsorted_idx[idx3]
 
 class CohortDiscreteUniform(CohortDiscrete, abc_.PriorDistribution):
     """Re-sample the given indices and produce samples from a uniform distribution."""
@@ -266,11 +297,12 @@ class CohortDiscreteDataLoader(cebra_data.Loader):
         negative_idx = reference_idx[num_samples:]
         reference_idx = reference_idx[:num_samples]
         reference = self.index[reference_idx]
-        #negative_idx = self.distribution.sample_invconditional_mov(reference)
+        negative_idx = self.distribution.sample_invconditional_mov(reference)
         if self.cond == 'cohmov':
             positive_idx = self.distribution.sample_conditional_cohmov(reference)
         elif self.cond == 'mov':
             positive_idx = self.distribution.sample_conditional_mov(reference)
+
         return BatchIndex(reference=reference_idx,
                           positive=positive_idx,
                           negative=negative_idx)

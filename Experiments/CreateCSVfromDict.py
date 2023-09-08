@@ -5,7 +5,7 @@ import sys
 
 # import the data
 ch_all = np.load(
-    os.path.join(r"D:\Glenn", "AllfeaturesPerformances_correctlength.npy"),
+    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "LFPECOGperformance.npy"),
     allow_pickle="TRUE",
 ).item()
 
@@ -13,7 +13,7 @@ features = ['Hjorth', 'Sharpwave', 'fooof', 'bursts','fft', 'combined']
 
 fields = ['cohort', 'sub', 'ch', 'type', 'ba_Hjorth', 'ba_Sharpwave', 'ba_fooof', 'ba_bursts','ba_fft', 'ba_combined','95%CI_Hjorth', '95%CI_Sharpwave', '95%CI_fooof', '95%CI_bursts','95%CI_fft', '95%CI_combined', 'length', 'movsamples']
 
-f = open(r'D:\Glenn\df_all_features.csv', 'w',newline="")
+f = open(r'C:\Users\ICN_GPU\Documents\Glenn_Data\df_all_features_LFPECOG.csv', 'w',newline="")
 w = csv.writer(f)
 
 w.writerow(fields)

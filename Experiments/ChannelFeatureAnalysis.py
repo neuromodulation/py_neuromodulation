@@ -5,10 +5,11 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # Load the csv as a dataframe
-df = pd.read_csv(r"D:\Glenn\df_all_features.csv")
+df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_all_features.csv")
 
 perflist = ['ba_Hjorth', 'ba_Sharpwave', 'ba_fooof', 'ba_bursts','ba_fft', 'ba_combined','95%CI_Hjorth', '95%CI_Sharpwave', '95%CI_fooof', '95%CI_bursts','95%CI_fft', '95%CI_combined', 'length', 'movsamples']
 baonly = ['ba_Hjorth', 'ba_Sharpwave', 'ba_fooof', 'ba_bursts','ba_fft', 'ba_combined']
+baonly = ['ba_combined']
 CIonly = ['95%CI_Hjorth', '95%CI_Sharpwave', '95%CI_fooof', '95%CI_bursts','95%CI_fft', '95%CI_combined']
 cohorts = ["Beijing", "Pittsburgh", "Berlin", "Washington"]
 # Best performing channel and corresponding feature per subject
@@ -25,6 +26,7 @@ ax = sns.boxplot(data = df.melt(id_vars='cohort',value_vars=baonly, var_name=''
                                        , value_name='balanced accuracy'), x = '', y = 'balanced accuracy', hue='cohort')
 ax.set(title='Performance of features (all channels)')
 ax.axhline(0.5,ls='--')
+
 # Boxplot over best channels per subject
 idxofmax = np.sort(list(df.groupby(['sub', 'cohort'])['ba_combined'].idxmax()))
 maxpersub = df.iloc[idxofmax][['cohort','ba_Hjorth', 'ba_Sharpwave', 'ba_fooof', 'ba_bursts','ba_fft', 'ba_combined']]
@@ -32,6 +34,28 @@ ax = sns.boxplot(data = maxpersub.melt(id_vars='cohort',value_vars=baonly, var_n
                                        , value_name='balanced accuracy'), x = '', y = 'balanced accuracy', hue='cohort')
 ax.set(title='Performance of features (best channel per subject)')
 ax.axhline(0.5, ls='--')
+################################################ LFP and ECOG combined# Load the csv as a dataframe
+df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_all_features.csv")
+maxsingle = maxpersub.melt(id_vars='cohort',value_vars=baonly, var_name='ba_combined'
+                                       , value_name='balanced accuracy')
+maxsingle = maxsingle[maxsingle["cohort"].str.contains("Washington") == False]
+maxsingle['ba_combined'] = maxsingle['ba_combined'].replace('ba_combined','BestChannel')
+df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_all_features_LFPECOG.csv")
+baonly = ['ba_combined']
+maxECOGLFP = df.melt(id_vars='cohort',value_vars=baonly, var_name='ba_combined'
+                                       , value_name='balanced accuracy')
+maxECOGLFP['ba_combined'] = maxECOGLFP['ba_combined'].replace('ba_combined','ECOGLFP')
+comparisondf = pd.concat([maxsingle,maxECOGLFP])
+sns.boxplot(data= comparisondf,x='ba_combined', y='balanced accuracy',hue='cohort')
+#################################################################
+# Plot and save tables
+##### Boxplots
+# boxplot over all channels
+ax = sns.boxplot(data = df.melt(id_vars='cohort',value_vars=baonly, var_name=''
+                                       , value_name='balanced accuracy'), x = '', y = 'balanced accuracy', hue='cohort')
+ax.set(title='Performance of features (best LFP+best ECOG)')
+ax.axhline(0.5,ls='--')
+####################################################
 
 # ba_combined ECOG vs LFP over best channel per subject (per cohort)
 f, axes = plt.subplots(1, 2)
@@ -115,3 +139,15 @@ ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='left')
 
 # Plot mean of means
 plt.errorbar(x = baonly,y = meanofmeans[baonly], yerr=list(meanofmeans[CIonly]))
+
+################################################ LFP and ECOG combined# Load the csv as a dataframe
+df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_all_features_LFPECOG.csv")
+baonly = ['ba_combined']
+
+# Plot and save tables
+##### Boxplots
+# boxplot over all channels
+ax = sns.boxplot(data = df.melt(id_vars='cohort',value_vars=baonly, var_name=''
+                                       , value_name='balanced accuracy'), x = '', y = 'balanced accuracy', hue='cohort')
+ax.set(title='Performance of features (best LFP+best ECOG)')
+ax.axhline(0.5,ls='--')

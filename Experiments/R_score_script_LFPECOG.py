@@ -32,13 +32,13 @@ idxlist_Berlin_001.append(np.concatenate(idxlist_Berlin_001))
 kf = KFold(n_splits = 3, shuffle = False)
 model = linear_model.LogisticRegression(class_weight="balanced",max_iter=1000)
 bascorer = metrics.make_scorer(metrics.balanced_accuracy_score)
-# loop over all channels
+# loop over all bestECOG+'+'+bestLFPs
 performancedict = {}
 
-coef = True
+coef = False
 coefdict = {} # Will just be empty otherwise
 features = ['combined']
-for cohort in ch_all.keys():
+for cohort in ['Berlin','Beijing','Pittsburgh']:
     print(cohort)
     performancedict[cohort] = {}
     coefdict[cohort] = {}
@@ -48,7 +48,6 @@ for cohort in ch_all.keys():
         coefdict[cohort][sub] = {}
 
         if cohort == 'Berlin' and sub == '001':
-            allchannels = ch_all[cohort][sub].keys()
             bestLFP = df_perf.query(f"cohort == @cohort and sub == @sub and type == 'LFP'").sort_values(
                     by='ba_combined', ascending=False)[
                     "ch"].iloc[0]
@@ -56,122 +55,204 @@ for cohort in ch_all.keys():
                 by='ba_combined', ascending=False)[
                 "ch"]
             # Create set of the runs contained
-            runset = set(ch_all[cohort][sub][bestLFP].keys())
-            # Select those channels that LFP also had
+            LFPrunset = set(ch_all[cohort][sub][bestLFP].keys())
+
+            # Select those bestECOG+'+'+bestLFPs that LFP also had
             for i in range(len(ECOGranked)):
                 bestECOG = ECOGranked.iloc[i]
+                ECOGruns = np.array(list(ch_all[cohort][sub][bestECOG].keys()))
+                contains = [ele in LFPrunset for ele in ECOGruns] # list of True/False, for each ch in ECOG whether it exists in LFP
+                if np.sum(contains) == 0:
+                    continue
+                else: # Then ECOG has at least one bestECOG+'+'+bestLFP that LFP also had
+                    overlapruns = ECOGruns[contains]
+                    break
             # Run estimator --> Maybe with a feature selector protocol?
-            for channel in ch_all[cohort][sub].keys():
-                performancedict[cohort][sub][channel] = {}
-                performancedict[cohort][sub][channel]['ba'] = {}
-                performancedict[cohort][sub][channel]['95%CI'] = {}
-                coefdict[cohort][sub][channel] = {}
-
-                for featureidx in range(len(features)):
-                    x_concat = []
-                    y_concat = []
-                    for runs in ch_all[cohort][sub][channel].keys():
-                        x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data'][:,idxlist_Berlin_001[5]]))
-                        y_concat.append(ch_all[cohort][sub][channel][runs]['label'])
-                    x_concat = np.concatenate(x_concat, axis=0)
-                    y_concat = np.concatenate(y_concat, axis=0)
-                    if coef:
-                        cv_out = cross_validate(model, x_concat, np.array(y_concat, dtype=int), cv=kf, scoring = bascorer,return_estimator=True)
-                        scores = cv_out['test_score']
-                        allcoefs = []
-                        for model in cv_out['estimator']:
-                            allcoefs.append(model.coef_)
-                        avgcoeff = np.mean(allcoefs,axis=0)
-                        coefdict[cohort][sub][channel][features[featureidx]] = avgcoeff
-                    else:
-                        scores = cross_val_score(model, x_concat, np.array(y_concat, dtype=int), cv=kf, scoring = bascorer)
-                    performancedict[cohort][sub][channel]['ba'][features[featureidx]] = np.mean(scores)
-                    print(np.mean(scores))
-                    performancedict[cohort][sub][channel]['95%CI'][features[featureidx]] = np.std(scores)*2
-                performancedict[cohort][sub][channel]['explength'] = len(y_concat)
-                performancedict[cohort][sub][channel]['movsamples'] = np.sum(y_concat)
+            performancedict[cohort][sub][bestECOG+'+'+bestLFP] = {}
+            performancedict[cohort][sub][bestECOG+'+'+bestLFP]['ba'] = {}
+            performancedict[cohort][sub][bestECOG+'+'+bestLFP]['95%CI'] = {}
+            coefdict[cohort][sub][bestECOG+'+'+bestLFP] = {}
+            for featureidx in range(len(features)):
+                x_concat = []
+                y_concat = []
+                for runs in overlapruns:
+                    x_temp = np.concatenate(
+                        (np.squeeze(ch_all[cohort][sub][bestECOG][runs]['data'][:,idxlist_Berlin_001[5]]),
+                         np.squeeze(ch_all[cohort][sub][bestLFP][runs]['data'][:, idxlist_Berlin_001[5]])),axis=1)
+                    x_concat.append(x_temp) # Get best ECOG data
+                    y_concat.append(ch_all[cohort][sub][bestECOG][runs]['label'])
+                x_concat = np.concatenate(x_concat, axis=0)
+                y_concat = np.concatenate(y_concat, axis=0)
+                if coef:
+                    cv_out = cross_validate(model, x_concat, np.array(y_concat, dtype=int), cv=kf, scoring = bascorer,return_estimator=True)
+                    scores = cv_out['test_score']
+                    allcoefs = []
+                    for model in cv_out['estimator']:
+                        allcoefs.append(model.coef_)
+                    avgcoeff = np.mean(allcoefs,axis=0)
+                    coefdict[cohort][sub][bestECOG+'+'+bestLFP][features[featureidx]] = avgcoeff
+                else:
+                    scores = cross_val_score(model, x_concat, np.array(y_concat, dtype=int), cv=kf, scoring = bascorer)
+                performancedict[cohort][sub][bestECOG+'+'+bestLFP]['ba'][features[featureidx]] = np.mean(scores)
+                print(np.mean(scores))
+                performancedict[cohort][sub][bestECOG+'+'+bestLFP]['95%CI'][features[featureidx]] = np.std(scores)*2
+            performancedict[cohort][sub][bestECOG+'+'+bestLFP]['explength'] = len(y_concat)
+            performancedict[cohort][sub][bestECOG+'+'+bestLFP]['movsamples'] = np.sum(y_concat)
         elif cohort == 'Berlin' and sub == '014':
-            for channel in list(ch_all[cohort][sub].keys())[:-1]:
-                performancedict[cohort][sub][channel] = {}
-                performancedict[cohort][sub][channel]['ba'] = {}
-                performancedict[cohort][sub][channel]['95%CI'] = {}
+            bestLFP = df_perf.query(f"cohort == @cohort and sub == @sub and type == 'LFP'").sort_values(
+                    by='ba_combined', ascending=False)[
+                    "ch"].iloc[0]
+            ECOGranked = df_perf.query(f"cohort == @cohort and sub == @sub and type == 'ECOG'").sort_values(
+                by='ba_combined', ascending=False)[
+                "ch"]
+            # Create set of the runs contained
+            LFPrunset = set([list(ch_all[cohort][sub][bestLFP].keys())[0]])
 
-                coefdict[cohort][sub][channel] = {}
-                for featureidx in range(len(features)):
-                    x_concat = []
-                    y_concat = []
-                    for runs in [list(ch_all[cohort][sub][channel].keys())[0]]: # Only include med on (which should be first in the keylist)
-                        x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data'][:,idxlist[5]]))
-                        y_concat.append(ch_all[cohort][sub][channel][runs]['label'])
-                    x_concat = np.concatenate(x_concat, axis=0)
-                    y_concat = np.concatenate(y_concat, axis=0)
-                    if coef:
-                        cv_out = cross_validate(model, x_concat, np.array(y_concat, dtype=int), cv=kf, scoring = bascorer,return_estimator=True)
-                        scores = cv_out['test_score']
-                        allcoefs = []
-                        for model in cv_out['estimator']:
-                            allcoefs.append(model.coef_)
-                        avgcoeff = np.mean(allcoefs,axis=0)
-                        coefdict[cohort][sub][channel][features[featureidx]] = avgcoeff
-                    else:
-                        scores = cross_val_score(model, x_concat, np.array(y_concat, dtype=int), cv=kf,
-                                                 scoring=bascorer)
-                    performancedict[cohort][sub][channel]['ba'][features[featureidx]] = np.mean(scores)
-                    performancedict[cohort][sub][channel]['95%CI'][features[featureidx]] = np.std(scores)*2
-                performancedict[cohort][sub][channel]['explength'] = len(y_concat)
-                performancedict[cohort][sub][channel]['movsamples'] = np.sum(y_concat)
+            # Select those bestECOG+'+'+bestLFPs that LFP also had
+            for i in range(len(ECOGranked)):
+                bestECOG = ECOGranked.iloc[i]
+                ECOGruns = np.array([list(ch_all[cohort][sub][bestECOG].keys())[0]])
+                contains = [ele in LFPrunset for ele in ECOGruns] # list of True/False, for each ch in ECOG whether it exists in LFP
+                if np.sum(contains) == 0:
+                    continue
+                else: # Then ECOG has at least one bestECOG+'+'+bestLFP that LFP also had
+                    overlapruns = ECOGruns[contains]
+                    break
+            performancedict[cohort][sub][bestECOG + '+' + bestLFP] = {}
+            performancedict[cohort][sub][bestECOG + '+' + bestLFP]['ba'] = {}
+            performancedict[cohort][sub][bestECOG + '+' + bestLFP]['95%CI'] = {}
+            coefdict[cohort][sub][bestECOG + '+' + bestLFP] = {}
+            for featureidx in range(len(features)):
+                x_concat = []
+                y_concat = []
+                for runs in overlapruns:
+                    x_temp = np.concatenate(
+                        (np.squeeze(ch_all[cohort][sub][bestECOG][runs]['data'][:,idxlist[5]]),
+                         np.squeeze(ch_all[cohort][sub][bestLFP][runs]['data'][:, idxlist[5]])),axis=1)
+                    x_concat.append(x_temp) # Get best ECOG data
+                    y_concat.append(ch_all[cohort][sub][bestECOG][runs]['label'])
+                x_concat = np.concatenate(x_concat, axis=0)
+                y_concat = np.concatenate(y_concat, axis=0)
+                if coef:
+                    cv_out = cross_validate(model, x_concat, np.array(y_concat, dtype=int), cv=kf, scoring = bascorer,return_estimator=True)
+                    scores = cv_out['test_score']
+                    allcoefs = []
+                    for model in cv_out['estimator']:
+                        allcoefs.append(model.coef_)
+                    avgcoeff = np.mean(allcoefs,axis=0)
+                    coefdict[cohort][sub][bestECOG+'+'+bestLFP][features[featureidx]] = avgcoeff
+                else:
+                    scores = cross_val_score(model, x_concat, np.array(y_concat, dtype=int), cv=kf,
+                                             scoring=bascorer)
+                performancedict[cohort][sub][bestECOG+'+'+bestLFP]['ba'][features[featureidx]] = np.mean(scores)
+                performancedict[cohort][sub][bestECOG+'+'+bestLFP]['95%CI'][features[featureidx]] = np.std(scores)*2
+            performancedict[cohort][sub][bestECOG+'+'+bestLFP]['explength'] = len(y_concat)
+            performancedict[cohort][sub][bestECOG+'+'+bestLFP]['movsamples'] = np.sum(y_concat)
         elif cohort == 'Berlin' and sub == 'EL015':
             del coefdict[cohort][sub]
             del performancedict[cohort][sub]
         elif cohort == 'Berlin' and sub == 'EL016':
-            for channel in list(ch_all[cohort][sub].keys()):
-                performancedict[cohort][sub][channel] = {}
-                performancedict[cohort][sub][channel]['ba'] = {}
-                performancedict[cohort][sub][channel]['95%CI'] = {}
-
-                coefdict[cohort][sub][channel] = {}
-                try: # Just to get around the one channel that does not have MedOn
-                    for featureidx in range(len(features)):
-                        x_concat = []
-                        y_concat = []
-                        for runs in ch_all[cohort][sub][channel].keys(): # Only include med on (which should be first in the keylist)
-                            if np.char.find(runs, 'MedOn') != -1:
-                                x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data'][:,idxlist[5]]))
-                                y_concat.append(ch_all[cohort][sub][channel][runs]['label'])
-                            else:
-                                continue
-                        x_concat = np.concatenate(x_concat, axis=0)
-                        y_concat = np.concatenate(y_concat, axis=0)
-                        if coef:
-                            cv_out = cross_validate(model, x_concat, np.array(y_concat, dtype=int), cv=kf, scoring = bascorer,return_estimator=True)
-                            scores = cv_out['test_score']
-                            allcoefs = []
-                            for model in cv_out['estimator']:
-                                allcoefs.append(model.coef_)
-                            avgcoeff = np.mean(allcoefs, axis=0)
-                            coefdict[cohort][sub][channel][features[featureidx]] = avgcoeff
-                        else:
-                            scores = cross_val_score(model, x_concat, np.array(y_concat, dtype=int), cv=kf,
-                                                     scoring=bascorer)
-                        performancedict[cohort][sub][channel]['ba'][features[featureidx]] = np.mean(scores)
-                        performancedict[cohort][sub][channel]['95%CI'][features[featureidx]] = np.std(scores)*2
-                    performancedict[cohort][sub][channel]['explength'] = len(y_concat)
-                    performancedict[cohort][sub][channel]['movsamples'] = np.sum(y_concat)
-                except:
-                    del performancedict[cohort][sub][channel]
-        else:
-            for channel in ch_all[cohort][sub].keys():
-                performancedict[cohort][sub][channel] = {}
-                performancedict[cohort][sub][channel]['ba'] = {}
-                performancedict[cohort][sub][channel]['95%CI'] = {}
-
-                coefdict[cohort][sub][channel] = {}
+            LFPranked = df_perf.query(f"cohort == @cohort and sub == @sub and type == 'LFP'").sort_values(
+                by='ba_combined', ascending=False)[
+                "ch"]
+            ECOGranked = df_perf.query(f"cohort == @cohort and sub == @sub and type == 'ECOG'").sort_values(
+                by='ba_combined', ascending=False)[
+                "ch"]
+            # Create set of the runs contained
+            for i in range(len(LFPranked)):
+                bestLFP = LFPranked.iloc[i]
+                LFPrunlist = list(ch_all[cohort][sub][bestLFP].keys())
+                medoffonly = [run for run in LFPrunlist if (np.char.find(run, 'MedOn') == -1)]
+                if medoffonly:
+                    LFPrunset = set(medoffonly)
+                    break
+                else:
+                    continue
+            # Select those bestECOG+'+'+bestLFPs that LFP also had
+            for i in range(len(ECOGranked)):
+                bestECOG = ECOGranked.iloc[i]
+                ECOGruns = np.array(list(ch_all[cohort][sub][bestECOG].keys()))
+                contains = [ele in LFPrunset for ele in
+                            ECOGruns]  # list of True/False, for each ch in ECOG whether it exists in LFP
+                if np.sum(contains) == 0:
+                    continue
+                else:  # Then ECOG has at least one bestECOG+'+'+bestLFP that LFP also had
+                    overlapruns = ECOGruns[contains]
+                    break
+            performancedict[cohort][sub][bestECOG + '+' + bestLFP] = {}
+            performancedict[cohort][sub][bestECOG + '+' + bestLFP]['ba'] = {}
+            performancedict[cohort][sub][bestECOG + '+' + bestLFP]['95%CI'] = {}
+            coefdict[cohort][sub][bestECOG + '+' + bestLFP] = {}
+            try: # Just to get around the one channel that does not have MedOn
                 for featureidx in range(len(features)):
                     x_concat = []
                     y_concat = []
-                    for runs in ch_all[cohort][sub][channel].keys():
-                        x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data'][:,idxlist[5]]))
-                        y_concat.append(ch_all[cohort][sub][channel][runs]['label'])
+                    for runs in overlapruns: # Only include med on (which should be first in the keylist)
+                        if np.char.find(runs, 'MedOn') != -1:
+                            x_temp = np.concatenate(
+                                (np.squeeze(
+                                    ch_all[cohort][sub][bestECOG][runs]['data'][:, idxlist[5]]),
+                                 np.squeeze(
+                                     ch_all[cohort][sub][bestLFP][runs]['data'][:, idxlist[5]])),
+                                axis=1)
+                            x_concat.append(x_temp)  # Get best ECOG data
+                            y_concat.append(ch_all[cohort][sub][bestECOG][runs]['label'])
+                        else:
+                            continue
+                    x_concat = np.concatenate(x_concat, axis=0)
+                    y_concat = np.concatenate(y_concat, axis=0)
+                    if coef:
+                        cv_out = cross_validate(model, x_concat, np.array(y_concat, dtype=int), cv=kf, scoring = bascorer,return_estimator=True)
+                        scores = cv_out['test_score']
+                        allcoefs = []
+                        for model in cv_out['estimator']:
+                            allcoefs.append(model.coef_)
+                        avgcoeff = np.mean(allcoefs, axis=0)
+                        coefdict[cohort][sub][bestECOG+'+'+bestLFP][features[featureidx]] = avgcoeff
+                    else:
+                        scores = cross_val_score(model, x_concat, np.array(y_concat, dtype=int), cv=kf,
+                                                 scoring=bascorer)
+                    performancedict[cohort][sub][bestECOG+'+'+bestLFP]['ba'][features[featureidx]] = np.mean(scores)
+                    performancedict[cohort][sub][bestECOG+'+'+bestLFP]['95%CI'][features[featureidx]] = np.std(scores)*2
+                performancedict[cohort][sub][bestECOG+'+'+bestLFP]['explength'] = len(y_concat)
+                performancedict[cohort][sub][bestECOG+'+'+bestLFP]['movsamples'] = np.sum(y_concat)
+            except:
+                del performancedict[cohort][sub][bestECOG+'+'+bestLFP]
+        else:
+            try:
+                bestLFP = df_perf.query(f"cohort == @cohort and sub == @sub and type == 'LFP'").sort_values(
+                    by='ba_combined', ascending=False)[
+                    "ch"].iloc[0]
+                ECOGranked = df_perf.query(f"cohort == @cohort and sub == @sub and type == 'ECOG'").sort_values(
+                    by='ba_combined', ascending=False)[
+                    "ch"]
+                # Create set of the runs contained
+                LFPrunset = set(ch_all[cohort][sub][bestLFP].keys())
+
+                # Select those bestECOG+'+'+bestLFPs that LFP also had
+                for i in range(len(ECOGranked)):
+                    bestECOG = ECOGranked.iloc[i]
+                    ECOGruns = np.array(list(ch_all[cohort][sub][bestECOG].keys()))
+                    contains = [ele in LFPrunset for ele in
+                                ECOGruns]  # list of True/False, for each ch in ECOG whether it exists in LFP
+                    if np.sum(contains) == 0:
+                        continue
+                    else:  # Then ECOG has at least one bestECOG+'+'+bestLFP that LFP also had
+                        overlapruns = ECOGruns[contains]
+                        break
+                performancedict[cohort][sub][bestECOG + '+' + bestLFP] = {}
+                performancedict[cohort][sub][bestECOG + '+' + bestLFP]['ba'] = {}
+                performancedict[cohort][sub][bestECOG + '+' + bestLFP]['95%CI'] = {}
+                coefdict[cohort][sub][bestECOG + '+' + bestLFP] = {}
+                for featureidx in range(len(features)):
+                    x_concat = []
+                    y_concat = []
+                    for runs in overlapruns:
+                        x_temp = np.concatenate(
+                            (np.squeeze(ch_all[cohort][sub][bestECOG][runs]['data'][:, idxlist[5]]),
+                             np.squeeze(ch_all[cohort][sub][bestLFP][runs]['data'][:, idxlist[5]])), axis=1)
+                        x_concat.append(x_temp)  # Get best ECOG data
+                        y_concat.append(ch_all[cohort][sub][bestECOG][runs]['label'])
                     x_concat = np.concatenate(x_concat,axis=0)
                     y_concat = np.concatenate(y_concat,axis=0)
                     if coef:
@@ -181,18 +262,21 @@ for cohort in ch_all.keys():
                         for model in cv_out['estimator']:
                             allcoefs.append(model.coef_)
                         avgcoeff = np.mean(allcoefs,axis=0)
-                        coefdict[cohort][sub][channel][features[featureidx]] = avgcoeff
+                        coefdict[cohort][sub][bestECOG+'+'+bestLFP][features[featureidx]] = avgcoeff
                     else:
                         scores = cross_val_score(model, x_concat, np.array(y_concat, dtype=int), cv=kf,
                                                  scoring=bascorer)
-                    performancedict[cohort][sub][channel]['ba'][features[featureidx]] = np.mean(scores)
-                    performancedict[cohort][sub][channel]['95%CI'][features[featureidx]] = np.std(scores)*2
-                performancedict[cohort][sub][channel]['explength'] = len(y_concat)
-                performancedict[cohort][sub][channel]['movsamples'] = np.sum(y_concat)
+                    performancedict[cohort][sub][bestECOG+'+'+bestLFP]['ba'][features[featureidx]] = np.mean(scores)
+                    performancedict[cohort][sub][bestECOG+'+'+bestLFP]['95%CI'][features[featureidx]] = np.std(scores)*2
+                performancedict[cohort][sub][bestECOG+'+'+bestLFP]['explength'] = len(y_concat)
+                performancedict[cohort][sub][bestECOG+'+'+bestLFP]['movsamples'] = np.sum(y_concat)
+            except:
+                del coefdict[cohort][sub]
+                del performancedict[cohort][sub]
 
-np.save(r'D:\Glenn\AllfeaturesPerformances_l1_2.npy', performancedict)
+np.save(r'C:\Users\ICN_GPU\Documents\Glenn_Data\LFPECOGperformance.npy', performancedict)
 if coef:
-    np.save(r'D:\Glenn\modelcoeffs_l1_2.npy', coefdict)
+    np.save(r'C:\Users\ICN_GPU\Documents\Glenn_Data\modelcoeffs_l1_2.npy', coefdict)
 
 # TODO: Leave out MedOn for subject 14 of Berlin, the run that does not have movement (due to left arm being used for rotation instead of right)
 # TODO: Leave ALL OF sub EL015 --> Also no movement in label for MedOn and MedOff

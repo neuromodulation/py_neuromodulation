@@ -1,7 +1,6 @@
 import numpy as np
 import os
 import pandas as pd
-from cebra import CEBRA
 from torch import nn
 import torch
 import cebra.models
@@ -26,35 +25,52 @@ from sklearn.utils import class_weight
 from Experiments.utils.knn_bpp import kNN_BPP
 # from einops.layers.torch import Rearrange # --> Can add to the model to reshape to fit 2dConv maybe
 from Experiments.utils.cebracustom import CohortDiscreteDataLoader
-
+import time
+torch.backends.cudnn.benchmark = True
 
 ch_all = np.load(
-    os.path.join(r"D:\Glenn", "train_channel_all_fft.npy"),
+    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "train_channel_all_fft.npy"),
     allow_pickle="TRUE",
 ).item()
 ch_all_feat = np.load(
-    os.path.join(r"D:\Glenn", "channel_all_noraw.npy"),
+    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "channel_all_noraw.npy"),
     allow_pickle="TRUE",
 ).item()
-df_best_rmap = pd.read_csv(r"D:\Glenn\df_best_func_rmap_ch.csv")
+df_best_rmap = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_best_func_rmap_ch.csv")
 
 
 cohorts = ["Beijing", "Pittsburgh", "Berlin"] # "Washington"]
 
 # offset9 should be better than offset 10, as the selected index will always cause class majority in the receptive field
 # In contrast to offset 10 where equality between classes can be had if selected value on edge
-# TODO: Select receptive field based on statistics of the dataset
+# DONE: Select receptive field based on statistics of the dataset
 @cebra.models.register("offset9-model") # --> add that line to register the model!
 class MyModel(_OffsetModel, ConvolutionalModelMixin):
 
     def __init__(self, num_neurons, num_units, num_output, normalize=True):
         super().__init__(
-            nn.Conv1d(num_neurons, num_units, 2),
+            nn.Dropout(0.2),
+            nn.Conv1d(num_neurons, 32, 2),
             nn.GELU(),
-            nn.Conv1d(num_units, num_units, 2), nn.GELU(),
-            cebra_layers._Skip(nn.Conv1d(num_units, num_units, 3), nn.GELU()),
-            cebra_layers._Skip(nn.Conv1d(num_units, num_units, 3), nn.GELU()),
-            nn.Conv1d(num_units, num_output, 3),
+            nn.LazyBatchNorm1d(),
+            nn.Dropout(0.2),
+            nn.Conv1d(32, 64, 2),
+            nn.GELU(),
+            nn.LazyBatchNorm1d(), # I would trust layer or group more (per channel. i.e more per feature of sample instead of over samples)
+            #nn.Dropout(0.2),
+            cebra_layers._Skip(nn.Conv1d(64, 64, 3),
+                               nn.GELU(),nn.LazyBatchNorm1d()),
+            #nn.Dropout(0.2),
+            cebra_layers._Skip(nn.Conv1d(64, 64, 3),
+                               nn.GELU(),nn.LazyBatchNorm1d(),
+                               nn.Dropout(0.2)),
+            nn.Conv1d(64, num_output, 3),
+            #nn.Flatten(),
+            #nn.LazyLinear(32*3),
+            #nn.GELU(), # num_units*kernel size? (= channels * kernel)
+            #nn.LazyBatchNorm1d(),
+            #nn.Dropout(0.5),
+            #nn.LazyLinear(3),
             num_input=num_neurons,
             num_output=num_output,
             normalize=normalize,
@@ -135,7 +151,7 @@ def get_data_sub_ch(channel_all, cohort, sub, ch):
 
     return X_train, y_train
 
-def get_data_channels(sub_test: str, cohort_test: str, df_rmap: list):
+def get_data_channels(sub_test: str, cohort_test: str, df_rmap: pd.DataFrame):
     ch_test = df_rmap.query("cohort == @cohort_test and sub == @sub_test")[
         "ch"
     ].iloc[0]
@@ -327,21 +343,41 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
                                                                           'min_temperature']).to('cuda')
 
                 Opt = torch.optim.Adam(list(neural_model.parameters()) + list(Crit.parameters()), lr=model_params['learning_rate'])
-                cebra_model = cebra.solver.init(name="single-session", model=neural_model, criterion=Crit, optimizer=Opt).to(
+                cebra_model = cebra.solver.init(name="single-session", model=neural_model, criterion=Crit, optimizer=Opt, tqdm_on=True).to(
                     'cuda')
                 Loader = CohortDiscreteDataLoader(dataset=CohortAuxData, num_steps=model_params['max_iterations'],
-                                                  batch_size=model_params['batch_size'], prior=model_params['prior'], cond=model_params['conditional'])
-                cebra_model.fit(Loader)
+                                                  batch_size=model_params['batch_size'], prior=model_params['prior'], cond=model_params['conditional']).to('cuda')
+                if model_params['early_stopping']: # TODO: Make the validation set all of the subjects for leave-cohort-out (else early stop on 1 only) OR change to train separate per sub (more accurate)
+                    ValidData = cebra.data.TensorDataset(torch.from_numpy(X_test).type(torch.FloatTensor),
+                                                             discrete=torch.from_numpy(np.array(y_train,dtype=int).T).type(torch.LongTensor)).to('cuda')
+                    ValidData.configure_for(neural_model)
+                    Valid_loader = cebra.data.DiscreteDataLoader(dataset=ValidData, num_steps=1,
+                                                      batch_size=len(X_test)-len(X_test)%8).to('cuda')
+                    cebra_model.fit(loader=Loader,valid_loader=Valid_loader,save_frequency=5,valid_frequency=5,logdir="C:/Users/ICN_GPU/Documents/Glenn_Data/CEBRAsaves")
+                    # Save the total losses first before resetting to the early stopping
+                    if type(alllosses) == int:
+                        alllosses = np.array(np.expand_dims(cebra_model.state_dict()["loss"], axis=0))
+                        alltemps = np.array(np.expand_dims(cebra_model.state_dict()["log"]["temperature"], axis=0))
+                    else:
+                        alllosses = np.concatenate(
+                            (alllosses, np.expand_dims(cebra_model.state_dict()["loss"], axis=0)), axis=0)
+                        alltemps = np.concatenate(
+                            (alltemps, np.expand_dims(cebra_model.state_dict()["log"]["temperature"], axis=0)), axis=0)
+                    # Load model with lowest validation loss (INFONCE on validation data)
+                    cebra_model.load(logdir="C:/Users/ICN_GPU/Documents/Glenn_Data/CEBRAsaves",filename='checkpoint_best.pth')
+                else:
+                    cebra_model.fit(loader=Loader)
+                    if type(alllosses) == int:
+                        alllosses = np.array(np.expand_dims(cebra_model.state_dict()["loss"], axis=0))
+                        alltemps = np.array(np.expand_dims(cebra_model.state_dict()["log"]["temperature"], axis=0))
+                    else:
+                        alllosses = np.concatenate(
+                            (alllosses, np.expand_dims(cebra_model.state_dict()["loss"], axis=0)), axis=0)
+                        alltemps = np.concatenate(
+                            (alltemps, np.expand_dims(cebra_model.state_dict()["log"]["temperature"], axis=0)), axis=0)
                 TrainBatches = np.lib.stride_tricks.sliding_window_view(X_train,neural_model.get_offset().__len__(),axis=0)
                 X_train_emb = cebra_model.transform(torch.from_numpy(TrainBatches[:]).type(torch.FloatTensor).to('cuda')).to('cuda')
                 X_train_emb = X_train_emb.cpu().detach().numpy()
-                # Get the loss and temperature plots
-                if type(alllosses) == int:
-                    alllosses = np.array(np.expand_dims(cebra_model.state_dict()["loss"],axis=0))
-                    alltemps = np.array(np.expand_dims(cebra_model.state_dict()["log"]["temperature"],axis=0))
-                else:
-                    alllosses = np.concatenate((alllosses,np.expand_dims(cebra_model.state_dict()["loss"],axis=0)),axis=0)
-                    alltemps = np.concatenate((alltemps, np.expand_dims(cebra_model.state_dict()["log"]["temperature"],axis=0)),axis=0)
 
                 if model_params['decoder'] == 'KNN':
                     decoder = neighbors.KNeighborsClassifier(
@@ -349,7 +385,7 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
                         n_jobs=model_params['n_jobs'])
                     decoder.fit(X_train_emb, np.array(y_train_discr[neural_model.get_offset().left:-neural_model.get_offset().right+1], dtype=int))
                 elif model_params['decoder'] == 'Logistic':
-                    decoder = linear_model.LogisticRegression(class_weight="balanced", penalty=None)
+                    decoder = linear_model.LogisticRegression(class_weight='balanced', penalty=None)
                     decoder.fit(X_train_emb, np.array(y_train_discr[neural_model.get_offset().left:-neural_model.get_offset().right+1], dtype=int))
                 elif model_params['decoder'] == 'SVM':
                     decoder = SVC(kernel=cosine_similarity)
@@ -414,7 +450,7 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
     if not model_params['debug']:
         # After the run
         np.save(
-            f"D:/Glenn/CEBRA performances/{curtime}_{val_approach}.npy",
+            f"C:/Users/ICN_GPU/Documents/Glenn_Data/CEBRA performances/{curtime}_{val_approach}.npy",
             p_,
         )
         plot_results(p_, val_approach, cohorts, save=True)
@@ -425,7 +461,6 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False):
         metric_dict['cohortbalanced_mean_accuracy'] = ba_mean_ba
         for coh in range(len(cohorts)):
             metric_dict[f'mean_{cohorts[coh]}'] =  bacohortlist[coh]
-        print(metric_dict)
         exp, ssi, sei = hparams(model_params, metric_dict)
         writer.file_writer.add_summary(exp)
         writer.file_writer.add_summary(ssi)
@@ -443,7 +478,7 @@ curtime = datetime.now().strftime("%Y_%m_%d-%H_%M")
 experiment = "All_channels"
 longcompute = "leave_1_sub_out_across_coh"
 perflist = []
-val_approaches = ["leave_1_cohort_out"] #"leave_1_sub_out_across_coh"]
+val_approaches = ["leave_1_cohort_out", "leave_1_sub_out_across_coh"]
 
 
 for val_approach in val_approaches:
@@ -463,14 +498,16 @@ for val_approach in val_approaches:
                 'all_embeddings':False, # If you want to combine all the embeddings (only when true_msess = True !), currently 1 model is used for the test set --> Make majority
                 'true_msess':False, # Make a single model will be made for every subject (Usefull if feature dimension different between subjects)
                 'discreteMov':True, # Turn pseudoDiscr to False if you want to test true discrete movement labels (Otherwise this setting will do nothing)
-                'pseudoDiscr': False, # Pseudodiscrete meaning direct conversion from int to float
+                'pseudoDiscr':False, # Pseudodiscrete meaning direct conversion from int to float
                 'gaussSigma':1.5, # Set pseuodDiscr to False for this to take effect and assuming a Gaussian for the movement distribution
                 'prior': 'uniform', # Set to empirical or uniform to either sample random or uniform across coh and movement
-                'conditional':'cohmov', # Set to mov or cohmov to either equalize reference-positive in movement or coherenceandmovement
-                'additional_comment':'PYTORCH_CohMovDiscrete_cohmov',
+                'conditional':'mov', # Set to mov or cohmov to either equalize reference-positive in movement or coherenceandmovement
+                'early_stopping':False,
+                'additional_comment':'PYTORCH_customnegative_mov_EarlyStop1',
                 'debug': True} # Debug = True; stops saving the results unnecessarily
     if not model_params['debug']:
-        writer = SummaryWriter(log_dir=f"D:\Glenn\CEBRA_logs\{val_approach}\{curtime}")
-
+        writer = SummaryWriter(log_dir=f"C:/Users/ICN_GPU/Documents/Glenn_Data/CEBRA_logs/{val_approach}/{curtime}")
+    t0 = time.time()
     run_CV(val_approach, curtime, model_params,show_embedding=False)
+    print(f'runtime: {time.time()-t0}')
 
