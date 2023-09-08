@@ -204,10 +204,10 @@ class Stream(_OfflineStream):
 
         super().run()  # reinitialize the stream
 
-        if self.data is not None:
-            data = self._handle_data(self.data)
-        elif data is not None:
+        if data is not None:
             data = self._handle_data(data)
+        elif self.data is not None:
+            data = self._handle_data(self.data)
         elif self.data is None and data is None:
             raise ValueError(
                 "No data passed to run function."
