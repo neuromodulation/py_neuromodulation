@@ -28,6 +28,7 @@ class Preprocessor(Protocol):
     def test_settings(self, settings: dict):
         ...
 
+
 _PREPROCESSING_CONSTRUCTORS = [
     "notch_filter",
     "re_referencing",
@@ -86,7 +87,8 @@ class DataProcessor:
 
         self.features_previous = None
 
-        (ch_names_used, _, self.feature_idx, _) = self._get_ch_info()
+        (self.ch_names_used, _, self.feature_idx, _) = self._get_ch_info()
+
         self.preprocessors: list[Preprocessor] = []
         for preprocessing_method in self.settings["preprocessing"]:
             settings_str = f"{preprocessing_method}_settings"
@@ -133,7 +135,7 @@ class DataProcessor:
 
         self.features = nm_features.Features(
             s=self.settings,
-            ch_names=ch_names_used,
+            ch_names=self.ch_names_used,
             sfreq=self.sfreq_raw,
         )
 
@@ -174,7 +176,6 @@ class DataProcessor:
             for coord_loc in ["cortex", "subcortex"]
             for lat in ["left", "right"]
         ]:
-
             coords[coord_region] = {}
 
             ch_type = (
@@ -328,10 +329,14 @@ class DataProcessor:
         """
         start_time = time()
 
+        nan_channels = np.isnan(data).any(axis=1)
+
+        data = np.nan_to_num(
+            data[self.feature_idx, :]
+        )  # needs to be before preprocessing
+
         for processor in self.preprocessors:
             data = processor.process(data)
-
-        data = data[self.feature_idx, :]
 
         # calculate features
         features_dict = self.features.estimate_features(data)
@@ -354,6 +359,13 @@ class DataProcessor:
             features_current = self.projection.project_features(
                 features_current
             )
+
+        # check for all features, where the channel had a NaN, that the feature is also put to NaN
+
+        for ch in list(np.array(self.ch_names_used)[nan_channels]):
+            features_current.loc[
+                features_current.index.str.contains(ch)
+            ] = np.nan
 
         if self.verbose is True:
             print(
@@ -395,9 +407,7 @@ class DataProcessor:
 
         nm_IO.save_sidecar(sidecar, out_path_root, folder_name)
 
-    def save_settings(
-        self, out_path_root: _PathLike, folder_name: str
-    ) -> None:
+    def save_settings(self, out_path_root: _PathLike, folder_name: str) -> None:
         nm_IO.save_settings(self.settings, out_path_root, folder_name)
 
     def save_nm_channels(

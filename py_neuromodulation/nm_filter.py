@@ -176,8 +176,7 @@ class NotchFilter:
     def process(self, data: np.ndarray) -> np.ndarray:
         if self.filter_bank is None:
             return data
-        return np.nan_to_num(
-            _overlap_add_filter(
+        return _overlap_add_filter(
                 x=data,
                 h=self.filter_bank,
                 n_fft=None,
@@ -187,4 +186,3 @@ class NotchFilter:
                 copy=True,
                 pad="reflect_limited",
             )
-        )
