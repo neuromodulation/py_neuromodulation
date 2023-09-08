@@ -80,9 +80,13 @@ class PNStream(ABC):
         self.path_grids = path_grids
         self.verbose = verbose
         self.sfreq = sfreq
+        self.line_noise = line_noise
+        self.coord_names = coord_names
+        self.coord_list = coord_list
         self.sess_right = None
         self.projection = None
         self.model = None
+
         self.run_analysis = nm_run_analysis.DataProcessor(
             sfreq=self.sfreq,
             settings=self.settings,
@@ -96,9 +100,20 @@ class PNStream(ABC):
 
     @abstractmethod
     def run(self):
-        """function that will be called when data streaming (offline or online) will be started.
-        Internally a data loader should be initialized. 
+        """Reinitialize the stream
+        This might be handy in case the nm_channels or nm_settings changed
         """
+
+        self.run_analysis = nm_run_analysis.DataProcessor(
+            sfreq=self.sfreq,
+            settings=self.settings,
+            nm_channels=self.nm_channels,
+            path_grids=self.path_grids,
+            coord_names=self.coord_names,
+            coord_list=self.coord_list,
+            line_noise=self.line_noise,
+            verbose=self.verbose,
+        )
 
     @abstractmethod
     def _add_timestamp(
