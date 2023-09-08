@@ -341,7 +341,7 @@ class DataProcessor:
         # calculate features
         features_dict = self.features.estimate_features(data)
         features_values = np.array(
-            list(features_dict.values()), dtype=np.float64
+            list(features_dict.values()), dtype=np.uint64
         )
 
         # normalize features
