@@ -108,7 +108,7 @@ class NotchFilter:
         line_noise: int | float | None = None,
         freqs: np.ndarray | None = None,
         notch_widths: int | np.ndarray | None = 3,
-        trans_bandwidth: int = 15,
+        trans_bandwidth: int = 6.8,
     ) -> None:
         if line_noise is None and freqs is None:
             raise ValueError(
