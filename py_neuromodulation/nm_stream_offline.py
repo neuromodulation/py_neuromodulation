@@ -99,7 +99,7 @@ class _OfflineStream(nm_stream_abc.PNStream):
             data_batch = next(generator, None)
             if data_batch is None:
                 break
-            feature_series = self.run_analysis.process(data_batch)
+            feature_series = self.run_analysis.process(data_batch.astpye(np.float64))
             feature_series = self._add_timestamp(feature_series, cnt_samples)
             features.append(feature_series)
 
