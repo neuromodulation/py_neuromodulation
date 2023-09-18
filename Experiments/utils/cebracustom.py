@@ -273,4 +273,6 @@ class CohortDiscreteDataLoader(cebra_data.Loader):
             positive_idx = self.distribution.sample_conditional_mov(reference)
         return BatchIndex(reference=reference_idx,
                           positive=positive_idx,
-                          negative=negative_idx)
+                          negative=negative_idx,
+                          index=reference,
+                          index_reversed=self.index[negative_idx])

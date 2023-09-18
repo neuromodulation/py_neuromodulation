@@ -1,4 +1,4 @@
-from sklearn import metrics, model_selection, linear_model, svm
+from sklearn import metrics, model_selection, linear_model, svm, ensemble, kernel_approximation
 import numpy as np
 import os
 import matplotlib.pyplot as plt
@@ -27,11 +27,16 @@ idxlist_Berlin_001.append(np.concatenate(idxlist_Berlin_001))
 
 kf = KFold(n_splits = 3, shuffle = False)
 model = linear_model.LogisticRegression(class_weight="balanced", penalty='l1',solver='liblinear',tol=0.1)
+model = linear_model.LogisticRegression(class_weight="balanced", C = 1) # C does not seem to have an effect
+#model = svm.SVC(class_weight="balanced",kernel='linear', C=0.25, cache_size = 5000) # RBF one performs best (vs Log) with C=0.25 but slow
+#model = svm.LinearSVC(class_weight="balanced",dual='auto', C=0.1)
+#RBFapprox = kernel_approximation.RBFSampler(gamma='scale', n_components=800) # Can then use linearSVC, which performs worse than SVC(linear)
+#model = ensemble.BaggingClassifier(estimator=model,n_estimators=5) # Does not seem to speedup SVC
 bascorer = metrics.make_scorer(metrics.balanced_accuracy_score)
 # loop over all channels
 performancedict = {}
 
-coef = True
+coef = False
 coefdict = {} # Will just be empty otherwise
 features = ['combined']
 for cohort in ch_all.keys():

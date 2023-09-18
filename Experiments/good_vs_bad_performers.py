@@ -6,12 +6,14 @@ import os
 import matplotlib.pyplot as plt
 
 ############ LOAD in the data ##################
-df = pd.read_csv(r"D:\Glenn\df_all_features.csv")
+df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_all_features.csv")
 
 ch_all = np.load(
-    os.path.join(r"D:\Glenn", "channel_all.npy"),
+    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "channel_all.npy"),
     allow_pickle="TRUE",
 ).item()
+
+updrs = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_updrs.csv")
 ############# Specify features to create the feature indexlist to exclude the fooof knee from analysis ################
 features = ['Hjorth','raw','fft','Sharpwave', 'fooof', 'bursts', 'combined']
 performances = []
@@ -33,6 +35,7 @@ idxofmax = list(df.groupby('sub')['ba_combined'].idxmax())
 cohsubchmax = df.iloc[idxofmax][['cohort','sub','ch']]
 ba_combined = df.iloc[idxofmax]['ba_combined']
 
+sub_names = []
 best_ch = []
 targets = [] # For analysis of the labels for the best channels --> length / movement samples etc.
 for i in range(len(cohsubchmax)):
@@ -47,6 +50,7 @@ for i in range(len(cohsubchmax)):
     x_concat = np.concatenate(x_concat, axis=0)
     y_concat = np.concatenate(y_concat, axis=0)
     best_ch.append(x_concat)
+    sub_names.append(sub)
     targets.append(y_concat)
 
 #####################  Get the bottom x percent and the top x percent subjects from Berlin #####################
@@ -56,9 +60,11 @@ Berlinba = list(ba_combined.iloc[np.where(cohsubchmax['cohort'].values == 'Berli
 lowperf = np.percentile(Berlinba,25,method='lower')
 highperf = np.percentile(Berlinba,75,method='lower')
 Berlinlow = [Berlindata[i] for i in np.where(Berlinba<=lowperf)[0]]
-Berlinhigh = [Berlindata[i] for i in np.where(Berlinba>=highperf)[0]]
+sublow = [sub_names[i] for i in np.where(Berlinba<=lowperf)[0]]
+Berlinhigh = [Berlindata[i] for i in np.where(Berlinba>highperf)[0]]
+subhigh = [sub_names[i] for i in np.where(Berlinba>highperf)[0]]
 targlow = [Berlintargets[i] for i in np.where(Berlinba<=lowperf)[0]]
-targhigh = [Berlintargets[i] for i in np.where(Berlinba>=highperf)[0]]
+targhigh = [Berlintargets[i] for i in np.where(Berlinba>highperf)[0]]
 
 ###################### Analyze the movement information for differences ####################
 nrmovlow = [np.sum(i) for i in targlow]
@@ -108,7 +114,7 @@ meanperfeatlow = []
 for i in range(len(Berlinlow)):
     stdperfeatlow.append(np.std(Berlinlow[i],axis=0))
     meanperfeatlow.append(np.mean(Berlinlow[i],axis=0))
-stdperfeatlow[0] = stdperfeatlow[0][idxlist_Berlin_001[6]]
+#stdperfeatlow[0] = stdperfeatlow[0][idxlist_Berlin_001[6]]
 stdperfeathigh = []
 meanperfeathigh = []
 for i in range(len(Berlinhigh)):
@@ -129,16 +135,16 @@ for i in range(len(stdperfeathigh[0])):
 
 # Variation in recording signal during movement
 stdperfeatlow = []
-meanperfeatlow = []
+meanperfeatlowmov = []
 for i in range(len(Berlinlow)):
     stdperfeatlow.append(np.std(Berlinlow[i][np.where(targlow[i])],axis=0))
-    meanperfeatlow.append(np.mean(Berlinlow[i][np.where(targlow[i])],axis=0))
-stdperfeatlow[0] = stdperfeatlow[0][idxlist_Berlin_001[6]]
+    meanperfeatlowmov.append(np.mean(Berlinlow[i][np.where(targlow[i])],axis=0))
+#stdperfeatlow[0] = stdperfeatlow[0][idxlist_Berlin_001[6]]
 stdperfeathigh = []
-meanperfeathigh = []
+meanperfeathighmov = []
 for i in range(len(Berlinhigh)):
     stdperfeathigh.append(np.std(Berlinhigh[i][np.where(targhigh[i])],axis=0))
-    meanperfeathigh.append(np.mean(Berlinhigh[i][np.where(targhigh[i])], axis=0))
+    meanperfeathighmov.append(np.mean(Berlinhigh[i][np.where(targhigh[i])], axis=0))
 plt.figure()
 for i in range(len(stdperfeathigh[0])):
     plt.subplot(6,7,i+1)
@@ -148,7 +154,7 @@ for i in range(len(stdperfeathigh[0])):
 plt.figure()
 for i in range(len(stdperfeathigh[0])):
     plt.subplot(6, 7, i + 1)
-    plt.boxplot([[item[i] for item in meanperfeatlow],[item[i] for item in meanperfeathigh]])
+    plt.boxplot([[item[i] for item in meanperfeatlowmov],[item[i] for item in meanperfeathighmov]])
     plt.title(f'{featuredim[i]}')
     plt.suptitle('Mean of features during movement of low vs high performers')
 
@@ -158,7 +164,7 @@ meanperfeatlow = []
 for i in range(len(Berlinlow)):
     stdperfeatlow.append(np.std(Berlinlow[i][~np.where(targlow[i])[0]],axis=0))
     meanperfeatlow.append(np.mean(Berlinlow[i][~np.where(targlow[i])[0]],axis=0))
-stdperfeatlow[0] = stdperfeatlow[0][idxlist_Berlin_001[6]]
+#stdperfeatlow[0] = stdperfeatlow[0][idxlist_Berlin_001[6]]
 stdperfeathigh = []
 meanperfeathigh = []
 for i in range(len(Berlinhigh)):
@@ -177,10 +183,51 @@ for i in range(len(stdperfeathigh[0])):
     plt.title(f'{featuredim[i]}')
     plt.suptitle('Mean of features during rest of low vs high performers')
 
+# feature value during move vs rest
+plt.figure()
+for i in range(len(stdperfeathigh[0])):
+    plt.subplot(6,7,i+1)
+    plt.boxplot([[item[i] for item in np.array(meanperfeatlowmov)-np.array(meanperfeatlow)],[item[i] for item in np.array(meanperfeathighmov)-np.array(meanperfeathigh)]])
+    plt.title(f'{featuredim[i]}')
+    plt.suptitle('Movement-rest feature mean of low vs high performers')
+
+# UPDRS scores
+# [Berlindata[i] for i in np.where(Berlinba<=lowperf)[0]]
+updrs_high = []
+for i in range(len(subhigh)):
+    number = np.where(np.array(updrs['sub'] == subhigh[i]) & np.array(updrs['cohort'] == 'Berlin'))[0][0]
+    print(number)
+    updrs_high.append(updrs['UPDRS_total'][number])
+
+updrs_low = []
+for i in range(len(sublow)):
+    number = np.where(np.array(updrs['sub'] == sublow[i]) & np.array(updrs['cohort'] == 'Berlin'))[0][0]
+    updrs_low.append(updrs['UPDRS_total'][number])
+plt.figure()
+plt.boxplot([updrs_low,updrs_high])
+plt.show()
 
 ################### Compare their movement related features --> Mean feature profile around movement ################
-
-
+# Find onset idx
+# x samples before and after
+# plot low and high in separate plots
+onsetlist = []
+for i in range(len(Berlintargets)):
+    onsetlist.append(np.where((~np.equal(np.array(Berlintargets[i]), np.array([False]+list(Berlintargets[i][:-1]))) & np.array(Berlintargets[i])))[0])
+onsetlow = [onsetlist[i] for i in np.where(Berlinba<=lowperf)[0]]
+onsethigh = [onsetlist[i] for i in np.where(Berlinba>highperf)[0]]
+plt.figure()
+for i in range(len(onsetlow)):
+    plt.subplot(6, 7, i + 1)
+    plt.boxplot([[item[i] for item in meanperfeatlow], [item[i] for item in meanperfeathigh]])
+    plt.title(f'{featuredim[i]}')
+    plt.suptitle('Mean of features during rest of low vs high performers')
+plt.figure()
+for j in range(len(onsethigh)):
+    plt.subplot(6, 7, i + 1)
+    plt.boxplot([[item[i] for item in meanperfeatlow], [item[i] for item in meanperfeathigh]])
+    plt.title(f'{featuredim[i]}')
+    plt.suptitle('Mean of features during rest of low vs high performers')
 ### Second part: Train a model to predict performance output (all best channels) and check what features it looks for (if the model works)
 tree =  tree.DecisionTreeRegressor()
 tree.fit(best_ch,ba_combined)

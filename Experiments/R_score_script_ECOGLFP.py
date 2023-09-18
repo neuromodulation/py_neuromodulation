@@ -54,24 +54,24 @@ for cohort in ['Berlin','Beijing','Pittsburgh']:
         coefdict[cohort][sub] = {}
 
         if cohort == 'Berlin' and sub == '001':
-            bestLFP = df_perf.query(f"cohort == @cohort and sub == @sub and type == 'LFP'").sort_values(
+            bestECOG = df_perf.query(f"cohort == @cohort and sub == @sub and type == 'ECOG'").sort_values(
                     by='ba_combined', ascending=False)[
                     "ch"].iloc[0]
-            ECOGranked = df_perf.query(f"cohort == @cohort and sub == @sub and type == 'ECOG'").sort_values(
+            LFPranked = df_perf.query(f"cohort == @cohort and sub == @sub and type == 'LFP'").sort_values(
                 by='ba_combined', ascending=False)[
                 "ch"]
             # Create set of the runs contained
-            LFPrunset = set(ch_all[cohort][sub][bestLFP].keys())
+            ECOGrunset = set(ch_all[cohort][sub][bestECOG].keys())
 
             # Select those bestECOG+'+'+bestLFPs that LFP also had
-            for i in range(len(ECOGranked)):
-                bestECOG = ECOGranked.iloc[i]
-                ECOGruns = np.array(list(ch_all[cohort][sub][bestECOG].keys()))
-                contains = [ele in LFPrunset for ele in ECOGruns] # list of True/False, for each ch in ECOG whether it exists in LFP
+            for i in range(len(LFPranked)):
+                bestLFP = LFPranked.iloc[i]
+                LFPruns = np.array(list(ch_all[cohort][sub][bestLFP].keys()))
+                contains = [ele in ECOGrunset for ele in LFPruns] # list of True/False, for each ch in ECOG whether it exists in LFP
                 if np.sum(contains) == 0:
                     continue
                 else: # Then ECOG has at least one bestECOG+'+'+bestLFP that LFP also had
-                    overlapruns = ECOGruns[contains]
+                    overlapruns = LFPruns[contains]
                     break
             # Run estimator --> Maybe with a feature selector protocol?
             performancedict[cohort][sub][bestECOG+'+'+bestLFP] = {}
@@ -234,25 +234,24 @@ for cohort in ['Berlin','Beijing','Pittsburgh']:
                 del performancedict[cohort][sub][bestECOG+'+'+bestLFP]
         else:
             try:
-                bestLFP = df_perf.query(f"cohort == @cohort and sub == @sub and type == 'LFP'").sort_values(
+                bestECOG = df_perf.query(f"cohort == @cohort and sub == @sub and type == 'ECOG'").sort_values(
                     by='ba_combined', ascending=False)[
                     "ch"].iloc[0]
-                ECOGranked = df_perf.query(f"cohort == @cohort and sub == @sub and type == 'ECOG'").sort_values(
+                LFPranked = df_perf.query(f"cohort == @cohort and sub == @sub and type == 'LFP'").sort_values(
                     by='ba_combined', ascending=False)[
                     "ch"]
                 # Create set of the runs contained
-                LFPrunset = set(ch_all[cohort][sub][bestLFP].keys())
-
+                ECOGrunset = set(ch_all[cohort][sub][bestECOG].keys())
                 # Select those bestECOG+'+'+bestLFPs that LFP also had
-                for i in range(len(ECOGranked)):
-                    bestECOG = ECOGranked.iloc[i]
-                    ECOGruns = np.array(list(ch_all[cohort][sub][bestECOG].keys()))
-                    contains = [ele in LFPrunset for ele in
-                                ECOGruns]  # list of True/False, for each ch in ECOG whether it exists in LFP
+                for i in range(len(LFPranked)):
+                    bestLFP = LFPranked.iloc[i]
+                    LFPruns = np.array(list(ch_all[cohort][sub][bestLFP].keys()))
+                    contains = [ele in ECOGrunset for ele in
+                                LFPruns]  # list of True/False, for each ch in ECOG whether it exists in LFP
                     if np.sum(contains) == 0:
                         continue
                     else:  # Then ECOG has at least one bestECOG+'+'+bestLFP that LFP also had
-                        overlapruns = ECOGruns[contains]
+                        overlapruns = LFPruns[contains]
                         break
                 performancedict[cohort][sub][bestECOG + '+' + bestLFP] = {}
                 performancedict[cohort][sub][bestECOG + '+' + bestLFP]['ba'] = {}

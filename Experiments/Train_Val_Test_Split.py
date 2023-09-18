@@ -9,11 +9,11 @@ from sklearn.model_selection import StratifiedShuffleSplit
 import copy
 
 ch_all = np.load(
-    os.path.join(r"D:\Glenn", "channel_all_fft.npy"),
+    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "channel_all_fft.npy"),
     allow_pickle="TRUE",
 ).item()
 
-cohorts = ["Beijing", "Pittsburgh", "Berlin", ]  # "Washington"
+cohorts = ["Beijing", "Pittsburgh", "Berlin", "Washington"]
 
 nrsubspercohort = []
 pretend_data = []
@@ -33,8 +33,6 @@ for cohort in cohorts:
     nrsubspercohort.append(nrsubs)
 
 sss = StratifiedShuffleSplit(n_splits=1, test_size=0.3, random_state=42)
-print(sss.split(pretend_data, cohort_label))
-
 
 for i, (train_index, test_index) in enumerate(sss.split(pretend_data, cohort_label)):
     test_idx = test_index
@@ -48,7 +46,8 @@ for idx in train_idx:
 for idx in test_idx:
     del train_dict[cohortlist[idx]][keylist[idx]]
 
+
 save = True
 if save:
-   np.save(os.path.join(r"D:\Glenn", "train_channel_all_fft.npy"), train_dict, allow_pickle="TRUE")
-   np.save(os.path.join(r"D:\Glenn", "test_channel_all_fft.npy"), test_dict, allow_pickle="TRUE")
+   np.save(os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "train_channel_all_fft.npy"), train_dict, allow_pickle="TRUE")
+   np.save(os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "test_channel_all_fft.npy"), test_dict, allow_pickle="TRUE")

@@ -34,6 +34,10 @@ ax = sns.boxplot(data = maxpersub.melt(id_vars='cohort',value_vars=baonly, var_n
                                        , value_name='balanced accuracy'), x = '', y = 'balanced accuracy', hue='cohort')
 ax.set(title='Performance of features (best channel per subject)')
 ax.axhline(0.5, ls='--')
+
+meanperf = maxpersub['ba_combined'].mean()
+stdperf = maxpersub['ba_combined'].std()
+
 ################################################ LFP and ECOG combined# Load the csv as a dataframe
 df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_all_features.csv")
 maxsingle = maxpersub.melt(id_vars='cohort',value_vars=baonly, var_name='ba_combined'
