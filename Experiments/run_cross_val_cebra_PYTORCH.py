@@ -27,7 +27,7 @@ from Experiments.utils.knn_bpp import kNN_BPP
 # from einops.layers.torch import Rearrange # --> Can add to the model to reshape to fit 2dConv maybe
 from Experiments.utils.cebracustom import CohortDiscreteDataLoader
 import time
-from Experiments.utils.ExtraTorchFunc import Attention
+from Experiments.utils.ExtraTorchFunc import Attention, WeightAttention, MatrixAttention, AttentionWithContext
 torch.backends.cudnn.benchmark = True
 
 ch_all_train = np.load(
@@ -73,7 +73,7 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
         self.conv4 = nn.Conv1d(64, 64, 3)
         self.skipconv3 = cebra_layers._Skip(self.conv3,self.GELU,self.BN3)
         self.skipconv4 = cebra_layers._Skip(self.conv4,self.GELU,self.BN4,self.drop02)
-        self.convout = nn.Conv1d(64, num_output, 3)
+        self.convout = nn.Conv1d(64, num_output, num_output)
         #nn.Flatten(),
         #nn.LazyLinear(32*3),
         #nn.GELU(), # num_units*kernel size? (= channels * kernel)
@@ -107,27 +107,35 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
             normalize=normalize,
                          )
         self.savedscales = None
+        self.savedparam = None
         bidir = False
         hidden = 2
+        numfeatures = 36
+        compress = 9
         self.leftset = 4
         self.rightset = 5
-        self.rnn = nn.GRU(num_neurons,hidden,1,bidirectional=bidir,batch_first=True)
-        self.fc = nn.Linear(hidden*(1+int(bidir)),3)
+        self.rnn = nn.GRU(numfeatures,hidden,1,bidirectional=bidir,batch_first=True)
+        self.fc = nn.Linear(hidden*(1+int(bidir)),num_output)
 
         self.gru_attention1 = Attention(hidden , self.leftset+self.rightset)
         self.gru_attention2 = Attention(hidden, self.leftset + self.rightset)
+        self.feat_attention = WeightAttention(self.leftset + self.rightset,numfeatures)
+        self.mat_attention = MatrixAttention(self.leftset + self.rightset,numfeatures)
         self.BN = nn.LazyBatchNorm1d()
-        self.LN = nn.LayerNorm([36, 9])
+        self.LN = nn.LayerNorm([numfeatures, compress])
         self.avg_pool = nn.AdaptiveAvgPool1d(1)
         self.max_pool = nn.AdaptiveMaxPool1d(1)
-        self.linfeat = nn.Linear(36, 36, bias=False)
+        self.linfeat = nn.Linear(numfeatures, numfeatures, bias=False)
         # Reduce expand
-        self.linred = nn.Linear(36, 9)
-        self.linexp = nn.Linear(9,36)
+        self.linred = nn.Linear(numfeatures, compress)
+        self.linexp = nn.Linear(compress,numfeatures)
         self.relu = nn.ReLU()
         # Linear to compress time
-        self.lintimecomp = nn.Linear(9,1)
+        self.lintimecomp = nn.Linear(compress,1)
         self.sigmoid = nn.Sigmoid()
+        weight = torch.zeros(numfeatures,1)
+        nn.init.xavier_uniform_(weight)
+        self.learnedscale = nn.Parameter(weight)
     def init_weights(self):
         ih = (param.data for name, param in self.named_parameters() if 'weight_ih' in name)
         hh = (param.data for name, param in self.named_parameters() if 'weight_hh' in name)
@@ -139,41 +147,49 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
         for k in b:
             nn.init.constant_(k, 0)
     def forward(self,x):
-        # Implement feature Attention here:
-        # Reduce the time domain first:
-        # Avg pool the features
+        #### Feature Attention: # TODO: Time/Feature attention (now compresses time to query point) but prob changes over time
+        #### Reduce the time domain first:
+        #### Avg pool the features
         #y = self.avg_pool(x)
-        # Take the exact sample (seems to work ok)
-        y = x[:,:,self.leftset].unsqueeze(2)
-        # Max pool
+        #### Take the exact sample (seems to work ok)
+        #y = x[:,:,self.leftset].unsqueeze(2)
+        #### Max pool
         #y = self.max_pool(x)
-        # FC to compress (let FC find the function to compr over time)
+        #### FC to compress (let FC find the function to compr over time)
         #y = self.lintimecomp(x)
+        #y = self.relu(y) # Optionally with Non-linearity afterwards
 
-        # Use FC to find corresponding weights, directly or trying to compress :
-        #y = self.linfeat(y.transpose(-1, -2)).transpose(-1, -2) # Or convolutional variant (local channel/feat interaction)
-        # Or with compression inbetween:
-        y = self.linred(y.transpose(-1, -2))
-        y = self.relu(y)
-        y = self.linexp(y).transpose(-1, -2)
-        # True linear learnable scaling directly (Just multiply with learnable params)
-        ######
-        # Scale weights between 0 and 1 & Apply
-        scale = self.sigmoid(y) # Save / visualize y here if you want to know channel/feat 'weights'/'scale'
-        self.savedscales = scale
-        x = x * scale.expand_as(x) # Apply the learned Channel / Feature Attention weights
+        #### Use FC to find corresponding weights, directly or trying to compress :
+        #y = self.linfeat(y.transpose(-1, -2)).transpose(-1, -2)
+        #### Or with compression inbetween:
+        #y = self.linred(y.transpose(-1, -2))
+        #y = self.relu(y)
+        #y = self.linexp(y).transpose(-1, -2)
+        #### Scaling like that for time attention (Find weights per features)
+        scale = self.feat_attention(x)
+        ### Time-Feature matrix scaling
+        #scale = self.mat_attention(x)
+        ### Some very naive implementation to scale
+        #x = x * self.learnedscale.unsqueeze(0).expand_as(x)
+        #### Scale weights between 0 and 1 & Apply
+        #scale = self.sigmoid(y) # Save / visualize y here if you want to know channel/feat 'weights'/'scale'
+        #x = x * scale.expand_as(x) # Apply the learned Channel / Feature Attention weights
         #x = self.BN(x) # To prevent vanishing grad from [0,1] scaling
+
+        #### Save scaling
+        #self.savedscales = self.learnedscale.repeat(1,x.shape[0]).T.unsqueeze(2)
+        self.savedscales = scale
         x = x.permute(0,2,1)
         out, hidden = self.rnn(x)
-        # If unidirectional:
-        # Either take the last output (RNN has seen the whole dataset)
-        out = self.fc(out[:,-1,:])
-        # Or use attention to take into account more outputs
-        # out = self.fc(self.gru_attention1(out))
-        # If Bidirectional
-        # Either take the last output from both the directions
+        #### If unidirectional:
+        ### Either take the last output (RNN has seen the whole dataset)
+        #out = self.fc(out[:,-1,:])
+        ### Or use attention to take into account more outputs
+        out = self.fc(self.gru_attention1(out))
+        #### If Bidirectional
+        ### Either take the last output from both the directions
         #out = self.fc(torch.concat([out[:,-1,:2],out[:,0,2:]],1)) # Takes last pred from both sides ????
-        # Or take let attention optimize either together or separate where the forward and backward should be looking
+        ### Or take let attention optimize either together or separate where the forward and backward should be looking
         #out1 = self.gru_attention1(out[:,:,:2])
         #out2 = self.gru_attention2(out[:,:,2:])
         #out = self.fc(torch.concat([out1, out2], 1))
@@ -216,7 +232,7 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
         #self.convout = nn.Conv1d(32, num_output, 3)
         self.flat = nn.Flatten()
         self.linint = nn.LazyLinear(32)
-        self.linout = nn.LazyLinear(3)
+        self.linout = nn.LazyLinear(num_output)
         #nn.LazyLinear(32*3),
         #nn.GELU(), # num_units*kernel size? (= channels * kernel)
         #nn.LazyBatchNorm1d(),
@@ -224,19 +240,20 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
         #nn.LazyLinear(3),
 
     def forward(self,x):
-        UPDRS = x[:,-1,5] # Take the UPDRS score of the sample corr to the label
+        UPDRS = x[:,-1,4] # Take the UPDRS score of the sample corr to the label
         x = x[:,0:-1,:]
         #x = self.drop02(x)
-        x = self.LN(self.GELU(self.conv1(x))) # In: 512,36,9, Out: 512,32,8
+        x = self.BN(self.GELU(self.conv1(x))) # In: 512,36,9, Out: 512,32,8
         #x = self.drop02(x)
-        x = self.LN2(self.GELU(self.conv2(x))) # Out: 512,64,7
+        x = self.BN2(self.GELU(self.conv2(x))) # Out: 512,64,7
         # Note that these are cropped skip connections
         x = self.skipconv3(x) # Out: 512,64,5
-        x = self.LN4(self.GELU(self.conv4alt(x))) # Out: 512,64,3
+        x = self.BN4(self.GELU(self.conv4alt(x))) # Out: 512,64,3
         x = self.flat(x) # Out: 512,192
         #x = self.BN5(self.GELU(self.linint(x))) # Out: 512,32
         # Add the UPDRS score as a feature alongside x (now 32) # of other processed
-        x = self.linout(torch.concat((x,UPDRS.expand((1,x.size(dim=0))).T),1)) # Out: 512,3
+        x = self.GELU(self.linint(torch.concat((x,UPDRS.expand((1,x.size(dim=0))).T),1))) # UPDRS
+        x = self.linout(x) # Out: 512,3
         return torch.squeeze(x)
 
     # ... and you can also redefine the forward method,
@@ -559,16 +576,32 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False,embeddingconsi
                 X_train_emb = cebra_model.transform(torch.from_numpy(TrainBatches[:]).type(torch.FloatTensor).to('cuda')).to('cuda')
                 X_train_emb = X_train_emb.cpu().detach().numpy()
                 if showfeatureweights:
-                    scales = cebra_model.model.savedscales[:,:,0].detach().cpu().numpy()
-                    somechannel = list(alldat[cohort_test][sub_test].keys())[0]
-                    somerun = list(alldat[cohort_test][sub_test][somechannel].keys())[0]
-                    features = np.array(list(alldat[cohort_test][sub_test][somechannel][somerun]['feature_names']))
-                    med = np.median(scales,0)
-                    sorted_desc = np.argsort(med)[::-1]
-                    g = sns.boxplot(scales[:,sorted_desc])
-                    g.set_title("Scaling applied by the feature attention module [0,1]")
-                    g.set_xticklabels(features[sorted_desc], rotation=45, ha='right')
-                    plt.show()
+                    scales = cebra_model.model.savedscales.detach().cpu().numpy()
+                    if scales.shape[2] > 1:
+                        somechannel = list(alldat[cohort_test][sub_test].keys())[0]
+                        somerun = list(alldat[cohort_test][sub_test][somechannel].keys())[0]
+                        features = np.array(list(alldat[cohort_test][sub_test][somechannel][somerun]['feature_names']))
+                        meanscale = np.mean(scales,0)
+                        g = sns.heatmap(meanscale,cmap="viridis")
+                        g.set_title("Learned Time - Feature scaling")
+                        g.set_yticks(np.arange(len(features))+0.5)
+                        g.set_yticklabels(features, rotation=0)
+                        for tick_label in g.axes.get_xticklabels():
+                            if tick_label.get_text() == '4':
+                                tick_label.set_color("red")
+                        plt.show()
+
+                    else:
+                        scales = scales[:,:,0]
+                        somechannel = list(alldat[cohort_test][sub_test].keys())[0]
+                        somerun = list(alldat[cohort_test][sub_test][somechannel].keys())[0]
+                        features = np.array(list(alldat[cohort_test][sub_test][somechannel][somerun]['feature_names']))
+                        med = np.median(scales,0)
+                        sorted_desc = np.argsort(med)[::-1]
+                        g = sns.boxplot(scales[:,sorted_desc])
+                        g.set_title("Scaling applied by the feature attention module [0,1]")
+                        g.set_xticklabels(features[sorted_desc], rotation=45, ha='right')
+                        plt.show()
 
                 if embeddingconsistency: # TODO: Fix computation of embedding consistencies
                     trainembeddings.append(X_train_emb)
@@ -701,12 +734,12 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False,embeddingconsi
 curtime = datetime.now().strftime("%Y_%m_%d-%H_%M")
 experiment = "All_channels"
 perflist = []
-val_approaches = ["leave_1_cohort_out", "leave_1_sub_out_across_coh"]#,"leave_1_sub_out_within_coh"]
+val_approaches = ["leave_1_cohort_out"]#, "leave_1_sub_out_across_coh","leave_1_sub_out_within_coh"]
 
 cohorts = ["Beijing", "Pittsburgh", "Berlin"]#, "Washington"]
 
 for val_approach in val_approaches:
-    model_params = {'model_architecture':'offset9RNN-model',
+    model_params = {'model_architecture':'offset9UPDRS-model',
                 'batch_size': 512, # Ideally as large as fits on the GPU, min recommended = 512
                 'temperature_mode':'auto', # Constant or auto
                 'temperature':1,
@@ -726,8 +759,8 @@ for val_approach in val_approaches:
                 'gaussSigma':1.5, # Set pseuodDiscr to False for this to take effect and assuming a Gaussian for the movement distribution
                 'prior': 'uniform', # Set to empirical or uniform to either sample random or uniform across coh and movement
                 'conditional':'mov', # Set to mov or cohmov to either equalize reference-positive in movement or coherenceandmovement
-                'early_stopping':False,
-                'additional_comment':'BidirGRUModel',
+                'early_stopping':True,
+                'additional_comment':'BidirGRUModel_FeatAttention',
                 'debug': True} # Debug = True; stops saving the results unnecessarily
     if not model_params['debug']:
         writer = SummaryWriter(log_dir=f"C:/Users/ICN_GPU/Documents/Glenn_Data/CEBRA_logs/{val_approach}/{curtime}")

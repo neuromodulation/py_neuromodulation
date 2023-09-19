@@ -43,6 +43,133 @@ class Attention(nn.Module):
         weighted_input = x * torch.unsqueeze(a, -1)
         return torch.sum(weighted_input, 1)
 
+class AttentionWithContext(nn.Module):
+    def __init__(self, feature_dim, step_dim, bias=True, **kwargs):
+        super(AttentionWithContext, self).__init__(**kwargs)
+
+        self.supports_masking = True
+
+        self.bias = bias
+        self.feature_dim = feature_dim
+        self.step_dim = step_dim
+        self.features_dim = 0
+
+        weight = torch.zeros(feature_dim, 1)
+        nn.init.xavier_uniform_(weight)
+        self.weight = nn.Parameter(weight)
+
+        context = torch.zeros(step_dim,1)
+        nn.init.xavier_uniform_(context)
+        self.context = nn.Parameter(context)
+
+        if bias:
+            self.b = nn.Parameter(torch.zeros(step_dim))
+
+    def forward(self, x, mask=None):
+        feature_dim = self.feature_dim
+        step_dim = self.step_dim
+
+        eij = torch.mm(
+            x.contiguous().view(-1, feature_dim),
+            self.weight
+        ).view(-1, step_dim)
+
+        if self.bias:
+            eij = eij + self.b
+
+        eij = torch.tanh(eij)
+        ait = torch.mm(
+            eij,
+            self.context)
+        a = torch.exp(eij)
+
+        if mask is not None:
+            a = a * mask
+
+        a = a / torch.sum(a, 1, keepdim=True) + 1e-10
+
+        weighted_input = x * torch.unsqueeze(a, -1)
+        return torch.sum(weighted_input, 1)
+
+class WeightAttention(nn.Module):
+    def __init__(self, feature_dim, step_dim, bias=True, **kwargs):
+        super(WeightAttention, self).__init__(**kwargs)
+
+        self.supports_masking = True
+
+        self.bias = bias
+        self.feature_dim = feature_dim
+        self.step_dim = step_dim
+        self.features_dim = 0
+
+        weight = torch.zeros(feature_dim, 1)
+        nn.init.xavier_uniform_(weight)
+        self.weight = nn.Parameter(weight)
+
+        if bias:
+            self.b = nn.Parameter(torch.zeros(step_dim))
+
+    def forward(self, x, mask=None):
+        feature_dim = self.feature_dim
+        step_dim = self.step_dim
+
+        eij = torch.mm(
+            x.contiguous().view(-1, feature_dim),
+            self.weight
+        ).view(-1, step_dim)
+
+        if self.bias:
+            eij = eij + self.b
+
+        eij = torch.tanh(eij)
+        a = torch.exp(eij)
+
+        if mask is not None:
+            a = a * mask
+
+        a = a / torch.max(a, 1, keepdim=True)[0] + 1e-10
+
+        return torch.unsqueeze(a, -1)
+
+class MatrixAttention(nn.Module):
+    def __init__(self, feature_dim, step_dim, bias=True, **kwargs):
+        super(MatrixAttention, self).__init__(**kwargs)
+
+        self.supports_masking = True
+
+        self.bias = bias
+        self.feature_dim = feature_dim
+        self.step_dim = step_dim
+        self.features_dim = 0
+
+        weight = torch.zeros(step_dim,feature_dim)
+        nn.init.xavier_uniform_(weight)
+        self.weight = nn.Parameter(weight)
+
+        if bias:
+            self.b = nn.Parameter(torch.zeros(step_dim,feature_dim))
+
+    def forward(self, x, mask=None):
+        feature_dim = self.feature_dim
+        step_dim = self.step_dim
+
+        eij = torch.mul(
+            x,
+            self.weight
+        )
+
+        if self.bias:
+            eij = eij + self.b
+
+        eij = torch.tanh(eij)
+        a = torch.exp(eij)
+
+        if mask is not None:
+            a = a * mask
+        a = a / torch.max(torch.max(a, 1, keepdim=True)[0],2,keepdim=True)[0]
+
+        return a
+
 class CyclicLR(object):
     def __init__(self, optimizer, base_lr=1e-3, max_lr=6e-3,
                  step_size=2000, mode='triangular', gamma=1.,
