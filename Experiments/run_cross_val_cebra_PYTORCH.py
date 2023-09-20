@@ -80,7 +80,11 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
         #nn.LazyBatchNorm1d(),
         #nn.Dropout(0.5),
         #nn.LazyLinear(3),
-
+    def init_weights(m):
+        if isinstance(m, nn.Conv2d):
+            torch.nn.init.xavier_uniform_(m.weight)
+            with torch.no_grad():
+                m.bias.zero_()
     def forward(self,x):
         x = self.drop02(x)
         x = self.BN(self.GELU(self.conv1(x)))
@@ -90,7 +94,7 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
         x = self.skipconv3(x)
         x = self.skipconv4(x)
         x = self.convout(x)
-        return torch.squeeze(x)
+        return torch.nn.functional.normalize(torch.squeeze(x),p=2,dim=1)
 
     # ... and you can also redefine the forward method,
     # as you would for a typical pytorch model
@@ -100,7 +104,6 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
 
 @cebra.models.register("offset9RNN-model") # --> add that line to register the model!
 class MyModel(_OffsetModel, ConvolutionalModelMixin):
-# TODO: Add a way to incorporate static and categorical features --> I guess UPDRS as feature (age maybe also) and categorical (gender) through embedding
     def __init__(self, num_neurons, num_units, num_output, normalize=True):
         super().__init__(num_input=num_neurons,
             num_output=num_output,
@@ -183,9 +186,9 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
         out, hidden = self.rnn(x)
         #### If unidirectional:
         ### Either take the last output (RNN has seen the whole dataset)
-        #out = self.fc(out[:,-1,:])
+        out = self.fc(out[:,-1,:])
         ### Or use attention to take into account more outputs
-        out = self.fc(self.gru_attention1(out))
+        #out = self.fc(self.gru_attention1(out))
         #### If Bidirectional
         ### Either take the last output from both the directions
         #out = self.fc(torch.concat([out[:,-1,:2],out[:,0,2:]],1)) # Takes last pred from both sides ????
@@ -193,7 +196,7 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
         #out1 = self.gru_attention1(out[:,:,:2])
         #out2 = self.gru_attention2(out[:,:,2:])
         #out = self.fc(torch.concat([out1, out2], 1))
-        return torch.squeeze(out)
+        return torch.nn.functional.normalize(torch.squeeze(out),p=2,dim=1)
 
     # ... and you can also redefine the forward method,
     # as you would for a typical pytorch model
@@ -238,7 +241,11 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
         #nn.LazyBatchNorm1d(),
         #nn.Dropout(0.5),
         #nn.LazyLinear(3),
-
+    def init_weights(m):
+        if isinstance(m, nn.Conv2d):
+            torch.nn.init.xavier_uniform_(m.weight)
+            with torch.no_grad():
+                m.bias.zero_()
     def forward(self,x):
         UPDRS = x[:,-1,4] # Take the UPDRS score of the sample corr to the label
         x = x[:,0:-1,:]
@@ -275,7 +282,11 @@ class MyModel2(_OffsetModel, ConvolutionalModelMixin):
             num_output=num_output,
             normalize=normalize,
         )
-
+    def init_weights(m):
+        if isinstance(m, nn.Conv2d):
+            torch.nn.init.xavier_uniform_(m.weight)
+            with torch.no_grad():
+                m.bias.zero_()
     # ... and you can also redefine the forward method,
     # as you would for a typical pytorch model
 
@@ -739,7 +750,7 @@ val_approaches = ["leave_1_cohort_out"]#, "leave_1_sub_out_across_coh","leave_1_
 cohorts = ["Beijing", "Pittsburgh", "Berlin"]#, "Washington"]
 
 for val_approach in val_approaches:
-    model_params = {'model_architecture':'offset9UPDRS-model',
+    model_params = {'model_architecture':'offset9RNN-model',
                 'batch_size': 512, # Ideally as large as fits on the GPU, min recommended = 512
                 'temperature_mode':'auto', # Constant or auto
                 'temperature':1,
@@ -759,13 +770,13 @@ for val_approach in val_approaches:
                 'gaussSigma':1.5, # Set pseuodDiscr to False for this to take effect and assuming a Gaussian for the movement distribution
                 'prior': 'uniform', # Set to empirical or uniform to either sample random or uniform across coh and movement
                 'conditional':'mov', # Set to mov or cohmov to either equalize reference-positive in movement or coherenceandmovement
-                'early_stopping':True,
+                'early_stopping':False,
                 'additional_comment':'BidirGRUModel_FeatAttention',
                 'debug': True} # Debug = True; stops saving the results unnecessarily
     if not model_params['debug']:
         writer = SummaryWriter(log_dir=f"C:/Users/ICN_GPU/Documents/Glenn_Data/CEBRA_logs/{val_approach}/{curtime}")
 
     t0 = time.time()
-    run_CV(val_approach, curtime, model_params,show_embedding=False, embeddingconsistency=False,showfeatureweights=False)
+    run_CV(val_approach, curtime, model_params,show_embedding=True, embeddingconsistency=False,showfeatureweights=False)
     print(f'runtime: {time.time()-t0}')
 

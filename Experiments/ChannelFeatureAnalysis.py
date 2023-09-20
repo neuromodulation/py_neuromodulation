@@ -155,3 +155,6 @@ ax = sns.boxplot(data = df.melt(id_vars='cohort',value_vars=baonly, var_name=''
                                        , value_name='balanced accuracy'), x = '', y = 'balanced accuracy', hue='cohort')
 ax.set(title='Performance of features (best LFP+best ECOG)')
 ax.axhline(0.5,ls='--')
+
+
+

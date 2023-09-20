@@ -216,18 +216,59 @@ for i in range(len(Berlintargets)):
     onsetlist.append(np.where((~np.equal(np.array(Berlintargets[i]), np.array([False]+list(Berlintargets[i][:-1]))) & np.array(Berlintargets[i])))[0])
 onsetlow = [onsetlist[i] for i in np.where(Berlinba<=lowperf)[0]]
 onsethigh = [onsetlist[i] for i in np.where(Berlinba>highperf)[0]]
-plt.figure()
+
+
+left = 20
+right = 20
+total = left+right
+onsetfeats = np.zeros((len(onsetlow),total,37))
 for i in range(len(onsetlow)):
-    plt.subplot(6, 7, i + 1)
-    plt.boxplot([[item[i] for item in meanperfeatlow], [item[i] for item in meanperfeathigh]])
-    plt.title(f'{featuredim[i]}')
-    plt.suptitle('Mean of features during rest of low vs high performers')
+    persub = np.zeros((len(onsetlow[i]),total,37)) # Create empty zeros mat of (nr onsets, features,time around onset)
+    for timepoints in range(len(onsetlow[i])): # Get the profile for each sub
+        persub[timepoints,:,:] = Berlinlow[i][onsetlow[i][timepoints]-left:onsetlow[i][timepoints]+right,:]
+    meanforsub = persub.mean(axis=0)
+    onsetfeats[i,:,:] = meanforsub
 plt.figure()
-for j in range(len(onsethigh)):
+for i in range(len(stdperfeathigh[0])):
     plt.subplot(6, 7, i + 1)
-    plt.boxplot([[item[i] for item in meanperfeatlow], [item[i] for item in meanperfeathigh]])
+    for subs in range(len(onsetfeats)):
+        plt.scatter(range(total),onsetfeats[subs,:,i],s=1)
+    plt.plot(np.mean(onsetfeats[:,:,i],0))
+    plt.fill_between(range(total), np.mean(onsetfeats[:,:,i],0) - np.std(onsetfeats[:,:,i],0), np.mean(onsetfeats[:,:,i],0) + np.std(onsetfeats[:,:,i],0), alpha=.1)
+    plt.xticks(range(total))
     plt.title(f'{featuredim[i]}')
-    plt.suptitle('Mean of features during rest of low vs high performers')
+    plt.suptitle('Features around movement onset for worst performers in Berlin dataset')
+plt.figure()
+plt.imshow(np.mean(onsetfeats,0).T)
+plt.xticks([0,left,total-1],[-left/10,0,right/10])
+plt.xlabel('Time [s]')
+plt.yticks(range(37),featuredim)
+plt.title('Features around movement onset for worst performers in Berlin dataset')
+
+onsetfeats = np.zeros((len(onsethigh),total,37))
+for i in range(len(onsethigh)):
+    persub = np.zeros((len(onsethigh[i]),total,37)) # Create empty zeros mat of (nr onsets, features,time around onset)
+    for timepoints in range(len(onsethigh[i])): # Get the profile for each sub
+        persub[timepoints,:,:] = Berlinhigh[i][onsethigh[i][timepoints]-left:onsethigh[i][timepoints]+right,:]
+    meanforsub = persub.mean(axis=0)
+    onsetfeats[i,:,:] = meanforsub
+plt.figure()
+for i in range(len(stdperfeathigh[0])):
+    plt.subplot(6, 7, i + 1)
+    for subs in range(len(onsetfeats)):
+        plt.scatter(range(total),onsetfeats[subs,:,i],s=1)
+    plt.plot(np.mean(onsetfeats[:,:,i],0))
+    plt.fill_between(range(total), np.mean(onsetfeats[:,:,i],0) - np.std(onsetfeats[:,:,i],0), np.mean(onsetfeats[:,:,i],0) + np.std(onsetfeats[:,:,i],0), alpha=.1)
+    plt.xticks(range(total))
+    plt.title(f'{featuredim[i]}')
+    plt.suptitle('Features around movement onset for best performers in Berlin dataset')
+plt.figure()
+plt.imshow(np.mean(onsetfeats,0).T)
+plt.xticks([0,left,total-1],[-left/10,0,right/10])
+plt.xlabel('Time [s]')
+plt.yticks(range(37),featuredim)
+plt.title('Features around movement onset for best performers in Berlin dataset')
+
 ### Second part: Train a model to predict performance output (all best channels) and check what features it looks for (if the model works)
 tree =  tree.DecisionTreeRegressor()
 tree.fit(best_ch,ba_combined)
