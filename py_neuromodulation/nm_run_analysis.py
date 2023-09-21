@@ -343,7 +343,8 @@ class DataProcessor:
 
         # normalize features
         if self.settings["postprocessing"]["feature_normalization"]:
-            features_values = self.feature_normalizer.process(features_values)
+            normed_features = self.feature_normalizer.process(np.fromiter(features_dict.values(), dtype="float"))
+            features_dict = {key: normed_features[idx] for idx, key in enumerate(features_dict.keys())}
 
         features_current = pd.Series(
             data=list(features_dict.values()),
