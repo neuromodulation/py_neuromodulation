@@ -3,7 +3,9 @@ build-backend = "flit_core.buildapi"
 requires = ["flit_core >=3.2,<4"]
 
 [project]
-authors = [{name = "Timon Merk"}]
+name = "py_neuromodulation"
+version = "0.0.1"
+authors = [{name = "Timon Merk", email="timon.merk@charite.de"}]
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",
   "License :: OSI Approved :: MIT License ",
@@ -11,7 +13,6 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 description = "Real-time analysis of intracranial neurophysiology recordings."
-dynamic = ["version"]
 keywords = [
   "real-time",
   "eeg",
@@ -24,8 +25,7 @@ keywords = [
 ]
 license = {file = "LICENSE"}
 maintainers = [{name = "Timon Merk"}]
-name = "py_neuromodulation"
-readme = {file = "README.rst", content-type = "text/x-rst"}
+readme = "README.rst"
 requires-python = ">=3.10"
 
 dependencies = [

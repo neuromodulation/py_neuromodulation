@@ -331,9 +331,7 @@ class DataProcessor:
 
         nan_channels = np.isnan(data).any(axis=1)
 
-        data = np.nan_to_num(
-            data[self.feature_idx, :]
-        )  # needs to be before preprocessing
+        data = np.nan_to_num(data)  # [self.feature_idx, :]needs to be before preprocessing
 
         for processor in self.preprocessors:
             data = processor.process(data)
