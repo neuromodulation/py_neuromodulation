@@ -30,6 +30,7 @@ from py_neuromodulation import (
 )
 
 import mne
+import numpy as np
 
 # %%
 # Let's read the example using `mne_bids <https://mne.tools/mne-bids/stable/index.html>`_.
@@ -39,8 +40,14 @@ PATH_OUT = r"E:\scratch"
 RUN_NAME = "TestBispectrum"
 
 raw = mne.io.read_raw_brainvision(r"C:\Users\ICN_admin\Documents\Datasets\Berlin\sub-002\ses-EcogLfpMedOff01\ieeg\sub-002_ses-EcogLfpMedOff01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg.vhdr")
+raw = mne.io.read_raw_brainvision(r"C:\Users\ICN_admin\Documents\Datasets\Berlin\sub-003\ses-EcogLfpMedOff01\ieeg\sub-003_ses-EcogLfpMedOff01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg.vhdr")
+raw = mne.io.read_raw_brainvision(r"C:\Users\ICN_admin\Documents\Datasets\Berlin\sub-005\ses-EcogLfpMedOff01\ieeg\sub-005_ses-EcogLfpMedOff01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg.vhdr")
+raw = mne.io.read_raw_brainvision(r"C:\Users\ICN_admin\Documents\Datasets\Berlin\sub-005\ses-EcogLfpMedOff02\ieeg\sub-005_ses-EcogLfpMedOff02_task-SelfpacedRotationR_acq-StimOn_run-01_ieeg.vhdr")
 
-raw.pick(["ECOG_L_1_SMC_AT", "SQUARED_ROTATION"])
+
+#raw.pick(["ECOG_L_1_SMC_AT", "SQUARED_ROTATION"])
+raw.pick(["ECOG_L_1_SMC_AT"])
+raw.pick(["ECOG_R_1_SMC_AT"])
 sfreq = raw.info["sfreq"]
 
 data = raw.get_data()#[:, :int(sfreq)*100]
@@ -111,6 +118,17 @@ features = stream.run(
     out_path_root=PATH_OUT,
     folder_name=RUN_NAME,
 )
+
+features_plt = features[np.logical_and(features["time"] > int(sfreq)*10, features["time"] < int(sfreq)*15)]
+plt.figure()
+plt.subplot(211)
+plt.plot(data[0, int(sfreq)*10 : int(sfreq)*15])
+plt.subplot(212)
+plt.plot(features_plt["ECOG_L_1_SMC_AT_Bispectrum_phase_mean_whole_fband_range"], label="phase")
+plt.plot(features_plt["ECOG_L_1_SMC_AT_Bispectrum_real_mean_whole_fband_range"], label="real")
+plt.plot(features_plt["ECOG_L_1_SMC_AT_Bispectrum_imag_mean_whole_fband_range"], label="imag")
+plt.legend()
+plt.show()
 
 # %%
 # Feature Analysis Movement
