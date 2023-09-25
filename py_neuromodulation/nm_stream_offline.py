@@ -85,13 +85,14 @@ class _OfflineStream(nm_stream_abc.PNStream):
         generator = nm_generator.raw_data_generator(
             data=data,
             settings=self.settings,
-            sfreq=math.floor(self.sfreq),
+            sfreq=self.sfreq,
         )
         features = []
-        sample_add = int(self.sfreq / self.run_analysis.sfreq_features)
+        sample_add = self.sfreq / self.run_analysis.sfreq_features
 
         offset_time = self.settings["segment_length_features_ms"]
-        offset_start = np.ceil(offset_time / 1000 * self.sfreq).astype(int)
+        #offset_start = np.ceil(offset_time / 1000 * self.sfreq).astype(int)
+        offset_start = offset_time / 1000 * self.sfreq
 
         cnt_samples = offset_start
 
