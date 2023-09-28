@@ -44,7 +44,7 @@ ch_all = np.load(
     allow_pickle="TRUE",
 ).item()
 ch_all_feat = np.load(
-    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "Cleaned_channel_all.npy"),
+    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "channel_all_noraw.npy"),
     allow_pickle="TRUE",
 ).item()
 df_best_rmap = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_best_func_rmap_ch.csv")
@@ -975,6 +975,6 @@ for val_approach in val_approaches:
         writer = SummaryWriter(log_dir=f"C:/Users/ICN_GPU/Documents/Glenn_Data/CEBRA_logs/{val_approach}/{curtime}")
 
     t0 = time.time()
-    run_CV(val_approach, curtime, model_params,show_embedding=False, embeddingconsistency=False,showfeatureweights=False,Testphase=False)
+    run_CV(val_approach, curtime, model_params,show_embedding=True, embeddingconsistency=False,showfeatureweights=False,Testphase=False)
     print(f'runtime: {time.time()-t0}')
 

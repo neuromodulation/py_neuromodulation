@@ -6,12 +6,12 @@ import matplotlib.pyplot as plt
 import os
 
 # Load the csv as a dataframe
-df = pd.read_csv(r"D:\Glenn\coeff_l1_2.csv")
+df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\coeff_l1_2.csv")
 
-df_perf = pd.read_csv(r"D:\Glenn\df_all_features.csv")
+df_perf = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_all_features.csv")
 
 ch_full = np.load(
-    os.path.join(r"D:\Glenn", "channel_all.npy"),
+    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "channel_all.npy"),
     allow_pickle="TRUE",
 ).item()
 
@@ -30,10 +30,27 @@ idxlist_Berlin_001.append(np.concatenate(idxlist_Berlin_001))
 
 fields = ['cohort', 'sub', 'ch', 'type']
 
+cohorts = ["Berlin","Beijing","Washington","Pittsburgh"]
+
+# Cohortsublist
+names = df[['cohort','sub']].drop_duplicates()
+namelist = []
+count = 1
+oldcohort = df['cohort'].iloc[0]
+lenper = []
+for i in range(len(names)):
+    curcohort = names['cohort'].iloc[i]
+    if curcohort != oldcohort:
+        lenper.append(count-1)
+        count = 1
+    namelist.append(names['cohort'].iloc[i]+','+str(count))
+    count += 1
+    oldcohort = curcohort
+lenper.append(count-1)
+
 corrfeaturedim = [featuredim[i] for i in idxlist[-1]]
 allfields = fields+ corrfeaturedim
 
-cohorts = ["Beijing", "Pittsburgh", "Berlin", "Washington"]
 
 idxofmax = np.sort(list(df_perf.groupby(['cohort','sub'])['ba_combined'].idxmax()))
 
@@ -47,13 +64,24 @@ maxpersub_n = maxpersub.subtract(maxpersub.mean(axis=1),axis=0).div(maxpersub.st
 maxpersub_01 = absolutes.subtract(absolutes.min(axis=1),axis=0).div(absolutes.max(axis=1).subtract(absolutes.min(axis=1)),axis=0)
 maxpersub_01 = maxpersub_01* (negatives*-2+1)
 subject = df.iloc[idxofmax]['sub']
-ax = sns.heatmap(maxpersub_01,yticklabels= subject,annot=maxpersub_01,cmap="coolwarm")
+ax = sns.heatmap(maxpersub_01,yticklabels= subject,cmap="coolwarm")
 ax.set(xlabel="", ylabel="")
-ax.set_xticks(list(range(len(corrfeaturedim))))
+ax.set_xticks(np.array(range(len(corrfeaturedim)))+0.5)
 ax.set_xticklabels(corrfeaturedim)
 ax.xaxis.tick_top()
 ax.set_xticks(ax.get_xticks())
 ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='left')
+#ax.set_yticklabels(namelist)
+ax.set_yticks([])
+base = 0
+for i in range(len(cohorts)):
+    ax.text(-0.02, base + lenper[i] / 2, cohorts[i], ha='right', va='center', rotation=0,
+            transform=ax.get_yaxis_transform())
+    ax.hlines(base + lenper[i], 0, -0.02, color='k', lw=1,
+                  transform=ax.get_yaxis_transform(), clip_on=False)
+    base += lenper[i]
+plt.tight_layout()
+plt.show()
 
 ### Ranking of relative importance (take absolute value and then scale [0,1] per subject, then boxplot per feature
 maxpersub = df.iloc[idxofmax][corrfeaturedim].abs()

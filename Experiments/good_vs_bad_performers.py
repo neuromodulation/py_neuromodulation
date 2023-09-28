@@ -4,7 +4,7 @@ import numpy as np
 from sklearn import tree
 import os
 import matplotlib.pyplot as plt
-
+# TODO: FIX USING ACTUALLY ALL THE CHANNELS AND THE CORRECT RUNS
 ############ LOAD in the data ##################
 df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_all_features.csv")
 
@@ -31,7 +31,7 @@ idxlist.append(np.concatenate(idxlist))
 idxlist_Berlin_001.append(np.concatenate(idxlist_Berlin_001))
 
 ################### Find the best channel per subject ##################################
-idxofmax = list(df.groupby('sub')['ba_combined'].idxmax())
+idxofmax = np.sort(list(df.groupby(['cohort','sub'])['ba_combined'].idxmax()))
 cohsubchmax = df.iloc[idxofmax][['cohort','sub','ch']]
 ba_combined = df.iloc[idxofmax]['ba_combined']
 
@@ -44,9 +44,26 @@ for i in range(len(cohsubchmax)):
     channel = cohsubchmax['ch'].values[i]
     x_concat = []
     y_concat = []
-    for runs in ch_all[cohort][sub][channel].keys():
-        x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data']))
-        y_concat.append(ch_all[cohort][sub][channel][runs]['label'])
+    if cohort == 'Berlin' and sub == '001':
+        for runs in ch_all[cohort][sub][channel].keys():
+            x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data'][:, idxlist_Berlin_001[-1]]))
+            y_concat.append(ch_all[cohort][sub][channel][runs]['label'])
+    elif cohort == 'Berlin' and sub == 'EL016':
+        for runs in ch_all[cohort][sub][channel].keys():  # Only include med on (which should be first in the keylist)
+            if np.char.find(runs, 'MedOn') != -1:
+                x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data'][:, idxlist[-1]]))
+                y_concat.append(ch_all[cohort][sub][channel][runs]['label'])
+            else:
+                continue
+    elif cohort == 'Berlin' and sub == '014':
+        for runs in [
+            list(ch_all[cohort][sub][channel].keys())[0]]:  # Only include med on (which should be first in the keylist)
+            x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data'][:, idxlist[-1]]))
+            y_concat.append(ch_all[cohort][sub][channel][runs]['label'])
+    else:
+        for runs in ch_all[cohort][sub][channel].keys():
+            x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data'][:, idxlist[-1]]))
+            y_concat.append(ch_all[cohort][sub][channel][runs]['label'])
     x_concat = np.concatenate(x_concat, axis=0)
     y_concat = np.concatenate(y_concat, axis=0)
     best_ch.append(x_concat)
@@ -195,14 +212,27 @@ for i in range(len(stdperfeathigh[0])):
 # [Berlindata[i] for i in np.where(Berlinba<=lowperf)[0]]
 updrs_high = []
 for i in range(len(subhigh)):
-    number = np.where(np.array(updrs['sub'] == subhigh[i]) & np.array(updrs['cohort'] == 'Berlin'))[0][0]
-    print(number)
-    updrs_high.append(updrs['UPDRS_total'][number])
+    try:
+        number = np.where(np.array(updrs['sub'] == subhigh[i]) & np.array(updrs['cohort'] == 'Berlin'))[0][0]
+        print(number)
+        if np.isnan(updrs['UPDRS_total'][number]):
+            updrs_high.append(30)
+        else:
+            updrs_high.append(updrs['UPDRS_total'][number])
+    except:
+        updrs_high.append(30)
 
 updrs_low = []
 for i in range(len(sublow)):
-    number = np.where(np.array(updrs['sub'] == sublow[i]) & np.array(updrs['cohort'] == 'Berlin'))[0][0]
-    updrs_low.append(updrs['UPDRS_total'][number])
+    try:
+        number = np.where(np.array(updrs['sub'] == sublow[i]) & np.array(updrs['cohort'] == 'Berlin'))[0][0]
+        updrs_low.append(updrs['UPDRS_total'][number])
+        if np.isnan(updrs['UPDRS_total'][number]):
+            updrs_low.append(30)
+        else:
+            updrs_low.append(updrs['UPDRS_total'][number])
+    except:
+        updrs_low.append(30)
 plt.figure()
 plt.boxplot([updrs_low,updrs_high])
 plt.show()
@@ -238,6 +268,7 @@ for i in range(len(stdperfeathigh[0])):
     plt.xticks(range(total))
     plt.title(f'{featuredim[i]}')
     plt.suptitle('Features around movement onset for worst performers in Berlin dataset')
+onsetfeatslow = onsetfeats
 plt.figure()
 plt.imshow(np.mean(onsetfeats,0).T)
 plt.xticks([0,left,total-1],[-left/10,0,right/10])
@@ -263,11 +294,21 @@ for i in range(len(stdperfeathigh[0])):
     plt.title(f'{featuredim[i]}')
     plt.suptitle('Features around movement onset for best performers in Berlin dataset')
 plt.figure()
+plt.subplot(1,2,1)
+plt.imshow(np.mean(onsetfeatslow,0).T)
+plt.xticks([0,left,total-1],[-left/10,0,right/10])
+plt.title('Average of three lowest performers')
+plt.xlabel('Time [s]')
+plt.colorbar(location='bottom')
+plt.yticks(range(37),featuredim)
+plt.subplot(1,2,2)
 plt.imshow(np.mean(onsetfeats,0).T)
 plt.xticks([0,left,total-1],[-left/10,0,right/10])
+plt.title('Average of three highest performers')
 plt.xlabel('Time [s]')
-plt.yticks(range(37),featuredim)
-plt.title('Features around movement onset for best performers in Berlin dataset')
+plt.yticks([],[])
+plt.colorbar(location='bottom')
+plt.suptitle('Features around movement onset in Berlin dataset')
 
 ### Second part: Train a model to predict performance output (all best channels) and check what features it looks for (if the model works)
 tree =  tree.DecisionTreeRegressor()

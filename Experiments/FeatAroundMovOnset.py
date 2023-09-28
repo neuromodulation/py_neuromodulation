@@ -31,7 +31,7 @@ idxlist.append(np.concatenate(idxlist))
 idxlist_Berlin_001.append(np.concatenate(idxlist_Berlin_001))
 
 ################### Find the best channel per subject ##################################
-idxofmax = list(df.groupby('sub')['ba_combined'].idxmax())
+idxofmax = np.sort(list(df.groupby(['cohort','sub'])['ba_combined'].idxmax()))
 cohsubchmax = df.iloc[idxofmax][['cohort','sub','ch']]
 ba_combined = df.iloc[idxofmax]['ba_combined']
 
@@ -44,9 +44,26 @@ for i in range(len(cohsubchmax)):
     channel = cohsubchmax['ch'].values[i]
     x_concat = []
     y_concat = []
-    for runs in ch_all[cohort][sub][channel].keys():
-        x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data']))
-        y_concat.append(ch_all[cohort][sub][channel][runs]['label'])
+    if cohort == 'Berlin' and sub == '001':
+        for runs in ch_all[cohort][sub][channel].keys():
+            x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data'][:, idxlist_Berlin_001[-1]]))
+            y_concat.append(ch_all[cohort][sub][channel][runs]['label'])
+    elif cohort == 'Berlin' and sub == 'EL016':
+        for runs in ch_all[cohort][sub][channel].keys():  # Only include med on (which should be first in the keylist)
+            if np.char.find(runs, 'MedOn') != -1:
+                x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data'][:, idxlist[-1]]))
+                y_concat.append(ch_all[cohort][sub][channel][runs]['label'])
+            else:
+                continue
+    elif cohort == 'Berlin' and sub == '014':
+        for runs in [
+            list(ch_all[cohort][sub][channel].keys())[0]]:  # Only include med on (which should be first in the keylist)
+            x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data'][:, idxlist[-1]]))
+            y_concat.append(ch_all[cohort][sub][channel][runs]['label'])
+    else:
+        for runs in ch_all[cohort][sub][channel].keys():
+            x_concat.append(np.squeeze(ch_all[cohort][sub][channel][runs]['data'][:, idxlist[-1]]))
+            y_concat.append(ch_all[cohort][sub][channel][runs]['label'])
     x_concat = np.concatenate(x_concat, axis=0)
     y_concat = np.concatenate(y_concat, axis=0)
     best_ch.append(x_concat)
@@ -59,8 +76,8 @@ for i in range(len(targets)):
 
 def reject_outliers(data, m=3, repeats = 1):
     for rep in range(repeats):
-        med_arr = np.repeat(np.mean(data[abs(data - np.median(data)) < m * np.std(data)]),len(data)) # Take mean without the outlier instead of outlier
-        med_arr[abs(data - np.median(data)) < m * np.std(data)] = data[abs(data - np.median(data)) < m * np.std(data)] # Add back original data
+        med_arr = np.repeat(np.mean(data[abs(data - np.median(data)) < m * np.std(data)+1e-5]),len(data)) # Take mean without the outlier instead of outlier
+        med_arr[abs(data - np.median(data)) < m * np.std(data)+1e-5] = data[abs(data - np.median(data)) < m * np.std(data)+1e-5] # Add back original data
     return med_arr
 
 left = 20

@@ -29,10 +29,13 @@ idxlist.append(np.concatenate(idxlist))
 idxlist_Berlin_001.append(np.concatenate(idxlist_Berlin_001))
 
 kf = KFold(n_splits = 3, shuffle = False)
+kf_sfs = KFold(n_splits = 3, shuffle = False)
+kf_rfe = KFold(n_splits = 5, shuffle = False)
 model = linear_model.LogisticRegression(class_weight="balanced", penalty='l1',solver='liblinear',tol=0.1)
 model = linear_model.LogisticRegression(class_weight="balanced", C = 1,max_iter=1000) # C does not seem to have an effect
-sfs = SequentialFeatureSelector(model,direction='forward', n_features_to_select='auto',tol=0.002,cv=3,n_jobs=1) # Results are not good for many channels --> Could have just been the channels though (Some score low, like 13 LFP)
-rfe = RFECV(model,cv=5,n_jobs=-1)
+# Changed for the proper no shuffle split only after RUN, might warranty a rerun
+sfs = SequentialFeatureSelector(model,direction='forward', n_features_to_select='auto',tol=0.002,cv=kf,n_jobs=1) # Results are not good for many channels --> Could have just been the channels though (Some score low, like 13 LFP)
+rfe = RFECV(model,cv=kf_rfe,n_jobs=-1)
 mrmr = mifs.MutualInformationFeatureSelector(method='JMIM') # Old package, not functioning properly
 pipe = Pipeline([("selector", sfs), ("estimator", model)])
 #model = svm.SVC(class_weight="balanced",kernel='linear', C=0.25, cache_size = 5000) # RBF one performs best (vs Log) with C=0.25 but slow
