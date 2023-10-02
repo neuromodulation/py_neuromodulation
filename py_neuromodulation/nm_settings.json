@@ -24,7 +24,8 @@
         "linelength": true,
         "coherence": false,
         "nolds": false,
-        "mne_connectivity": false
+        "mne_connectivity": false,
+        "bispectrum": false
     },
     "postprocessing": {
         "feature_normalization": true,
@@ -257,5 +258,33 @@
     "mne_connectiviy": {
         "method": "plv",
         "mode": "multitaper"
+    },
+    "bispectrum": {
+        "f1s": [
+            5,
+            35
+        ],
+        "f2s": [
+            5,
+            35
+        ],
+        "compute_features_for_whole_fband_range": true,
+        "frequency_bands": [
+            "theta",
+            "alpha",
+            "low beta",
+            "high beta"
+        ],
+        "components": {
+            "absolute": true,
+            "real": true,
+            "imag": true,
+            "phase": true
+        },
+        "bispectrum_features": {
+            "mean": true,
+            "sum": true,
+            "var": true
+        }
     }
 }

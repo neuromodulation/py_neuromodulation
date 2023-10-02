@@ -11,6 +11,7 @@ from py_neuromodulation import (
     nm_oscillatory,
     nm_bursts,
     nm_linelength,
+    nm_bispectra
 )
 
 
@@ -69,6 +70,8 @@ class Features:
                     FeatureClass = nm_linelength.LineLength
                 case "mne_connectivity":
                     FeatureClass = nm_mne_connectivity.MNEConnectivity
+                case "bispectrum":
+                    FeatureClass = nm_bispectra.Bispectra
                 case _:
                     raise ValueError(f"Unknown feature found. Got: {feature}.")
 
