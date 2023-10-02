@@ -25,13 +25,13 @@ def raw_data_generator(
     offset_time = settings["segment_length_features_ms"]
     offset_start = offset_time / 1000 * sfreq
 
-    cnt_fsnew = 0
-    for cnt in range(data.shape[1]+1):  # shape + 1 guarantees that the last sample is also included
-        if cnt < offset_start:
-            cnt_fsnew += 1
-            continue
+    ratio_samples_features = sfreq / sfreq_new
 
-        cnt_fsnew += 1
-        if cnt_fsnew >= (sfreq / sfreq_new):
-            cnt_fsnew = 0
+    ratio_counter = 0
+    for cnt in range(data.shape[1]+1):  # shape + 1 guarantees that the last sample is also included
+
+        if (cnt - offset_start) >= ratio_samples_features * ratio_counter:
+
+            ratio_counter += 1
+
             yield data[:, np.floor(cnt-offset_start).astype(int) : cnt]
