@@ -29,12 +29,16 @@ from Experiments.utils.knn_bpp import kNN_BPP
 from Experiments.utils.cebracustom import CohortDiscreteDataLoader
 import time
 from Experiments.utils.ExtraTorchFunc import Attention, WeightAttention, MatrixAttention, AttentionWithContext
+from captum.attr import LayerConductance, LayerActivation, LayerIntegratedGradients
+from captum.attr import IntegratedGradients, DeepLift, GradientShap, NoiseTunnel, FeatureAblation
 torch.backends.cudnn.benchmark = True
 
 ch_all_train = np.load(
     os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "train_channel_all_fft.npy"),
     allow_pickle="TRUE",
 ).item()
+del ch_all_train['Pittsburgh']['014'] #TODO: FIX THESE TO BE CONTRALATERAL AND REINTEGRATE
+del ch_all_train['Pittsburgh']['000']
 ch_all_test = np.load(
     os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "test_channel_all_fft.npy"),
     allow_pickle="TRUE",
@@ -43,13 +47,24 @@ ch_all = np.load(
     os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "channel_all_fft.npy"),
     allow_pickle="TRUE",
 ).item()
+del ch_all['Pittsburgh']['014'] #TODO: FIX THESE TO BE CONTRALATERAL AND REINTEGRATE
+del ch_all['Pittsburgh']['000']
 ch_all_feat = np.load(
-    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "channel_all_noraw.npy"),
+    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "TempCleaned_channel_all.npy"),
     allow_pickle="TRUE",
 ).item()
-df_best_rmap = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_best_func_rmap_ch.csv")
+df_best_rmap = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_best_func_rmap_ch_adapted.csv")
+df_best_rmap_og = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_best_func_rmap_ch.csv")
 df_updrs = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_updrs.csv")
 
+
+features = ['Hjorth','fft', 'Sharpwave', 'fooof', 'bursts']
+performances = []
+featuredim = ch_all_feat['Berlin']['002']['ECOG_L_1_SMC_AT-avgref']['sub-002_ses-EcogLfpMedOff01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg']['feature_names']
+featuredict = {}
+for i in range(len(features)):
+    idx_i = np.nonzero(np.char.find(featuredim, features[i])+1)[0]
+    featuredict[features[i]] = idx_i
 
 # offset9 should be better than offset 10, as the selected index will always cause class majority in the receptive field
 # In contrast to offset 10 where equality between classes can be had if selected value on edge
@@ -114,32 +129,31 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
         self.savedparam = None
         bidir = False
         hidden = 2
-        numfeatures = 36
         compress = 9
         num_layers = 1
         grudrop = 0
-        self.leftset = 5
-        self.rightset = 4
-        self.rnn = nn.GRU(numfeatures,hidden,num_layers,dropout=grudrop,bidirectional=bidir,batch_first=True)
+        self.leftset = 9
+        self.rightset = 1
+        self.rnn = nn.GRU(num_neurons,hidden,num_layers,dropout=grudrop,bidirectional=bidir,batch_first=True)
         self.fc = nn.Linear(hidden*(1+int(bidir)),num_output)
 
         self.gru_attention1 = Attention(hidden , self.leftset+self.rightset)
         self.gru_attention2 = Attention(hidden, self.leftset + self.rightset)
-        self.feat_attention = WeightAttention(self.leftset + self.rightset,numfeatures)
-        self.mat_attention = MatrixAttention(self.leftset + self.rightset,numfeatures)
+        self.feat_attention = WeightAttention(self.leftset + self.rightset,num_neurons)
+        self.mat_attention = MatrixAttention(self.leftset + self.rightset,num_neurons)
         self.BN = nn.LazyBatchNorm1d()
-        self.LN = nn.LayerNorm([numfeatures, compress])
+        self.LN = nn.LayerNorm([num_neurons, compress])
         self.avg_pool = nn.AdaptiveAvgPool1d(1)
         self.max_pool = nn.AdaptiveMaxPool1d(1)
-        self.linfeat = nn.Linear(numfeatures, numfeatures, bias=False)
+        self.linfeat = nn.Linear(num_neurons, num_neurons, bias=False)
         # Reduce expand
-        self.linred = nn.Linear(numfeatures, compress)
-        self.linexp = nn.Linear(compress,numfeatures)
+        self.linred = nn.Linear(num_neurons, compress)
+        self.linexp = nn.Linear(compress,num_neurons)
         self.relu = nn.ReLU()
         # Linear to compress time
         self.lintimecomp = nn.Linear(compress,1)
         self.sigmoid = nn.Sigmoid()
-        weight = torch.zeros(numfeatures,1)
+        weight = torch.zeros(num_neurons,1)
         nn.init.xavier_uniform_(weight)
         self.learnedscale = nn.Parameter(weight)
     def init_weights(self):
@@ -172,7 +186,7 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
         #y = self.relu(y)
         #y = self.linexp(y).transpose(-1, -2)
         #### Scaling like that for time attention (Find weights per features)
-        scale = self.feat_attention(x)
+        #scale = self.feat_attention(x)
         ### Time-Feature matrix scaling
         #scale = self.mat_attention(x)
         ### Some very naive implementation to scale
@@ -184,7 +198,7 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
 
         #### Save scaling
         #self.savedscales = self.learnedscale.repeat(1,x.shape[0]).T.unsqueeze(2)
-        self.savedscales = scale
+        #self.savedscales = scale
         x = x.permute(0,2,1)
         out, hidden = self.rnn(x)
         #### If unidirectional:
@@ -270,31 +284,29 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
     # as you would for a typical pytorch model
     def get_offset(self):
         return cebra.data.Offset(4, 5)
-@cebra.models.register("kernel9-model") # --> add that line to register the model!
-class MyModel2(_OffsetModel, ConvolutionalModelMixin):
 
-    def __init__(self, num_neurons, num_units, num_output, normalize=True):
-        super().__init__(
-            nn.Conv1d(num_neurons, num_units, 9),
-            nn.GELU(),
-            nn.Conv1d(num_units, num_units, 7), nn.GELU(),
-            nn.Conv1d(num_units, num_units, 5), nn.GELU(),
-            nn.Conv1d(num_units, num_units, 5), nn.GELU(),
-            nn.Conv1d(num_units, num_output, 5),
-            num_input=num_neurons,
-            num_output=num_output,
-            normalize=normalize,
-        )
-    def init_weights(m):
-        if isinstance(m, nn.Conv2d):
-            torch.nn.init.xavier_uniform_(m.weight)
-            with torch.no_grad():
-                m.bias.zero_()
-    # ... and you can also redefine the forward method,
-    # as you would for a typical pytorch model
 
-    def get_offset(self):
-        return cebra.data.Offset(4+9, 5+9) # such that the full kernel can go on the full mov data >90% of times (90% at least 9 samples)
+class LogisticRegression(nn.Module):
+    def __init__(self, input_dim, output_dim):
+        super(LogisticRegression, self).__init__()
+        self.linear = nn.Linear(input_dim, output_dim)
+        nn.init.uniform_(self.linear.weight, -0.01, 0.01)
+        nn.init.zeros_(self.linear.bias)
+    def forward(self, x):
+        outputs = self.linear(x)
+        return outputs
+
+
+class DirectClassifier(nn.Module): # Concatenate the learned models in 1 model
+    def __init__(self, CEBRA, Logres):
+        super(DirectClassifier, self).__init__()
+        self.modelA = CEBRA
+        self.modelB = Logres
+
+    def forward(self, x):
+        x = self.modelA(x)
+        x = self.modelB(x)
+        return torch.sigmoid(x)
 
 def get_patients_train_dict(sub_test, cohort_test, val_approach: str, data_select: dict):
     cohorts_train = {}
@@ -350,7 +362,11 @@ def get_data_sub_ch(channel_all, cohort, sub, ch, UPDRS=None):
     return X_train, y_train
 
 def get_data_channels(sub_test: str, cohort_test: str, df_rmap: pd.DataFrame, naiveupdrs=False):
-    ch_test = df_rmap.query("cohort == @cohort_test and sub == @sub_test")[
+    if sub_test != '000':
+        sub_num = sub_test.lstrip('0')
+    else:
+        sub_num = '0'
+    ch_test = df_rmap.query("cohort == @cohort_test and sub == @sub_num")[
         "ch"
     ].iloc[0]
     if not naiveupdrs:
@@ -601,6 +617,8 @@ def plotly_embeddings(X_train_emb,X_test_emb,y_train_discr,y_test,test_coh,aux=N
                 opacity=0.8))]}, auto_open=True)
 
 def run_CV(val_approach,curtime,model_params,show_embedding=False,embeddingconsistency=False,showfeatureweights=False,Testphase=False):
+    featuredim = ch_all_feat['Berlin']['002']['ECOG_L_1_SMC_AT-avgref'][
+        'sub-002_ses-EcogLfpMedOff01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg']['feature_names']
     train_select = ch_all_train
     test_select = ch_all_test
     alldat = ch_all_feat
@@ -631,7 +649,14 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False,embeddingconsi
             X_test, y_test = get_data_channels(
                 sub_test, cohort_test, df_rmap=df_best_rmap
             )
-
+            # Select the desired features
+            toselect = model_params['features'].split(',')
+            idxlist = []
+            for featsel in toselect:
+                idxlist.append(featuredict[featsel])
+            idxlist = np.concatenate(idxlist)
+            featuredim = featuredim[idxlist]
+            X_test = X_test[:, idxlist]
             # if statement to keep the same model for all subjects of leave 1 out cohort
             if (val_approach == "leave_1_cohort_out" and cohort_test != cohort_prev_it) or val_approach != "leave_1_cohort_out":
                 cohorts_train = get_patients_train_dict(
@@ -678,6 +703,7 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False,embeddingconsi
                     sub_aux = sub_aux_comb[0]
                     coh_aux = coh_aux_comb[0]
 
+                X_train = X_train[:,idxlist]
                 # Put in TensorDataset with 2d discrete in order cohort - movement
                 CohortAuxData = cebra.data.TensorDataset(torch.from_numpy(X_train).type(torch.FloatTensor),
                                                          discrete=torch.from_numpy(np.array([coh_aux,y_train],dtype=int).T).type(torch.LongTensor)).to('cuda')
@@ -727,7 +753,8 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False,embeddingconsi
                         alltemps = np.concatenate(
                             (alltemps, np.expand_dims(cebra_model.state_dict()["log"]["temperature"], axis=0)), axis=0)
                 TrainBatches = np.lib.stride_tricks.sliding_window_view(X_train,neural_model.get_offset().__len__(),axis=0)
-                X_train_emb = cebra_model.transform(torch.from_numpy(TrainBatches[:]).type(torch.FloatTensor).to('cuda')).to('cuda')
+                X_train_batch = torch.from_numpy(TrainBatches[:]).type(torch.FloatTensor).to('cuda')
+                X_train_emb = cebra_model.transform(X_train_batch).to('cuda')
                 X_train_emb = X_train_emb.cpu().detach().numpy()
                 if showfeatureweights:
                     scales = cebra_model.model.savedscales.detach().cpu().numpy()
@@ -769,67 +796,46 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False,embeddingconsi
                     else:
                         trainembeddinglabels.append(y_train_discr[neural_model.get_offset().left:rightbound])
 
-                if model_params['decoder'] == 'KNN':
-                    decoder = neighbors.KNeighborsClassifier(
-                        n_neighbors=model_params['n_neighbors'], metric=model_params['metric'],
-                        n_jobs=model_params['n_jobs'])
+
+                elif model_params['decoder'] == 'Logistic': # NOTE: Implemented in Pytorch here, such that they can be merged, saved and passed as a whole to Captum
+                    decoder = LogisticRegression(3,1)
+                    decoder.train(True)
+                    Opt_log = torch.optim.LBFGS(list(decoder.parameters()))
                     if tillend:
-                        decoder.fit(X_train_emb, np.array(y_train_discr[neural_model.get_offset().left:], dtype=int))
+                        pos_w = np.sum((len(y_train_discr[neural_model.get_offset().left:])-np.sum(y_train_discr[neural_model.get_offset().left:]))/(np.sum(y_train_discr[neural_model.get_offset().left:])))
+                        weights = np.zeros(np.shape(y_train_discr[neural_model.get_offset().left:]))
+                        weights += 1
+                        weights[np.array(y_train_discr[neural_model.get_offset().left:],dtype=bool)] = pos_w
+                        loss_fn = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor(weights)) # TODO: Calculate pos_weight
+                        def closure(): # Define closure
+                            Opt_log.zero_grad()
+                            outputs = decoder(torch.Tensor(X_train_emb))
+                            loss = loss_fn(torch.squeeze(outputs),
+                                           torch.Tensor(y_train_discr[neural_model.get_offset().left:]))
+                            loss.backward()
+                            return loss
+                        for i in range(100): # 100 optimization steps like sklearn
+                            # Adjust learning weights
+                            Opt_log.step(closure)
                     else:
-                        decoder.fit(X_train_emb, np.array(
-                            y_train_discr[neural_model.get_offset().left:rightbound],
-                            dtype=int))
-                elif model_params['decoder'] == 'Logistic':
-                    decoder = linear_model.LogisticRegression(class_weight='balanced', penalty=None)
-                    if tillend:
-                        decoder.fit(X_train_emb, np.array(y_train_discr[neural_model.get_offset().left:], dtype=int))
-                    else:
-                        decoder.fit(X_train_emb, np.array(
-                            y_train_discr[neural_model.get_offset().left:rightbound],
-                            dtype=int))
-                elif model_params['decoder'] == 'SVM':
-                    decoder = SVC(kernel=cosine_similarity)
-                    if tillend:
-                        decoder.fit(X_train_emb, np.array(y_train_discr[neural_model.get_offset().left:], dtype=int))
-                    else:
-                        decoder.fit(X_train_emb, np.array(
-                            y_train_discr[neural_model.get_offset().left:rightbound],
-                            dtype=int))
-                elif model_params['decoder'] == 'FAISS':
-                    raise Exception('Not implemented')
-                elif model_params['decoder'] == 'MLP':
-                    raise Exception('Not implemented')
-                elif model_params['decoder'] == 'XGB':
-                    decoder = xgboost.sklearn.XGBClassifier()
-                    #decoder.set_params(**{'lambda':2})
-                    if tillend:
-                        classes_weights = class_weight.compute_sample_weight(
-                            class_weight="balanced", y=y_train_discr[neural_model.get_offset().left:]
-                        )
-                        decoder.set_params(eval_metric="auc")
-                        decoder.fit(
-                            X_train_emb,
-                            np.array(y_train_discr[neural_model.get_offset().left:], dtype=int),
-                            sample_weight=classes_weights,
-                        )
-                    else:
-                        classes_weights = class_weight.compute_sample_weight(
-                            class_weight="balanced", y=y_train_discr[neural_model.get_offset().left:rightbound]
-                        )
-                        decoder.set_params(eval_metric="auc")
-                        decoder.fit(
-                            X_train_emb,
-                            np.array(y_train_discr[neural_model.get_offset().left:rightbound], dtype=int),
-                            sample_weight=classes_weights,
-                        )
-                elif model_params['decoder'] == 'KNN_BPP':
-                    decoder = kNN_BPP(n_neighbors=model_params['n_neighbors'])
-                    if tillend:
-                        decoder.fit(X_train_emb, np.array(y_train_discr[neural_model.get_offset().left:], dtype=int))
-                    else:
-                        decoder.fit(X_train_emb, np.array(
-                            y_train_discr[neural_model.get_offset().left:rightbound],
-                            dtype=int))
+                        pos_w = np.sum((len(y_train_discr[neural_model.get_offset().left:rightbound]) - np.sum(
+                            y_train_discr[neural_model.get_offset().left:rightbound])) / (
+                                           np.sum(y_train_discr[neural_model.get_offset().left:rightbound])))
+                        loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_w) # TODO: Calculate pos_weight
+                        for i in range(100): # 100 optimization steps like sklearn
+
+                            # Zero your gradients for every batch!
+                            Opt_log.zero_grad()
+
+                            # Make predictions for this batch
+                            outputs = decoder(X_train_emb)
+
+                            # Compute the loss and its gradients
+                            loss = loss_fn(outputs, y_train_discr[neural_model.get_offset().left:rightbound])
+                            loss.backward()
+
+                            # Adjust learning weights
+                            Opt_log.step()
 
             # Needed for training once per across cohort
             cohort_prev_it = cohort_test
@@ -837,7 +843,8 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False,embeddingconsi
             # rng = np.random.default_rng()
             # X_test_emb = cebra_model.transform(rng.permutation(X_test,axis=1),session_id=0)
             TestBatches = np.lib.stride_tricks.sliding_window_view(X_test,neural_model.get_offset().__len__(),axis=0)
-            X_test_emb = cebra_model.transform(torch.from_numpy(TestBatches).type(torch.FloatTensor).to('cuda')).to('cuda')
+            X_test_batch = torch.from_numpy(TestBatches).type(torch.FloatTensor).to('cuda')
+            X_test_emb = cebra_model.transform(X_test_batch).to('cuda')
             X_test_emb = X_test_emb.cpu().detach().numpy()
             if embeddingconsistency:
                 testembeddings.append(X_test_emb)
@@ -857,8 +864,11 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False,embeddingconsi
                                                                neural_model.get_offset().left:rightbound],
                                       y_test[neural_model.get_offset().left:rightbound],cohort_test,
                                       aux=coh_aux[neural_model.get_offset().left:rightbound], type='coh', grad=False, nearest=False,model=None,val=val_approach)
+            decoder.eval()
+            y_test_pr = decoder(torch.Tensor(X_test_emb))
+            y_test_pr = torch.sigmoid(y_test_pr)>0.5 # Have to add sigmoid now and binarize
+            y_test_pr = y_test_pr.detach().cpu().numpy()
 
-            y_test_pr = decoder.predict(X_test_emb)
             if tillend:
                 ba = metrics.balanced_accuracy_score(y_test[neural_model.get_offset().left:], y_test_pr)
             else:
@@ -883,6 +893,70 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False,embeddingconsi
             # Save some performance metrics
             bacohort.append(ba)
             batotal.append(ba)
+
+            # Do the XAI stuff and compute feature importances
+            torch.backends.cudnn.enabled = False
+            compmodel = DirectClassifier(cebra_model.model,decoder.cuda())
+            del cebra_model
+            del decoder
+
+            ig = IntegratedGradients(compmodel)
+            ig_nt = NoiseTunnel(ig)
+            #dl = DeepLift(compmodel)
+            gs = GradientShap(compmodel)
+            fa = FeatureAblation(compmodel)
+
+            ig_attr_test = ig.attribute(X_test_batch, n_steps=50)
+            ig_attr_test = ig_attr_test.detach().cpu().numpy().sum(0)
+            ig_attr_test_norm_sum = ig_attr_test / np.linalg.norm(ig_attr_test, ord=1)
+            ig_nt_attr_test = ig_nt.attribute(X_test_batch,n_steps=40)
+            #dl_attr_test = dl.attribute(X_test_batch)
+            gs_attr_test = gs.attribute(X_test_batch, X_train_batch)
+            fa_attr_test = fa.attribute(X_test_batch)
+            # prepare attributions for visualization
+
+            x_axis_data = np.arange(X_test_batch.shape[1])
+            x_axis_data_labels = list(map(lambda idx: featuredim[idx], x_axis_data))
+
+            ig_nt_attr_test_sum = ig_nt_attr_test.detach().cpu().numpy().sum(0)
+            ig_nt_attr_test_norm_sum = ig_nt_attr_test_sum / np.linalg.norm(ig_nt_attr_test_sum, ord=1)
+
+            #dl_attr_test_sum = dl_attr_test.detach().cpu().numpy().sum(0)
+            #dl_attr_test_norm_sum = dl_attr_test_sum / np.linalg.norm(dl_attr_test_sum, ord=1)
+
+            gs_attr_test_sum = gs_attr_test.detach().cpu().numpy().sum(0)
+            gs_attr_test_norm_sum = gs_attr_test_sum / np.linalg.norm(gs_attr_test_sum, ord=1)
+
+            fa_attr_test_sum = fa_attr_test.detach().cpu().numpy().sum(0)
+            fa_attr_test_norm_sum = fa_attr_test_sum / np.linalg.norm(fa_attr_test_sum, ord=1)
+
+            width = 0.14
+            legends = ['Int Grads', 'Int Grads w/SmoothGrad', 'GradientSHAP', 'Feature Ablation']
+
+            plt.figure(figsize=(20, 10))
+
+            ax = plt.subplot()
+            ax.set_title('Comparing input feature importances across multiple algorithms and learned weights')
+            ax.set_ylabel('Attributions')
+
+            FONT_SIZE = 16
+            plt.rc('font', size=FONT_SIZE)  # fontsize of the text sizes
+            plt.rc('axes', titlesize=FONT_SIZE)  # fontsize of the axes title
+            plt.rc('axes', labelsize=FONT_SIZE)  # fontsize of the x and y labels
+            plt.rc('legend', fontsize=FONT_SIZE - 4)  # fontsize of the legend
+
+            ax.bar(x_axis_data, ig_attr_test_norm_sum[:,-1], width, align='center', alpha=0.8, color='#eb5e7c')
+            ax.bar(x_axis_data + width, ig_nt_attr_test_norm_sum[:,-1], width, align='center', alpha=0.7, color='#A90000')
+            ax.bar(x_axis_data + 2 * width, gs_attr_test_norm_sum[:,-1], width, align='center', alpha=0.8, color='#4260f5')
+            ax.bar(x_axis_data + 3 * width, fa_attr_test_norm_sum[:,-1], width, align='center', alpha=1.0, color='#49ba81')
+            ax.autoscale_view()
+            plt.tight_layout()
+
+            ax.set_xticks(x_axis_data + 0.5)
+            ax.set_xticklabels(x_axis_data_labels,rotation=45,ha='right')
+
+            plt.legend(legends, loc=3)
+            plt.show()
 
         # After all subjects
         bacohortlist.append(np.mean(bacohort))
@@ -944,8 +1018,8 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False,embeddingconsi
 curtime = datetime.now().strftime("%Y_%m_%d-%H_%M")
 experiment = "All_channels"
 perflist = []
-val_approaches = ["leave_1_sub_out_within_coh","leave_1_cohort_out","leave_1_sub_out_across_coh"]
-cohorts = [ "Pittsburgh","Beijing", "Berlin"]#, "Washington"]
+val_approaches = ["leave_1_sub_out_across_coh","leave_1_sub_out_within_coh","leave_1_cohort_out"]
+cohorts = [ "Pittsburgh","Beijing", "Berlin", "Washington"]
 
 for val_approach in val_approaches:
     model_params = {'model_architecture':'offset9RNN-model',
@@ -969,12 +1043,13 @@ for val_approach in val_approaches:
                 'prior': 'uniform', # Set to empirical or uniform to either sample random or uniform across coh and movement
                 'conditional':'mov', # Set to mov or cohmov to either equalize reference-positive in movement or coherenceandmovement
                 'early_stopping':False,
-                'additional_comment':'TEST_BidirGRUModel_FeatAttention',
+                'features': 'Hjorth,fft,Sharpwave,fooof,bursts', # Choose what features to include 'Hjorth,fft,Sharpwave,fooof,bursts' as 1 string separated by commas without spaces
+                'additional_comment':'all_BidirGRUModel_Cleaned_RT_Morehistory',
                 'debug': True} # Debug = True; stops saving the results unnecessarily
     if not model_params['debug']:
         writer = SummaryWriter(log_dir=f"C:/Users/ICN_GPU/Documents/Glenn_Data/CEBRA_logs/{val_approach}/{curtime}")
 
     t0 = time.time()
-    run_CV(val_approach, curtime, model_params,show_embedding=True, embeddingconsistency=False,showfeatureweights=False,Testphase=False)
+    run_CV(val_approach, curtime, model_params,show_embedding=False, embeddingconsistency=False,showfeatureweights=False,Testphase=False)
     print(f'runtime: {time.time()-t0}')
 

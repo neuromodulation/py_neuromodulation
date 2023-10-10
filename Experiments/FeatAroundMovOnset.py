@@ -6,7 +6,7 @@ import os
 import matplotlib.pyplot as plt
 
 ############ LOAD in the data ##################
-df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_all_features.csv")
+df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\AllfeaturePerformances_TempCleaned.csv")
 
 ch_all = np.load(
     os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "channel_all.npy"),
@@ -36,6 +36,7 @@ cohsubchmax = df.iloc[idxofmax][['cohort','sub','ch']]
 ba_combined = df.iloc[idxofmax]['ba_combined']
 
 sub_names = []
+cohs = []
 best_ch = []
 targets = [] # For analysis of the labels for the best channels --> length / movement samples etc.
 for i in range(len(cohsubchmax)):
@@ -66,6 +67,7 @@ for i in range(len(cohsubchmax)):
             y_concat.append(ch_all[cohort][sub][channel][runs]['label'])
     x_concat = np.concatenate(x_concat, axis=0)
     y_concat = np.concatenate(y_concat, axis=0)
+    cohs.append(cohort)
     best_ch.append(x_concat)
     sub_names.append(sub)
     targets.append(y_concat)
@@ -111,9 +113,147 @@ plt.show()
 
 plt.figure()
 plt.imshow(np.mean(onsetfeats[:,:,:],0).T)
-plt.colorbar()
-plt.xticks([0,left,total-1],[-left/10,0,right/10])
-plt.xlabel('Time [s]')
-plt.yticks(range(37),featuredim)
-plt.title('Features around movement onset')
+cbar = plt.colorbar()
+ticklabs = cbar.ax.get_yticklabels()
+cbar.ax.set_yticklabels(ticklabs, fontsize=15)
+cbar.set_label('Amplitude [a.u.]',fontsize=18)
+plt.xticks([0,left,total-1],[-left/10,0,right/10],fontsize=20)
+plt.xlabel('Time aligned to movement [s]', fontsize=25)
+plt.yticks(range(37),featuredim,fontsize=10)
+plt.title('Feature estimation ',fontsize=18)
+plt.show()
+plt.savefig(r"C:\Users\ICN_GPU\Documents\Glenn_Data\Figures\PosterFigures\HeatmapFeaturesAroundMovementOnset.pdf")
+
+############# Analyze Berlin vs rest ##############
+Berlinbool = [cohs[i] == 'Berlin' for i in range(len(cohs))]
+onsetfeatBer = onsetfeats[Berlinbool]
+plt.figure()
+for i in range(np.shape(x_concat)[1]):
+    plt.subplot(6, 7, i + 1)
+    #for subs in range(len(onsetfeats)):
+        #plt.scatter(range(total),onsetfeats[subs,:,i],s=1)
+    plt.plot(np.mean(onsetfeatBer[:,:,i],0))
+    plt.fill_between(range(total), np.mean(onsetfeatBer[:,:,i],0) - np.std(onsetfeatBer[:,:,i],0), np.mean(onsetfeatBer[:,:,i],0) + np.std(onsetfeatBer[:,:,i],0), alpha=.1)
+    plt.xticks([0,left,total-1],[-left/10,0,right/10])
+    plt.title(f'{featuredim[i]}')
+plt.suptitle('Features around movement onset')
+plt.show()
+
+plt.figure()
+plt.imshow(np.mean(onsetfeatBer[:,:,:],0).T)
+cbar = plt.colorbar()
+ticklabs = cbar.ax.get_yticklabels()
+cbar.ax.set_yticklabels(ticklabs, fontsize=15)
+cbar.set_label('Amplitude [a.u.]',fontsize=18)
+plt.xticks([0,left,total-1],[-left/10,0,right/10],fontsize=20)
+plt.xlabel('Time aligned to movement [s]', fontsize=25)
+plt.yticks(range(37),featuredim,fontsize=10)
+plt.title('Feature estimation ',fontsize=18)
+plt.show()
+
+# Berlin per subject
+Berlinbool = [cohs[i] == 'Berlin' for i in range(len(cohs))]
+onsetfeatBer = onsetfeats[Berlinbool]
+idxTrue = [i for i in range(len(Berlinbool)) if Berlinbool[i]]
+plt.figure()
+import matplotlib
+for j in range(sum(Berlinbool)):
+    plt.subplot(3, 6, j + 1)
+    cursub = idxTrue[j]
+    plt.imshow(onsetfeats[cursub,:,:].T)
+    cbar = plt.colorbar()
+    plt.xticks([0, left, total - 1], [-left / 10, 0, right / 10])
+    plt.title(f'sub {j}, R {ba_combined.iloc[cursub]:.2f}')
+    plt.show()
+
+## Pittsburgh
+Pittbool = [cohs[i] == 'Pittsburgh' for i in range(len(cohs))]
+onsetfeatPitt = onsetfeats[Pittbool]
+plt.figure()
+for i in range(np.shape(x_concat)[1]):
+    plt.subplot(6, 7, i + 1)
+    #for subs in range(len(onsetfeats)):
+        #plt.scatter(range(total),onsetfeats[subs,:,i],s=1)
+    plt.plot(np.mean(onsetfeatPitt[:,:,i],0))
+    plt.fill_between(range(total), np.mean(onsetfeatPitt[:,:,i],0) - np.std(onsetfeatPitt[:,:,i],0), np.mean(onsetfeatPitt[:,:,i],0) + np.std(onsetfeatPitt[:,:,i],0), alpha=.1)
+    plt.xticks([0,left,total-1],[-left/10,0,right/10])
+    plt.title(f'{featuredim[i]}')
+plt.suptitle('Features around movement onset')
+plt.show()
+
+plt.figure()
+plt.imshow(np.mean(onsetfeatPitt[:,:,:],0).T)
+cbar = plt.colorbar()
+ticklabs = cbar.ax.get_yticklabels()
+cbar.ax.set_yticklabels(ticklabs, fontsize=15)
+cbar.set_label('Amplitude [a.u.]',fontsize=18)
+plt.xticks([0,left,total-1],[-left/10,0,right/10],fontsize=20)
+plt.xlabel('Time aligned to movement [s]', fontsize=25)
+plt.yticks(range(37),featuredim,fontsize=10)
+plt.title('Feature estimation ',fontsize=18)
+plt.show()
+
+# Berlin per subject
+idxTrue = [i for i in range(len(Pittbool)) if Pittbool[i]]
+plt.figure()
+for j in range(sum(Pittbool)):
+    plt.subplot(3, 6, j + 1)
+    cursub = idxTrue[j]
+    plt.imshow(onsetfeats[cursub,:,:].T)
+    cbar = plt.colorbar()
+    plt.title(f'sub {j}')
+    plt.show()
+
+## Beijing
+Beibool = [cohs[i] == 'Beijing' for i in range(len(cohs))]
+onsetfeatBei = onsetfeats[Beibool]
+plt.figure()
+for i in range(np.shape(x_concat)[1]):
+    plt.subplot(6, 7, i + 1)
+    #for subs in range(len(onsetfeats)):
+        #plt.scatter(range(total),onsetfeats[subs,:,i],s=1)
+    plt.plot(np.mean(onsetfeatBei[:,:,i],0))
+    plt.fill_between(range(total), np.mean(onsetfeatBei[:,:,i],0) - np.std(onsetfeatBei[:,:,i],0), np.mean(onsetfeatBei[:,:,i],0) + np.std(onsetfeatBei[:,:,i],0), alpha=.1)
+    plt.xticks([0,left,total-1],[-left/10,0,right/10])
+    plt.title(f'{featuredim[i]}')
+plt.suptitle('Features around movement onset')
+plt.show()
+
+plt.figure()
+plt.imshow(np.mean(onsetfeatBei[:,:,:],0).T)
+cbar = plt.colorbar()
+ticklabs = cbar.ax.get_yticklabels()
+cbar.ax.set_yticklabels(ticklabs, fontsize=15)
+cbar.set_label('Amplitude [a.u.]',fontsize=18)
+plt.xticks([0,left,total-1],[-left/10,0,right/10],fontsize=20)
+plt.xlabel('Time aligned to movement [s]', fontsize=25)
+plt.yticks(range(37),featuredim,fontsize=10)
+plt.title('Feature estimation ',fontsize=18)
+plt.show()
+
+# Washington
+Washbool = [cohs[i] == 'Washington' for i in range(len(cohs))]
+onsetfeatWash = onsetfeats[Washbool]
+plt.figure()
+for i in range(np.shape(x_concat)[1]):
+    plt.subplot(6, 7, i + 1)
+    #for subs in range(len(onsetfeats)):
+        #plt.scatter(range(total),onsetfeats[subs,:,i],s=1)
+    plt.plot(np.mean(onsetfeatWash[:,:,i],0))
+    plt.fill_between(range(total), np.mean(onsetfeatWash[:,:,i],0) - np.std(onsetfeatWash[:,:,i],0), np.mean(onsetfeatWash[:,:,i],0) + np.std(onsetfeatWash[:,:,i],0), alpha=.1)
+    plt.xticks([0,left,total-1],[-left/10,0,right/10])
+    plt.title(f'{featuredim[i]}')
+plt.suptitle('Features around movement onset')
+plt.show()
+
+plt.figure()
+plt.imshow(np.mean(onsetfeatWash[:,:,:],0).T)
+cbar = plt.colorbar()
+ticklabs = cbar.ax.get_yticklabels()
+cbar.ax.set_yticklabels(ticklabs, fontsize=15)
+cbar.set_label('Amplitude [a.u.]',fontsize=18)
+plt.xticks([0,left,total-1],[-left/10,0,right/10],fontsize=20)
+plt.xlabel('Time aligned to movement [s]', fontsize=25)
+plt.yticks(range(37),featuredim,fontsize=10)
+plt.title('Feature estimation ',fontsize=18)
 plt.show()

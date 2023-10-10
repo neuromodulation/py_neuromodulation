@@ -59,9 +59,9 @@ df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\CEBRAtestCoh.csv")
 cohlist = df['cohort']
 sublist = df['sub']
 
-df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_all_features.csv")
+df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\AllfeaturePerformances_TempCleaned.csv")
 idxofmax = np.sort(list(df.groupby(['sub', 'cohort'])['ba_combined'].idxmax()))
-maxpersub = df.iloc[idxofmax][['cohort','sub','ba_Hjorth', 'ba_Sharpwave', 'ba_fooof', 'ba_bursts','ba_fft', 'ba_combined']]
+maxpersub = df.iloc[idxofmax][['cohort','sub', 'ba_combined']]
 Testsel = pd.DataFrame()
 for i in range(len(cohlist)):
     Testsel = pd.concat([Testsel, maxpersub[(df['cohort']==cohlist[i]) & (df['sub']==sublist[i])]], ignore_index=True)
@@ -70,7 +70,7 @@ maxsingle = Testsel.melt(id_vars='cohort',value_vars=baonly, var_name='ba_combin
                                        , value_name='balanced accuracy')
 maxsingle['ba_combined'] = maxsingle['ba_combined'].replace('ba_combined','Within channel LogREG')
 
-df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\WithinChannelCEBRA.csv")
+df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\WithinChannelCEBRA_RT.csv")
 baonly = ['ba_combined']
 Testsel = pd.DataFrame()
 for i in range(len(cohlist)):
@@ -99,19 +99,24 @@ g = sns.boxplot(data= comparisondf,x='ba_combined', y='balanced accuracy',hue='c
 g.set(ylim=(0.49, 1))
 g.axhline(0.5,ls='--')
 
-
+### plot for the across cohort cebra the results over different cohorts
 df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\CEBRAtestAcross.csv")
 g = sns.boxplot(df,y='ba_combined',x='cohort',palette='viridis',order=['Pittsburgh', 'Berlin', 'Beijing', 'Washington'])
-g.set(xlabel='Cohort', ylabel='Balanced accuracy',title='Generalized, across-cohort decoding')
+g.set_title('Generalized, across-cohort decoding',fontsize=17)
 g.set(ylim=(0.49, 1))
 g.axhline(0.5,ls='--')
+g.set_xlabel("Cohort",fontsize=17)
+g.set_ylabel("Balanced accuracy",fontsize=17)
+g.tick_params(labelsize=15)
+plt.savefig(r"C:\Users\ICN_GPU\Documents\Glenn_Data\Figures\PosterFigures\PerfAcrossContra_RT.pdf")
+
 ########################## Not per cohort ###########################
 ################## For the same subjects as the Test set #######################
 df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\CEBRAtestCoh.csv")
 cohlist = df['cohort']
 sublist = df['sub']
 
-df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_all_features.csv")
+df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\AllfeaturePerformances_TempCleaned.csv")
 idxofmax = np.sort(list(df.groupby(['sub', 'cohort'])['ba_combined'].idxmax()))
 maxpersub = df.iloc[idxofmax][['cohort','sub', 'ba_combined']]
 Testsel = pd.DataFrame()
@@ -121,7 +126,7 @@ for i in range(len(cohlist)):
 maxsingle = Testsel
 maxsingle['ba_combined'] = maxsingle['ba_combined'].replace('ba_combined','Within channel LogREG')
 
-df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\WithinChannelCEBRA.csv")
+df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\WithinChannelCEBRA_RT.csv")
 baonly = ['ba_combined']
 Testsel = pd.DataFrame()
 for i in range(len(cohlist)):

@@ -6,10 +6,10 @@ import os
 import matplotlib.pyplot as plt
 
 ############ LOAD in the data ##################
-df = pd.read_csv(r"D:\Glenn\df_all_features.csv")
+df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_all_features.csv")
 
 ch_all = np.load(
-    os.path.join(r"D:\Glenn", "channel_all_noraw.npy"),
+    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "channel_all_noraw.npy"),
     allow_pickle="TRUE",
 ).item()
 

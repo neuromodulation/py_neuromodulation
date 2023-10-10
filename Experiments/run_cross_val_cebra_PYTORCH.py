@@ -44,12 +44,21 @@ ch_all = np.load(
     allow_pickle="TRUE",
 ).item()
 ch_all_feat = np.load(
-    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "Cleaned_channel_all.npy"),
+    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "TempCleaned2_channel_all.npy"),
     allow_pickle="TRUE",
 ).item()
-df_best_rmap = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_best_func_rmap_ch.csv")
+df_best_rmap = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_best_func_rmap_ch_adapted.csv")
+df_best_rmap_og = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_best_func_rmap_ch.csv")
 df_updrs = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_updrs.csv")
 
+
+features = ['Hjorth','fft', 'Sharpwave', 'fooof', 'bursts']
+performances = []
+featuredim = ch_all_feat['Berlin']['002']['ECOG_L_1_SMC_AT-avgref']['sub-002_ses-EcogLfpMedOff01_task-SelfpacedRotationR_acq-StimOff_run-01_ieeg']['feature_names']
+featuredict = {}
+for i in range(len(features)):
+    idx_i = np.nonzero(np.char.find(featuredim, features[i])+1)[0]
+    featuredict[features[i]] = idx_i
 
 # offset9 should be better than offset 10, as the selected index will always cause class majority in the receptive field
 # In contrast to offset 10 where equality between classes can be had if selected value on edge
@@ -114,32 +123,31 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
         self.savedparam = None
         bidir = False
         hidden = 2
-        numfeatures = 36
         compress = 9
         num_layers = 1
         grudrop = 0
-        self.leftset = 5
-        self.rightset = 4
-        self.rnn = nn.GRU(numfeatures,hidden,num_layers,dropout=grudrop,bidirectional=bidir,batch_first=True)
+        self.leftset = 9
+        self.rightset = 1
+        self.rnn = nn.GRU(num_neurons,hidden,num_layers,dropout=grudrop,bidirectional=bidir,batch_first=True)
         self.fc = nn.Linear(hidden*(1+int(bidir)),num_output)
 
         self.gru_attention1 = Attention(hidden , self.leftset+self.rightset)
         self.gru_attention2 = Attention(hidden, self.leftset + self.rightset)
-        self.feat_attention = WeightAttention(self.leftset + self.rightset,numfeatures)
-        self.mat_attention = MatrixAttention(self.leftset + self.rightset,numfeatures)
+        self.feat_attention = WeightAttention(self.leftset + self.rightset,num_neurons)
+        self.mat_attention = MatrixAttention(self.leftset + self.rightset,num_neurons)
         self.BN = nn.LazyBatchNorm1d()
-        self.LN = nn.LayerNorm([numfeatures, compress])
+        self.LN = nn.LayerNorm([num_neurons, compress])
         self.avg_pool = nn.AdaptiveAvgPool1d(1)
         self.max_pool = nn.AdaptiveMaxPool1d(1)
-        self.linfeat = nn.Linear(numfeatures, numfeatures, bias=False)
+        self.linfeat = nn.Linear(num_neurons, num_neurons, bias=False)
         # Reduce expand
-        self.linred = nn.Linear(numfeatures, compress)
-        self.linexp = nn.Linear(compress,numfeatures)
+        self.linred = nn.Linear(num_neurons, compress)
+        self.linexp = nn.Linear(compress,num_neurons)
         self.relu = nn.ReLU()
         # Linear to compress time
         self.lintimecomp = nn.Linear(compress,1)
         self.sigmoid = nn.Sigmoid()
-        weight = torch.zeros(numfeatures,1)
+        weight = torch.zeros(num_neurons,1)
         nn.init.xavier_uniform_(weight)
         self.learnedscale = nn.Parameter(weight)
     def init_weights(self):
@@ -172,7 +180,7 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
         #y = self.relu(y)
         #y = self.linexp(y).transpose(-1, -2)
         #### Scaling like that for time attention (Find weights per features)
-        scale = self.feat_attention(x)
+        #scale = self.feat_attention(x)
         ### Time-Feature matrix scaling
         #scale = self.mat_attention(x)
         ### Some very naive implementation to scale
@@ -184,7 +192,7 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
 
         #### Save scaling
         #self.savedscales = self.learnedscale.repeat(1,x.shape[0]).T.unsqueeze(2)
-        self.savedscales = scale
+        #self.savedscales = scale
         x = x.permute(0,2,1)
         out, hidden = self.rnn(x)
         #### If unidirectional:
@@ -350,7 +358,11 @@ def get_data_sub_ch(channel_all, cohort, sub, ch, UPDRS=None):
     return X_train, y_train
 
 def get_data_channels(sub_test: str, cohort_test: str, df_rmap: pd.DataFrame, naiveupdrs=False):
-    ch_test = df_rmap.query("cohort == @cohort_test and sub == @sub_test")[
+    if sub_test != '000':
+        sub_num = sub_test.lstrip('0')
+    else:
+        sub_num = '0'
+    ch_test = df_rmap.query("cohort == @cohort_test and sub == @sub_num")[
         "ch"
     ].iloc[0]
     if not naiveupdrs:
@@ -631,12 +643,24 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False,embeddingconsi
             X_test, y_test = get_data_channels(
                 sub_test, cohort_test, df_rmap=df_best_rmap
             )
-
+            # Select the desired features
+            toselect = model_params['features'].split(',')
+            idxlist = []
+            for featsel in toselect:
+                idxlist.append(featuredict[featsel])
+            idxlist = np.concatenate(idxlist)
+            X_test = X_test[:, idxlist]
             # if statement to keep the same model for all subjects of leave 1 out cohort
             if (val_approach == "leave_1_cohort_out" and cohort_test != cohort_prev_it) or val_approach != "leave_1_cohort_out":
-                cohorts_train = get_patients_train_dict(
-                    sub_test, cohort_test, val_approach=val_approach, data_select=ch_all # Use all data in training (except test data, which gets rejected in the function)
-                )
+                if not Testphase:
+                    cohorts_train = get_patients_train_dict(
+                        sub_test, cohort_test, val_approach=val_approach, data_select=ch_all_train # Use all data in training (except test data, which gets rejected in the function)
+                    )
+                else:
+                    cohorts_train = get_patients_train_dict(
+                        sub_test, cohort_test, val_approach=val_approach, data_select=ch_all
+                        # Use all data in training (except test data, which gets rejected in the function)
+                    )
                 X_train_comb = []
                 y_train_comb = []
                 y_train_discr_comb = []
@@ -678,6 +702,7 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False,embeddingconsi
                     sub_aux = sub_aux_comb[0]
                     coh_aux = coh_aux_comb[0]
 
+                X_train = X_train[:,idxlist]
                 # Put in TensorDataset with 2d discrete in order cohort - movement
                 CohortAuxData = cebra.data.TensorDataset(torch.from_numpy(X_train).type(torch.FloatTensor),
                                                          discrete=torch.from_numpy(np.array([coh_aux,y_train],dtype=int).T).type(torch.LongTensor)).to('cuda')
@@ -942,10 +967,9 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False,embeddingconsi
 
 # In time change this setup to use PYTORCH and TENSORBOARD to keep track of iterations, model params and output
 curtime = datetime.now().strftime("%Y_%m_%d-%H_%M")
-experiment = "All_channels"
 perflist = []
-val_approaches = ["leave_1_sub_out_within_coh","leave_1_cohort_out","leave_1_sub_out_across_coh"]
-cohorts = [ "Pittsburgh","Beijing", "Berlin"]#, "Washington"]
+val_approaches = ["leave_1_sub_out_across_coh","leave_1_sub_out_within_coh","leave_1_cohort_out"]
+cohorts = [ "Berlin","Beijing","Pittsburgh","Washington"]
 
 for val_approach in val_approaches:
     model_params = {'model_architecture':'offset9RNN-model',
@@ -967,10 +991,11 @@ for val_approach in val_approaches:
                 'pseudoDiscr':False, # Pseudodiscrete meaning direct conversion from int to float
                 'gaussSigma':1.5, # Set pseuodDiscr to False for this to take effect and assuming a Gaussian for the movement distribution
                 'prior': 'uniform', # Set to empirical or uniform to either sample random or uniform across coh and movement
-                'conditional':'mov', # Set to mov or cohmov to either equalize reference-positive in movement or coherenceandmovement
+                'conditional':'mov', # Set to mov or cohmov to either equalize reference-positive in movement or cohort and movement
                 'early_stopping':False,
-                'additional_comment':'TEST_BidirGRUModel_FeatAttention',
-                'debug': True} # Debug = True; stops saving the results unnecessarily
+                'features': 'fft', # Choose what features to include 'Hjorth,fft,Sharpwave,fooof,bursts' as 1 string separated by commas without spaces
+                'additional_comment':'Val_fft_GRU',
+                'debug': False} # Debug = True; stops saving the results unnecessarily
     if not model_params['debug']:
         writer = SummaryWriter(log_dir=f"C:/Users/ICN_GPU/Documents/Glenn_Data/CEBRA_logs/{val_approach}/{curtime}")
 

@@ -17,11 +17,11 @@ torch.backends.cudnn.benchmark = True
 
 # import the data
 ch_all = np.load(
-    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "Cleaned_channel_all.npy"),
+    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "TempCleaned_channel_all.npy"),
     allow_pickle="TRUE",
 ).item()
 
-df_perf = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_all_features.csv")
+df_perf = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\AllfeaturePerformances_TempCleaned.csv")
 
 @cebra.models.register("offset9RNN-model") # --> add that line to register the model!
 class MyModel(_OffsetModel, ConvolutionalModelMixin):
@@ -37,8 +37,8 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
         numfeatures = 36
         num_layers = 1
         grudrop = 0
-        self.leftset = 5
-        self.rightset = 4
+        self.leftset = 9
+        self.rightset = 1
         self.rnn = nn.GRU(numfeatures,hidden,num_layers,dropout=grudrop,bidirectional=bidir,batch_first=True)
         self.fc = nn.Linear(hidden*(1+int(bidir)),num_output)
 
@@ -54,8 +54,8 @@ class MyModel(_OffsetModel, ConvolutionalModelMixin):
         for k in b:
             nn.init.constant_(k, 0)
     def forward(self,x):
-        scale = self.feat_attention(x)
-        self.savedscales = scale
+        #scale = self.feat_attention(x)
+        #self.savedscales = scale
         x = x.permute(0,2,1)
         out, hidden = self.rnn(x)
         out = self.fc(out[:,-1,:])
@@ -161,34 +161,37 @@ meanlist = []
 features = ['combined']
 idxofmax = np.sort(list(df_perf.groupby(['cohort','sub'])['ba_combined'].idxmax()))
 for ch_i in range(len(idxofmax)):
-    idx = idxofmax[ch_i]
-    cohort = df_perf.iloc[idx]['cohort']
-    sub = df_perf.iloc[idx]['sub']
-    chname = df_perf.iloc[idx]['ch']
-    if not cohort in performancedict:
-        performancedict[cohort] = {}
-    performancedict[cohort][sub] = {}
-    performancedict[cohort][sub][chname] = {}
-    performancedict[cohort][sub][chname]['ba'] = {}
-    performancedict[cohort][sub][chname]['95%CI'] = {}
-    x_concat = []
-    y_concat = []
-    for runs in ch_all[cohort][sub][chname].keys():
-        x_concat.append(
-            np.squeeze(ch_all[cohort][sub][chname][runs]['data']))  # Get best ECOG data
-        y_concat.append(ch_all[cohort][sub][chname][runs]['label'])
-    x_concat = np.concatenate(x_concat, axis=0)
-    y_concat = np.concatenate(y_concat, axis=0)
-    crossvals = kf.split(x_concat,y_concat)
-    scores = []
-    for i, (train_index, test_index) in enumerate(crossvals):
-        scores.append(RunCebra(x_concat[train_index,:],np.zeros_like(x_concat[train_index,0]),y_concat[train_index],x_concat[test_index,:],y_concat[test_index]))
-    performancedict[cohort][sub][chname]['ba'][features[0]] = np.mean(scores)
-    print(np.mean(scores))
-    meanlist.append(np.mean(scores))
-    print(f'Running mean: {np.mean(meanlist)}')
-    performancedict[cohort][sub][chname]['95%CI'][features[0]] = np.std(scores) * 2
-    performancedict[cohort][sub][chname]['explength'] = len(y_concat)
-    performancedict[cohort][sub][chname]['movsamples'] = np.sum(y_concat)
+    try:
+        idx = idxofmax[ch_i]
+        cohort = df_perf.iloc[idx]['cohort']
+        sub = df_perf.iloc[idx]['sub']
+        chname = df_perf.iloc[idx]['ch']
+        if not cohort in performancedict:
+            performancedict[cohort] = {}
+        performancedict[cohort][sub] = {}
+        performancedict[cohort][sub][chname] = {}
+        performancedict[cohort][sub][chname]['ba'] = {}
+        performancedict[cohort][sub][chname]['95%CI'] = {}
+        x_concat = []
+        y_concat = []
+        for runs in ch_all[cohort][sub][chname].keys():
+            x_concat.append(
+                np.squeeze(ch_all[cohort][sub][chname][runs]['data']))  # Get best ECOG data
+            y_concat.append(ch_all[cohort][sub][chname][runs]['label'])
+        x_concat = np.concatenate(x_concat, axis=0)
+        y_concat = np.concatenate(y_concat, axis=0)
+        crossvals = kf.split(x_concat,y_concat)
+        scores = []
+        for i, (train_index, test_index) in enumerate(crossvals):
+            scores.append(RunCebra(x_concat[train_index,:],np.zeros_like(x_concat[train_index,0]),y_concat[train_index],x_concat[test_index,:],y_concat[test_index]))
+        performancedict[cohort][sub][chname]['ba'][features[0]] = np.mean(scores)
+        print(np.mean(scores))
+        meanlist.append(np.mean(scores))
+        print(f'Running mean: {np.mean(meanlist)}')
+        performancedict[cohort][sub][chname]['95%CI'][features[0]] = np.std(scores) * 2
+        performancedict[cohort][sub][chname]['explength'] = len(y_concat)
+        performancedict[cohort][sub][chname]['movsamples'] = np.sum(y_concat)
+    except:
+        del performancedict[cohort][sub]
 
-np.save(r'C:\Users\ICN_GPU\Documents\Glenn_Data\WithinChannelCEBRA.npy', performancedict)
+np.save(r'C:\Users\ICN_GPU\Documents\Glenn_Data\WithinChannelCEBRA_RT.npy', performancedict)

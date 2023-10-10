@@ -85,7 +85,5 @@ for cohort in ch_all.keys():
                     for runs in ch_all[cohort][sub][channel].keys():
                         ch_all[cohort][sub][channel][runs]['data'] = ch_all[cohort][sub][channel][runs]['data'][:,idxlist[5]]
                         ch_all[cohort][sub][channel][runs]['feature_names'] = np.array(ch_all[cohort][sub][channel][runs]['feature_names'])[idxlist[5]]
-del ch_all['Pittsburgh']['000']
-del ch_all['Pittsburgh']['014']
 
-np.save(r'C:\Users\ICN_GPU\Documents\Glenn_Data\TempCleaned_channel_all.npy', ch_all)
+np.save(r'C:\Users\ICN_GPU\Documents\Glenn_Data\TempCleaned2_channel_all.npy', ch_all)

@@ -6,7 +6,7 @@ import sys
 valtype = ['_leave_1_cohort_out','_leave_1_sub_out_across_coh','_leave_1_sub_out_within_coh']
 # import the data
 ch_all = np.load(
-    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data\CEBRA performances", "2023_09_27-10_58"+valtype[2]+".npy"),
+    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data\CEBRA performances", "2023_10_10-09_54"+valtype[0]+".npy"),
     allow_pickle="TRUE",
 ).item()
 
@@ -15,7 +15,7 @@ features = ['Hjorth', 'Sharpwave', 'fooof', 'bursts','fft', 'combined']
 fields = ['cohort', 'sub', 'ch', 'type', 'ba_Hjorth', 'ba_Sharpwave', 'ba_fooof', 'ba_bursts','ba_fft', 'ba_combined','95%CI_Hjorth', '95%CI_Sharpwave', '95%CI_fooof', '95%CI_bursts','95%CI_fft', '95%CI_combined', 'length', 'movsamples']
 fields = ['cohort', 'sub', 'ch', 'type', 'ba_combined', 'importance', '95%CI_combined', 'length', 'movsamples']
 fields = ['cohort', 'sub', 'ba_combined']
-f = open(r'C:\Users\ICN_GPU\Documents\Glenn_Data\CEBRAtestWithin.csv', 'w',newline="")
+f = open(r'C:\Users\ICN_GPU\Documents\Glenn_Data\CEBRAGRUcoh.csv', 'w',newline="")
 w = csv.writer(f)
 
 w.writerow(fields)

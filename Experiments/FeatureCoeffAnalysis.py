@@ -64,24 +64,30 @@ maxpersub_n = maxpersub.subtract(maxpersub.mean(axis=1),axis=0).div(maxpersub.st
 maxpersub_01 = absolutes.subtract(absolutes.min(axis=1),axis=0).div(absolutes.max(axis=1).subtract(absolutes.min(axis=1)),axis=0)
 maxpersub_01 = maxpersub_01* (negatives*-2+1)
 subject = df.iloc[idxofmax]['sub']
-ax = sns.heatmap(maxpersub_01,yticklabels= subject,cmap="coolwarm")
+ax = sns.heatmap(maxpersub_01,yticklabels= subject,cmap='coolwarm',vmin=-1,vmax=1,cbar_kws={'label': 'Scaled value of regression coefficient'})
+ax.figure.axes[-1].yaxis.label.set_size(17)
+cbar = ax.collections[0].colorbar
+cbar.ax.tick_params(labelsize=15)
 ax.set(xlabel="", ylabel="")
 ax.set_xticks(np.array(range(len(corrfeaturedim)))+0.5)
 ax.set_xticklabels(corrfeaturedim)
-ax.xaxis.tick_top()
+ax.tick_params(labelsize=12)
+ax.set_title('Within channel logistic regression coefficients',fontsize=20)
+#ax.xaxis.tick_top()
 ax.set_xticks(ax.get_xticks())
-ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='left')
+ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right')
 #ax.set_yticklabels(namelist)
 ax.set_yticks([])
 base = 0
 for i in range(len(cohorts)):
     ax.text(-0.02, base + lenper[i] / 2, cohorts[i], ha='right', va='center', rotation=0,
-            transform=ax.get_yaxis_transform())
+            transform=ax.get_yaxis_transform(),fontsize=15)
     ax.hlines(base + lenper[i], 0, -0.02, color='k', lw=1,
                   transform=ax.get_yaxis_transform(), clip_on=False)
     base += lenper[i]
-plt.tight_layout()
+#plt.tight_layout()
 plt.show()
+plt.savefig(r"C:\Users\ICN_GPU\Documents\Glenn_Data\Figures\PosterFigures\FeatureHeatmapTop.pdf")
 
 ### Ranking of relative importance (take absolute value and then scale [0,1] per subject, then boxplot per feature
 maxpersub = df.iloc[idxofmax][corrfeaturedim].abs()
