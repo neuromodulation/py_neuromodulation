@@ -24,6 +24,8 @@ idxlist_Berlin_001 = idxlist.copy()
 idxlist_Berlin_001[3] = np.add(idxlist_Berlin_001[3],1)
 idxlist.append(np.concatenate(idxlist))
 idxlist_Berlin_001.append(np.concatenate(idxlist_Berlin_001))
+idxlist_Berlin_001[-1] = np.sort(idxlist_Berlin_001[-1])
+idxlist[-1] = np.sort(idxlist[-1])
 
 # TODO: Leave out MedOn for subject 14 of Berlin, the run that does not have movement (due to left arm being used for rotation instead of right)
 # TODO: Leave ALL OF sub EL015 --> Also no movement in label for MedOn and MedOff

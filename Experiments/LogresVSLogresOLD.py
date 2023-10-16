@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 leaveacross = True
 
-suffix = '2023_10_10-09_54'
+suffix = '2023_10_16-11_33'
 
 leave_cohort_out = np.load(
     os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data\CEBRA performances", f"{suffix}_leave_1_cohort_out.npy"),
@@ -40,7 +40,7 @@ for cohort in ['Beijing','Pittsburgh','Berlin','Washington']:
         df_temp = pd.DataFrame(data=result,columns=Col)
         df = pd.concat([df,df_temp])
 
-suffix_log = '2023_10_10-10_11'
+suffix_log = '2023_10_16-11_29'
 
 leave_cohort_out = np.load(
     os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data\CEBRA performances", f"{suffix_log}_leave_1_cohort_out.npy"),
@@ -64,13 +64,13 @@ else:
 
 Col = ['Cohort','Validation','Performance']
 # Repeat this over
-df_log = pd.DataFrame(columns=['Cohort','Validation','Performance'])
+df_old = pd.DataFrame(columns=['Cohort','Validation','Performance'])
 for cohort in ['Beijing','Pittsburgh','Berlin','Washington']:
     for valset in range(len(valtypes)):
         dataset = listofdicts[valset]
         result = [[cohort,valtypes[valset],dataset[cohort][item]['performance']] for item in dataset[cohort] if isinstance(dataset[cohort][item],dict)]
         df_temp = pd.DataFrame(data=result,columns=Col)
-        df_log = pd.concat([df_log,df_temp])
+        df_old = pd.concat([df_old,df_temp])
 
 
 #sns.boxplot(x="Cohort", y="Performance", data=df, saturation=0.5)
@@ -78,17 +78,17 @@ sns.catplot(data=df, x="Validation", y="Performance", kind="box",color="0.9")
 sns.swarmplot(x="Validation", y="Performance", data=df, hue="Cohort",
               size=4, edgecolor="black",dodge=True).set_title(f"{suffix}")
 plt.ylim(0.3, 1)
-plt.title('CEBRA results')
+plt.title('Logreg on new fft data')
 plt.show()
 
-sns.catplot(data=df_log, x="Validation", y="Performance", kind="box",color="0.9")
-sns.swarmplot(x="Validation", y="Performance", data=df_log, hue="Cohort",
+sns.catplot(data=df_old, x="Validation", y="Performance", kind="box",color="0.9")
+sns.swarmplot(x="Validation", y="Performance", data=df_old, hue="Cohort",
               size=4, edgecolor="black",dodge=True).set_title(f"{suffix_log}")
 plt.ylim(0.3, 1)
-plt.title('Logistic results')
+plt.title('Logreg on old fft data')
 plt.show()
 
-df['Performance_log'] = df_log['Performance']
+df['Performance_log'] = df_old['Performance']
 
 df_coh = df.loc[df['Validation'] == valtypes[0]]
 data = pd.melt(df_coh[['Performance_log','Performance']])
@@ -104,9 +104,11 @@ sns.lineplot(x="variable", y="value", hue='nr', data=data,
 df['diff'] = df['Performance'] - df['Performance_log']
 
 ## Analyze the mean difference per category
+plt.figure()
 df.groupby(['Cohort','Validation']).mean()['diff'].plot(kind='bar')
-plt.title('Difference between CEBRA and LogReg performance')
-plt.ylabel('CEBRA-LogisticRegression BA')
+plt.title('Difference between old and new dataset with only fft and logistic regression')
+plt.ylabel('New-Old fft Logistic Regression BA')
+plt.figure()
 sns.boxplot(x="Cohort", y="diff", data=df,hue='Validation',showmeans=True,meanline=True,meanprops={'color': 'r'})
-plt.title('Difference between CEBRA and LogReg performance')
-plt.ylabel('CEBRA-LogisticRegression BA')
+plt.title('Difference between old and new dataset with only fft and logistic regression')
+plt.ylabel('New-Old fft Logistic Regression BA')

@@ -38,7 +38,7 @@ ch_all_feat = np.load(
     allow_pickle="TRUE",
 ).item()
 df_best_rmap = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_best_func_rmap_ch_adapted.csv")
-df_best_rmap_old = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_best_func_rmap_ch.csv")
+df_best_rmap_og = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_best_func_rmap_ch.csv")
 df_updrs = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_updrs.csv")
 
 features = ['Hjorth','fft', 'Sharpwave', 'fooof', 'bursts']
@@ -160,12 +160,13 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False,Testphase=Fals
                 sub_test, cohort_test, df_rmap=df_best_rmap
             )
             # Select the desired features
-            toselect = model_params['features'].split(',')
-            idxlist = []
-            for featsel in toselect:
-                idxlist.append(featuredict[featsel])
-            idxlist = np.concatenate(idxlist)
-            X_test = X_test[:, idxlist].copy()
+            if model_params['features']:
+                toselect = model_params['features'].split(',')
+                idxlist = []
+                for featsel in toselect:
+                    idxlist.append(featuredict[featsel])
+                idxlist = np.concatenate(idxlist)
+                X_test = X_test[:, idxlist].copy()
 
             # if statement to keep the same model for all subjects of leave 1 out cohort
             if (val_approach == "leave_1_cohort_out" and cohort_test != cohort_prev_it) or val_approach != "leave_1_cohort_out":
@@ -220,7 +221,8 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False,Testphase=Fals
                     sub_aux = sub_aux_comb[0]
                     coh_aux = coh_aux_comb[0]
                 #print(X_train.shape[0])
-                X_train = X_train[:,idxlist].copy()
+                if model_params['features']:
+                    X_train = X_train[:,idxlist].copy()
                 #print(X_test.shape[0])
                 # Proof that TEST not in Train
                 #def is_a_in_x(A, X):
@@ -313,9 +315,9 @@ for val_approach in val_approaches:
                 'discreteMov':True, # Turn pseudoDiscr to False if you want to test true discrete movement labels (Otherwise this setting will do nothing)
                 'pseudoDiscr': False, # Pseudodiscrete meaning direct conversion from int to float
                 'gaussSigma':1.5, # Set pseuodDiscr to False for this to take effect and assuming a Gaussian for the movement distribution
-                'features': 'Hjorth,fft,Sharpwave,fooof,bursts',# Choose what features to include 'Hjorth,fft,Sharpwave,fooof,bursts' as 1 string separated by commas without spaces
-                'additional_comment':'Val_all_Logres',
-                'debug': False} # Debug = True; stops saving the results unnecessarily
+                'features': 'fft',# Choose what features to include 'Hjorth,fft,Sharpwave,fooof,bursts' as 1 string separated by commas without spaces
+                'additional_comment':'Val_fft_Logreg',
+                'debug': True} # Debug = True; stops saving the results unnecessarily
     if not model_params['debug']:
         writer = SummaryWriter(log_dir=f"C:/Users/ICN_GPU/Documents/Glenn_Data/CEBRA_logs/{val_approach}/{curtime}")
 

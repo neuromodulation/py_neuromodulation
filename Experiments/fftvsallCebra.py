@@ -76,12 +76,14 @@ sns.catplot(data=df, x="Validation", y="Performance", kind="box",color="0.9")
 sns.swarmplot(x="Validation", y="Performance", data=df, hue="Cohort",
               size=4, edgecolor="black",dodge=True).set_title(f"{suffix}")
 plt.ylim(0.3, 1)
+plt.title('All feature CEBRA')
 plt.show()
 
 sns.catplot(data=df_fft, x="Validation", y="Performance", kind="box",color="0.9")
 sns.swarmplot(x="Validation", y="Performance", data=df_fft, hue="Cohort",
               size=4, edgecolor="black",dodge=True).set_title(f"{suffix_fft}")
 plt.ylim(0.3, 1)
+plt.title('fft only CEBRA')
 plt.show()
 
 df['Performance_fft'] = df_fft['Performance']
@@ -89,7 +91,7 @@ df['Performance_fft'] = df_fft['Performance']
 df_coh = df.loc[df['Validation'] == valtypes[0]]
 data = pd.melt(df_coh[['Performance_fft','Performance']])
 data['nr'] = list(range(39))+list(range(39))
-
+plt.figure()
 sns.boxplot(x="variable", y="value", data=data)
 sns.swarmplot(x="variable", y="value", data=data, color=".25")
 pal = sns.color_palette(['black'], df.shape[1])
@@ -97,3 +99,13 @@ sns.lineplot(x="variable", y="value", hue='nr', data=data,
              estimator=None, legend=False,palette=pal)
 
 df['diff'] = df['Performance'] - df['Performance_fft']
+
+## Analyze the mean difference per category
+plt.figure()
+df.groupby(['Cohort','Validation']).mean()['diff'].plot(kind='bar')
+plt.title('Difference between CEBRA with all features vs fft')
+plt.ylabel('CEBRA all - CEBRA fft BA')
+plt.figure()
+sns.boxplot(x="Cohort", y="diff", data=df,hue='Validation',showmeans=True,meanline=True,meanprops={'color': 'r'})
+plt.title('Difference between CEBRA with all features vs fft')
+plt.ylabel('CEBRA all - CEBRA fft BA')

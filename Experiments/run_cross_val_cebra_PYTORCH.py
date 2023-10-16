@@ -969,7 +969,7 @@ def run_CV(val_approach,curtime,model_params,show_embedding=False,embeddingconsi
 curtime = datetime.now().strftime("%Y_%m_%d-%H_%M")
 perflist = []
 val_approaches = ["leave_1_sub_out_across_coh","leave_1_sub_out_within_coh","leave_1_cohort_out"]
-cohorts = [ "Berlin","Beijing","Pittsburgh","Washington"]
+cohorts = ["Berlin","Beijing","Pittsburgh","Washington"]
 
 for val_approach in val_approaches:
     model_params = {'model_architecture':'offset9RNN-model',
@@ -995,7 +995,7 @@ for val_approach in val_approaches:
                 'early_stopping':False,
                 'features': 'fft', # Choose what features to include 'Hjorth,fft,Sharpwave,fooof,bursts' as 1 string separated by commas without spaces
                 'additional_comment':'Val_fft_GRU',
-                'debug': False} # Debug = True; stops saving the results unnecessarily
+                'debug': True} # Debug = True; stops saving the results unnecessarily
     if not model_params['debug']:
         writer = SummaryWriter(log_dir=f"C:/Users/ICN_GPU/Documents/Glenn_Data/CEBRA_logs/{val_approach}/{curtime}")
 

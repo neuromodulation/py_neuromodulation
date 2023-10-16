@@ -6,7 +6,7 @@ import os
 import matplotlib.pyplot as plt
 
 ############ LOAD in the data ##################
-df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\AllfeaturePerformances_TempCleaned.csv")
+df = pd.read_csv(r"C:\Users\ICN_GPU\Documents\Glenn_Data\df_ch_performances.csv")
 
 ch_all_fft = np.load(
     os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "channel_all_fft.npy"),
@@ -14,7 +14,7 @@ ch_all_fft = np.load(
 ).item()
 
 ch_all_feat = np.load(
-    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "TempCleaned2_channel_all.npy"),
+    os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data", "channel_all_fft.npy"),
     allow_pickle="TRUE",
 ).item()
 
@@ -35,12 +35,10 @@ idxlist_Berlin_001[5] = np.add(idxlist_Berlin_001[5],1)
 idxlist.append(np.concatenate(idxlist))
 idxlist_Berlin_001.append(np.concatenate(idxlist_Berlin_001))
 
-featuredim = featuredim[idxlist[-1]]
-
 ################### Find the best channel per subject ##################################
-idxofmax = np.sort(list(df.groupby(['cohort','sub'])['ba_combined'].idxmax()))
+idxofmax = np.sort(list(df.groupby(['cohort','sub'])['performance_test'].idxmax()))
 cohsubchmax = df.iloc[idxofmax][['cohort','sub','ch']]
-ba_combined = df.iloc[idxofmax]['ba_combined']
+ba_combined = df.iloc[idxofmax]['performance_test']
 
 sub_names = []
 cohs = []
@@ -75,9 +73,9 @@ def reject_outliers(data, m=3, repeats = 1):
 left = 20
 right = 20
 total = left+right
-onsetfeats = np.zeros((len(onsetlist),total,36))
+onsetfeats = np.zeros((len(onsetlist),total,7))
 for i in range(len(onsetlist)):
-    persub = np.zeros((len(onsetlist[i]),total,36)) # Create empty zeros mat of (nr onsets, features,time around onset)
+    persub = np.zeros((len(onsetlist[i]),total,7)) # Create empty zeros mat of (nr onsets, features,time around onset)
     for timepoints in range(len(onsetlist[i])): # Get the profile for each sub
         if onsetlist[i][timepoints] >= left and onsetlist[i][timepoints]+right < len(best_ch[i]):
             data = best_ch[i][onsetlist[i][timepoints] - left:onsetlist[i][timepoints] + right, :]
@@ -91,7 +89,7 @@ for i in range(len(onsetlist)):
     onsetfeats[i,:,:] = meanforsub
 plt.figure()
 for i in range(np.shape(x_concat)[1]):
-    plt.subplot(6, 7, i + 1)
+    plt.subplot(3, 3, i + 1)
     #for subs in range(len(onsetfeats)):
         #plt.scatter(range(total),onsetfeats[subs,:,i],s=1)
     plt.plot(np.mean(onsetfeats[:,:,i],0))
@@ -109,7 +107,7 @@ cbar.ax.set_yticklabels(ticklabs, fontsize=15)
 cbar.set_label('Amplitude [a.u.]',fontsize=18)
 plt.xticks([0,left,total-1],[-left/10,0,right/10],fontsize=20)
 plt.xlabel('Time aligned to movement [s]', fontsize=25)
-plt.yticks(range(36),featuredim,fontsize=10)
+plt.yticks(range(7),featuredim,fontsize=10)
 plt.title('Feature estimation ',fontsize=18)
 plt.show()
 plt.savefig(r"C:\Users\ICN_GPU\Documents\Glenn_Data\Figures\PosterFigures\HeatmapFeaturesAroundMovementOnset.pdf")
@@ -123,7 +121,7 @@ Berlinbool = [cohs[i] == 'Berlin' for i in range(len(cohs))]
 onsetfeatBer = onsetfeats[Berlinbool]
 plt.figure()
 for i in range(np.shape(x_concat)[1]):
-    plt.subplot(6, 7, i + 1)
+    plt.subplot(3, 3, i + 1)
     #for subs in range(len(onsetfeats)):
         #plt.scatter(range(total),onsetfeats[subs,:,i],s=1)
     plt.plot(np.mean(onsetfeatBer[:,:,i],0))
@@ -139,10 +137,10 @@ cax = divider.append_axes('right', size='5%', pad=0.05)
 cax.set_label('Amplitude [a.u.]')
 samefig.colorbar(im1, cax=cax, orientation='vertical',label='Amplitude [a.u.]')
 ticklabs = cax.get_yticklabels()
-sameax[0,0].set_xticks([0,left,total-1],[-left/10,0,right/10])
-sameax[0,0].set_xlabel('Time aligned to movement [s]')
-sameax[0,0].set_yticks(range(36),featuredim)
-sameax[0,0].set_title('Berlin')
+sameax[0,0].set_xticks([0,left,total-1],[-left/10,0,right/10],fontsize=20)
+sameax[0,0].set_xlabel('Time aligned to movement [s]', fontsize=25)
+sameax[0,0].set_yticks(range(7),featuredim,fontsize=10)
+sameax[0,0].set_title('Berlin',fontsize=18)
 
 # Berlin per subject
 Berlinbool = [cohs[i] == 'Berlin' for i in range(len(cohs))]
@@ -150,7 +148,7 @@ onsetfeatBer = onsetfeats[Berlinbool]
 idxTrue = [i for i in range(len(Berlinbool)) if Berlinbool[i]]
 plt.figure()
 for j in range(sum(Berlinbool)):
-    plt.subplot(3, 6, j + 1)
+    plt.subplot(3, 4, j + 1)
     cursub = idxTrue[j]
     plt.imshow(onsetfeats[cursub,:,:].T)
     cbar = plt.colorbar()
@@ -163,7 +161,7 @@ Pittbool = [cohs[i] == 'Pittsburgh' for i in range(len(cohs))]
 onsetfeatPitt = onsetfeats[Pittbool]
 plt.figure()
 for i in range(np.shape(x_concat)[1]):
-    plt.subplot(6, 7, i + 1)
+    plt.subplot(3, 3, i + 1)
     #for subs in range(len(onsetfeats)):
         #plt.scatter(range(total),onsetfeats[subs,:,i],s=1)
     plt.plot(np.mean(onsetfeatPitt[:,:,i],0))
@@ -178,10 +176,10 @@ divider = make_axes_locatable(sameax[0,1])
 cax = divider.append_axes('right', size='5%', pad=0.05)
 samefig.colorbar(im2, cax=cax, orientation='vertical',label='Amplitude [a.u.]')
 ticklabs = cax.get_yticklabels()
-sameax[0,1].set_xticks([0,left,total-1],[-left/10,0,right/10])
-sameax[0,1].set_xlabel('Time aligned to movement [s]')
-sameax[0,1].set_yticks(range(36),'')
-sameax[0,1].set_title('Pittsburgh')
+sameax[0,1].set_xticks([0,left,total-1],[-left/10,0,right/10],fontsize=20)
+sameax[0,1].set_xlabel('Time aligned to movement [s]', fontsize=25)
+sameax[0,1].set_yticks(range(7),'',fontsize=10)
+sameax[0,1].set_title('Pittsburgh',fontsize=18)
 
 # Pitt per subject
 idxTrue = [i for i in range(len(Pittbool)) if Pittbool[i]]
@@ -200,7 +198,7 @@ Beibool = [cohs[i] == 'Beijing' for i in range(len(cohs))]
 onsetfeatBei = onsetfeats[Beibool]
 plt.figure()
 for i in range(np.shape(x_concat)[1]):
-    plt.subplot(6, 7, i + 1)
+    plt.subplot(3, 3, i + 1)
     #for subs in range(len(onsetfeats)):
         #plt.scatter(range(total),onsetfeats[subs,:,i],s=1)
     plt.plot(np.mean(onsetfeatBei[:,:,i],0))
@@ -217,29 +215,17 @@ samefig.colorbar(im1, cax=cax, orientation='vertical',label='Amplitude [a.u.]')
 ticklabs = cax.get_yticklabels()
 #cax.set_yticklabels(ticklabs, fontsize=15)
 #cax.set_label('Amplitude [a.u.]',fontsize=18)
-sameax[1,0].set_xticks([0,left,total-1],[-left/10,0,right/10])
-sameax[1,0].set_xlabel('Time aligned to movement [s]')
-sameax[1,0].set_yticks(range(36),featuredim)
-sameax[1,0].set_title('Beijing')
-
-# Bei per subject
-idxTrue = [i for i in range(len(Beibool)) if Beibool[i]]
-plt.figure()
-for j in range(sum(Beibool)):
-    plt.subplot(3, 6, j + 1)
-    cursub = idxTrue[j]
-    plt.imshow(onsetfeats[cursub,:,:].T)
-    cbar = plt.colorbar()
-    plt.xticks([0, left, total - 1], [-left / 10, 0, right / 10])
-    plt.title(f'sub {j}, R {ba_combined.iloc[cursub]:.2f}')
-    plt.show()
+sameax[1,0].set_xticks([0,left,total-1],[-left/10,0,right/10],fontsize=20)
+sameax[1,0].set_xlabel('Time aligned to movement [s]', fontsize=25)
+sameax[1,0].set_yticks(range(7),featuredim,fontsize=10)
+sameax[1,0].set_title('Beijing',fontsize=18)
 
 # Washington
 Washbool = [cohs[i] == 'Washington' for i in range(len(cohs))]
 onsetfeatWash = onsetfeats[Washbool]
 plt.figure()
 for i in range(np.shape(x_concat)[1]):
-    plt.subplot(6, 7, i + 1)
+    plt.subplot(3, 3, i + 1)
     #for subs in range(len(onsetfeats)):
         #plt.scatter(range(total),onsetfeats[subs,:,i],s=1)
     plt.plot(np.mean(onsetfeatWash[:,:,i],0))
@@ -256,8 +242,8 @@ samefig.colorbar(im1, cax=cax, orientation='vertical',label='Amplitude [a.u.]')
 ticklabs = cax.get_yticklabels()
 #cax.set_yticklabels(ticklabs, fontsize=15)
 #cax.set_label('Amplitude [a.u.]',fontsize=18)
-sameax[1,1].set_xticks([0,left,total-1],[-left/10,0,right/10])
-sameax[1,1].set_xlabel('Time aligned to movement [s]')
-sameax[1,1].set_yticks(range(36),'')
-sameax[1,1].set_title('Washington')
-samefig.suptitle('Features aligned to movement onset for the different cohorts')
+sameax[1,1].set_xticks([0,left,total-1],[-left/10,0,right/10],fontsize=20)
+sameax[1,1].set_xlabel('Time aligned to movement [s]', fontsize=25)
+sameax[1,1].set_yticks(range(7),'',fontsize=10)
+sameax[1,1].set_title('Washington',fontsize=18)
+samefig.suptitle('Old dataset')
