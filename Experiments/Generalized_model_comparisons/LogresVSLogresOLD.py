@@ -109,6 +109,12 @@ df.groupby(['Cohort','Validation']).mean()['diff'].plot(kind='bar')
 plt.title('Difference between old and new dataset with only fft and logistic regression')
 plt.ylabel('New-Old fft Logistic Regression BA')
 plt.figure()
-sns.boxplot(x="Cohort", y="diff", data=df,hue='Validation',showmeans=True,meanline=True,meanprops={'color': 'r'})
-plt.title('Difference between old and new dataset with only fft and logistic regression')
-plt.ylabel('New-Old fft Logistic Regression BA')
+sns.boxplot(x="Cohort", y="diff", data=df,hue='Validation',showmeans=True,
+            meanprops={"marker":"o",
+                       "markerfacecolor":"white",
+                       "markeredgecolor":"black",
+                      "markersize":"5"})
+plt.plot([], [], 'o',markerfacecolor="white",markeredgecolor="black",markersize="5", linewidth=1, color='Crimson', label='mean')
+plt.legend()
+plt.title('Difference in decoding performance between the old and new dataset; fft only with Logistic Regression')
+plt.ylabel('Balanced accuracy: New minus old dataset')
