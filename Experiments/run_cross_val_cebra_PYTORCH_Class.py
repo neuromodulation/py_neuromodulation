@@ -29,6 +29,8 @@ from Experiments.utils.knn_bpp import kNN_BPP
 from Experiments.utils.cebracustom import CohortDiscreteDataLoader
 import time
 from Experiments.utils.ExtraTorchFunc import Attention, WeightAttention, MatrixAttention, AttentionWithContext
+from captum.attr import LayerConductance, LayerActivation, LayerIntegratedGradients
+from captum.attr import IntegratedGradients, DeepLift, GradientShap, NoiseTunnel, FeatureAblation
 torch.backends.cudnn.benchmark = True
 
 class run_cross_val_cebra:
@@ -60,10 +62,10 @@ class run_cross_val_cebra:
         self.embeddingconsistency = False
         self.showfeatureweights = False
         self.Testphase = False
-        # Temporary datetime in case of running sub parts
-        self.curtime = datetime.now().strftime("%Y_%m_%d-%H_%M")
+        self.Captum = False
         # Standard val_approach for run CV
         self.val_approach = ''
+        self.writer = None
 
         # Dynamics / Settings and run parameters
         self.model_params = settings
@@ -71,7 +73,6 @@ class run_cross_val_cebra:
         self.cohorts = cohorts
 
         # Empty values changing during the run
-        self.modelregistered=False
         self.offset = None
         self.tillend = False
 
@@ -102,261 +103,262 @@ class run_cross_val_cebra:
         return featuredict, idxlist, selfeatures
 
     def _register_model(self, architecture = ''):
-        '''Internal function that is used to register the correct model if the model is a custom one (else this function will do nothing)'''
+        '''Internal functiofn that is used to register the correct model if the model is a custom one (else this function will do nothing)'''
         if not architecture:
             architecture = self.model_params['model_architecture']
-        if architecture == "offset9-model":
-            @cebra.models.register("offset9-model")  # --> add that line to register the model!
-            class MyModel(_OffsetModel, ConvolutionalModelMixin):
-                # TODO: Add a way to incorporate static and categorical features --> I guess UPDRS as feature (age maybe also) and categorical (gender) through embedding
-                def __init__(self, num_neurons, num_units, num_output, normalize=True):
-                    super().__init__(num_input=num_neurons,
-                                     num_output=num_output,
-                                     normalize=normalize,
-                                     )
-                    self.drop02 = nn.Dropout(0.2)
-                    self.conv1 = nn.Conv1d(num_neurons, 32, 2)
-                    self.GELU = nn.GELU()
-                    self.BN = nn.LazyBatchNorm1d()  # Can do some work to figure out actual sizes and not use Lazy
-                    self.BN2 = nn.LazyBatchNorm1d()
-                    self.BN3 = nn.LazyBatchNorm1d()
-                    self.BN4 = nn.LazyBatchNorm1d()
-                    self.conv2 = nn.Conv1d(32, 64, 2)
-                    self.conv3 = nn.Conv1d(64, 64, 3)
-                    self.conv4 = nn.Conv1d(64, 64, 3)
-                    self.skipconv3 = cebra_layers._Skip(self.conv3, self.GELU, self.BN3)
-                    self.skipconv4 = cebra_layers._Skip(self.conv4, self.GELU, self.BN4, self.drop02)
-                    self.convout = nn.Conv1d(64, num_output, num_output)
-                    # nn.Flatten(),
-                    # nn.LazyLinear(32*3),
-                    # nn.GELU(), # num_units*kernel size? (= channels * kernel)
-                    # nn.LazyBatchNorm1d(),
-                    # nn.Dropout(0.5),
-                    # nn.LazyLinear(3),
+        if not architecture in cebra.models.get_options():
+            if architecture == "offset9-model":
+                @cebra.models.register("offset9-model")  # --> add that line to register the model!
+                class MyModel(_OffsetModel, ConvolutionalModelMixin):
+                    # TODO: Add a way to incorporate static and categorical features --> I guess UPDRS as feature (age maybe also) and categorical (gender) through embedding
+                    def __init__(self, num_neurons, num_units, num_output, normalize=True):
+                        super().__init__(num_input=num_neurons,
+                                         num_output=num_output,
+                                         normalize=normalize,
+                                         )
+                        self.drop02 = nn.Dropout(0.2)
+                        self.conv1 = nn.Conv1d(num_neurons, 32, 2)
+                        self.GELU = nn.GELU()
+                        self.BN = nn.LazyBatchNorm1d()  # Can do some work to figure out actual sizes and not use Lazy
+                        self.BN2 = nn.LazyBatchNorm1d()
+                        self.BN3 = nn.LazyBatchNorm1d()
+                        self.BN4 = nn.LazyBatchNorm1d()
+                        self.conv2 = nn.Conv1d(32, 64, 2)
+                        self.conv3 = nn.Conv1d(64, 64, 3)
+                        self.conv4 = nn.Conv1d(64, 64, 3)
+                        self.skipconv3 = cebra_layers._Skip(self.conv3, self.GELU, self.BN3)
+                        self.skipconv4 = cebra_layers._Skip(self.conv4, self.GELU, self.BN4, self.drop02)
+                        self.convout = nn.Conv1d(64, num_output, num_output)
+                        # nn.Flatten(),
+                        # nn.LazyLinear(32*3),
+                        # nn.GELU(), # num_units*kernel size? (= channels * kernel)
+                        # nn.LazyBatchNorm1d(),
+                        # nn.Dropout(0.5),
+                        # nn.LazyLinear(3),
 
-                def init_weights(m):
-                    if isinstance(m, nn.Conv2d):
-                        torch.nn.init.xavier_uniform_(m.weight)
-                        with torch.no_grad():
-                            m.bias.zero_()
+                    def init_weights(m):
+                        if isinstance(m, nn.Conv2d):
+                            torch.nn.init.xavier_uniform_(m.weight)
+                            with torch.no_grad():
+                                m.bias.zero_()
 
-                def forward(self, x):
-                    x = self.drop02(x)
-                    x = self.BN(self.GELU(self.conv1(x)))
-                    x = self.drop02(x)
-                    x = self.BN2(self.GELU(self.conv2(x)))
-                    # Note that these are cropped skip connections
-                    x = self.skipconv3(x)
-                    x = self.skipconv4(x)
-                    x = self.convout(x)
-                    return torch.nn.functional.normalize(torch.squeeze(x), p=2, dim=1)
+                    def forward(self, x):
+                        x = self.drop02(x)
+                        x = self.BN(self.GELU(self.conv1(x)))
+                        x = self.drop02(x)
+                        x = self.BN2(self.GELU(self.conv2(x)))
+                        # Note that these are cropped skip connections
+                        x = self.skipconv3(x)
+                        x = self.skipconv4(x)
+                        x = self.convout(x)
+                        return torch.nn.functional.normalize(torch.squeeze(x), p=2, dim=1)
 
-                # ... and you can also redefine the forward method,
-                # as you would for a typical pytorch model
-                def get_offset(self):
-                    return cebra.data.Offset(4, 5)
-        elif architecture == "offset9RNN-model":
-            @cebra.models.register("offset9RNN-model")  # --> add that line to register the model!
-            class MyModel(_OffsetModel, ConvolutionalModelMixin):
-                def __init__(self, num_neurons, num_units, num_output, normalize=True):
-                    super().__init__(num_input=num_neurons,
-                                     num_output=num_output,
-                                     normalize=normalize,
-                                     )
-                    self.savedscales = None
-                    self.savedparam = None
-                    bidir = False
-                    hidden = 2
-                    compress = 9
-                    num_layers = 1
-                    grudrop = 0
-                    self.leftset = 9
-                    self.rightset = 1
-                    self.rnn = nn.GRU(num_neurons, hidden, num_layers, dropout=grudrop, bidirectional=bidir,
-                                      batch_first=True)
-                    self.fc = nn.Linear(hidden * (1 + int(bidir)), num_output)
+                    # ... and you can also redefine the forward method,
+                    # as you would for a typical pytorch model
+                    def get_offset(self):
+                        return cebra.data.Offset(4, 5)
+            elif architecture == "offset9RNN-model":
+                @cebra.models.register("offset9RNN-model")  # --> add that line to register the model!
+                class MyModel(_OffsetModel, ConvolutionalModelMixin):
+                    def __init__(self, num_neurons, num_units, num_output, normalize=True):
+                        super().__init__(num_input=num_neurons,
+                                         num_output=num_output,
+                                         normalize=normalize,
+                                         )
+                        self.savedscales = None
+                        self.savedparam = None
+                        bidir = False
+                        hidden = 2
+                        compress = 9
+                        num_layers = 1
+                        grudrop = 0
+                        self.leftset = 9
+                        self.rightset = 1
+                        self.rnn = nn.GRU(num_neurons, hidden, num_layers, dropout=grudrop, bidirectional=bidir,
+                                          batch_first=True)
+                        self.fc = nn.Linear(hidden * (1 + int(bidir)), num_output)
 
-                    self.gru_attention1 = Attention(hidden, self.leftset + self.rightset)
-                    self.gru_attention2 = Attention(hidden, self.leftset + self.rightset)
-                    self.feat_attention = WeightAttention(self.leftset + self.rightset, num_neurons)
-                    self.mat_attention = MatrixAttention(self.leftset + self.rightset, num_neurons)
-                    self.BN = nn.LazyBatchNorm1d()
-                    self.LN = nn.LayerNorm([num_neurons, compress])
-                    self.avg_pool = nn.AdaptiveAvgPool1d(1)
-                    self.max_pool = nn.AdaptiveMaxPool1d(1)
-                    self.linfeat = nn.Linear(num_neurons, num_neurons, bias=False)
-                    # Reduce expand
-                    self.linred = nn.Linear(num_neurons, compress)
-                    self.linexp = nn.Linear(compress, num_neurons)
-                    self.relu = nn.ReLU()
-                    # Linear to compress time
-                    self.lintimecomp = nn.Linear(compress, 1)
-                    self.sigmoid = nn.Sigmoid()
-                    weight = torch.zeros(num_neurons, 1)
-                    nn.init.xavier_uniform_(weight)
-                    self.learnedscale = nn.Parameter(weight)
+                        self.gru_attention1 = Attention(hidden, self.leftset + self.rightset)
+                        self.gru_attention2 = Attention(hidden, self.leftset + self.rightset)
+                        self.feat_attention = WeightAttention(self.leftset + self.rightset, num_neurons)
+                        self.mat_attention = MatrixAttention(self.leftset + self.rightset, num_neurons)
+                        self.BN = nn.LazyBatchNorm1d()
+                        self.LN = nn.LayerNorm([num_neurons, compress])
+                        self.avg_pool = nn.AdaptiveAvgPool1d(1)
+                        self.max_pool = nn.AdaptiveMaxPool1d(1)
+                        self.linfeat = nn.Linear(num_neurons, num_neurons, bias=False)
+                        # Reduce expand
+                        self.linred = nn.Linear(num_neurons, compress)
+                        self.linexp = nn.Linear(compress, num_neurons)
+                        self.relu = nn.ReLU()
+                        # Linear to compress time
+                        self.lintimecomp = nn.Linear(compress, 1)
+                        self.sigmoid = nn.Sigmoid()
+                        weight = torch.zeros(num_neurons, 1)
+                        nn.init.xavier_uniform_(weight)
+                        self.learnedscale = nn.Parameter(weight)
 
-                def init_weights(self):
-                    ih = (param.data for name, param in self.named_parameters() if 'weight_ih' in name)
-                    hh = (param.data for name, param in self.named_parameters() if 'weight_hh' in name)
-                    b = (param.data for name, param in self.named_parameters() if 'bias' in name)
-                    for k in ih:
-                        nn.init.xavier_uniform_(k)
-                    for k in hh:
-                        nn.init.orthogonal_(k)
-                    for k in b:
-                        nn.init.constant_(k, 0)
+                    def init_weights(self):
+                        ih = (param.data for name, param in self.named_parameters() if 'weight_ih' in name)
+                        hh = (param.data for name, param in self.named_parameters() if 'weight_hh' in name)
+                        b = (param.data for name, param in self.named_parameters() if 'bias' in name)
+                        for k in ih:
+                            nn.init.xavier_uniform_(k)
+                        for k in hh:
+                            nn.init.orthogonal_(k)
+                        for k in b:
+                            nn.init.constant_(k, 0)
 
-                def forward(self, x):
-                    #### Feature Attention: # TODO: Time/Feature attention (now compresses time to query point) but prob changes over time
-                    #### Reduce the time domain first:
-                    #### Avg pool the features
-                    # y = self.avg_pool(x)
-                    #### Take the exact sample (seems to work ok)
-                    # y = x[:,:,self.leftset].unsqueeze(2)
-                    #### Max pool
-                    # y = self.max_pool(x)
-                    #### FC to compress (let FC find the function to compr over time)
-                    # y = self.lintimecomp(x)
-                    # y = self.relu(y) # Optionally with Non-linearity afterwards
+                    def forward(self, x):
+                        #### Feature Attention: # TODO: Time/Feature attention (now compresses time to query point) but prob changes over time
+                        #### Reduce the time domain first:
+                        #### Avg pool the features
+                        # y = self.avg_pool(x)
+                        #### Take the exact sample (seems to work ok)
+                        # y = x[:,:,self.leftset].unsqueeze(2)
+                        #### Max pool
+                        # y = self.max_pool(x)
+                        #### FC to compress (let FC find the function to compr over time)
+                        # y = self.lintimecomp(x)
+                        # y = self.relu(y) # Optionally with Non-linearity afterwards
 
-                    #### Use FC to find corresponding weights, directly or trying to compress :
-                    # y = self.linfeat(y.transpose(-1, -2)).transpose(-1, -2)
-                    #### Or with compression inbetween:
-                    # y = self.linred(y.transpose(-1, -2))
-                    # y = self.relu(y)
-                    # y = self.linexp(y).transpose(-1, -2)
-                    #### Scaling like that for time attention (Find weights per features)
-                    # scale = self.feat_attention(x)
-                    ### Time-Feature matrix scaling
-                    # scale = self.mat_attention(x)
-                    ### Some very naive implementation to scale
-                    # x = x * self.learnedscale.unsqueeze(0).expand_as(x)
-                    #### Scale weights between 0 and 1 & Apply
-                    # scale = self.sigmoid(y) # Save / visualize y here if you want to know channel/feat 'weights'/'scale'
-                    # x = x * scale.expand_as(x) # Apply the learned Channel / Feature Attention weights
-                    # x = self.BN(x) # To prevent vanishing grad from [0,1] scaling
+                        #### Use FC to find corresponding weights, directly or trying to compress :
+                        # y = self.linfeat(y.transpose(-1, -2)).transpose(-1, -2)
+                        #### Or with compression inbetween:
+                        # y = self.linred(y.transpose(-1, -2))
+                        # y = self.relu(y)
+                        # y = self.linexp(y).transpose(-1, -2)
+                        #### Scaling like that for time attention (Find weights per features)
+                        # scale = self.feat_attention(x)
+                        ### Time-Feature matrix scaling
+                        # scale = self.mat_attention(x)
+                        ### Some very naive implementation to scale
+                        # x = x * self.learnedscale.unsqueeze(0).expand_as(x)
+                        #### Scale weights between 0 and 1 & Apply
+                        # scale = self.sigmoid(y) # Save / visualize y here if you want to know channel/feat 'weights'/'scale'
+                        # x = x * scale.expand_as(x) # Apply the learned Channel / Feature Attention weights
+                        # x = self.BN(x) # To prevent vanishing grad from [0,1] scaling
 
-                    #### Save scaling
-                    # self.savedscales = self.learnedscale.repeat(1,x.shape[0]).T.unsqueeze(2)
-                    # self.savedscales = scale
-                    x = x.permute(0, 2, 1)
-                    out, hidden = self.rnn(x)
-                    #### If unidirectional:
-                    ### Either take the last output (RNN has seen the whole dataset)
-                    out = self.fc(out[:, -1, :])
-                    ### Or use attention to take into account more outputs
-                    # out = self.fc(self.gru_attention1(out))
-                    #### If Bidirectional
-                    ### Either take the last output from both the directions
-                    # out = self.fc(torch.concat([out[:,-1,:2],out[:,0,2:]],1)) # Takes last pred from both sides ????
-                    ### Or take let attention optimize either together or separate where the forward and backward should be looking
-                    # out1 = self.gru_attention1(out[:,:,:2])
-                    # out2 = self.gru_attention2(out[:,:,2:])
-                    # out = self.fc(torch.concat([out1, out2], 1))
-                    return torch.nn.functional.normalize(torch.squeeze(out), p=2, dim=1)
+                        #### Save scaling
+                        # self.savedscales = self.learnedscale.repeat(1,x.shape[0]).T.unsqueeze(2)
+                        # self.savedscales = scale
+                        x = x.permute(0, 2, 1)
+                        out, hidden = self.rnn(x)
+                        #### If unidirectional:
+                        ### Either take the last output (RNN has seen the whole dataset)
+                        out = self.fc(out[:, -1, :])
+                        ### Or use attention to take into account more outputs
+                        # out = self.fc(self.gru_attention1(out))
+                        #### If Bidirectional
+                        ### Either take the last output from both the directions
+                        # out = self.fc(torch.concat([out[:,-1,:2],out[:,0,2:]],1)) # Takes last pred from both sides ????
+                        ### Or take let attention optimize either together or separate where the forward and backward should be looking
+                        # out1 = self.gru_attention1(out[:,:,:2])
+                        # out2 = self.gru_attention2(out[:,:,2:])
+                        # out = self.fc(torch.concat([out1, out2], 1))
+                        return torch.nn.functional.normalize(torch.squeeze(out), p=2, dim=1)
 
-                # ... and you can also redefine the forward method,
-                # as you would for a typical pytorch model
-                def get_offset(self):
-                    return cebra.data.Offset(self.leftset, self.rightset)
-        elif architecture == "offset9UPDRS-model":
-            @cebra.models.register("offset9UPDRS-model")  # --> add that line to register the model!
-            class MyModel(_OffsetModel, ConvolutionalModelMixin):
-                # TODO: Add a way to incorporate static and categorical features --> I guess UPDRS as feature (age maybe also) and categorical (gender) through embedding
-                def __init__(self, num_neurons, num_units, num_output, normalize=True):
-                    super().__init__(num_input=num_neurons,
-                                     num_output=num_output,
-                                     normalize=normalize,
-                                     )
-                    self.drop02 = nn.Dropout(0.2)
-                    self.drop1d02 = nn.Dropout1d(0.2)
-                    self.drop04 = nn.Dropout(0.3)
-                    self.conv1 = nn.Conv1d(num_neurons - 1, 64, 2)
-                    self.GELU = nn.GELU()
-                    self.BN = nn.LazyBatchNorm1d()  # Can do some work to figure out actual sizes and not use Lazy
-                    self.BN2 = nn.LazyBatchNorm1d()
-                    self.BN3 = nn.LazyBatchNorm1d()
-                    self.BN4 = nn.LazyBatchNorm1d()
-                    self.BN5 = nn.LazyBatchNorm1d()
-                    self.LN = nn.LayerNorm([64, 8])
-                    self.LN2 = nn.LayerNorm([64, 7])
-                    self.LN3 = nn.LayerNorm([64, 5])
-                    self.LN4 = nn.LayerNorm([8, 3])
-                    # self.LN5 = nn.LayerNorm([32, 8])
-                    self.conv2 = nn.Conv1d(64, 64, 2)
-                    self.conv3 = nn.Conv1d(64, 64, 3)
-                    # self.conv4 = nn.Conv1d(64, 64, 3)
-                    self.conv4alt = nn.Conv1d(64, 8, 3)
-                    # self.skipconv2 = cebra_layers._Skip(self.conv2, self.GELU, self.LN3)
-                    self.skipconv3 = cebra_layers._Skip(self.conv3, self.GELU, self.LN3)
-                    # self.skipconv4 = cebra_layers._Skip(self.conv4,self.GELU,self.LN4)
-                    # self.convout = nn.Conv1d(32, num_output, 3)
-                    self.flat = nn.Flatten()
-                    self.linint = nn.LazyLinear(32)
-                    self.linout = nn.LazyLinear(num_output)
-                    # nn.LazyLinear(32*3),
-                    # nn.GELU(), # num_units*kernel size? (= channels * kernel)
-                    # nn.LazyBatchNorm1d(),
-                    # nn.Dropout(0.5),
-                    # nn.LazyLinear(3),
+                    # ... and you can also redefine the forward method,
+                    # as you would for a typical pytorch model
+                    def get_offset(self):
+                        return cebra.data.Offset(self.leftset, self.rightset)
+            elif architecture == "offset9UPDRS-model":
+                @cebra.models.register("offset9UPDRS-model")  # --> add that line to register the model!
+                class MyModel(_OffsetModel, ConvolutionalModelMixin):
+                    # TODO: Add a way to incorporate static and categorical features --> I guess UPDRS as feature (age maybe also) and categorical (gender) through embedding
+                    def __init__(self, num_neurons, num_units, num_output, normalize=True):
+                        super().__init__(num_input=num_neurons,
+                                         num_output=num_output,
+                                         normalize=normalize,
+                                         )
+                        self.drop02 = nn.Dropout(0.2)
+                        self.drop1d02 = nn.Dropout1d(0.2)
+                        self.drop04 = nn.Dropout(0.3)
+                        self.conv1 = nn.Conv1d(num_neurons - 1, 64, 2)
+                        self.GELU = nn.GELU()
+                        self.BN = nn.LazyBatchNorm1d()  # Can do some work to figure out actual sizes and not use Lazy
+                        self.BN2 = nn.LazyBatchNorm1d()
+                        self.BN3 = nn.LazyBatchNorm1d()
+                        self.BN4 = nn.LazyBatchNorm1d()
+                        self.BN5 = nn.LazyBatchNorm1d()
+                        self.LN = nn.LayerNorm([64, 8])
+                        self.LN2 = nn.LayerNorm([64, 7])
+                        self.LN3 = nn.LayerNorm([64, 5])
+                        self.LN4 = nn.LayerNorm([8, 3])
+                        # self.LN5 = nn.LayerNorm([32, 8])
+                        self.conv2 = nn.Conv1d(64, 64, 2)
+                        self.conv3 = nn.Conv1d(64, 64, 3)
+                        # self.conv4 = nn.Conv1d(64, 64, 3)
+                        self.conv4alt = nn.Conv1d(64, 8, 3)
+                        # self.skipconv2 = cebra_layers._Skip(self.conv2, self.GELU, self.LN3)
+                        self.skipconv3 = cebra_layers._Skip(self.conv3, self.GELU, self.LN3)
+                        # self.skipconv4 = cebra_layers._Skip(self.conv4,self.GELU,self.LN4)
+                        # self.convout = nn.Conv1d(32, num_output, 3)
+                        self.flat = nn.Flatten()
+                        self.linint = nn.LazyLinear(32)
+                        self.linout = nn.LazyLinear(num_output)
+                        # nn.LazyLinear(32*3),
+                        # nn.GELU(), # num_units*kernel size? (= channels * kernel)
+                        # nn.LazyBatchNorm1d(),
+                        # nn.Dropout(0.5),
+                        # nn.LazyLinear(3),
 
-                def init_weights(m):
-                    if isinstance(m, nn.Conv2d):
-                        torch.nn.init.xavier_uniform_(m.weight)
-                        with torch.no_grad():
-                            m.bias.zero_()
+                    def init_weights(m):
+                        if isinstance(m, nn.Conv2d):
+                            torch.nn.init.xavier_uniform_(m.weight)
+                            with torch.no_grad():
+                                m.bias.zero_()
 
-                def forward(self, x):
-                    UPDRS = x[:, -1, 4]  # Take the UPDRS score of the sample corr to the label
-                    x = x[:, 0:-1, :]
-                    # x = self.drop02(x)
-                    x = self.BN(self.GELU(self.conv1(x)))  # In: 512,36,9, Out: 512,32,8
-                    # x = self.drop02(x)
-                    x = self.BN2(self.GELU(self.conv2(x)))  # Out: 512,64,7
-                    # Note that these are cropped skip connections
-                    x = self.skipconv3(x)  # Out: 512,64,5
-                    x = self.BN4(self.GELU(self.conv4alt(x)))  # Out: 512,64,3
-                    x = self.flat(x)  # Out: 512,192
-                    # x = self.BN5(self.GELU(self.linint(x))) # Out: 512,32
-                    # Add the UPDRS score as a feature alongside x (now 32) # of other processed
-                    x = self.GELU(self.linint(torch.concat((x, UPDRS.expand((1, x.size(dim=0))).T), 1)))  # UPDRS
-                    x = self.linout(x)  # Out: 512,3
-                    return torch.squeeze(x)
+                    def forward(self, x):
+                        UPDRS = x[:, -1, 4]  # Take the UPDRS score of the sample corr to the label
+                        x = x[:, 0:-1, :]
+                        # x = self.drop02(x)
+                        x = self.BN(self.GELU(self.conv1(x)))  # In: 512,36,9, Out: 512,32,8
+                        # x = self.drop02(x)
+                        x = self.BN2(self.GELU(self.conv2(x)))  # Out: 512,64,7
+                        # Note that these are cropped skip connections
+                        x = self.skipconv3(x)  # Out: 512,64,5
+                        x = self.BN4(self.GELU(self.conv4alt(x)))  # Out: 512,64,3
+                        x = self.flat(x)  # Out: 512,192
+                        # x = self.BN5(self.GELU(self.linint(x))) # Out: 512,32
+                        # Add the UPDRS score as a feature alongside x (now 32) # of other processed
+                        x = self.GELU(self.linint(torch.concat((x, UPDRS.expand((1, x.size(dim=0))).T), 1)))  # UPDRS
+                        x = self.linout(x)  # Out: 512,3
+                        return torch.squeeze(x)
 
-                # ... and you can also redefine the forward method,
-                # as you would for a typical pytorch model
-                def get_offset(self):
-                    return cebra.data.Offset(4, 5)
-        elif architecture == "kernel9-model":
-            @cebra.models.register("kernel9-model")  # --> add that line to register the model!
-            class MyModel2(_OffsetModel, ConvolutionalModelMixin):
+                    # ... and you can also redefine the forward method,
+                    # as you would for a typical pytorch model
+                    def get_offset(self):
+                        return cebra.data.Offset(4, 5)
+            elif architecture == "kernel9-model":
+                @cebra.models.register("kernel9-model")  # --> add that line to register the model!
+                class MyModel2(_OffsetModel, ConvolutionalModelMixin):
 
-                def __init__(self, num_neurons, num_units, num_output, normalize=True):
-                    super().__init__(
-                        nn.Conv1d(num_neurons, num_units, 9),
-                        nn.GELU(),
-                        nn.Conv1d(num_units, num_units, 7), nn.GELU(),
-                        nn.Conv1d(num_units, num_units, 5), nn.GELU(),
-                        nn.Conv1d(num_units, num_units, 5), nn.GELU(),
-                        nn.Conv1d(num_units, num_output, 5),
-                        num_input=num_neurons,
-                        num_output=num_output,
-                        normalize=normalize,
-                    )
+                    def __init__(self, num_neurons, num_units, num_output, normalize=True):
+                        super().__init__(
+                            nn.Conv1d(num_neurons, num_units, 9),
+                            nn.GELU(),
+                            nn.Conv1d(num_units, num_units, 7), nn.GELU(),
+                            nn.Conv1d(num_units, num_units, 5), nn.GELU(),
+                            nn.Conv1d(num_units, num_units, 5), nn.GELU(),
+                            nn.Conv1d(num_units, num_output, 5),
+                            num_input=num_neurons,
+                            num_output=num_output,
+                            normalize=normalize,
+                        )
 
-                def init_weights(m):
-                    if isinstance(m, nn.Conv2d):
-                        torch.nn.init.xavier_uniform_(m.weight)
-                        with torch.no_grad():
-                            m.bias.zero_()
+                    def init_weights(m):
+                        if isinstance(m, nn.Conv2d):
+                            torch.nn.init.xavier_uniform_(m.weight)
+                            with torch.no_grad():
+                                m.bias.zero_()
 
-                # ... and you can also redefine the forward method,
-                # as you would for a typical pytorch model
+                    # ... and you can also redefine the forward method,
+                    # as you would for a typical pytorch model
 
-                def get_offset(self):
-                    return cebra.data.Offset(4 + 9,
-                                             5 + 9)  # such that the full kernel can go on the full mov data >90% of times (90% at least 9 samples)
+                    def get_offset(self):
+                        return cebra.data.Offset(4 + 9,
+                                                 5 + 9)  # such that the full kernel can go on the full mov data >90% of times (90% at least 9 samples)
 
     def _get_continuous_color(self,colorscale, intermed):
         """
@@ -473,6 +475,30 @@ class run_cross_val_cebra:
             plt.show()
         if save:
             self.writer.add_figure('Performance_Figure', plt.gcf(), 0)
+
+    def _create_Captum_networks(self):
+        class LogisticRegressionNetwork(nn.Module):
+            def __init__(self, input_dim, output_dim):
+                super(LogisticRegressionNetwork, self).__init__()
+                self.linear = nn.Linear(input_dim, output_dim)
+                nn.init.uniform_(self.linear.weight, -0.01, 0.01)
+                nn.init.zeros_(self.linear.bias)
+
+            def forward(self, x):
+                outputs = self.linear(x)
+                return outputs
+
+        class DirectClassifier(nn.Module):  # Concatenate the learned models in 1 model
+            def __init__(self, CEBRA, Logres):
+                super(DirectClassifier, self).__init__()
+                self.modelA = CEBRA
+                self.modelB = Logres
+
+            def forward(self, x):
+                x = self.modelA(x)
+                x = self.modelB(x)
+                return torch.sigmoid(x)
+        return LogisticRegressionNetwork, DirectClassifier
 
     def get_patients_train_dict(self, sub_test, cohort_test, data_select: dict, val_approach = None):
         '''Function that takes current test subject, belonging cohort the dataset to use and for external use
@@ -790,13 +816,13 @@ class run_cross_val_cebra:
         '''Function that builds and fits the CEBRA model using the PyTorch API, following specifications
         given in "model_params"'''
         # Put in TensorDataset with 2d discrete in order cohort - movement
+        # Put in TensorDataset with 2d discrete in order cohort - movement
         CohortAuxData = cebra.data.TensorDataset(torch.from_numpy(X_train).type(torch.FloatTensor),
                                                  discrete=torch.from_numpy(
                                                      np.array([coh_aux, y_train], dtype=int).T).type(
                                                      torch.LongTensor)).to('cuda')
-        if not self.modelregistered:
-            self._register_model()
-            self.modelregistered = True
+
+        self._register_model()
 
         self.neural_model = cebra.models.init(
             name=model_params['model_architecture'],
@@ -854,9 +880,7 @@ class run_cross_val_cebra:
                                                  discrete=torch.from_numpy(
                                                      np.array([coh_aux, y_train], dtype=int).T).type(
                                                      torch.LongTensor)).to('cuda')
-        if not self.modelregistered:
-            self._register_model()
-            self.modelregistered = True
+        self._register_model()
 
         self.neural_model = cebra.models.init(
             name=model_params['model_architecture'],
@@ -938,39 +962,64 @@ class run_cross_val_cebra:
         will use model_params['decoder'] to select if decmodel is left empty (could be used for external use)'''
         if not decmodel: # Allow use of this function without
             decmodel = self.model_params['decoder']
-        if decmodel == 'KNN':
-            decoder = neighbors.KNeighborsClassifier(
-            n_neighbors=model_params['n_neighbors'], metric=model_params['metric'],
-            n_jobs=model_params['n_jobs'])
-            decoder.fit(trainemb, np.array(y_train, dtype=int))
-        elif decmodel == 'Logistic':
-            decoder = linear_model.LogisticRegression(class_weight='balanced', penalty=None)
-            decoder.fit(trainemb, np.array(y_train, dtype=int))
-        elif decmodel == 'SVM':
-            decoder = SVC(kernel=cosine_similarity)
-            decoder.fit(trainemb, np.array(y_train, dtype=int))
-        elif decmodel == 'FAISS':
-            raise Exception('Not implemented')
-        elif decmodel == 'MLP':
-            raise Exception('Not implemented')
-        elif decmodel == 'XGB':
-            decoder = xgboost.sklearn.XGBClassifier()
-            # decoder.set_params(**{'lambda':2})
-            classes_weights = class_weight.compute_sample_weight(
-                class_weight="balanced", y=y_train
-            )
-            decoder.set_params(eval_metric="auc")
-            decoder.fit(
-                trainemb,
-                np.array(y_train, dtype=int),
-                sample_weight=classes_weights,
-            )
-        elif decmodel == 'KNN_BPP':
-            decoder = kNN_BPP(n_neighbors=model_params['n_neighbors'])
-            decoder.fit(trainemb, np.array(y_train, dtype=int))
+        if self.Captum:
+            if decmodel == 'Logistic':
+                if not 'LogisticRegressionNetwork' in dir():
+                    self.LogisticRegressionNetwork, self.DirectClassifier = self._create_Captum_networks()
+                decoder = self.LogisticRegressionNetwork(3,1)
+                decoder.train(True)
+                Opt_log = torch.optim.LBFGS(list(decoder.parameters()))
+                pos_w = np.sum((len(y_train)-np.sum(y_train))/(np.sum(y_train)))
+                weights = np.zeros(np.shape(y_train))
+                weights += 1
+                weights[np.array(y_train,dtype=bool)] = pos_w
+                loss_fn = nn.BCEWithLogitsLoss(pos_weight=torch.Tensor(weights)) # TODO: Calculate pos_weight
+                def closure(): # Define closure
+                    Opt_log.zero_grad()
+                    outputs = decoder(torch.Tensor(trainemb))
+                    loss = loss_fn(torch.squeeze(outputs),
+                                   torch.Tensor(y_train))
+                    loss.backward()
+                    return loss
+                for i in range(100): # 100 optimization steps like sklearn
+                    # Adjust learning weights
+                    Opt_log.step(closure)
+            else:
+                raise ValueError(f'Only Logistic Regression is currently supported with XAI/Captum, you chose {decmodel}')
         else:
-            print(f"selected decoder model {decmodel} is not available")
-            raise
+            if decmodel == 'KNN':
+                decoder = neighbors.KNeighborsClassifier(
+                n_neighbors=model_params['n_neighbors'], metric=model_params['metric'],
+                n_jobs=model_params['n_jobs'])
+                decoder.fit(trainemb, np.array(y_train, dtype=int))
+            elif decmodel == 'Logistic':
+                decoder = linear_model.LogisticRegression(class_weight='balanced', penalty=None)
+                decoder.fit(trainemb, np.array(y_train, dtype=int))
+            elif decmodel == 'SVM':
+                decoder = SVC(kernel=cosine_similarity)
+                decoder.fit(trainemb, np.array(y_train, dtype=int))
+            elif decmodel == 'FAISS':
+                raise Exception('Not implemented')
+            elif decmodel == 'MLP':
+                raise Exception('Not implemented')
+            elif decmodel == 'XGB':
+                decoder = xgboost.sklearn.XGBClassifier()
+                # decoder.set_params(**{'lambda':2})
+                classes_weights = class_weight.compute_sample_weight(
+                    class_weight="balanced", y=y_train
+                )
+                decoder.set_params(eval_metric="auc")
+                decoder.fit(
+                    trainemb,
+                    np.array(y_train, dtype=int),
+                    sample_weight=classes_weights,
+                )
+            elif decmodel == 'KNN_BPP':
+                decoder = kNN_BPP(n_neighbors=model_params['n_neighbors'])
+                decoder.fit(trainemb, np.array(y_train, dtype=int))
+            else:
+                print(f"selected decoder model {decmodel} is not available")
+                raise
         return decoder
 
     def computeconsistency(self,embeddings):
@@ -989,14 +1038,91 @@ class run_cross_val_cebra:
                                title="Between-subject consistencies")
         plt.show()
 
-    def run_CV(self,val_approach=''):
+    def ExplainableAI(self,X_test_batch,X_train_batch):
+        '''Runs some explainable AI methods from the Captum package on the CEBRA model to gain insight into feature importances
+
+        TODO: Add short description of the different methods
+        '''
+        # Do the XAI stuff and compute feature importances
+        torch.backends.cudnn.enabled = False
+        compmodel = self.DirectClassifier(self.cebra_model.model, self.decoder.cuda())
+        del self.cebra_model
+        del self.decoder
+
+        ig = IntegratedGradients(compmodel)
+        ig_nt = NoiseTunnel(ig)
+        # dl = DeepLift(compmodel)
+        gs = GradientShap(compmodel)
+        fa = FeatureAblation(compmodel)
+
+        ig_attr_test = ig.attribute(X_test_batch, n_steps=50)
+        ig_attr_test = ig_attr_test.detach().cpu().numpy().sum(0)
+        ig_attr_test_norm_sum = ig_attr_test / np.linalg.norm(ig_attr_test, ord=1)
+        ig_nt_attr_test = ig_nt.attribute(X_test_batch, n_steps=40)
+        # dl_attr_test = dl.attribute(X_test_batch)
+        gs_attr_test = gs.attribute(X_test_batch, X_train_batch)
+        fa_attr_test = fa.attribute(X_test_batch)
+        # prepare attributions for visualization
+
+        x_axis_data = np.arange(X_test_batch.shape[1])
+        x_axis_data_labels = list(map(lambda idx: self.featurelist[idx], x_axis_data))
+
+        ig_nt_attr_test_sum = ig_nt_attr_test.detach().cpu().numpy().sum(0)
+        ig_nt_attr_test_norm_sum = ig_nt_attr_test_sum / np.linalg.norm(ig_nt_attr_test_sum, ord=1)
+
+        # dl_attr_test_sum = dl_attr_test.detach().cpu().numpy().sum(0)
+        # dl_attr_test_norm_sum = dl_attr_test_sum / np.linalg.norm(dl_attr_test_sum, ord=1)
+
+        gs_attr_test_sum = gs_attr_test.detach().cpu().numpy().sum(0)
+        gs_attr_test_norm_sum = gs_attr_test_sum / np.linalg.norm(gs_attr_test_sum, ord=1)
+
+        fa_attr_test_sum = fa_attr_test.detach().cpu().numpy().sum(0)
+        fa_attr_test_norm_sum = fa_attr_test_sum / np.linalg.norm(fa_attr_test_sum, ord=1)
+
+        width = 0.14
+        legends = ['Int Grads', 'Int Grads w/SmoothGrad', 'GradientSHAP', 'Feature Ablation']
+
+        plt.figure(figsize=(20, 10))
+
+        ax = plt.subplot()
+        ax.set_title('Comparing input feature importances across multiple algorithms and learned weights')
+        ax.set_ylabel('Attributions')
+
+        FONT_SIZE = 16
+        plt.rc('font', size=FONT_SIZE)  # fontsize of the text sizes
+        plt.rc('axes', titlesize=FONT_SIZE)  # fontsize of the axes title
+        plt.rc('axes', labelsize=FONT_SIZE)  # fontsize of the x and y labels
+        plt.rc('legend', fontsize=FONT_SIZE - 4)  # fontsize of the legend
+
+        ax.bar(x_axis_data, ig_attr_test_norm_sum[:, -1], width, align='center', alpha=0.8, color='#eb5e7c')
+        ax.bar(x_axis_data + width, ig_nt_attr_test_norm_sum[:, -1], width, align='center', alpha=0.7, color='#A90000')
+        ax.bar(x_axis_data + 2 * width, gs_attr_test_norm_sum[:, -1], width, align='center', alpha=0.8, color='#4260f5')
+        ax.bar(x_axis_data + 3 * width, fa_attr_test_norm_sum[:, -1], width, align='center', alpha=1.0, color='#49ba81')
+        ax.autoscale_view()
+        plt.tight_layout()
+
+        ax.set_xticks(x_axis_data + 0.5)
+        ax.set_xticklabels(x_axis_data_labels, rotation=45, ha='right')
+
+        plt.legend(legends, loc=3)
+        plt.show()
+        torch.backends.cudnn.enabled = True
+    def run_CV(self,val_approach='',show_embedding=False, embeddingconsistency=False,showfeatureweights=False,Testphase=False,Captum=True):
         ''''The main cross validation loop. Will use the self.val_approach as determinant on what approach to run,
         or can be manually set to run a certain validation approach and give the results.
 
         TODO:
-        For saving the result (with model_params["debug"] == False) might require defining self.writer'''
+        Saving the result (with model_params["debug"] == False) might require defining self.writer if not run through loop_approaches
+        Properly handle the auxillary parameters checking if they have been set by the loop, else using the default setting
+        '''
         if not val_approach: # allow running CV externally with given val_approach
             val_approach = self.val_approach
+            if not val_approach:
+                raise ValueError('No validation approach defined')
+        if not self.writer and not self.model_params['debug']:
+            self.curtime = datetime.now().strftime("%Y_%m_%d-%H_%M")
+            self.writer = SummaryWriter(
+                log_dir=f"C:/Users/ICN_GPU/Documents/Glenn_Data/CEBRA_logs/{self.val_approach}/{self.curtime}")
         # Very local parameters
         trainembeddings = []
         trainID = []
@@ -1090,7 +1216,13 @@ class run_cross_val_cebra:
                         self.plotly_embeddings(self.X_train_emb,self.X_test_emb,self.y_train_offset,
                                       self.y_test_offset,cohort_test,aux=self.coh_aux_offset,type='coh', grad=False, nearest=False,model=None,val=val_approach)
                 # Predict the class based on the test embedding and the trained decoder
-                self.y_test_pr = self.decoder.predict(self.X_test_emb)
+                if not self.Captum:
+                    self.y_test_pr = self.decoder.predict(self.X_test_emb)
+                else:
+                    self.decoder.eval()
+                    self.y_test_pr = self.decoder(torch.Tensor(self.X_test_emb))
+                    self.y_test_pr = torch.sigmoid(self.y_test_pr) > 0.5  # Have to add sigmoid now and binarize
+                    self.y_test_pr = self.y_test_pr.detach().cpu().numpy()
 
                 # Compute balanced accuracy and store the results in dict
                 ba = metrics.balanced_accuracy_score(self.y_test_offset, self.y_test_pr)
@@ -1107,6 +1239,14 @@ class run_cross_val_cebra:
                 # Save performance metrics over the loops
                 bacohort.append(ba)
                 self.batotal.append(ba)
+
+                if self.Captum:
+                    TestBatches = np.lib.stride_tricks.sliding_window_view(self.X_test, self.offset.__len__(), axis=0)
+                    X_test_batch = torch.from_numpy(TestBatches).type(torch.FloatTensor).to('cuda')
+                    TrainBatches = np.lib.stride_tricks.sliding_window_view(self.X_train, self.offset.__len__(), axis=0)
+                    X_train_batch = torch.from_numpy(TrainBatches).type(torch.FloatTensor).to('cuda')
+                    self.ExplainableAI(X_test_batch,
+                                       X_train_batch)
 
             # After all subjects
             self.bacohortlist.append(np.mean(bacohort))
@@ -1126,7 +1266,7 @@ class run_cross_val_cebra:
         if not model_params['debug']:
             self._saveresultstoTensorBoard(mean_ba,self.batotal)
 
-    def loop_approaches(self,show_embedding=False,embeddingconsistency=False, showfeatureweights=False, Testphase=False):
+    def loop_approaches(self,show_embedding=False,embeddingconsistency=False, showfeatureweights=False, Testphase=False,Captum=False):
         '''Function that loops over all validation approaches given in self.val_approaches and runs the cross validation for each approach.
         Parameters:
             show_embedding: whether to show the visualize the resulting embedding using Plotly; default=False
@@ -1135,11 +1275,13 @@ class run_cross_val_cebra:
             showfeatureweights: whether to visualize the weights of an attention module in the neural model, make sure
                                 an attention_model is present.; default=False
             Testphase: whether the model is in test mode, calculating the accuracy only based on left-out test subjects
-                        default = False (train/validation mode)'''
+                        default = False (train/validation mode)
+            Captum: Set to True to use explainable AI methods to gain insight into feature importances'''
         self.show_embedding = show_embedding
         self.embeddingconsistency = embeddingconsistency
         self.showfeatureweights = showfeatureweights
         self.Testphase = Testphase
+        self.Captum = Captum
         self.curtime = datetime.now().strftime("%Y_%m_%d-%H_%M")
         for val_approach in self.val_approaches:
             self.val_approach = val_approach
@@ -1174,13 +1316,11 @@ model_params = {'model_architecture':'offset9RNN-model',
             'early_stopping':False,
             'features': 'fft', # Choose what features to include 'Hjorth,fft,Sharpwave,fooof,bursts' as 1 string separated by commas without spaces
             'additional_comment':'test_refactored_code',
-            'debug': False} # Debug = True; stops saving the results unnecessarily
+            'debug': True} # Debug = True; stops saving the results unnecessarily
 
 val_approaches = ["leave_1_sub_out_across_coh","leave_1_sub_out_within_coh","leave_1_cohort_out"]
-cohorts = ["Berlin","Beijing","Pittsburgh","Washington"]
+cohorts = ["Pittsburgh","Berlin","Beijing","Washington"]
 # Set general settings
 run1 = run_cross_val_cebra(model_params,val_approaches,cohorts) # Put in the data
 # Set run related settings
-run1.loop_approaches(show_embedding=False, embeddingconsistency=False,showfeatureweights=False,Testphase=False)
-
-
+run1.loop_approaches(show_embedding=False, embeddingconsistency=False,showfeatureweights=False,Testphase=False,Captum=True)
