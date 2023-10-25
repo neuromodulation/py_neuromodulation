@@ -34,9 +34,7 @@ class Burst(nm_features_abc.Feature):
             )
         ).astype(int)
 
-        self.number_samples_calc_features = int(
-            self.sfreq / self.s["sampling_rate_features_hz"]
-        )
+        self.num_max_samples_ring_buffer = int(self.sfreq * self.time_duration_s)
 
         self.bandpass_filter = nm_filter.BandPassFilter(
             f_ranges=self.f_ranges,
@@ -101,7 +99,7 @@ class Burst(nm_features_abc.Feature):
                 else:
                     self.data_buffer[ch_name][fband_name] = np.concatenate(
                         (self.data_buffer[ch_name][fband_name], new_dat), axis=0
-                    )
+                    )[-self.num_max_samples_ring_buffer:]
 
                 # calc features
                 burst_thr = np.percentile(
