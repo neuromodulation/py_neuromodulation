@@ -23,7 +23,9 @@ The following features are currently included:
 * and more...
 
 
-The original intention for writing this toolbox was movement decoding from invasive brain signals [1]_.
+Find here the preprint of **py_neuromodulation** called *"Invasive neurophysiology and whole brain connectomics for neural decoding in patients with brain implants"* [1]_.
+
+The original intention for writing this toolbox was movement decoding from invasive brain signals [2]_.
 The application however could be any neural decoding problem.
 *py_neuromodulation* offers wrappers around common practice machine learning methods for efficient analysis.
 
@@ -93,4 +95,5 @@ information at `my GitHub profile <https://github.com/timonmerk>`_.
 References
 ----------
 
-.. [1] Merk, T. et al. *Electrocorticography is superior to subthalamic local field potentials for movement decoding in Parkinson’s disease*. Elife 11, e75126, `https://doi.org/10.7554/eLife.75126` (2022).
+.. [1] Merk, T. et al. *Invasive neurophysiology and whole brain connectomics for neural decoding in patients with brain implants*, `https://doi.org/10.21203/rs.3.rs-3212709/v1` (2023).
+.. [2] Merk, T. et al. *Electrocorticography is superior to subthalamic local field potentials for movement decoding in Parkinson’s disease*. Elife 11, e75126, `https://doi.org/10.7554/eLife.75126` (2022).
