@@ -255,6 +255,23 @@ for j in vals:
     plisttot.append(p_val)
     conditiontot.append(j)
 
+g = sns.boxplot(x="Cohort", y="Performance", data=df,hue='Validation',showmeans=True,order=['Pittsburgh', 'Berlin', 'Beijing', 'Washington'],hue_order=['leave_subject_within_cohort',
+                                                                                                                                                        'leave_subject_across_cohorts',
+                                                                                                                                                        'leave_cohort_out'],
+            meanprops={"marker":"o",
+                       "markerfacecolor":"white",
+                       "markeredgecolor":"black",
+                      "markersize":"5"})
+g.set_title('Generalized, across-cohort decoding',fontsize=17)
+plt.plot([], [], 'o',markerfacecolor="white",markeredgecolor="black",markersize="5", linewidth=1, color='Crimson', label='mean')
+plt.legend(fontsize="13")
+g.set(ylim=(0.49, 1))
+g.axhline(0.5,ls='--')
+g.set_xlabel("Cohort",fontsize=17)
+g.set_ylabel("Balanced accuracy",fontsize=17)
+g.tick_params(labelsize=15)
+plt.savefig(r"C:\Users\ICN_GPU\Documents\Glenn_Data\Figures\PosterFigures\PerfAcrossContra_RT_new.pdf")
+
 def convert_pvalue_to_asterisks(pvalue):
     if pvalue <= 0.0001:
         return "****"

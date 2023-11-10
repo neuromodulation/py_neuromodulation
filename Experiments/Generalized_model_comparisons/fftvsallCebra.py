@@ -108,16 +108,21 @@ df.groupby(['Cohort','Validation']).mean()['diff'].plot(kind='bar')
 plt.title('Difference between CEBRA with all features vs fft')
 plt.ylabel('CEBRA all - CEBRA fft BA')
 plt.figure()
-sns.boxplot(x="Cohort", y="diff", data=df,hue='Validation',showmeans=True,
+g = sns.boxplot(x="Cohort", y="diff", data=df,hue='Validation',showmeans=True,order=['Pittsburgh', 'Berlin', 'Beijing', 'Washington'],hue_order=['leave_subject_within_cohort',
+                                                                                                                                                        'leave_subject_across_cohorts',
+                                                                                                                                                        'leave_cohort_out'],
             meanprops={"marker":"o",
                        "markerfacecolor":"white",
                        "markeredgecolor":"black",
                       "markersize":"5"})
 plt.plot([], [], 'o',markerfacecolor="white",markeredgecolor="black",markersize="5", linewidth=1, color='Crimson', label='mean')
-plt.legend()
-plt.title('Difference in decoding performance between CEBRA with all features compared to fft')
-plt.ylabel('Balanced accuracy: CEBRA all features - CEBRA fft')
+plt.legend(fontsize="13")
+g.set_title('Generalized, across-cohort decoding',fontsize=17)
 plt.axhline(y=0, color='r', linestyle='--')
+g.set_xlabel("Cohort",fontsize=17)
+g.set_ylabel("Balanced accuracy: CEBRA all features - CEBRA fft",fontsize=17)
+g.tick_params(labelsize=15)
+plt.savefig(r"C:\Users\ICN_GPU\Documents\Glenn_Data\Figures\PosterFigures\fftvsallCEBRA.pdf")
 
 def permutationTest(x, y, plot_distr=True, x_unit='', p=5000):
     """
