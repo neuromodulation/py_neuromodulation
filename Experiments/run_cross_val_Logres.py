@@ -293,8 +293,8 @@ curtime = datetime.now().strftime("%Y_%m_%d-%H_%M")
 experiment = "All_channels"
 longcompute = "leave_1_sub_out_across_coh"
 perflist = []
-val_approaches = ["leave_1_sub_out_within_coh","leave_1_cohort_out","leave_1_sub_out_across_coh"]
-cohorts = [ "Pittsburgh","Beijing", "Berlin",'Washington']
+val_approaches = ["leave_1_sub_out_within_coh"]
+cohorts = ["Pittsburgh","Berlin","Beijing","Washington"]
 
 for val_approach in val_approaches:
     model_params = {'model_architecture':'LogisticReg',
@@ -303,7 +303,7 @@ for val_approach in val_approaches:
                 'temperature':1,
                 'min_temperature':0.1, # If temperature mode = auto this should be set in the desired expected range
                 'learning_rate': 0.005, # Set this in accordance to loss function progression in TensorBoard
-                'max_iterations': 100,  # 5000, Set this in accordance to the loss functions in TensorBoard
+                'max_iterations': 100,  # Set this in accordance to the loss functions in TensorBoard
                 'time_offsets': 1, # Time offset between samples (Ideally set larger than receptive field according to docs)
                 'output_dimension': 3, # Nr of output dimensions of the CEBRA model
                 'decoder': 'Logistic', # Choose from "KNN", "Logistic", "SVM", "KNN_BPP"
@@ -315,10 +315,10 @@ for val_approach in val_approaches:
                 'discreteMov':True, # Turn pseudoDiscr to False if you want to test true discrete movement labels (Otherwise this setting will do nothing)
                 'pseudoDiscr': False, # Pseudodiscrete meaning direct conversion from int to float
                 'gaussSigma':1.5, # Set pseuodDiscr to False for this to take effect and assuming a Gaussian for the movement distribution
-                'features': 'fft',# Choose what features to include 'Hjorth,fft,Sharpwave,fooof,bursts' as 1 string separated by commas without spaces
-                'additional_comment':'Val_fft_Logreg',
-                'debug': True} # Debug = True; stops saving the results unnecessarily
+                'features': 'Hjorth,fft,Sharpwave,fooof,bursts',# Choose what features to include 'Hjorth,fft,Sharpwave,fooof,bursts' as 1 string separated by commas without spaces
+                'additional_comment':'TEST_LogReg',
+                'debug': False} # Debug = True; stops saving the results unnecessarily
     if not model_params['debug']:
         writer = SummaryWriter(log_dir=f"C:/Users/ICN_GPU/Documents/Glenn_Data/CEBRA_logs/{val_approach}/{curtime}")
 
-    run_CV(val_approach, curtime, model_params,show_embedding=False,Testphase=False)
+    run_CV(val_approach, curtime, model_params,show_embedding=False,Testphase=True)

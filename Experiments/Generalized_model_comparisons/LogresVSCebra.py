@@ -1,4 +1,7 @@
 import numpy as np
+import copy
+import scipy.stats
+import random
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 import pandas as pd
@@ -119,3 +122,123 @@ plt.plot([], [], 'o',markerfacecolor="white",markeredgecolor="black",markersize=
 plt.legend()
 plt.title('Difference in decoding accuracy between CEBRA and Logistic Regression using all features')
 plt.ylabel('Balanced accuracy: CEBRA minus Logistic Regression')
+
+def permutationTest(x, y, plot_distr=True, x_unit='', p=5000):
+    """
+    Calculate permutation test
+    https://towardsdatascience.com/how-to-assess-statistical-significance-in-your-data-with-permutation-tests-8bb925b2113d
+
+    x (np array) : first distr.
+    y (np array) : first distr.
+    plot_distr (boolean) : if True: plot permutation histplot and ground truth
+    x_unit (str) : histplot xlabel
+    p (int): number of permutations
+
+    returns:
+    gT (float) : estimated ground truth, here absolute difference of
+    distribution means
+    p (float) : p value of permutation test
+
+    """
+    # Compute ground truth difference
+    gT = np.abs(np.average(x) - np.average(y))
+
+    pV = np.concatenate((x, y), axis=0)
+    pS = copy.copy(pV)
+    # Initialize permutation:
+    pD = []
+    # Permutation loop:
+    for i in range(0, p):
+        # Shuffle the data:
+        random.shuffle(pS)
+        # Compute permuted absolute difference of your two sampled
+        # distributions and store it in pD:
+        pD.append(np.abs(np.average(pS[0:int(len(pS)/2)]) - np.average(
+            pS[int(len(pS)/2):])))
+
+    # Calculate p-value
+    if gT < 0:
+        p_val = len(np.where(pD <= gT)[0])/p
+    else:
+        p_val = len(np.where(pD >= gT)[0])/p
+
+    if plot_distr is True:
+        plt.hist(pD, bins=30, label="permutation results")
+        plt.axvline(gT, color="orange", label="ground truth")
+        plt.title("ground truth "+x_unit+"="+str(gT)+" p="+str(p_val))
+        plt.xlabel(x_unit)
+        plt.legend()
+        plt.show()
+    return gT, p_val
+
+cohs = ['Beijing','Pittsburgh','Berlin','Washington']
+vals = ['leave_cohort_out','leave_subject_across_cohorts','leave_subject_within_cohort']
+gTlist = []
+plist = []
+condition = []
+for i in cohs:
+    for j in vals:
+        allfeatureperf = np.array(df.loc[np.array(df['Cohort'] == i) & np.array(df['Validation'] == j)]['Performance'])
+        fftperf = np.array(df.loc[np.array(df['Cohort'] == i) & np.array(df['Validation'] == j)]['Performance_log'])
+        gT,p_val = permutationTest(allfeatureperf,fftperf)
+        gTlist.append(gT)
+        plist.append(p_val)
+        condition.append(i+','+j)
+
+ax = plt.gca()
+plt.bar(condition,plist)
+ax.set_xticklabels(condition, rotation=45, ha='right')
+# All non significant
+
+cohs = ['Beijing','Pittsburgh','Berlin','Washington']
+vals = ['leave_cohort_out','leave_subject_across_cohorts','leave_subject_within_cohort']
+gTlist = []
+plist = []
+condition = []
+mulist = []
+sigmalist = []
+for j in vals:
+    allfeatureperf = np.array(df.loc[np.array(df['Validation'] == j)]['Performance'])
+    fftperf = np.array(df.loc[np.array(df['Validation'] == j)]['Performance_log'])
+    mulist.append(allfeatureperf.mean())
+    sigmalist.append(fftperf.std())
+    gT,p_val = permutationTest(allfeatureperf,fftperf)
+    gTlist.append(gT)
+    plist.append(p_val)
+    condition.append(j)
+
+ax = plt.gca()
+plt.bar(condition,plist)
+ax.set_xticklabels(condition, rotation=45, ha='right')
+# All non significant
+
+cohs = ['Beijing','Pittsburgh','Berlin','Washington']
+vals = ['leave_cohort_out','leave_subject_across_cohorts','leave_subject_within_cohort']
+gTlist = []
+plist = []
+condition = []
+for i in cohs:
+    allfeatureperf = np.array(df.loc[np.array(df['Cohort'] == i)]['Performance'])
+    fftperf = np.array(df.loc[np.array(df['Cohort'] == i)]['Performance_log'])
+    gT,p_val = permutationTest(allfeatureperf,fftperf)
+    gTlist.append(gT)
+    plist.append(p_val)
+    condition.append(i)
+
+ax = plt.gca()
+plt.bar(condition,plist)
+ax.set_xticklabels(condition, rotation=45, ha='right')
+# All non significant
+
+
+
+def convert_pvalue_to_asterisks(pvalue):
+    if pvalue <= 0.0001:
+        return "****"
+    elif pvalue <= 0.001:
+        return "***"
+    elif pvalue <= 0.01:
+        return "**"
+    elif pvalue <= 0.05:
+        return "*"
+    return "ns"

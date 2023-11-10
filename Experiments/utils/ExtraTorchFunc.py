@@ -54,34 +54,33 @@ class AttentionWithContext(nn.Module):
         self.step_dim = step_dim
         self.features_dim = 0
 
-        weight = torch.zeros(feature_dim, 1)
-        nn.init.xavier_uniform_(weight)
+        weight = torch.zeros(feature_dim, feature_dim,1)
+        weight = nn.init.xavier_uniform_(weight)
         self.weight = nn.Parameter(weight)
 
-        context = torch.zeros(step_dim,1)
-        nn.init.xavier_uniform_(context)
+        context = torch.zeros(feature_dim,1)
+        context = nn.init.xavier_uniform_(context)
         self.context = nn.Parameter(context)
 
         if bias:
-            self.b = nn.Parameter(torch.zeros(step_dim))
+            self.b = nn.Parameter(torch.zeros(feature_dim))
 
     def forward(self, x, mask=None):
         feature_dim = self.feature_dim
         step_dim = self.step_dim
 
-        eij = torch.mm(
+        uit = torch.matmul(
             x.contiguous().view(-1, feature_dim),
             self.weight
-        ).view(-1, step_dim)
+        ).view(-1, feature_dim)
 
         if self.bias:
-            eij = eij + self.b
+            uit = uit + self.b
 
-        eij = torch.tanh(eij)
-        ait = torch.mm(
-            eij,
-            self.context)
-        a = torch.exp(eij)
+        uit = torch.tanh(uit)
+        ait = torch.matmul(uit.view(-1, feature_dim), self.context).view(-1, step_dim)
+
+        a = torch.exp(ait)
 
         if mask is not None:
             a = a * mask

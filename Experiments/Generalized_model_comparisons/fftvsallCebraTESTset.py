@@ -10,17 +10,19 @@ import matplotlib.pyplot as plt
 
 leaveacross = True
 
-suffix = '2023_10_10-09_54'
+suffix = '2023_11_07-10_27'
 
 leave_cohort_out = np.load(
     os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data\CEBRA performances", f"{suffix}_leave_1_cohort_out.npy"),
     allow_pickle="TRUE",
 ).item()
+suffix = '2023_11_07-10_13'
 leave_sub_within = np.load(
     os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data\CEBRA performances", f"{suffix}_leave_1_sub_out_within_coh.npy"),
     allow_pickle="TRUE",
 ).item()
 if leaveacross:
+    suffix = '2023_11_03-16_50'
     leave_sub_across = np.load(
         os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data\CEBRA performances", f"{suffix}_leave_1_sub_out_across_coh.npy"),
         allow_pickle="TRUE",
@@ -42,17 +44,19 @@ for cohort in ['Beijing','Pittsburgh','Berlin','Washington']:
         df_temp = pd.DataFrame(data=result,columns=Col)
         df = pd.concat([df,df_temp])
 
-suffix_fft = '2023_10_10-12_04'
+suffix_fft = '2023_11_07-10_24'
 
 leave_cohort_out = np.load(
     os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data\CEBRA performances", f"{suffix_fft}_leave_1_cohort_out.npy"),
     allow_pickle="TRUE",
 ).item()
+suffix_fft = '2023_11_07-10_30'
 leave_sub_within = np.load(
     os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data\CEBRA performances", f"{suffix_fft}_leave_1_sub_out_within_coh.npy"),
     allow_pickle="TRUE",
 ).item()
 if leaveacross:
+    suffix_fft = '2023_11_06-17_58'
     leave_sub_across = np.load(
         os.path.join(r"C:\Users\ICN_GPU\Documents\Glenn_Data\CEBRA performances", f"{suffix_fft}_leave_1_sub_out_across_coh.npy"),
         allow_pickle="TRUE",
@@ -92,7 +96,7 @@ df['Performance_fft'] = df_fft['Performance']
 
 df_coh = df.loc[df['Validation'] == valtypes[0]]
 data = pd.melt(df_coh[['Performance_fft','Performance']])
-data['nr'] = list(range(39))+list(range(39))
+data['nr'] = list(range(18))+list(range(18))
 plt.figure()
 sns.boxplot(x="variable", y="value", data=data)
 sns.swarmplot(x="variable", y="value", data=data, color=".25")
@@ -118,6 +122,7 @@ plt.legend()
 plt.title('Difference in decoding performance between CEBRA with all features compared to fft')
 plt.ylabel('Balanced accuracy: CEBRA all features - CEBRA fft')
 plt.axhline(y=0, color='r', linestyle='--')
+plt.show()
 
 def permutationTest(x, y, plot_distr=True, x_unit='', p=5000):
     """
@@ -231,28 +236,3 @@ for i in cohs:
 ax = plt.gca()
 plt.bar(condition,plist)
 ax.set_xticklabels(condition, rotation=45, ha='right')
-
-gTlisttot = []
-plisttot = []
-p_permutepackagetot = []
-conditiontot = []
-for j in vals:
-    allfeatureperf = np.array(df.loc[np.array(df['Validation'] == j)]['Performance'])
-    fftperf = np.array(df.loc[np.array(df['Validation'] == j)]['Performance_fft'])
-    gT,p_val = permutationTest_relative(allfeatureperf,fftperf)
-    (p, diff_means) = one_sample(allfeatureperf, fftperf, stat='mean',alternative='two-sided')
-    p_permutepackagetot.append(p)
-    gTlisttot.append(gT)
-    plisttot.append(p_val)
-    conditiontot.append(j)
-
-def convert_pvalue_to_asterisks(pvalue):
-    if pvalue <= 0.0001:
-        return "****"
-    elif pvalue <= 0.001:
-        return "***"
-    elif pvalue <= 0.01:
-        return "**"
-    elif pvalue <= 0.05:
-        return "*"
-    return "ns"

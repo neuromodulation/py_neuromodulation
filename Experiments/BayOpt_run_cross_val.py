@@ -33,6 +33,13 @@ from captum.attr import LayerConductance, LayerActivation, LayerIntegratedGradie
 from captum.attr import IntegratedGradients, DeepLift, GradientShap, NoiseTunnel, FeatureAblation
 torch.backends.cudnn.benchmark = True
 
+import skopt
+from skopt.space import Real
+from skopt.space import Categorical
+from skopt.space import Integer
+from skopt import gp_minimize
+from skopt.utils import use_named_args
+
 class run_cross_val_cebra:
     '''A class that consists of all functions needed to perform three different kind of cross validations on movement decoding
     data. Features can be set by calling the class with a dictionary containing settings, the desired validation approaches
@@ -160,20 +167,23 @@ class run_cross_val_cebra:
             elif architecture == "offset9RNN-model":
                 @cebra.models.register("offset9RNN-model")  # --> add that line to register the model!
                 class MyModel(_OffsetModel, ConvolutionalModelMixin):
-                    def __init__(self, num_neurons, num_units, num_output, normalize=True):
+                    def __init__(self, num_neurons, num_units, num_output, latent, numlayers, left_set, normalize=True):
                         super().__init__(num_input=num_neurons,
                                          num_output=num_output,
                                          normalize=normalize,
+                                         latent = latent,
+                                         numlayers = numlayers,
+                                         left_set = left_set
                                          )
                         self.savedscales = None
                         self.savedparam = None
                         bidir = False
-                        hidden = 5
-                        num_layers = 1
-                        grudrop = 0
-                        self.leftset = 3
-                        self.rightset = 1
+                        hidden = latent
                         compress = 9
+                        num_layers = numlayers
+                        grudrop = 0
+                        self.leftset = left_set
+                        self.rightset = 1
                         self.rnn = nn.GRU(num_neurons, hidden, num_layers, dropout=grudrop, bidirectional=bidir,
                                           batch_first=True)
                         self.fc = nn.Linear(hidden * (1 + int(bidir)), num_output)
@@ -824,12 +834,14 @@ class run_cross_val_cebra:
                                                      torch.LongTensor)).to('cuda')
 
         self._register_model()
-
         self.neural_model = cebra.models.init(
             name=model_params['model_architecture'],
             num_neurons=CohortAuxData.input_dimension,
             num_units=32,
-            num_output=model_params['output_dimension']
+            num_output=model_params['output_dimension'],
+            latent=model_params['latent'],
+            numlayers=model_params['numlayers'],
+            left_set=model_params['left_set'],
         ).to('cuda')
 
         CohortAuxData.configure_for(self.neural_model)
@@ -967,7 +979,7 @@ class run_cross_val_cebra:
             if decmodel == 'Logistic':
                 if not 'LogisticRegressionNetwork' in dir():
                     self.LogisticRegressionNetwork, self.DirectClassifier = self._create_Captum_networks()
-                decoder = self.LogisticRegressionNetwork(12,1)
+                decoder = self.LogisticRegressionNetwork(3,1)
                 decoder.train(True)
                 Opt_log = torch.optim.LBFGS(list(decoder.parameters()))
                 pos_w = np.sum((len(y_train)-np.sum(y_train))/(np.sum(y_train)))
@@ -994,7 +1006,7 @@ class run_cross_val_cebra:
                 n_jobs=model_params['n_jobs'])
                 decoder.fit(trainemb, np.array(y_train, dtype=int))
             elif decmodel == 'Logistic':
-                decoder = linear_model.LogisticRegression(class_weight='balanced')
+                decoder = linear_model.LogisticRegression(class_weight='balanced', penalty=None)
                 decoder.fit(trainemb, np.array(y_train, dtype=int))
             elif decmodel == 'SVM':
                 decoder = SVC(kernel=cosine_similarity)
@@ -1053,16 +1065,16 @@ class run_cross_val_cebra:
         ig = IntegratedGradients(compmodel)
         ig_nt = NoiseTunnel(ig)
         # dl = DeepLift(compmodel)
-        # gs = GradientShap(compmodel)
-        # fa = FeatureAblation(compmodel)
+        gs = GradientShap(compmodel)
+        fa = FeatureAblation(compmodel)
 
-        #ig_attr_test = ig.attribute(X_test_batch, n_steps=50)
-        #ig_attr_test = ig_attr_test.detach().cpu().numpy().sum(0)
-        #ig_attr_test_norm_sum = ig_attr_test / np.linalg.norm(ig_attr_test, ord=1)
-        ig_nt_attr_test = ig_nt.attribute(X_test_batch, n_steps=40, nt_type='smoothgrad_sq')
+        ig_attr_test = ig.attribute(X_test_batch, n_steps=50)
+        ig_attr_test = ig_attr_test.detach().cpu().numpy().sum(0)
+        ig_attr_test_norm_sum = ig_attr_test / np.linalg.norm(ig_attr_test, ord=1)
+        ig_nt_attr_test = ig_nt.attribute(X_test_batch, n_steps=40)
         # dl_attr_test = dl.attribute(X_test_batch)
-        # gs_attr_test = gs.attribute(X_test_batch, X_train_batch)
-        # fa_attr_test = fa.attribute(X_test_batch)
+        gs_attr_test = gs.attribute(X_test_batch, X_train_batch)
+        fa_attr_test = fa.attribute(X_test_batch)
         # prepare attributions for visualization
 
         x_axis_data = np.arange(X_test_batch.shape[1])
@@ -1074,19 +1086,19 @@ class run_cross_val_cebra:
         # dl_attr_test_sum = dl_attr_test.detach().cpu().numpy().sum(0)
         # dl_attr_test_norm_sum = dl_attr_test_sum / np.linalg.norm(dl_attr_test_sum, ord=1)
 
-        #gs_attr_test_sum = gs_attr_test.detach().cpu().numpy().sum(0)
-        #gs_attr_test_norm_sum = gs_attr_test_sum / np.linalg.norm(gs_attr_test_sum, ord=1)
+        gs_attr_test_sum = gs_attr_test.detach().cpu().numpy().sum(0)
+        gs_attr_test_norm_sum = gs_attr_test_sum / np.linalg.norm(gs_attr_test_sum, ord=1)
 
-        #fa_attr_test_sum = fa_attr_test.detach().cpu().numpy().sum(0)
-        #fa_attr_test_norm_sum = fa_attr_test_sum / np.linalg.norm(fa_attr_test_sum, ord=1)
+        fa_attr_test_sum = fa_attr_test.detach().cpu().numpy().sum(0)
+        fa_attr_test_norm_sum = fa_attr_test_sum / np.linalg.norm(fa_attr_test_sum, ord=1)
 
         width = 0.14
-        legends = ['Int Grads w/SmoothGrad_sq']
+        legends = ['Int Grads', 'Int Grads w/SmoothGrad', 'GradientSHAP', 'Feature Ablation']
 
         plt.figure(figsize=(20, 10))
 
         ax = plt.subplot()
-        ax.set_title('Feature importances as ranked by Integrated Gradients with squared SmoothGrad')
+        ax.set_title('Comparing input feature importances across multiple algorithms and learned weights')
         ax.set_ylabel('Attributions')
 
         FONT_SIZE = 16
@@ -1095,22 +1107,15 @@ class run_cross_val_cebra:
         plt.rc('axes', labelsize=FONT_SIZE)  # fontsize of the x and y labels
         plt.rc('legend', fontsize=FONT_SIZE - 4)  # fontsize of the legend
 
-        # Save Captum results
-        if False:
-            np.save(
-                f"C:/Users/ICN_GPU/Documents/Glenn_Data/FeatureImportancedata/Captum_{self.curtime}_{self.val_approach}.npy",
-                ig_nt_attr_test_norm_sum[:, -1],
-            )
-        sortedorder = np.argsort(ig_nt_attr_test_norm_sum[:, -1])[::-1]
-        ax.bar(x_axis_data, ig_nt_attr_test_norm_sum[:, -1][sortedorder], align='center', alpha=0.7, color='#A90000')
-        #ax.bar(x_axis_data + width, ig_attr_test_norm_sum[:, -1], width, align='center', alpha=0.8, color='#eb5e7c')
-        #ax.bar(x_axis_data + 2 * width, gs_attr_test_norm_sum[:, -1], width, align='center', alpha=0.8, color='#4260f5')
-        #ax.bar(x_axis_data + 3 * width, fa_attr_test_norm_sum[:, -1], width, align='center', alpha=1.0, color='#49ba81')
+        ax.bar(x_axis_data, ig_attr_test_norm_sum[:, -1], width, align='center', alpha=0.8, color='#eb5e7c')
+        ax.bar(x_axis_data + width, ig_nt_attr_test_norm_sum[:, -1], width, align='center', alpha=0.7, color='#A90000')
+        ax.bar(x_axis_data + 2 * width, gs_attr_test_norm_sum[:, -1], width, align='center', alpha=0.8, color='#4260f5')
+        ax.bar(x_axis_data + 3 * width, fa_attr_test_norm_sum[:, -1], width, align='center', alpha=1.0, color='#49ba81')
         ax.autoscale_view()
         plt.tight_layout()
 
         ax.set_xticks(x_axis_data + 0.5)
-        ax.set_xticklabels(np.array(x_axis_data_labels)[sortedorder], rotation=45, ha='right')
+        ax.set_xticklabels(x_axis_data_labels, rotation=45, ha='right')
 
         plt.legend(legends, loc=3)
         plt.show()
@@ -1302,14 +1307,14 @@ class run_cross_val_cebra:
 # MAIN
 
 model_params = {'model_architecture':'offset9RNN-model',
-            'batch_size': 256, # Ideally as large as fits on the GPU, min recommended = 512
+            'batch_size': 512, # Ideally as large as fits on the GPU, min recommended = 512
             'temperature_mode':'auto', # Constant or auto
             'temperature':1,
-            'min_temperature':1, # If temperature mode = auto this should be set in the desired expected range
+            'min_temperature':0.1, # If temperature mode = auto this should be set in the desired expected range
             'learning_rate': 0.005, # Set this in accordance to loss function progression in TensorBoard
-            'max_iterations': 290,  # 5000, Set this in accordance to the loss functions in TensorBoard
+            'max_iterations': 500,  # 5000, Set this in accordance to the loss functions in TensorBoard
             'time_offsets': 1, # Time offset between samples (Ideally set larger than receptive field according to docs)
-            'output_dimension': 12, # Nr of output dimensions of the CEBRA model
+            'output_dimension': 3, # Nr of output dimensions of the CEBRA model
             'decoder': 'Logistic', # Choose from "KNN", "Logistic", "SVM", "KNN_BPP or XGB"
             'n_neighbors': 35, # KNN & KNN_BPP setting (# of neighbours to consider) 35 works well for 3 output dimensions
             'metric': "euclidean", # KNN setting (For L2 normalized vectors, the ordering of Euclidean and Cosine should be the same)
@@ -1322,14 +1327,42 @@ model_params = {'model_architecture':'offset9RNN-model',
             'prior': 'uniform', # Set to empirical or uniform to either sample random or uniform across coh and movement
             'conditional':'mov', # Set to mov or cohmov to either equalize reference-positive in movement or cohort and movement
             'early_stopping':False,
-            'features': 'fft', # Choose what features to include 'Hjorth,fft,Sharpwave,fooof,bursts' as 1 string separated by commas without spaces
-            'additional_comment':'TEST_fftWithin',
-            'debug': False} # Debug = True; stops saving the results unnecessarily
+            'features': 'Hjorth,fft,Sharpwave,fooof,bursts', # Choose what features to include 'Hjorth,fft,Sharpwave,fooof,bursts' as 1 string separated by commas without spaces
+            'latent': 2,
+            'numlayers': 1,
+            'left_set': 9,
+            'additional_comment':'test_AttentionWithContext',
+            'debug': True} # Debug = True; stops saving the results unnecessarily
 
 val_approaches = ["leave_1_sub_out_within_coh"]
 cohorts = ["Pittsburgh","Berlin","Beijing","Washington"]
-# Set general settings
-run1 = run_cross_val_cebra(model_params,val_approaches,cohorts) # Put in the data
-# Set run related settings
-run1.loop_approaches(show_embedding=False, embeddingconsistency=False,showfeatureweights=False,Testphase=True,Captum=False)
-# TODO: When running Captum XAI tools, set the logistic network input dimension to equal the output dimension of CEBRA
+search_space = list()
+search_space.append(Integer(200, 1000, name='max_iterations'))
+search_space.append(Categorical([256, 512, 1028], name='batch_size'))
+search_space.append(Integer(3, 12, name='output_dimension'))
+search_space.append(Real(0.1,1,name='min_temperature'))
+search_space.append(Categorical(['fft','Hjorth,fft,Sharpwave,fooof,bursts'], name='features'))
+search_space.append(Integer(1,12, name='latent'))
+search_space.append(Integer(1,3, name='numlayers'))
+search_space.append(Integer(3,15, name='left_set'))
+
+global it
+it = 1
+allbas = []
+@use_named_args(search_space)
+def evaluate_model(**params):
+    global it
+    print(it)
+    it+=1
+    model_params.update(params)
+    run1 = run_cross_val_cebra(model_params, val_approaches, cohorts)  # Put in the data
+    run1.loop_approaches(show_embedding=False, embeddingconsistency=False,showfeatureweights=False,Testphase=False,Captum=False)
+    # Save for every model all the performances such that the performances can be plot for the best model
+    allbas.append(run1.batotal)
+    # Optimized on the average balanced accuracy
+    ba_avg = np.mean(run1.batotal)
+    return 1.0-ba_avg
+
+result = gp_minimize(evaluate_model, search_space)
+print('Best Accuracy: %.3f' % (1.0 - result.fun))
+print('Best Parameters: %s' % (result.x))
