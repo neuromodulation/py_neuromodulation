@@ -122,7 +122,7 @@ plt.axhline(y=0, color='r', linestyle='--')
 g.set_xlabel("Cohort",fontsize=17)
 g.set_ylabel("Balanced accuracy: CEBRA all features - CEBRA fft",fontsize=17)
 g.tick_params(labelsize=15)
-plt.savefig(r"C:\Users\ICN_GPU\Documents\Glenn_Data\Figures\PosterFigures\fftvsallCEBRA.pdf")
+#plt.savefig(r"C:\Users\ICN_GPU\Documents\Glenn_Data\Figures\PosterFigures\fftvsallCEBRA.pdf")
 
 def permutationTest(x, y, plot_distr=True, x_unit='', p=5000):
     """

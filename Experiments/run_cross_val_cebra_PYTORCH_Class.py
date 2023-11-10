@@ -1226,8 +1226,8 @@ class run_cross_val_cebra:
                     testembeddings = self.appendembeddings(testembeddings,testembeddinglabels,testID,self.X_test_emb,self.y_test_offset,cohort_test)
                 # Plot the embeddings if desired
                 if self.show_embedding:
-                        self.plotly_embeddings(self.X_train_emb,self.X_test_emb,self.y_train_offset,
-                                      self.y_test_offset,cohort_test,aux=self.coh_aux_offset,type='coh', grad=False, nearest=False,model=None,val=val_approach)
+                        self.plotly_embeddings(self.X_train_emb,self.y_train_offset,self.X_test_emb,
+                                      self.y_test_offset,cohort_test,aux=self.coh_aux_offset,type='coh', nearest=False,model=None,val=val_approach)
                 # Predict the class based on the test embedding and the trained decoder
                 if not self.Captum:
                     self.y_test_pr = self.decoder.predict(self.X_test_emb)
@@ -1314,7 +1314,7 @@ model_params = {'model_architecture':'offset9RNN-model',
             'learning_rate': 0.005, # Set this in accordance to loss function progression in TensorBoard
             'max_iterations': 1000,  # 5000, Set this in accordance to the loss functions in TensorBoard
             'time_offsets': 1, # Time offset between samples (Ideally set larger than receptive field according to docs)
-            'output_dimension': 12, # Nr of output dimensions of the CEBRA model
+            'output_dimension': 3, # Nr of output dimensions of the CEBRA model
             'decoder': 'Logistic', # Choose from "KNN", "Logistic", "SVM", "KNN_BPP or XGB"
             'n_neighbors': 35, # KNN & KNN_BPP setting (# of neighbours to consider) 35 works well for 3 output dimensions
             'metric': "euclidean", # KNN setting (For L2 normalized vectors, the ordering of Euclidean and Cosine should be the same)
@@ -1336,5 +1336,5 @@ cohorts = ["Pittsburgh","Berlin","Beijing","Washington"]
 # Set general settings
 run1 = run_cross_val_cebra(model_params,val_approaches,cohorts) # Put in the data
 # Set run related settings
-run1.loop_approaches(show_embedding=False, embeddingconsistency=False,showfeatureweights=False,Testphase=False,Captum=True)
+run1.loop_approaches(show_embedding=True, embeddingconsistency=False,showfeatureweights=False,Testphase=False,Captum=False)
 # TODO: When running Captum XAI tools, set the logistic network input dimension to equal the output dimension of CEBRA
