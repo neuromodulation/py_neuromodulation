@@ -168,10 +168,10 @@ class run_cross_val_cebra:
                         self.savedscales = None
                         self.savedparam = None
                         bidir = False
-                        hidden = 5
-                        num_layers = 1
+                        hidden = 2
+                        num_layers = 3
                         grudrop = 0
-                        self.leftset = 3
+                        self.leftset = 11
                         self.rightset = 1
                         compress = 9
                         self.rnn = nn.GRU(num_neurons, hidden, num_layers, dropout=grudrop, bidirectional=bidir,
@@ -1067,6 +1067,11 @@ class run_cross_val_cebra:
 
         x_axis_data = np.arange(X_test_batch.shape[1])
         x_axis_data_labels = list(map(lambda idx: self.featurelist[idx], x_axis_data))
+        if True:
+            np.save(
+                f"C:/Users/ICN_GPU/Documents/Glenn_Data/FeatureImportancedata/Captum_featurelabels.npy",
+                x_axis_data_labels,
+            )
 
         ig_nt_attr_test_sum = ig_nt_attr_test.detach().cpu().numpy().sum(0)
         ig_nt_attr_test_norm_sum = ig_nt_attr_test_sum / np.linalg.norm(ig_nt_attr_test_sum, ord=1)
@@ -1096,7 +1101,7 @@ class run_cross_val_cebra:
         plt.rc('legend', fontsize=FONT_SIZE - 4)  # fontsize of the legend
 
         # Save Captum results
-        if False:
+        if True:
             np.save(
                 f"C:/Users/ICN_GPU/Documents/Glenn_Data/FeatureImportancedata/Captum_{self.curtime}_{self.val_approach}.npy",
                 ig_nt_attr_test_norm_sum[:, -1],
@@ -1302,12 +1307,12 @@ class run_cross_val_cebra:
 # MAIN
 
 model_params = {'model_architecture':'offset9RNN-model',
-            'batch_size': 256, # Ideally as large as fits on the GPU, min recommended = 512
+            'batch_size': 1028, # Ideally as large as fits on the GPU, min recommended = 512
             'temperature_mode':'auto', # Constant or auto
             'temperature':1,
             'min_temperature':1, # If temperature mode = auto this should be set in the desired expected range
             'learning_rate': 0.005, # Set this in accordance to loss function progression in TensorBoard
-            'max_iterations': 290,  # 5000, Set this in accordance to the loss functions in TensorBoard
+            'max_iterations': 1000,  # 5000, Set this in accordance to the loss functions in TensorBoard
             'time_offsets': 1, # Time offset between samples (Ideally set larger than receptive field according to docs)
             'output_dimension': 12, # Nr of output dimensions of the CEBRA model
             'decoder': 'Logistic', # Choose from "KNN", "Logistic", "SVM", "KNN_BPP or XGB"
@@ -1322,14 +1327,14 @@ model_params = {'model_architecture':'offset9RNN-model',
             'prior': 'uniform', # Set to empirical or uniform to either sample random or uniform across coh and movement
             'conditional':'mov', # Set to mov or cohmov to either equalize reference-positive in movement or cohort and movement
             'early_stopping':False,
-            'features': 'fft', # Choose what features to include 'Hjorth,fft,Sharpwave,fooof,bursts' as 1 string separated by commas without spaces
+            'features': 'Hjorth,fft,Sharpwave,fooof,bursts', # Choose what features to include 'Hjorth,fft,Sharpwave,fooof,bursts' as 1 string separated by commas without spaces
             'additional_comment':'TEST_fftWithin',
-            'debug': False} # Debug = True; stops saving the results unnecessarily
+            'debug': True} # Debug = True; stops saving the results unnecessarily
 
-val_approaches = ["leave_1_sub_out_within_coh"]
+val_approaches = ["leave_1_sub_out_across_coh"]
 cohorts = ["Pittsburgh","Berlin","Beijing","Washington"]
 # Set general settings
 run1 = run_cross_val_cebra(model_params,val_approaches,cohorts) # Put in the data
 # Set run related settings
-run1.loop_approaches(show_embedding=False, embeddingconsistency=False,showfeatureweights=False,Testphase=True,Captum=False)
+run1.loop_approaches(show_embedding=False, embeddingconsistency=False,showfeatureweights=False,Testphase=False,Captum=True)
 # TODO: When running Captum XAI tools, set the logistic network input dimension to equal the output dimension of CEBRA
