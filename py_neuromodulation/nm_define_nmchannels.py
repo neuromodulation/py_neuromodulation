@@ -17,7 +17,7 @@ def set_channels(
     ecog_only: bool = False,
     used_types: Optional[Iterable[str]] = ("ecog", "dbs", "seeg"),
     target_keywords: Optional[Iterable[str]] = ("mov", "squared", "label"),
-):
+) -> pd.DataFrame:
     """Return dataframe with channel-specific settings in nm_channels format.
 
         Return an nm_channels dataframe with the columns: "name", "rereference",

@@ -34,7 +34,13 @@ from py_neuromodulation import (
 # The resulting raw object is of type `mne.RawArray <https://mne.tools/stable/generated/mne.io.RawArray.html>`_.
 # We can use the properties such as sampling frequency, channel names, channel types all from the mne array and create the *nm_channels* DataFrame:
 
-RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data()
+(
+    RUN_NAME,
+    PATH_RUN,
+    PATH_BIDS,
+    PATH_OUT,
+    datatype,
+) = nm_IO.get_paths_example_data()
 
 (
     raw,
@@ -85,9 +91,9 @@ settings = nm_settings.get_default_settings()
 settings = nm_settings.set_settings_fast_compute(settings)
 
 settings["features"]["fft"] = True
-settings["features"]["bursts"] = False
-settings["features"]["sharpwave_analysis"] = False
-settings["features"]["coherence"] = False # True
+settings["features"]["bursts"] = True
+settings["features"]["sharpwave_analysis"] = True
+settings["features"]["coherence"] = True  # True
 settings["coherence"]["channels"] = [["LFP_RIGHT_0", "ECOG_RIGHT_0"]]
 settings["coherence"]["frequency_bands"] = ["high beta", "low gamma"]
 settings["sharpwave_analysis_settings"]["estimator"]["mean"] = []
@@ -154,7 +160,7 @@ feature_reader.plot_target_averaged_channel(
 
 # %%
 feature_reader.plot_all_features(
-    ytick_labelsize=3,
+    ytick_labelsize=6,
     clim_low=-2,
     clim_high=2,
     ch_used="ECOG_RIGHT_0",
@@ -186,7 +192,7 @@ nm_plots.plot_corr_matrix(
 #
 # Here, we show an example using the XGBOOST classifier. The used labels came from a continuous grip force movement target, named "MOV_RIGHT".
 #
-# First we initialize the :class:`~nm_decode.Decoder` class, which the specified *validation method*, here being a simple 3-fold cross validation, 
+# First we initialize the :class:`~nm_decode.Decoder` class, which the specified *validation method*, here being a simple 3-fold cross validation,
 # the evaluation metric, used machine learning model, and the channels we want to evaluate performances for.
 #
 # There are many more implemented methods, but we will here limit it to the ones presented.
@@ -225,7 +231,7 @@ ax = nm_plots.plot_df_subjects(
     y_col="performance_test",
     hue="ch_type",
     PATH_SAVE=PATH_OUT / RUN_NAME / (RUN_NAME + "_decoding_performance.png"),
-    figsize_tuple=(8, 5)
+    figsize_tuple=(8, 5),
 )
 ax.set_ylabel(r"$R^2$ Correlation")
 ax.set_xlabel("Subject 000")
