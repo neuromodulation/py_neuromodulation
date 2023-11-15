@@ -1,6 +1,7 @@
 import enum
 import numpy as np
 from typing import Iterable
+from scipy import signal
 
 from py_neuromodulation import nm_features_abc, nm_filter
 
@@ -9,7 +10,6 @@ class Burst(nm_features_abc.Feature):
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:
-
         self.s = settings
         self.sfreq = sfreq
         self.ch_names = ch_names
@@ -34,7 +34,9 @@ class Burst(nm_features_abc.Feature):
             )
         ).astype(int)
 
-        self.num_max_samples_ring_buffer = int(self.sfreq * self.time_duration_s)
+        self.num_max_samples_ring_buffer = int(
+            self.sfreq * self.time_duration_s
+        )
 
         self.bandpass_filter = nm_filter.BandPassFilter(
             f_ranges=self.f_ranges,
@@ -62,35 +64,40 @@ class Burst(nm_features_abc.Feature):
         ch_names: Iterable[str],
         sfreq: int | float,
     ):
-        assert (
-            isinstance(settings["burst_settings"]["threshold"], (float, int))
+        assert isinstance(
+            settings["burst_settings"]["threshold"], (float, int)
         ), f"burst settings threshold needs to be type int or float, got: {settings['burst_settings']['threshold']}"
         assert (
             0 < settings["burst_settings"]["threshold"] < 100
         ), f"burst setting threshold needs to be between 0 and 100, got: {settings['burst_settings']['threshold']}"
-        assert (
-            isinstance(settings["burst_settings"]["time_duration_s"], (float, int))
+        assert isinstance(
+            settings["burst_settings"]["time_duration_s"], (float, int)
         ), f"burst settings time_duration_s needs to be type int or float, got: {settings['burst_settings']['time_duration_s']}"
         assert (
             settings["burst_settings"]["time_duration_s"] > 0
         ), f"burst setting time_duration_s needs to be greater than 0, got: {settings['burst_settings']['time_duration_s']}"
 
         for fband_burst in settings["burst_settings"]["frequency_bands"]:
-            assert (
-                fband_burst in list(settings["frequency_ranges_hz"].keys())
+            assert fband_burst in list(
+                settings["frequency_ranges_hz"].keys()
             ), f"bursting {fband_burst} needs to be defined in settings['frequency_ranges_hz']"
 
-        for burst_feature in settings["burst_settings"]["burst_features"].keys():
+        for burst_feature in settings["burst_settings"][
+            "burst_features"
+        ].keys():
             assert isinstance(
-                settings["burst_settings"]["burst_features"][burst_feature], bool
+                settings["burst_settings"]["burst_features"][burst_feature],
+                bool,
             ), (
                 f"bursting feature {burst_feature} needs to be type bool, "
                 f"got: {settings['burst_settings']['burst_features'][burst_feature]}"
             )
-    def calc_feature(self, data: np.array, features_compute: dict) -> dict:
 
+    def calc_feature(self, data: np.array, features_compute: dict) -> dict:
         # filter_data returns (n_channels, n_fbands, n_samples)
-        filtered_data = self.bandpass_filter.filter_data(data)
+        filtered_data = np.abs(
+            signal.hilbert(self.bandpass_filter.filter_data(data), axis=2)
+        )
         for ch_idx, ch_name in enumerate(self.ch_names):
             for fband_idx, fband_name in enumerate(self.fband_names):
                 new_dat = filtered_data[ch_idx, fband_idx, :]
@@ -99,7 +106,7 @@ class Burst(nm_features_abc.Feature):
                 else:
                     self.data_buffer[ch_name][fband_name] = np.concatenate(
                         (self.data_buffer[ch_name][fband_name], new_dat), axis=0
-                    )[-self.num_max_samples_ring_buffer:]
+                    )[-self.num_max_samples_ring_buffer :]
 
                 # calc features
                 burst_thr = np.percentile(
