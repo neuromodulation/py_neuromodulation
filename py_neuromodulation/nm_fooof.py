@@ -79,40 +79,67 @@ class FooofAnalyzer(nm_features_abc.Feature):
             except Exception as e:
                 print(e)
                 print(f"failing spectrum: {spectrum}")
+
+            if self.fm.fooofed_spectrum_ is None:
+                FIT_PASSED = False
+            else:
+                FIT_PASSED = True
+
             if self.settings_fooof["aperiodic"]["exponent"]:
                 features_compute[f"{ch_name}_fooof_a_exp"] = (
-                    np.nan_to_num(self.fm.get_params("aperiodic_params", "exponent"))
-                    if self.fm.fooofed_spectrum_ is not None
+                    np.nan_to_num(
+                        self.fm.get_params("aperiodic_params", "exponent")
+                    )
+                    if FIT_PASSED is True
                     else None
                 )
 
             if self.settings_fooof["aperiodic"]["offset"]:
                 features_compute[f"{ch_name}_fooof_a_offset"] = (
-                    np.nan_to_num(self.fm.get_params("aperiodic_params", "offset"))
-                    if self.fm.fooofed_spectrum_ is not None
-                    else None
-                )
-            
-            if self.settings_fooof["aperiodic"]["knee"]:
-                features_compute[f"{ch_name}_fooof_a_knee"] = (
-                    np.nan_to_num(self.fm.get_params("aperiodic_params", "knee"))
-                    if self.fm.fooofed_spectrum_ is not None
+                    np.nan_to_num(
+                        self.fm.get_params("aperiodic_params", "offset")
+                    )
+                    if FIT_PASSED is True
                     else None
                 )
 
+            if self.settings_fooof["aperiodic"]["knee"]:
+                if FIT_PASSED is False:
+                    knee_freq = None
+                else:
+                    if self.fm.get_params("aperiodic_params", "exponent") != 0:
+                        knee_fooof = self.fm.get_params(
+                            "aperiodic_params", "knee"
+                        )
+                        knee_freq = np.nan_to_num(
+                            knee_fooof
+                            ** (
+                                1
+                                / self.fm.get_params(
+                                    "aperiodic_params", "exponent"
+                                )
+                            )
+                        )
+                    else:
+                        knee_freq = None
+
+                features_compute[
+                    f"{ch_name}_fooof_a_knee_frequency"
+                ] = knee_freq
+
             peaks_bw = (
                 self.fm.get_params("peak_params", "BW")
-                if self.fm.fooofed_spectrum_ is not None
+                if FIT_PASSED is True
                 else None
             )
             peaks_cf = (
                 self.fm.get_params("peak_params", "CF")
-                if self.fm.fooofed_spectrum_ is not None
+                if FIT_PASSED is True
                 else None
             )
             peaks_pw = (
                 self.fm.get_params("peak_params", "PW")
-                if self.fm.fooofed_spectrum_ is not None
+                if FIT_PASSED is True
                 else None
             )
 
@@ -122,7 +149,6 @@ class FooofAnalyzer(nm_features_abc.Feature):
                 peaks_pw = [peaks_pw]
 
             for peak_idx in range(self.max_n_peaks):
-
                 if self.settings_fooof["periodic"]["band_width"]:
                     features_compute[f"{ch_name}_fooof_p_{peak_idx}_bw"] = (
                         peaks_bw[peak_idx] if peak_idx < len(peaks_bw) else None

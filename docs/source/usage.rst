@@ -427,6 +427,9 @@ aperiodic component. *fooof* specific parameters, e.g. *knee* or *max_n_peaks* a
        "knee": true
    }
 
+.. note::
+    When using the knee parameter, the *knee_frequency* is returned for every fit. See also the fooof `Aperiodic Component Fitting Notebook <https://fooof-tools.github.io/fooof/auto_tutorials/plot_05-AperiodicFitting.html#sphx-glr-auto-tutorials-plot-05-aperiodicfitting-py>`_. 
+
 Nonlinear measures for dynamical systems (nolds)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

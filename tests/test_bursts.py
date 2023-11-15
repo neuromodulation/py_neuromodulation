@@ -87,6 +87,9 @@ def test_bursting_duration():
         f = bursts.calc_feature(data, {})
 
     np.random.seed(0)
+    # the percentile of the hilbert transform of a continuous oscillation will be high
+    # select better max amplitude
+    bursts = nm_bursts.Burst(settings, ch_names, sfreq)
     f_burst = bursts.calc_feature(
         beta_wave + np.random.random([NUM_CH, 1 * sfreq]), {}
     )
