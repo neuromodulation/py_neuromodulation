@@ -221,7 +221,7 @@ class Feature_Reader:
             pd.DataFrame: z-scored feature_arr
         """
         cols_norm = [c for c in self.feature_arr.columns if "time" not in c]
-        feature_arr_norm = stats.zscore(self.feature_arr[cols_norm])
+        feature_arr_norm = stats.zscore(self.feature_arr[cols_norm], nan_policy="omit")
         feature_arr_norm["time"] = self.feature_arr["time"]
         return feature_arr_norm
 

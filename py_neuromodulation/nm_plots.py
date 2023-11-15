@@ -87,7 +87,9 @@ def plot_epoch(
 ):
     if z_score is None:
         X_epoch = stats.zscore(
-            np.nan_to_num(np.nanmean(np.squeeze(X_epoch), axis=0)), axis=0
+            np.nan_to_num(np.nanmean(np.squeeze(X_epoch), axis=0)),
+            axis=0,
+            nan_policy="omit",
         ).T
     y_epoch = np.stack(np.array(y_epoch))
     plt.figure(figsize=(6, 6))
@@ -329,7 +331,7 @@ def plot_epochs_avg(
 
     if normalize_data:
         X_epoch_mean = stats.zscore(
-            np.nanmean(np.squeeze(X_epoch), axis=0), axis=0
+            np.nanmean(np.squeeze(X_epoch), axis=0), axis=0, nan_policy="omit"
         ).T
     else:
         X_epoch_mean = np.nanmean(np.squeeze(X_epoch), axis=0).T
@@ -441,7 +443,6 @@ def plot_all_features(
     OUT_PATH: str = None,
     feature_file: str = None,
 ):
-
     if time_limit_high_s is not None:
         df = df[df["time"] < time_limit_high_s * 1000]
     if time_limit_low_s is not None:
@@ -449,7 +450,7 @@ def plot_all_features(
 
     cols_plt = [c for c in df.columns if c != "time"]
     if normalize is True:
-        data_plt = stats.zscore(df[cols_plt])
+        data_plt = stats.zscore(df[cols_plt], nan_policy="omit")
     else:
         data_plt = df[cols_plt]
 
@@ -487,7 +488,6 @@ class NM_Plot:
         sess_right: Optional[bool] = False,
         proj_matrix_cortex: np.ndarray | None = None,
     ) -> None:
-
         self.grid_cortex = grid_cortex
         self.grid_subcortex = grid_subcortex
         self.ecog_strip = ecog_strip
@@ -510,7 +510,6 @@ class NM_Plot:
         ) = nm_IO.read_plot_modules()
 
     def plot_grid_elec_3d(self) -> None:
-
         plot_grid_elec_3d(np.array(self.grid_cortex), np.array(self.ecog_strip))
 
     def plot_cortex(
@@ -552,7 +551,6 @@ class NM_Plot:
         axes.axes.set_aspect("equal", anchor="C")
 
         if grid_cortex is not None:
-
             grid_color = (
                 np.ones(grid_cortex.shape[0])
                 if grid_color is None

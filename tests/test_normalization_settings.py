@@ -7,7 +7,6 @@ from py_neuromodulation import nm_normalization
 
 
 def test_raw_normalization_init():
-
     with pytest.raises(Exception):
         nm_normalization.RawNormalizer(
             sfreq=1000,
@@ -19,7 +18,6 @@ def test_raw_normalization_init():
 
 
 def test_feature_normalization_init():
-
     with pytest.raises(Exception):
         nm_normalization.FeatureNormalizer(
             sampling_rate_features_hz=500,
@@ -30,7 +28,6 @@ def test_feature_normalization_init():
 
 
 def test_process_norm_features():
-
     norm = nm_normalization.FeatureNormalizer(
         sampling_rate_features_hz=500,
         normalization_method="mean",
@@ -46,7 +43,6 @@ def test_process_norm_features():
 
 
 def test_previous_size_FeatureNorm():
-
     norm = nm_normalization.FeatureNormalizer(
         sampling_rate_features_hz=10,
         normalization_method="zscore",
@@ -87,7 +83,6 @@ def test_zscore_feature_analysis():
 
 
 def test_zscore_raw_analysis():
-
     norm = nm_normalization.RawNormalizer(
         sampling_rate_features_hz=10,
         normalization_method="zscore",
@@ -113,7 +108,6 @@ def test_zscore_raw_analysis():
 
 
 def test_all_norm_methods_raw():
-
     for norm_method in [e.value for e in nm_normalization.NORM_METHODS]:
         norm = nm_normalization.RawNormalizer(
             sampling_rate_features_hz=10,
@@ -134,7 +128,6 @@ def test_all_norm_methods_raw():
 
 
 def test_all_norm_methods_feature():
-
     for norm_method in [e.value for e in nm_normalization.NORM_METHODS]:
         norm = nm_normalization.FeatureNormalizer(
             sampling_rate_features_hz=10,
