@@ -99,12 +99,12 @@ class Bispectra(nm_features_abc.Feature):
 
             waveshape = WaveShape(
                 data=fft_coeffs,
-                freqs=freqs.astype(int),
+                freqs=freqs,
                 sampling_freq=self.sfreq,
                 verbose=False,
             )
 
-            waveshape.compute(f1s=tuple(self.f1s), f2s=tuple(self.f2s))
+            waveshape.compute(f1s=tuple(self.f1s[0], self.f1s[-1]), f2s=tuple(self.f2s[0], self.f2s[-1]))
 
             bispectrum = np.squeeze(waveshape.results._data)
 
