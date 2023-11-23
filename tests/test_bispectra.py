@@ -9,11 +9,11 @@ from py_neuromodulation import (
     nm_IO,
     nm_plots,
     nm_settings,
-    nm_stream_offline
+    nm_stream_offline,
 )
 
-def test_bispectrum():
 
+def test_bispectrum():
     (
         RUN_NAME,
         PATH_RUN,
@@ -64,4 +64,7 @@ def test_bispectrum():
 
     features = stream.run(np.expand_dims(data[3, :], axis=0))
 
-    assert features["ECOG_RIGHT_1_Bispectrum_phase_mean_whole_fband_range"].sum() != 0
+    assert (
+        features["ECOG_RIGHT_1_Bispectrum_phase_mean_whole_fband_range"].sum()
+        != 0
+    )

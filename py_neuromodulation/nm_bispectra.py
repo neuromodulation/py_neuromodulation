@@ -4,9 +4,11 @@ from pybispectra import compute_fft, get_example_data_paths, WaveShape
 
 from py_neuromodulation import nm_features_abc
 
-class Bispectra(nm_features_abc.Feature):
 
-    def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: int | float) -> None:
+class Bispectra(nm_features_abc.Feature):
+    def __init__(
+        self, settings: dict, ch_names: Iterable[str], sfreq: int | float
+    ) -> None:
         super().__init__(settings, ch_names, sfreq)
         self.sfreq = sfreq
         self.ch_names = ch_names
@@ -40,18 +42,14 @@ class Bispectra(nm_features_abc.Feature):
             )
 
         test_range("f1s", s["bispectrum"]["f1s"])
-        test_range("f2s", s["bispectrum"]["f2s"])            
+        test_range("f2s", s["bispectrum"]["f2s"])
 
-        for feature_name, val in s["bispectrum"][
-            "components"
-        ].items():
+        for feature_name, val in s["bispectrum"]["components"].items():
             assert isinstance(
                 val, bool
             ), f"bispectrum component {feature_name} has to be of type bool, got {val}"
-        
-        for feature_name, val in s["bispectrum"][
-            "bispectrum_features"
-        ].items():
+
+        for feature_name, val in s["bispectrum"]["bispectrum_features"].items():
             assert isinstance(
                 val, bool
             ), f"bispectrum feature {feature_name} has to be of type bool, got {val}"
@@ -66,10 +64,15 @@ class Bispectra(nm_features_abc.Feature):
             f"specified frequency_ranges_hz: {s['frequency_ranges_hz']}"
         )
 
-    def compute_bs_features(self, spectrum_ch: np.array, features_compute: dict, ch_name: str, component: str, f_band: str) -> dict:
-        
+    def compute_bs_features(
+        self,
+        spectrum_ch: np.array,
+        features_compute: dict,
+        ch_name: str,
+        component: str,
+        f_band: str,
+    ) -> dict:
         for bispectrum_feature in self.s["bispectrum"]["bispectrum_features"]:
-            
             if bispectrum_feature == "mean":
                 func = np.nanmean
             if bispectrum_feature == "sum":
@@ -78,9 +81,25 @@ class Bispectra(nm_features_abc.Feature):
                 func = np.nanvar
 
             if f_band is not None:
-                str_feature = "_".join([ch_name, "Bispectrum", component, bispectrum_feature, f_band])
+                str_feature = "_".join(
+                    [
+                        ch_name,
+                        "Bispectrum",
+                        component,
+                        bispectrum_feature,
+                        f_band,
+                    ]
+                )
             else:
-                str_feature = "_".join([ch_name, "Bispectrum", component, bispectrum_feature, "whole_fband_range"])
+                str_feature = "_".join(
+                    [
+                        ch_name,
+                        "Bispectrum",
+                        component,
+                        bispectrum_feature,
+                        "whole_fband_range",
+                    ]
+                )
 
             features_compute[str_feature] = func(spectrum_ch)
 
@@ -89,13 +108,18 @@ class Bispectra(nm_features_abc.Feature):
     def calc_feature(self, data: np.array, features_compute: dict) -> dict:
         for ch_idx, ch_name in enumerate(self.ch_names):
             fft_coeffs, freqs = compute_fft(
-                data=np.expand_dims(data[ch_idx, :], axis=(0,1)),
+                data=np.expand_dims(data[ch_idx, :], axis=(0, 1)),
                 sampling_freq=self.sfreq,
                 n_points=data.shape[1],
-            verbose=False,
+                verbose=False,
             )
 
-            f_spectrum_range = freqs[np.logical_and(freqs >= np.min([self.f1s, self.f2s]), freqs <= np.max([self.f1s, self.f2s]))]
+            f_spectrum_range = freqs[
+                np.logical_and(
+                    freqs >= np.min([self.f1s, self.f2s]),
+                    freqs <= np.max([self.f1s, self.f2s]),
+                )
+            ]
 
             waveshape = WaveShape(
                 data=fft_coeffs,
@@ -104,7 +128,9 @@ class Bispectra(nm_features_abc.Feature):
                 verbose=False,
             )
 
-            waveshape.compute(f1s=tuple(self.f1s[0], self.f1s[-1]), f2s=tuple(self.f2s[0], self.f2s[-1]))
+            waveshape.compute(
+                f1s=(self.f1s[0], self.f1s[-1]), f2s=(self.f2s[0], self.f2s[-1])
+            )
 
             bispectrum = np.squeeze(waveshape.results._data)
 
@@ -120,14 +146,23 @@ class Bispectra(nm_features_abc.Feature):
                         spectrum_ch = np.angle(bispectrum)
 
                 for fb in self.s["bispectrum"]["frequency_bands"]:
-                    range_ = (f_spectrum_range >= self.s["frequency_ranges_hz"][fb][0]) \
-                        & (f_spectrum_range <= self.s["frequency_ranges_hz"][fb][1])
-                    #waveshape.results.plot()
-                    data_bs = spectrum_ch[range_, range_]        
+                    range_ = (
+                        f_spectrum_range >= self.s["frequency_ranges_hz"][fb][0]
+                    ) & (
+                        f_spectrum_range <= self.s["frequency_ranges_hz"][fb][1]
+                    )
+                    # waveshape.results.plot()
+                    data_bs = spectrum_ch[range_, range_]
 
-                    features_compute = self.compute_bs_features(data_bs, features_compute, ch_name, component, fb)
+                    features_compute = self.compute_bs_features(
+                        data_bs, features_compute, ch_name, component, fb
+                    )
 
-                if self.s["bispectrum"]["compute_features_for_whole_fband_range"]:
-                    features_compute = self.compute_bs_features(spectrum_ch, features_compute, ch_name, component, None)
+                if self.s["bispectrum"][
+                    "compute_features_for_whole_fband_range"
+                ]:
+                    features_compute = self.compute_bs_features(
+                        spectrum_ch, features_compute, ch_name, component, None
+                    )
 
         return features_compute
