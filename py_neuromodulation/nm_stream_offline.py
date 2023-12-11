@@ -127,10 +127,13 @@ class _OfflineStream(nm_stream_abc.PNStream):
 
     def plot_raw_signal(
         self,
-        sfreq: float,
+        sfreq: float = None,
         data: np.array = None,
+        lowpass: float = None,
+        highpass: float = None,
+        picks: list = None,
         plot_time: bool = True,
-        plot_psd: bool = True,
+        plot_psd: bool = False,
     ) -> None:
         """Use MNE-RawArray Plot to investigate PSD or raw_signal plot.
 
@@ -156,6 +159,9 @@ class _OfflineStream(nm_stream_abc.PNStream):
         if data is None and self.data is not None:
             data = self.data
 
+        if sfreq is None:
+            sfreq = self.sfreq
+
         if self.nm_channels is not None:
             ch_names = self.nm_channels["name"].to_list()
             ch_types = self.nm_channels["type"].to_list()
@@ -165,12 +171,15 @@ class _OfflineStream(nm_stream_abc.PNStream):
 
         # create mne.RawArray
         info = mne.create_info(
-            ch_names=ch_names, sfreq=self.sfreq, ch_types=ch_types
+            ch_names=ch_names, sfreq=sfreq, ch_types=ch_types
         )
         raw = mne.io.RawArray(data, info)
+
+        if picks is not None:
+            raw = raw.pick(picks)
         self.raw = raw
         if plot_time:
-            raw.plot()
+            raw.plot(highpass=highpass, lowpass=lowpass)
         if plot_psd:
             raw.plot_psd()
 

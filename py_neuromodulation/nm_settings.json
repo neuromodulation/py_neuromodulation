@@ -89,17 +89,32 @@
     "fft_settings": {
         "windowlength_ms": 1000,
         "log_transform": true,
-        "kalman_filter": false
+        "features": {
+            "mean": true,
+            "median": false,
+            "std": false,
+            "max" : false
+        }
     },
     "welch_settings": {
         "windowlength_ms": 1000,
         "log_transform": true,
-        "kalman_filter": false
+        "features": {
+            "mean": true,
+            "median": false,
+            "std": false,
+            "max" : false
+        }
     },
     "stft_settings": {
         "windowlength_ms": 500,
         "log_transform": true,
-        "kalman_filter": false
+        "features": {
+            "mean": true,
+            "median": false,
+            "std": false,
+            "max" : false
+        }
     },
     "bandpass_filter_settings": {
         "segment_lengths_ms": {

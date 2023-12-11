@@ -48,12 +48,6 @@ class OscillatoryFeature(nm_features_abc.Feature):
         assert isinstance(
             s[osc_feature_name]["log_transform"], bool
         ), f"log_transform needs to be type bool, got {s[osc_feature_name]['log_transform']}"
-        assert isinstance(
-            s[osc_feature_name]["kalman_filter"], bool
-        ), f"kalman_filter needs to be type bool, got {s[osc_feature_name]['kalman_filter']}"
-
-        if s[osc_feature_name]["kalman_filter"] is True:
-            nm_kalmanfilter.test_kf_settings(s, ch_names, sfreq)
 
         assert isinstance(s["frequency_ranges_hz"], dict)
 
@@ -95,6 +89,22 @@ class OscillatoryFeature(nm_features_abc.Feature):
             feature_calc = self.KF_dict[KF_name].x[0]
         return feature_calc
 
+    def estimate_osc_features(self, features_compute: dict, data: np.ndarray, feature_name: np.ndarray, est_name: str):
+        for feature_est_name in list(self.s[est_name]["features"].keys()):
+            if self.s[est_name]["features"][feature_est_name] is True:
+                # switch case for feature_est_name
+                match feature_est_name:
+                    case "mean":
+                        features_compute[f"{feature_name}_{feature_est_name}"] = np.nanmean(data)
+                    case "median":
+                        features_compute[f"{feature_name}_{feature_est_name}"] = np.nanmedian(data)
+                    case "std":
+                        features_compute[f"{feature_name}_{feature_est_name}"] = np.nanstd(data)
+                    case "max":
+                        features_compute[f"{feature_name}_{feature_est_name}"] = np.nanmax(data)
+
+        return features_compute
+
 
 class FFT(OscillatoryFeature):
     def __init__(
@@ -104,8 +114,6 @@ class FFT(OscillatoryFeature):
         sfreq: float,
     ) -> None:
         super().__init__(settings, ch_names, sfreq)
-        if self.s["fft_settings"]["kalman_filter"]:
-            self.init_KF("fft")
 
         if self.s["fft_settings"]["log_transform"]:
             self.log_transform = True
@@ -132,17 +140,16 @@ class FFT(OscillatoryFeature):
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         data = data[:, self.window_samples :]
         Z = np.abs(fft.rfft(data))
+
+        if self.log_transform:
+            Z = np.log10(Z)
+
         for ch_idx, feature_name, idx_range in self.feature_params:
+
             Z_ch = Z[ch_idx, idx_range]
-            feature_calc = np.mean(Z_ch)
 
-            if self.log_transform:
-                feature_calc = np.log10(feature_calc)
+            features_compute = self.estimate_osc_features(features_compute, Z_ch, feature_name, "fft_settings")
 
-            if self.KF_dict:
-                feature_calc = self.update_KF(feature_calc, feature_name)
-
-            features_compute[feature_name] = feature_calc
         return features_compute
 
 
@@ -154,8 +161,6 @@ class Welch(OscillatoryFeature):
         sfreq: float,
     ) -> None:
         super().__init__(settings, ch_names, sfreq)
-        if self.s["welch_settings"]["kalman_filter"]:
-            self.init_KF("welch")
 
         self.log_transform = self.s["welch_settings"]["log_transform"]
 
@@ -187,12 +192,8 @@ class Welch(OscillatoryFeature):
                 Z_ch = np.log10(Z_ch)
 
             idx_range = np.where((f >= f_range[0]) & (f <= f_range[1]))[0]
-            feature_calc = np.mean(Z_ch[idx_range])
 
-            if self.KF_dict:
-                feature_calc = self.update_KF(feature_calc, feature_name)
-
-            features_compute[feature_name] = feature_calc
+            features_compute = self.estimate_osc_features(features_compute, Z_ch[idx_range], feature_name, "welch_settings")
 
         return features_compute
 
@@ -205,8 +206,6 @@ class STFT(OscillatoryFeature):
         sfreq: float,
     ) -> None:
         super().__init__(settings, ch_names, sfreq)
-        if self.s["stft_settings"]["kalman_filter"]:
-            self.init_KF("stft")
 
         self.nperseg = int(self.s["stft_settings"]["windowlength_ms"])
         self.log_transform = self.s["stft_settings"]["log_transform"]
@@ -232,18 +231,13 @@ class STFT(OscillatoryFeature):
             boundary="even",
         )
         Z = np.abs(Zxx)
+        if self.log_transform:
+            Z = np.log10(Z)
         for ch_idx, feature_name, f_range in self.feature_params:
             Z_ch = Z[ch_idx]
             idx_range = np.where((f >= f_range[0]) & (f <= f_range[1]))[0]
-            feature_calc = np.mean(Z_ch[idx_range, :])  # 1. dim: f, 2. dim: t
 
-            if self.KF_dict:
-                feature_calc = self.update_KF(feature_calc, feature_name)
-
-            if self.log_transform:
-                feature_calc = np.log10(feature_calc)
-
-            features_compute[feature_name] = feature_calc
+            features_compute = self.estimate_osc_features(features_compute, Z_ch[idx_range, :], feature_name, "stft_settings")
 
         return features_compute
 
