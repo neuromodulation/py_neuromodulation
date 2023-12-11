@@ -11,7 +11,7 @@ from py_neuromodulation import (
     nm_oscillatory,
     nm_bursts,
     nm_linelength,
-    nm_bispectra
+    nm_bispectra,
 )
 
 
@@ -56,6 +56,8 @@ class Features:
                     FeatureClass = nm_oscillatory.STFT
                 case "fft":
                     FeatureClass = nm_oscillatory.FFT
+                case "welch":
+                    FeatureClass = nm_oscillatory.Welch
                 case "sharpwave_analysis":
                     FeatureClass = nm_sharpwaves.SharpwaveAnalyzer
                 case "fooof":

@@ -18,6 +18,7 @@
         "bandpass_filter": false,
         "stft": false,
         "fft": true,
+        "welch": true,
         "sharpwave_analysis": true,
         "fooof": false,
         "bursts": true,
@@ -86,6 +87,11 @@
         ]
     },
     "fft_settings": {
+        "windowlength_ms": 1000,
+        "log_transform": true,
+        "kalman_filter": false
+    },
+    "welch_settings": {
         "windowlength_ms": 1000,
         "log_transform": true,
         "kalman_filter": false
