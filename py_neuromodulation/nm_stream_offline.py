@@ -181,7 +181,7 @@ class _OfflineStream(nm_stream_abc.PNStream):
         if plot_time:
             raw.plot(highpass=highpass, lowpass=lowpass)
         if plot_psd:
-            raw.plot_psd()
+            raw.compute_psd().plot()
 
 
 class Stream(_OfflineStream):
