@@ -21,7 +21,6 @@ def get_example_settings(test_arr: np.array) -> nm_stream_abc.PNStream:
 
 
 def test_different_sampling_rate_100Hz():
-
     sampling_rate_features = 100
 
     arr_test = np.random.random([2, 1020])
@@ -40,7 +39,6 @@ def test_different_sampling_rate_100Hz():
 
 
 def test_different_sampling_rate_10Hz():
-
     sampling_rate_features = 10
 
     arr_test = np.random.random([2, 1200])
@@ -59,7 +57,6 @@ def test_different_sampling_rate_10Hz():
 
 
 def test_different_sampling_rate_1Hz():
-
     sampling_rate_features = 1
 
     arr_test = np.random.random([2, 3000])
@@ -78,7 +75,6 @@ def test_different_sampling_rate_1Hz():
 
 
 def test_different_sampling_rate_0DOT1Hz():
-
     sampling_rate_features = 0.1
 
     arr_test = np.random.random([2, 30000])
@@ -97,7 +93,6 @@ def test_different_sampling_rate_0DOT1Hz():
 
 
 def test_different_segment_lengths():
-
     segment_length_features_ms = 800
 
     arr_test = np.random.random([2, 1200])
@@ -124,6 +119,6 @@ def test_different_segment_lengths():
     # check the difference between time points
 
     assert (
-        df_seglength_1000.iloc[0]["ch0-avgref_fft_theta"]
-        != df_seglength_800.iloc[0]["ch0-avgref_fft_theta"]
+        df_seglength_1000.iloc[0]["ch0-avgref_fft_theta_mean"]
+        != df_seglength_800.iloc[0]["ch0-avgref_fft_theta_mean"]
     )
