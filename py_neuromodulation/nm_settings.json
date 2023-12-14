@@ -93,8 +93,9 @@
             "mean": true,
             "median": false,
             "std": false,
-            "max" : false
-        }
+            "max": false
+        },
+        "return_spectrum": true
     },
     "welch_settings": {
         "windowlength_ms": 1000,
@@ -103,8 +104,9 @@
             "mean": true,
             "median": false,
             "std": false,
-            "max" : false
-        }
+            "max": false
+        },
+        "return_spectrum": true
     },
     "stft_settings": {
         "windowlength_ms": 500,
@@ -113,8 +115,9 @@
             "mean": true,
             "median": false,
             "std": false,
-            "max" : false
-        }
+            "max": false
+        },
+        "return_spectrum": true
     },
     "bandpass_filter_settings": {
         "segment_lengths_ms": {

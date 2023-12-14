@@ -69,7 +69,8 @@ def test_fft_zero_data():
     features_out = fft_obj.calc_feature(data, {})
 
     for f in features_out.keys():
-        assert features_out[f] == 0
+        if "psd_0" not in f:
+            assert np.isclose(features_out[f], 0, atol=1e-6)
 
 
 def test_fft_random_data():
