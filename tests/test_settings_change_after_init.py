@@ -5,8 +5,7 @@ from py_neuromodulation import nm_settings
 
 
 def test_post_init_nm_channels_change():
-    """Test if post initialization of nm_channels will also be ported to the feature computation.
-    """
+    """Test if post initialization of nm_channels will also be ported to the feature computation."""
 
     data = np.random.random((10, 1000))
     fs = 1000
@@ -23,22 +22,55 @@ def test_post_init_nm_channels_change():
     assert len([f for f in features.columns if "new_ch_name_0" in f]) != 0
 
 
-def test_post_init_settings_change():
-    """Test if post initialization of nm_settings will also be ported to the feature computation.
-    """
+def test_post_init_nm_channels_used_channels_change_single_channel():
+    """Test if post initialization of nm_settings will also be ported to the feature computation."""
 
-    data = np.random.random((10, 1000))
-    fs = 1000
+    np.random.seed(0)
+    data = np.random.random((3, 1000))
+    sfreq = 1000
+    stream = pn.Stream(sfreq=sfreq, data=data, sampling_rate_features_hz=11)
+    stream.nm_channels["used"] = 0
+    stream.nm_channels.loc[1, "used"] = 1
 
-    settings = nm_settings.get_default_settings()
+    features = stream.run(data)
 
-    settings["features"]["fft"] = True
+    chs_not_used = stream.nm_channels[stream.nm_channels["used"] == 0][
+        "new_name"
+    ]
 
-    stream = pn.Stream(fs, data)
+    assert (
+        np.sum(
+            [
+                len([c for c in features.columns if c.startswith(ch_not_used)])
+                for ch_not_used in chs_not_used
+            ]
+        )
+        == 0
+    )
 
-    stream.settings["features"]["fft"] = False
 
-    features = stream.run()
+def test_post_init_nm_channels_used_channels_change_multiple_channel():
+    """Test if post initialization of nm_settings will also be ported to the feature computation."""
 
-    assert len([f for f in features.columns if "fft" in f]) == 0
+    np.random.seed(0)
+    data = np.random.random((3, 1000))
+    sfreq = 1000
+    stream = pn.Stream(sfreq=sfreq, data=data, sampling_rate_features_hz=11)
+    stream.nm_channels["used"] = 0
+    stream.nm_channels.loc[[0, 2], "used"] = 1
 
+    features = stream.run(data)
+
+    chs_not_used = stream.nm_channels[stream.nm_channels["used"] == 0][
+        "new_name"
+    ]
+
+    assert (
+        np.sum(
+            [
+                len([c for c in features.columns if c.startswith(ch_not_used)])
+                for ch_not_used in chs_not_used
+            ]
+        )
+        == 0
+    )
