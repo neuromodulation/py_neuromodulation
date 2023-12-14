@@ -38,6 +38,15 @@ class OscillatoryFeature(nm_features_abc.Feature):
             assert isinstance(
                 s[osc_feature_name]["windowlength_ms"], int
             ), f"windowlength_ms needs to be type int, got {s[osc_feature_name]['windowlength_ms']}"
+
+            assert (
+                s[osc_feature_name]["windowlength_ms"]
+                <= s["segment_length_features_ms"]
+            ), (
+                f"oscillatory feature windowlength_ms = ({s[osc_feature_name]['windowlength_ms']})"
+                f"needs to be smaller than"
+                f"s['segment_length_features_ms'] = {s['segment_length_features_ms']}",
+            )
         else:
             for seg_length in s[osc_feature_name][
                 "segment_lengths_ms"

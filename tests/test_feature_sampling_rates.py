@@ -92,6 +92,21 @@ def test_different_sampling_rate_0DOT1Hz():
     assert np.diff(df["time"].iloc[:2]) / 1000 == (1 / sampling_rate_features)
 
 
+def test_wrong_initalization_of_segment_length_features_ms_and_osc_window_length():
+    segment_length_features_ms = 800
+
+    arr_test = np.random.random([2, 1200])
+    settings, nm_channels = get_example_settings(arr_test)
+
+    settings["segment_length_features_ms"] = 800
+    settings["fft_settings"]["windowlength_ms"] = 1000
+
+    with pytest.raises(Exception):
+        stream = nm_stream_offline.Stream(
+            sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
+        )
+
+
 def test_different_segment_lengths():
     segment_length_features_ms = 800
 
@@ -99,6 +114,8 @@ def test_different_segment_lengths():
     settings, nm_channels = get_example_settings(arr_test)
 
     settings["segment_length_features_ms"] = segment_length_features_ms
+    settings["fft_settings"]["windowlength_ms"] = segment_length_features_ms
+
     stream = nm_stream_offline.Stream(
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )
@@ -111,6 +128,8 @@ def test_different_segment_lengths():
     settings, nm_channels = get_example_settings(arr_test)
 
     settings["segment_length_features_ms"] = segment_length_features_ms
+    settings["fft_settings"]["windowlength_ms"] = segment_length_features_ms
+
     stream = nm_stream_offline.Stream(
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )

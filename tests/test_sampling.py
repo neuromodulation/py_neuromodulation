@@ -16,6 +16,7 @@ def get_features(time_end_ms: int, segment_length_features_ms: int):
     data = np.random.random([2, time_end_ms])
     settings = get_fast_compute_settings()
     settings["segment_length_features_ms"] = segment_length_features_ms
+    settings["fft_settings"]["windowlength_ms"] = segment_length_features_ms
 
     settings["frequency_ranges_hz"] = {
         # "high beta" : [20, 35],
