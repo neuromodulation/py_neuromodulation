@@ -65,14 +65,14 @@ Then *py_neuromodulation* can be imported via:
 
 .. code-block::
 
-    import py_neuromodulation as py_nm
+    import py_neuromodulation as nm
 
 Basic Usage
 ===========
 
 .. code-block:: python
     
-    import py_neuromodulation as pn
+    import py_neuromodulation as nm
     import numpy as np
     
     NUM_CHANNELS = 5
@@ -82,7 +82,7 @@ Basic Usage
 
     data = np.random.random([NUM_CHANNELS, NUM_DATA])
 
-    stream = pn.Stream(sfreq=sfreq, data=data, sampling_rate_features_hz=sampling_rate_features_hz)
+    stream = nm.Stream(sfreq=sfreq, data=data, sampling_rate_features_hz=sampling_rate_features_hz)
     features = stream.run()
 
 Check the `Usage <https://py-neuromodulation.readthedocs.io/en/latest/usage.html>`_ and `First examples <https://py-neuromodulation.readthedocs.io/en/latest/auto_examples/plot_first_demo.html>`_ for further introduction.

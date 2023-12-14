@@ -1,6 +1,6 @@
 import numpy as np
 
-import py_neuromodulation as pn
+import py_neuromodulation as nm
 from py_neuromodulation import nm_settings
 
 
@@ -10,7 +10,7 @@ def test_post_init_nm_channels_change():
     data = np.random.random((10, 1000))
     fs = 1000
 
-    stream = pn.Stream(fs, data)
+    stream = nm.Stream(fs, data)
 
     # default channel names are "ch{i}"
     # every time the name changes, the "new_name" should also changes
@@ -28,7 +28,7 @@ def test_post_init_nm_channels_used_channels_change_single_channel():
     np.random.seed(0)
     data = np.random.random((3, 1000))
     sfreq = 1000
-    stream = pn.Stream(sfreq=sfreq, data=data, sampling_rate_features_hz=11)
+    stream = nm.Stream(sfreq=sfreq, data=data, sampling_rate_features_hz=11)
     stream.nm_channels["used"] = 0
     stream.nm_channels.loc[1, "used"] = 1
 
@@ -55,7 +55,7 @@ def test_post_init_nm_channels_used_channels_change_multiple_channel():
     np.random.seed(0)
     data = np.random.random((3, 1000))
     sfreq = 1000
-    stream = pn.Stream(sfreq=sfreq, data=data, sampling_rate_features_hz=11)
+    stream = nm.Stream(sfreq=sfreq, data=data, sampling_rate_features_hz=11)
     stream.nm_channels["used"] = 0
     stream.nm_channels.loc[[0, 2], "used"] = 1
 

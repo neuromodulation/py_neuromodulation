@@ -1,4 +1,4 @@
-import py_neuromodulation as pn
+import py_neuromodulation as nm
 from py_neuromodulation import (
     nm_settings,
 )
@@ -21,7 +21,7 @@ def test_setting_computation_time():
     settings["segment_length_features_ms"] = 1000  # start afte 1 second
     settings["features"]["fft"] = False
     settings["features"]["raw_hjorth"] = True
-    stream = pn.Stream(
+    stream = nm.Stream(
         sfreq=fs,
         data=data,
         sampling_rate_features_hz=sampling_rate_features_hz,
@@ -59,7 +59,7 @@ def test_float_fs():
 
     settings["features"]["fft"] = False
     settings["features"]["raw_hjorth"] = True
-    stream = pn.Stream(
+    stream = nm.Stream(
         sfreq=fs,
         data=data,
         sampling_rate_features_hz=sampling_rate_features_hz,
