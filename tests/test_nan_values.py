@@ -1,6 +1,6 @@
 import numpy as np
 
-import py_neuromodulation as pn
+import py_neuromodulation as nm
 
 
 def test_stream_with_none_data():
@@ -10,7 +10,7 @@ def test_stream_with_none_data():
     data = np.random.random([2, 2000])
     data[0, :] = None
 
-    stream = pn.Stream(fs, data)
+    stream = nm.Stream(fs, data)
 
     features = stream.run(data)
 

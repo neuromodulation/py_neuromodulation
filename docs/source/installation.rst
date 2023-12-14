@@ -32,4 +32,4 @@ Then *py_neuromodulation* can be imported via:
 
 .. code-block::
 
-    import py_neuromodulation as py_nm
+    import py_neuromodulation as nm

@@ -4,11 +4,11 @@ import pickle
 import numpy as np
 import pandas as pd
 
-import py_neuromodulation as py_nm
+import py_neuromodulation as nm
 from py_neuromodulation import nm_generator
 
 
-class EpochStream(py_nm.nm_stream.PNStream):
+class EpochStream(nm.nm_stream.PNStream):
     def __init__(self) -> None:
         super().__init__()
 
@@ -43,7 +43,6 @@ class EpochStream(py_nm.nm_stream.PNStream):
     def run(
         self,
     ):
-
         self._set_run()
         # shape is n, channels=7, 800 Hz
 
