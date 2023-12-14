@@ -90,6 +90,7 @@ plt.xlim(0, 20)
 settings = nm_settings.get_default_settings()
 settings = nm_settings.set_settings_fast_compute(settings)
 
+settings["features"]["welch"] = True
 settings["features"]["fft"] = True
 settings["features"]["bursts"] = True
 settings["features"]["sharpwave_analysis"] = True

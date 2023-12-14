@@ -331,7 +331,7 @@ class DataProcessor:
 
         nan_channels = np.isnan(data).any(axis=1)
 
-        data = np.nan_to_num(data)  # [self.feature_idx, :]needs to be before preprocessing
+        data = np.nan_to_num(data)[self.feature_idx, :]
 
         for processor in self.preprocessors:
             data = processor.process(data)
@@ -341,8 +341,13 @@ class DataProcessor:
 
         # normalize features
         if self.settings["postprocessing"]["feature_normalization"]:
-            normed_features = self.feature_normalizer.process(np.fromiter(features_dict.values(), dtype="float"))
-            features_dict = {key: normed_features[idx] for idx, key in enumerate(features_dict.keys())}
+            normed_features = self.feature_normalizer.process(
+                np.fromiter(features_dict.values(), dtype="float")
+            )
+            features_dict = {
+                key: normed_features[idx]
+                for idx, key in enumerate(features_dict.keys())
+            }
 
         features_current = pd.Series(
             data=list(features_dict.values()),

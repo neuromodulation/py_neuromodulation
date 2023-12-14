@@ -4,9 +4,7 @@ import pandas as pd
 
 
 class ReReferencer:
-
     ref_matrix: np.ndarray
-
 
     def __init__(
         self,
@@ -28,11 +26,15 @@ class ReReferencer:
             ValueError: rereferencing using undefined channel
             ValueError: rereferencing to same channel
         """
-        (channels_used,) = np.where((nm_channels.used == 1))
+        nm_channels = nm_channels[nm_channels["used"] == 1].reset_index(
+            drop=True
+        )
+        # (channels_used,) = np.where((nm_channels.used == 1))
 
         ch_names = nm_channels["name"].tolist()
 
-        if len(ch_names) == 1:
+        # no re-referencing is being performed when there is a single channel present only
+        if nm_channels.shape[0] in (0, 1):
             self.ref_matrix = None
             return
 
@@ -48,8 +50,8 @@ class ReReferencer:
         ref_matrix = np.zeros((len(nm_channels), len(nm_channels)))
         for ind in range(len(nm_channels)):
             ref_matrix[ind, ind] = 1
-            if ind not in channels_used:
-                continue
+            # if ind not in channels_used:
+            #    continue
             ref = refs[ind]
             if ref.lower() == "none" or pd.isnull(ref):
                 ref_idx = None
@@ -84,7 +86,7 @@ class ReReferencer:
                 shape(n_channels, n_samples) - data to be rereferenced.
 
         Returns:
-            reref_data (numpy ndarray): 
+            reref_data (numpy ndarray):
             shape(n_channels, n_samples) - rereferenced data
         """
         if self.ref_matrix is not None:
