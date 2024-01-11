@@ -2,6 +2,9 @@
 import math
 import os
 
+import multiprocessing as  mp
+from itertools import count
+
 import numpy as np
 import pandas as pd
 
@@ -83,42 +86,50 @@ class _OfflineStream(nm_stream_abc.PNStream):
             )
         return data.to_numpy()
 
+    def _process_batch(self, data_batch, cnt_samples):
+        feature_series = self.run_analysis.process(
+            data_batch.astype(np.float64)
+        )
+        feature_series = self._add_timestamp(feature_series, cnt_samples)
+        return feature_series
+        
     def _run_offline(
         self,
         data: np.ndarray,
         out_path_root: _PathLike | None = None,
         folder_name: str = "sub",
+        parallel: bool = True,
+        num_threads = None
     ) -> pd.DataFrame:
         generator = nm_generator.raw_data_generator(
             data=data,
             settings=self.settings,
             sfreq=self.sfreq,
         )
-        features = []
+
         sample_add = self.sfreq / self.run_analysis.sfreq_features
 
         offset_time = self.settings["segment_length_features_ms"]
         # offset_start = np.ceil(offset_time / 1000 * self.sfreq).astype(int)
         offset_start = offset_time / 1000 * self.sfreq
 
-        cnt_samples = offset_start
+        if parallel:
+            try: mp.set_start_method('fork') # Set process  start method. 'spawn' and 'forkserver' do not work
+            except RuntimeError: pass # mp.set_start_method() will crash the program if called more than once
+            pool = mp.Pool(processes=num_threads) # Create sub-process pool. Faster than concurrent.futures.ProcessPoolExecutor()     
+            # Assign tasks to sub-processes, starmap is same as map, only for 2+ arguments that must be zipped
+            feature_df = pd.DataFrame(pool.starmap(self._process_batch, zip(generator, count(offset_start, sample_add))))
+            # Prevent memory leaks by releasing process pool resources
+            pool.close() 
+            pool.join()
+        else:
+            # If no parallelization required, is faster to not use a process pool at all
+            feature_df = pd.DataFrame(map(self._process_batch, generator, count(offset_start, sample_add)))
+        
+        # I don't know what this does :(
+        # if self.model is not None:
+        #     prediction = self.model.predict(features[-1])
 
-        while True:
-            data_batch = next(generator, None)
-            if data_batch is None:
-                break
-            feature_series = self.run_analysis.process(
-                data_batch.astype(np.float64)
-            )
-            feature_series = self._add_timestamp(feature_series, cnt_samples)
-            features.append(feature_series)
-
-            if self.model is not None:
-                prediction = self.model.predict(feature_series)
-
-            cnt_samples += sample_add
-
-        feature_df = pd.DataFrame(features)
         feature_df = self._add_labels(features=feature_df, data=data)
 
         self.save_after_stream(out_path_root, folder_name, feature_df)
@@ -253,6 +264,8 @@ class Stream(_OfflineStream):
         data: np.ndarray | pd.DataFrame = None,
         out_path_root: _PathLike | None = None,
         folder_name: str = "sub",
+        parallel: bool = True,
+        num_threads = None
     ) -> pd.DataFrame:
         """Call run function for offline stream.
 
@@ -281,4 +294,4 @@ class Stream(_OfflineStream):
         elif self.data is None and data is None:
             raise ValueError("No data passed to run function.")
 
-        return self._run_offline(data, out_path_root, folder_name)
+        return self._run_offline(data, out_path_root, folder_name, parallel=parallel, num_threads=num_threads)
