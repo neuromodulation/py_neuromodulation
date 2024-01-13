@@ -2,7 +2,6 @@ import numpy as np
 from scipy import signal
 from mne.filter import create_filter
 from typing import Iterable
-import sys
 
 from py_neuromodulation import nm_features_abc
 
@@ -140,12 +139,10 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
         """
         for ch_idx, ch_name in enumerate(self.ch_names):
             for filter_name, filter in self.list_filter:
-                if filter_name == "no_filter":
-                    self.data_process_sw = data[ch_idx, :]
-                else:
-                    self.data_process_sw = signal.fftconvolve(
-                        data[ch_idx, :], filter, mode="same"
-                    )
+                self.data_process_sw = (data[ch_idx, :] 
+                    if filter_name == "no_filter" 
+                    else signal.fftconvolve(data[ch_idx, :], filter, mode="same")
+                )
 
                 # check settings if troughs and peaks are analyzed
 
@@ -257,124 +254,96 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
             distance=self.sw_settings["detect_troughs"]["distance_troughs_ms"],
         )[0]
 
-        right_peak_idx = 0
-        for trough_idx in troughs:
+        """ Find left and right peak indexes for each trough """
+        peak_pointer = 0
+        peak_idx_left = []
+        peak_idx_right = []
+        first_valid = last_valid = 0
+
+        for i, trough_idx in enumerate(troughs):
             
-            while right_peak_idx < peaks.size and peaks[right_peak_idx] < trough_idx:
-                right_peak_idx += 1
+            # Locate peak right of current trough
+            while peak_pointer < peaks.size and peaks[peak_pointer] < trough_idx:
+                peak_pointer += 1
 
-            if right_peak_idx - 1 < 0:
+            if peak_pointer - 1 < 0: 
+                # If trough has no peak to it's left, it's not valid 
+                first_valid = i + 1 # Try with next one
                 continue
-            peak_idx_left = peaks[right_peak_idx - 1]
 
-            if right_peak_idx >= peaks.size:
+            if peak_pointer == peaks.size:
+                # If we went past the end of the peaks list, trough had no peak to its right
                 continue
-            peak_idx_right = peaks[right_peak_idx]
 
-            peak_left = self.data_process_sw[peak_idx_left]
-            peak_right = self.data_process_sw[peak_idx_right]
+            last_valid = i
+            peak_idx_left.append(peaks[peak_pointer - 1])
+            peak_idx_right.append(peaks[peak_pointer])
 
-            trough = self.data_process_sw[trough_idx]
-            self.trough.append(trough)
-            self.troughs_idx.append(trough_idx)
+        troughs = troughs[first_valid:last_valid + 1] # Remove non valid troughs
+        
+        peak_left = self.data_process_sw[peak_idx_left]
+        peak_right = self.data_process_sw[peak_idx_right]
+        trough_values = self.data_process_sw[troughs]
 
-            if self.sw_settings["sharpwave_features"]["interval"] is True:
-                if len(self.troughs_idx) > 1:
-                    # take the last identified trough idx
-                    # corresponds here to second last trough_idx
+        # No need to store trough data as it is not used anywhere else in the program
+        # self.trough.append(trough)
+        # self.troughs_idx.append(trough_idx)
+         
+        """ Calculate features (vectorized) """
 
-                    interval = (trough_idx - self.troughs_idx[-2]) * (
-                        1000 / self.sfreq
-                    )
-                else:
-                    # set first interval to zero
-                    interval = 0
-                self.interval.append(interval)
+        if self.sw_settings["sharpwave_features"]["interval"]:
+            self.interval = (np.pad(troughs, (0,1)) - np.pad(troughs, (1,0))) * (1000 / self.sfreq)
+            if self.interval.shape[0] > 1: self.interval = self.interval[:-1]
+            self.interval[0] = 0
 
-            if self.sw_settings["sharpwave_features"]["peak_left"] is True:
-                self.peak_left.append(peak_left)
+        if self.sw_settings["sharpwave_features"]["peak_left"]:
+            self.peak_left = peak_left
 
-            if self.sw_settings["sharpwave_features"]["peak_right"] is True:
-                self.peak_right.append(peak_right)
+        if self.sw_settings["sharpwave_features"]["peak_right"]:
+            self.peak_right = peak_right
 
-            if self.sw_settings["sharpwave_features"]["sharpness"] is True:
-                # check if sharpness can be calculated
-                # trough_idx 5 ms need to be consistent
-                if (trough_idx - int(5 * (1000 / self.sfreq)) <= 0) or (
-                    trough_idx + int(5 * (1000 / self.sfreq))
-                    >= self.data_process_sw.shape[0]
-                ):
-                    continue
+        if self.sw_settings["sharpwave_features"]["sharpness"]:
+            # sharpess is calculated on a +- 5 ms window
+            # valid troughs need 5 ms of margin on both siddes
+            troughs_valid = troughs[np.logical_and(
+                                troughs - int(5 * (1000 / self.sfreq)) > 0, 
+                                troughs + int(5 * (1000 / self.sfreq)) < self.data_process_sw.shape[0])]
 
-                sharpness = (
-                    (
-                        self.data_process_sw[trough_idx]
-                        - self.data_process_sw[
-                            trough_idx - int(5 * (1000 / self.sfreq))
-                        ]
-                    )
-                    + (
-                        self.data_process_sw[trough_idx]
-                        - self.data_process_sw[
-                            trough_idx + int(5 * (1000 / self.sfreq))
-                        ]
-                    )
-                ) / 2
+            self.sharpness = (
+                        (self.data_process_sw[troughs_valid] - self.data_process_sw[troughs_valid - int(5 * (1000 / self.sfreq))]) +
+                        (self.data_process_sw[troughs_valid] - self.data_process_sw[troughs_valid + int(5 * (1000 / self.sfreq))])
+                        ) / 2
 
-                self.sharpness.append(sharpness)
+        if (self.sw_settings["sharpwave_features"]["rise_steepness"] or
+            self.sw_settings["sharpwave_features"]["decay_steepness"]):
+            
+            # steepness is calculated as the first derivative
+            steepness = np.concatenate(([0],np.diff(self.data_process_sw)))
 
-            if self.sw_settings["sharpwave_features"]["rise_steepness"] is True:
-                # steepness is calculated as the first derivative
-                # from peak/trough to trough/peak
-                # here  + 1 due to python syntax, s.t. the last element is included
-                rise_steepness = np.max(
-                    np.diff(
-                        self.data_process_sw[peak_idx_left : trough_idx + 1]
-                    )
-                )
-                self.rise_steepness.append(rise_steepness)
+            if self.sw_settings["sharpwave_features"]["rise_steepness"]: # left peak -> trough
+                # + 1 due to python syntax, s.t. the last element is included
+                self.rise_steepness = np.array([np.max(steepness[peak_idx_left[i] : troughs[i] + 1]) for i in range(trough_idx.size)])
+                
+            if self.sw_settings["sharpwave_features"]["decay_steepness"]: # trough -> right peak
+                self.decay_steepness = np.array([np.max(steepness[troughs[i] : peak_idx_right[i] + 1]) for i in range(trough_idx.size)])
 
-            if (
-                self.sw_settings["sharpwave_features"]["decay_steepness"]
-                is True
-            ):
-                decay_steepness = np.max(
-                    np.diff(
-                        self.data_process_sw[trough_idx : peak_idx_right + 1]
-                    )
-                )
-                self.decay_steepness.append(decay_steepness)
+            if (self.sw_settings["sharpwave_features"]["rise_steepness"] and
+                self.sw_settings["sharpwave_features"]["decay_steepness"] and
+                self.sw_settings["sharpwave_features"]["slope_ratio"]):
+                self.slope_ratio = self.rise_steepness - self.decay_steepness
 
-            if (
-                self.sw_settings["sharpwave_features"]["rise_steepness"] is True
-                and self.sw_settings["sharpwave_features"]["decay_steepness"]
-                is True
-                and self.sw_settings["sharpwave_features"]["slope_ratio"]
-                is True
-            ):
-                self.slope_ratio.append(rise_steepness - decay_steepness)
+        if self.sw_settings["sharpwave_features"]["prominence"]:
+            self.prominence = np.abs((peak_right + peak_left) / 2 - trough_values)
 
-            if self.sw_settings["sharpwave_features"]["prominence"] is True:
-                self.prominence.append(
-                    np.abs(
-                        (peak_right + peak_left) / 2
-                        - self.data_process_sw[trough_idx]
-                    )
-                )
+        if self.sw_settings["sharpwave_features"]["decay_time"]:
+            self.decay_time = (peak_idx_left - troughs) * (1000 / self.sfreq) # ms
 
-            if self.sw_settings["sharpwave_features"]["decay_time"] is True:
-                self.decay_time.append(
-                    (peak_idx_left - trough_idx) * (1000 / self.sfreq)
-                )  # ms
+        if self.sw_settings["sharpwave_features"]["rise_time"]:
+            self.rise_time = (peak_idx_right - troughs) * (1000 / self.sfreq) # ms
 
-            if self.sw_settings["sharpwave_features"]["rise_time"] is True:
-                self.rise_time.append(
-                    (peak_idx_right - trough_idx) * (1000 / self.sfreq)
-                )  # ms
-
-            if self.sw_settings["sharpwave_features"]["width"] is True:
-                self.width.append(peak_idx_right - peak_idx_left)  # ms
-
+        if self.sw_settings["sharpwave_features"]["width"]:
+            self.width = peak_idx_right - peak_idx_left  # ms
+    
     @staticmethod
     def test_settings(
         s: dict,
