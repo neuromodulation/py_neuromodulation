@@ -95,7 +95,7 @@
             "std": false,
             "max": false
         },
-        "return_spectrum": true
+        "return_spectrum": false
     },
     "welch_settings": {
         "windowlength_ms": 1000,
@@ -106,7 +106,7 @@
             "std": false,
             "max": false
         },
-        "return_spectrum": true
+        "return_spectrum": false
     },
     "stft_settings": {
         "windowlength_ms": 500,
@@ -117,7 +117,7 @@
             "std": false,
             "max": false
         },
-        "return_spectrum": true
+        "return_spectrum": false
     },
     "bandpass_filter_settings": {
         "segment_lengths_ms": {
