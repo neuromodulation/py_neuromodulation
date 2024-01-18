@@ -30,7 +30,6 @@ def load_nm_channels(
     reference Union[list, str]
     """
 
-    
     if isinstance(nm_channels, pd.DataFrame):
         nm_ch_return = nm_channels
     elif nm_channels:
@@ -41,6 +40,7 @@ def load_nm_channels(
         nm_ch_return = pd.read_csv(nm_channels)
 
     return nm_ch_return
+
 
 def read_BIDS_data(
     PATH_RUN: _PathLike | mne_bids.BIDSPath,
@@ -123,7 +123,6 @@ def read_grid(PATH_GRIDS: _PathLike | None, grid_str: str) -> pd.DataFrame:
 def get_annotations(
     PATH_ANNOTATIONS: str, PATH_RUN: str, raw_arr: mne.io.RawArray
 ):
-
     try:
         annot = mne.read_annotations(
             Path(PATH_ANNOTATIONS) / (os.path.basename(PATH_RUN)[:-5] + ".txt")
@@ -137,14 +136,15 @@ def get_annotations(
         print(
             "expected location: "
             + str(
-                Path(PATH_ANNOTATIONS) / (os.path.basename(PATH_RUN)[:-5] + ".txt")
+                Path(PATH_ANNOTATIONS)
+                / (os.path.basename(PATH_RUN)[:-5] + ".txt")
             )
         )
     return annot, annot_data, raw_arr
 
 
 def read_plot_modules(
-    PATH_PLOT: _PathLike = Path(__file__).absolute().parent / "plots"
+    PATH_PLOT: _PathLike = Path(__file__).absolute().parent / "plots",
 ):
     """Read required .mat files for plotting
 
@@ -269,14 +269,16 @@ def save_features_and_settings(
     save_settings(settings, out_path, folder_name)
     save_nm_channels(nm_channels, out_path, folder_name)
 
-def write_csv(df, path_out): 
-    """ 
+
+def write_csv(df, path_out):
+    """
     Function to save Pandas dataframes to disk as CSV using
     PyArrow (almost 10x faster than Pandas)
     Difference with pandas.df.to_csv() is that it does not
     write an index column by default
     """
     csv.write_csv(pyarrow.Table.from_pandas(df), path_out)
+
 
 def save_settings(
     settings: dict, path_out: _PathLike, folder_name: str | None = None
@@ -370,7 +372,7 @@ def read_settings(PATH: str) -> dict:
 
 
 def read_features(PATH: str) -> pd.DataFrame:
-    return pd.read_csv(PATH + "_FEATURES.csv")
+    return pd.read_csv(PATH + "_FEATURES.csv", engine="pyarrow")
 
 
 def read_nm_channels(PATH: str) -> pd.DataFrame:
@@ -416,7 +418,14 @@ def get_paths_example_data():
 
     PATH_BIDS = Path(SCRIPT_DIR) / "data"
 
-    PATH_RUN = Path(SCRIPT_DIR) / "data" / f"sub-{sub}" / f"ses-{ses}" / datatype / RUN_NAME
+    PATH_RUN = (
+        Path(SCRIPT_DIR)
+        / "data"
+        / f"sub-{sub}"
+        / f"ses-{ses}"
+        / datatype
+        / RUN_NAME
+    )
 
     # Provide a path for the output data.
     PATH_OUT = PATH_BIDS / "derivatives"
