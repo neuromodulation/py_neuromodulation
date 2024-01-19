@@ -26,19 +26,38 @@ class _OfflineStream(nm_stream_abc.PNStream):
     nm_stream_abc : nm_stream_abc.PNStream
     """
 
-    def _add_labels(
-        self, features: pd.DataFrame, data: np.ndarray
-    ) -> pd.DataFrame:
-        """Add resampled labels to features if there are target channels."""
+    def _add_target(
+        self, feature_series: pd.Series, data: np.ndarray
+    ) -> pd.Series:
+        """Add target channels to feature series.
+
+        Parameters
+        ----------
+        feature_series : pd.Series
+        data : np.ndarray
+            Raw data with shape (n_channels, n_samples). Channels not for feature computation are also included
+
+        Returns
+        -------
+        pd.Series
+            feature series with target channels added
+        """
+
         if self.nm_channels["target"].sum() > 0:
-            features = nm_IO.add_labels(
-                features=features,
-                settings=self.settings,
-                nm_channels=self.nm_channels,
-                raw_arr_data=data,
-                fs=self.sfreq,
-            )
-        return features
+            if not self.target_idx_initialized:
+                self.target_indexes = self.nm_channels[
+                    self.nm_channels["target"] == 1
+                ].index
+                self.target_names = self.nm_channels.loc[
+                    self.target_indexes, "name"
+                ].to_list()
+                self.target_idx_initialized = True
+
+            for target_idx, target_name in zip(
+                self.target_indexes, self.target_names
+            ):
+                feature_series[target_name] = data[target_idx, -1]
+        return feature_series
 
     def _add_timestamp(
         self, feature_series: pd.Series, cnt_samples: int
@@ -111,6 +130,8 @@ class _OfflineStream(nm_stream_abc.PNStream):
                 data_batch.astype(np.float64)
             )
             feature_series = self._add_timestamp(feature_series, cnt_samples)
+            feature_series = self._add_target(feature_series, data_batch)
+
             features.append(feature_series)
 
             if self.model is not None:
@@ -119,7 +140,6 @@ class _OfflineStream(nm_stream_abc.PNStream):
             cnt_samples += sample_add
 
         feature_df = pd.DataFrame(features)
-        feature_df = self._add_labels(features=feature_df, data=data)
 
         self.save_after_stream(out_path_root, folder_name, feature_df)
 
@@ -247,6 +267,8 @@ class Stream(_OfflineStream):
         )
 
         self.data = data
+
+        self.target_idx_initialized = False
 
     def run(
         self,
