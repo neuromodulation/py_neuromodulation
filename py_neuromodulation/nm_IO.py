@@ -27,7 +27,6 @@ def load_nm_channels(
     reference Union[list, str]
     """
 
-    
     if isinstance(nm_channels, pd.DataFrame):
         nm_ch_return = nm_channels
     elif nm_channels:
@@ -38,6 +37,7 @@ def load_nm_channels(
         nm_ch_return = pd.read_csv(nm_channels)
 
     return nm_ch_return
+
 
 def read_BIDS_data(
     PATH_RUN: _PathLike | mne_bids.BIDSPath,
@@ -120,7 +120,6 @@ def read_grid(PATH_GRIDS: _PathLike | None, grid_str: str) -> pd.DataFrame:
 def get_annotations(
     PATH_ANNOTATIONS: str, PATH_RUN: str, raw_arr: mne.io.RawArray
 ):
-
     try:
         annot = mne.read_annotations(
             Path(PATH_ANNOTATIONS) / (os.path.basename(PATH_RUN)[:-5] + ".txt")
@@ -134,14 +133,15 @@ def get_annotations(
         print(
             "expected location: "
             + str(
-                Path(PATH_ANNOTATIONS) / (os.path.basename(PATH_RUN)[:-5] + ".txt")
+                Path(PATH_ANNOTATIONS)
+                / (os.path.basename(PATH_RUN)[:-5] + ".txt")
             )
         )
     return annot, annot_data, raw_arr
 
 
 def read_plot_modules(
-    PATH_PLOT: _PathLike = Path(__file__).absolute().parent / "plots"
+    PATH_PLOT: _PathLike = Path(__file__).absolute().parent / "plots",
 ):
     """Read required .mat files for plotting
 
@@ -178,55 +178,6 @@ def read_plot_modules(
         y_stn,
         z_stn,
     )
-
-
-def add_labels(
-    features: pd.DataFrame,
-    settings: dict,
-    nm_channels: pd.DataFrame,
-    raw_arr_data: np.ndarray,
-    fs: int | float,
-) -> pd.DataFrame | None:
-    """Given a constructed feature data frame, resample the target labels and add to dataframe
-
-    Parameters
-    ----------
-    features : pd.DataFrame
-        computed feature dataframe
-    settings_wrapper : settings.py
-        initialized settings used for feature estimation
-    raw_arr_data : np.ndarray
-        raw data including target
-
-    Returns
-    -------
-    pd.DataFrame | None
-        computed feature dataframe including resampled features
-    """
-    # resample_label
-    ind_label = np.where(nm_channels.target == 1)[0]
-    if ind_label.shape[0] == 0:
-        print("no target specified")
-        return None
-
-    offset_time = settings["segment_length_features_ms"]
-
-    offset_start = np.ceil(offset_time / 1000 * fs).astype(int)
-    data = raw_arr_data[ind_label, offset_start:]
-    if data.ndim == 1:
-        data = np.expand_dims(data, axis=0)
-    label_downsampled = data[
-        :,
-        :: int(np.ceil(fs / settings["sampling_rate_features_hz"])),
-    ]
-
-    # and add to df
-    if features.shape[0] == label_downsampled.shape[1]:
-        for idx, label_ch in enumerate(nm_channels.name[ind_label]):
-            features[label_ch] = label_downsampled[idx, :]
-    else:
-        print("label dimensions don't match, saving downsampled label extra")
-    return features
 
 
 def save_features_and_settings(
@@ -405,7 +356,14 @@ def get_paths_example_data():
 
     PATH_BIDS = Path(SCRIPT_DIR) / "data"
 
-    PATH_RUN = Path(SCRIPT_DIR) / "data" / f"sub-{sub}" / f"ses-{ses}" / datatype / RUN_NAME
+    PATH_RUN = (
+        Path(SCRIPT_DIR)
+        / "data"
+        / f"sub-{sub}"
+        / f"ses-{ses}"
+        / datatype
+        / RUN_NAME
+    )
 
     # Provide a path for the output data.
     PATH_OUT = PATH_BIDS / "derivatives"
