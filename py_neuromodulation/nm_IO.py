@@ -183,55 +183,6 @@ def read_plot_modules(
     )
 
 
-def add_labels(
-    features: pd.DataFrame,
-    settings: dict,
-    nm_channels: pd.DataFrame,
-    raw_arr_data: np.ndarray,
-    fs: int | float,
-) -> pd.DataFrame | None:
-    """Given a constructed feature data frame, resample the target labels and add to dataframe
-
-    Parameters
-    ----------
-    features : pd.DataFrame
-        computed feature dataframe
-    settings_wrapper : settings.py
-        initialized settings used for feature estimation
-    raw_arr_data : np.ndarray
-        raw data including target
-
-    Returns
-    -------
-    pd.DataFrame | None
-        computed feature dataframe including resampled features
-    """
-    # resample_label
-    ind_label = np.where(nm_channels.target == 1)[0]
-    if ind_label.shape[0] == 0:
-        print("no target specified")
-        return None
-
-    offset_time = settings["segment_length_features_ms"]
-
-    offset_start = np.ceil(offset_time / 1000 * fs).astype(int)
-    data = raw_arr_data[ind_label, offset_start:]
-    if data.ndim == 1:
-        data = np.expand_dims(data, axis=0)
-    label_downsampled = data[
-        :,
-        :: int(np.ceil(fs / settings["sampling_rate_features_hz"])),
-    ]
-
-    # and add to df
-    if features.shape[0] == label_downsampled.shape[1]:
-        for idx, label_ch in enumerate(nm_channels.name[ind_label]):
-            features[label_ch] = label_downsampled[idx, :]
-    else:
-        print("label dimensions don't match, saving downsampled label extra")
-    return features
-
-
 def save_features_and_settings(
     df_features,
     run_analysis,

@@ -51,7 +51,8 @@ dependencies = [
   "notebook",
   "ipython",
   "pybispectra>=1.1.0",
-  "pyarrow>=14.0.2"
+  "pyparrm",
+  "pyarrow>=14.0.2",
 ]
 
 [project.optional-dependencies]
