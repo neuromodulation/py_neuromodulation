@@ -1,9 +1,11 @@
 """Module for offline data streams."""
 import math
 import os
+from platform import system as get_os_name
 
 import multiprocessing as  mp
 from itertools import count
+from joblib import Parallel, delayed
 
 import numpy as np
 import pandas as pd
@@ -113,18 +115,23 @@ class _OfflineStream(nm_stream_abc.PNStream):
         # offset_start = np.ceil(offset_time / 1000 * self.sfreq).astype(int)
         offset_start = offset_time / 1000 * self.sfreq
 
-        if parallel:
-            try: mp.set_start_method('fork') # Set process  start method. 'spawn' and 'forkserver' do not work
-            except RuntimeError: pass # mp.set_start_method() will crash the program if called more than once
-            pool = mp.Pool(processes=num_threads) # Create sub-process pool. Faster than concurrent.futures.ProcessPoolExecutor()     
-            # Assign tasks to sub-processes, starmap is same as map, only for 2+ arguments that must be zipped
-            feature_df = pd.DataFrame(pool.starmap(self._process_batch, zip(generator, count(offset_start, sample_add))))
-            # Prevent memory leaks by releasing process pool resources
-            pool.close() 
-            pool.join()
-        else:
-            # If no parallelization required, is faster to not use a process pool at all
-            feature_df = pd.DataFrame(map(self._process_batch, generator, count(offset_start, sample_add)))
+        match parallel:
+            case True:
+                match get_os_name():
+                    case 'Linux': # Use standard multiprocessing module
+                        try: mp.set_start_method('fork') # 'spawn' and 'forkserver' do not work
+                        except RuntimeError: pass # mp.set_start_method() will crash the program if called more than once
+                        pool = mp.Pool(processes=num_threads) # faster than concurrent.futures.ProcessPoolExecutor()     
+                        feature_df = pd.DataFrame(pool.starmap(self._process_batch, zip(generator, count(offset_start, sample_add))))
+                        pool.close() 
+                        pool.join()
+                    case 'Windows' | 'Darwin': # Use Joblib
+                        if num_threads is None: num_threads = -1 # use all cores
+                        feature_df = pd.DataFrame(Parallel(n_jobs=num_threads, prefer='processes')(
+                            delayed(self._process_batch)(batch, n) for batch, n in zip(generator, count(offset_start, sample_add))))
+            case False:
+                # If no parallelization required, is faster to not use a process pool at all
+                feature_df = pd.DataFrame(map(self._process_batch, generator, count(offset_start, sample_add)))
         
         # I don't know what this does :(
         # if self.model is not None:
