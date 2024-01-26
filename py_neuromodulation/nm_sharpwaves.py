@@ -143,7 +143,7 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
                 if filter_name == "no_filter":
                     self.data_process_sw = data[ch_idx, :]
                 else:
-                    self.data_process_sw = signal.convolve(
+                    self.data_process_sw = signal.fftconvolve(
                         data[ch_idx, :], filter, mode="same"
                     )
 
