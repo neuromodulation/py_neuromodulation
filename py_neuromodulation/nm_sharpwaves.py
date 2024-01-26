@@ -2,6 +2,7 @@ import numpy as np
 from scipy import signal
 from mne.filter import create_filter
 from typing import Iterable
+import sys
 
 from py_neuromodulation import nm_features_abc
 
@@ -105,23 +106,12 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
         peak_right_val (np.ndarray): value of righ peak
         """
 
-        ind_greater = np.where(arr_ind_peaks > trough_ind)[0]
-        if ind_greater.shape[0] == 0:
-            raise NoValidTroughException("No valid trough")
-        val_ind_greater = arr_ind_peaks[ind_greater]
-        peak_right_idx = arr_ind_peaks[
-            ind_greater[np.argsort(val_ind_greater)[0]]
-        ]
+        try: peak_right_idx = arr_ind_peaks[arr_ind_peaks > trough_ind][0]
+        except IndexError: raise NoValidTroughException("No valid trough")
 
-        ind_smaller = np.where(arr_ind_peaks < trough_ind)[0]
-        if ind_smaller.shape[0] == 0:
-            raise NoValidTroughException("No valid trough")
-
-        val_ind_smaller = arr_ind_peaks[ind_smaller]
-        peak_left_idx = arr_ind_peaks[
-            ind_smaller[np.argsort(val_ind_smaller)[-1]]
-        ]
-
+        try: peak_left_idx  = arr_ind_peaks[arr_ind_peaks < trough_ind][-1]
+        except IndexError: raise NoValidTroughException("No valid trough")
+       
         return (
             peak_left_idx,
             peak_right_idx,
