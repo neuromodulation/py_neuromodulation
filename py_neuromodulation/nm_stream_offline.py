@@ -1,14 +1,10 @@
 """Module for offline data streams."""
-import math
 import os
-from platform import system as get_os_name
-
-import multiprocessing as  mp
-from itertools import count
 from joblib import Parallel, delayed
-
 import numpy as np
 import pandas as pd
+
+from itertools import count
 
 import mne
 
@@ -72,7 +68,6 @@ class _OfflineStream(nm_stream_abc.PNStream):
         Due to normalization run_analysis needs to keep track of the counted
         samples. These are accessed here for time conversion.
         """
-        timestamp = cnt_samples * 1000 / self.sfreq
         feature_series["time"] = cnt_samples * 1000 / self.sfreq
 
         if self.verbose:
@@ -106,6 +101,27 @@ class _OfflineStream(nm_stream_abc.PNStream):
                 f"Data columns: {names_data}, nm_channels.name: {names_data}."
             )
         return data.to_numpy()
+    
+    def _check_settings_for_parallel(self):
+        """Check specified settings and raise error if parallel processing is not possible.
+
+        Raises:
+            ValueError: depending on the settings, parallel processing is not possible
+        """
+
+        if "raw_normalization" in self.settings["preprocessing"]:
+            raise ValueError(
+                "Parallel processing is not possible with raw_normalization normalization."
+            )
+        if self.settings["postprocessing"]["feature_normalization"] is True:
+            raise ValueError(
+                "Parallel processing is not possible with feature normalization."
+            )
+        if self.settings["features"]["bursts"] is True:
+            raise ValueError(
+                "Parallel processing is not possible with burst estimation."
+            )
+
 
     def _process_batch(self, data_batch, cnt_samples):
         feature_series = self.run_analysis.process(
@@ -119,8 +135,8 @@ class _OfflineStream(nm_stream_abc.PNStream):
         data: np.ndarray,
         out_path_root: _PathLike | None = None,
         folder_name: str = "sub",
-        parallel: bool = True,
-        num_threads = None
+        parallel: bool = False,
+        n_jobs: int = -2,
     ) -> pd.DataFrame:
         generator = nm_generator.raw_data_generator(
             data=data,
@@ -134,29 +150,33 @@ class _OfflineStream(nm_stream_abc.PNStream):
         # offset_start = np.ceil(offset_time / 1000 * self.sfreq).astype(int)
         offset_start = offset_time / 1000 * self.sfreq
 
-        match parallel:
-            case True:
-                match get_os_name():
-                    case 'Linux': # Use standard multiprocessing module
-                        try: mp.set_start_method('fork') # 'spawn' and 'forkserver' do not work
-                        except RuntimeError: pass # mp.set_start_method() will crash the program if called more than once
-                        pool = mp.Pool(processes=num_threads) # faster than concurrent.futures.ProcessPoolExecutor()     
-                        feature_df = pd.DataFrame(pool.starmap(self._process_batch, zip(generator, count(offset_start, sample_add))))
-                        pool.close() 
-                        pool.join()
-                    case 'Windows' | 'Darwin': # Use Joblib
-                        if num_threads is None: num_threads = -1 # use all cores
-                        feature_df = pd.DataFrame(Parallel(n_jobs=num_threads, prefer='processes')(
-                            delayed(self._process_batch)(batch, n) for batch, n in zip(generator, count(offset_start, sample_add))))
-            case False:
-                # If no parallelization required, is faster to not use a process pool at all
-                feature_df = pd.DataFrame(map(self._process_batch, generator, count(offset_start, sample_add)))
-        
-        # I don't know what this does :(
-        # if self.model is not None:
-        #     prediction = self.model.predict(features[-1])
+        if parallel:
+            l_features = Parallel(n_jobs=n_jobs, verbose=10)(
+                delayed(self._process_batch)(data_batch, cnt_samples)
+                for data_batch, cnt_samples in zip(
+                    generator, count(offset_start, sample_add)
+                )
+            )
 
-        feature_df = self._add_labels(features=feature_df, data=data)
+        else:
+            l_features = []
+            cnt_samples = offset_start
+            while True:
+                data_batch = next(generator, None)
+                if data_batch is None:
+                    break
+                feature_series = self.run_analysis.process(
+                    data_batch.astype(np.float64)
+                )
+                feature_series = self._add_timestamp(
+                    feature_series, cnt_samples
+                )
+                l_features.append(feature_series)
+
+                cnt_samples += sample_add
+        feature_df = pd.DataFrame(l_features)
+
+        feature_df = self._add_target(feature_series=feature_df, data=data)
 
         self.save_after_stream(out_path_root, folder_name, feature_df)
 
@@ -292,8 +312,8 @@ class Stream(_OfflineStream):
         data: np.ndarray | pd.DataFrame = None,
         out_path_root: _PathLike | None = None,
         folder_name: str = "sub",
-        parallel: bool = True,
-        num_threads = None
+        parallel: bool = False,
+        n_jobs: int = -2
     ) -> pd.DataFrame:
         """Call run function for offline stream.
 
@@ -321,5 +341,8 @@ class Stream(_OfflineStream):
             data = self._handle_data(self.data)
         elif self.data is None and data is None:
             raise ValueError("No data passed to run function.")
+        
+        if parallel is True:
+            self._check_settings_for_parallel()
 
-        return self._run_offline(data, out_path_root, folder_name, parallel=parallel, num_threads=num_threads)
+        return self._run_offline(data, out_path_root, folder_name, parallel=parallel, n_jobs=n_jobs)
