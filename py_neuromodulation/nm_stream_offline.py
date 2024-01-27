@@ -129,7 +129,7 @@ class _OfflineStream(nm_stream_abc.PNStream):
         )
         feature_series = self._add_timestamp(feature_series, cnt_samples)
         return feature_series
-        
+
     def _run_offline(
         self,
         data: np.ndarray,
