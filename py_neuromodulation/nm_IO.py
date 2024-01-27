@@ -9,6 +9,9 @@ import numpy as np
 import pandas as pd
 from scipy import io
 
+import pyarrow
+from pyarrow import csv
+
 import py_neuromodulation
 
 _PathLike = str | os.PathLike
@@ -218,6 +221,16 @@ def save_features_and_settings(
     save_nm_channels(nm_channels, out_path, folder_name)
 
 
+def write_csv(df, path_out):
+    """
+    Function to save Pandas dataframes to disk as CSV using
+    PyArrow (almost 10x faster than Pandas)
+    Difference with pandas.df.to_csv() is that it does not
+    write an index column by default
+    """
+    csv.write_csv(pyarrow.Table.from_pandas(df), path_out)
+
+
 def save_settings(
     settings: dict, path_out: _PathLike, folder_name: str | None = None
 ) -> None:
@@ -242,7 +255,7 @@ def save_nm_channels(
         path_out = os.path.join(
             path_out, folder_name, folder_name + "_nm_channels.csv"
         )
-    nmchannels.to_csv(path_out)
+    write_csv(nmchannels, path_out)
     print("nm_channels.csv saved to " + path_out)
 
 
@@ -256,7 +269,7 @@ def save_features(
         path_out = os.path.join(
             path_out, folder_name, folder_name + "_FEATURES.csv"
         )
-    df_features.to_csv(path_out)
+    write_csv(df_features, path_out)
     print("FEATURES.csv saved to " + str(path_out))
 
 
@@ -310,11 +323,11 @@ def read_settings(PATH: str) -> dict:
 
 
 def read_features(PATH: str) -> pd.DataFrame:
-    return pd.read_csv(PATH + "_FEATURES.csv", index_col=0)
+    return pd.read_csv(PATH + "_FEATURES.csv", engine="pyarrow")
 
 
 def read_nm_channels(PATH: str) -> pd.DataFrame:
-    return pd.read_csv(PATH + "_nm_channels.csv", index_col=0)
+    return pd.read_csv(PATH + "_nm_channels.csv")
 
 
 def get_run_list_indir(PATH: str) -> list:
