@@ -59,7 +59,7 @@ class MNEConnectivity(nm_features_abc.Feature):
         if epochs.events.shape[0] < 2:
             raise Exception(
                 f"A minimum of 2 epochs is required for mne_connectivity,"
-                f" got only {epochs.events.shape[0]}. Increase settings['segment_length']"
+                f" got only {epochs.events.shape[0]}. Increase settings['segment_length_features_ms']"
             )
         return epochs
 
