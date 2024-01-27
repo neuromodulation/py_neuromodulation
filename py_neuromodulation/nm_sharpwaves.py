@@ -281,6 +281,9 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
 
         troughs = troughs[first_valid:last_valid + 1] # Remove non valid troughs
         
+        peak_idx_left = np.array(peak_idx_left, dtype=np.integer)
+        peak_idx_right = np.array(peak_idx_right, dtype=np.integer)
+
         peak_left = self.data_process_sw[peak_idx_left]
         peak_right = self.data_process_sw[peak_idx_right]
         trough_values = self.data_process_sw[troughs]
@@ -290,7 +293,7 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
         # self.troughs_idx.append(trough_idx)
          
         """ Calculate features (vectorized) """
-
+        
         if self.sw_settings["sharpwave_features"]["interval"]:
             self.interval = np.concatenate(([0], np.diff(troughs))) * (1000 / self.sfreq)
 
