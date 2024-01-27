@@ -111,7 +111,7 @@ class CoherenceObject:
 
 class NM_Coherence(nm_features_abc.Feature):
 
-    coherence_objects: Iterable[CoherenceObject] = []
+    
 
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: float
@@ -119,6 +119,7 @@ class NM_Coherence(nm_features_abc.Feature):
         self.s = settings
         self.sfreq = sfreq
         self.ch_names = ch_names
+        self.coherence_objects: Iterable[CoherenceObject] = []
 
         for idx_coh in range(len(self.s["coherence"]["channels"])):
             fband_names = self.s["coherence"]["frequency_bands"]
