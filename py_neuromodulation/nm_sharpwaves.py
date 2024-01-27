@@ -292,9 +292,7 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
         """ Calculate features (vectorized) """
 
         if self.sw_settings["sharpwave_features"]["interval"]:
-            self.interval = (np.pad(troughs, (0,1)) - np.pad(troughs, (1,0))) * (1000 / self.sfreq)
-            if self.interval.shape[0] > 1: self.interval = self.interval[:-1]
-            self.interval[0] = 0
+            self.interval = np.concatenate(([0], np.diff(troughs))) * (1000 / self.sfreq)
 
         if self.sw_settings["sharpwave_features"]["peak_left"]:
             self.peak_left = peak_left
