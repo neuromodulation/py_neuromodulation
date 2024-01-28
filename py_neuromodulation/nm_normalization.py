@@ -3,8 +3,6 @@ from enum import Enum
 
 from sklearn import preprocessing
 import numpy as np
-
-
 class NORM_METHODS(Enum):
     MEAN = "mean"
     MEDIAN = "median"
@@ -138,6 +136,17 @@ class FeatureNormalizer:
 
         return data
 
+"""
+Functions to check for NaN's before deciding which Numpy function to call
+"""
+def nan_mean(data, axis):
+    return np.nanmean(data, axis=axis) if np.any(np.isnan(sum(data))) else np.mean(data, axis=axis)
+
+def nan_std(data, axis):
+    return np.nanstd(data, axis=axis) if np.any(np.isnan(sum(data))) else np.std(data, axis=axis)
+
+def nan_median(data, axis):
+    return np.nanmedian(data, axis=axis) if np.any(np.isnan(sum(data))) else np.median(data, axis=axis)
 
 def _normalize_and_clip(
     current: np.ndarray,
@@ -147,82 +156,49 @@ def _normalize_and_clip(
     description: str,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Normalize data."""
-    if method == NORM_METHODS.MEAN.value:
-        mean = np.nanmean(previous, axis=0)
-        current = (current - mean) / mean
-    elif method == NORM_METHODS.MEDIAN.value:
-        median = np.nanmedian(previous, axis=0)
-        current = (current - median) / median
-    elif method == NORM_METHODS.ZSCORE.value:
-        mean = np.nanmean(previous, axis=0)
-        current = (current - mean) / np.nanstd(previous, axis=0)
-    elif method == NORM_METHODS.ZSCORE_MEDIAN.value:
-        current = (current - np.nanmedian(previous, axis=0)) / np.nanstd(
-            previous, axis=0
-        )
-    # For the following methods we check for the shape of current
-    # when current is a 1D array, then it is the post-processing normalization,
-    # and we need to expand, and take the [0, :] component
-    # When current is a 2D array, then it is pre-processing normalization, and
-    # there's no need for expanding.
-    elif method == NORM_METHODS.QUANTILE.value:
-        if len(current.shape) == 1:
+    match method:
+        case NORM_METHODS.MEAN.value:
+            mean = nan_mean(previous, axis=0)
+            current = (current - mean) / mean
+        case NORM_METHODS.MEDIAN.value:
+            median = nan_median(previous, axis=0)
+            current = (current - median) / median
+        case NORM_METHODS.ZSCORE.value:
+            current = (current - nan_mean(previous, axis=0)) / nan_std(previous, axis=0)
+        case NORM_METHODS.ZSCORE_MEDIAN.value:
+            current = (current - nan_median(previous, axis=0)) / nan_std(previous, axis=0)
+        # For the following methods we check for the shape of current
+        # when current is a 1D array, then it is the post-processing normalization,
+        # and we need to expand, and remove the extra dimension afterwards
+        # When current is a 2D array, then it is pre-processing normalization, and
+        # there's no need for expanding.
+        case (NORM_METHODS.QUANTILE.value | 
+              NORM_METHODS.ROBUST.value | 
+              NORM_METHODS.MINMAX.value | 
+              NORM_METHODS.POWER.value):
+            
+            norm_methods = {
+                NORM_METHODS.QUANTILE.value : lambda: preprocessing.QuantileTransformer(n_quantiles=300),
+                NORM_METHODS.ROBUST.value : preprocessing.RobustScaler,
+                NORM_METHODS.MINMAX.value : preprocessing.MinMaxScaler,
+                NORM_METHODS.POWER.value : preprocessing.PowerTransformer
+            }
+                
             current = (
-                preprocessing.QuantileTransformer(n_quantiles=300)
+                norm_methods[method]()
                 .fit(np.nan_to_num(previous))
-                .transform(np.expand_dims(current, axis=0))[0, :]
+                .transform(
+                    # if post-processing: pad dimensions to 2
+                    np.reshape(current, (2-len(current.shape))*(1,) + current.shape)
+                    )
+                .squeeze() # if post-processing: remove extra dimension
             )
-        else:
-            current = (
-                preprocessing.QuantileTransformer(n_quantiles=300)
-                .fit(np.nan_to_num(previous))
-                .transform(current)
+            
+        case _:
+            raise ValueError(
+                f"Only {[e.value for e in NORM_METHODS]} are supported as "
+                f"{description} normalization methods. Got {method}."
             )
-    elif method == NORM_METHODS.ROBUST.value:
-        if len(current.shape) == 1:
-            current = (
-                preprocessing.RobustScaler()
-                .fit(np.nan_to_num(previous))
-                .transform(np.expand_dims(current, axis=0))[0, :]
-            )
-        else:
-            current = (
-                preprocessing.RobustScaler()
-                .fit(np.nan_to_num(previous))
-                .transform(current)
-            )
-
-    elif method == NORM_METHODS.MINMAX.value:
-        if len(current.shape) == 1:
-            current = (
-                preprocessing.MinMaxScaler()
-                .fit(np.nan_to_num(previous))
-                .transform(np.expand_dims(current, axis=0))[0, :]
-            )
-        else:
-            current = (
-                preprocessing.MinMaxScaler()
-                .fit(np.nan_to_num(previous))
-                .transform(current)
-            )
-    elif method == NORM_METHODS.POWER.value:
-        if len(current.shape) == 1:
-            current = (
-                preprocessing.PowerTransformer()
-                .fit(np.nan_to_num(previous))
-                .transform(np.expand_dims(current, axis=0))[0, :]
-            )
-        else:
-            current = (
-                preprocessing.PowerTransformer()
-                .fit(np.nan_to_num(previous))
-                .transform(current)
-            )
-    else:
-        raise ValueError(
-            f"Only {[e.value for e in NORM_METHODS]} are supported as "
-            f"{description} normalization methods. Got {method}."
-        )
 
     if clip:
         current = _clip(data=current, clip=clip)
