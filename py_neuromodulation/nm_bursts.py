@@ -170,11 +170,11 @@ class Burst(nm_features_abc.Feature):
         burst_length = []
         burst_amplitude = []
 
-        burst_states = np.where(deriv==True)[0]
+        burst_time_points = np.where(deriv==True)[0]
 
-        for i in range(burst_states.size//2):
-            burst_length.append(burst_states[2 * i + 1] - burst_states[2 * i])
-            burst_amplitude.append(beta_averp_norm[burst_states[2 * i] : burst_states[2 * i + 1]])
+        for i in range(burst_time_points.size//2):
+            burst_length.append(burst_time_points[2 * i + 1] - burst_time_points[2 * i])
+            burst_amplitude.append(beta_averp_norm[burst_time_points[2 * i] : burst_time_points[2 * i + 1]])
 
         # the last burst length (in case isburst == True) is omitted,
         # since the true burst length cannot be estimated
