@@ -101,7 +101,7 @@ class _OfflineStream(nm_stream_abc.PNStream):
                 f"Data columns: {names_data}, nm_channels.name: {names_data}."
             )
         return data.to_numpy()
-    
+
     def _check_settings_for_parallel(self):
         """Check specified settings and raise error if parallel processing is not possible.
 
@@ -122,12 +122,14 @@ class _OfflineStream(nm_stream_abc.PNStream):
                 "Parallel processing is not possible with burst estimation."
             )
 
-
     def _process_batch(self, data_batch, cnt_samples):
         feature_series = self.run_analysis.process(
             data_batch.astype(np.float64)
         )
         feature_series = self._add_timestamp(feature_series, cnt_samples)
+        feature_series = self._add_target(
+            feature_series=feature_series, data=data_batch
+        )
         return feature_series
 
     def _run_offline(
@@ -171,12 +173,15 @@ class _OfflineStream(nm_stream_abc.PNStream):
                 feature_series = self._add_timestamp(
                     feature_series, cnt_samples
                 )
+
+                feature_series = self._add_target(
+                    feature_series=feature_series, data=data_batch
+                )
+
                 l_features.append(feature_series)
 
                 cnt_samples += sample_add
         feature_df = pd.DataFrame(l_features)
-
-        feature_df = self._add_target(feature_series=feature_df, data=data)
 
         self.save_after_stream(out_path_root, folder_name, feature_df)
 
@@ -313,7 +318,7 @@ class Stream(_OfflineStream):
         out_path_root: _PathLike | None = None,
         folder_name: str = "sub",
         parallel: bool = False,
-        n_jobs: int = -2
+        n_jobs: int = -2,
     ) -> pd.DataFrame:
         """Call run function for offline stream.
 
@@ -341,8 +346,10 @@ class Stream(_OfflineStream):
             data = self._handle_data(self.data)
         elif self.data is None and data is None:
             raise ValueError("No data passed to run function.")
-        
+
         if parallel is True:
             self._check_settings_for_parallel()
 
-        return self._run_offline(data, out_path_root, folder_name, parallel=parallel, n_jobs=n_jobs)
+        return self._run_offline(
+            data, out_path_root, folder_name, parallel=parallel, n_jobs=n_jobs
+        )
