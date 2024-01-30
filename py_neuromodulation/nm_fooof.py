@@ -18,15 +18,6 @@ class FooofAnalyzer(nm_features_abc.Feature):
         self.ap_mode = "knee" if self.settings_fooof["knee"] else "fixed"
         self.max_n_peaks = self.settings_fooof["max_n_peaks"]
 
-        self.fm = FOOOF(
-            aperiodic_mode=self.ap_mode,
-            peak_width_limits=self.settings_fooof["peak_width_limits"],
-            max_n_peaks=self.settings_fooof["max_n_peaks"],
-            min_peak_height=self.settings_fooof["min_peak_height"],
-            peak_threshold=self.settings_fooof["peak_threshold"],
-            verbose=False,
-        )
-
         self.num_samples = int(
             self.settings_fooof["windowlength_ms"] * sfreq / 1000
         )
@@ -75,30 +66,34 @@ class FooofAnalyzer(nm_features_abc.Feature):
             spectrum = self._get_spectrum(data[ch_idx, :])
 
             try:
-                self.fm.fit(self.f_vec, spectrum, self.freq_range)
+                fm = FOOOF(
+                    aperiodic_mode=self.ap_mode,
+                    peak_width_limits=self.settings_fooof["peak_width_limits"],
+                    max_n_peaks=self.settings_fooof["max_n_peaks"],
+                    min_peak_height=self.settings_fooof["min_peak_height"],
+                    peak_threshold=self.settings_fooof["peak_threshold"],
+                    verbose=False,
+                )
+                fm.fit(self.f_vec, spectrum, self.freq_range)
             except Exception as e:
                 print(e)
                 print(f"failing spectrum: {spectrum}")
 
-            if self.fm.fooofed_spectrum_ is None:
+            if fm.fooofed_spectrum_ is None:
                 FIT_PASSED = False
             else:
                 FIT_PASSED = True
 
             if self.settings_fooof["aperiodic"]["exponent"]:
                 features_compute[f"{ch_name}_fooof_a_exp"] = (
-                    np.nan_to_num(
-                        self.fm.get_params("aperiodic_params", "exponent")
-                    )
+                    np.nan_to_num(fm.get_params("aperiodic_params", "exponent"))
                     if FIT_PASSED is True
                     else None
                 )
 
             if self.settings_fooof["aperiodic"]["offset"]:
                 features_compute[f"{ch_name}_fooof_a_offset"] = (
-                    np.nan_to_num(
-                        self.fm.get_params("aperiodic_params", "offset")
-                    )
+                    np.nan_to_num(fm.get_params("aperiodic_params", "offset"))
                     if FIT_PASSED is True
                     else None
                 )
@@ -107,17 +102,13 @@ class FooofAnalyzer(nm_features_abc.Feature):
                 if FIT_PASSED is False:
                     knee_freq = None
                 else:
-                    if self.fm.get_params("aperiodic_params", "exponent") != 0:
-                        knee_fooof = self.fm.get_params(
-                            "aperiodic_params", "knee"
-                        )
+                    if fm.get_params("aperiodic_params", "exponent") != 0:
+                        knee_fooof = fm.get_params("aperiodic_params", "knee")
                         knee_freq = np.nan_to_num(
                             knee_fooof
                             ** (
                                 1
-                                / self.fm.get_params(
-                                    "aperiodic_params", "exponent"
-                                )
+                                / fm.get_params("aperiodic_params", "exponent")
                             )
                         )
                     else:
@@ -128,17 +119,17 @@ class FooofAnalyzer(nm_features_abc.Feature):
                 ] = knee_freq
 
             peaks_bw = (
-                self.fm.get_params("peak_params", "BW")
+                fm.get_params("peak_params", "BW")
                 if FIT_PASSED is True
                 else None
             )
             peaks_cf = (
-                self.fm.get_params("peak_params", "CF")
+                fm.get_params("peak_params", "CF")
                 if FIT_PASSED is True
                 else None
             )
             peaks_pw = (
-                self.fm.get_params("peak_params", "PW")
+                fm.get_params("peak_params", "PW")
                 if FIT_PASSED is True
                 else None
             )
