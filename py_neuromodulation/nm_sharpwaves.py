@@ -323,10 +323,16 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
 
             if self.sw_settings["sharpwave_features"]["rise_steepness"]: # left peak -> trough
                 # + 1 due to python syntax, s.t. the last element is included
-                self.rise_steepness = np.array([np.max(steepness[peak_idx_left[i] : troughs[i] + 1]) for i in range(trough_idx.size)])
+                self.rise_steepness = np.array([
+                    np.max(np.abs(steepness[peak_idx_left[i] : troughs[i] + 1]))
+                    for i in range(trough_idx.size)
+                ])
                 
             if self.sw_settings["sharpwave_features"]["decay_steepness"]: # trough -> right peak
-                self.decay_steepness = np.array([np.max(steepness[troughs[i] : peak_idx_right[i] + 1]) for i in range(trough_idx.size)])
+                self.decay_steepness = np.array([
+                    np.max(np.abs(steepness[troughs[i] : peak_idx_right[i] + 1]))
+                    for i in range(trough_idx.size)
+                ])
 
             if (self.sw_settings["sharpwave_features"]["rise_steepness"] and
                 self.sw_settings["sharpwave_features"]["decay_steepness"] and
