@@ -16,6 +16,7 @@ from py_neuromodulation import (
     nm_projection,
     nm_rereference,
     nm_resample,
+    nm_filter_preprocessing
 )
 
 _PathLike = str | os.PathLike
@@ -117,6 +118,12 @@ class DataProcessor:
                         sfreq=self.sfreq_raw,
                         sampling_rate_features_hz=self.sfreq_features,
                         **self.settings.get(settings_str, {}),
+                    )
+                    self.preprocessors.append(preprocessor)
+                case "preprocessing_filter":
+                    preprocessor = nm_filter_preprocessing.PreprocessingFilter(
+                        settings=self.settings,
+                        sfreq=self.sfreq_raw,
                     )
                     self.preprocessors.append(preprocessor)
                 case _:

@@ -1,6 +1,6 @@
 import mne
 import mne_bids
-import pybv
+import pybv  # pip install pybv
 import os
 
 

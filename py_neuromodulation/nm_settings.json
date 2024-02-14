@@ -4,13 +4,15 @@
     "preprocessing": [
         "raw_resampling",
         "notch_filter",
-        "re_referencing"
+        "re_referencing",
+        "preprocessing_filter"
     ],
     "documentation_preprocessing_options": [
         "raw_resampling",
         "notch_filter",
         "re_referencing",
-        "raw_normalization"
+        "raw_normalization",
+        "preprocessing_filter"
     ],
     "features": {
         "raw_hjorth": true,
@@ -35,6 +37,29 @@
     },
     "raw_resampling_settings": {
         "resample_freq_hz": 1000
+    },
+    "preprocessing_filter" : {
+        "bandstop_filter" : true,
+        "lowpass_filter" : true,
+        "highpass_filter" : true,
+        "bandpass_filter" : true,
+        "bandstop_filter_settings" : {
+            "frequency_low_hz": 100,
+            "frequency_high_hz": 160
+        },
+        "lowpass_filter_settings" : {
+            "frequency_cutoff_hz": 200
+        },
+        "highpass_filter_settings" : {
+            "frequency_cutoff_hz": 1
+        },
+        "bandpass_filter_settings" : {
+            "frequency_low_hz": 1,
+            "frequency_high_hz": 200
+        }
+    },
+    "re_referencing_settings": {
+        "reference": "common"
     },
     "documentation_normalization_options": [
         "mean",

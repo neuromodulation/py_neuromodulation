@@ -4,8 +4,8 @@ from py_neuromodulation import nm_filter
 import pytest
 
 
-class TestBandPassFilterData:
-    """Test filter_data method of BandPassFilter class."""
+class TestMNEFilterData:
+    """Test filter_data method of MNEFilter class."""
 
     @pytest.mark.parametrize(
         "filter_length",
@@ -19,7 +19,7 @@ class TestBandPassFilterData:
         sfreq = 4000
         duration = 10
         times = np.linspace(0, duration, int(duration * sfreq))
-        bandpass_filter = nm_filter.BandPassFilter(
+        bandpass_filter = nm_filter.MNEFilter(
             f_ranges=f_ranges,
             sfreq=sfreq,
             filter_length=filter_length,
@@ -48,7 +48,7 @@ class TestBandPassFilterData:
         sfreq = 4000
         duration = 10
         times = np.linspace(0, duration, int(duration * sfreq))
-        bandpass_filter = nm_filter.BandPassFilter(
+        bandpass_filter = nm_filter.MNEFilter(
             f_ranges=f_ranges,
             sfreq=sfreq,
             filter_length="999ms",
@@ -77,7 +77,7 @@ class TestBandPassFilterData:
         sfreq = 4000
         duration = 10
         times = np.linspace(0, duration, int(duration * sfreq))
-        bandpass_filter = nm_filter.BandPassFilter(
+        bandpass_filter = nm_filter.MNEFilter(
             f_ranges=f_ranges,
             sfreq=sfreq,
             filter_length="999ms",

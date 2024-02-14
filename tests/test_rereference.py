@@ -14,50 +14,6 @@ from py_neuromodulation import (
 )
 
 
-@pytest.fixture
-def setup():
-    """This test function sets a data batch and automatic initialized M1 datafram
-
-    Args:
-        PATH_PYNEUROMODULATION (string): Path to py_neuromodulation repository
-
-    Returns:
-        ieeg_batch (np.ndarray): (channels, samples)
-        df_M1 (pd Dataframe): auto intialized table for rereferencing
-        settings_wrapper (settings.py): settings.json
-        fs (float): example sampling frequency
-    """
-
-    (
-        RUN_NAME,
-        PATH_RUN,
-        PATH_BIDS,
-        PATH_OUT,
-        datatype,
-    ) = nm_IO.get_paths_example_data()
-
-    (
-        raw,
-        data,
-        sfreq,
-        line_noise,
-        coord_list,
-        coord_names,
-    ) = nm_IO.read_BIDS_data(
-        PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype
-    )
-
-    settings = nm_settings.get_default_settings()
-    settings = nm_settings.set_settings_fast_compute(settings)
-
-    generator = nm_generator.raw_data_generator(
-        data, settings, math.floor(sfreq)
-    )
-    data_batch = next(generator, None)
-
-    return [raw.ch_names, raw.get_channel_types(), raw.info["bads"], data_batch]
-
-
 def test_rereference_not_used_channels_no_reref(setup):
     ch_names, ch_types, bads, data_batch = setup
 

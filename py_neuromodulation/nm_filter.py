@@ -4,13 +4,15 @@ from mne.filter import _overlap_add_filter
 import numpy as np
 
 
-class BandPassFilter:
-    """Bandpass filters data in given frequency ranges.
+class MNEFilter:
+    """mne.filter wrapper
 
     This class stores for given frequency band ranges the filter
     coefficients with length "filter_len".
     The filters can then be used sequentially for band power estimation with
     apply_filter().
+    Note that this filter can be a bandpass, bandstop, lowpass, or highpass filter
+    depending on the frequency ranges given (see further details in mne.filter.create_filter).
 
     Parameters
     ----------
@@ -35,7 +37,7 @@ class BandPassFilter:
 
     def __init__(
         self,
-        f_ranges: list[list[int | float | None]],
+        f_ranges: list[list[int | float | None]] | list[int | float | None],
         sfreq: int | float,
         filter_length: str | float = "999ms",
         l_trans_bandwidth: int | float | str = 4,
@@ -43,9 +45,12 @@ class BandPassFilter:
         verbose: bool | int | str | None = None,
     ) -> None:
         filter_bank = []
-        # mne create_filter function only accepts str and int
+        # mne create_filter function only accepts str and int for filter_length
         if isinstance(filter_length, float):
             filter_length = int(filter_length)
+
+        if not isinstance(f_ranges[0], list):
+            f_ranges = [f_ranges]
 
         for f_range in f_ranges:
             filt = mne.filter.create_filter(
