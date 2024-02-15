@@ -74,6 +74,7 @@ class MNEFilter:
                     h_freq=f_range[1],
                     fir_design="firwin",
                     verbose=verbose,
+                    # filter_length=filter_length,
                 )
             filter_bank.append(filt)
         self.filter_bank = np.vstack(filter_bank)
@@ -104,10 +105,25 @@ class MNEFilter:
 
         filtered = np.array(
             [
-                [np.convolve(self.filter_bank[0, :], chan, mode="same")]
+                [
+                    np.convolve(filt, chan, mode="same")
+                    for filt in self.filter_bank
+                ]
                 for chan in data
             ]
         )
+
+        # ensure here that the output dimension matches the input dimension
+        if data.shape[1] != filtered.shape[-1]:
+            # select the middle part of the filtered data
+            middle_index = filtered.shape[-1] // 2
+            filtered = filtered[
+                :,
+                :,
+                middle_index
+                - data.shape[1] // 2 : middle_index
+                + data.shape[1] // 2,
+            ]
 
         return filtered
 
