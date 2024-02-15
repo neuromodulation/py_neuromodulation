@@ -40,8 +40,8 @@ def test_rereference_not_used_channels_no_reref(setup_databatch):
         assert_allclose(ref_dat[no_ref_idx, :], data_batch[no_ref_idx, :])
 
 
-def test_rereference_car(setup):
-    ch_names, ch_types, bads, data_batch = setup
+def test_rereference_car(setup_databatch):
+    ch_names, ch_types, bads, data_batch = setup_databatch
 
     nm_channels = nm_define_nmchannels.set_channels(
         ch_names=ch_names,
@@ -72,8 +72,8 @@ def test_rereference_car(setup):
         )
 
 
-def test_rereference_bp(setup):
-    ch_names, ch_types, bads, data_batch = setup
+def test_rereference_bp(setup_databatch):
+    ch_names, ch_types, bads, data_batch = setup_databatch
 
     nm_channels = nm_define_nmchannels.set_channels(
         ch_names=ch_names,
@@ -107,8 +107,8 @@ def test_rereference_bp(setup):
         )
 
 
-def test_rereference_wrong_rererference_column_name(setup):
-    ch_names, ch_types, bads, data_batch = setup
+def test_rereference_wrong_rererference_column_name(setup_databatch):
+    ch_names, ch_types, bads, data_batch = setup_databatch
 
     nm_channels = nm_define_nmchannels.set_channels(
         ch_names=ch_names,
@@ -125,8 +125,8 @@ def test_rereference_wrong_rererference_column_name(setup):
         re_referencer = ReReferencer(1, nm_channels)
 
 
-def test_rereference_muliple_channels(setup):
-    ch_names, ch_types, bads, data_batch = setup
+def test_rereference_muliple_channels(setup_databatch):
+    ch_names, ch_types, bads, data_batch = setup_databatch
 
     nm_channels = nm_define_nmchannels.set_channels(
         ch_names=ch_names,
@@ -152,8 +152,8 @@ def test_rereference_muliple_channels(setup):
     )
 
 
-def test_rereference_same_channel(setup):
-    ch_names, ch_types, bads, data_batch = setup
+def test_rereference_same_channel(setup_databatch):
+    ch_names, ch_types, bads, data_batch = setup_databatch
 
     nm_channels = nm_define_nmchannels.set_channels(
         ch_names=ch_names,
