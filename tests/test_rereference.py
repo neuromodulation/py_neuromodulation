@@ -14,8 +14,8 @@ from py_neuromodulation import (
 )
 
 
-def test_rereference_not_used_channels_no_reref(setup):
-    ch_names, ch_types, bads, data_batch = setup
+def test_rereference_not_used_channels_no_reref(setup_databatch):
+    ch_names, ch_types, bads, data_batch = setup_databatch
 
     nm_channels = nm_define_nmchannels.set_channels(
         ch_names=ch_names,

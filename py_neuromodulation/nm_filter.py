@@ -1,4 +1,5 @@
 """Module for filter functionality."""
+
 import mne
 from mne.filter import _overlap_add_filter
 import numpy as np
@@ -53,17 +54,27 @@ class MNEFilter:
             f_ranges = [f_ranges]
 
         for f_range in f_ranges:
-            filt = mne.filter.create_filter(
-                None,
-                sfreq,
-                l_freq=f_range[0],
-                h_freq=f_range[1],
-                fir_design="firwin",
-                l_trans_bandwidth=l_trans_bandwidth,  # type: ignore
-                h_trans_bandwidth=h_trans_bandwidth,  # type: ignore
-                filter_length=filter_length,  # type: ignore
-                verbose=verbose,
-            )
+            try:
+                filt = mne.filter.create_filter(
+                    None,
+                    sfreq,
+                    l_freq=f_range[0],
+                    h_freq=f_range[1],
+                    fir_design="firwin",
+                    l_trans_bandwidth=l_trans_bandwidth,  # type: ignore
+                    h_trans_bandwidth=h_trans_bandwidth,  # type: ignore
+                    filter_length=filter_length,  # type: ignore
+                    verbose=verbose,
+                )
+            except:
+                filt = mne.filter.create_filter(
+                    None,
+                    sfreq,
+                    l_freq=f_range[0],
+                    h_freq=f_range[1],
+                    fir_design="firwin",
+                    verbose=verbose,
+                )
             filter_bank.append(filt)
         self.filter_bank = np.vstack(filter_bank)
 
@@ -82,10 +93,6 @@ class MNEFilter:
         np.ndarray, shape (n_channels, n_fbands, n_samples)
             Filtered data.
 
-        Raises
-        ------
-        ValueError
-            If data.ndim > 2
         """
         if data.ndim > 2:
             raise ValueError(
@@ -94,15 +101,14 @@ class MNEFilter:
             )
         if data.ndim == 1:
             data = np.expand_dims(data, axis=0)
+
         filtered = np.array(
             [
-                [
-                    np.convolve(flt, chan, mode="same")
-                    for flt in self.filter_bank
-                ]
+                [np.convolve(self.filter_bank[0, :], chan, mode="same")]
                 for chan in data
             ]
         )
+
         return filtered
 
 
@@ -175,19 +181,19 @@ class NotchFilter:
             phase="zero",
             fir_window="hamming",
             fir_design="firwin",
-            verbose=False
+            verbose=False,
         )
 
     def process(self, data: np.ndarray) -> np.ndarray:
         if self.filter_bank is None:
             return data
         return _overlap_add_filter(
-                x=data,
-                h=self.filter_bank,
-                n_fft=None,
-                phase="zero",
-                picks=None,
-                n_jobs=1,
-                copy=True,
-                pad="reflect_limited",
-            )
+            x=data,
+            h=self.filter_bank,
+            n_fft=None,
+            phase="zero",
+            picks=None,
+            n_jobs=1,
+            copy=True,
+            pad="reflect_limited",
+        )

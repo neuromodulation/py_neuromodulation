@@ -5,9 +5,7 @@ from py_neuromodulation import nm_filter
 
 class PreprocessingFilter:
 
-    def __init__(
-        self, settings: dict, sfreq: int | float
-    ) -> None:
+    def __init__(self, settings: dict, sfreq: int | float) -> None:
         self.s = settings
         self.sfreq = sfreq
         self.filters = []
@@ -18,10 +16,10 @@ class PreprocessingFilter:
                     f_ranges=[
                         self.s["preprocessing_filter"][
                             "bandstop_filter_settings"
-                        ]["frequency_low_hz"],
+                        ]["frequency_high_hz"],
                         self.s["preprocessing_filter"][
                             "bandstop_filter_settings"
-                        ]["frequency_high_hz"],
+                        ]["frequency_low_hz"],
                     ],
                     sfreq=self.sfreq,
                     filter_length=self.sfreq - 1,
@@ -87,6 +85,7 @@ class PreprocessingFilter:
         """
 
         for filter in self.filters:
-            data = filter.filter_data(data)
-
-        return data
+            data = filter.filter_data(
+                data if len(data.shape) == 2 else data[:, 0, :]
+            )
+        return data if len(data.shape) == 2 else data[:, 0, :]
