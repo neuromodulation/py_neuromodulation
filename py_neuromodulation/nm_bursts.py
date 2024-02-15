@@ -38,7 +38,7 @@ class Burst(nm_features_abc.Feature):
             self.sfreq * self.time_duration_s
         )
 
-        self.bandpass_filter = nm_filter.BandPassFilter(
+        self.bandpass_filter = nm_filter.MNEFilter(
             f_ranges=self.f_ranges,
             sfreq=self.sfreq,
             filter_length=self.sfreq - 1,

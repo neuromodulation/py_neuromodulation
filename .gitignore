@@ -159,3 +159,5 @@ examples/utils/*
 sub/
 
 py_neuromodulation/data/derivatives/*
+
+plot_0_first_demo.py

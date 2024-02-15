@@ -14,52 +14,8 @@ from py_neuromodulation import (
 )
 
 
-@pytest.fixture
-def setup():
-    """This test function sets a data batch and automatic initialized M1 datafram
-
-    Args:
-        PATH_PYNEUROMODULATION (string): Path to py_neuromodulation repository
-
-    Returns:
-        ieeg_batch (np.ndarray): (channels, samples)
-        df_M1 (pd Dataframe): auto intialized table for rereferencing
-        settings_wrapper (settings.py): settings.json
-        fs (float): example sampling frequency
-    """
-
-    (
-        RUN_NAME,
-        PATH_RUN,
-        PATH_BIDS,
-        PATH_OUT,
-        datatype,
-    ) = nm_IO.get_paths_example_data()
-
-    (
-        raw,
-        data,
-        sfreq,
-        line_noise,
-        coord_list,
-        coord_names,
-    ) = nm_IO.read_BIDS_data(
-        PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype
-    )
-
-    settings = nm_settings.get_default_settings()
-    settings = nm_settings.set_settings_fast_compute(settings)
-
-    generator = nm_generator.raw_data_generator(
-        data, settings, math.floor(sfreq)
-    )
-    data_batch = next(generator, None)
-
-    return [raw.ch_names, raw.get_channel_types(), raw.info["bads"], data_batch]
-
-
-def test_rereference_not_used_channels_no_reref(setup):
-    ch_names, ch_types, bads, data_batch = setup
+def test_rereference_not_used_channels_no_reref(setup_databatch):
+    ch_names, ch_types, bads, data_batch = setup_databatch
 
     nm_channels = nm_define_nmchannels.set_channels(
         ch_names=ch_names,
@@ -84,8 +40,8 @@ def test_rereference_not_used_channels_no_reref(setup):
         assert_allclose(ref_dat[no_ref_idx, :], data_batch[no_ref_idx, :])
 
 
-def test_rereference_car(setup):
-    ch_names, ch_types, bads, data_batch = setup
+def test_rereference_car(setup_databatch):
+    ch_names, ch_types, bads, data_batch = setup_databatch
 
     nm_channels = nm_define_nmchannels.set_channels(
         ch_names=ch_names,
@@ -116,8 +72,8 @@ def test_rereference_car(setup):
         )
 
 
-def test_rereference_bp(setup):
-    ch_names, ch_types, bads, data_batch = setup
+def test_rereference_bp(setup_databatch):
+    ch_names, ch_types, bads, data_batch = setup_databatch
 
     nm_channels = nm_define_nmchannels.set_channels(
         ch_names=ch_names,
@@ -151,8 +107,8 @@ def test_rereference_bp(setup):
         )
 
 
-def test_rereference_wrong_rererference_column_name(setup):
-    ch_names, ch_types, bads, data_batch = setup
+def test_rereference_wrong_rererference_column_name(setup_databatch):
+    ch_names, ch_types, bads, data_batch = setup_databatch
 
     nm_channels = nm_define_nmchannels.set_channels(
         ch_names=ch_names,
@@ -169,8 +125,8 @@ def test_rereference_wrong_rererference_column_name(setup):
         re_referencer = ReReferencer(1, nm_channels)
 
 
-def test_rereference_muliple_channels(setup):
-    ch_names, ch_types, bads, data_batch = setup
+def test_rereference_muliple_channels(setup_databatch):
+    ch_names, ch_types, bads, data_batch = setup_databatch
 
     nm_channels = nm_define_nmchannels.set_channels(
         ch_names=ch_names,
@@ -196,8 +152,8 @@ def test_rereference_muliple_channels(setup):
     )
 
 
-def test_rereference_same_channel(setup):
-    ch_names, ch_types, bads, data_batch = setup
+def test_rereference_same_channel(setup_databatch):
+    ch_names, ch_types, bads, data_batch = setup_databatch
 
     nm_channels = nm_define_nmchannels.set_channels(
         ch_names=ch_names,

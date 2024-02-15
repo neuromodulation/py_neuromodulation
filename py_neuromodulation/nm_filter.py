@@ -1,16 +1,19 @@
 """Module for filter functionality."""
+
 import mne
 from mne.filter import _overlap_add_filter
 import numpy as np
 
 
-class BandPassFilter:
-    """Bandpass filters data in given frequency ranges.
+class MNEFilter:
+    """mne.filter wrapper
 
     This class stores for given frequency band ranges the filter
     coefficients with length "filter_len".
     The filters can then be used sequentially for band power estimation with
     apply_filter().
+    Note that this filter can be a bandpass, bandstop, lowpass, or highpass filter
+    depending on the frequency ranges given (see further details in mne.filter.create_filter).
 
     Parameters
     ----------
@@ -35,7 +38,7 @@ class BandPassFilter:
 
     def __init__(
         self,
-        f_ranges: list[list[int | float | None]],
+        f_ranges: list[list[int | float | None]] | list[int | float | None],
         sfreq: int | float,
         filter_length: str | float = "999ms",
         l_trans_bandwidth: int | float | str = 4,
@@ -43,22 +46,36 @@ class BandPassFilter:
         verbose: bool | int | str | None = None,
     ) -> None:
         filter_bank = []
-        # mne create_filter function only accepts str and int
+        # mne create_filter function only accepts str and int for filter_length
         if isinstance(filter_length, float):
             filter_length = int(filter_length)
 
+        if not isinstance(f_ranges[0], list):
+            f_ranges = [f_ranges]
+
         for f_range in f_ranges:
-            filt = mne.filter.create_filter(
-                None,
-                sfreq,
-                l_freq=f_range[0],
-                h_freq=f_range[1],
-                fir_design="firwin",
-                l_trans_bandwidth=l_trans_bandwidth,  # type: ignore
-                h_trans_bandwidth=h_trans_bandwidth,  # type: ignore
-                filter_length=filter_length,  # type: ignore
-                verbose=verbose,
-            )
+            try:
+                filt = mne.filter.create_filter(
+                    None,
+                    sfreq,
+                    l_freq=f_range[0],
+                    h_freq=f_range[1],
+                    fir_design="firwin",
+                    l_trans_bandwidth=l_trans_bandwidth,  # type: ignore
+                    h_trans_bandwidth=h_trans_bandwidth,  # type: ignore
+                    filter_length=filter_length,  # type: ignore
+                    verbose=verbose,
+                )
+            except:
+                filt = mne.filter.create_filter(
+                    None,
+                    sfreq,
+                    l_freq=f_range[0],
+                    h_freq=f_range[1],
+                    fir_design="firwin",
+                    verbose=verbose,
+                    # filter_length=filter_length,
+                )
             filter_bank.append(filt)
         self.filter_bank = np.vstack(filter_bank)
 
@@ -77,10 +94,6 @@ class BandPassFilter:
         np.ndarray, shape (n_channels, n_fbands, n_samples)
             Filtered data.
 
-        Raises
-        ------
-        ValueError
-            If data.ndim > 2
         """
         if data.ndim > 2:
             raise ValueError(
@@ -89,15 +102,29 @@ class BandPassFilter:
             )
         if data.ndim == 1:
             data = np.expand_dims(data, axis=0)
+
         filtered = np.array(
             [
                 [
-                    np.convolve(flt, chan, mode="same")
-                    for flt in self.filter_bank
+                    np.convolve(filt, chan, mode="same")
+                    for filt in self.filter_bank
                 ]
                 for chan in data
             ]
         )
+
+        # ensure here that the output dimension matches the input dimension
+        if data.shape[1] != filtered.shape[-1]:
+            # select the middle part of the filtered data
+            middle_index = filtered.shape[-1] // 2
+            filtered = filtered[
+                :,
+                :,
+                middle_index
+                - data.shape[1] // 2 : middle_index
+                + data.shape[1] // 2,
+            ]
+
         return filtered
 
 
@@ -170,19 +197,19 @@ class NotchFilter:
             phase="zero",
             fir_window="hamming",
             fir_design="firwin",
-            verbose=False
+            verbose=False,
         )
 
     def process(self, data: np.ndarray) -> np.ndarray:
         if self.filter_bank is None:
             return data
         return _overlap_add_filter(
-                x=data,
-                h=self.filter_bank,
-                n_fft=None,
-                phase="zero",
-                picks=None,
-                n_jobs=1,
-                copy=True,
-                pad="reflect_limited",
-            )
+            x=data,
+            h=self.filter_bank,
+            n_fft=None,
+            phase="zero",
+            picks=None,
+            n_jobs=1,
+            copy=True,
+            pad="reflect_limited",
+        )
