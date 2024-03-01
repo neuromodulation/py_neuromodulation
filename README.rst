@@ -40,7 +40,7 @@ py_neuromodulation requires at least python 3.10. For installation you can use p
 
     pip install py-neuromodulation
 
-We recommend however installing the package in a new new conda environment:
+We recommend however installing the package in a new conda environment:
 
 .. code-block::
 

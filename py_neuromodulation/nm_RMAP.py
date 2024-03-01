@@ -2,11 +2,85 @@ import enum
 import nibabel as nib
 import numpy as np
 import os
-#from numba import jit
+
+# from numba import jit
 from scipy import stats
+import scipy.io as sio
 import pandas as pd
+from typing import Union
+
+import py_neuromodulation
 
 from py_neuromodulation import nm_plots
+
+
+class ConnectivityChannelSelector:
+
+    def __init__(self) -> None:
+
+        self.PATH_CONN_DECODING = os.path.join(
+            py_neuromodulation.__path__[0],
+            "ConnectivityDecoding",
+        )
+        self.PATH_GRID = os.path.join(
+            self.PATH_CONN_DECODING,
+            "downsampled_cortex.mat",
+        )
+
+        self.grid = sio.loadmat(self.PATH_GRID)["downsample_ctx"]
+        self.RMAP_func = nib.load(
+            os.path.join(self.PATH_CONN_DECODING, "RMAP_func_all.nii")
+        ).get_fdata()
+        self.RMAP_struct = nib.load(
+            os.path.join(self.PATH_CONN_DECODING, "RMAP_struc.nii")
+        ).get_fdata()
+
+    def get_closest_node(self, coord: np.array):
+        # shape of coord: (num_channels, 3)
+        # returns the index of the closest node in the grid
+        idx_ = []
+        for c in coord:
+            dist = np.linalg.norm(self.grid - c, axis=1)
+            idx_.append(np.argmin(dist))
+
+        return [self.grid[idx] for idx in idx_], idx_
+
+    def get_rmap_correlations(
+        self, fps: Union[list, np.array], struct_corr: bool = True
+    ):
+        if struct_corr:
+            RMAP_use = self.RMAP_struct
+        else:
+            RMAP_use = self.RMAP_func
+        corrs = []
+        for fp in fps:
+            corrs.append(np.corrcoef(RMAP_use, fp)[0][1])
+        return corrs
+
+    def _check_connectome(
+        self,
+    ):
+        PATH_CONNECTOME = os.path.join(
+            py_neuromodulation.__path__[0],
+            "ConnectivityDecoding",
+            "connectome_struct.mat",
+        )
+        if os.path.exists(PATH_CONNECTOME) is False:
+            user_input = input(
+                "Do you want to download the connectome? (yes/no): "
+            ).lower()
+            if user_input == "yes":
+                self._download_connectome()
+            elif user_input == "no":
+                print("Connectome missing, has to be downloaded")
+
+    def download_connectome(
+        self,
+    ):
+        # download the connectome from the Zenodo API
+        print("Downloading the connectome...")
+        ...
+
 
 class RMAPChannelSelector:
 
@@ -90,7 +164,7 @@ class RMAPChannelSelector:
         return r
 
     @staticmethod
-    #@jit(nopython=True)
+    # @jit(nopython=True)
     def calculate_RMap_numba(fp, performances):
         # The RMap also needs performances; for every fingerprint / channel
         # Save the corresponding performance
@@ -112,7 +186,7 @@ class RMAPChannelSelector:
         return RMAP
 
     @staticmethod
-    #@jit(nopython=True)
+    # @jit(nopython=True)
     def get_corr_numba(fp, fp_test):
         val = np.corrcoef(fp_test, fp)[0][1]
         return val
@@ -224,11 +298,18 @@ class RMAPChannelSelector:
         idx_max = np.argmax(np.array(fp_pairs)[:, 3])
         return fp_pairs[idx_max][0:3]
 
-    def plot_performance_prediction_correlation(per_left_out, per_predict, out_path_save: str = None):
+    def plot_performance_prediction_correlation(
+        per_left_out, per_predict, out_path_save: str = None
+    ):
         df_plt_corr = pd.DataFrame()
         df_plt_corr["test_performance"] = per_left_out
-        df_plt_corr["struct_conn_predict"] = per_predict  # change "struct" with "funct" for functional connectivity
+        df_plt_corr["struct_conn_predict"] = (
+            per_predict  # change "struct" with "funct" for functional connectivity
+        )
 
         nm_plots.reg_plot(
-            x_col="test_performance", y_col="struct_conn_predict", data=df_plt_corr, out_path_save=out_path_save
+            x_col="test_performance",
+            y_col="struct_conn_predict",
+            data=df_plt_corr,
+            out_path_save=out_path_save,
         )
