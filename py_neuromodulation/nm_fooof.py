@@ -1,7 +1,9 @@
+import logging
+from typing import Iterable
+
 import numpy as np
 from fooof import FOOOF
 from scipy import fft
-from typing import Iterable
 
 from py_neuromodulation import nm_features_abc
 
@@ -76,8 +78,7 @@ class FooofAnalyzer(nm_features_abc.Feature):
                 )
                 fm.fit(self.f_vec, spectrum, self.freq_range)
             except Exception as e:
-                print(e)
-                print(f"failing spectrum: {spectrum}")
+                logging.critical(e, exc_info=True)
 
             if fm.fooofed_spectrum_ is None:
                 FIT_PASSED = False
@@ -114,9 +115,9 @@ class FooofAnalyzer(nm_features_abc.Feature):
                     else:
                         knee_freq = None
 
-                features_compute[
-                    f"{ch_name}_fooof_a_knee_frequency"
-                ] = knee_freq
+                features_compute[f"{ch_name}_fooof_a_knee_frequency"] = (
+                    knee_freq
+                )
 
             peaks_bw = (
                 fm.get_params("peak_params", "BW")

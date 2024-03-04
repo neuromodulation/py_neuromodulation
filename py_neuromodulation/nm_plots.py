@@ -6,6 +6,9 @@ from matplotlib import gridspec
 from typing import Optional
 import seaborn as sb
 import pandas as pd
+import logging
+
+logger = logging.getLogger("PynmLogger")
 
 from py_neuromodulation import nm_IO, nm_stats
 
@@ -239,7 +242,7 @@ def plot_corr_matrix(
 
     if save_plot:
         plt.savefig(plt_path, bbox_inches="tight")
-        print("Correlation matrix figure saved to " + str(plt_path))
+        logger.info(f"Correlation matrix figure saved to {plt_path}")
 
     if show_plot is False:
         plt.close()
@@ -387,7 +390,7 @@ def plot_epochs_avg(
             feature_name=feature_str_add,
         )
         plt.savefig(plt_path, bbox_inches="tight")
-        print("Feature epoch average figure saved to: " + str(plt_path))
+        logger.info(f"Feature epoch average figure saved to: {str(plt_path)}")
     if show_plot is False:
         plt.close()
 
@@ -602,6 +605,8 @@ class NM_Plot:
                 feature_name=feature_str_add,
             )
             plt.savefig(plt_path, bbox_inches="tight")
-            print("Feature epoch average figure saved to: " + str(plt_path))
+            logger.info(
+                f"Feature epoch average figure saved to: {str(plt_path)}"
+            )
         if show_plot is False:
             plt.close()

@@ -1,8 +1,14 @@
 """Module that contains PNStream ABC."""
+
 from abc import ABC, abstractmethod
 import os
 import pathlib
 import _pickle as cPickle
+
+from .utils import _logging  # logger initialization
+
+# Logger use in different modules: logger = logging.getLogger("PynmLogger")
+
 
 import pandas as pd
 from sklearn import base
@@ -12,7 +18,7 @@ from py_neuromodulation import (
     nm_IO,
     nm_plots,
     nm_run_analysis,
-    nm_settings
+    nm_settings,
 )
 
 _PathLike = str | os.PathLike
@@ -72,7 +78,9 @@ class PNStream(ABC):
         self.settings = self._load_settings(settings)
 
         if sampling_rate_features_hz is not None:
-            self.settings["sampling_rate_features_hz"] = sampling_rate_features_hz
+            self.settings["sampling_rate_features_hz"] = (
+                sampling_rate_features_hz
+            )
 
         self.nm_channels = self._load_nm_channels(nm_channels)
         if path_grids is None:
@@ -138,10 +146,12 @@ class PNStream(ABC):
         nm_channels: pd.DataFrame | _PathLike,
     ) -> pd.DataFrame:
         if not isinstance(nm_channels, pd.DataFrame):
-            nm_channels =  nm_IO.load_nm_channels(nm_channels)
-        
-        if nm_channels.query("used == 1 and target == 0").shape[0]  == 0:
-            raise ValueError("No channels selected for analysis that have column 'used' = 1 and 'target' = 0. Please check your nm_channels")
+            nm_channels = nm_IO.load_nm_channels(nm_channels)
+
+        if nm_channels.query("used == 1 and target == 0").shape[0] == 0:
+            raise ValueError(
+                "No channels selected for analysis that have column 'used' = 1 and 'target' = 0. Please check your nm_channels"
+            )
 
         return nm_channels
 
@@ -149,7 +159,7 @@ class PNStream(ABC):
     def _load_settings(settings: dict | _PathLike | None) -> dict:
         if isinstance(settings, dict):
             return settings
-        if settings is None: 
+        if settings is None:
             return nm_settings.get_default_settings()
         return nm_IO.read_settings(str(settings))
 
@@ -196,9 +206,7 @@ class PNStream(ABC):
     ) -> None:
         self.run_analysis.save_nm_channels(out_path_root, folder_name)
 
-    def save_settings(
-        self, out_path_root: _PathLike, folder_name: str
-    ) -> None:
+    def save_settings(self, out_path_root: _PathLike, folder_name: str) -> None:
         self.run_analysis.save_settings(out_path_root, folder_name)
 
     def save_sidecar(self, out_path_root: _PathLike, folder_name: str) -> None:
