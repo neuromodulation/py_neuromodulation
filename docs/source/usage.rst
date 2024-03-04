@@ -16,14 +16,14 @@ Here is the definition of a minimalistic example:
     NUM_CHANNELS = 5
     NUM_DATA = 10000
     sfreq = 1000  # Hz
-    feature_freq = 3  # Hz
+    sampling_rate_features_hz = 3  # Hz
 
     data = np.random.random([NUM_CHANNELS, NUM_DATA])
 
     stream = nm.Stream(sfreq=sfreq, data=data, sampling_rate_features_hz=sampling_rate_features_hz)
     features = stream.run()
 
-`features` will be a dictionary containing the computed features for each channel. In this example the default signal processing pipeline is estimated.
+`features` will be a pd.DataFrame containing the computed features for each channel and each time point. In this example the default signal processing pipeline is estimated.
 An offline data-stream was initialized with raw data being common-average re-referenced. FFT, bursting features and temporal waveform-shape were computed.
 Features were calculated with a *sampling_rate_features_hz* of 3 Hz and subsequently *z-score* normalized.
 

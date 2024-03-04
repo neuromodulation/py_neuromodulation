@@ -40,12 +40,23 @@ py_neuromodulation requires at least python 3.10. For installation you can use p
 
     pip install py-neuromodulation
 
-We recommend however installing the package in a new new conda environment:
+We recommend however installing the package using `rye <https://rye-up.com/guide/installation/>`_:
 
 .. code-block::
 
     git clone https://github.com/neuromodulation/py_neuromodulation.git
-    conda create -n pynm-test python=3.10
+    rye pin 3.11
+    rye sync
+
+And then activating the virtual environment e.g. in Windows using:
+
+.. code-block::
+
+    .\.venv\Scripts\activate
+
+Alternatively you can also install the package in a conda environment:
+
+    conda create -n pynm-test python=3.11
     conda activate pynm-test
 
 Then install the packages listed in the `pyproject.toml`:
@@ -78,7 +89,7 @@ Basic Usage
     NUM_CHANNELS = 5
     NUM_DATA = 10000
     sfreq = 1000  # Hz
-    feature_freq = 3  # Hz
+    sampling_rate_features_hz = 3  # Hz
 
     data = np.random.random([NUM_CHANNELS, NUM_DATA])
 
