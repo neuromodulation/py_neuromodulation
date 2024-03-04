@@ -159,3 +159,14 @@ examples/utils/*
 sub/
 
 py_neuromodulation/data/derivatives/*
+
+requirements.lock
+requirements-dev.lock
+
+write_example_RMAP.np
+
+.python-version
+
+py_neuromodulation/ConnectivityDecoding/connectome_struct.mat
+
+plot_0_first_demo.py
