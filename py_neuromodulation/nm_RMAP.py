@@ -2,11 +2,13 @@ import enum
 import nibabel as nib
 import numpy as np
 import os
-#from numba import jit
+
+# from numba import jit
 from scipy import stats
 import pandas as pd
 
 from py_neuromodulation import nm_plots
+
 
 class RMAPChannelSelector:
 
@@ -90,7 +92,7 @@ class RMAPChannelSelector:
         return r
 
     @staticmethod
-    #@jit(nopython=True)
+    # @jit(nopython=True)
     def calculate_RMap_numba(fp, performances):
         # The RMap also needs performances; for every fingerprint / channel
         # Save the corresponding performance
@@ -112,7 +114,7 @@ class RMAPChannelSelector:
         return RMAP
 
     @staticmethod
-    #@jit(nopython=True)
+    # @jit(nopython=True)
     def get_corr_numba(fp, fp_test):
         val = np.corrcoef(fp_test, fp)[0][1]
         return val
@@ -126,7 +128,7 @@ class RMAPChannelSelector:
         per_predict = []
 
         for idx_left_out, f_left_out in enumerate(l_fps_names):
-            print(idx_left_out)
+            # print(idx_left_out)
             l_cv = l_fps_dat.copy()
             per_cv = l_per.copy()
 
@@ -160,7 +162,7 @@ class RMAPChannelSelector:
         per_left_out = []
 
         for subject_test in sub_list:
-            print(subject_test)
+            # print(subject_test)
             idx_test = [
                 idx for idx, f in enumerate(l_fps_names) if subject_test in f
             ]
@@ -224,11 +226,18 @@ class RMAPChannelSelector:
         idx_max = np.argmax(np.array(fp_pairs)[:, 3])
         return fp_pairs[idx_max][0:3]
 
-    def plot_performance_prediction_correlation(per_left_out, per_predict, out_path_save: str = None):
+    def plot_performance_prediction_correlation(
+        per_left_out, per_predict, out_path_save: str = None
+    ):
         df_plt_corr = pd.DataFrame()
         df_plt_corr["test_performance"] = per_left_out
-        df_plt_corr["struct_conn_predict"] = per_predict  # change "struct" with "funct" for functional connectivity
+        df_plt_corr["struct_conn_predict"] = (
+            per_predict  # change "struct" with "funct" for functional connectivity
+        )
 
         nm_plots.reg_plot(
-            x_col="test_performance", y_col="struct_conn_predict", data=df_plt_corr, out_path_save=out_path_save
+            x_col="test_performance",
+            y_col="struct_conn_predict",
+            data=df_plt_corr,
+            out_path_save=out_path_save,
         )

@@ -1,5 +1,9 @@
 """Module for filter functionality."""
 
+import logging
+
+logger = logging.getLogger("PynmLogger")
+
 import mne
 from mne.filter import _overlap_add_filter
 import numpy as np
@@ -152,7 +156,7 @@ class NotchFilter:
         # Code is copied from filter.py notch_filter
         if freqs.size == 0:
             self.filter_bank = None
-            print(
+            logger.warning(
                 "WARNING: notch_filter is activated but data is not being"
                 f" filtered. This may be due to a low sampling frequency or"
                 f" incorrect specifications. Make sure your settings are"
