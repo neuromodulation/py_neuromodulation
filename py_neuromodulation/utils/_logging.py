@@ -6,7 +6,8 @@ logger = logging.getLogger("PynmLogger")
 logger.setLevel(logging.INFO)
 
 # Create a file handler and set its level to DEBUG
-file_handler = logging.FileHandler("logfile_pynm.log")
+# change mode to "a" to append to the file
+file_handler = logging.FileHandler("logfile_pynm.log", mode="w")
 file_handler.setLevel(logging.INFO)
 
 # console_handler = logging.StreamHandler()
