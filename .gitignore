@@ -167,6 +167,6 @@ write_example_RMAP.np
 
 .python-version
 
-py_neuromodulation/ConnectivityDecoding/connectome_struct.mat
+py_neuromodulation/ConnectivityDecoding/connectome_folder/*
 
 plot_0_first_demo.py

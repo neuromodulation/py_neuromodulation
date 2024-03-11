@@ -1,43 +1,205 @@
-import enum
-import nibabel as nib
 import numpy as np
 import os
+import wget
 
 # from numba import jit
 from scipy import stats
 import scipy.io as sio
 import pandas as pd
-from typing import Union
+from typing import Union, Tuple, List
+import nibabel as nib
+from matplotlib import pyplot as plt
 
 import py_neuromodulation
 
 from py_neuromodulation import nm_plots
 
+LIST_STRUC_UNCONNECTED_GRIDPOINTS_HULL = [256, 385, 417, 447, 819, 914]
+LIST_STRUC_UNCONNECTED_GRIDPOINTS_WHOLEBRAIN = [
+    1,
+    8,
+    16,
+    33,
+    34,
+    35,
+    36,
+    37,
+    51,
+    75,
+    77,
+    78,
+    99,
+    109,
+    115,
+    136,
+    155,
+    170,
+    210,
+    215,
+    243,
+    352,
+    359,
+    361,
+    415,
+    416,
+    422,
+    529,
+    567,
+    569,
+    622,
+    623,
+    625,
+    627,
+    632,
+    633,
+    634,
+    635,
+    639,
+    640,
+    641,
+    643,
+    644,
+    650,
+    661,
+    663,
+    667,
+    683,
+    684,
+    685,
+    704,
+    708,
+    722,
+    839,
+    840,
+    905,
+    993,
+    1011,
+]
+
 
 class ConnectivityChannelSelector:
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        whole_brain_connectome: bool = True,
+        func_connectivity: bool = True,
+    ) -> None:
+        """ConnectivityChannelSelector
+
+        Parameters
+        ----------
+        whole_brain_connectome : bool, optional
+            if True a 1236 whole-brain point grid is chosen,
+            if False, a 1025 point grid of the cortical hull is loaded,
+            by default True
+        func_connectivity : bool, optional
+            if true, functional connectivity fMRI is loaded,
+            if false structural dMRIby, default True
+        """
+
+        self.connectome_name = self._get_connectome_name(
+            whole_brain_connectome, func_connectivity
+        )
+
+        self.whole_brain_connectome = whole_brain_connectome
+        self.func_connectivity = func_connectivity
 
         self.PATH_CONN_DECODING = os.path.join(
             py_neuromodulation.__path__[0],
             "ConnectivityDecoding",
         )
-        self.PATH_GRID = os.path.join(
-            self.PATH_CONN_DECODING,
-            "downsampled_cortex.mat",
+
+        if whole_brain_connectome:
+            self.PATH_GRID = os.path.join(
+                self.PATH_CONN_DECODING,
+                "mni_coords_whole_brain.mat",
+            )
+            self.grid = sio.loadmat(self.PATH_GRID)["downsample_ctx"]
+            if func_connectivity is False:
+                # reduce the grid to only valid points that are not in LIST_STRUC_UNCONNECTED_GRIDPOINTS_WHOLEBRAIN
+                self.grid = np.delete(
+                    self.grid,
+                    LIST_STRUC_UNCONNECTED_GRIDPOINTS_WHOLEBRAIN,
+                    axis=0,
+                )
+        else:
+            self.PATH_GRID = os.path.join(
+                self.PATH_CONN_DECODING,
+                "mni_coords_cortical_surface.mat",
+            )
+            self.grid = sio.loadmat(self.PATH_GRID)["downsample_ctx"]
+            if func_connectivity is False:
+                # reduce the grid to only valid points that are not in LIST_STRUC_UNCONNECTED_GRIDPOINTS_HULL
+                self.grid = np.delete(
+                    self.grid, LIST_STRUC_UNCONNECTED_GRIDPOINTS_HULL, axis=0
+                )
+
+        if func_connectivity:
+            self.RMAP_arr = nib.load(
+                os.path.join(self.PATH_CONN_DECODING, "RMAP_func_all.nii")
+            ).get_fdata()
+        else:
+            self.RMAP_arr = nib.load(
+                os.path.join(self.PATH_CONN_DECODING, "RMAP_struc.nii")
+            ).get_fdata()
+
+    def _get_connectome_name(
+        self, whole_brain_connectome: str, func_connectivity: str
+    ):
+
+        connectome_name = "connectome_"
+        if whole_brain_connectome:
+            connectome_name += "whole_brain_"
+        else:
+            connectome_name += "hull_"
+        if func_connectivity:
+            connectome_name += "func"
+        else:
+            connectome_name += "struc"
+        return connectome_name
+
+    def get_available_connectomes(self) -> list:
+        """Return list of saved connectomes in the
+        package folder/ConnectivityDecoding/connectome_folder/ folder.
+
+        Returns
+        -------
+        list_connectomes: list
+        """
+        return os.listdir(
+            os.path.join(
+                self.PATH_CONN_DECODING,
+                "connectome_folder",
+            )
         )
 
-        self.grid = sio.loadmat(self.PATH_GRID)["downsample_ctx"]
-        self.RMAP_func = nib.load(
-            os.path.join(self.PATH_CONN_DECODING, "RMAP_func_all.nii")
-        ).get_fdata()
-        self.RMAP_struct = nib.load(
-            os.path.join(self.PATH_CONN_DECODING, "RMAP_struc.nii")
-        ).get_fdata()
+    def plot_grid(self) -> None:
+        """Plot the loaded template grid that passed coordinates are matched to."""
 
-    def get_closest_node(self, coord: np.array):
-        # shape of coord: (num_channels, 3)
-        # returns the index of the closest node in the grid
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="3d")
+        ax.scatter(
+            self.grid[:, 0], self.grid[:, 1], self.grid[:, 2], s=50, alpha=0.2
+        )
+        plt.show()
+
+    def get_closest_node(
+        self, coord: Union[List, np.array]
+    ) -> Tuple[List, List]:
+        """Given a list or np.array of coordinates, return the closest nodes in the
+        grid and their indices.
+
+        Parameters
+        ----------
+        coord : np.array
+            MNI coordinates with shape (num_channels, 3)
+
+        Returns
+        -------
+        Tuple[List, List]
+            Grid coordinates, grid indices
+        """
+
         idx_ = []
         for c in coord:
             dist = np.linalg.norm(self.grid - c, axis=1)
@@ -46,25 +208,62 @@ class ConnectivityChannelSelector:
         return [self.grid[idx] for idx in idx_], idx_
 
     def get_rmap_correlations(
-        self, fps: Union[list, np.array], struct_corr: bool = True
-    ):
-        if struct_corr:
-            RMAP_use = self.RMAP_struct
-        else:
-            RMAP_use = self.RMAP_func
+        self, fps: Union[list, np.array], RMAP_use: np.array = None
+    ) -> List:
+        """Calculate correlations of passed fingerprints with the RMAP
+
+        Parameters
+        ----------
+        fps : Union[list, np.array]
+            List of fingerprints
+        RMAP_use : np.array, optional
+            Passed RMAP, by default None
+
+        Returns
+        -------
+        List
+            correlation values
+        """
+
+        RMAP_ = self.RMAP_arr if RMAP_use is None else RMAP_use
+        RMAP_ = RMAP_.flatten()
         corrs = []
         for fp in fps:
-            corrs.append(np.corrcoef(RMAP_use, fp)[0][1])
+            corrs.append(np.corrcoef(RMAP_, fp.flatten())[0][1])
         return corrs
 
-    def _check_connectome(
+    def load_connectome(
         self,
-    ):
-        PATH_CONNECTOME = os.path.join(
-            py_neuromodulation.__path__[0],
-            "ConnectivityDecoding",
-            "connectome_struct.mat",
+        whole_brain_connectome: bool = None,
+        func_connectivity: bool = None,
+    ) -> None:
+        """Load connectome, if not available download connectome from
+        Zenodo.
+
+        Parameters
+        ----------
+        whole_brain_connectome : bool, optional
+            if true whole brain connectome
+            if false cortical hull grid connectome, by default None
+        func_connectivity : bool, optional
+            if true fMRI if false dMRI, by default None
+        """
+
+        if whole_brain_connectome is not None:
+            self.whole_brain_connectome = whole_brain_connectome
+        if func_connectivity is not None:
+            self.func_connectivity = func_connectivity
+
+        self.connectome_name = self._get_connectome_name(
+            self.whole_brain_connectome, self.func_connectivity
         )
+
+        PATH_CONNECTOME = os.path.join(
+            self.PATH_CONN_DECODING,
+            "connectome_folder",
+            self.connectome_name + ".mat",
+        )
+
         if os.path.exists(PATH_CONNECTOME) is False:
             user_input = input(
                 "Do you want to download the connectome? (yes/no): "
@@ -74,15 +273,31 @@ class ConnectivityChannelSelector:
             elif user_input == "no":
                 print("Connectome missing, has to be downloaded")
 
+        self.connectome = sio.loadmat(PATH_CONNECTOME)
+
+    def get_grid_fingerprints(self, grid_idx: Union[list, np.array]) -> list:
+        return [self.connectome[str(grid_idx)] for grid_idx in grid_idx]
+
     def download_connectome(
         self,
     ):
         # download the connectome from the Zenodo API
         print("Downloading the connectome...")
-        ...
+
+        record_id = "10804702"
+        file_name = self.connectome_name
+
+        wget.download(
+            f"https://zenodo.org/api/records/{record_id}/files/{file_name}/content",
+            out=os.path.join(
+                self.PATH_CONN_DECODING,
+                "connectome_folder",
+                f"{self.connectome_name}.mat",
+            ),
+        )
 
 
-class RMAPChannelSelector:
+class RMAPCross_Val_ChannelSelector:
 
     def __init__(self) -> None:
         pass
