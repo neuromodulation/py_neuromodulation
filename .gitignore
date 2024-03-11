@@ -163,10 +163,11 @@ py_neuromodulation/data/derivatives/*
 requirements.lock
 requirements-dev.lock
 
-write_example_RMAP.np
-
 .python-version
 
 py_neuromodulation/ConnectivityDecoding/connectome_folder/*
 
 plot_0_first_demo.py
+
+requirements.lock
+requirements-dev.lock

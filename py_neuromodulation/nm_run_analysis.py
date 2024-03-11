@@ -1,9 +1,13 @@
 """This module contains the class to process a given batch of data."""
+
 from enum import Enum
 import math
 import os
 from time import time
 from typing import Protocol, Type
+import logging
+
+logger = logging.getLogger("PynmLogger")
 
 import numpy as np
 import pandas as pd
@@ -16,6 +20,7 @@ from py_neuromodulation import (
     nm_projection,
     nm_rereference,
     nm_resample,
+    nm_filter_preprocessing,
 )
 
 _PathLike = str | os.PathLike
@@ -25,8 +30,7 @@ class Preprocessor(Protocol):
     def process(self, data: np.ndarray) -> np.ndarray:
         pass
 
-    def test_settings(self, settings: dict):
-        ...
+    def test_settings(self, settings: dict): ...
 
 
 _PREPROCESSING_CONSTRUCTORS = [
@@ -73,7 +77,7 @@ class DataProcessor:
         notch_filter : nm_filter.NotchFilter,
             Notch Filter object, needs to be instantiated beforehand
         verbose : boolean
-            if True, print out signal processed and computation time
+            if True, log signal processed and computation time
         """
         self.settings = self._load_settings(settings)
         self.nm_channels = self._load_nm_channels(nm_channels)
@@ -117,6 +121,12 @@ class DataProcessor:
                         sfreq=self.sfreq_raw,
                         sampling_rate_features_hz=self.sfreq_features,
                         **self.settings.get(settings_str, {}),
+                    )
+                    self.preprocessors.append(preprocessor)
+                case "preprocessing_filter":
+                    preprocessor = nm_filter_preprocessing.PreprocessingFilter(
+                        settings=self.settings,
+                        sfreq=self.sfreq_raw,
                     )
                     self.preprocessors.append(preprocessor)
                 case _:
@@ -369,7 +379,7 @@ class DataProcessor:
                 ] = np.nan
 
         if self.verbose is True:
-            print(
+            logger.info(
                 "Last batch took: "
                 + str(np.round(time() - start_time, 2))
                 + " seconds"
@@ -395,14 +405,14 @@ class DataProcessor:
             sidecar["coords"] = self.projection.coords
             if self.settings["postprocessing"]["project_cortex"]:
                 sidecar["grid_cortex"] = self.projection.grid_cortex
-                sidecar[
-                    "proj_matrix_cortex"
-                ] = self.projection.proj_matrix_cortex
+                sidecar["proj_matrix_cortex"] = (
+                    self.projection.proj_matrix_cortex
+                )
             if self.settings["postprocessing"]["project_subcortex"]:
                 sidecar["grid_subcortex"] = self.projection.grid_subcortex
-                sidecar[
-                    "proj_matrix_subcortex"
-                ] = self.projection.proj_matrix_subcortex
+                sidecar["proj_matrix_subcortex"] = (
+                    self.projection.proj_matrix_subcortex
+                )
         if additional_args is not None:
             sidecar = sidecar | additional_args
 

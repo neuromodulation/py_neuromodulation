@@ -2,6 +2,7 @@ import numpy as np
 import os
 import wget
 
+
 # from numba import jit
 from scipy import stats
 import scipy.io as sio
@@ -415,7 +416,7 @@ class RMAPCross_Val_ChannelSelector:
         per_predict = []
 
         for idx_left_out, f_left_out in enumerate(l_fps_names):
-            print(idx_left_out)
+            # print(idx_left_out)
             l_cv = l_fps_dat.copy()
             per_cv = l_per.copy()
 
@@ -449,7 +450,7 @@ class RMAPCross_Val_ChannelSelector:
         per_left_out = []
 
         for subject_test in sub_list:
-            print(subject_test)
+            # print(subject_test)
             idx_test = [
                 idx for idx, f in enumerate(l_fps_names) if subject_test in f
             ]

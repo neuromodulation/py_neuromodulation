@@ -321,7 +321,7 @@ class BandPower(OscillatoryFeature):
         super().__init__(settings, ch_names, sfreq)
         bp_settings = self.s["bandpass_filter_settings"]
 
-        self.bandpass_filter = nm_filter.BandPassFilter(
+        self.bandpass_filter = nm_filter.MNEFilter(
             f_ranges=list(self.f_ranges_dict.values()),
             sfreq=self.sfreq,
             filter_length=self.sfreq - 1,

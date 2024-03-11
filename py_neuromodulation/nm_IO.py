@@ -2,6 +2,10 @@ import json
 import os
 import sys
 from pathlib import Path
+import logging
+
+logger = logging.getLogger("PynmLogger")
+
 
 import mne
 import mne_bids
@@ -73,10 +77,8 @@ def read_BIDS_data(
     if raw_arr.info["line_freq"] is not None:
         line_noise = int(raw_arr.info["line_freq"])
     else:
-        print(
-            "Line noise is not available in the data, using value of {} Hz.".format(
-                line_noise
-            )
+        logger.info(
+            f"Line noise is not available in the data, using value of {line_noise} Hz."
         )
     return (
         raw_arr,
@@ -132,9 +134,9 @@ def get_annotations(
         # annotations starting with "BAD" are omitted with reject_by_annotations 'omit' param
         annot_data = raw_arr.get_data(reject_by_annotation="omit")
     except FileNotFoundError:
-        print("Annotations file could not be found")
-        print(
-            "expected location: "
+        logger.critical(
+            "Annotations file could not be found"
+            + "expected location: "
             + str(
                 Path(PATH_ANNOTATIONS)
                 / (os.path.basename(PATH_RUN)[:-5] + ".txt")
@@ -210,7 +212,7 @@ def save_features_and_settings(
 
     # create out folder if doesn't exist
     if not os.path.exists(os.path.join(out_path, folder_name)):
-        print("Creating output folder: " + str(folder_name))
+        logger.Info(f"Creating output folder: {folder_name}")
         os.makedirs(os.path.join(out_path, folder_name))
 
     dict_sidecar = {"fs": fs, "coords": coords, "line_noise": line_noise}
@@ -242,7 +244,7 @@ def save_settings(
 
     with open(path_out, "w") as f:
         json.dump(settings, f, indent=4)
-    print("settings.json saved to " + path_out)
+    logger.info(f"settings.json saved to {path_out}")
 
 
 def save_nm_channels(
@@ -256,7 +258,7 @@ def save_nm_channels(
             path_out, folder_name, folder_name + "_nm_channels.csv"
         )
     write_csv(nmchannels, path_out)
-    print("nm_channels.csv saved to " + path_out)
+    logger.info(f"nm_channels.csv saved to {path_out}")
 
 
 def save_features(
@@ -270,7 +272,7 @@ def save_features(
             path_out, folder_name, folder_name + "_FEATURES.csv"
         )
     write_csv(df_features, path_out)
-    print("FEATURES.csv saved to " + str(path_out))
+    logger.info(f"FEATURES.csv saved to {str(path_out)}")
 
 
 def save_sidecar(
@@ -297,7 +299,7 @@ def save_general_dict(
             indent=4,
             separators=(",", ": "),
         )
-    print(f"{str_add} saved to " + str(path_out))
+    logger.info(f"{str_add} saved to " + str(path_out))
 
 
 def default_json_convert(obj) -> list | int | float:

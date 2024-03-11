@@ -1,10 +1,13 @@
 """Module for offline data streams."""
+
 import os
 from joblib import Parallel, delayed
 import numpy as np
 import pandas as pd
-
 from itertools import count
+import logging
+
+logger = logging.getLogger("PynmLogger")
 
 import mne
 
@@ -71,7 +74,7 @@ class _OfflineStream(nm_stream_abc.PNStream):
         feature_series["time"] = cnt_samples * 1000 / self.sfreq
 
         if self.verbose:
-            print(
+            logging.info(
                 str(np.round(feature_series["time"] / 1000, 2))
                 + " seconds of data processed"
             )
@@ -283,7 +286,7 @@ class Stream(_OfflineStream):
         coord_list : list | None, optional
             coordinates in the form [[coord_1_x, coord_1_y, coord_1_z], [coord_2_x, coord_2_y, coord_2_z],], by default None
         verbose : bool, optional
-            print out stream computation time information, by default True
+            log stream computation time information, by default True
         """
 
         if nm_channels is None and data is not None:
