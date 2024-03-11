@@ -160,9 +160,14 @@ sub/
 
 py_neuromodulation/data/derivatives/*
 
+requirements.lock
+requirements-dev.lock
+
+.python-version
+
+py_neuromodulation/ConnectivityDecoding/connectome_folder/*
+
 plot_0_first_demo.py
 
 requirements.lock
 requirements-dev.lock
-
-py_neuromodulation/ConnectivityDecoding/connectome_struct.mat

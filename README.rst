@@ -40,6 +40,7 @@ py_neuromodulation requires at least python 3.10. For installation you can use p
 
     pip install py-neuromodulation
 
+
 We recommend however installing the package using `rye <https://rye-up.com/guide/installation/>`_:
 
 .. code-block::
