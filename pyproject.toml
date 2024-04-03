@@ -56,7 +56,7 @@ dependencies = [
   "joblib>=1.3.2",
   "black>=24.2.0",
   "pytest>=8.0.2",
-  "wget"
+  "wget",
 ]
 
 [project.optional-dependencies]
