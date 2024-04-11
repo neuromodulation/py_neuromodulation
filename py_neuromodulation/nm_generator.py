@@ -17,6 +17,7 @@ class LSLOfflinePlayer:
     def __init__(
         self,
         settings: dict,
+        stream_name: str = "example_stream",
         f_name: str = None,
         sfreq: Union[int, float] = None,
         data: np.array = None,
@@ -24,7 +25,7 @@ class LSLOfflinePlayer:
 
         self.settings = settings
         self.sfreq = sfreq
-
+        self.stream_name = stream_name
         got_fname = f_name is not None
         got_sfreq_data = sfreq is not None and data is not None
         if not (got_fname or got_sfreq_data):
@@ -47,7 +48,7 @@ class LSLOfflinePlayer:
             raw.save(self._path_raw, overwrite=True)
 
         self.player = PlayerLSL(
-            self._path_raw, name="example_stream", chunk_size=100
+            self._path_raw, name = stream_name, chunk_size=100, n_repeat=1
         )
         self.interval = self.player.chunk_size / self.player.info["sfreq"]
 
@@ -57,12 +58,12 @@ class LSLOfflinePlayer:
 class LSLStream:
 
     def __init__(
-        self, settings: dict, stream_name: str = "example_stream"
+        self, settings: dict, stream_name: str
     ) -> None:
 
-        self.stream_name = stream_name
+        self.stream_name = "example_stream"
         self.settings = settings
-        self.stream = StreamLSL(name=stream_name, bufsize=2).connect()
+        self.stream = StreamLSL(name=stream_name, bufsize=2).connect(timeout=3)
         self.winsize = (
             settings["segment_length_features_ms"] / self.stream.sinfo.sfreq
         )
@@ -73,8 +74,8 @@ class LSLStream:
 
         while True:
             time_diff = time.time() - self.last_time  # in s
-
             if time_diff >= self.sampling_interval:
+                # print(f"time diff between two samples: {time_diff}")
 
                 self.last_time = time.time()
                 logger.info(f"Current time: {self.last_time}")

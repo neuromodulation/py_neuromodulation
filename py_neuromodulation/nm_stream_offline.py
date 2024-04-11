@@ -358,7 +358,7 @@ class Stream(_GenericStream):
         parallel: bool = False,
         n_jobs: int = -2,
         stream_lsl: bool = False,
-        stream_lsl_name: str = "example_stream",
+        stream_name: str = "example_stream",
         plot_lsl: bool = False,
     ) -> pd.DataFrame:
         """Call run function for offline stream.
@@ -382,7 +382,7 @@ class Stream(_GenericStream):
         super().run()  # reinitialize the stream
 
         self.stream_lsl = stream_lsl
-        self.stream_lsl_name = stream_lsl_name
+        self.stream_lsl_name = stream_name
 
         if data is not None:
             data = self._handle_data(data)
@@ -401,6 +401,6 @@ class Stream(_GenericStream):
             parallel=parallel,
             n_jobs=n_jobs,
             stream_lsl=stream_lsl,
-            stream_lsl_name=stream_lsl_name,
+            stream_lsl_name=stream_name,
             plot_lsl=plot_lsl,
         )

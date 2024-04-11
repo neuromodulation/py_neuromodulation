@@ -1,6 +1,7 @@
 mne
 mne-connectivity
 mne-bids
+mne-lsl
 numpy
 pandas
 scikit-learn
