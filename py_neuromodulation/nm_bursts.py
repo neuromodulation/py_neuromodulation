@@ -15,6 +15,11 @@ class Burst(nm_features_abc.Feature):
         self.ch_names = ch_names
         self.threshold = self.s["burst_settings"]["threshold"]
         self.time_duration_s = self.s["burst_settings"]["time_duration_s"]
+        self.samples_overlap = int(
+            self.sfreq
+            * (self.s["segment_length_features_ms"] / 1000)
+            / self.s["sampling_rate_features_hz"]
+        )
 
         self.fband_names = self.s["burst_settings"]["frequency_bands"]
         self.f_ranges = [
@@ -105,7 +110,11 @@ class Burst(nm_features_abc.Feature):
                     self.data_buffer[ch_name][fband_name] = new_dat
                 else:
                     self.data_buffer[ch_name][fband_name] = np.concatenate(
-                        (self.data_buffer[ch_name][fband_name], new_dat), axis=0
+                        (
+                            self.data_buffer[ch_name][fband_name],
+                            new_dat[-self.samples_overlap :],
+                        ),
+                        axis=0,
                     )[-self.num_max_samples_ring_buffer :]
 
                 # calc features
@@ -152,9 +161,9 @@ class Burst(nm_features_abc.Feature):
                 if self.data_buffer[ch_name][fband_name][-1] > burst_thr:
                     in_burst = True
 
-                features_compute[
-                    f"{ch_name}_bursts_{fband_name}_in_burst"
-                ] = in_burst
+                features_compute[f"{ch_name}_bursts_{fband_name}_in_burst"] = (
+                    in_burst
+                )
         return features_compute
 
     @staticmethod
@@ -170,15 +179,20 @@ class Burst(nm_features_abc.Feature):
         burst_length = []
         burst_amplitude = []
 
-        burst_time_points = np.where(deriv==True)[0]
+        burst_time_points = np.where(deriv == True)[0]
 
-        for i in range(burst_time_points.size//2):
-            burst_length.append(burst_time_points[2 * i + 1] - burst_time_points[2 * i])
-            burst_amplitude.append(beta_averp_norm[burst_time_points[2 * i] : burst_time_points[2 * i + 1]])
+        for i in range(burst_time_points.size // 2):
+            burst_length.append(
+                burst_time_points[2 * i + 1] - burst_time_points[2 * i]
+            )
+            burst_amplitude.append(
+                beta_averp_norm[
+                    burst_time_points[2 * i] : burst_time_points[2 * i + 1]
+                ]
+            )
 
         # the last burst length (in case isburst == True) is omitted,
         # since the true burst length cannot be estimated
         burst_length = np.array(burst_length) / sfreq
 
         return burst_amplitude, burst_length
-    

@@ -171,3 +171,5 @@ plot_0_first_demo.py
 
 requirements.lock
 requirements-dev.lock
+
+plot_1_example_BIDS.py
