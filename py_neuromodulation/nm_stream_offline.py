@@ -88,9 +88,9 @@ class _OfflineStream(nm_stream_abc.PNStream):
             if not len(names_expected) == data.shape[0]:
                 raise ValueError(
                     "If data is passed as an array, the first dimension must"
-                    " match the number of channel names in `nm_channels`. Got:"
-                    f" Data columns: {data.shape[0]}, nm_channels.name:"
-                    f" {len(names_expected)}."
+                    " match the number of channel names in `nm_channels`.\n"
+                    f" Number of data channels (data.shape[0]): {data.shape[0]}\n"
+                    f" Length of nm_channels[\"name\"]: {len(names_expected)}."
                 )
             return data
         names_data = data.columns.to_list()
@@ -100,10 +100,11 @@ class _OfflineStream(nm_stream_abc.PNStream):
         ):
             raise ValueError(
                 "If data is passed as a DataFrame, the"
-                "columns must match the channel names in `nm_channels`. Got:"
-                f"Data columns: {names_data}, nm_channels.name: {names_data}."
+                "column names must match the channel names in `nm_channels`.\n"
+                f"Input dataframe column names: {names_data}\n"
+                f"Expected (from nm_channels[\"name\"]): : {names_expected}."
             )
-        return data.to_numpy()
+        return data.to_numpy().transpose()
 
     def _check_settings_for_parallel(self):
         """Check specified settings and raise error if parallel processing is not possible.
