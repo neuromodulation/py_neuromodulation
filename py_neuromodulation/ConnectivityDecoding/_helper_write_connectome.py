@@ -46,7 +46,7 @@ def write_connectome_mat(
 
         if MISSING:
             ROI_file = os.path.join(
-                f"D:\Connectome_RMAP_OUT\whole_brain\ROIs", f"ROI-{i}.nii"
+                r"D:\Connectome_RMAP_OUT\whole_brain\ROIs", f"ROI-{i}.nii"
             )
             # copy the ROI file to the following folder:
             PATH_ROI_OUT = (
