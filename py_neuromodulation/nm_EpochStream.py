@@ -6,6 +6,7 @@ import pandas as pd
 
 import py_neuromodulation as nm
 from py_neuromodulation import nm_generator
+from typing import Optional
 
 
 class EpochStream(nm.nm_stream.PNStream):
@@ -83,7 +84,7 @@ class EpochStream(nm.nm_stream.PNStream):
             self.feature_arr_list.append(self.feature_arr)
 
     def _add_timestamp(
-        self, feature_series: pd.Series, idx: int = None
+        self, feature_series: pd.Series, idx: Optional[int] = None
     ) -> pd.Series:
         # in case of epochs no timestamp is necessary
         return feature_series

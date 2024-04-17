@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Optional, Iterable
 
 import numpy as np
 from scipy import fft, signal
@@ -316,7 +316,7 @@ class BandPower(OscillatoryFeature):
         settings: dict,
         ch_names: Iterable[str],
         sfreq: float,
-        use_kf: bool = None,
+        use_kf: Optional[bool] = None,
     ) -> None:
         super().__init__(settings, ch_names, sfreq)
         bp_settings = self.s["bandpass_filter_settings"]

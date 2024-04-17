@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from itertools import count
 import logging
+from typing import Optional
 
 logger = logging.getLogger("PynmLogger")
 
@@ -193,11 +194,11 @@ class _OfflineStream(nm_stream_abc.PNStream):
 
     def plot_raw_signal(
         self,
-        sfreq: float = None,
-        data: np.array = None,
-        lowpass: float = None,
-        highpass: float = None,
-        picks: list = None,
+        sfreq: Optional[float] = None,
+        data: Optional[np.array] = None,
+        lowpass: Optional[float] = None,
+        highpass: Optional[float] = None,
+        picks: Optional[list] = None,
         plot_time: bool = True,
         plot_psd: bool = False,
     ) -> None:
@@ -254,10 +255,10 @@ class Stream(_OfflineStream):
     def __init__(
         self,
         sfreq: int | float,
-        data: np.ndarray | pd.DataFrame = None,
-        nm_channels: pd.DataFrame | _PathLike = None,
+        data: Optional[np.ndarray | pd.DataFrame] = None,
+        nm_channels: Optional[pd.DataFrame | _PathLike] = None,
         settings: dict | _PathLike | None = None,
-        sampling_rate_features_hz: float = None,
+        sampling_rate_features_hz: Optional[float] = None,
         line_noise: int | float | None = 50,
         path_grids: _PathLike | None = None,
         coord_names: list | None = None,
@@ -318,7 +319,7 @@ class Stream(_OfflineStream):
 
     def run(
         self,
-        data: np.ndarray | pd.DataFrame = None,
+        data: Optional[np.ndarray | pd.DataFrame] = None,
         out_path_root: _PathLike | None = None,
         folder_name: str = "sub",
         parallel: bool = False,

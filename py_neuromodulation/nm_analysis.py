@@ -162,8 +162,8 @@ class Feature_Reader:
     @staticmethod
     def filter_features(
         feature_columns: list,
-        ch_name: str = None,
-        list_feature_keywords: list[str] = None,
+        ch_name: Optional[str] = None,
+        list_feature_keywords: Optional[list[str]] = None,
     ) -> list:
         """filters read features by ch_name and/or modality
 
@@ -282,9 +282,9 @@ class Feature_Reader:
 
     def plot_target_averaged_channel(
         self,
-        ch: str = None,
+        ch: Optional[str] = None,
         list_feature_keywords: Optional[list[str]] = None,
-        features_to_plt: list = None,
+        features_to_plt: Optional[list] = None,
         epoch_len: int = 4,
         threshold: float = 0.1,
         normalize_data: bool = True,
@@ -369,15 +369,15 @@ class Feature_Reader:
 
     def plot_all_features(
         self,
-        ch_used: str = None,
-        time_limit_low_s: float = None,
-        time_limit_high_s: float = None,
+        ch_used: Optional[str] = None,
+        time_limit_low_s: Optional[float] = None,
+        time_limit_high_s: Optional[float] = None,
         normalize: bool = True,
         save: bool = False,
         title="all_feature_plt.pdf",
         ytick_labelsize: int = 10,
-        clim_low: float = None,
-        clim_high: float = None,
+        clim_low: Optional[float] = None,
+        clim_high: Optional[float] = None,
     ):
         """_summary_
 
@@ -642,7 +642,7 @@ class Feature_Reader:
 
     def set_decoder(
         self,
-        decoder: nm_decode.Decoder = None,
+        decoder: Optional[nm_decode.Decoder] = None,
         TRAIN_VAL_SPLIT=False,
         RUN_BAY_OPT=False,
         save_coef=False,
@@ -700,7 +700,7 @@ class Feature_Reader:
 
     def run_ML_model(
         self,
-        feature_file: str = None,
+        feature_file: Optional[str] = None,
         estimate_gridpoints: bool = False,
         estimate_channels: bool = True,
         estimate_all_channels_combined: bool = False,
@@ -766,7 +766,7 @@ class Feature_Reader:
     def read_results(
         self,
         performance_dict: dict = {},
-        subject_name: str = None,
+        subject_name: Optional[str] = None,
         DEFAULT_PERFORMANCE: float = 0.5,
         read_grid_points: bool = True,
         read_channels: bool = True,
@@ -777,9 +777,9 @@ class Feature_Reader:
         read_mrmr: bool = False,
         model_save: bool = False,
         save_results: bool = False,
-        PATH_OUT: str = None,
-        folder_name: str = None,
-        str_add: str = None,
+        PATH_OUT: Optional[str] = None,
+        folder_name: Optional[str] = None,
+        str_add: Optional[str] = None,
     ):
         """Save performances of a given patient into performance_dict from saved nm_decoder
 

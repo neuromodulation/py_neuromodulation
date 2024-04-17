@@ -5,6 +5,7 @@ from sklearn import metrics, linear_model, model_selection
 
 import py_neuromodulation
 from py_neuromodulation import nm_decode, nm_RMAP
+from typing import Optional
 
 
 class AcrossPatientRunner:
@@ -19,7 +20,7 @@ class AcrossPatientRunner:
         use_nested_cv=True,
         RUN_BAY_OPT=False,
         ML_model_name="LM",
-        cohorts: list = None,
+        cohorts: Optional[list] = None,
         load_channel_all: bool = False,
         load_grid_point_all: bool = False,
     ) -> None:
@@ -145,10 +146,10 @@ class AcrossPatientRunner:
     def cross_val_approach_RMAP(
         self,
         val_approach: str = "leave_1_cohort_out",
-        df_select: pd.DataFrame = None,
+        df_select: Optional[pd.DataFrame] = None,
         select_best_gp: bool = False,
         add_UPDRS: bool = False,
-        df_updrs: pd.DataFrame = None,
+        df_updrs: Optional[pd.DataFrame] = None,
     ):
 
         if select_best_gp is True:
@@ -269,7 +270,7 @@ class AcrossPatientRunner:
 
     def cross_val_p2p_RMAP(
         self,
-        df_select: pd.DataFrame = None,
+        df_select: Optional[pd.DataFrame] = None,
         select_best_gp: bool = False,
     ):
         if select_best_gp is True:

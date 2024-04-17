@@ -19,7 +19,7 @@ def plot_df_subjects(
     y_col="performance_test",
     hue=None,
     title="channel specific performances",
-    PATH_SAVE: str = None,
+    PATH_SAVE: Optional[str] = None,
     figsize_tuple: tuple = (5, 3),
 ):
     alpha_box = 0.4
@@ -81,12 +81,12 @@ def plot_epoch(
     X_epoch: np.array,
     y_epoch: np.array,
     feature_names: list,
-    z_score: bool = None,
+    z_score: Optional[bool] = None,
     epoch_len: int = 4,
     sfreq: int = 10,
-    str_title: str = None,
-    str_label: str = None,
-    ytick_labelsize: float = None,
+    str_title: Optional[str] = None,
+    str_label: Optional[str] = None,
+    ytick_labelsize: Optional[float] = None,
 ):
     if z_score is None:
         X_epoch = stats.zscore(
@@ -133,7 +133,7 @@ def plot_epoch(
 
 
 def reg_plot(
-    x_col: str, y_col: str, data: pd.DataFrame, out_path_save: str = None
+    x_col: str, y_col: str, data: pd.DataFrame, out_path_save: Optional[str] = None
 ):
     plt.figure(figsize=(4, 4), dpi=300)
     rho, p = nm_stats.permutationTestSpearmansRho(
@@ -157,7 +157,7 @@ def plot_bar_performance_per_channel(
     ch_names,
     performances: dict,
     PATH_OUT: str,
-    sub: str = None,
+    sub: Optional[str] = None,
     save_str: str = "ch_comp_bar_plt.png",
     performance_metric: str = "Balanced Accuracy",
 ):
@@ -183,16 +183,16 @@ def plot_bar_performance_per_channel(
 
 def plot_corr_matrix(
     feature: pd.DataFrame,
-    feature_file: str = None,
-    ch_name: str = None,
-    feature_names: list[str] = None,
+    feature_file: Optional[str] = None,
+    ch_name: Optional[str] = None,
+    feature_names: Optional[list[str]] = None,
     show_plot=True,
-    OUT_PATH: str = None,
+    OUT_PATH: Optional[str] = None,
     feature_name_plt="Features_corr_matr",
     save_plot: bool = False,
-    save_plot_name: str = None,
+    save_plot_name: Optional[str] = None,
     figsize: tuple[int] = (7, 7),
-    title: str = None,
+    title: Optional[str] = None,
     cbar_vmin: float = -1,
     cbar_vmax: float = 1.0,
 ):
@@ -308,16 +308,16 @@ def plot_epochs_avg(
     y_epoch: np.ndarray,
     epoch_len: int,
     sfreq: int,
-    feature_names: list[str] = None,
-    feature_str_add: str = None,
+    feature_names: Optional[list[str]] = None,
+    feature_str_add: Optional[str] = None,
     cut_ch_name_cols: bool = True,
-    ch_name: str = None,
-    label_name: str = None,
+    ch_name: Optional[str] = None,
+    label_name: Optional[str] = None,
     normalize_data: bool = True,
     show_plot: bool = True,
     save: bool = False,
-    OUT_PATH: str = None,
-    feature_file: str = None,
+    OUT_PATH: Optional[str] = None,
+    feature_file: Optional[str] = None,
     str_title: str = "Movement aligned features",
     ytick_labelsize=None,
     figsize_x: float = 8,
@@ -435,16 +435,16 @@ def plot_grid_elec_3d(
 
 def plot_all_features(
     df: pd.DataFrame,
-    time_limit_low_s: float = None,
-    time_limit_high_s: float = None,
+    time_limit_low_s: Optional[float] = None,
+    time_limit_high_s: Optional[float] = None,
     normalize: bool = True,
     ytick_labelsize: int = 4,
-    clim_low: float = None,
-    clim_high: float = None,
+    clim_low: Optional[float] = None,
+    clim_high: Optional[float] = None,
     save: bool = False,
     title="all_feature_plt.pdf",
-    OUT_PATH: str = None,
-    feature_file: str = None,
+    OUT_PATH: Optional[str] = None,
+    feature_file: Optional[str] = None,
 ):
     if time_limit_high_s is not None:
         df = df[df["time"] < time_limit_high_s * 1000]
@@ -523,9 +523,9 @@ class NM_Plot:
         strip_color: Optional[np.ndarray] = None,
         sess_right: Optional[bool] = None,
         save: bool = False,
-        OUT_PATH: str = None,
-        feature_file: str = None,
-        feature_str_add: str = None,
+        OUT_PATH: Optional[str] = None,
+        feature_file: Optional[str] = None,
+        feature_str_add: Optional[str] = None,
         show_plot: bool = True,
         title: str = "Cortical grid",
         set_clim: bool = True,

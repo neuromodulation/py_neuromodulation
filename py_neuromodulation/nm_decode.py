@@ -26,7 +26,7 @@ import numpy as np
 from copy import deepcopy
 
 from mrmr import mrmr_classif
-from typing import Type
+from typing import Optional, Type
 import _pickle as cPickle
 
 
@@ -103,10 +103,10 @@ class Decoder:
 
     def __init__(
         self,
-        features: pd.DataFrame = None,
-        label: np.ndarray = None,
-        label_name: str = None,
-        used_chs: list[str] = None,
+        features: Optional[pd.DataFrame] = None,
+        label: Optional[np.ndarray] = None,
+        label_name: Optional[str] = None,
+        used_chs: Optional[list[str]] = None,
         model=linear_model.LinearRegression(),
         eval_method=metrics.r2_score,
         cv_method=model_selection.KFold(n_splits=3, shuffle=False),
@@ -122,7 +122,7 @@ class Decoder:
         min_consequent_count: int = 3,
         bay_opt_param_space: list = [],
         VERBOSE: bool = False,
-        sfreq: int = None,
+        sfreq: Optional[int] = None,
         undersampling: bool = False,
         oversampling: bool = False,
         mrmr_select: bool = False,
@@ -661,7 +661,7 @@ class Decoder:
         y_train,
         X_test=None,
         y_test=None,
-        cv_res: Type[CV_res] = None,
+        cv_res: Optional[Type[CV_res]] = None,
         return_fitted_model_only: bool = False,
         save_data=True,
     ):

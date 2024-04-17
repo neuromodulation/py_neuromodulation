@@ -24,12 +24,13 @@ import nibabel as nib
 import py_neuromodulation
 from py_neuromodulation import nm_decode, nm_analysis, nm_IO
 from py_neuromodulation import nm_stream_offline
+from typing import Optional
 
 
 class CohortRunner:
     def __init__(
         self,
-        cohorts: dict = None,
+        cohorts: Optional[dict] = None,
         ML_model_name="LM",
         model=linear_model.LogisticRegression(class_weight="balanced"),
         eval_method=metrics.balanced_accuracy_score,
