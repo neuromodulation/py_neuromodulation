@@ -12,7 +12,7 @@ from py_neuromodulation import (
 
 @pytest.fixture
 def setup_default_stream_fast_compute():
-    """This test function sets a data batch and automatic initialized M1 datafram
+    """This test function sets a data batch and automatic initialized M1 dataframe
 
     Args:
         PATH_PYNEUROMODULATION (string): Path to py_neuromodulation repository
@@ -75,7 +75,7 @@ def setup_default_stream_fast_compute():
 
 @pytest.fixture
 def setup_databatch():
-    """This test function sets a data batch and automatic initialized M1 datafram
+    """This test function sets a data batch and automatic initialized M1 dataframe
 
     Args:
         PATH_PYNEUROMODULATION (string): Path to py_neuromodulation repository

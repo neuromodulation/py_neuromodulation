@@ -63,7 +63,8 @@ class LSLStream:
 
         self.stream_name = "example_stream"
         self.settings = settings
-        self.stream = StreamLSL(name=stream_name, bufsize=2).connect(timeout=3)
+        self.stream = StreamLSL(name=stream_name, bufsize=2).connect(timeout=2)
+        # self.stream._inlet.recover = False
         self.winsize = (
             settings["segment_length_features_ms"] / self.stream.sinfo.sfreq
         )
@@ -71,12 +72,11 @@ class LSLStream:
 
     def get_next_batch(self) -> np.array:
         self.last_time = time.time()
-
-        while True:
+        check_data = None
+        data = None
+        while self.stream.connected:
             time_diff = time.time() - self.last_time  # in s
             if time_diff >= self.sampling_interval:
-                # print(f"time diff between two samples: {time_diff}")
-
                 self.last_time = time.time()
                 logger.info(f"Current time: {self.last_time}")
 
@@ -85,9 +85,14 @@ class LSLStream:
                         "Feature computation time between two consecutive samples"
                         "was twice the feature sampling interval"
                     )
-                data, timestamp = self.stream.get_data(winsize=self.winsize)
+                if data is not None:
+                    check_data = data
 
-                # check if the yielded data is at the end
+                data, timestamp = self.stream.get_data(winsize=self.winsize)
+                # Checking if new data is incoming # TODO check for cleaner solution
+                if data is not None and check_data is not None and np.array_equal(data, check_data):
+                    self.stream.disconnect()
+
                 yield timestamp, data
 
 
@@ -127,5 +132,5 @@ def raw_data_generator(
 
             yield (
                 np.arange(cnt - offset_start, cnt) / sfreq,
-                data[:, np.floor(cnt - offset_start).astype(int) : cnt],
+                data[:, np.floor(cnt - offset_start).astype(int) : cnt]
             )

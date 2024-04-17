@@ -4,15 +4,34 @@ from mne_lsl import stream_viewer
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
-from py_neuromodulation import (nm_stream_abc, nm_define_nmchannels, nm_analysis, nm_stream_offline, nm_settings, nm_generator)
+from py_neuromodulation import (nm_stream_abc, nm_plots, nm_IO, nm_define_nmchannels, nm_analysis, nm_stream_offline, nm_settings, nm_generator)
 import mne
 import threading
+import time 
 import random
 
+(
+    RUN_NAME,
+    PATH_RUN,
+    PATH_BIDS,
+    PATH_OUT,
+    datatype,
+) = nm_IO.get_paths_example_data()
 
-test_general_lsl = True
+(
+    raw,
+    data,
+    sfreq,
+    line_noise,
+    coord_list,
+    coord_names,
+) = nm_IO.read_BIDS_data(
+    PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype
+)
+
+test_general_lsl = False
 test_custom_lsl = True
-f_name = "./py_neuromodulation/data/sub-testsub/ses-EphysMedOff/ieeg/sub-testsub_ses-EphysMedOff_task-gripforce_run-0_ieeg.vhdr"
+f_name = "/Users/Sam/charite/py_neuro/py_neuromodulation/py_neuromodulation/data/sub-testsub/ses-EphysMedOff/ieeg/sub-testsub_ses-EphysMedOff_task-gripforce_run-0_ieeg.vhdr"
 
 
 if test_general_lsl:
@@ -89,43 +108,96 @@ if test_custom_lsl:
     print("Custom LSL test started")
     # settings 
     settings = nm_settings.get_default_settings()
-    settings = nm_settings.reset_settings(settings)
-    settings['features']['fft'] = True
-    settings['features']['bursts'] = True
-    settings['features']['sharpwave_analysis'] = True
+    settings = nm_settings.set_settings_fast_compute(settings)
 
-    # player (mock lsl stream)
     player = nm_generator.LSLOfflinePlayer(f_name = f_name, settings = settings)
 
     def get_example_stream(test_arr: np.array) -> nm_stream_abc.PNStream:
-            settings = nm_settings.get_default_settings()
-            settings["features"]["raw_hjorth"] = True
-            settings["features"]["bandpass_filter"] = True
-            settings["features"]["stft"] = True
-            settings["features"]["fft"] = True
-            settings["features"]["sharpwave_analysis"] = True
-            settings["features"]["fooof"] = True
-            settings["features"]["bursts"] = True
-            settings["features"]["linelength"] = True
-            settings["features"]["nolds"] = False
-            settings["features"]["mne_connectivity"] = False
-            settings["features"]["return_raw"] = True
-            settings["features"]["coherence"] = False
 
-            nm_channels = nm_define_nmchannels.get_default_channels_from_data(test_arr)
-
-            stream = nm_stream_offline.Stream(
-                sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
-            )
-            return stream
+        settings["features"]["welch"] = True
+        settings["features"]["fft"] = True
+        settings["features"]["bursts"] = True
+        settings["features"]["sharpwave_analysis"] = True
+        settings["features"]["coherence"] = True
+        settings["coherence"]["channels"] = [["LFP_RIGHT_0", "ECOG_RIGHT_0"]]
+        settings["coherence"]["frequency_bands"] = ["high beta", "low gamma"]
+        settings["sharpwave_analysis_settings"]["estimator"]["mean"] = []
+        for sw_feature in list(settings["sharpwave_analysis_settings"]["sharpwave_features"].keys()):
+            settings["sharpwave_analysis_settings"]["sharpwave_features"][sw_feature] = True
+            settings["sharpwave_analysis_settings"]["estimator"]["mean"].append(sw_feature)
 
 
-    arr = mne.io.read_raw_brainvision(f_name).get_data()
-    stream = get_example_stream(arr) 
-    # viewer = stream_viewer.StreamViewer(stream_name="example_stream")
-    stream.run(arr, stream_lsl = True)
-    # df = stream.run(arr, stream_lsl = True, stream_lsl_name = "example_stream")
-    # df.head()
+        nm_channels = nm_define_nmchannels.set_channels(
+            ch_names=raw.ch_names,
+            ch_types=raw.get_channel_types(),
+            reference="default",
+            bads=raw.info["bads"],
+            new_names="default",
+            used_types=("ecog", "dbs", "seeg"),
+            target_keywords=["MOV_RIGHT"],
+        )
+
+        stream = nm_stream_offline.Stream(
+            sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
+        )
+        return stream
+
+
+    arr = mne.io.read_raw_brainvision(f_name)
+    stream = get_example_stream(arr)
+
+    features = stream._run(arr, stream_lsl = True, plot_lsl = False)
+
+
     print("starting analysis")
     analyzer = nm_analysis.Feature_Reader(feature_dir = stream.PATH_OUT, feature_file = stream.PATH_OUT_folder_name)
     print(analyzer.feature_arr)
+
+
+
+    analyzer.label_name = "MOV_RIGHT"
+    analyzer.label = analyzer.feature_arr["MOV_RIGHT"]
+    analyzer.feature_arr.iloc[100:108, -6:]
+    print(analyzer._get_target_ch())
+
+
+
+    analyzer.plot_target_averaged_channel(
+    ch="ECOG_RIGHT_0",
+    list_feature_keywords=None,
+    epoch_len=4,
+    threshold=0.5,
+    ytick_labelsize=7,
+    figsize_x=12,
+    figsize_y=12,
+    )
+    plt.show()
+
+
+    analyzer.plot_all_features(
+    ytick_labelsize=6,
+    clim_low=-2,
+    clim_high=2,
+    ch_used="ECOG_RIGHT_0",
+    time_limit_low_s=0,
+    time_limit_high_s=20,
+    normalize=True,
+    save=True,
+    )
+    plt.show()
+
+    nm_plots.plot_corr_matrix(
+    feature=analyzer.feature_arr.filter(regex="ECOG_RIGHT_0"),
+    ch_name="ECOG_RIGHT_0-avgref",
+    feature_names=analyzer.feature_arr.filter(
+        regex="ECOG_RIGHT_0-avgref"
+    ).columns,
+    feature_file=analyzer.feature_file,
+    show_plot=True,
+    figsize=(15, 15),
+    )
+    plt.show()
+
+
+    # features.label_name = "MOV_RIGHT"
+    # features.label = features.feature_arr["MOV_RIGHT"]

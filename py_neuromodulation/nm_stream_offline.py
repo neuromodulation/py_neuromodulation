@@ -155,9 +155,9 @@ class _GenericStream(nm_stream_abc.PNStream):
                 sfreq=self.sfreq,
             )
         else:
-            self.lsl_player = nm_generator.LSLOfflinePlayer(
-                settings=self.settings, data=data, sfreq=self.sfreq
-            )
+            # self.lsl_player = nm_generator.LSLOfflinePlayer(
+            #     settings=self.settings, data=data, sfreq=self.sfreq
+            # )
             self.lsl_stream = nm_generator.LSLStream(
                 settings=self.settings, stream_name=stream_lsl_name
             )
@@ -195,9 +195,17 @@ class _GenericStream(nm_stream_abc.PNStream):
             cnt_samples = offset_start
             start_time = None
             while True:
+                next_item = next(generator, None)
 
-                time_, data_batch = next(generator, None)
+                if next_item is not None:
+                    time_, data_batch = next_item
+                else:
+                    # Handle the case where no more data is available
+                    break  # or continue, based on your logic
+
+
                 if data_batch is None:
+                    print(" data is None")
                     break
                 feature_series = self.run_analysis.process(
                     data_batch.astype(np.float64)
@@ -205,12 +213,12 @@ class _GenericStream(nm_stream_abc.PNStream):
 
                 start_time = time_[0] if start_time is None else start_time
 
-                feature_series["time"] = (
-                    time_[-1] - start_time
-                )  # check if results in same
-                # feature_series = self._add_timestamp(
-                #    feature_series, cnt_samples
-                # )
+                # feature_series["time"] = (
+                #     time_[-1] - start_time
+                # )  # check if results in same
+                feature_series = self._add_timestamp(
+                   feature_series, cnt_samples
+                )
 
                 feature_series = self._add_target(
                     feature_series=feature_series, data=data_batch
