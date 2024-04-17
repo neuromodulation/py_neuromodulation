@@ -90,6 +90,8 @@ exclude = [
   "py_neuromodulation.data.derivatives.*",
 ]
 
+[tool.mypy]
+ignore_missing_imports = true
 
 # [tool.flit.module]
 # name = "py_neuromodulation"
@@ -100,3 +102,4 @@ exclude = [
 #   "py_neuromodulation.ConnectivityDecoding.connectome_folder",
 #   "py_neuromodulation.data.derivatives.*",
 # ]
+
