@@ -1,15 +1,14 @@
 [build-system]
-requires = ["setuptools>=61.2", "wheel"]
-#build-backend = "flit_core.buildapi"
-#requires = ["flit_core >=3.2,<4"]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
 
 [project]
 name = "py_neuromodulation"
-version = "0.0.3"
+version = "0.0.4"
 authors = [{ name = "Timon Merk", email = "timon.merk@charite.de" }]
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",
-  "License :: OSI Approved :: MIT License ",
+  "License :: OSI Approved :: MIT License",
   "Programming Language :: Python",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
@@ -58,6 +57,7 @@ dependencies = [
   "black>=24.2.0",
   "pytest>=8.0.2",
   "wget",
+  "hatch>=1.9.4",
 ]
 
 [project.optional-dependencies]
@@ -68,35 +68,15 @@ bugtracker = "https://github.com/neuromodulation/py_neuromodulation/issues"
 repository = "https://github.com/neuromodulation/py_neuromodulation"
 
 [tool.black]
-exclude = '''
-/(
-  __pycache__
-)/
-'''
-include = '''
-(
-  /src/
-  # | /tests
-)
-'''
 line-length = 80
 target-version = ['py310']
 
+[tool.hatch.build.targets.sdist]
+exclude = ["/.github", "/docs"]
 
-[tool.setuptools.packages.find]
+[tool.hatch.build.targets.wheel]
+packages = ["py_neuromodulation"]
 exclude = [
-  "py_neuromodulation.ConnectivityDecoding",
-  "py_neuromodulation.ConnectivityDecoding.connectome_folder",
-  "py_neuromodulation.data.derivatives.*",
+  "py_neuromodulation/data/derivatives",
+  "py_neuromodulation/ConnectivityDecoding/connectome_folder",
 ]
-
-
-# [tool.flit.module]
-# name = "py_neuromodulation"
-# 
-# [tool.flit.sdist]
-# exclude = [
-#   "py_neuromodulation.ConnectivityDecoding",
-#   "py_neuromodulation.ConnectivityDecoding.connectome_folder",
-#   "py_neuromodulation.data.derivatives.*",
-# ]
