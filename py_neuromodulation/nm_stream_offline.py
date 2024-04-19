@@ -155,9 +155,6 @@ class _GenericStream(nm_stream_abc.PNStream):
                 sfreq=self.sfreq,
             )
         else:
-            # self.lsl_player = nm_generator.LSLOfflinePlayer(
-            #     settings=self.settings, data=data, sfreq=self.sfreq
-            # )
             self.lsl_stream = nm_generator.LSLStream(
                 settings=self.settings, stream_name=stream_lsl_name
             )
@@ -165,7 +162,15 @@ class _GenericStream(nm_stream_abc.PNStream):
             if plot_lsl:
                 viewer = stream_viewer.StreamViewer(stream_name=stream_lsl_name)
                 viewer.start()
-
+            
+            if self.sfreq != self.lsl_stream.stream.sinfo.sfreq:
+                error_msg = (
+                    f"Sampling frequency of the lsl-stream ({self.lsl_stream.stream.sinfo.sfreq}) "
+                    f"does not match the settings ({self.sfreq})."
+                )
+                logger.critical(error_msg)
+                raise Exception(error_msg)
+            
             generator = self.lsl_stream.get_next_batch()
 
         sample_add = self.sfreq / self.run_analysis.sfreq_features

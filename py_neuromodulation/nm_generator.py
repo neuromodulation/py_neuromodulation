@@ -63,7 +63,12 @@ class LSLStream:
 
         self.stream_name = "example_stream"
         self.settings = settings
-        self.stream = StreamLSL(name=stream_name, bufsize=2).connect(timeout=2)
+        try:
+            self.stream = StreamLSL(name=stream_name, bufsize=2).connect(timeout=2)
+        except Exception as e:
+            msg =f"Could not connect to stream: {e}. No stream is running and under the name {stream_name}"
+            logger.warning(msg)
+            raise RuntimeError(msg)
         # self.stream._inlet.recover = False
         self.winsize = (
             settings["segment_length_features_ms"] / self.stream.sinfo.sfreq
