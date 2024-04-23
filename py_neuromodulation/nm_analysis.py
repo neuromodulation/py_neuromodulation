@@ -1,10 +1,8 @@
 import os
 from pathlib import Path
-from re import VERBOSE
-import re
-from typing import Optional
+from typing import Tuple
 
-import _pickle as cPickle
+import pickle
 import numpy as np
 import pandas as pd
 from sklearn import base, linear_model, metrics, model_selection
@@ -23,21 +21,22 @@ features_reverse_order_plotting = {"stft", "fft", "bandpass"}
 
 
 class Feature_Reader:
-
-    feature_dir: str
-    feature_list: list[str]
-    settings: dict
-    sidecar: dict
-    sfreq: int
-    line_noise: int
-    nm_channels: pd.DataFrame
-    feature_arr: pd.DataFrame
-    ch_names: list[str]
-    ch_names_ECOG: list[str]
-    decoder: nm_decode.Decoder = None
+    
+#     These are class variables, not instance variables
+#     feature_dir: str
+#     feature_list: list[str]
+#     settings: dict
+#     sidecar: dict
+#     sfreq: int
+#     line_noise: int
+#     nm_channels: pd.DataFrame
+#     feature_arr: pd.DataFrame
+#     ch_names: list[str]
+#     ch_names_ECOG: list[str]
+#     decoder: nm_decode.Decoder | None = None
 
     def __init__(
-        self, feature_dir: str, feature_file: str, binarize_label: bool = True
+        self, feature_dir: str, feature_file: str = "", binarize_label: bool = True
     ) -> None:
         """Feature_Reader enables analysis methods on top of NM_reader and NM_Decoder
 
@@ -51,9 +50,10 @@ class Feature_Reader:
             binarize label, by default True
             
         """
-        self.feature_dir = feature_dir
-        self.feature_list = nm_IO.get_run_list_indir(self.feature_dir)
-        if feature_file is None:
+        self.feature_dir: str = feature_dir
+        self.feature_list: list[str] = nm_IO.get_run_list_indir(self.feature_dir)
+        self.feature_file: str
+        if not feature_file:
             self.feature_file = self.feature_list[0]
         else:
             self.feature_file = feature_file
@@ -134,7 +134,7 @@ class Feature_Reader:
         label_name: str,
         binarize: bool = True,
         binarize_th: float = 0.3,
-    ) -> None:
+    ) -> np.ndarray:
         """_summary_
 
         Parameters
@@ -162,8 +162,8 @@ class Feature_Reader:
     @staticmethod
     def filter_features(
         feature_columns: list,
-        ch_name: Optional[str] = None,
-        list_feature_keywords: Optional[list[str]] = None,
+        ch_name: str | None = None,
+        list_feature_keywords: list[str] | None = None,
     ) -> list:
         """filters read features by ch_name and/or modality
 
@@ -210,7 +210,7 @@ class Feature_Reader:
         return feature_select
 
     def set_target_ch(self, ch_name: str) -> None:
-        self.label = ch_name
+        self.label_name = ch_name # Toni: I think this was the intended behavior
 
     def normalize_features(
         self,
@@ -282,9 +282,9 @@ class Feature_Reader:
 
     def plot_target_averaged_channel(
         self,
-        ch: Optional[str] = None,
-        list_feature_keywords: Optional[list[str]] = None,
-        features_to_plt: Optional[list] = None,
+        ch: str = "",
+        list_feature_keywords: list[str] | None = None,
+        features_to_plt: list | None = None,
         epoch_len: int = 4,
         threshold: float = 0.1,
         normalize_data: bool = True,
@@ -354,7 +354,7 @@ class Feature_Reader:
             if list_feature_keywords is not None
             else "all",
             cut_ch_name_cols=True,
-            ch_name=ch if ch is not None else None,
+            ch_name=ch,
             label_name=self.label_name,
             normalize_data=normalize_data,
             show_plot=show_plot,
@@ -369,15 +369,15 @@ class Feature_Reader:
 
     def plot_all_features(
         self,
-        ch_used: Optional[str] = None,
-        time_limit_low_s: Optional[float] = None,
-        time_limit_high_s: Optional[float] = None,
+        ch_used: str | None = None,
+        time_limit_low_s: float | None = None,
+        time_limit_high_s: float | None = None,
         normalize: bool = True,
         save: bool = False,
         title="all_feature_plt.pdf",
         ytick_labelsize: int = 10,
-        clim_low: Optional[float] = None,
-        clim_high: Optional[float] = None,
+        clim_low: float | None = None,
+        clim_high: float | None = None,
     ):
         """_summary_
 
@@ -588,7 +588,7 @@ class Feature_Reader:
         )
 
     @staticmethod
-    def get_epochs(data, y_, epoch_len, sfreq, threshold=0) -> (np.ndarray, np.ndarray):
+    def get_epochs(data, y_, epoch_len, sfreq, threshold=0) -> Tuple[np.ndarray, np.ndarray]:
         """Return epoched data.
 
         Parameters
@@ -642,7 +642,7 @@ class Feature_Reader:
 
     def set_decoder(
         self,
-        decoder: Optional[nm_decode.Decoder] = None,
+        decoder: nm_decode.Decoder | None = None,
         TRAIN_VAL_SPLIT=False,
         RUN_BAY_OPT=False,
         save_coef=False,
@@ -700,7 +700,7 @@ class Feature_Reader:
 
     def run_ML_model(
         self,
-        feature_file: Optional[str] = None,
+        feature_file: str | None = None,
         estimate_gridpoints: bool = False,
         estimate_channels: bool = True,
         estimate_all_channels_combined: bool = False,
@@ -766,7 +766,7 @@ class Feature_Reader:
     def read_results(
         self,
         performance_dict: dict = {},
-        subject_name: Optional[str] = None,
+        subject_name: str | None = None,
         DEFAULT_PERFORMANCE: float = 0.5,
         read_grid_points: bool = True,
         read_channels: bool = True,
@@ -777,9 +777,9 @@ class Feature_Reader:
         read_mrmr: bool = False,
         model_save: bool = False,
         save_results: bool = False,
-        PATH_OUT: Optional[str] = None,
-        folder_name: Optional[str] = None,
-        str_add: Optional[str] = None,
+        PATH_OUT: str = "", # Removed None default, save_general_dict does not handle None anyway
+        folder_name: str = "",
+        str_add: str = "",
     ):
         """Save performances of a given patient into performance_dict from saved nm_decoder
 
@@ -833,7 +833,7 @@ class Feature_Reader:
 
         # read ML results
         with open(PATH_ML_, "rb") as input:
-            ML_res = cPickle.load(input)
+            ML_res = pickle.load(input)
             if self.decoder is None:
                 self.decoder = ML_res
 
@@ -858,8 +858,8 @@ class Feature_Reader:
                 obj_read, obj_write, set_inner_CV_res: bool = False
             ):
                 def set_score(
-                    key_set: str,
-                    key_get: str,
+                    key_set: str = "",
+                    key_get: str = "",
                     take_mean: bool = True,
                     val=None,
                 ):
@@ -928,7 +928,6 @@ class Feature_Reader:
                     )
                     set_score(
                         key_set="bay_opt_best_params",
-                        key_get=None,
                         take_mean=False,
                         val=dict_to_save,
                     )
@@ -938,14 +937,12 @@ class Feature_Reader:
 
                     set_score(
                         key_set="mrmr_select",
-                        key_get=None,
                         take_mean=False,
                         val=obj_read["mrmr_select"],
                     )
                 if model_save is True:
                     set_score(
                         key_set="model_save",
-                        key_get=None,
                         take_mean=False,
                         val=obj_read["model_save"],
                     )

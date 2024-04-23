@@ -12,7 +12,7 @@ class LineLength(nm_features_abc.Feature):
         self.ch_names = ch_names
 
     @staticmethod
-    def get_line_length(x: np.ndarray) -> np.ndarray:
+    def get_line_length(x: np.ndarray) -> np.floating: # np.mean w/o axis argument
         return np.mean(np.abs(np.diff(x)) / (x.shape[0] - 1))
 
     @staticmethod

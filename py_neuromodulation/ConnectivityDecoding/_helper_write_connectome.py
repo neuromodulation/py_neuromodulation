@@ -2,7 +2,6 @@ import nibabel as nib
 import numpy as np
 import scipy.io as sio
 import os
-from matplotlib import pyplot as plt
 
 
 def write_connectome_mat(

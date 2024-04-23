@@ -6,7 +6,7 @@ import numpy as np
 def raw_data_generator(
     data: np.ndarray,
     settings: dict,
-    sfreq: int,
+    sfreq: int | float, # Added float, consistent with rest of sfreq variables
 ) -> Iterator[np.ndarray]:
     """
     This generator function mimics online data acquisition.

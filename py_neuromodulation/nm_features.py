@@ -16,9 +16,9 @@ from py_neuromodulation import (
 
 
 class Features:
-    """Class for calculating features."""
+    """Class for calculating features.p"""
 
-    features: list[nm_features_abc.Feature] = []
+    # features: list[nm_features_abc.Feature] = []
 
     def __init__(
         self, s: dict, ch_names: list[str], sfreq: int | float
@@ -40,8 +40,9 @@ class Features:
             _description_
         """
 
-        self.features = []
+        self.features: list[nm_features_abc.Feature]  = []
 
+        feature: nm_features_abc.Feature
         for feature in s["features"]:
             if s["features"][feature] is False:
                 continue
@@ -105,7 +106,7 @@ class Features:
         dat (dict): naming convention : channel_method_feature_(f_band)
         """
 
-        features_compute = {}
+        features_compute : dict = {}
 
         for feature in self.features:
             features_compute = feature.calc_feature(

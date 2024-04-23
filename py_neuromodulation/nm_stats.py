@@ -400,7 +400,7 @@ def cluster_wise_p_val_correction_numba(p_arr, p_sig, n_perm):
 
         Returns
         -------
-        cluster_labels : np.array
+        cluster_labels : np.ndarray
             Array of shape (len(iterable), 1), where each value indicates the
             number of the cluster. Values are 0 if the item does not belong to
             a cluster

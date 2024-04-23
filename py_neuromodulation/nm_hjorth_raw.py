@@ -1,4 +1,3 @@
-import enum
 import numpy as np
 from typing import Iterable
 
@@ -21,7 +20,7 @@ class Hjorth(nm_features_abc.Feature):
         # no settings to test
         pass
 
-    def calc_feature(self, data: np.array, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         for ch_idx, ch_name in enumerate(self.ch_names):
             features_compute[
                 "_".join([ch_name, "RawHjorth_Activity"])
@@ -55,7 +54,7 @@ class Raw(nm_features_abc.Feature):
 
     def calc_feature(
         self,
-        data: np.array,
+        data: np.ndarray,
         features_compute: dict,
     ) -> dict:
         for ch_idx, ch_name in enumerate(self.ch_names):

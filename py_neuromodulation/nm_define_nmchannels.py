@@ -1,5 +1,5 @@
 """Module for handling nm_channels."""
-from typing import Iterable, Optional, Union
+from typing import Iterable
 
 import pandas as pd
 import numpy as np
@@ -11,12 +11,12 @@ _LFP_TYPES = ["seeg", "dbs", "lfp"]  # must be lower-case
 def set_channels(
     ch_names: list[str],
     ch_types: list[str],
-    reference: Union[list, str] = "default",
-    bads: Optional[list[str]] = None,
-    new_names: Union[str, list[str]] = "default",
+    reference: list | str = "default",
+    bads: list[str] | None = None,
+    new_names: str | list[str] = "default",
     ecog_only: bool = False,
-    used_types: Optional[Iterable[str]] = ("ecog", "dbs", "seeg"),
-    target_keywords: Optional[Iterable[str]] = ("mov", "squared", "label"),
+    used_types: Iterable[str] | None = ("ecog", "dbs", "seeg"),
+    target_keywords: Iterable[str] | None = ("mov", "squared", "label"),
 ) -> pd.DataFrame:
     """Return dataframe with channel-specific settings in nm_channels format.
 
@@ -86,7 +86,7 @@ def set_channels(
     df["name"] = ch_names
 
     if used_types:
-        if type(used_types) is str:
+        if isinstance(used_types, str):
             used_types = [used_types]          # Even if the user passes only ("ecog"), the if statement bellow will work
         used_list = []
         for ch_type in ch_types:
@@ -101,7 +101,7 @@ def set_channels(
         df["used"] = 0
 
     if target_keywords:
-        if type(target_keywords) is str:
+        if isinstance(target_keywords, str):
             target_keywords = [target_keywords]
         targets = []
         for ch_name in ch_names:
@@ -172,7 +172,7 @@ def set_channels(
         for name, ref in zip(df["name"], df["rereference"]):
             if ref == "None":
                 new_names.append(name)
-            elif type(ref) == float:
+            elif isinstance(ref, float):
                 if np.isnan(ref):
                     new_names.append(name)
             elif ref == "average":
@@ -250,14 +250,14 @@ def _get_default_references(
     return df
 
 def get_default_channels_from_data(
-        data: np.array, car_rereferencing:bool=True,
+        data: np.ndarray, car_rereferencing:bool=True,
 ):
     """Return default nm_channels dataframe with
     ecog datatype, no bad channels, no targets, common average rereferencing 
 
     Parameters
     ----------
-    data : np.array
+    data : np.ndarray
         Data array in shape (n_channels, n_time)
     car_rereferencing : bool, optional
         use common average rereferencing, by default True

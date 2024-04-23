@@ -21,7 +21,7 @@ class MNEConnectivity(nm_features_abc.Feature):
         self.sfreq = sfreq
 
         self.fbands = list(self.s["frequency_ranges_hz"].keys())
-        self.fband_ranges = []
+        self.fband_ranges : list = []
 
     @staticmethod
     def test_settings(
@@ -35,7 +35,7 @@ class MNEConnectivity(nm_features_abc.Feature):
     @staticmethod
     def get_epoched_data(
         raw: mne.io.RawArray, epoch_length: float = 1
-    ) -> np.array:
+    ) -> np.ndarray:
         time_samples_s = raw.get_data().shape[1] / raw.info["sfreq"]
         if epoch_length > time_samples_s:
              raise ValueError(
@@ -79,7 +79,7 @@ class MNEConnectivity(nm_features_abc.Feature):
         )
         return spec_out
 
-    def calc_feature(self, data: np.array, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
 
         raw = mne.io.RawArray(
             data=data,

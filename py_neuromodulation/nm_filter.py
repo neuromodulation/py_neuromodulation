@@ -1,13 +1,12 @@
 """Module for filter functionality."""
 
-import logging
-
-logger = logging.getLogger("PynmLogger")
-
 import mne
 from mne.filter import _overlap_add_filter
 import numpy as np
+from typing import cast
 
+import logging
+logger = logging.getLogger("PynmLogger")
 
 class MNEFilter:
     """mne.filter wrapper
@@ -56,7 +55,7 @@ class MNEFilter:
 
         if not isinstance(f_ranges[0], list):
             f_ranges = [f_ranges]
-
+            
         for f_range in f_ranges:
             try:
                 filt = mne.filter.create_filter(
@@ -70,7 +69,7 @@ class MNEFilter:
                     filter_length=filter_length,  # type: ignore
                     verbose=verbose,
                 )
-            except:
+            except ValueError:
                 filt = mne.filter.create_filter(
                     None,
                     sfreq,
@@ -139,7 +138,7 @@ class NotchFilter:
         line_noise: int | float | None = None,
         freqs: np.ndarray | None = None,
         notch_widths: int | np.ndarray | None = 3,
-        trans_bandwidth: int = 6.8,
+        trans_bandwidth: float = 6.8,
     ) -> None:
         if line_noise is None and freqs is None:
             raise ValueError(
@@ -178,7 +177,8 @@ class NotchFilter:
                     "notch_widths must be None, scalar, or the "
                     "same length as freqs"
                 )
-
+        notch_widths = cast(np.ndarray, notch_widths) # For MyPy only, no runtime cost
+                
         # Speed this up by computing the fourier coefficients once
         tb_half = trans_bandwidth / 2.0
         lows = [

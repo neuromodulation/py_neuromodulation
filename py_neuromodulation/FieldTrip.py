@@ -9,7 +9,6 @@ FieldTrip buffer (V1) client in pure Python
 import socket
 import struct
 import numpy
-import unicodedata
 
 VERSION = 1
 
@@ -335,25 +334,25 @@ class Client:
         haveLabels = False
         extras = b''
 
-        if (type(labels)==list) and (len(labels)==0):
+        if isinstance(labels, list) and (len(labels)==0):
             labels=None
 
-        if not(labels is None):
+        if labels is not None:
             serLabels = b''
             for n in range(0, nChannels):
                 # ensure that labels are ascii strings, not unicode
                 serLabels += labels[n].encode('ascii', 'ignore') + b'\0'
             try:
                 pass
-            except:
-                raise ValueError('Channels names (labels), if given,'
+            except ValueError:
+                print('Channels names (labels), if given,'
                                  ' must be a list of N=numChannels strings')
 
             extras = struct.pack('II', CHUNK_CHANNEL_NAMES,
                                  len(serLabels)) + serLabels
             haveLabels = True
 
-        if not(chunks is None):
+        if chunks is not None:
             for chunk_type, chunk_data in chunks:
                 if haveLabels and chunk_type == CHUNK_CHANNEL_NAMES:
                     # ignore channel names chunk in case we got labels
@@ -553,7 +552,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         try:
             port = int(sys.argv[2])
-        except:
+        except ValueError:
             print(('Error: second argument (%s) must be a valid (=integer)'
                    ' port number' % sys.argv[2]))
             sys.exit(1)

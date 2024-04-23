@@ -26,6 +26,7 @@ class FooofAnalyzer(nm_features_abc.Feature):
 
         self.f_vec = np.arange(0, int(self.num_samples / 2) + 1, 1)
 
+    @staticmethod
     def test_settings(
         s: dict,
         ch_names: Iterable[str],
@@ -51,7 +52,7 @@ class FooofAnalyzer(nm_features_abc.Feature):
             and s["fooof"]["freq_range_hz"][1] < sfreq
         ), f"fooof frequency range needs to be below sfreq, got {s['fooof']['freq_range_hz']}"
 
-    def _get_spectrum(self, data: np.array):
+    def _get_spectrum(self, data: np.ndarray):
         """return absolute value fft spectrum"""
 
         data = data[-self.num_samples :]
@@ -61,7 +62,7 @@ class FooofAnalyzer(nm_features_abc.Feature):
 
     def calc_feature(
         self,
-        data: np.array,
+        data: np.ndarray,
         features_compute: dict,
     ) -> dict:
         for ch_idx, ch_name in enumerate(self.ch_names):

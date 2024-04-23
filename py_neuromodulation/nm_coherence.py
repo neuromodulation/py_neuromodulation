@@ -114,7 +114,7 @@ class NM_Coherence(nm_features_abc.Feature):
     
 
     def __init__(
-        self, settings: dict, ch_names: Iterable[str], sfreq: float
+        self, settings: dict, ch_names: list[str], sfreq: float
     ) -> None:
         self.s = settings
         self.sfreq = sfreq
@@ -194,7 +194,7 @@ class NM_Coherence(nm_features_abc.Feature):
                 "feature coherence enabled, but no coherence['method'] selected"
             )
 
-    def calc_feature(self, data: np.array, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         for coh_obj in self.coherence_objects:
             features_compute = coh_obj.get_coh(
                 features_compute,

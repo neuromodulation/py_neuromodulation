@@ -43,7 +43,7 @@ class Nolds(nm_features_abc.Feature):
 
     def calc_feature(
         self,
-        data: np.array,
+        data: np.ndarray,
         features_compute: dict,
     ) -> dict:
 
@@ -63,7 +63,7 @@ class Nolds(nm_features_abc.Feature):
         return features_compute
 
     def calc_nolds(
-        self, data: np.array, features_compute: dict, data_str: str = "raw"
+        self, data: np.ndarray, features_compute: dict, data_str: str = "raw"
     ) -> dict:
 
         for ch_idx, ch_name in enumerate(self.ch_names):

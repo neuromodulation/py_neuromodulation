@@ -1,6 +1,6 @@
-from typing import Iterable
+from typing import Iterable, Callable
 import numpy as np
-from pybispectra import compute_fft, get_example_data_paths, WaveShape
+from pybispectra import compute_fft, WaveShape
 
 from py_neuromodulation import nm_features_abc
 
@@ -66,15 +66,16 @@ class Bispectra(nm_features_abc.Feature):
 
     def compute_bs_features(
         self,
-        spectrum_ch: np.array,
+        spectrum_ch: np.ndarray,
         features_compute: dict,
         ch_name: str,
         component: str,
-        f_band: str,
+        f_band: str | None,
     ) -> dict:
+        func : Callable
         for bispectrum_feature in self.s["bispectrum"]["bispectrum_features"]:
             if bispectrum_feature == "mean":
-                func = np.nanmean
+                func  = np.nanmean
             if bispectrum_feature == "sum":
                 func = np.nansum
             if bispectrum_feature == "var":
@@ -105,7 +106,7 @@ class Bispectra(nm_features_abc.Feature):
 
         return features_compute
 
-    def calc_feature(self, data: np.array, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         for ch_idx, ch_name in enumerate(self.ch_names):
             fft_coeffs, freqs = compute_fft(
                 data=np.expand_dims(data[ch_idx, :], axis=(0, 1)),

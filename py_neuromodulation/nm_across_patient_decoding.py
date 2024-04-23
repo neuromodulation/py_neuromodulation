@@ -5,7 +5,6 @@ from sklearn import metrics, linear_model, model_selection
 
 import py_neuromodulation
 from py_neuromodulation import nm_decode, nm_RMAP
-from typing import Optional
 
 
 class AcrossPatientRunner:
@@ -20,7 +19,7 @@ class AcrossPatientRunner:
         use_nested_cv=True,
         RUN_BAY_OPT=False,
         ML_model_name="LM",
-        cohorts: Optional[list] = None,
+        cohorts: list | None = None,
         load_channel_all: bool = False,
         load_grid_point_all: bool = False,
     ) -> None:
@@ -146,10 +145,10 @@ class AcrossPatientRunner:
     def cross_val_approach_RMAP(
         self,
         val_approach: str = "leave_1_cohort_out",
-        df_select: Optional[pd.DataFrame] = None,
+        df_select: pd.DataFrame | None = None,
         select_best_gp: bool = False,
         add_UPDRS: bool = False,
-        df_updrs: Optional[pd.DataFrame] = None,
+        df_updrs: pd.DataFrame | None = None,
     ):
 
         if select_best_gp is True:
@@ -270,7 +269,7 @@ class AcrossPatientRunner:
 
     def cross_val_p2p_RMAP(
         self,
-        df_select: Optional[pd.DataFrame] = None,
+        df_select: pd.DataFrame | None = None,
         select_best_gp: bool = False,
     ):
         if select_best_gp is True:
@@ -346,7 +345,7 @@ class AcrossPatientRunner:
         np.save(
             os.path.join(
                 self.outpath,
-                self.ML_model_name + f"_performance_p2p_RMAP.npy",
+                self.ML_model_name + "_performance_p2p_RMAP.npy",
             ),
             p_,
         )
@@ -506,11 +505,12 @@ class AcrossPatientRunner:
 
                     # run here ML estimation
                     self.decoder = self.init_decoder()
-                    model = self.decoder.wrapper_model_train(
-                        X_train=X_train,
-                        y_train=y_train,
-                        return_fitted_model_only=True,
-                    )
+                    # Unused variable, remove?
+                    #model = self.decoder.wrapper_model_train(
+                    #    X_train=X_train,
+                    #    y_train=y_train,
+                    #    return_fitted_model_only=True,
+                    #)
                     # use initialized decoder
                     try:
                         cv_res = self.eval_model(

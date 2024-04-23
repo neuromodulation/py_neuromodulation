@@ -4,7 +4,7 @@ import pandas as pd
 
 
 class ReReferencer:
-    ref_matrix: np.ndarray
+    # ref_matrix: np.ndarray | None
 
     def __init__(
         self,
@@ -26,6 +26,9 @@ class ReReferencer:
             ValueError: rereferencing using undefined channel
             ValueError: rereferencing to same channel
         """
+        
+        self.ref_matrix: np.ndarray | None
+        
         nm_channels = nm_channels[nm_channels["used"] == 1].reset_index(
             drop=True
         )

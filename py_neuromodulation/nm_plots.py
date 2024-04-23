@@ -3,15 +3,13 @@ import os
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import gridspec
-from typing import Optional
 import seaborn as sb
 import pandas as pd
-import logging
-
-logger = logging.getLogger("PynmLogger")
 
 from py_neuromodulation import nm_IO, nm_stats
 
+import logging
+logger = logging.getLogger("PynmLogger")
 
 def plot_df_subjects(
     df,
@@ -19,8 +17,8 @@ def plot_df_subjects(
     y_col="performance_test",
     hue=None,
     title="channel specific performances",
-    PATH_SAVE: Optional[str] = None,
-    figsize_tuple: tuple = (5, 3),
+    PATH_SAVE: str | None = None,
+    figsize_tuple: tuple[float,float] = (5, 3),
 ):
     alpha_box = 0.4
     plt.figure(figsize=figsize_tuple, dpi=300)
@@ -54,17 +52,18 @@ def plot_df_subjects(
     )
 
     if hue is not None:
-        n_hues = df[hue].nunique()
+        # n_hues = df[hue].nunique() # Never used, remove?
 
         handles, labels = ax.get_legend_handles_labels()
-        l = plt.legend(
-            handles[0:n_hues],
-            labels[0:n_hues],
-            bbox_to_anchor=(1.05, 1),
-            loc=2,
-            title=hue,
-            borderaxespad=0.0,
-        )
+        # Never used, remove?
+        # l = plt.legend(
+        #     handles[0:n_hues],
+        #     labels[0:n_hues],
+        #     bbox_to_anchor=(1.05, 1),
+        #     loc=2,
+        #     title=hue,
+        #     borderaxespad=0.0,
+        # )
     plt.title(title)
     plt.ylabel(y_col)
     plt.xticks(rotation=90)
@@ -78,15 +77,15 @@ def plot_df_subjects(
 
 
 def plot_epoch(
-    X_epoch: np.array,
-    y_epoch: np.array,
+    X_epoch: np.ndarray,
+    y_epoch: np.ndarray,
     feature_names: list,
-    z_score: Optional[bool] = None,
+    z_score: bool | None = None,
     epoch_len: int = 4,
     sfreq: int = 10,
-    str_title: Optional[str] = None,
-    str_label: Optional[str] = None,
-    ytick_labelsize: Optional[float] = None,
+    str_title: str = "",
+    str_label: str = "",
+    ytick_labelsize: float | None = None,
 ):
     if z_score is None:
         X_epoch = stats.zscore(
@@ -94,7 +93,7 @@ def plot_epoch(
             axis=0,
             nan_policy="omit",
         ).T
-    y_epoch = np.stack(np.array(y_epoch))
+    y_epoch = np.stack([np.array(y_epoch)])
     plt.figure(figsize=(6, 6))
     plt.subplot(211)
     plt.imshow(X_epoch, aspect="auto")
@@ -133,7 +132,7 @@ def plot_epoch(
 
 
 def reg_plot(
-    x_col: str, y_col: str, data: pd.DataFrame, out_path_save: Optional[str] = None
+    x_col: str, y_col: str, data: pd.DataFrame, out_path_save: str | None = None
 ):
     plt.figure(figsize=(4, 4), dpi=300)
     rho, p = nm_stats.permutationTestSpearmansRho(
@@ -157,7 +156,7 @@ def plot_bar_performance_per_channel(
     ch_names,
     performances: dict,
     PATH_OUT: str,
-    sub: Optional[str] = None,
+    sub: str | None = None,
     save_str: str = "ch_comp_bar_plt.png",
     performance_metric: str = "Balanced Accuracy",
 ):
@@ -183,21 +182,21 @@ def plot_bar_performance_per_channel(
 
 def plot_corr_matrix(
     feature: pd.DataFrame,
-    feature_file: Optional[str] = None,
-    ch_name: Optional[str] = None,
-    feature_names: Optional[list[str]] = None,
+    feature_file: str = "",
+    ch_name: str = "",
+    feature_names: list[str] = [],
     show_plot=True,
-    OUT_PATH: Optional[str] = None,
+    OUT_PATH: str = "",
     feature_name_plt="Features_corr_matr",
     save_plot: bool = False,
-    save_plot_name: Optional[str] = None,
-    figsize: tuple[int] = (7, 7),
-    title: Optional[str] = None,
+    save_plot_name: str = "",
+    figsize: tuple[float, float] = (7, 7),
+    title: str = "",
     cbar_vmin: float = -1,
     cbar_vmax: float = 1.0,
 ):
     # cut out channel name for each column
-    if ch_name is not None:
+    if not ch_name:
         feature_col_name = [
             i[len(ch_name) + 1 :] for i in feature_names if ch_name in i
         ]
@@ -205,7 +204,7 @@ def plot_corr_matrix(
         feature_col_name = feature.columns
 
     plt.figure(figsize=figsize)
-    if feature_names is not None:
+    if len(feature_names) > 0: # Checking length to accomodate for tests passing a pandas Index
         corr = feature[feature_names].corr()
     else:
         corr = feature.corr()
@@ -217,8 +216,8 @@ def plot_corr_matrix(
         vmax=cbar_vmax,
         cmap="viridis",
     )
-    if title is None:
-        if ch_name is not None:
+    if not title:
+        if ch_name:
             plt.title("Correlation matrix features channel: " + str(ch_name))
         else:
             plt.title("Correlation matrix")
@@ -229,7 +228,7 @@ def plot_corr_matrix(
     #    plt.xticks([])
     #    plt.yticks([])
 
-    if save_plot and save_plot_name is None:
+    if save_plot and save_plot_name:
         plt_path = get_plt_path(
             OUT_PATH=OUT_PATH,
             feature_file=feature_file,
@@ -257,12 +256,12 @@ def plot_feature_series_time(features) -> None:
 
 
 def get_plt_path(
-    OUT_PATH: str | None = None,
-    feature_file: str | None = None,
-    ch_name: str | None = None,
-    str_plt_type: str | None = None,
-    feature_name: str | None = None,
-) -> None:
+    OUT_PATH: str = "",
+    feature_file: str = "",
+    ch_name: str = "",
+    str_plt_type: str = "",
+    feature_name: str = "",
+) -> str:
     """[summary]
 
     Parameters
@@ -278,8 +277,8 @@ def get_plt_path(
     feature_name : str, optional
         e.g. bandpower, stft, sharpwave_prominence, by default None
     """
-    if None not in (ch_name, OUT_PATH, feature_file):
-        if feature_name is None:
+    if (ch_name and OUT_PATH and feature_file):
+        if feature_name:
             plt_path = os.path.join(
                 OUT_PATH,
                 feature_file,
@@ -291,7 +290,7 @@ def get_plt_path(
                 feature_file,
                 str_plt_type + "_ch_" + ch_name + "_" + feature_name + ".png",
             )
-    elif None not in (OUT_PATH, feature_file) and ch_name is None:
+    elif (OUT_PATH and feature_file) and not ch_name:
         plt_path = os.path.join(
             OUT_PATH,
             feature_file,
@@ -308,23 +307,23 @@ def plot_epochs_avg(
     y_epoch: np.ndarray,
     epoch_len: int,
     sfreq: int,
-    feature_names: Optional[list[str]] = None,
-    feature_str_add: Optional[str] = None,
+    feature_names: list[str] = [],
+    feature_str_add: str = "",
     cut_ch_name_cols: bool = True,
-    ch_name: Optional[str] = None,
-    label_name: Optional[str] = None,
+    ch_name: str = "",
+    label_name: str = "",
     normalize_data: bool = True,
     show_plot: bool = True,
     save: bool = False,
-    OUT_PATH: Optional[str] = None,
-    feature_file: Optional[str] = None,
+    OUT_PATH: str = "",
+    feature_file: str = "",
     str_title: str = "Movement aligned features",
-    ytick_labelsize=None,
+    ytick_labelsize = None,
     figsize_x: float = 8,
     figsize_y: float = 8,
 ) -> None:
     # cut channel name of for axis + "_" for more dense plot
-    if feature_names is None:
+    if not feature_names:
         if cut_ch_name_cols and None not in (ch_name, feature_names):
             feature_names = [
                 i[len(ch_name) + 1 :]
@@ -426,7 +425,7 @@ def plot_grid_elec_3d(
             ecog_strip[:, 1],
             ecog_strip[:, 2],
             c=strip_color,
-            s=500,
+            s=500, # Bug? Third argument is s, what is this value?
             alpha=0.8,
             cmap="gray",
             marker="o",
@@ -435,16 +434,16 @@ def plot_grid_elec_3d(
 
 def plot_all_features(
     df: pd.DataFrame,
-    time_limit_low_s: Optional[float] = None,
-    time_limit_high_s: Optional[float] = None,
+    time_limit_low_s: float | None = None,
+    time_limit_high_s: float | None = None,
     normalize: bool = True,
     ytick_labelsize: int = 4,
-    clim_low: Optional[float] = None,
-    clim_high: Optional[float] = None,
+    clim_low: float | None = None,
+    clim_high: float | None = None,
     save: bool = False,
     title="all_feature_plt.pdf",
-    OUT_PATH: Optional[str] = None,
-    feature_file: Optional[str] = None,
+    OUT_PATH: str = "",
+    feature_file: str = "",
 ):
     if time_limit_high_s is not None:
         df = df[df["time"] < time_limit_high_s * 1000]
@@ -477,7 +476,7 @@ def plot_all_features(
     plt.colorbar()
     plt.tight_layout()
 
-    if save is True:
+    if save:
         plt_path = os.path.join(OUT_PATH, feature_file, title)
         plt.savefig(plt_path, bbox_inches="tight")
 
@@ -488,7 +487,7 @@ class NM_Plot:
         ecog_strip: np.ndarray | None = None,
         grid_cortex: np.ndarray | None = None,
         grid_subcortex: np.ndarray | None = None,
-        sess_right: Optional[bool] = False,
+        sess_right: bool | None = False,
         proj_matrix_cortex: np.ndarray | None = None,
     ) -> None:
         self.grid_cortex = grid_cortex
@@ -517,15 +516,15 @@ class NM_Plot:
 
     def plot_cortex(
         self,
-        grid_cortex: Optional[np.ndarray] = None,
-        grid_color: Optional[np.ndarray] = None,
-        ecog_strip: Optional[np.ndarray] = None,
-        strip_color: Optional[np.ndarray] = None,
-        sess_right: Optional[bool] = None,
+        grid_cortex: np.ndarray | pd.DataFrame | None = None,
+        grid_color: np.ndarray | None = None,
+        ecog_strip: np.ndarray | None = None,
+        strip_color: np.ndarray | None = None,
+        sess_right: bool | None = None,
         save: bool = False,
-        OUT_PATH: Optional[str] = None,
-        feature_file: Optional[str] = None,
-        feature_str_add: Optional[str] = None,
+        OUT_PATH: str = "",
+        feature_file: str = "",
+        feature_str_add: str = "",
         show_plot: bool = True,
         title: str = "Cortical grid",
         set_clim: bool = True,
@@ -539,15 +538,15 @@ class NM_Plot:
 
         if grid_cortex is None:
             if type(self.grid_cortex) is pd.DataFrame:
-                grid_cortex = np.array(self.grid_cortex)
+                grid_cortex = np.array(self.grid_cortex) 
             else:
                 grid_cortex = self.grid_cortex
 
         if ecog_strip is None:
             ecog_strip = self.ecog_strip
 
-        if sess_right is True:
-            grid_cortex[0, :] = grid_cortex[0, :] * -1
+        if sess_right:
+            grid_cortex[0, :] = grid_cortex[0, :] * -1 # type: ignore # Handled above
 
         fig, axes = plt.subplots(1, 1, facecolor=(1, 1, 1), figsize=(14, 9))
         axes.scatter(self.x_ecog, self.y_ecog, c="gray", s=0.01)
@@ -600,7 +599,6 @@ class NM_Plot:
             plt_path = get_plt_path(
                 OUT_PATH,
                 feature_file,
-                ch_name=None,
                 str_plt_type="PLOT_CORTEX",
                 feature_name=feature_str_add,
             )

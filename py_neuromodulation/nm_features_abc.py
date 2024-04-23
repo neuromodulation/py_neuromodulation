@@ -21,13 +21,13 @@ class Feature(ABC):
         pass
 
     @abstractmethod
-    def calc_feature(self, data: np.array, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         """
         Feature calculation method. Each method needs to loop through all channels
 
         Parameters
         ----------
-        data : np.array
+        data : np.ndarray
             (channels, time)
         features_compute : dict
         ch_names : Iterable[str]

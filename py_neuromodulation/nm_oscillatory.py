@@ -1,10 +1,8 @@
-from typing import Optional, Iterable
-
+from typing import Iterable
 import numpy as np
 from scipy import fft, signal
 
 from py_neuromodulation import nm_filter, nm_features_abc, nm_kalmanfilter
-
 
 class OscillatoryFeature(nm_features_abc.Feature):
     def __init__(
@@ -13,7 +11,7 @@ class OscillatoryFeature(nm_features_abc.Feature):
         self.s = settings
         self.sfreq = sfreq
         self.ch_names = ch_names
-        self.KF_dict = {}
+        self.KF_dict : dict = {}
 
         self.f_ranges_dict = settings["frequency_ranges_hz"]
         self.fband_names = list(settings["frequency_ranges_hz"].keys())
@@ -102,7 +100,7 @@ class OscillatoryFeature(nm_features_abc.Feature):
         self,
         features_compute: dict,
         data: np.ndarray,
-        feature_name: np.ndarray,
+        feature_name: str,
         est_name: str,
     ):
         for feature_est_name in list(self.s[est_name]["features"].keys()):
@@ -316,7 +314,7 @@ class BandPower(OscillatoryFeature):
         settings: dict,
         ch_names: Iterable[str],
         sfreq: float,
-        use_kf: Optional[bool] = None,
+        use_kf: bool | None = None,
     ) -> None:
         super().__init__(settings, ch_names, sfreq)
         bp_settings = self.s["bandpass_filter_settings"]

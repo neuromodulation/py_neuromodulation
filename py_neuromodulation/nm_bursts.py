@@ -1,4 +1,3 @@
-import enum
 import numpy as np
 from typing import Iterable
 from scipy import signal
@@ -53,7 +52,7 @@ class Burst(nm_features_abc.Feature):
         # create dict with fband, channel specific data store
         # for previous time_duration_s
         def init_ch_fband_dict() -> dict:
-            d = {}
+            d : dict = {}
             for ch in self.ch_names:
                 if ch not in d:
                     d[ch] = {}
@@ -63,7 +62,8 @@ class Burst(nm_features_abc.Feature):
             return d
 
         self.data_buffer = init_ch_fband_dict()
-
+        
+    @staticmethod
     def test_settings(
         settings: dict,
         ch_names: Iterable[str],
@@ -98,7 +98,7 @@ class Burst(nm_features_abc.Feature):
                 f"got: {settings['burst_settings']['burst_features'][burst_feature]}"
             )
 
-    def calc_feature(self, data: np.array, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         # filter_data returns (n_channels, n_fbands, n_samples)
         filtered_data = np.abs(
             signal.hilbert(self.bandpass_filter.filter_data(data), axis=2)
@@ -168,7 +168,7 @@ class Burst(nm_features_abc.Feature):
 
     @staticmethod
     def get_burst_amplitude_length(
-        beta_averp_norm, burst_thr: float, sfreq: float
+        beta_averp_norm, burst_thr: np.floating | float, sfreq: int | float
     ):
         """
         Analysing the duration of beta burst
@@ -179,7 +179,7 @@ class Burst(nm_features_abc.Feature):
         burst_length = []
         burst_amplitude = []
 
-        burst_time_points = np.where(deriv == True)[0]
+        burst_time_points = np.where(deriv)[0]
 
         for i in range(burst_time_points.size // 2):
             burst_length.append(
@@ -193,6 +193,5 @@ class Burst(nm_features_abc.Feature):
 
         # the last burst length (in case isburst == True) is omitted,
         # since the true burst length cannot be estimated
-        burst_length = np.array(burst_length) / sfreq
+        return burst_amplitude, np.array(burst_length) / sfreq
 
-        return burst_amplitude, burst_length

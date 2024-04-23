@@ -3,42 +3,36 @@
 from abc import ABC, abstractmethod
 import os
 import pathlib
-import _pickle as cPickle
-
-from .utils import _logging  # logger initialization
-
-# Logger use in different modules: logger = logging.getLogger("PynmLogger")
-
+import pickle
 
 import pandas as pd
-from sklearn import base
 
 from py_neuromodulation import (
-    nm_features,
     nm_IO,
-    nm_plots,
     nm_run_analysis,
     nm_settings,
 )
+
 
 _PathLike = str | os.PathLike
 
 
 class PNStream(ABC):
 
-    settings: dict
-    nm_channels: pd.DataFrame
-    run_analysis: nm_run_analysis.DataProcessor
-    features: nm_features.Features
-    coords: dict
-    sfreq: int | float
-    sfreq_feature: int | float = None
-    path_grids: _PathLike | None
-    model: base.BaseEstimator | None
-    sess_right: bool | None
-    verbose: bool
-    PATH_OUT: _PathLike | None
-    PATH_OUT_folder_name: _PathLike | None
+#    Toni: These were being declared as class variables, not instance variables 
+#    settings: dict
+#    nm_channels: pd.DataFrame
+#    run_analysis: nm_run_analysis.DataProcessor
+#    features: nm_features.Features
+#    coords: dict
+#    sfreq: int | float
+#    sfreq_feature: int | float | None = None
+#    path_grids: _PathLike | None
+#    model: base.BaseEstimator | None
+#    sess_right: bool | None
+#    verbose: bool
+#    PATH_OUT: _PathLike | None
+#    PATH_OUT_folder_name: _PathLike | None
 
     def __init__(
         self,
@@ -125,7 +119,7 @@ class PNStream(ABC):
 
     @abstractmethod
     def _add_timestamp(
-        self, feature_series: pd.Series, idx: int | None = None
+        self, feature_series: pd.Series, cnt_samples: int
     ) -> pd.Series:
         """Add to feature_series "time" keyword
         For Bids specify with fs_features, for real time analysis with current time stamp
@@ -166,7 +160,7 @@ class PNStream(ABC):
     def load_model(self, model_name: _PathLike) -> None:
         """Load sklearn model, that utilizes predict"""
         with open(model_name, "rb") as fid:
-            self.model = cPickle.load(fid)
+            self.model = pickle.load(fid)
 
     def save_after_stream(
         self,

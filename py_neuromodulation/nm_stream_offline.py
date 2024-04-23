@@ -6,18 +6,14 @@ import numpy as np
 import pandas as pd
 from itertools import count
 import logging
-from typing import Optional
-
-logger = logging.getLogger("PynmLogger")
-
 import mne
-
 from py_neuromodulation import (
     nm_generator,
-    nm_IO,
     nm_stream_abc,
     nm_define_nmchannels,
 )
+
+logger = logging.getLogger("PynmLogger")
 
 _PathLike = str | os.PathLike
 
@@ -194,11 +190,11 @@ class _OfflineStream(nm_stream_abc.PNStream):
 
     def plot_raw_signal(
         self,
-        sfreq: Optional[float] = None,
-        data: Optional[np.array] = None,
-        lowpass: Optional[float] = None,
-        highpass: Optional[float] = None,
-        picks: Optional[list] = None,
+        sfreq: float | None = None,
+        data: np.ndarray | None = None,
+        lowpass: float | None = None,
+        highpass: float | None = None,
+        picks: list | None = None,
         plot_time: bool = True,
         plot_psd: bool = False,
     ) -> None:
@@ -208,7 +204,7 @@ class _OfflineStream(nm_stream_abc.PNStream):
         ----------
         sfreq : float
             sampling frequency [Hz]
-        data : np.array, optional
+        data : np.ndarray, optional
             data (n_channels, n_times), by default None
         plot_time : bool, optional
             mne.io.RawArray.plot(), by default True
@@ -255,10 +251,10 @@ class Stream(_OfflineStream):
     def __init__(
         self,
         sfreq: int | float,
-        data: Optional[np.ndarray | pd.DataFrame] = None,
-        nm_channels: Optional[pd.DataFrame | _PathLike] = None,
+        data: np.ndarray | pd.DataFrame | None = None,
+        nm_channels: pd.DataFrame | _PathLike | None = None,
         settings: dict | _PathLike | None = None,
-        sampling_rate_features_hz: Optional[float] = None,
+        sampling_rate_features_hz: float | None = None,
         line_noise: int | float | None = 50,
         path_grids: _PathLike | None = None,
         coord_names: list | None = None,
@@ -315,11 +311,11 @@ class Stream(_OfflineStream):
 
         self.data = data
 
-        self.target_idx_initialized = False
+        self.target_idx_initialized : bool = False
 
     def run(
         self,
-        data: Optional[np.ndarray | pd.DataFrame] = None,
+        data: np.ndarray | pd.DataFrame | None = None,
         out_path_root: _PathLike | None = None,
         folder_name: str = "sub",
         parallel: bool = False,

@@ -1,17 +1,14 @@
-import os
-import pickle
-
 import numpy as np
 import pandas as pd
+from typing import Iterator
 
-import py_neuromodulation as nm
 from py_neuromodulation import nm_generator
-from typing import Optional
+from py_neuromodulation.nm_stream_abc import PNStream
 
 
-class EpochStream(nm.nm_stream.PNStream):
+class EpochStream(PNStream):
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__() # Bug, needs fixing: missing arguments
 
     def read_epoch_data(self, path_epoch) -> None:
         """Read npy array of epochs. Shape is assumed to be (samples, channels, time)
@@ -24,7 +21,7 @@ class EpochStream(nm.nm_stream.PNStream):
 
     def get_data(
         self,
-    ) -> np.array:
+    ) -> Iterator[np.ndarray]:
         """This data generator returns one epoch at a time.
         Data will thus be analyzed in steps of the epoch size
 
@@ -50,7 +47,7 @@ class EpochStream(nm.nm_stream.PNStream):
         self.feature_arr = pd.DataFrame()
         self.feature_arr_list = []
         epoch_gen = self.get_data()
-        idx_epoch = 0
+        # idx_epoch = 0 # Never used, remove?
 
         while True:
             data = next(
@@ -84,7 +81,7 @@ class EpochStream(nm.nm_stream.PNStream):
             self.feature_arr_list.append(self.feature_arr)
 
     def _add_timestamp(
-        self, feature_series: pd.Series, idx: Optional[int] = None
+        self, feature_series: pd.Series, cnt_samples: int
     ) -> pd.Series:
         # in case of epochs no timestamp is necessary
         return feature_series

@@ -1,36 +1,19 @@
-from re import VERBOSE
-import sys
 import os
 import numpy as np
-from pathlib import Path
-from scipy import stats
 import pandas as pd
 from multiprocessing import Pool
-from sklearn import linear_model, discriminant_analysis, ensemble, svm
-from sklearn import metrics
-from sklearn.base import clone
-from sklearn import model_selection
-from sklearn.utils import class_weight
-from scipy.ndimage import binary_dilation, binary_erosion, label
-import _pickle as cPickle
-from scipy import io
-from matplotlib import pyplot as plt
-import matplotlib
-import bids
+from sklearn import metrics, model_selection, linear_model
 from bids import BIDSLayout
-from itertools import product
-import nibabel as nib
+from bids.layout.models import BIDSFile
 
 import py_neuromodulation
-from py_neuromodulation import nm_decode, nm_analysis, nm_IO
-from py_neuromodulation import nm_stream_offline
-from typing import Optional
+from py_neuromodulation import nm_decode, nm_analysis, nm_IO, nm_stream_offline
 
 
 class CohortRunner:
     def __init__(
         self,
-        cohorts: Optional[dict] = None,
+        cohorts: dict | None = None,
         ML_model_name="LM",
         model=linear_model.LogisticRegression(class_weight="balanced"),
         eval_method=metrics.balanced_accuracy_score,
@@ -106,7 +89,7 @@ class CohortRunner:
 
     def multiprocess_pipeline_run_wrapper(self, PATH_RUN):
 
-        if type(PATH_RUN) is bids.layout.models.BIDSFile:
+        if type(PATH_RUN) is BIDSFile:
             PATH_RUN = PATH_RUN.path
 
         # set BIDS PATH and out path
@@ -302,20 +285,21 @@ class CohortRunner:
             feature_reader.label = np.array(feature_reader.feature_arr["mov"] > 0, dtype=int)
             subject_name = feature_file[:2]
             task_name = "hand_movement"
-            run_number = 1
+            # run_number = 1 # Unused variable, remove?
         else:
             subject_name = feature_file[
                 feature_file.find("sub-") + 4 : feature_file.find("_ses")
             ]
-            sess_name = feature_file[
-                feature_file.find("ses-") + 4 : feature_file.find("_task")
-            ]
-            task_name = feature_file[
-                feature_file.find("task-") + 5 : feature_file.find("_run")
-            ]
-            run_number = feature_file[
-                feature_file.find("run-") + 4 : feature_file.find("_ieeg")
-            ]
+            # Unused variables, remove?
+            #sess_name = feature_file[
+            #    feature_file.find("ses-") + 4 : feature_file.find("_task")
+            #]
+            #task_name = feature_file[
+            #    feature_file.find("task-") + 5 : feature_file.find("_run")
+            #]
+            #run_number = feature_file[
+            #    feature_file.find("run-") + 4 : feature_file.find("_ieeg")
+            #]
         print(feature_reader.label_name)
         decoder = nm_decode.Decoder(
             features=feature_reader.feature_arr,

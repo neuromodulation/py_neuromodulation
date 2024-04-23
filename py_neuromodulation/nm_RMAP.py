@@ -4,10 +4,9 @@ import wget
 
 
 # from numba import jit
-from scipy import stats
 import scipy.io as sio
 import pandas as pd
-from typing import Optional, Union, Tuple, List
+from typing import Union, Tuple, List
 import nibabel as nib
 from matplotlib import pyplot as plt
 
@@ -185,14 +184,14 @@ class ConnectivityChannelSelector:
         plt.show()
 
     def get_closest_node(
-        self, coord: Union[List, np.array]
+        self, coord: List | np.ndarray
     ) -> Tuple[List, List]:
         """Given a list or np.array of coordinates, return the closest nodes in the
         grid and their indices.
 
         Parameters
         ----------
-        coord : np.array
+        coord : np.ndarray
             MNI coordinates with shape (num_channels, 3)
 
         Returns
@@ -209,7 +208,9 @@ class ConnectivityChannelSelector:
         return [self.grid[idx] for idx in idx_], idx_
 
     def get_rmap_correlations(
-        self, fps: Union[list, np.array], RMAP_use: Optional[np.array] = None
+        self, 
+        fps: list | np.ndarray, 
+        RMAP_use: np.ndarray | None = None
     ) -> List:
         """Calculate correlations of passed fingerprints with the RMAP
 
@@ -217,7 +218,7 @@ class ConnectivityChannelSelector:
         ----------
         fps : Union[list, np.array]
             List of fingerprints
-        RMAP_use : np.array, optional
+        RMAP_use : np.ndarray, optional
             Passed RMAP, by default None
 
         Returns
@@ -235,8 +236,8 @@ class ConnectivityChannelSelector:
 
     def load_connectome(
         self,
-        whole_brain_connectome: Optional[bool] = None,
-        func_connectivity: Optional[bool] = None,
+        whole_brain_connectome: bool | None = None,
+        func_connectivity: bool | None = None,
     ) -> None:
         """Load connectome, if not available download connectome from
         Zenodo.
@@ -326,8 +327,8 @@ class RMAPCross_Val_ChannelSelector:
     def get_fingerprints_from_path_with_cond(
         self,
         path_dir: str,
-        str_to_omit: Optional[str] = None,
-        str_to_keep: Optional[str] = None,
+        str_to_omit: str | None = None,
+        str_to_keep: str | None = None,
         keep: bool = True,
     ):
 
@@ -351,8 +352,8 @@ class RMAPCross_Val_ChannelSelector:
 
     @staticmethod
     def save_Nii(
-        fp: np.array,
-        affine: np.array,
+        fp: np.ndarray,
+        affine: np.ndarray,
         name: str = "img.nii",
         reshape: bool = True,
     ):
@@ -364,7 +365,7 @@ class RMAPCross_Val_ChannelSelector:
 
         nib.save(img, name)
 
-    def get_RMAP(self, X: np.array, y: np.array):
+    def get_RMAP(self, X: np.ndarray, y: np.ndarray):
         # faster than calculate_RMap_numba
         # https://stackoverflow.com/questions/71252740/correlating-an-array-row-wise-with-a-vector/71253141#71253141
 
@@ -515,7 +516,7 @@ class RMAPCross_Val_ChannelSelector:
         return fp_pairs[idx_max][0:3]
 
     def plot_performance_prediction_correlation(
-        per_left_out, per_predict, out_path_save: Optional[str] = None
+        per_left_out, per_predict, out_path_save: str | None = None
     ):
         df_plt_corr = pd.DataFrame()
         df_plt_corr["test_performance"] = per_left_out

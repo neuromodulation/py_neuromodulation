@@ -177,7 +177,7 @@ nm_plots.plot_corr_matrix(
     ch_name="ECOG_RIGHT_0-avgref",
     feature_names=feature_reader.feature_arr.filter(
         regex="ECOG_RIGHT_0-avgref"
-    ).columns,
+    ).columns, # TONI: plot_corr_matrix expects a list as per the type hint, but here a pandas Index is passed
     feature_file=feature_reader.feature_file,
     show_plot=True,
     figsize=(15, 15),

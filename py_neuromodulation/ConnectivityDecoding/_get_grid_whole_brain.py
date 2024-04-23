@@ -1,9 +1,6 @@
 import nibabel as nib
 import numpy as np
-import scipy.io as sio
-import os
 from matplotlib import pyplot as plt
-
 
 class NiiToMNI:
 
@@ -12,7 +9,7 @@ class NiiToMNI:
         PATH_nii_file: str = r"C:\code\RMap_ROI_Estimation\Automated Anatomical Labeling 3 (Rolls 2020).nii",
     ) -> None:
 
-        self.img = nib.load(PATH_nii_file)
+        self.img = nib.Nifti1Image.from_filename(PATH_nii_file)
         self.data = self.img.get_fdata()
 
     def downsample_nii(
@@ -55,7 +52,7 @@ class NiiToMNI:
 
     def select_non_zero_voxels(
         self,
-        mni_coordinates: np.array,
+        mni_coordinates: np.ndarray,
     ):
 
         coords = np.hstack(
@@ -74,22 +71,22 @@ class NiiToMNI:
             coord_.append(mni_coordinates[i, :])
 
         # get only voxel values non-zero
-        ival = np.array(ival)
-        coord_ = np.array(coord_)
-        ival_non_zero = ival[ival != 0]
-        coord_non_zero = coord_[ival != 0]
+        ival_arr  = np.array(ival)
+        coord_arr = np.array(coord_)
+        ival_non_zero = ival_arr[ival != 0]
+        coord_non_zero = coord_arr[ival != 0]
         print(coord_non_zero.shape)
 
         return coord_non_zero, ival_non_zero
 
-    def plot_3d_coordinates(self, coord_non_zero: np.array):
+    def plot_3d_coordinates(self, coord_non_zero: np.ndarray):
         fig = plt.figure()
         ax = fig.add_subplot(111, projection="3d")
         ax.scatter(
             coord_non_zero[:, 0],
             coord_non_zero[:, 1],
             coord_non_zero[:, 2],
-            s=50,
+            s=50, # Bug? Third and fourth argument are s
             alpha=0.2,
         )
         plt.show()

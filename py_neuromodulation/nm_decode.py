@@ -2,35 +2,29 @@ from sklearn import (
     model_selection,
     metrics,
     linear_model,
-    discriminant_analysis,
-    base,
     decomposition,
     cross_decomposition,
 )
-from skopt.space import Real, Integer, Categorical
-from skopt.utils import use_named_args
-from skopt import gp_minimize, Optimizer
-from sklearn.linear_model import ElasticNet
+from skopt import  Optimizer
 from sklearn.base import clone
-from sklearn.utils import class_weight
 from scipy.ndimage import binary_dilation, binary_erosion
 from scipy.ndimage import label as label_ndimage
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.under_sampling import RandomUnderSampler
 import pandas as pd
 import os
-import json
 import numpy as np
 #from numba import jit
 #import xgboost
 from copy import deepcopy
 
 from mrmr import mrmr_classif
-from typing import Optional, Type
-import _pickle as cPickle
+from typing import Type, List
+import pickle
 
 
 class CV_res:
+
     def __init__(
         self,
         get_movement_detection_rate: bool = False,
@@ -39,56 +33,58 @@ class CV_res:
         model_save: bool = False,
     ) -> None:
 
-        self.score_train = []
-        self.score_test = []
-        self.y_test = []
-        self.y_train = []
-        self.y_test_pr = []
-        self.y_train_pr = []
-        self.X_test = []
-        self.X_train = []
-        self.coef = []
+        self.score_train : List = []
+        self.score_test : List = []
+        self.y_test : List = []
+        self.y_train : List = []
+        self.y_test_pr : List = []
+        self.y_train_pr : List = []
+        self.X_test : List = []
+        self.X_train : List = []
+        self.coef : List = []
+
         if get_movement_detection_rate is True:
-            self.mov_detection_rates_test = []
-            self.tprate_test = []
-            self.fprate_test = []
-            self.mov_detection_rates_train = []
-            self.tprate_train = []
-            self.fprate_train = []
+            self.mov_detection_rates_test : List = []
+            self.tprate_test : List = []
+            self.fprate_test : List = []
+            self.mov_detection_rates_train : List = []
+            self.tprate_train : List = []
+            self.fprate_train : List = []
         if RUN_BAY_OPT is True:
-            self.best_bay_opt_params = []
+            self.best_bay_opt_params: List = []
         if mrmr_select is True:
-            self.mrmr_select = []
+            self.mrmr_select : List = []
         if model_save is True:
-            self.model_save = []
+            self.model_save : List = []
 
 
 class Decoder:
 
-    features: pd.DataFrame
-    label: np.ndarray
-    model: base.BaseEstimator
-    cv_method: model_selection.BaseCrossValidator
-    use_nested_cv: bool
-    threshold_score: bool
-    mov_detection_threshold: float
-    TRAIN_VAL_SPLIT: bool
-    RUN_BAY_OPT: bool
-    save_coef: bool
-    get_movement_detection_rate: bool
-    min_consequent_count: int
-    STACK_FEATURES_N_SAMPLES: bool
-    time_stack_n_samples: int
-    ros: RandomOverSampler = None
-    rus: RandomUnderSampler = None
-    VERBOSE: bool = False
-    ch_ind_data: dict = {}
-    grid_point_ind_data: dict = {}
-    active_gridpoints: list = []
-    feature_names: list = []
-    ch_ind_results: dict = {}
-    gridpoint_ind_results: dict = {}
-    all_ch_results: dict = {}
+    # TONI: this are defined as class variables, not instance variables
+    # features: pd.DataFrame
+    # label: np.ndarray
+    # model: base.BaseEstimator
+    # cv_method: model_selection.BaseCrossValidator
+    # use_nested_cv: bool
+    # threshold_score: bool
+    # mov_detection_threshold: float
+    # TRAIN_VAL_SPLIT: bool
+    # RUN_BAY_OPT: bool
+    # save_coef: bool
+    # get_movement_detection_rate: bool
+    # min_consequent_count: int
+    # STACK_FEATURES_N_SAMPLES: bool
+    # time_stack_n_samples: int
+    # ros: RandomOverSampler = None
+    # rus: RandomUnderSampler = None
+    # VERBOSE: bool = False
+    # ch_ind_data: dict = {}
+    # grid_point_ind_data: dict = {}
+    # active_gridpoints: list = []
+    # feature_names: list = []
+    # ch_ind_results: dict = {}
+    # gridpoint_ind_results: dict = {}
+    # all_ch_results: dict = {}
 
     class ClassMissingException(Exception):
         def __init__(
@@ -103,10 +99,10 @@ class Decoder:
 
     def __init__(
         self,
-        features: Optional[pd.DataFrame] = None,
-        label: Optional[np.ndarray] = None,
-        label_name: Optional[str] = None,
-        used_chs: Optional[list[str]] = None,
+        features: pd.DataFrame | None = None,
+        label: np.ndarray | None = None,
+        label_name: str | None = None,
+        used_chs: list[str] | None = None,
         model=linear_model.LinearRegression(),
         eval_method=metrics.r2_score,
         cv_method=model_selection.KFold(n_splits=3, shuffle=False),
@@ -122,7 +118,7 @@ class Decoder:
         min_consequent_count: int = 3,
         bay_opt_param_space: list = [],
         VERBOSE: bool = False,
-        sfreq: Optional[int] = None,
+        sfreq: int | None = None,
         undersampling: bool = False,
         oversampling: bool = False,
         mrmr_select: bool = False,
@@ -384,7 +380,7 @@ class Decoder:
 
         Parameters
         ----------
-        prediction : np.array
+        prediction : np.ndarray
             numpy array of either predictions or labels, that is going to be grouped
         threshold : float, optional
             threshold to be applied to 'prediction', by default 0.5
@@ -393,7 +389,7 @@ class Decoder:
 
         Returns
         -------
-        labeled_array : np.array
+        labeled_array : np.ndarray
             grouped vector with incrementing number for movement blocks
         labels_count : int
             count of individual movement blocks
@@ -428,10 +424,10 @@ class Decoder:
         -------
         mov_detection_rate : float
             movement detection rate, where at least 'min_consequent_count' samples where high in prediction
-        fpr : np.array
-            sklearn.metrics false positive rate np.array
-        tpr : np.array
-            sklearn.metrics true positive rate np.array
+        fpr : np.ndarray
+            sklearn.metrics false positive rate np.ndarray
+        tpr : np.ndarray
+            sklearn.metrics true positive rate np.ndarray
         """
 
         pred_grouped, _ = self.get_movement_grouped_array(
@@ -661,7 +657,7 @@ class Decoder:
         y_train,
         X_test=None,
         y_test=None,
-        cv_res: Optional[Type[CV_res]] = None,
+        cv_res: Type[CV_res] | None = None,
         return_fitted_model_only: bool = False,
         save_data=True,
     ):
@@ -989,4 +985,4 @@ class Decoder:
 
         print("model being saved to: " + str(PATH_OUT))
         with open(PATH_OUT, "wb") as output:  # Overwrites any existing file.
-            cPickle.dump(self, output)
+            pickle.dump(self, output)

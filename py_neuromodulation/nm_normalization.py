@@ -41,7 +41,7 @@ class RawNormalizer:
         sampling_rate_features_hz: int,
         normalization_method: str = "zscore",
         normalization_time_s: int | float = 30,
-        clip: bool | int | float = False,
+        clip: bool = False,
     ) -> None:
         """Normalize raw data.
 
@@ -63,11 +63,11 @@ class RawNormalizer:
         self.clip = clip
         self.num_samples_normalize = int(normalization_time_s * sfreq)
         self.add_samples = int(sfreq / sampling_rate_features_hz)
-        self.previous = None
+        self.previous: np.ndarray = np.array([]) # Default empty array
 
     def process(self, data: np.ndarray) -> np.ndarray:
         data = data.T
-        if self.previous is None:
+        if self.previous.size == 0: # Check if empty
             self.previous = data
             return data.T
 
@@ -92,7 +92,7 @@ class FeatureNormalizer:
         sampling_rate_features_hz: int,
         normalization_method: str = "zscore",
         normalization_time_s: int | float = 30,
-        clip: bool | int | float = False,
+        clip: bool = False,
     ) -> None:
         """Normalize raw data.
 
@@ -115,10 +115,10 @@ class FeatureNormalizer:
         self.num_samples_normalize = int(
             normalization_time_s * sampling_rate_features_hz
         )
-        self.previous = None
+        self.previous: np.ndarray = np.array([])
 
     def process(self, data: np.ndarray) -> np.ndarray:
-        if self.previous is None:
+        if self.previous.size == 0:
             self.previous = data
             return data
 

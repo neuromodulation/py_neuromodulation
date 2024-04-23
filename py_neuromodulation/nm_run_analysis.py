@@ -5,9 +5,6 @@ import math
 import os
 from time import time
 from typing import Protocol, Type
-import logging
-
-logger = logging.getLogger("PynmLogger")
 
 import numpy as np
 import pandas as pd
@@ -22,6 +19,11 @@ from py_neuromodulation import (
     nm_resample,
     nm_filter_preprocessing,
 )
+
+import logging
+
+logger = logging.getLogger("PynmLogger")
+
 
 _PathLike = str | os.PathLike
 
@@ -82,12 +84,12 @@ class DataProcessor:
         self.settings = self._load_settings(settings)
         self.nm_channels = self._load_nm_channels(nm_channels)
 
-        self.sfreq_features = self.settings["sampling_rate_features_hz"]
-        self._sfreq_raw_orig = sfreq
-        self.sfreq_raw = math.floor(sfreq)
-        self.line_noise = line_noise
-        self.path_grids = path_grids
-        self.verbose = verbose
+        self.sfreq_features: int | float = self.settings["sampling_rate_features_hz"]
+        self._sfreq_raw_orig: int | float = sfreq
+        self.sfreq_raw: int | float = math.floor(sfreq)
+        self.line_noise: int | float | None = line_noise
+        self.path_grids: _PathLike | None = path_grids
+        self.verbose: bool = verbose
 
         self.features_previous = None
 
@@ -96,6 +98,7 @@ class DataProcessor:
         self.preprocessors: list[Preprocessor] = []
         for preprocessing_method in self.settings["preprocessing"]:
             settings_str = f"{preprocessing_method}_settings"
+            preprocessor: Preprocessor
             match preprocessing_method:
                 case "raw_resampling":
                     preprocessor = nm_resample.Resampler(
@@ -179,7 +182,7 @@ class DataProcessor:
                 return val < 0
             return val > 0
 
-        coords = {}
+        coords: dict[str, dict[str, list | np.ndarray] ] = {}
 
         for coord_region in [
             coord_loc + "_" + lat
@@ -206,8 +209,7 @@ class DataProcessor:
                     ch_type in coord_name
                 ):
                     positions.append(coord)
-            positions = np.array(positions, dtype=np.float64) * 1000
-            coords[coord_region]["positions"] = positions
+            coords[coord_region]["positions"] = np.array(positions, dtype=np.float64) * 1000
 
         return coords
 
@@ -321,7 +323,7 @@ class DataProcessor:
             )
 
         return self._add_coordinates(
-            coord_names=coord_names, coord_list=coord_list
+            coord_names=coord_names, coord_list=coord_list  # type: ignore # None case handled above
         )
 
     def process(self, data: np.ndarray) -> pd.Series:
@@ -396,7 +398,7 @@ class DataProcessor:
         """Save sidecar incuding fs, coords, sess_right to
         out_path_root and subfolder 'folder_name'.
         """
-        sidecar = {
+        sidecar : dict = {
             "original_fs": self._sfreq_raw_orig,
             "final_fs": self.sfreq_raw,
             "sfreq": self.sfreq_features,

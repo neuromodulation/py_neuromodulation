@@ -1,11 +1,6 @@
 import json
 import os
-import sys
 from pathlib import Path
-import logging
-
-logger = logging.getLogger("PynmLogger")
-
 
 import mne
 import mne_bids
@@ -17,6 +12,10 @@ import pyarrow
 from pyarrow import csv
 
 import py_neuromodulation
+
+import logging
+logger = logging.getLogger("PynmLogger")
+
 
 _PathLike = str | os.PathLike
 
@@ -212,7 +211,7 @@ def save_features_and_settings(
 
     # create out folder if doesn't exist
     if not os.path.exists(os.path.join(out_path, folder_name)):
-        logger.Info(f"Creating output folder: {folder_name}")
+        logger.info(f"Creating output folder: {folder_name}")
         os.makedirs(os.path.join(out_path, folder_name))
 
     dict_sidecar = {"fs": fs, "coords": coords, "line_noise": line_noise}
@@ -276,7 +275,7 @@ def save_features(
 
 
 def save_sidecar(
-    sidecar: dict, path_out: _PathLike, folder_name: str | None = None
+    sidecar: dict, path_out: _PathLike, folder_name: str = ""
 ) -> None:
     path_out = _pathlike_to_str(path_out)
     save_general_dict(sidecar, path_out, "_SIDECAR.json", folder_name)
@@ -285,10 +284,10 @@ def save_sidecar(
 def save_general_dict(
     dict_: dict,
     path_out: _PathLike,
-    str_add: str,
-    folder_name: str | None = None,
+    str_add: str = "",
+    folder_name: str = "",
 ) -> None:
-    if folder_name is not None:
+    if folder_name:
         path_out = os.path.join(path_out, folder_name, folder_name + str_add)
 
     with open(path_out, "w") as f:
