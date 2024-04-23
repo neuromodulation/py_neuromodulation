@@ -89,7 +89,7 @@ class RawNormalizer:
 class FeatureNormalizer:
     def __init__(
         self,
-        sampling_rate_features_hz: int,
+        sampling_rate_features_hz: int | float,
         normalization_method: str = "zscore",
         normalization_time_s: int | float = 30,
         clip: bool = False,
