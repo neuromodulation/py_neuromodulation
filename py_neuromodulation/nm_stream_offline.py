@@ -128,11 +128,11 @@ class _GenericStream(nm_stream_abc.PNStream):
 
     def _process_batch(self, data_batch, cnt_samples):
         feature_series = self.run_analysis.process(
-            data_batch.astype(np.float64)
+            data_batch[1].astype(np.float64)
         )
         feature_series = self._add_timestamp(feature_series, cnt_samples)
         feature_series = self._add_target(
-            feature_series=feature_series, data=data_batch
+            feature_series=feature_series, data=data_batch[1]
         )
         return feature_series
 
@@ -205,9 +205,7 @@ class _GenericStream(nm_stream_abc.PNStream):
                 if next_item is not None:
                     time_, data_batch = next_item
                 else:
-                    # Handle the case where no more data is available
-                    break  # or continue, based on your logic
-
+                    break 
 
                 if data_batch is None:
                     print(" data is None")

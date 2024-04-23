@@ -114,4 +114,4 @@ def setup_databatch():
     )
     data_batch = next(generator, None)
 
-    return [raw.ch_names, raw.get_channel_types(), raw.info["bads"], data_batch]
+    return [raw.ch_names, raw.get_channel_types(), raw.info["bads"], data_batch[1]]

@@ -10,9 +10,9 @@ import threading
 import time 
 import random
 
-test_general_lsl = True
+test_general_lsl = False
 test_offline_lsl = True
-test_live_lsl = True
+test_live_lsl = False
 f_name = "/Users/Sam/charite/py_neuro/py_neuromodulation/py_neuromodulation/data/sub-testsub/ses-EphysMedOff/ieeg/sub-testsub_ses-EphysMedOff_task-gripforce_run-0_ieeg.vhdr"
 
     

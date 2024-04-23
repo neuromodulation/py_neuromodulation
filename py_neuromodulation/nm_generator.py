@@ -66,7 +66,7 @@ class LSLStream:
         try:
             self.stream = StreamLSL(name=stream_name, bufsize=2).connect(timeout=2)
         except Exception as e:
-            msg =f"Could not connect to stream: {e}. No stream is running and under the name {stream_name}"
+            msg =f"Could not connect to stream: {e}. No stream is running under the name {stream_name}"
             logger.warning(msg)
             raise RuntimeError(msg)
         # self.stream._inlet.recover = False
