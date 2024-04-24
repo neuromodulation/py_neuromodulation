@@ -48,3 +48,8 @@ class Resampler:
         if not self.up:
             return data
         return mne.filter.resample(data.astype(np.float64), up=self.up, down=1.0)
+
+    # TODO: implement this method
+    def test_settings(self, settings: dict):
+        pass
+        

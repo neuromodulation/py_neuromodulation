@@ -84,6 +84,12 @@ class RawNormalizer:
             self.previous = self.previous[1:]
 
         return data.T
+    
+    # TODO: implement this method
+    def test_settings(self, settings: dict):
+        pass
+        
+
 
 
 class FeatureNormalizer:

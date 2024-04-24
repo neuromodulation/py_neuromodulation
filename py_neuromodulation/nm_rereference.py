@@ -95,3 +95,8 @@ class ReReferencer:
             return self.ref_matrix @ data
         else:
             return data
+
+    # TODO: implement this method
+    def test_settings(self, settings: dict):
+        pass
+        

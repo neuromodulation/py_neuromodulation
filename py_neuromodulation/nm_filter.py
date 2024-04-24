@@ -217,3 +217,8 @@ class NotchFilter:
             copy=True,
             pad="reflect_limited",
         )
+
+    # TODO: implement this method
+    def test_settings(self, settings: dict):
+        pass
+        
