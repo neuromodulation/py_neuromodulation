@@ -8,8 +8,8 @@ from bids.layout.models import BIDSFile
 
 from py_neuromodulation.nm_decode import Decoder
 from py_neuromodulation.nm_analysis import Feature_Reader
-from py_neuromodulation.nm_IO import PYNM_DIR, get_run_list_indir 
-from py_neuromodulation import Stream
+from py_neuromodulation.nm_IO import get_run_list_indir 
+from py_neuromodulation import Stream, PYNM_DIR
 
 class CohortRunner:
     def __init__(

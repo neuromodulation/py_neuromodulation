@@ -7,7 +7,7 @@ import pickle
 
 import pandas as pd
 
-from py_neuromodulation import nm_IO
+from py_neuromodulation import nm_IO, PYNM_DIR
 from py_neuromodulation.nm_run_analysis import DataProcessor
 from py_neuromodulation.nm_settings import get_default_settings
 from py_neuromodulation.nm_types import _PathLike
@@ -58,7 +58,7 @@ class PNStream(ABC):
 
         self.nm_channels = self._load_nm_channels(nm_channels)
         if path_grids is None:
-            path_grids = nm_IO.PYNM_DIR
+            path_grids = PYNM_DIR
         self.path_grids = path_grids
         self.verbose = verbose
         self.sfreq = sfreq

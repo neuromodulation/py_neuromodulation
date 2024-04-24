@@ -1,9 +1,7 @@
 """Module for handling settings."""
-import pathlib
 
-import pandas as pd
-
-from py_neuromodulation.nm_IO import PYNM_DIR, read_settings
+from py_neuromodulation import PYNM_DIR
+from py_neuromodulation.nm_IO import  read_settings
 
 
 def get_default_settings() -> dict:

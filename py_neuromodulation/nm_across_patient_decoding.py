@@ -7,7 +7,7 @@ from sklearn import metrics, linear_model, model_selection
 # from py_neuromodulation import nm_RMAP
 
 from py_neuromodulation.nm_decode import Decoder, CV_res
-from py_neuromodulation.nm_IO import PYNM_DIR 
+from py_neuromodulation import PYNM_DIR 
 
 
 class AcrossPatientRunner:

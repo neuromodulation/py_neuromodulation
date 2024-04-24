@@ -10,7 +10,7 @@ import nibabel as nib
 from matplotlib import pyplot as plt
 
 from py_neuromodulation.nm_plots import reg_plot
-from py_neuromodulation.nm_IO import PYNM_DIR 
+from py_neuromodulation import PYNM_DIR 
 
 LIST_STRUC_UNCONNECTED_GRIDPOINTS_HULL = [256, 385, 417, 447, 819, 914]
 LIST_STRUC_UNCONNECTED_GRIDPOINTS_WHOLEBRAIN = [

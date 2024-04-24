@@ -1,5 +1,10 @@
-# logger initialization first to prevent circular import
 from .utils import _logging  
+from pathlib import PurePath
+
+# Define constant for py_nm directory
+PYNM_DIR = PurePath(__file__).parent
+
+# logger initialization first to prevent circular import
 logger = _logging.logger
 
 # Bring Stream and DataProcessor classes to top namespace

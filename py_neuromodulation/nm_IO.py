@@ -12,10 +12,8 @@ import pyarrow
 from pyarrow import csv
 
 from py_neuromodulation.nm_types import _PathLike
-from py_neuromodulation import logger
+from py_neuromodulation import logger, PYNM_DIR
 
-# Define constant for py_nm directory
-PYNM_DIR = Path(__file__).parent.resolve()
 
 def load_nm_channels(
     nm_channels: pd.DataFrame | _PathLike,
