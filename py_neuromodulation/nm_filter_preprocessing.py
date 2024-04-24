@@ -1,6 +1,6 @@
 import numpy as np
 
-from py_neuromodulation import nm_filter
+from py_neuromodulation.nm_filter import MNEFilter
 
 
 class PreprocessingFilter:
@@ -10,9 +10,9 @@ class PreprocessingFilter:
         self.sfreq = sfreq
         self.filters = []
 
-        if self.s["preprocessing_filter"]["bandstop_filter"] is True:
+        if self.s["preprocessing_filter"]["bandstop_filter"]:
             self.filters.append(
-                nm_filter.MNEFilter(
+                MNEFilter(
                     f_ranges=[
                         self.s["preprocessing_filter"][
                             "bandstop_filter_settings"
@@ -27,9 +27,9 @@ class PreprocessingFilter:
                 )
             )
 
-        if self.s["preprocessing_filter"]["bandpass_filter"] is True:
+        if self.s["preprocessing_filter"]["bandpass_filter"]:
             self.filters.append(
-                nm_filter.MNEFilter(
+                MNEFilter(
                     f_ranges=[
                         self.s["preprocessing_filter"][
                             "bandpass_filter_settings"
@@ -43,9 +43,9 @@ class PreprocessingFilter:
                     verbose=False,
                 )
             )
-        if self.s["preprocessing_filter"]["lowpass_filter"] is True:
+        if self.s["preprocessing_filter"]["lowpass_filter"]:
             self.filters.append(
-                nm_filter.MNEFilter(
+                MNEFilter(
                     f_ranges=[
                         None,
                         self.s["preprocessing_filter"][
@@ -57,9 +57,9 @@ class PreprocessingFilter:
                     verbose=False,
                 )
             )
-        if self.s["preprocessing_filter"]["highpass_filter"] is True:
+        if self.s["preprocessing_filter"]["highpass_filter"]:
             self.filters.append(
-                nm_filter.MNEFilter(
+                MNEFilter(
                     f_ranges=[
                         self.s["preprocessing_filter"][
                             "highpass_filter_settings"

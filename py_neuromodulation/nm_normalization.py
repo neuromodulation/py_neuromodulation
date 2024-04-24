@@ -207,7 +207,7 @@ def _normalize_and_clip(
 
 def _clip(data: np.ndarray, clip: bool | int | float) -> np.ndarray:
     """Clip data."""
-    if clip is True:
+    if clip:
         clip = 3.0  # default value
     else:
         clip = float(clip)

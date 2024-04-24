@@ -3,8 +3,11 @@ import os
 import pandas as pd
 from sklearn import metrics, linear_model, model_selection
 
-import py_neuromodulation
-from py_neuromodulation import nm_decode, nm_RMAP
+
+# from py_neuromodulation import nm_RMAP
+
+from py_neuromodulation.nm_decode import Decoder, CV_res
+from py_neuromodulation.nm_IO import PYNM_DIR 
 
 
 class AcrossPatientRunner:
@@ -36,26 +39,27 @@ class AcrossPatientRunner:
         self.cohorts = cohorts
 
         self.grid_cortex = pd.read_csv(
-            os.path.join(py_neuromodulation.__path__[0], "grid_cortex.tsv"),
+            os.path.join(PYNM_DIR, "grid_cortex.tsv"),
             sep="\t",
         ).to_numpy()
 
-        self.RMAPSelector = nm_RMAP.RMAPChannelSelector()
+        # This function does not exist, needs refactor
+        # self.RMAPSelector = nm_RMAP.RMAPChannelSelector() 
 
-        if load_channel_all is True:
+        if load_channel_all:
             self.ch_all = np.load(
                 os.path.join(self.outpath, "channel_all.npy"),
                 allow_pickle="TRUE",
             ).item()
-        if load_grid_point_all is True:
+        if load_grid_point_all:
             self.grid_point_all = np.load(
                 os.path.join(self.outpath, "grid_point_all.npy"),
                 allow_pickle="TRUE",
             ).item()
 
-    def init_decoder(self) -> nm_decode.Decoder:
+    def init_decoder(self) -> Decoder:
 
-        return nm_decode.Decoder(
+        return Decoder(
             model=self.model,
             TRAIN_VAL_SPLIT=self.TRAIN_VAL_SPLIT,
             get_movement_detection_rate=True,
@@ -73,7 +77,7 @@ class AcrossPatientRunner:
             y_train,
             X_test,
             y_test,
-            cv_res=nm_decode.CV_res(get_movement_detection_rate=True),
+            cv_res=CV_res(get_movement_detection_rate=True),
         )
 
     @staticmethod
@@ -151,7 +155,7 @@ class AcrossPatientRunner:
         df_updrs: pd.DataFrame | None = None,
     ):
 
-        if select_best_gp is True:
+        if select_best_gp:
             best_gp_list = list(
                 df_select.sort_values("performance_test", ascending=False)["ch"]
             )
@@ -168,7 +172,7 @@ class AcrossPatientRunner:
                 print(sub_test)
                 if sub_test not in p_[cohort_test]:
                     p_[cohort_test][sub_test] = {}
-                if select_best_gp is True:
+                if select_best_gp:
                     X_test, y_test = self.get_data_grid_point(
                         sub_test, cohort_test, best_gp_list
                     )
@@ -177,7 +181,7 @@ class AcrossPatientRunner:
                         sub_test, cohort_test, df_rmap=df_select
                     )
 
-                if add_UPDRS is True:
+                if add_UPDRS:
                     updrs = df_updrs.query(
                         "sub == @sub_test and cohort == @cohort_test"
                     ).iloc[0]["UPDRS_total"]
@@ -202,7 +206,7 @@ class AcrossPatientRunner:
                 y_train_comb = []
                 for cohort_train in list(cohorts_train.keys()):
                     for sub_train in cohorts_train[cohort_train]:
-                        if select_best_gp is True:
+                        if select_best_gp:
                             X_train, y_train = self.get_data_grid_point(
                                 sub_train, cohort_train, best_gp_list
                             )
@@ -210,7 +214,7 @@ class AcrossPatientRunner:
                             X_train, y_train = self.get_data_channels(
                                 sub_train, cohort_train, df_rmap=df_select
                             )
-                        if add_UPDRS is True:
+                        if add_UPDRS:
                             updrs = df_updrs.query(
                                 "sub == @sub_train and cohort == @cohort_train"
                             ).iloc[0]["UPDRS_total"]
@@ -255,7 +259,7 @@ class AcrossPatientRunner:
                     X_test,
                     y_train,
                     y_test,
-                    cv_res=nm_decode.CV_res(get_movement_detection_rate=True),
+                    cv_res=CV_res(get_movement_detection_rate=True),
                     save_data=False,
                 )
                 p_[cohort_test][sub_test] = cv_res
@@ -272,7 +276,7 @@ class AcrossPatientRunner:
         df_select: pd.DataFrame | None = None,
         select_best_gp: bool = False,
     ):
-        if select_best_gp is True:
+        if select_best_gp:
             best_gp_list = list(
                 df_select.sort_values("performance_test", ascending=False)["ch"]
             )
@@ -290,7 +294,7 @@ class AcrossPatientRunner:
                 if sub_test not in p_[cohort_test]:
                     p_[cohort_test][sub_test] = {}
 
-                if select_best_gp is True:
+                if select_best_gp:
                     X_test, y_test = self.get_data_grid_point(
                         sub_test, cohort_test, best_gp_list
                     )
@@ -310,7 +314,7 @@ class AcrossPatientRunner:
                                 sub_train
                             ] = {}
 
-                        if select_best_gp is True:
+                        if select_best_gp:
                             X_train, y_train = self.get_data_grid_point(
                                 sub_train, cohort_train, best_gp_list
                             )
@@ -333,7 +337,7 @@ class AcrossPatientRunner:
                             X_test,
                             y_train,
                             y_test,
-                            cv_res=nm_decode.CV_res(
+                            cv_res=CV_res(
                                 get_movement_detection_rate=True
                             ),
                             save_data=False,
@@ -400,7 +404,7 @@ class AcrossPatientRunner:
                         X_test,
                         y_train,
                         y_test,
-                        cv_res=nm_decode.CV_res(
+                        cv_res=CV_res(
                             get_movement_detection_rate=True
                         ),
                         save_data=False,
@@ -516,7 +520,7 @@ class AcrossPatientRunner:
                         cv_res = self.eval_model(
                             X_train, y_train, X_test, y_test
                         )
-                    except nm_decode.Decoder.ClassMissingException:
+                    except Decoder.ClassMissingException:
                         continue
 
                     performance_leave_one_patient_out[cohort][grid_point][
@@ -641,7 +645,7 @@ class AcrossPatientRunner:
                         X_test,
                         y_train,
                         y_test,
-                        cv_res=nm_decode.CV_res(),
+                        cv_res=CV_res(),
                     )
 
                     performance_leave_one_cohort_out[cohort_test][grid_point][
@@ -757,7 +761,7 @@ class AcrossPatientRunner:
                         cv_res = self.eval_model(
                             X_train, y_train, X_test, y_test
                         )
-                    except nm_decode.Decoder.ClassMissingException:
+                    except Decoder.ClassMissingException:
                         continue
 
                     performance_leave_one_patient_out[cohort][grid_point][
@@ -882,7 +886,7 @@ class AcrossPatientRunner:
                                 cv_res = self.eval_model(
                                     X_train, y_train, X_test, y_test
                                 )
-                            except nm_decode.Decoder.ClassMissingException:
+                            except Decoder.ClassMissingException:
                                 continue
 
                             if (

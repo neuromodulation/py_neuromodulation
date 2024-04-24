@@ -1,10 +1,10 @@
 import numpy as np
 from typing import Iterable
 
-from py_neuromodulation import nm_features_abc
+from py_neuromodulation.nm_features_abc import Feature
 
 
-class LineLength(nm_features_abc.Feature):
+class LineLength(Feature):
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:

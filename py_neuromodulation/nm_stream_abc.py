@@ -7,13 +7,10 @@ import pickle
 
 import pandas as pd
 
-from py_neuromodulation import (
-    nm_IO,
-    nm_run_analysis,
-    nm_settings,
-)
+from py_neuromodulation import nm_IO
+from py_neuromodulation.nm_run_analysis import DataProcessor
+from py_neuromodulation.nm_settings import get_default_settings
 from py_neuromodulation.nm_types import _PathLike
-from py_neuromodulation.nm_IO import PYNM_DIR
 
 class PNStream(ABC):
 
@@ -76,7 +73,7 @@ class PNStream(ABC):
 
         self.nm_channels = self._load_nm_channels(nm_channels)
         if path_grids is None:
-            path_grids = PYNM_DIR
+            path_grids = nm_IO.PYNM_DIR
         self.path_grids = path_grids
         self.verbose = verbose
         self.sfreq = sfreq
@@ -87,7 +84,7 @@ class PNStream(ABC):
         self.projection = None
         self.model = None
 
-        self.run_analysis = nm_run_analysis.DataProcessor(
+        self.run_analysis = DataProcessor(
             sfreq=self.sfreq,
             settings=self.settings,
             nm_channels=self.nm_channels,
@@ -104,7 +101,7 @@ class PNStream(ABC):
         This might be handy in case the nm_channels or nm_settings changed
         """
 
-        self.run_analysis = nm_run_analysis.DataProcessor(
+        self.run_analysis = DataProcessor(
             sfreq=self.sfreq,
             settings=self.settings,
             nm_channels=self.nm_channels,
@@ -152,7 +149,7 @@ class PNStream(ABC):
         if isinstance(settings, dict):
             return settings
         if settings is None:
-            return nm_settings.get_default_settings()
+            return get_default_settings()
         return nm_IO.read_settings(str(settings))
 
     def load_model(self, model_name: _PathLike) -> None:

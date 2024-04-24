@@ -43,18 +43,18 @@ class CV_res:
         self.X_train : List = []
         self.coef : List = []
 
-        if get_movement_detection_rate is True:
+        if get_movement_detection_rate:
             self.mov_detection_rates_test : List = []
             self.tprate_test : List = []
             self.fprate_test : List = []
             self.mov_detection_rates_train : List = []
             self.tprate_train : List = []
             self.fprate_train : List = []
-        if RUN_BAY_OPT is True:
+        if RUN_BAY_OPT:
             self.best_bay_opt_params: List = []
-        if mrmr_select is True:
+        if mrmr_select:
             self.mrmr_select : List = []
-        if model_save is True:
+        if model_save:
             self.model_save : List = []
 
 
@@ -249,7 +249,7 @@ class Decoder:
             """
 
             def set_score(key_: str, val):
-                if set_inner_CV_res is True:
+                if set_inner_CV_res:
                     key_ = "InnerCV_" + key_
                 obj_set[key_] = val
 
@@ -277,18 +277,18 @@ class Decoder:
                 set_score("tprate_test", cv_res.tprate_test)
                 set_score("tprate_train", cv_res.tprate_train)
 
-            if self.RUN_BAY_OPT is True:
+            if self.RUN_BAY_OPT:
                 set_score("best_bay_opt_params", cv_res.best_bay_opt_params)
 
-            if self.mrmr_select is True:
+            if self.mrmr_select:
                 set_score("mrmr_select", cv_res.mrmr_select)
-            if self.model_save is True:
+            if self.model_save:
                 set_score("model_save", cv_res.model_save)
             return obj_set
 
         obj_set = set_scores(self.cv_res)
 
-        if self.use_nested_cv is True:
+        if self.use_nested_cv:
             obj_set = set_scores(self.cv_res_inner, set_inner_CV_res=True)
 
     def run_CV_caller(self, feature_contacts: str = "ind_channels"):
@@ -503,7 +503,7 @@ class Decoder:
 
     def fit_model(self, model, X_train, y_train):
 
-        if self.TRAIN_VAL_SPLIT is True:
+        if self.TRAIN_VAL_SPLIT:
             X_train, X_val, y_train, y_val = model_selection.train_test_split(
                 X_train, y_train, train_size=0.7, shuffle=False
             )
@@ -587,23 +587,23 @@ class Decoder:
         sc_te = self.eval_method(y_test, y_test_pr)
         sc_tr = self.eval_method(y_train, y_train_pr)
 
-        if self.threshold_score is True:
+        if self.threshold_score:
             if sc_tr < 0:
                 sc_tr = 0
             if sc_te < 0:
                 sc_te = 0
 
-        if self.get_movement_detection_rate is True:
+        if self.get_movement_detection_rate:
             self._set_movement_detection_rates(
                 y_test, y_test_pr, y_train, y_train_pr, cv_res
             )
 
         cv_res.score_train.append(sc_tr)
         cv_res.score_test.append(sc_te)
-        if save_data is True:
+        if save_data:
             cv_res.X_train.append(X_train)
             cv_res.X_test.append(X_test)
-        if self.model_save is True:
+        if self.model_save:
             cv_res.model_save.append(
                 deepcopy(model_train)
             )  # clone won't copy params
@@ -671,7 +671,7 @@ class Decoder:
             )
 
         model_train = clone(self.model)
-        if self.STACK_FEATURES_N_SAMPLES is True:
+        if self.STACK_FEATURES_N_SAMPLES:
             if X_test is not None:
                 X_train, y_train, X_test, y_test = Decoder.append_samples_val(
                     X_train,
@@ -690,10 +690,10 @@ class Decoder:
         ):  # only one class present
             raise Decoder.ClassMissingException
 
-        if self.RUN_BAY_OPT is True:
+        if self.RUN_BAY_OPT:
             model_train = self.bay_opt_wrapper(model_train, X_train, y_train)
 
-        if self.mrmr_select is True:
+        if self.mrmr_select:
             if len(self.feature_names) > X_train.shape[1]:
                 # analyze induvidual ch
                 columns_names = [
@@ -720,21 +720,21 @@ class Decoder:
             X_train = X_train[selected_features]
             X_test = X_test[selected_features]
 
-        if self.pca is True:
+        if self.pca:
             pca = decomposition.PCA(n_components=10)
             pca.fit(X_train)
             X_train = pca.transform(X_train)
             X_test = pca.transform(X_test)
 
-        if self.cca is True:
+        if self.cca:
             cca = cross_decomposition.CCA(n_components=10)
             cca.fit(X_train, y_train)
             X_train = cca.transform(X_train)
             X_test = cca.transform(X_test)
 
-        if self.STACK_FEATURES_N_SAMPLES is True:
+        if self.STACK_FEATURES_N_SAMPLES:
 
-            if return_fitted_model_only is True:
+            if return_fitted_model_only:
                 X_train, y_train = self.append_previous_n_samples(
                     X_train, y_train, self.time_stack_n_samples
                 )
@@ -746,14 +746,14 @@ class Decoder:
         # fit model
         model_train = self.fit_model(model_train, X_train, y_train)
 
-        if return_fitted_model_only is True:
+        if return_fitted_model_only:
             return model_train
 
         cv_res = self.eval_model(
             model_train, X_train, X_test, y_train, y_test, cv_res, save_data
         )
 
-        if self.mrmr_select is True:
+        if self.mrmr_select:
             cv_res.mrmr_select.append(selected_features)
 
         return cv_res
@@ -818,7 +818,7 @@ class Decoder:
 
         cv_res = self.init_cv_res()
 
-        if self.use_nested_cv is True:
+        if self.use_nested_cv:
             cv_res_inner = self.init_cv_res()
 
         for train_index, test_index in split_data(data):
@@ -831,7 +831,7 @@ class Decoder:
             except Decoder.ClassMissingException:
                 continue
 
-            if self.use_nested_cv is True:
+            if self.use_nested_cv:
                 data_inner = data[train_index]
                 label_inner = label[train_index]
                 for train_index_inner, test_index_inner in split_data(
@@ -853,7 +853,7 @@ class Decoder:
                         continue
 
         self.cv_res = cv_res
-        if self.use_nested_cv is True:
+        if self.use_nested_cv:
             self.cv_res_inner = cv_res_inner
 
     def bay_opt_wrapper(self, model_train, X_train, y_train):

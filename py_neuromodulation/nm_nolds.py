@@ -3,10 +3,11 @@ from typing import Iterable
 import nolds
 import warnings
 
-from py_neuromodulation import nm_features_abc, nm_oscillatory
+from py_neuromodulation.nm_features_abc import Feature
+from py_neuromodulation.nm_oscillatory import BandPower
 
 
-class Nolds(nm_features_abc.Feature):
+class Nolds(Feature):
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:
@@ -14,7 +15,7 @@ class Nolds(nm_features_abc.Feature):
         self.ch_names = ch_names
 
         if len(self.s["nolds_features"]["data"]["frequency_bands"]) > 0:
-            self.bp_filter = nm_oscillatory.BandPower(
+            self.bp_filter = BandPower(
                 settings, ch_names, sfreq, use_kf=False
             )
 

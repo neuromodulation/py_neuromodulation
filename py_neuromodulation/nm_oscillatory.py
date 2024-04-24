@@ -2,9 +2,11 @@ from typing import Iterable
 import numpy as np
 from scipy import fft, signal
 
-from py_neuromodulation import nm_filter, nm_features_abc, nm_kalmanfilter
+from py_neuromodulation.nm_kalmanfilter import define_KF
+from py_neuromodulation.nm_features_abc import Feature
+from py_neuromodulation.nm_filter import MNEFilter
 
-class OscillatoryFeature(nm_features_abc.Feature):
+class OscillatoryFeature(Feature):
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:
@@ -83,7 +85,7 @@ class OscillatoryFeature(nm_features_abc.Feature):
             for channel in self.ch_names:
                 self.KF_dict[
                     "_".join([channel, feature, f_band])
-                ] = nm_kalmanfilter.define_KF(
+                ] = define_KF(
                     self.s["kalman_filter_settings"]["Tp"],
                     self.s["kalman_filter_settings"]["sigma_w"],
                     self.s["kalman_filter_settings"]["sigma_v"],
@@ -104,7 +106,7 @@ class OscillatoryFeature(nm_features_abc.Feature):
         est_name: str,
     ):
         for feature_est_name in list(self.s[est_name]["features"].keys()):
-            if self.s[est_name]["features"][feature_est_name] is True:
+            if self.s[est_name]["features"][feature_est_name]:
                 # switch case for feature_est_name
                 match feature_est_name:
                     case "mean":
@@ -319,7 +321,7 @@ class BandPower(OscillatoryFeature):
         super().__init__(settings, ch_names, sfreq)
         bp_settings = self.s["bandpass_filter_settings"]
 
-        self.bandpass_filter = nm_filter.MNEFilter(
+        self.bandpass_filter = MNEFilter(
             f_ranges=list(self.f_ranges_dict.values()),
             sfreq=self.sfreq,
             filter_length=self.sfreq - 1,
@@ -342,7 +344,7 @@ class BandPower(OscillatoryFeature):
                 seglength_ms = seglengths[f_band]
                 seglen = int(np.floor(self.sfreq / 1000 * seglength_ms))
                 for bp_feature, v in bp_settings["bandpower_features"].items():
-                    if v is True:
+                    if v:
                         if bp_feature not in bp_features:
                             raise ValueError()
                         feature_name = "_".join(

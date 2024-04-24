@@ -6,7 +6,8 @@ from matplotlib import gridspec
 import seaborn as sb
 import pandas as pd
 
-from py_neuromodulation import nm_IO, nm_stats
+from py_neuromodulation.nm_IO import read_plot_modules
+from py_neuromodulation.nm_stats import permutationTestSpearmansRho
 
 import logging
 logger = logging.getLogger("PynmLogger")
@@ -135,7 +136,7 @@ def reg_plot(
     x_col: str, y_col: str, data: pd.DataFrame, out_path_save: str | None = None
 ):
     plt.figure(figsize=(4, 4), dpi=300)
-    rho, p = nm_stats.permutationTestSpearmansRho(
+    rho, p = permutationTestSpearmansRho(
         data[x_col],
         data[y_col],
         False,
@@ -451,7 +452,7 @@ def plot_all_features(
         df = df[df["time"] > time_limit_low_s * 1000]
 
     cols_plt = [c for c in df.columns if c != "time"]
-    if normalize is True:
+    if normalize:
         data_plt = stats.zscore(df[cols_plt], nan_policy="omit")
     else:
         data_plt = df[cols_plt]
@@ -509,7 +510,7 @@ class NM_Plot:
             self.x_stn,
             self.y_stn,
             self.z_stn,
-        ) = nm_IO.read_plot_modules()
+        ) = read_plot_modules()
 
     def plot_grid_elec_3d(self) -> None:
         plot_grid_elec_3d(np.array(self.grid_cortex), np.array(self.ecog_strip))

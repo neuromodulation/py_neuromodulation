@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from py_neuromodulation import nm_plots
+from py_neuromodulation.nm_plots import NM_Plot
 
 
 class Projection:
@@ -75,8 +75,8 @@ class Projection:
                 self.proj_matrix_subcortex.sum(axis=1)
             )[0]
 
-        if plot_projection is True:
-            nmplotter = nm_plots.NM_Plot(
+        if plot_projection:
+            nmplotter = NM_Plot(
                 ecog_strip=self.ecog_strip,
                 grid_cortex=self.grid_cortex.to_numpy(),
                 grid_subcortex=self.grid_subcortex.to_numpy(),
@@ -87,11 +87,11 @@ class Projection:
 
     @staticmethod
     def test_settings(s: dict):
-        if s["postprocessing"]["project_cortex"] is True:
+        if s["postprocessing"]["project_cortex"]:
             assert isinstance(
                 s["project_cortex_settings"]["max_dist_mm"], (float, int)
             )
-        if s["postprocessing"]["project_subcortex"] is True:
+        if s["postprocessing"]["project_subcortex"]:
             assert isinstance(
                 s["project_subcortex_settings"]["max_dist_mm"], (float, int)
             )
@@ -158,7 +158,7 @@ class Projection:
 
         proj_matrix_run = np.empty(2, dtype=object)
 
-        if self.sess_right is True:
+        if self.sess_right:
 
             if self.project_cortex:
                 cortex_grid_right = np.copy(self.grid_cortex)

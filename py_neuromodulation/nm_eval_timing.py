@@ -1,12 +1,15 @@
 import timeit
 from . import nm_oscillatory
 import numpy as np
-from py_neuromodulation import (
-    nm_normalization,
-    nm_stft,
-    nm_bandpower,
-    nm_filter,
-)
+from py_neuromodulation.nm_normalization import normalize_features, normalize_raw
+from py_neuromodulation.nm_filter import apply_filter
+from py_neuromodulation.nm_oscillatory import STFT, BandPower
+
+#from py_neuromodulation import (
+    # The following 2 files do not exist in the project, maybe there were deleted?
+    # nm_stft, 
+    # nm_bandpower,
+#)
 
 
 class NM_Timer:
@@ -68,7 +71,7 @@ class NM_Timer:
         if self.analyzer.settings["methods"]["raw_normalization"]:
             dict_timings["time_norm_raw"] = (
                 timeit.timeit(
-                    lambda: nm_normalization.normalize_raw(
+                    lambda: normalize_raw(
                         current=data,
                         previous=data.T,
                         normalize_samples=int(
@@ -98,7 +101,7 @@ class NM_Timer:
         if self.analyzer.settings["methods"]["feature_normalization"]:
             dict_timings["time_feature_norm"] = (
                 timeit.timeit(
-                    lambda: nm_normalization.normalize_features(
+                    lambda: normalize_features(
                         current=features_current.to_numpy(),
                         previous=features_previous,
                         normalize_samples=self.analyzer.feat_normalize_samples,
@@ -197,7 +200,7 @@ class NM_Timer:
                 )
             ).astype(int)
 
-            dat_filtered = nm_filter.apply_filter(
+            dat_filtered = apply_filter(
                 data, self.analyzer.features.filter_fun
             )  # shape (bands, time)
             dict_timings["time_bandpass_filter"] = (

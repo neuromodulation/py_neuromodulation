@@ -2,10 +2,10 @@ from typing import Iterable, Callable
 import numpy as np
 from pybispectra import compute_fft, WaveShape
 
-from py_neuromodulation import nm_features_abc
+from py_neuromodulation.nm_features_abc import Feature
 
 
-class Bispectra(nm_features_abc.Feature):
+class Bispectra(Feature):
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: int | float
     ) -> None:

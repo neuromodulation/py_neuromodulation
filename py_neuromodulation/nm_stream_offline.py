@@ -7,18 +7,17 @@ import pandas as pd
 from itertools import count
 import logging
 import mne
-from py_neuromodulation import (
-    nm_generator,
-    nm_stream_abc,
-    nm_define_nmchannels,
-)
+
+from py_neuromodulation.nm_generator import raw_data_generator
+from py_neuromodulation.nm_stream_abc import PNStream
+from py_neuromodulation.nm_define_nmchannels import get_default_channels_from_data
 
 logger = logging.getLogger("PynmLogger")
 
 _PathLike = str | os.PathLike
 
 
-class _OfflineStream(nm_stream_abc.PNStream):
+class _OfflineStream(PNStream):
     """Offline stream base class.
     This class can be inhereted for different types of offline streams, e.g. epoch-based or continuous.
 
@@ -114,11 +113,11 @@ class _OfflineStream(nm_stream_abc.PNStream):
             raise ValueError(
                 "Parallel processing is not possible with raw_normalization normalization."
             )
-        if self.settings["postprocessing"]["feature_normalization"] is True:
+        if self.settings["postprocessing"]["feature_normalization"]:
             raise ValueError(
                 "Parallel processing is not possible with feature normalization."
             )
-        if self.settings["features"]["bursts"] is True:
+        if self.settings["features"]["bursts"]:
             raise ValueError(
                 "Parallel processing is not possible with burst estimation."
             )
@@ -141,7 +140,7 @@ class _OfflineStream(nm_stream_abc.PNStream):
         parallel: bool = False,
         n_jobs: int = -2,
     ) -> pd.DataFrame:
-        generator = nm_generator.raw_data_generator(
+        generator = raw_data_generator(
             data=data,
             settings=self.settings,
             sfreq=self.sfreq,
@@ -288,7 +287,7 @@ class Stream(_OfflineStream):
         """
 
         if nm_channels is None and data is not None:
-            nm_channels = nm_define_nmchannels.get_default_channels_from_data(
+            nm_channels = get_default_channels_from_data(
                 data
             )
 
@@ -348,7 +347,7 @@ class Stream(_OfflineStream):
         elif self.data is None and data is None:
             raise ValueError("No data passed to run function.")
 
-        if parallel is True:
+        if parallel:
             self._check_settings_for_parallel()
 
         return self._run_offline(

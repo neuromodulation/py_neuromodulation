@@ -9,17 +9,18 @@ from typing import Protocol, Type
 import numpy as np
 import pandas as pd
 
-from py_neuromodulation import (
-    nm_features,
-    nm_filter,
-    nm_IO,
-    nm_normalization,
-    nm_projection,
-    nm_rereference,
-    nm_resample,
-    nm_filter_preprocessing,
-)
+from py_neuromodulation import nm_IO, logger
 from py_neuromodulation.nm_types import _PathLike
+
+from py_neuromodulation.nm_features import Features
+# Perhaps have all the followings in a Preprocessor dictionary like for Features
+from py_neuromodulation.nm_filter_preprocessing import PreprocessingFilter
+from py_neuromodulation.nm_filter import NotchFilter
+from py_neuromodulation.nm_resample import Resampler
+from py_neuromodulation.nm_rereference import ReReferencer
+from py_neuromodulation.nm_normalization import RawNormalizer, FeatureNormalizer
+from py_neuromodulation.nm_projection import Projection
+
 
 
 class Preprocessor(Protocol):
@@ -95,33 +96,33 @@ class DataProcessor:
             preprocessor: Preprocessor
             match preprocessing_method:
                 case "raw_resampling":
-                    preprocessor = nm_resample.Resampler(
+                    preprocessor = Resampler(
                         sfreq=self.sfreq_raw, **self.settings[settings_str]
                     )
                     self.sfreq_raw = preprocessor.sfreq_new
                     self.preprocessors.append(preprocessor)
                 case "notch_filter":
-                    preprocessor = nm_filter.NotchFilter(
+                    preprocessor = NotchFilter(
                         sfreq=self.sfreq_raw,
                         line_noise=self.line_noise,
                         **self.settings.get(settings_str, {}),
                     )
                     self.preprocessors.append(preprocessor)
                 case "re_referencing":
-                    preprocessor = nm_rereference.ReReferencer(
+                    preprocessor = ReReferencer(
                         sfreq=self.sfreq_raw,
                         nm_channels=self.nm_channels,
                     )
                     self.preprocessors.append(preprocessor)
                 case "raw_normalization":
-                    preprocessor = nm_normalization.RawNormalizer(
+                    preprocessor = RawNormalizer(
                         sfreq=self.sfreq_raw,
                         sampling_rate_features_hz=self.sfreq_features,
                         **self.settings.get(settings_str, {}),
                     )
                     self.preprocessors.append(preprocessor)
                 case "preprocessing_filter":
-                    preprocessor = nm_filter_preprocessing.PreprocessingFilter(
+                    preprocessor = PreprocessingFilter(
                         settings=self.settings,
                         sfreq=self.sfreq_raw,
                     )
@@ -135,12 +136,12 @@ class DataProcessor:
 
         if self.settings["postprocessing"]["feature_normalization"]:
             settings_str = "feature_normalization_settings"
-            self.feature_normalizer = nm_normalization.FeatureNormalizer(
+            self.feature_normalizer = FeatureNormalizer(
                 sampling_rate_features_hz=self.sfreq_features,
                 **self.settings.get(settings_str, {}),
             )
 
-        self.features = nm_features.Features(
+        self.features = Features(
             s=self.settings,
             ch_names=self.ch_names_used,
             sfreq=self.sfreq_raw,
@@ -247,11 +248,11 @@ class DataProcessor:
             grid_cortex, grid_subcortex,
             might be None if not specified in settings
         """
-        if settings["postprocessing"]["project_cortex"] is True:
+        if settings["postprocessing"]["project_cortex"]:
             grid_cortex = nm_IO.read_grid(path_grids, grid_type.CORTEX.name)
         else:
             grid_cortex = None
-        if settings["postprocessing"]["project_subcortex"] is True:
+        if settings["postprocessing"]["project_subcortex"]:
             grid_subcortex = nm_IO.read_grid(
                 path_grids, grid_type.SUBCORTEX.name
             )
@@ -261,7 +262,7 @@ class DataProcessor:
 
     def _get_projection(
         self, settings: dict, nm_channels: pd.DataFrame
-    ) -> nm_projection.Projection | None:
+    ) -> Projection | None:
         """Return projection of used coordinated and grids"""
 
         if not any(
@@ -275,7 +276,7 @@ class DataProcessor:
         grid_cortex, grid_subcortex = self._get_grids(
             self.settings, self.path_grids, GRIDS
         )
-        projection = nm_projection.Projection(
+        projection = Projection(
             settings=settings,
             grid_cortex=grid_cortex,
             grid_subcortex=grid_subcortex,
@@ -374,7 +375,7 @@ class DataProcessor:
                     features_current.index.str.contains(ch)
                 ] = np.nan
 
-        if self.verbose is True:
+        if self.verbose:
             logger.info(
                 "Last batch took: "
                 + str(np.round(time() - start_time, 2))

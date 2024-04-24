@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 from typing import Iterator
 
-from py_neuromodulation import nm_generator
 from py_neuromodulation.nm_stream_abc import PNStream
+from py_neuromodulation.nm_generator import raw_data_generator
 
 
 class EpochStream(PNStream):
@@ -55,7 +55,7 @@ class EpochStream(PNStream):
             )  # None will be returned if generator ran through
             if data is None:
                 break
-            gen = nm_generator.raw_data_generator(
+            gen = raw_data_generator(
                 data, self.settings, self.sfreq
             )
 

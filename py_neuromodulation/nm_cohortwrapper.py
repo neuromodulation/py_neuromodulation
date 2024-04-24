@@ -6,9 +6,10 @@ from sklearn import metrics, model_selection, linear_model
 from bids import BIDSLayout
 from bids.layout.models import BIDSFile
 
-import py_neuromodulation
-from py_neuromodulation import nm_decode, nm_analysis, nm_IO, nm_stream_offline
-
+from py_neuromodulation.nm_decode import Decoder
+from py_neuromodulation.nm_analysis import Feature_Reader
+from py_neuromodulation.nm_IO import PYNM_DIR, get_run_list_indir 
+from py_neuromodulation import Stream
 
 class CohortRunner:
     def __init__(
@@ -70,12 +71,12 @@ class CohortRunner:
         self.target_keywords = target_keywords
         self.get_movement_detection_rate = get_movement_detection_rate
         self.grid_cortex = pd.read_csv(
-            os.path.join(py_neuromodulation.__path__[0], "grid_cortex.tsv"),
+            os.path.join(PYNM_DIR, "grid_cortex.tsv"),
             sep="\t",
         ).to_numpy()
 
-    def init_decoder(self) -> nm_decode.Decoder:
-        return nm_decode.Decoder(
+    def init_decoder(self) -> Decoder:
+        return Decoder(
             model=self.model,
             TRAIN_VAL_SPLIT=self.TRAIN_VAL_SPLIT,
             STACK_FEATURES_N_SAMPLES=self.STACK_FEATURES_N_SAMPLES,
@@ -102,7 +103,7 @@ class CohortRunner:
                 break
 
         if self.run_bids:
-            stream = nm_stream_offline.Stream(
+            stream = Stream(
                 PATH_RUN=PATH_RUN,
                 PATH_BIDS=PATH_BIDS,
                 PATH_OUT=PATH_OUT,
@@ -118,7 +119,7 @@ class CohortRunner:
 
         feature_file = os.path.basename(PATH_RUN)[:-5]  # cut off ".vhdr"
 
-        feature_reader = nm_analysis.Feature_Reader(
+        feature_reader = Feature_Reader(
             feature_dir=PATH_OUT,
             feature_file=feature_file,
             binarize_label=self.binarize_label,
@@ -207,7 +208,7 @@ class CohortRunner:
         performance_out = {}
 
         for feature_file in feature_paths:
-            feature_reader = nm_analysis.Feature_Reader(
+            feature_reader = Feature_Reader(
                 feature_dir=feature_path, feature_file=feature_file
             )
 
@@ -268,7 +269,7 @@ class CohortRunner:
         dictionary
             ch_all
         """
-        feature_reader = nm_analysis.Feature_Reader(
+        feature_reader = Feature_Reader(
             feature_dir=feature_path, feature_file=feature_file
         )
         if "Washington" in feature_path:
@@ -301,14 +302,14 @@ class CohortRunner:
             #    feature_file.find("run-") + 4 : feature_file.find("_ieeg")
             #]
         print(feature_reader.label_name)
-        decoder = nm_decode.Decoder(
+        decoder = Decoder(
             features=feature_reader.feature_arr,
             label=feature_reader.label,
             label_name=feature_reader.label_name,
             used_chs=feature_reader.used_chs,
         )
 
-        if read_channels is True:
+        if read_channels:
             decoder.set_data_ind_channels()
             data_to_read = decoder.ch_ind_data
         else:
@@ -371,7 +372,7 @@ class CohortRunner:
         for cohort in cohorts:
             print("COHORT: " + cohort)
             feature_path = os.path.join(self.outpath, cohort)
-            feature_list = nm_IO.get_run_list_indir(feature_path)
+            feature_list = get_run_list_indir(feature_path)
             for feature_file in feature_list:
                 print(feature_file)
                 grid_point_all = self.read_all_channels(
@@ -382,7 +383,7 @@ class CohortRunner:
                     read_channels=read_channels,
                 )
 
-        if read_channels is True:
+        if read_channels:
             np.save(
                 os.path.join(self.outpath, "channel_all.npy"), grid_point_all
             )

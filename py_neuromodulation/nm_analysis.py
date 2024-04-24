@@ -8,7 +8,8 @@ import pandas as pd
 from sklearn import base, linear_model, metrics, model_selection
 from scipy import stats
 
-from py_neuromodulation import nm_decode, nm_IO, nm_plots
+from py_neuromodulation import nm_IO, nm_plots
+from py_neuromodulation.nm_decode import Decoder
 
 target_filter_str = {
     "CLEAN",
@@ -642,7 +643,7 @@ class Feature_Reader:
 
     def set_decoder(
         self,
-        decoder: nm_decode.Decoder | None = None,
+        decoder: Decoder | None = None,
         TRAIN_VAL_SPLIT=False,
         RUN_BAY_OPT=False,
         save_coef=False,
@@ -670,7 +671,7 @@ class Feature_Reader:
             self.decoder = decoder
         else:
 
-            self.decoder = nm_decode.Decoder(
+            self.decoder = Decoder(
                 features=self.feature_arr,
                 label=self.label,
                 label_name=self.label_name,
@@ -863,10 +864,10 @@ class Feature_Reader:
                     take_mean: bool = True,
                     val=None,
                 ):
-                    if set_inner_CV_res is True:
+                    if set_inner_CV_res:
                         key_set = "InnerCV_" + key_set
                         key_get = "InnerCV_" + key_get
-                    if take_mean is True:
+                    if take_mean:
                         val = np.mean(obj_read[key_get])
                     obj_write[key_set] = val
 
@@ -921,7 +922,7 @@ class Feature_Reader:
                         take_mean=True,
                     )
 
-                if read_bay_opt_params is True:
+                if read_bay_opt_params:
                     # transform dict into keys for json saving
                     dict_to_save = transform_list_of_dicts_into_dict_of_lists(
                         obj_read["best_bay_opt_params"]
@@ -932,7 +933,7 @@ class Feature_Reader:
                         val=dict_to_save,
                     )
 
-                if read_mrmr is True:
+                if read_mrmr:
                     # transform dict into keys for json saving
 
                     set_score(
@@ -940,7 +941,7 @@ class Feature_Reader:
                         take_mean=False,
                         val=obj_read["mrmr_select"],
                     )
-                if model_save is True:
+                if model_save:
                     set_score(
                         key_set="model_save",
                         take_mean=False,

@@ -6,13 +6,11 @@ import wget
 # from numba import jit
 import scipy.io as sio
 import pandas as pd
-from typing import Union, Tuple, List
 import nibabel as nib
 from matplotlib import pyplot as plt
 
-import py_neuromodulation
-
-from py_neuromodulation import nm_plots
+from py_neuromodulation.nm_plots import reg_plot
+from py_neuromodulation.nm_IO import PYNM_DIR 
 
 LIST_STRUC_UNCONNECTED_GRIDPOINTS_HULL = [256, 385, 417, 447, 819, 914]
 LIST_STRUC_UNCONNECTED_GRIDPOINTS_WHOLEBRAIN = [
@@ -105,7 +103,7 @@ class ConnectivityChannelSelector:
         self.func_connectivity = func_connectivity
 
         self.PATH_CONN_DECODING = os.path.join(
-            py_neuromodulation.__path__[0],
+            PYNM_DIR,
             "ConnectivityDecoding",
         )
 
@@ -184,8 +182,8 @@ class ConnectivityChannelSelector:
         plt.show()
 
     def get_closest_node(
-        self, coord: List | np.ndarray
-    ) -> Tuple[List, List]:
+        self, coord: list | np.ndarray
+    ) -> tuple[list, list]:
         """Given a list or np.array of coordinates, return the closest nodes in the
         grid and their indices.
 
@@ -196,7 +194,7 @@ class ConnectivityChannelSelector:
 
         Returns
         -------
-        Tuple[List, List]
+        Tuple[list, list]
             Grid coordinates, grid indices
         """
 
@@ -211,7 +209,7 @@ class ConnectivityChannelSelector:
         self, 
         fps: list | np.ndarray, 
         RMAP_use: np.ndarray | None = None
-    ) -> List:
+    ) -> list:
         """Calculate correlations of passed fingerprints with the RMAP
 
         Parameters
@@ -277,7 +275,7 @@ class ConnectivityChannelSelector:
 
         self.connectome = sio.loadmat(PATH_CONNECTOME)
 
-    def get_grid_fingerprints(self, grid_idx: Union[list, np.array]) -> list:
+    def get_grid_fingerprints(self, grid_idx: list | np.ndarray) -> list:
         return [self.connectome[str(grid_idx)] for grid_idx in grid_idx]
 
     def download_connectome(
@@ -524,7 +522,7 @@ class RMAPCross_Val_ChannelSelector:
             per_predict  # change "struct" with "funct" for functional connectivity
         )
 
-        nm_plots.reg_plot(
+        reg_plot(
             x_col="test_performance",
             y_col="struct_conn_predict",
             data=df_plt_corr,

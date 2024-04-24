@@ -279,7 +279,7 @@ def get_default_channels_from_data(
     status = ["good" for _ in range(data.shape[0])]
     type_nm = ["ecog" for _ in range(data.shape[0])]
 
-    if car_rereferencing is True:
+    if car_rereferencing:
         rereference = ["average" for _ in range(data.shape[0])]
         new_name = [f"{ch}-avgref" for ch in ch_name]
     else:

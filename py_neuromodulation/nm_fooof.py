@@ -5,10 +5,10 @@ import numpy as np
 from fooof import FOOOF
 from scipy import fft
 
-from py_neuromodulation import nm_features_abc
+from py_neuromodulation.nm_features_abc import Feature
 
 
-class FooofAnalyzer(nm_features_abc.Feature):
+class FooofAnalyzer(Feature):
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:

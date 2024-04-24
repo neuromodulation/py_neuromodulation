@@ -2,10 +2,11 @@ import numpy as np
 from typing import Iterable
 from scipy import signal
 
-from py_neuromodulation import nm_features_abc, nm_filter
+from py_neuromodulation.nm_features_abc import Feature
+from py_neuromodulation.nm_filter import MNEFilter
 
 
-class Burst(nm_features_abc.Feature):
+class Burst(Feature):
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:
@@ -42,7 +43,7 @@ class Burst(nm_features_abc.Feature):
             self.sfreq * self.time_duration_s
         )
 
-        self.bandpass_filter = nm_filter.MNEFilter(
+        self.bandpass_filter = MNEFilter(
             f_ranges=self.f_ranges,
             sfreq=self.sfreq,
             filter_length=self.sfreq - 1,

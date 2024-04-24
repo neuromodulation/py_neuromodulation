@@ -81,7 +81,7 @@ def permutationTestSpearmansRho(x, y, plot_distr=True, x_unit=None, p=5000):
     else:
         p_val = len(np.where(pD >= gT)[0]) / p
 
-    if plot_distr is True:
+    if plot_distr:
         plt.hist(pD, bins=30, label="permutation results")
         plt.axvline(gT, color="orange", label="ground truth")
         plt.title("ground truth " + x_unit + "=" + str(gT) + " p=" + str(p_val))
@@ -134,7 +134,7 @@ def permutationTest(x, y, plot_distr=True, x_unit=None, p=5000):
     else:
         p_val = len(np.where(pD >= gT)[0]) / p
 
-    if plot_distr is True:
+    if plot_distr:
         plt.hist(pD, bins=30, label="permutation results")
         plt.axvline(gT, color="orange", label="ground truth")
         plt.title("ground truth " + x_unit + "=" + str(gT) + " p=" + str(p_val))
@@ -180,7 +180,7 @@ def permutationTest_relative(x, y, plot_distr=True, x_unit=None, p=5000):
     else:
         p_val = len(np.where(pD >= gT)[0]) / p
 
-    if plot_distr is True:
+    if plot_distr:
         plt.hist(pD, bins=30, label="permutation results")
         plt.axvline(gT, color="orange", label="ground truth")
         plt.title("ground truth " + x_unit + "=" + str(gT) + " p=" + str(p_val))
@@ -217,7 +217,7 @@ def permutation_numba_onesample(x, y, n_perm, two_tailed=True):
     float
         P-value of permutation test
     """
-    if two_tailed is True:
+    if two_tailed:
         zeroed = x - y
         z = np.abs(np.mean(zeroed))
         p = np.empty(n_perm)
@@ -267,7 +267,7 @@ def permutation_numba_twosample(x, y, n_perm, two_tailed=True):
     float
         P-value of permutation test
     """
-    if two_tailed is True:
+    if two_tailed:
         z = np.abs(np.mean(x) - np.mean(y))
         pS = np.concatenate((x, y), axis=0)
         half = int(len(pS) / 2)

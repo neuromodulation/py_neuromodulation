@@ -3,14 +3,14 @@ from scipy import signal
 from mne.filter import create_filter
 from typing import Iterable
 
-from py_neuromodulation import nm_features_abc
+from py_neuromodulation.nm_features_abc import Feature
 
 
 class NoValidTroughException(Exception):
     pass
 
 
-class SharpwaveAnalyzer(nm_features_abc.Feature):
+class SharpwaveAnalyzer(Feature):
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:
@@ -49,7 +49,7 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
         # initialize used features
         self.used_features = list()
         for feature_name, val in self.sw_settings["sharpwave_features"].items():
-            if val is True:
+            if val:
                 self.used_features.append(feature_name)
 
         # initialize attributes
@@ -167,7 +167,7 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
                         # the detect_troughs loop start with peaks, s.t. data does not
                         # need to be flipped
 
-                    if detect_troughs is True:
+                    if detect_troughs:
                         if (
                             self.sw_settings["detect_troughs"]["estimate"]
                             is False
@@ -390,7 +390,7 @@ class SharpwaveAnalyzer(nm_features_abc.Feature):
             assert isinstance(
                 val, bool
             ), f"sharpwave_feature type {feature_name} has to be of type bool, got {val}"
-            if val is True:
+            if val:
                 used_features.append(feature_name)
         for used_feature in used_features:
             estimator_list_feature = (
