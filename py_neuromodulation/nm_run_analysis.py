@@ -29,10 +29,11 @@ class Preprocessor(Protocol):
 
 
 _PREPROCESSING_CONSTRUCTORS = [
-    "notch_filter",
-    "re_referencing",
-    "raw_normalization",
-    "raw_resample",
+        "raw_resampling",
+        "notch_filter",
+        "re_referencing",
+        "raw_normalization",
+        "preprocessing_filter"
 ]
 
 
