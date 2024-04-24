@@ -4,7 +4,6 @@ import pandas as pd
 
 
 class ReReferencer:
-    # ref_matrix: np.ndarray | None
 
     def __init__(
         self,
