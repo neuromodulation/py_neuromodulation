@@ -1,8 +1,6 @@
 """This module contains the class to process a given batch of data."""
 
 from enum import Enum
-import math
-import os
 from time import time
 from typing import Protocol, Type
 
@@ -81,7 +79,7 @@ class DataProcessor:
 
         self.sfreq_features: int | float = self.settings["sampling_rate_features_hz"]
         self._sfreq_raw_orig: int | float = sfreq
-        self.sfreq_raw: int | float = math.floor(sfreq)
+        self.sfreq_raw: int = sfreq // 1
         self.line_noise: int | float | None = line_noise
         self.path_grids: _PathLike | None = path_grids
         self.verbose: bool = verbose
@@ -231,7 +229,7 @@ class DataProcessor:
     @staticmethod
     def _get_grids(
         settings: dict,
-        path_grids: str | _PathLike | None,
+        path_grids: _PathLike | None,
         grid_type: Type[GRIDS],
     ) -> tuple[pd.DataFrame | None, pd.DataFrame | None]:
         """Read settings specified grids
