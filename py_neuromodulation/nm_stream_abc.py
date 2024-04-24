@@ -14,21 +14,6 @@ from py_neuromodulation.nm_types import _PathLike
 
 class PNStream(ABC):
 
-#    Toni: These were being declared as class variables, not instance variables 
-#    settings: dict
-#    nm_channels: pd.DataFrame
-#    run_analysis: nm_run_analysis.DataProcessor
-#    features: nm_features.Features
-#    coords: dict
-#    sfreq: int | float
-#    sfreq_feature: int | float | None = None
-#    path_grids: _PathLike | None
-#    model: base.BaseEstimator | None
-#    sess_right: bool | None
-#    verbose: bool
-#    PATH_OUT: _PathLike | None
-#    PATH_OUT_folder_name: _PathLike | None
-
     def __init__(
         self,
         sfreq: int | float,
