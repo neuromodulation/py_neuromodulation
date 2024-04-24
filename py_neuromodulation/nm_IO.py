@@ -11,14 +11,11 @@ from scipy import io
 import pyarrow
 from pyarrow import csv
 
-import py_neuromodulation
+from py_neuromodulation.nm_types import _PathLike
+from py_neuromodulation import logger
 
-import logging
-logger = logging.getLogger("PynmLogger")
-
-
-_PathLike = str | os.PathLike
-
+# Define constant for py_nm directory
+PYNM_DIR = Path(__file__).parent.resolve()
 
 def load_nm_channels(
     nm_channels: pd.DataFrame | _PathLike,
@@ -110,7 +107,7 @@ def get_coord_list(
 def read_grid(PATH_GRIDS: _PathLike | None, grid_str: str) -> pd.DataFrame:
     if PATH_GRIDS is None:
         grid = pd.read_csv(
-            Path(__file__).parent / ("grid_" + grid_str.lower() + ".tsv"),
+            PYNM_DIR / ("grid_" + grid_str.lower() + ".tsv"),
             sep="\t",
         )
     else:
@@ -145,7 +142,7 @@ def get_annotations(
 
 
 def read_plot_modules(
-    PATH_PLOT: _PathLike = Path(__file__).absolute().parent / "plots",
+    PATH_PLOT: _PathLike = PYNM_DIR / "plots",
 ):
     """Read required .mat files for plotting
 
@@ -357,8 +354,6 @@ def get_paths_example_data():
     dataset used in most examples.
     """
 
-    SCRIPT_DIR = Path(py_neuromodulation.__file__).parent.absolute()
-
     sub = "testsub"
     ses = "EphysMedOff"
     task = "gripforce"
@@ -368,10 +363,10 @@ def get_paths_example_data():
     # Define run name and access paths in the BIDS format.
     RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}"
 
-    PATH_BIDS = Path(SCRIPT_DIR) / "data"
+    PATH_BIDS = Path(PYNM_DIR) / "data"
 
     PATH_RUN = (
-        Path(SCRIPT_DIR)
+        Path(PYNM_DIR)
         / "data"
         / f"sub-{sub}"
         / f"ses-{ses}"

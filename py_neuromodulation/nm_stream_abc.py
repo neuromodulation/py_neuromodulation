@@ -12,10 +12,8 @@ from py_neuromodulation import (
     nm_run_analysis,
     nm_settings,
 )
-
-
-_PathLike = str | os.PathLike
-
+from py_neuromodulation.nm_types import _PathLike
+from py_neuromodulation.nm_IO import PYNM_DIR
 
 class PNStream(ABC):
 
@@ -78,7 +76,7 @@ class PNStream(ABC):
 
         self.nm_channels = self._load_nm_channels(nm_channels)
         if path_grids is None:
-            path_grids = pathlib.Path(__file__).parent.resolve()
+            path_grids = PYNM_DIR
         self.path_grids = path_grids
         self.verbose = verbose
         self.sfreq = sfreq

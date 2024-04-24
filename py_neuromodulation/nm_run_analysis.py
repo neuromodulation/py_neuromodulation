@@ -19,13 +19,7 @@ from py_neuromodulation import (
     nm_resample,
     nm_filter_preprocessing,
 )
-
-import logging
-
-logger = logging.getLogger("PynmLogger")
-
-
-_PathLike = str | os.PathLike
+from py_neuromodulation.nm_types import _PathLike
 
 
 class Preprocessor(Protocol):

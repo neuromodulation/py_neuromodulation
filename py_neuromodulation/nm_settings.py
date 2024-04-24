@@ -1,14 +1,17 @@
 """Module for handling settings."""
 import pathlib
-from py_neuromodulation import nm_IO
+
+import pandas as pd
+
+from py_neuromodulation.nm_IO import PYNM_DIR, read_settings
 
 
 def get_default_settings() -> dict:
     """Read default settings from nm_settings.json"""
     settings_path = str(
-        pathlib.Path(__file__).parent.resolve() / "nm_settings.json"
+        PYNM_DIR / "nm_settings.json"
     )
-    return nm_IO.read_settings(settings_path)
+    return read_settings(settings_path)
 
 
 def reset_settings(
