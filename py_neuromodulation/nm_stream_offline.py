@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger("PynmLogger")
 
 import mne
-from mne_lsl import stream_viewer
+# from mne_lsl import stream_viewer
 
 from py_neuromodulation import (
     nm_generator,
@@ -159,9 +159,9 @@ class _GenericStream(nm_stream_abc.PNStream):
                 settings=self.settings, stream_name=stream_lsl_name
             )
 
-            if plot_lsl:
-                viewer = stream_viewer.StreamViewer(stream_name=stream_lsl_name)
-                viewer.start()
+            # if plot_lsl:
+            #     viewer = stream_viewer.StreamViewer(stream_name=stream_lsl_name)
+            #     viewer.start()
             
             if self.sfreq != self.lsl_stream.stream.sinfo.sfreq:
                 error_msg = (

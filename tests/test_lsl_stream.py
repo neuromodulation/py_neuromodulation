@@ -10,10 +10,29 @@ import threading
 import time 
 import random
 
+(
+    RUN_NAME,
+    PATH_RUN,
+    PATH_BIDS,
+    PATH_OUT,
+    datatype,
+) = nm_IO.get_paths_example_data()
+(
+    raw,
+    data,
+    sfreq,
+    line_noise,
+    coord_list,
+    coord_names,
+) = nm_IO.read_BIDS_data(
+    PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype
+)
+
+
 test_general_lsl = False
 test_offline_lsl = True
 test_live_lsl = False
-f_name = "/Users/Sam/charite/py_neuro/py_neuromodulation/py_neuromodulation/data/sub-testsub/ses-EphysMedOff/ieeg/sub-testsub_ses-EphysMedOff_task-gripforce_run-0_ieeg.vhdr"
+f_name = f"{PATH_RUN}_ieeg.vhdr"
 
     
 if test_general_lsl:
