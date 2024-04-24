@@ -5,9 +5,6 @@ import math
 import os
 from time import time
 from typing import Protocol, Type
-import logging
-
-logger = logging.getLogger("PynmLogger")
 
 import numpy as np
 import pandas as pd
@@ -21,6 +18,7 @@ from py_neuromodulation import (
     nm_rereference,
     nm_resample,
     nm_filter_preprocessing,
+    logger,
 )
 
 _PathLike = str | os.PathLike

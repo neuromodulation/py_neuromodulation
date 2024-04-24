@@ -1,3 +1,6 @@
+from .nm_logger import PYNMLogger
+logger = PYNMLogger(__name__)
+
 from . import (
     nm_analysis,
     nm_stream_abc,
@@ -7,6 +10,7 @@ from . import (
     nm_settings,
     nm_define_nmchannels,
 )
+
 from .nm_stream_offline import Stream
 from .nm_run_analysis import DataProcessor
 

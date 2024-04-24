@@ -1,11 +1,10 @@
-import logging
 from typing import Iterable
 
 import numpy as np
 from fooof import FOOOF
 from scipy import fft
 
-from py_neuromodulation import nm_features_abc
+from py_neuromodulation import nm_features_abc, logger
 
 
 class FooofAnalyzer(nm_features_abc.Feature):
@@ -78,7 +77,7 @@ class FooofAnalyzer(nm_features_abc.Feature):
                 )
                 fm.fit(self.f_vec, spectrum, self.freq_range)
             except Exception as e:
-                logging.critical(e, exc_info=True)
+                logger.critical(e, exc_info=True)
 
             if fm.fooofed_spectrum_ is None:
                 FIT_PASSED = False

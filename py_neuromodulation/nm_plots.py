@@ -6,12 +6,8 @@ from matplotlib import gridspec
 from typing import Optional
 import seaborn as sb
 import pandas as pd
-import logging
 
-logger = logging.getLogger("PynmLogger")
-
-from py_neuromodulation import nm_IO, nm_stats
-
+from py_neuromodulation import nm_IO, nm_stats, logger
 
 def plot_df_subjects(
     df,

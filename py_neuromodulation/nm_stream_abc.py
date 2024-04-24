@@ -5,11 +5,6 @@ import os
 import pathlib
 import _pickle as cPickle
 
-from .utils import _logging  # logger initialization
-
-# Logger use in different modules: logger = logging.getLogger("PynmLogger")
-
-
 import pandas as pd
 from sklearn import base
 

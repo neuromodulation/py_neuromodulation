@@ -2,9 +2,6 @@ import json
 import os
 import sys
 from pathlib import Path
-import logging
-
-logger = logging.getLogger("PynmLogger")
 
 
 import mne
@@ -17,6 +14,7 @@ import pyarrow
 from pyarrow import csv
 
 import py_neuromodulation
+from py_neuromodulation import logger
 
 _PathLike = str | os.PathLike
 

@@ -1,12 +1,10 @@
 """Module for filter functionality."""
 
-import logging
-
-logger = logging.getLogger("PynmLogger")
-
 import mne
 from mne.filter import _overlap_add_filter
 import numpy as np
+
+from py_neuromodulation import logger
 
 
 class MNEFilter:
