@@ -47,6 +47,14 @@ jobs:
           path: ${{ steps.pip-cache.outputs.dir }}
           key: pip|${{ runner.os }}|${{ matrix.python }}|${{ hashFiles('requirements/*.txt') }}
           restore-keys: pip|${{ runner.os }}|${{ matrix.python }}
+      - name: Install liblsl (linux)
+        if: ${{ matrix.os == 'ubuntu' }}
+        run: |
+          curl -L https://github.com/sccn/liblsl/releases/download/v1.16.2/liblsl-1.16.2-jammy_amd64.deb -o liblsl-1.16.2-jammy_amd64.deb
+          sudo apt update
+          sudo apt install -y binutils libpugixml-dev qtbase5-dev qt5-qmake
+          sudo apt install -y ./liblsl-1.16.2-jammy_amd64.deb
+          rm liblsl-1.16.2-jammy_amd64.deb
       - run: pip install tox
         env:
           APPDATA: DefaultNonExistingPath 
