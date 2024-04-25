@@ -3,10 +3,11 @@ from typing import Iterable
 import nolds
 import warnings
 
-from py_neuromodulation import nm_features_abc, nm_oscillatory
+from py_neuromodulation.nm_features import NMFeature
+from py_neuromodulation.nm_oscillatory import BandPower
 
 
-class Nolds(nm_features_abc.Feature):
+class Nolds(NMFeature):
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:

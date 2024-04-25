@@ -3,14 +3,14 @@ from scipy import signal
 from mne.filter import create_filter
 from typing import Iterable
 
-from py_neuromodulation import nm_features_abc
+from py_neuromodulation.nm_features import NMFeature
 
 
 class NoValidTroughException(Exception):
     pass
 
 
-class SharpwaveAnalyzer(nm_features_abc.Feature):
+class SharpwaveAnalyzer(NMFeature):
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:

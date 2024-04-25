@@ -3,10 +3,11 @@ from typing import Iterable
 import numpy as np
 from scipy import fft, signal
 
-from py_neuromodulation import nm_filter, nm_features_abc, nm_kalmanfilter
+from py_neuromodulation.nm_kalmanfilter import define_KF
+from py_neuromodulation.nm_features import NMFeature
+from py_neuromodulation.nm_filter import MNEFilter
 
-
-class OscillatoryFeature(nm_features_abc.Feature):
+class OscillatoryFeature(NMFeature):
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:

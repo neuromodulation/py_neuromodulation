@@ -3,10 +3,11 @@ from fooof import FOOOF
 from scipy import fft
 from typing import Iterable
 
-from py_neuromodulation import nm_features_abc
+from py_neuromodulation.nm_features import NMFeature
+from py_neuromodulation import logger
 
 
-class FooofAnalyzer(nm_features_abc.Feature):
+class FooofAnalyzer(NMFeature):
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:

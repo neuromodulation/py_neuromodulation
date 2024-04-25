@@ -3,10 +3,11 @@ import numpy as np
 from typing import Iterable
 from scipy import signal
 
-from py_neuromodulation import nm_features_abc, nm_filter
+from py_neuromodulation.nm_features import NMFeature
+from py_neuromodulation.nm_filter import MNEFilter
 
 
-class Burst(nm_features_abc.Feature):
+class Burst(NMFeature):
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:

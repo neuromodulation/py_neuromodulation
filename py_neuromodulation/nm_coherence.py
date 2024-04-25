@@ -3,7 +3,7 @@ import numpy as np
 from typing import Iterable
 import warnings
 
-from py_neuromodulation import nm_features_abc
+from py_neuromodulation.nm_features import NMFeature
 
 
 class CoherenceObject:
@@ -109,9 +109,7 @@ class CoherenceObject:
         return features_compute
 
 
-class NM_Coherence(nm_features_abc.Feature):
-
-    
+class NM_Coherence(NMFeature):
 
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: float

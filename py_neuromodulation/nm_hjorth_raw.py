@@ -2,10 +2,10 @@ import enum
 import numpy as np
 from typing import Iterable
 
-from py_neuromodulation import nm_features_abc
+from py_neuromodulation.nm_features import NMFeature
 
 
-class Hjorth(nm_features_abc.Feature):
+class Hjorth(NMFeature):
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:
@@ -47,7 +47,7 @@ class Hjorth(nm_features_abc.Feature):
         return features_compute
 
 
-class Raw(nm_features_abc.Feature):
+class Raw(NMFeature):
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:
