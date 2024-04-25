@@ -4,7 +4,7 @@ from typing import Iterable
 from scipy import signal
 
 from py_neuromodulation.nm_features import NMFeature
-from py_neuromodulation.nm_filter import MNEFilter
+from py_neuromodulation import nm_filter
 
 
 class Burst(NMFeature):

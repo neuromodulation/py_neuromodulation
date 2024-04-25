@@ -4,7 +4,7 @@ import nolds
 import warnings
 
 from py_neuromodulation.nm_features import NMFeature
-from py_neuromodulation.nm_oscillatory import BandPower
+from py_neuromodulation import nm_oscillatory
 
 
 class Nolds(NMFeature):

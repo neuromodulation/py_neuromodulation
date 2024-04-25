@@ -4,7 +4,6 @@ from scipy import fft
 from typing import Iterable
 
 from py_neuromodulation.nm_features import NMFeature
-from py_neuromodulation import logger
 
 
 class FooofAnalyzer(NMFeature):
