@@ -348,15 +348,15 @@ class Stream(_GenericStream):
             )
 
         super().__init__(
-            sfreq,
-            nm_channels,
-            settings,
-            line_noise,
-            sampling_rate_features_hz,
-            path_grids,
-            coord_names,
-            coord_list,
-            verbose,
+            sfreq=sfreq,
+            nm_channels=nm_channels,
+            settings=settings,
+            line_noise=line_noise,
+            sampling_rate_features_hz = sampling_rate_features_hz,
+            path_grids = path_grids,
+            coord_names = coord_names,
+            coord_list = coord_list,
+            verbose = verbose,
         )
 
         self.data = data

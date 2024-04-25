@@ -25,9 +25,9 @@ import time
 )
 
 
-test_general_lsl = True
-test_offline_lsl = True
-test_live_lsl = False 
+test_general_lsl = False
+test_offline_lsl = False
+test_live_lsl = True 
 f_name = f"{PATH_RUN}_ieeg.vhdr"
 
     
@@ -51,9 +51,6 @@ if test_general_lsl:
         stream1 = StreamLSL(name="general_stream", bufsize=2).connect()
         ch_types = stream1.get_channel_types(unique=True)
         print(f"Channel types included: {', '.join(ch_types)}")
-
-        # viewer = stream_viewer.StreamViewer(stream_name="example_stream")
-        # viewer.start()
 
         data_l = []
         timestamps_l = []
