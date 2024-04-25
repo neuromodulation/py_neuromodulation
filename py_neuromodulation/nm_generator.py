@@ -5,7 +5,7 @@ import logging
 logger = logging.getLogger("PynmLogger")
 
 from typing import Iterator, Union
-
+from pynput import keyboard
 import numpy as np
 import mne
 from mne_lsl.player import PlayerLSL
@@ -75,10 +75,19 @@ class LSLStream:
         )
         self.sampling_interval = 1 / self.settings["sampling_rate_features_hz"]
 
+    def on_press(self, key):
+        if key == keyboard.Key.esc:
+            self.key_pressed = True
+            return False
+
     def get_next_batch(self) -> np.array:
         self.last_time = time.time()
         check_data = None
         data = None
+        
+        listener = keyboard.Listener(on_press=self.on_press)
+        listener.start()
+
         while self.stream.connected:
             time_diff = time.time() - self.last_time  # in s
             if time_diff >= self.sampling_interval:
@@ -96,9 +105,13 @@ class LSLStream:
                 data, timestamp = self.stream.get_data(winsize=self.winsize)
                 # Checking if new data is incoming # TODO check for cleaner solution
                 if data is not None and check_data is not None and np.array_equal(data, check_data):
+                    logger.warning("No new data incoming. Stopping stream.")
                     self.stream.disconnect()
 
                 yield timestamp, data
+                if not listener.running:
+                    logger.info("Keyboard interrupt")
+                    self.stream.disconnect()
 
 
 def raw_data_generator(
@@ -136,6 +149,6 @@ def raw_data_generator(
             ratio_counter += 1
 
             yield (
-                np.arange(cnt - offset_start, cnt) / sfreq,
+                np.arange(cnt - offset_start, cnt) / sfreq,  # what is this exactly? Not in main. need? 
                 data[:, np.floor(cnt - offset_start).astype(int) : cnt]
             )

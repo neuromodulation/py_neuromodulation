@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger("PynmLogger")
 
 import mne
-# from mne_lsl import stream_viewer
+from mne_lsl import stream_viewer
 
 from py_neuromodulation import (
     nm_generator,
@@ -127,6 +127,9 @@ class _GenericStream(nm_stream_abc.PNStream):
             )
 
     def _process_batch(self, data_batch, cnt_samples):
+        # if isinstance(data_batch, tuple):
+        #     data_batch = np.array(data_batch[1])
+
         feature_series = self.run_analysis.process(
             data_batch[1].astype(np.float64)
         )
@@ -159,9 +162,9 @@ class _GenericStream(nm_stream_abc.PNStream):
                 settings=self.settings, stream_name=stream_lsl_name
             )
 
-            # if plot_lsl:
-            #     viewer = stream_viewer.StreamViewer(stream_name=stream_lsl_name)
-            #     viewer.start()
+            if plot_lsl:
+                viewer = stream_viewer.StreamViewer(stream_name=stream_lsl_name)
+                viewer.start()
             
             if self.sfreq != self.lsl_stream.stream.sinfo.sfreq:
                 error_msg = (
@@ -208,7 +211,6 @@ class _GenericStream(nm_stream_abc.PNStream):
                     break 
 
                 if data_batch is None:
-                    print(" data is None")
                     break
                 feature_series = self.run_analysis.process(
                     data_batch.astype(np.float64)

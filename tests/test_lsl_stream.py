@@ -1,14 +1,10 @@
 from mne_lsl.player import PlayerLSL
 from mne_lsl.stream import StreamLSL
-from mne_lsl import stream_viewer
-from matplotlib import pyplot as plt
 import numpy as np
-import pandas as pd
-from py_neuromodulation import (nm_stream_abc, nm_plots, nm_IO, nm_define_nmchannels, nm_analysis, nm_stream_offline, nm_settings, nm_generator)
+from py_neuromodulation import (nm_stream_abc, nm_IO, nm_define_nmchannels, nm_analysis, nm_stream_offline, nm_settings, nm_generator)
 import mne
 import threading
 import time 
-import random
 
 (
     RUN_NAME,
@@ -29,9 +25,9 @@ import random
 )
 
 
-test_general_lsl = False
+test_general_lsl = True
 test_offline_lsl = True
-test_live_lsl = False
+test_live_lsl = False 
 f_name = f"{PATH_RUN}_ieeg.vhdr"
 
     
