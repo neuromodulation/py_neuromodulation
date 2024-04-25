@@ -85,8 +85,7 @@ class Features:
                 feature_module = import_module(FEATURE_DICT[feature_name][0])
                 feature_classobj = getattr(feature_module, FEATURE_DICT[feature_name][1])
                 feature_classobj.test_settings(s, ch_names, sfreq)
-                feature_instance = feature_classobj(s, ch_names, sfreq)
-                self.features.append(feature_instance)
+                self.features.append(feature_classobj(s, ch_names, sfreq))
 
 
     def register_new_feature(self, feature: NMFeature) -> None:
