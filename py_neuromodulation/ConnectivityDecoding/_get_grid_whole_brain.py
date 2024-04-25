@@ -86,7 +86,7 @@ class NiiToMNI:
             coord_non_zero[:, 0],
             coord_non_zero[:, 1],
             coord_non_zero[:, 2],
-            s=50, # Bug? Third and fourth argument are s
+            s=50,
             alpha=0.2,
         )
         plt.show()

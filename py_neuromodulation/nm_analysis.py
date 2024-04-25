@@ -22,19 +22,6 @@ features_reverse_order_plotting = {"stft", "fft", "bandpass"}
 
 class Feature_Reader:
     
-#     These are class variables, not instance variables
-#     feature_dir: str
-#     feature_list: list[str]
-#     settings: dict
-#     sidecar: dict
-#     sfreq: int
-#     line_noise: int
-#     nm_channels: pd.DataFrame
-#     feature_arr: pd.DataFrame
-#     ch_names: list[str]
-#     ch_names_ECOG: list[str]
-#     decoder: nm_decode.Decoder | None = None
-
     def __init__(
         self, feature_dir: str, feature_file: str = "", binarize_label: bool = True
     ) -> None:
@@ -210,7 +197,7 @@ class Feature_Reader:
         return feature_select
 
     def set_target_ch(self, ch_name: str) -> None:
-        self.label_name = ch_name # Toni: I think this was the intended behavior
+        self.label_name = ch_name
 
     def normalize_features(
         self,

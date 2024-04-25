@@ -59,32 +59,6 @@ class CV_res:
 
 class Decoder:
 
-    # TONI: this are defined as class variables, not instance variables
-    # features: pd.DataFrame
-    # label: np.ndarray
-    # model: base.BaseEstimator
-    # cv_method: model_selection.BaseCrossValidator
-    # use_nested_cv: bool
-    # threshold_score: bool
-    # mov_detection_threshold: float
-    # TRAIN_VAL_SPLIT: bool
-    # RUN_BAY_OPT: bool
-    # save_coef: bool
-    # get_movement_detection_rate: bool
-    # min_consequent_count: int
-    # STACK_FEATURES_N_SAMPLES: bool
-    # time_stack_n_samples: int
-    # ros: RandomOverSampler = None
-    # rus: RandomUnderSampler = None
-    # VERBOSE: bool = False
-    # ch_ind_data: dict = {}
-    # grid_point_ind_data: dict = {}
-    # active_gridpoints: list = []
-    # feature_names: list = []
-    # ch_ind_results: dict = {}
-    # gridpoint_ind_results: dict = {}
-    # all_ch_results: dict = {}
-
     class ClassMissingException(Exception):
         def __init__(
             self,

@@ -282,25 +282,14 @@ class CohortRunner:
             ind_cut = np.concatenate((np.where(feature_reader.feature_arr["mov"] == 11)[0], seg_cut))
             idx_select = set(np.arange(feature_reader.feature_arr["mov"].shape[0])) - set(ind_cut)
             feature_reader.feature_arr = feature_reader.feature_arr.iloc[list(idx_select), :].reset_index(drop=True)
-            #analyzer.feature_arr["mov"] = analyzer.feature_arr["mov"] > 0
             feature_reader.label = np.array(feature_reader.feature_arr["mov"] > 0, dtype=int)
             subject_name = feature_file[:2]
             task_name = "hand_movement"
-            # run_number = 1 # Unused variable, remove?
         else:
             subject_name = feature_file[
                 feature_file.find("sub-") + 4 : feature_file.find("_ses")
             ]
-            # Unused variables, remove?
-            #sess_name = feature_file[
-            #    feature_file.find("ses-") + 4 : feature_file.find("_task")
-            #]
-            #task_name = feature_file[
-            #    feature_file.find("task-") + 5 : feature_file.find("_run")
-            #]
-            #run_number = feature_file[
-            #    feature_file.find("run-") + 4 : feature_file.find("_ieeg")
-            #]
+
         print(feature_reader.label_name)
         decoder = Decoder(
             features=feature_reader.feature_arr,
