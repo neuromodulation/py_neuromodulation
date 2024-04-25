@@ -5,14 +5,13 @@ from joblib import Parallel, delayed
 import numpy as np
 import pandas as pd
 from itertools import count
-import logging
 import mne
 
 from py_neuromodulation.nm_generator import raw_data_generator
 from py_neuromodulation.nm_stream_abc import PNStream
 from py_neuromodulation.nm_define_nmchannels import get_default_channels_from_data
 
-logger = logging.getLogger("PynmLogger")
+from py_neuromodulation import logger
 
 _PathLike = str | os.PathLike
 
@@ -70,7 +69,7 @@ class _OfflineStream(PNStream):
         feature_series["time"] = cnt_samples * 1000 / self.sfreq
 
         if self.verbose:
-            logging.info(
+            logger.info(
                 str(np.round(feature_series["time"] / 1000, 2))
                 + " seconds of data processed"
             )

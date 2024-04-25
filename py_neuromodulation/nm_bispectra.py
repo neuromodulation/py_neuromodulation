@@ -1,4 +1,4 @@
-from typing import Iterable, Callable
+from collections.abc import Iterable, Callable
 import numpy as np
 from pybispectra import compute_fft, WaveShape
 

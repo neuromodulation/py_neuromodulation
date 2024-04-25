@@ -8,9 +8,8 @@ import pandas as pd
 
 from py_neuromodulation.nm_IO import read_plot_modules
 from py_neuromodulation.nm_stats import permutationTestSpearmansRho
+from py_neuromodulation import logger
 
-import logging
-logger = logging.getLogger("PynmLogger")
 
 def plot_df_subjects(
     df,

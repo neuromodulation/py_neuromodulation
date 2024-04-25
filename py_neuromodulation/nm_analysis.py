@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from typing import Tuple
 
 import pickle
 import numpy as np
@@ -589,7 +588,7 @@ class Feature_Reader:
         )
 
     @staticmethod
-    def get_epochs(data, y_, epoch_len, sfreq, threshold=0) -> Tuple[np.ndarray, np.ndarray]:
+    def get_epochs(data, y_, epoch_len, sfreq, threshold=0) -> tuple[np.ndarray, np.ndarray]:
         """Return epoched data.
 
         Parameters

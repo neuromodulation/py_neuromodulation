@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import signal
 from mne.filter import create_filter
-from typing import Iterable
+from collections.abc import Iterable
 
 from py_neuromodulation.nm_features_abc import Feature
 

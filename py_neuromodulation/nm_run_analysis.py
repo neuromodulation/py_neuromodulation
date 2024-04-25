@@ -2,7 +2,7 @@
 
 from enum import Enum
 from time import time
-from typing import Protocol, Type
+from typing import Protocol
 
 import numpy as np
 import pandas as pd
@@ -231,7 +231,7 @@ class DataProcessor:
     def _get_grids(
         settings: dict,
         path_grids: _PathLike | None,
-        grid_type: Type[GRIDS],
+        grid_type: GRIDS,
     ) -> tuple[pd.DataFrame | None, pd.DataFrame | None]:
         """Read settings specified grids
 

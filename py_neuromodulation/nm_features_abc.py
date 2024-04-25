@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
-from typing import Iterable
+from collections.abc import Iterable
 
 
 class Feature(ABC):

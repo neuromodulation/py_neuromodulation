@@ -19,7 +19,6 @@ import numpy as np
 from copy import deepcopy
 
 from mrmr import mrmr_classif
-from typing import Type, List
 import pickle
 
 
@@ -33,29 +32,29 @@ class CV_res:
         model_save: bool = False,
     ) -> None:
 
-        self.score_train : List = []
-        self.score_test : List = []
-        self.y_test : List = []
-        self.y_train : List = []
-        self.y_test_pr : List = []
-        self.y_train_pr : List = []
-        self.X_test : List = []
-        self.X_train : List = []
-        self.coef : List = []
+        self.score_train : list = []
+        self.score_test : list = []
+        self.y_test : list = []
+        self.y_train : list = []
+        self.y_test_pr : list = []
+        self.y_train_pr : list = []
+        self.X_test : list = []
+        self.X_train : list = []
+        self.coef : list = []
 
         if get_movement_detection_rate:
-            self.mov_detection_rates_test : List = []
-            self.tprate_test : List = []
-            self.fprate_test : List = []
-            self.mov_detection_rates_train : List = []
-            self.tprate_train : List = []
-            self.fprate_train : List = []
+            self.mov_detection_rates_test : list = []
+            self.tprate_test : list = []
+            self.fprate_test : list = []
+            self.mov_detection_rates_train : list = []
+            self.tprate_train : list = []
+            self.fprate_train : list = []
         if RUN_BAY_OPT:
-            self.best_bay_opt_params: List = []
+            self.best_bay_opt_params: list = []
         if mrmr_select:
-            self.mrmr_select : List = []
+            self.mrmr_select : list = []
         if model_save:
-            self.model_save : List = []
+            self.model_save : list = []
 
 
 class Decoder:
@@ -243,7 +242,7 @@ class Decoder:
         else:
             obj_set = getattr(self, attr_name)
 
-        def set_scores(cv_res: Type[CV_res], set_inner_CV_res: bool = False):
+        def set_scores(cv_res: CV_res, set_inner_CV_res: bool = False):
             """
             This function renames the CV_res keys for InnerCV
             """
@@ -573,10 +572,10 @@ class Decoder:
         X_test,
         y_train,
         y_test,
-        cv_res: Type[CV_res],
+        cv_res: CV_res,
         save_data=True,
         save_probabilities=False,
-    ) -> Type[CV_res]:
+    ) -> CV_res:
 
         if self.save_coef:
             cv_res.coef.append(model_train.coef_)
@@ -624,8 +623,8 @@ class Decoder:
         y_test_pr: np.ndarray,
         y_train: np.ndarray,
         y_train_pr: np.ndarray,
-        cv_res: Type[CV_res],
-    ) -> Type[CV_res]:
+        cv_res: CV_res,
+    ) -> CV_res:
 
         mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(
             y_test,
@@ -657,7 +656,7 @@ class Decoder:
         y_train,
         X_test=None,
         y_test=None,
-        cv_res: Type[CV_res] | None = None,
+        cv_res: CV_res | None = None,
         return_fitted_model_only: bool = False,
         save_data=True,
     ):

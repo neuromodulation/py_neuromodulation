@@ -1,5 +1,5 @@
 from numpy import array, cov
-from typing import Iterable
+from collections.abc import Iterable
 
 from filterpy.kalman import KalmanFilter
 

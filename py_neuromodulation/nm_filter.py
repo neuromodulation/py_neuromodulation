@@ -5,8 +5,8 @@ from mne.filter import _overlap_add_filter
 import numpy as np
 from typing import cast
 
-import logging
-logger = logging.getLogger("PynmLogger")
+from py_neuromodulation import logger
+
 
 class MNEFilter:
     """mne.filter wrapper

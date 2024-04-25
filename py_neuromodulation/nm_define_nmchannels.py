@@ -1,6 +1,5 @@
 """Module for handling nm_channels."""
-from typing import Iterable
-
+from collections.abc import Iterable
 import pandas as pd
 import numpy as np
 

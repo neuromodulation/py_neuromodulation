@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from typing import Iterator
+from collections.abc import Iterator
 
 from py_neuromodulation.nm_stream_abc import PNStream
 from py_neuromodulation.nm_generator import raw_data_generator

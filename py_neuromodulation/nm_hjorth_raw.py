@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Iterable
+from collections.abc import Iterable
 
 from py_neuromodulation.nm_features_abc import Feature
 
