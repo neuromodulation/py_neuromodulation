@@ -25,9 +25,9 @@ import time
 )
 
 
-test_general_lsl = False
-test_offline_lsl = False
-test_live_lsl = True 
+test_general_lsl = True
+test_offline_lsl = True
+test_live_lsl = False
 f_name = f"{PATH_RUN}_ieeg.vhdr"
 
     
