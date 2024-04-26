@@ -24,6 +24,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       APPDATA: DefaultNonExistingPath 
+      MNE_LSL_LIB: ${{ github.workspace }}/liblsl.1.16.0.dylib
     strategy:
       fail-fast: false
       matrix:
@@ -62,4 +63,5 @@ jobs:
       - run: pip install tox
         env:
           APPDATA: DefaultNonExistingPath 
+          MNE_LSL_LIB: ${{ github.workspace }}/liblsl.1.16.0.dylib
       - run: tox -e ${{ matrix.tox }}
