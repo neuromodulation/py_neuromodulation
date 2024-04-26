@@ -47,7 +47,7 @@ class SharpwaveAnalyzer(Feature):
                 )
 
         # initialize used features
-        self.used_features = list()
+        self.used_features = []
         for feature_name, val in self.sw_settings["sharpwave_features"].items():
             if val:
                 self.used_features.append(feature_name)
@@ -383,7 +383,7 @@ class SharpwaveAnalyzer(Feature):
                 f"got sfreq {sfreq} and filter range {filter_range}"
             )
         # check if all features are also enbled via an estimator
-        used_features = list()
+        used_features = []
         for feature_name, val in s["sharpwave_analysis_settings"][
             "sharpwave_features"
         ].items():
