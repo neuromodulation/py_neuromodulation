@@ -1,20 +1,17 @@
 """Module for offline data streams."""
 
-import os
-from joblib import Parallel, delayed
 import numpy as np
 import pandas as pd
 from itertools import count
 import mne
 
+from joblib import Parallel, delayed
+
 from py_neuromodulation.nm_generator import raw_data_generator
 from py_neuromodulation.nm_stream_abc import PNStream
 from py_neuromodulation.nm_define_nmchannels import get_default_channels_from_data
-
+from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
-
-_PathLike = str | os.PathLike
-
 
 class _OfflineStream(PNStream):
     """Offline stream base class.

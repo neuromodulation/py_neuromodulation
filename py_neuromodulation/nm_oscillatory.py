@@ -1,6 +1,7 @@
 from collections.abc import Iterable
 import numpy as np
-from scipy import fft, signal
+from scipy.signal import welch, stft
+from scipy.fft import rfft, rfftfreq
 
 from py_neuromodulation.nm_kalmanfilter import define_KF
 from py_neuromodulation.nm_features_abc import Feature
@@ -145,7 +146,7 @@ class FFT(OscillatoryFeature):
 
         window_ms = self.s["fft_settings"]["windowlength_ms"]
         self.window_samples = int(-np.floor(window_ms / 1000 * sfreq))
-        self.freqs = fft.rfftfreq(
+        self.freqs = rfftfreq(
             -self.window_samples, 1 / np.floor(self.sfreq)
         )
 
@@ -164,7 +165,7 @@ class FFT(OscillatoryFeature):
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         data = data[:, self.window_samples :]
-        Z = np.abs(fft.rfft(data))
+        Z = np.abs(rfft(data))
 
         if self.log_transform:
             Z = np.log10(Z)
@@ -212,7 +213,7 @@ class Welch(OscillatoryFeature):
         )
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
-        freqs, Z = signal.welch(
+        freqs, Z = welch(
             data,
             fs=self.sfreq,
             window="hann",
@@ -274,7 +275,7 @@ class STFT(OscillatoryFeature):
         )
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
-        freqs, _, Zxx = signal.stft(
+        freqs, _, Zxx = stft(
             data,
             fs=self.sfreq,
             window="hamming",

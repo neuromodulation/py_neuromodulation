@@ -1,10 +1,9 @@
 from scipy import signal
 import numpy as np
 from collections.abc import Iterable
-import warnings
 
 from py_neuromodulation.nm_features_abc import Feature
-
+from py_neuromodulation import logger
 
 class CoherenceObject:
     def __init__(
@@ -188,7 +187,7 @@ class NM_Coherence(Feature):
         )
 
         if sum(list(s["coherence"]["method"].values())) == 0:
-            warnings.warn(
+            logger.warn(
                 "feature coherence enabled, but no coherence['method'] selected"
             )
 

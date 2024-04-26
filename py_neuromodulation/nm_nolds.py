@@ -1,11 +1,10 @@
 import numpy as np
 from collections.abc import Iterable
 import nolds
-import warnings
 
 from py_neuromodulation.nm_features_abc import Feature
 from py_neuromodulation.nm_oscillatory import BandPower
-
+from py_neuromodulation import logger
 
 class Nolds(Feature):
     def __init__(
@@ -33,7 +32,7 @@ class Nolds(Feature):
             "detrended_fluctutaion_analysis",
         ]
         if sum([s["nolds_features"][f] for f in nolds_feature_cols]) == 0:
-            warnings.warn(
+            logger.warn(
                 "nolds feature enabled, but no nolds_feature type selected"
             )
 

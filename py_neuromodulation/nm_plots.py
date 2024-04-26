@@ -1,10 +1,12 @@
-from scipy import stats
 import os
 import numpy as np
+
+from scipy.stats import zscore as scipy_zscore
+import pandas as pd
+
 from matplotlib import pyplot as plt
 from matplotlib import gridspec
 import seaborn as sb
-import pandas as pd
 
 from py_neuromodulation.nm_IO import read_plot_modules
 from py_neuromodulation.nm_stats import permutationTestSpearmansRho
@@ -87,7 +89,7 @@ def plot_epoch(
     ytick_labelsize: float | None = None,
 ):
     if z_score is None:
-        X_epoch = stats.zscore(
+        X_epoch = scipy_zscore(
             np.nan_to_num(np.nanmean(np.squeeze(X_epoch), axis=0)),
             axis=0,
             nan_policy="omit",
@@ -331,7 +333,7 @@ def plot_epochs_avg(
             ]
 
     if normalize_data:
-        X_epoch_mean = stats.zscore(
+        X_epoch_mean = scipy_zscore(
             np.nanmean(np.squeeze(X_epoch), axis=0), axis=0, nan_policy="omit"
         ).T
     else:
@@ -451,7 +453,7 @@ def plot_all_features(
 
     cols_plt = [c for c in df.columns if c != "time"]
     if normalize:
-        data_plt = stats.zscore(df[cols_plt], nan_policy="omit")
+        data_plt = scipy_zscore(df[cols_plt], nan_policy="omit")
     else:
         data_plt = df[cols_plt]
 

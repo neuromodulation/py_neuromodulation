@@ -6,10 +6,10 @@ import mne
 import mne_bids
 import numpy as np
 import pandas as pd
-from scipy import io
+from scipy import io as scipy_io
 
-import pyarrow
-from pyarrow import csv
+from pyarrow import Table as pyarrow_Table
+from pyarrow import csv as pyarrow_csv
 
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger, PYNM_DIR
@@ -150,10 +150,10 @@ def read_plot_modules(
         path to plotting files, by default
     """
 
-    faces = io.loadmat(os.path.join(PATH_PLOT, "faces.mat"))
-    vertices = io.loadmat(os.path.join(PATH_PLOT, "Vertices.mat"))
-    grid = io.loadmat(os.path.join(PATH_PLOT, "grid.mat"))["grid"]
-    stn_surf = io.loadmat(os.path.join(PATH_PLOT, "STN_surf.mat"))
+    faces = scipy_io.loadmat(os.path.join(PATH_PLOT, "faces.mat"))
+    vertices = scipy_io.loadmat(os.path.join(PATH_PLOT, "Vertices.mat"))
+    grid = scipy_io.loadmat(os.path.join(PATH_PLOT, "grid.mat"))["grid"]
+    stn_surf = scipy_io.loadmat(os.path.join(PATH_PLOT, "STN_surf.mat"))
     x_ver = stn_surf["vertices"][::2, 0]
     y_ver = stn_surf["vertices"][::2, 1]
     x_ecog = vertices["Vertices"][::1, 0]
@@ -224,7 +224,7 @@ def write_csv(df, path_out):
     Difference with pandas.df.to_csv() is that it does not
     write an index column by default
     """
-    csv.write_csv(pyarrow.Table.from_pandas(df), path_out)
+    pyarrow_csv.write_csv(pyarrow_Table.from_pandas(df), path_out)
 
 
 def save_settings(
@@ -342,7 +342,7 @@ def loadmat(filename) -> dict:
     from mat files. It calls the function check keys to cure all entries
     which are still mat-objects
     """
-    data = io.loadmat(filename, struct_as_record=False, squeeze_me=True)
+    data = scipy_io.loadmat(filename, struct_as_record=False, squeeze_me=True)
     return _check_keys(data)
 
 
@@ -384,7 +384,7 @@ def _check_keys(dict):
     todict is called to change them to nested dictionaries
     """
     for key in dict:
-        if isinstance(dict[key], io.matlab.mio5_params.mat_struct):
+        if isinstance(dict[key], scipy_io.matlab.mio5_params.mat_struct):
             dict[key] = _todict(dict[key])
     return dict
 
@@ -396,7 +396,7 @@ def _todict(matobj) -> dict:
     dict = {}
     for strg in matobj._fieldnames:
         elem = matobj.__dict__[strg]
-        if isinstance(elem, io.matlab.mio5_params.mat_struct):
+        if isinstance(elem, scipy_io.matlab.mio5_params.mat_struct):
             dict[strg] = _todict(elem)
         else:
             dict[strg] = elem

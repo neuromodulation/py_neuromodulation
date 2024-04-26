@@ -1,7 +1,6 @@
 """Module for filter functionality."""
 
-import mne
-from mne.filter import _overlap_add_filter
+from mne.filter import create_filter, _overlap_add_filter
 import numpy as np
 from typing import cast
 
@@ -58,7 +57,7 @@ class MNEFilter:
             
         for f_range in f_ranges:
             try:
-                filt = mne.filter.create_filter(
+                filt = create_filter(
                     None,
                     sfreq,
                     l_freq=f_range[0],
@@ -70,7 +69,7 @@ class MNEFilter:
                     verbose=verbose,
                 )
             except ValueError:
-                filt = mne.filter.create_filter(
+                filt = create_filter(
                     None,
                     sfreq,
                     l_freq=f_range[0],
@@ -188,7 +187,7 @@ class NotchFilter:
             freq + nw / 2.0 + tb_half for freq, nw in zip(freqs, notch_widths)
         ]
 
-        self.filter_bank = mne.filter.create_filter(
+        self.filter_bank = create_filter(
             data=None,
             sfreq=sfreq,
             l_freq=highs,

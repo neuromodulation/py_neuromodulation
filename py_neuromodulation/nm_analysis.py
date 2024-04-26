@@ -4,8 +4,11 @@ from pathlib import Path
 import pickle
 import numpy as np
 import pandas as pd
-from sklearn import base, linear_model, metrics, model_selection
-from scipy import stats
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import r2_score
+from sklearn.model_selection import KFold
+
+from scipy.stats import zscore as scipy_zscore 
 
 from py_neuromodulation import nm_IO, nm_plots
 from py_neuromodulation.nm_decode import Decoder
@@ -208,7 +211,7 @@ class Feature_Reader:
             pd.DataFrame: z-scored feature_arr
         """
         cols_norm = [c for c in self.feature_arr.columns if "time" not in c]
-        feature_arr_norm = stats.zscore(self.feature_arr[cols_norm], nan_policy="omit")
+        feature_arr_norm = scipy_zscore(self.feature_arr[cols_norm], nan_policy="omit")
         feature_arr_norm["time"] = self.feature_arr["time"]
         return feature_arr_norm
 
@@ -633,9 +636,9 @@ class Feature_Reader:
         TRAIN_VAL_SPLIT=False,
         RUN_BAY_OPT=False,
         save_coef=False,
-        model: base.BaseEstimator = linear_model.LogisticRegression,
-        eval_method=metrics.r2_score,
-        cv_method: model_selection.BaseCrossValidator = model_selection.KFold(
+        model = LogisticRegression,
+        eval_method = r2_score,
+        cv_method = KFold(
             n_splits=3, shuffle=False
         ),
         get_movement_detection_rate: bool = False,

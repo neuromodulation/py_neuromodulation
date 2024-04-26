@@ -1,6 +1,6 @@
 import numpy as np
 from collections.abc import Iterable
-from scipy import signal
+from scipy.signal import hilbert as scipy_hilbert
 
 from py_neuromodulation.nm_features_abc import Feature
 from py_neuromodulation.nm_filter import MNEFilter
@@ -55,11 +55,10 @@ class Burst(Feature):
         def init_ch_fband_dict() -> dict:
             d : dict = {}
             for ch in self.ch_names:
-                if ch not in d:
-                    d[ch] = {}
+                d.setdefault(ch , {})
                 for fb in self.fband_names:
-                    if fb not in d[ch]:
-                        d[ch][fb] = None
+                    d[ch].setdefault(fb, None)
+
             return d
 
         self.data_buffer = init_ch_fband_dict()
@@ -102,7 +101,7 @@ class Burst(Feature):
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         # filter_data returns (n_channels, n_fbands, n_samples)
         filtered_data = np.abs(
-            signal.hilbert(self.bandpass_filter.filter_data(data), axis=2)
+            scipy_hilbert(self.bandpass_filter.filter_data(data), axis=2)
         )
         for ch_idx, ch_name in enumerate(self.ch_names):
             for fband_idx, fband_name in enumerate(self.fband_names):
