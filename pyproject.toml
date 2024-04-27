@@ -61,6 +61,7 @@ dev = [
     "black>=24.2.0",
     "pytest>=8.0.2",
     "pytest-cov",
+    "pytest-sugar",
     "notebook",
 ]
 
@@ -81,22 +82,7 @@ docs = [
 
 [tool.rye]
 dev-dependencies = [
-    "black>=24.2.0",
-    "pytest>=8.0.2",
-    "pytest-cov",
-    "notebook",
     "py-neuromodulation[dev]",
-    "nbsphinx",
-    "sphinx",
-    "pandoc",
-    "recommonmark",
-    "sphinx",
-    "numpydoc",
-    "sphinx-gallery",
-    "nbsphinx_link",
-    "pydata-sphinx-theme",
-    "pypandoc",
-    "sphinx_togglebutton",
 ]
 
 [project.urls]
@@ -116,23 +102,3 @@ exclude = [
   "py_neuromodulation/data/derivatives",
   "py_neuromodulation/ConnectivityDecoding/connectome_folder",
 ]
-
-[tool.tox]
-legacy_tox_ini = """
-  [tox]
-  env_list =
-    py3{10, 11}
-  
-  skip_missing_interpreters = true
-  isolated_build = true
-
-
-  [testenv]
-  description = install pytest in a virtual environment and invoke it on the tests folder
-  deps =
-      pytest>=7
-      pytest-sugar
-  commands = pytest tests {posargs}
-"""
-
-# check https://stackoverflow.com/a/40831237/5060208 for adding posargs to pytest
