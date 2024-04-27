@@ -41,7 +41,7 @@ class RawNormalizer:
         sampling_rate_features_hz: int | float,
         normalization_method: str = "zscore",
         normalization_time_s: int | float = 30,
-        clip: bool = False,
+        clip: int | float = 0,
     ) -> None:
         """Normalize raw data.
 
@@ -99,7 +99,7 @@ class FeatureNormalizer:
         sampling_rate_features_hz: int | float,
         normalization_method: str = "zscore",
         normalization_time_s: int | float = 30,
-        clip: bool = False,
+        clip: int | float = 0,
     ) -> None:
         """Normalize raw data.
 
@@ -221,9 +221,9 @@ def _normalize_and_clip(
     return current, previous
 
 
-def _clip(data: np.ndarray, clip: bool | int | float) -> np.ndarray:
+def _clip(data: np.ndarray, clip: int | float) -> np.ndarray:
     """Clip data."""
-    if clip:
+    if not clip:
         clip = 3.0  # default value
     else:
         clip = float(clip)
