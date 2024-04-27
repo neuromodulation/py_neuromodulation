@@ -18,7 +18,7 @@ class Features:
     # features: list[nm_features_abc.Feature] = []
 
     def __init__(
-        self, s: dict, ch_names: list[str], sfreq: int | float
+        self, s: dict, ch_names: list[str], sfreq: float
     ) -> None:
         """_summary_
 
@@ -28,7 +28,7 @@ class Features:
             _description_
         ch_names : list[str]
             _description_
-        sfreq : int | float
+        sfreq : float
             _description_
 
         Raises

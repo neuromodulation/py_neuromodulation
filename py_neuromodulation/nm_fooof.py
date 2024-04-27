@@ -29,7 +29,7 @@ class FooofAnalyzer(Feature):
     def test_settings(
         s: dict,
         ch_names: Iterable[str],
-        sfreq: int | float,
+        sfreq: float,
     ):
         assert isinstance(s["fooof"]["aperiodic"]["exponent"], bool)
         assert isinstance(s["fooof"]["aperiodic"]["offset"], bool)

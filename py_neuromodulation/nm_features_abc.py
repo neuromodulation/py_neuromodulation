@@ -6,7 +6,7 @@ from collections.abc import Iterable
 class Feature(ABC):
     @abstractmethod
     def __init__(
-        self, settings: dict, ch_names: Iterable[str], sfreq: int | float
+        self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:
         pass
 
@@ -15,7 +15,7 @@ class Feature(ABC):
     def test_settings(
         settings: dict,
         ch_names: Iterable[str],
-        sfreq: int | float,
+        sfreq: float,
     ):
         """Method to check passed settings"""
         pass

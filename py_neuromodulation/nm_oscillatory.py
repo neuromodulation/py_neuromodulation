@@ -24,7 +24,7 @@ class OscillatoryFeature(Feature):
     def test_settings_osc(
         s: dict,
         ch_names: Iterable[str],
-        sfreq: int | float,
+        sfreq: float,
         osc_feature_name: str,
     ):
         assert (
@@ -160,7 +160,7 @@ class FFT(OscillatoryFeature):
                 self.feature_params.append((ch_idx, feature_name, idx_range))
 
     @staticmethod
-    def test_settings(s: dict, ch_names: Iterable[str], sfreq: int | float):
+    def test_settings(s: dict, ch_names: Iterable[str], sfreq: float):
         OscillatoryFeature.test_settings_osc(s, ch_names, sfreq, "fft_settings")
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
@@ -207,7 +207,7 @@ class Welch(OscillatoryFeature):
                 self.feature_params.append((ch_idx, feature_name, f_range))
 
     @staticmethod
-    def test_settings(s: dict, ch_names: Iterable[str], sfreq: int | float):
+    def test_settings(s: dict, ch_names: Iterable[str], sfreq: float):
         OscillatoryFeature.test_settings_osc(
             s, ch_names, sfreq, "welch_settings"
         )
@@ -269,7 +269,7 @@ class STFT(OscillatoryFeature):
                 self.feature_params.append((ch_idx, feature_name, f_range))
 
     @staticmethod
-    def test_settings(s: dict, ch_names: Iterable[str], sfreq: int | float):
+    def test_settings(s: dict, ch_names: Iterable[str], sfreq: float):
         OscillatoryFeature.test_settings_osc(
             s, ch_names, sfreq, "stft_settings"
         )
@@ -364,7 +364,7 @@ class BandPower(OscillatoryFeature):
                         )
 
     @staticmethod
-    def test_settings(s: dict, ch_names: Iterable[str], sfreq: int | float):
+    def test_settings(s: dict, ch_names: Iterable[str], sfreq: float):
         OscillatoryFeature.test_settings_osc(
             s, ch_names, sfreq, "bandpass_filter_settings"
         )

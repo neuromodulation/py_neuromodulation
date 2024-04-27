@@ -45,7 +45,7 @@ def read_BIDS_data(
     BIDS_PATH: _PathLike | None = None,
     datatype: str = "ieeg",
     line_noise: int = 50,
-) -> tuple[mne.io.Raw, np.ndarray, int | float, int, list | None, list | None]:
+) -> tuple[mne.io.Raw, np.ndarray, float, int, list | None, list | None]:
     """Given a run path and bids data path, read the respective data
 
     Parameters
@@ -296,7 +296,7 @@ def save_general_dict(
     logger.info(f"{str_add} saved to " + str(path_out))
 
 
-def default_json_convert(obj) -> list | int | float:
+def default_json_convert(obj) -> list | float:
     if isinstance(obj, np.ndarray):
         return obj.tolist()
     if isinstance(obj, pd.DataFrame):

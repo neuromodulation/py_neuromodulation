@@ -15,7 +15,7 @@ class NORM_METHODS(Enum):
 
 
 def test_normalization_settings(
-    normalization_time_s: int | float, normalization_method: str, clip: bool
+    normalization_time_s: float, normalization_method: str, clip: bool
 ):
     assert isinstance(
         normalization_time_s,
@@ -37,11 +37,11 @@ def test_normalization_settings(
 class RawNormalizer:
     def __init__(
         self,
-        sfreq: int | float,
-        sampling_rate_features_hz: int | float,
+        sfreq: float,
+        sampling_rate_features_hz: float,
         normalization_method: str = "zscore",
-        normalization_time_s: int | float = 30,
-        clip: int | float = 0,
+        normalization_time_s: float = 30,
+        clip: float = 0,
     ) -> None:
         """Normalize raw data.
 
@@ -53,7 +53,7 @@ class RawNormalizer:
             data is normalized via subtraction of the 'mean' or 'median' and
             subsequent division by the 'mean' or 'median'. For z-scoring enter
             'zscore'.
-        clip : int | float, optional
+        clip : float, optional
             value at which to clip after normalization
         """
 
@@ -96,10 +96,10 @@ class RawNormalizer:
 class FeatureNormalizer:
     def __init__(
         self,
-        sampling_rate_features_hz: int | float,
+        sampling_rate_features_hz: float,
         normalization_method: str = "zscore",
-        normalization_time_s: int | float = 30,
-        clip: int | float = 0,
+        normalization_time_s: float = 30,
+        clip: float = 0,
     ) -> None:
         """Normalize raw data.
 
@@ -111,7 +111,7 @@ class FeatureNormalizer:
             data is normalized via subtraction of the 'mean' or 'median' and
             subsequent division by the 'mean' or 'median'. For z-scoring enter
             'zscore'.
-        clip : int | float, optional
+        clip : float, optional
             value at which to clip after normalization
         """
         self.test_settings(
@@ -168,7 +168,7 @@ def _normalize_and_clip(
     current: np.ndarray,
     previous: np.ndarray,
     method: str,
-    clip: int | float | bool,
+    clip: float | bool,
     description: str,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Normalize data."""
@@ -221,7 +221,7 @@ def _normalize_and_clip(
     return current, previous
 
 
-def _clip(data: np.ndarray, clip: int | float) -> np.ndarray:
+def _clip(data: np.ndarray, clip: float) -> np.ndarray:
     """Clip data."""
     if not clip:
         clip = 3.0  # default value

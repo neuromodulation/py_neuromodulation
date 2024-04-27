@@ -37,12 +37,12 @@ _PREPROCESSING_CONSTRUCTORS = [
 class DataProcessor:
     def __init__(
         self,
-        sfreq: int | float,
+        sfreq: float,
         settings: dict | _PathLike,
         nm_channels: pd.DataFrame | _PathLike,
         coord_names: list | None = None,
         coord_list: list | None = None,
-        line_noise: int | float | None = None,
+        line_noise: float | None = None,
         path_grids: _PathLike | None = None,
         verbose: bool = True,
     ) -> None:
@@ -68,10 +68,10 @@ class DataProcessor:
         self.settings = self._load_settings(settings)
         self.nm_channels = self._load_nm_channels(nm_channels)
 
-        self.sfreq_features: int | float = self.settings["sampling_rate_features_hz"]
-        self._sfreq_raw_orig: int | float = sfreq
-        self.sfreq_raw: int | float = sfreq // 1
-        self.line_noise: int | float | None = line_noise
+        self.sfreq_features: float = self.settings["sampling_rate_features_hz"]
+        self._sfreq_raw_orig: float = sfreq
+        self.sfreq_raw: float = sfreq // 1
+        self.line_noise: float | None = line_noise
         self.path_grids: _PathLike | None = path_grids
         self.verbose: bool = verbose
 
@@ -158,7 +158,7 @@ class DataProcessor:
         dict with (sub)cortex_left and (sub)cortex_right ch_names and positions
         """
 
-        def is_left_coord(val: int | float, coord_region: str) -> bool:
+        def is_left_coord(val: float, coord_region: str) -> bool:
             if coord_region.split("_")[1] == "left":
                 return val < 0
             return val > 0

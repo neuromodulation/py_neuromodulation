@@ -19,7 +19,7 @@ class LineLength(Feature):
     def test_settings(
         settings: dict,
         ch_names: Iterable[str],
-        sfreq: int | float,
+        sfreq: float,
     ):
         # no settings to be checked
         pass

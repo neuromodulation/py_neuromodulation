@@ -7,14 +7,14 @@ class ReReferencer:
 
     def __init__(
         self,
-        sfreq: int | float,
+        sfreq: float,
         nm_channels: pd.DataFrame,
     ) -> None:
         """Initialize real-time rereference information.
 
         Parameters
         ----------
-        sfreq : int | float
+        sfreq : float
             Sampling frequency. Is not used, only kept for compatibility.
         nm_channels : Pandas DataFrame
             Dataframe containing information about rereferencing, as

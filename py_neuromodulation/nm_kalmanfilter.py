@@ -37,7 +37,7 @@ def define_KF(Tp, sigma_w, sigma_v):
 def test_kf_settings(
         s: dict,
         ch_names: Iterable[str],
-        sfreq: int | float,
+        sfreq: float,
     ):
         assert isinstance(s["kalman_filter_settings"]["Tp"], (float, int))
         assert isinstance(s["kalman_filter_settings"]["sigma_w"], (float, int))

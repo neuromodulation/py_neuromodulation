@@ -16,11 +16,11 @@ class PNStream(ABC):
 
     def __init__(
         self,
-        sfreq: int | float,
+        sfreq: float,
         nm_channels: pd.DataFrame | _PathLike,
         settings: dict | _PathLike | None = None,
-        line_noise: int | float | None = 50,
-        sampling_rate_features_hz: int | float | None = None,
+        line_noise: float | None = 50,
+        sampling_rate_features_hz: float | None = None,
         path_grids: _PathLike | None = None,
         coord_names: list | None = None,
         coord_list: list | None = None,
@@ -30,15 +30,15 @@ class PNStream(ABC):
 
         Parameters
         ----------
-        sfreq : int | float
+        sfreq : float
             sampling frequency of data in Hertz
         nm_channels : pd.DataFrame | _PathLike
             parametrization of channels (see nm_define_channels.py for initialization)
         settings : dict | _PathLike | None, optional
             features settings can be a dictionary or path to the nm_settings.json, by default the py_neuromodulation/nm_settings.json are read
-        line_noise : int | float | None, optional
+        line_noise : float | None, optional
             line noise, by default 50
-        sampling_rate_features_hz : int | float | None, optional
+        sampling_rate_features_hz : float | None, optional
             feature sampling rate, by default None
         path_grids : _PathLike | None, optional
             path to grid_cortex.tsv and/or gird_subcortex.tsv, by default Non

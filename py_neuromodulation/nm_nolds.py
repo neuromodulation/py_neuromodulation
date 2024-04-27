@@ -22,7 +22,7 @@ class Nolds(Feature):
     def test_settings(
         s: dict,
         ch_names: Iterable[str],
-        sfreq: int | float,
+        sfreq: float,
     ):
         nolds_feature_cols = [
             "sample_entropy",

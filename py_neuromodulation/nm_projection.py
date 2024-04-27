@@ -115,7 +115,7 @@ class Projection:
 
     def calc_proj_matrix(
         self,
-        max_dist: int | float,
+        max_dist: float,
         grid: np.ndarray,
         coord_array: np.ndarray,
     ) -> np.ndarray:

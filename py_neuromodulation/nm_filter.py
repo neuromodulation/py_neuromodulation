@@ -21,13 +21,13 @@ class MNEFilter:
     ----------
     f_ranges : list of lists
         Frequency ranges. Inner lists must be of length 2.
-    sfreq : int | float
+    sfreq : float
         Sampling frequency.
     filter_length : str, optional
         Filter length. Human readable (e.g. "1000ms", "1s"), by default "999ms"
-    l_trans_bandwidth : int | float | str, optional
+    l_trans_bandwidth : float | str, optional
         Length of the lower transition band or "auto", by default 4
-    h_trans_bandwidth : int | float | str, optional
+    h_trans_bandwidth : float | str, optional
         Length of the higher transition band or "auto", by default 4
     verbose : bool | None, optional
         Verbosity level, by default None
@@ -40,11 +40,11 @@ class MNEFilter:
 
     def __init__(
         self,
-        f_ranges: list[list[int | float | None]] | list[int | float | None],
-        sfreq: int | float,
+        f_ranges: list[list[float | None]] | list[float | None],
+        sfreq: float,
         filter_length: str | float = "999ms",
-        l_trans_bandwidth: int | float | str = 4,
-        h_trans_bandwidth: int | float | str = 4,
+        l_trans_bandwidth: float | str = 4,
+        h_trans_bandwidth: float | str = 4,
         verbose: bool | int | str | None = None,
     ) -> None:
         filter_bank = []
@@ -133,8 +133,8 @@ class MNEFilter:
 class NotchFilter:
     def __init__(
         self,
-        sfreq: int | float,
-        line_noise: int | float | None = None,
+        sfreq: float,
+        line_noise: float | None = None,
         freqs: np.ndarray | None = None,
         notch_widths: int | np.ndarray | None = 3,
         trans_bandwidth: float = 6.8,

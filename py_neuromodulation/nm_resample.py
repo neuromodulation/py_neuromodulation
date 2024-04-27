@@ -8,7 +8,7 @@ class Resampler:
 
     Parameters
     ----------
-    sfreq : int | float
+    sfreq : float
         Original sampling frequency.
 
     Attributes
@@ -19,8 +19,8 @@ class Resampler:
 
     def __init__(
         self,
-        sfreq: int | float,
-        resample_freq_hz: int | float,
+        sfreq: float,
+        resample_freq_hz: float,
     ) -> None:
 
         self.test_settings(resample_freq_hz)

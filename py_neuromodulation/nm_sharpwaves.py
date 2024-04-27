@@ -362,7 +362,7 @@ class SharpwaveAnalyzer(Feature):
     def test_settings(
         s: dict,
         ch_names: Iterable[str],
-        sfreq: int | float,
+        sfreq: float,
     ):
         for filter_range in s["sharpwave_analysis_settings"][
             "filter_ranges_hz"

@@ -7,7 +7,7 @@ from py_neuromodulation.nm_features_abc import Feature
 
 class Bispectra(Feature):
     def __init__(
-        self, settings: dict, ch_names: Iterable[str], sfreq: int | float
+        self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:
         super().__init__(settings, ch_names, sfreq)
         self.sfreq = sfreq
@@ -20,7 +20,7 @@ class Bispectra(Feature):
     def test_settings(
         settings: dict,
         ch_names: Iterable[str],
-        sfreq: int | float,
+        sfreq: float,
     ):
         s = settings
 

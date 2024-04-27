@@ -5,7 +5,7 @@ from py_neuromodulation.nm_filter import MNEFilter
 
 class PreprocessingFilter:
 
-    def __init__(self, settings: dict, sfreq: int | float) -> None:
+    def __init__(self, settings: dict, sfreq: float) -> None:
         self.s = settings
         self.sfreq = sfreq
         self.filters = []

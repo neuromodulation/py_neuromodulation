@@ -15,7 +15,7 @@ class Hjorth(Feature):
     def test_settings(
         settings: dict,
         ch_names: Iterable[str],
-        sfreq: int | float,
+        sfreq: float,
     ):
         # no settings to test
         pass
@@ -66,7 +66,7 @@ class Raw(Feature):
     def test_settings(
         settings: dict,
         ch_names: Iterable[str],
-        sfreq: int | float,
+        sfreq: float,
     ):
         # no settings to test
         pass

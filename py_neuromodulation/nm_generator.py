@@ -5,7 +5,7 @@ import numpy as np
 def raw_data_generator(
     data: np.ndarray,
     settings: dict,
-    sfreq: int | float,
+    sfreq: float,
 ) -> Iterator[np.ndarray]:
     """
     This generator function mimics online data acquisition.
@@ -15,7 +15,7 @@ def raw_data_generator(
         ieeg_raw (np array): shape (channels, time)
         sfreq: int
         sfreq_new: int
-        offset_time: int | float
+        offset_time: float
     Returns
     -------
         np.array: new batch for run function of full segment length shape

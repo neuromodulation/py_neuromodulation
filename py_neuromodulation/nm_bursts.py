@@ -67,7 +67,7 @@ class Burst(Feature):
     def test_settings(
         settings: dict,
         ch_names: Iterable[str],
-        sfreq: int | float,
+        sfreq: float,
     ):
         assert isinstance(
             settings["burst_settings"]["threshold"], (float, int)
@@ -168,7 +168,7 @@ class Burst(Feature):
 
     @staticmethod
     def get_burst_amplitude_length(
-        beta_averp_norm, burst_thr: np.floating | float, sfreq: int | float
+        beta_averp_norm, burst_thr: np.floating | float, sfreq: float
     ):
         """
         Analysing the duration of beta burst
