@@ -23,10 +23,9 @@ class Resampler:
         resample_freq_hz: int | float,
     ) -> None:
 
-        assert isinstance(resample_freq_hz, (float, int))
+        self.test_settings(resample_freq_hz)
 
-        self.sfreq_new: int | float = resample_freq_hz
-        ratio = float(self.sfreq_new / sfreq)
+        ratio = float(resample_freq_hz/ sfreq)
         if ratio == 1.0:
             self.up = 0.0
         else:
@@ -49,7 +48,6 @@ class Resampler:
             return data
         return mne_resample(data.astype(np.float64), up=self.up, down=1.0)
 
-    # TODO: implement this method
-    def test_settings(self, settings: dict):
-        pass
+    def test_settings(self, resample_freq_hz):
+        assert isinstance(resample_freq_hz, (float, int))
         

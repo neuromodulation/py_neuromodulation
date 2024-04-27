@@ -96,7 +96,4 @@ class ReReferencer:
         else:
             return data
 
-    # TODO: implement this method
-    def test_settings(self, settings: dict):
-        pass
         

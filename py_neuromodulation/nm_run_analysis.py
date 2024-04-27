@@ -24,8 +24,6 @@ class Preprocessor(Protocol):
     def process(self, data: np.ndarray) -> np.ndarray:
         pass
 
-    def test_settings(self, settings: dict): ...
-
 
 _PREPROCESSING_CONSTRUCTORS = [
         "raw_resampling",
@@ -87,43 +85,40 @@ class DataProcessor:
             preprocessor: Preprocessor
             match preprocessing_method:
                 case "raw_resampling":
+                    # Preprocessors are supposed to call test_settings in the constructor
                     preprocessor = Resampler(
                         sfreq=self.sfreq_raw, **self.settings[settings_str]
                     )
-                    self.sfreq_raw = preprocessor.sfreq_new
-                    self.preprocessors.append(preprocessor)
                 case "notch_filter":
                     preprocessor = NotchFilter(
                         sfreq=self.sfreq_raw,
                         line_noise=self.line_noise,
                         **self.settings.get(settings_str, {}),
                     )
-                    self.preprocessors.append(preprocessor)
                 case "re_referencing":
                     preprocessor = ReReferencer(
                         sfreq=self.sfreq_raw,
                         nm_channels=self.nm_channels,
                     )
-                    self.preprocessors.append(preprocessor)
                 case "raw_normalization":
                     preprocessor = RawNormalizer(
                         sfreq=self.sfreq_raw,
                         sampling_rate_features_hz=self.sfreq_features,
                         **self.settings.get(settings_str, {}),
                     )
-                    self.preprocessors.append(preprocessor)
                 case "preprocessing_filter":
                     preprocessor = PreprocessingFilter(
                         settings=self.settings,
                         sfreq=self.sfreq_raw,
                     )
-                    self.preprocessors.append(preprocessor)
                 case _:
                     raise ValueError(
                         "Invalid preprocessing method. Must be one of"
                         f" {_PREPROCESSING_CONSTRUCTORS}. Got"
                         f" {preprocessing_method}"
                     )
+
+            self.preprocessors.append(preprocessor)
 
         if self.settings["postprocessing"]["feature_normalization"]:
             settings_str = "feature_normalization_settings"

@@ -38,7 +38,7 @@ class RawNormalizer:
     def __init__(
         self,
         sfreq: int | float,
-        sampling_rate_features_hz: int,
+        sampling_rate_features_hz: int | float,
         normalization_method: str = "zscore",
         normalization_time_s: int | float = 30,
         clip: bool = False,
@@ -85,11 +85,12 @@ class RawNormalizer:
 
         return data.T
     
-    # TODO: implement this method
-    def test_settings(self, settings: dict):
-        pass
-        
-
+    def test_settings(self, normalization_time_s, normalization_method, clip):
+        test_normalization_settings(
+            normalization_time_s,
+            normalization_method,
+            clip
+        )
 
 
 class FeatureNormalizer:
@@ -113,8 +114,11 @@ class FeatureNormalizer:
         clip : int | float, optional
             value at which to clip after normalization
         """
-
-        test_normalization_settings(normalization_time_s, normalization_method, clip)
+        self.test_settings(
+            normalization_time_s,
+            normalization_method,
+            clip
+        )
 
         self.method = normalization_method
         self.clip = clip
@@ -142,6 +146,12 @@ class FeatureNormalizer:
 
         return data
 
+    def test_settings(self, normalization_time_s, normalization_method, clip):
+        test_normalization_settings(
+            normalization_time_s,
+            normalization_method,
+            clip
+        )
 """
 Functions to check for NaN's before deciding which Numpy function to call
 """

@@ -139,11 +139,9 @@ class NotchFilter:
         notch_widths: int | np.ndarray | None = 3,
         trans_bandwidth: float = 6.8,
     ) -> None:
-        if line_noise is None and freqs is None:
-            raise ValueError(
-                "Either line_noise or freqs must be defined if notch_filter is"
-                "activated."
-            )
+        
+        self.test_settings(line_noise, sfreq)
+
         if freqs is None:
             freqs = np.arange(line_noise, sfreq / 2, line_noise, dtype=int)
 
@@ -217,7 +215,10 @@ class NotchFilter:
             pad="reflect_limited",
         )
 
-    # TODO: implement this method
-    def test_settings(self, settings: dict):
-        pass
+    def test_settings(self, line_noise, freqs):
+        if line_noise is None and freqs is None:
+            raise ValueError(
+                "Either line_noise or freqs must be defined if notch_filter is"
+                "activated."
+            )
         
