@@ -118,7 +118,7 @@ class Burst(Feature):
                     )[-self.num_max_samples_ring_buffer :]
 
                 # calc features
-                burst_thr = np.percentile(
+                burst_thr : float = np.percentile(
                     self.data_buffer[ch_name][fband_name], q=self.threshold
                 )
 
@@ -168,7 +168,7 @@ class Burst(Feature):
 
     @staticmethod
     def get_burst_amplitude_length(
-        beta_averp_norm, burst_thr: np.floating | float, sfreq: float
+        beta_averp_norm, burst_thr: float, sfreq: float
     ):
         """
         Analysing the duration of beta burst
