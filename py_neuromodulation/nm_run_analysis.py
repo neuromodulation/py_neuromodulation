@@ -1,6 +1,5 @@
 """This module contains the class to process a given batch of data."""
 
-from enum import Enum
 from time import time
 from typing import Protocol
 
@@ -35,13 +34,6 @@ _PREPROCESSING_CONSTRUCTORS = [
         "raw_normalization",
         "preprocessing_filter"
 ]
-
-
-class GRIDS(Enum):
-    """Definition of possible projection grid types"""
-
-    CORTEX = "cortex"
-    SUBCORTEX = "subcortex"
 
 
 class DataProcessor:
@@ -80,7 +72,7 @@ class DataProcessor:
 
         self.sfreq_features: int | float = self.settings["sampling_rate_features_hz"]
         self._sfreq_raw_orig: int | float = sfreq
-        self.sfreq_raw: int = sfreq // 1
+        self.sfreq_raw: int | float = sfreq // 1
         self.line_noise: int | float | None = line_noise
         self.path_grids: _PathLike | None = path_grids
         self.verbose: bool = verbose
@@ -231,7 +223,6 @@ class DataProcessor:
     def _get_grids(
         settings: dict,
         path_grids: _PathLike | None,
-        grid_type: GRIDS,
     ) -> tuple[pd.DataFrame | None, pd.DataFrame | None]:
         """Read settings specified grids
 
@@ -239,7 +230,6 @@ class DataProcessor:
         ----------
         settings : dict
         path_grids : str
-        grid_type : GRIDS
 
         Returns
         -------
@@ -248,12 +238,12 @@ class DataProcessor:
             might be None if not specified in settings
         """
         if settings["postprocessing"]["project_cortex"]:
-            grid_cortex = nm_IO.read_grid(path_grids, grid_type.CORTEX.name)
+            grid_cortex = nm_IO.read_grid(path_grids, "cortex")
         else:
             grid_cortex = None
         if settings["postprocessing"]["project_subcortex"]:
             grid_subcortex = nm_IO.read_grid(
-                path_grids, grid_type.SUBCORTEX.name
+                path_grids, "subcortex"
             )
         else:
             grid_subcortex = None
@@ -273,7 +263,7 @@ class DataProcessor:
             return None
 
         grid_cortex, grid_subcortex = self._get_grids(
-            self.settings, self.path_grids, GRIDS
+            self.settings, self.path_grids
         )
         projection = Projection(
             settings=settings,
