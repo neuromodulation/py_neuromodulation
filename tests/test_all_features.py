@@ -1,16 +1,13 @@
 import numpy as np
-import pandas as pd
-import pytest
 
 from py_neuromodulation import (
     nm_settings,
-    nm_stream_offline,
     nm_define_nmchannels,
-    nm_stream_abc,
+    Stream,
 )
 
 
-def get_example_stream(test_arr: np.array) -> nm_stream_abc.PNStream:
+def get_example_stream(test_arr: np.ndarray) -> Stream:
     settings = nm_settings.get_default_settings()
     settings["features"]["raw_hjorth"] = True
     settings["features"]["return_raw"] = True
@@ -27,7 +24,7 @@ def get_example_stream(test_arr: np.array) -> nm_stream_abc.PNStream:
 
     nm_channels = nm_define_nmchannels.get_default_channels_from_data(test_arr)
 
-    stream = nm_stream_offline.Stream(
+    stream = Stream(
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )
     return stream

@@ -1,5 +1,3 @@
-import math
-import os
 import numpy as np
 from numpy.testing import assert_allclose
 import pandas as pd
@@ -7,9 +5,6 @@ import pytest
 
 from py_neuromodulation.nm_rereference import ReReferencer
 from py_neuromodulation import (
-    nm_generator,
-    nm_settings,
-    nm_IO,
     nm_define_nmchannels,
 )
 

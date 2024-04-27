@@ -81,7 +81,7 @@ class PNStream(ABC):
         )
 
     @abstractmethod
-    def run(self):
+    def run(self) -> pd.DataFrame:
         """Reinitialize the stream
         This might be handy in case the nm_channels or nm_settings changed
         """

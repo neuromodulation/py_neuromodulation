@@ -1,15 +1,10 @@
-import pytest
-import mne
 import numpy as np
 
 from py_neuromodulation import (
-    nm_analysis,
-    nm_decode,
     nm_define_nmchannels,
     nm_IO,
-    nm_plots,
     nm_settings,
-    nm_stream_offline,
+    Stream,
 )
 
 
@@ -51,7 +46,7 @@ def test_bispectrum():
 
     settings["features"]["bispectrum"] = True
 
-    stream = nm_stream_offline.Stream(
+    stream = Stream(
         settings=settings,
         nm_channels=nm_channels,
         path_grids=None,

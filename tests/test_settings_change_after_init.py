@@ -1,8 +1,6 @@
 import numpy as np
 
 import py_neuromodulation as nm
-from py_neuromodulation import nm_settings
-
 
 def test_post_init_nm_channels_change():
     """Test if post initialization of nm_channels will also be ported to the feature computation."""

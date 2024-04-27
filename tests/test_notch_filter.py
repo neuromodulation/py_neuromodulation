@@ -1,6 +1,5 @@
 import numpy as np
-import pytest
-from scipy import fft, signal
+from scipy import fft
 
 from py_neuromodulation import nm_filter
 

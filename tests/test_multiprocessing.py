@@ -1,6 +1,5 @@
 import py_neuromodulation as pn
 import numpy as np
-from py_neuromodulation import nm_settings
 import pytest
 
 

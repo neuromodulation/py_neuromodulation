@@ -3,8 +3,6 @@ import numpy as np
 from py_neuromodulation import (
     nm_bursts,
     nm_settings,
-    nm_stream_offline,
-    nm_define_nmchannels,
 )
 
 
