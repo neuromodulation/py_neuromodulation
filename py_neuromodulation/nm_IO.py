@@ -6,7 +6,7 @@ import mne
 import mne_bids
 import numpy as np
 import pandas as pd
-from scipy import io as scipy_io
+import scipy.io as sio
 
 from pyarrow import Table as pyarrow_Table
 from pyarrow import csv as pyarrow_csv
@@ -150,10 +150,10 @@ def read_plot_modules(
         path to plotting files, by default
     """
 
-    faces = scipy_io.loadmat(os.path.join(PATH_PLOT, "faces.mat"))
-    vertices = scipy_io.loadmat(os.path.join(PATH_PLOT, "Vertices.mat"))
-    grid = scipy_io.loadmat(os.path.join(PATH_PLOT, "grid.mat"))["grid"]
-    stn_surf = scipy_io.loadmat(os.path.join(PATH_PLOT, "STN_surf.mat"))
+    faces = sio.loadmat(os.path.join(PATH_PLOT, "faces.mat"))
+    vertices = sio.loadmat(os.path.join(PATH_PLOT, "Vertices.mat"))
+    grid = sio.loadmat(os.path.join(PATH_PLOT, "grid.mat"))["grid"]
+    stn_surf = sio.loadmat(os.path.join(PATH_PLOT, "STN_surf.mat"))
     x_ver = stn_surf["vertices"][::2, 0]
     y_ver = stn_surf["vertices"][::2, 1]
     x_ecog = vertices["Vertices"][::1, 0]
@@ -342,7 +342,7 @@ def loadmat(filename) -> dict:
     from mat files. It calls the function check keys to cure all entries
     which are still mat-objects
     """
-    data = scipy_io.loadmat(filename, struct_as_record=False, squeeze_me=True)
+    data = sio.loadmat(filename, struct_as_record=False, squeeze_me=True)
     return _check_keys(data)
 
 
@@ -384,7 +384,7 @@ def _check_keys(dict):
     todict is called to change them to nested dictionaries
     """
     for key in dict:
-        if isinstance(dict[key], scipy_io.matlab.mio5_params.mat_struct):
+        if isinstance(dict[key], sio.matlab.mio5_params.mat_struct):
             dict[key] = _todict(dict[key])
     return dict
 
@@ -396,7 +396,7 @@ def _todict(matobj) -> dict:
     dict = {}
     for strg in matobj._fieldnames:
         elem = matobj.__dict__[strg]
-        if isinstance(elem, scipy_io.matlab.mio5_params.mat_struct):
+        if isinstance(elem, sio.matlab.mio5_params.mat_struct):
             dict[strg] = _todict(elem)
         else:
             dict[strg] = elem
