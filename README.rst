@@ -57,6 +57,8 @@ And then activating the virtual environment e.g. in Windows using:
 
 Alternatively you can also install the package in a conda environment:
 
+.. code-block::
+
     conda create -n pynm-test python=3.11
     conda activate pynm-test
 
