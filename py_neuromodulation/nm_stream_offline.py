@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from itertools import count
 import mne
+from pathlib import Path
 
 from joblib import Parallel, delayed
 
@@ -61,10 +62,7 @@ class _OfflineStream(NMStream):
         feature_series["time"] = cnt_samples * 1000 / self.sfreq
 
         if self.verbose:
-            logger.info(
-                str(np.round(feature_series["time"] / 1000, 2))
-                + " seconds of data processed"
-            )
+            logger.info("%.2f seconds of data processed", feature_series['time'] / 1000)
 
         return feature_series
 
@@ -298,7 +296,7 @@ class Stream(_OfflineStream):
     def run(
         self,
         data: np.ndarray | pd.DataFrame | None = None,
-        out_path_root: _PathLike | None = None,
+        out_path_root: _PathLike = "",
         folder_name: str = "sub",
         parallel: bool = False,
         n_jobs: int = -2,
@@ -333,10 +331,11 @@ class Stream(_OfflineStream):
         if parallel:
             self._check_settings_for_parallel()
 
-        if os.path.exists(os.path.join(out_path_root, folder_name)) is False:
-            os.makedirs(os.path.join(out_path_root, folder_name))
+        out_path = Path(out_path_root, folder_name)
+        if out_path_root:
+            out_path.mkdir(parents=True, exist_ok=True)
 
-        logger.log_to_file(os.path.join(out_path_root, folder_name))
+        logger.log_to_file(out_path)
 
         return self._run_offline(
             data, out_path_root, folder_name, parallel=parallel, n_jobs=n_jobs

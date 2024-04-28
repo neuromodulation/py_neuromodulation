@@ -1,6 +1,6 @@
-import logging
-from py_neuromodulation.nm_types import _PathLike
 from pathlib import PurePath
+from py_neuromodulation.nm_types import _PathLike
+import logging
 
 INFOFORMAT = "%(name)s:\t%(message)s"
 DEBUGFORMAT = "%(asctime)s:%(levelname)s:%(name)s:%(filename)s:%(funcName)s:%(lineno)d:\t%(message)s"
@@ -12,15 +12,17 @@ LOG_LEVELS = {
     "ERROR": (logging.ERROR, DEBUGFORMAT),
 }
 
+
 class PYNMLogger(logging.Logger):
     """
     Subclass of logging.Logger with some extra functionality
     """
+
     def __init__(self, name: str, level: str = "INFO") -> None:
         super().__init__(name, LOG_LEVELS[level][0])
 
         self.setLevel(level)
-                
+
         self._console_handler = logging.StreamHandler()
         self._console_handler.setLevel(level)
         self._console_handler.setFormatter(logging.Formatter(LOG_LEVELS[level][1]))
@@ -34,10 +36,8 @@ class PYNMLogger(logging.Logger):
         self.setLevel(level)
         self._console_handler.setLevel(level)
         self._console_handler.setFormatter(logging.Formatter(LOG_LEVELS[level][1]))
-        
-    def log_to_file(
-        self, path: _PathLike, mode: str = "w"
-    ):
+
+    def log_to_file(self, path: _PathLike, mode: str = "w"):
         """
         Add file handlers to the logger
 
@@ -50,20 +50,16 @@ class PYNMLogger(logging.Logger):
         """
 
         self.debug_file_handler = logging.FileHandler(
-            PurePath(path, "logfile_pynm_debug.log")
+            PurePath(path) / "logfile_pynm_debug.log"
         )
         self.debug_file_handler.setLevel(logging.DEBUG)
-        self.debug_file_handler.setFormatter(
-            logging.Formatter(DEBUGFORMAT)
-        )
+        self.debug_file_handler.setFormatter(logging.Formatter(DEBUGFORMAT))
 
         self.info_file_handler = logging.FileHandler(
-            PurePath(path, "logfile_pynm_info.log"), mode=mode
+            PurePath(path) / "logfile_pynm_info.log", mode=mode
         )
         self.info_file_handler.setLevel(logging.INFO)
-        self.info_file_handler.setFormatter(
-            logging.Formatter(INFOFORMAT)
-        )
+        self.info_file_handler.setFormatter(logging.Formatter(INFOFORMAT))
 
         self.addHandler(self.info_file_handler)
         self.addHandler(self.debug_file_handler)

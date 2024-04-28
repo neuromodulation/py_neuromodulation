@@ -306,9 +306,7 @@ class DataProcessor:
                 features_current.loc[features_current.index.str.contains(ch)] = np.nan
 
         if self.verbose:
-            logger.info(
-                "Last batch took: " + str(np.round(time() - start_time, 2)) + " seconds"
-            )
+            logger.info("Last batch took: %.2f seconds", time() - start_time)
 
         return features_current
 
