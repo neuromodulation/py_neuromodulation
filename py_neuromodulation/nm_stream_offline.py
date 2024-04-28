@@ -332,9 +332,7 @@ class Stream(_OfflineStream):
             self._check_settings_for_parallel()
 
         out_path = Path(out_path_root, folder_name)
-        if out_path_root:
-            out_path.mkdir(parents=True, exist_ok=True)
-
+        out_path.mkdir(parents=True, exist_ok=True)
         logger.log_to_file(out_path)
 
         return self._run_offline(
