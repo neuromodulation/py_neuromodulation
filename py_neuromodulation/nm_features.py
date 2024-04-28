@@ -1,28 +1,25 @@
 import numpy as np
 
-from py_neuromodulation import (
-    nm_hjorth_raw,
-    nm_mne_connectivity,
-    nm_sharpwaves,
-    nm_coherence,
-    nm_fooof,
-    nm_nolds,
-    nm_features_abc,
-    nm_oscillatory,
-    nm_bursts,
-    nm_linelength,
-    nm_bispectra,
-)
+from py_neuromodulation.nm_hjorth_raw import Hjorth, Raw
+from py_neuromodulation.nm_oscillatory import BandPower, STFT, FFT, Welch
+from py_neuromodulation.nm_sharpwaves import SharpwaveAnalyzer
+from py_neuromodulation.nm_fooof import FooofAnalyzer
+from py_neuromodulation.nm_nolds import Nolds
+from py_neuromodulation.nm_coherence import NM_Coherence
+from py_neuromodulation.nm_bursts import Burst
+from py_neuromodulation.nm_linelength import LineLength
+from py_neuromodulation.nm_mne_connectivity import MNEConnectivity
+from py_neuromodulation.nm_bispectra import Bispectra
+
+from py_neuromodulation.nm_features_abc import Feature
 
 
 class Features:
-    """Class for calculating features."""
+    """Class for calculating features.p"""
 
-    features: list[nm_features_abc.Feature] = []
+    # features: list[nm_features_abc.Feature] = []
 
-    def __init__(
-        self, s: dict, ch_names: list[str], sfreq: int | float
-    ) -> None:
+    def __init__(self, s: dict, ch_names: list[str], sfreq: float) -> None:
         """_summary_
 
         Parameters
@@ -31,7 +28,7 @@ class Features:
             _description_
         ch_names : list[str]
             _description_
-        sfreq : int | float
+        sfreq : float
             _description_
 
         Raises
@@ -40,40 +37,41 @@ class Features:
             _description_
         """
 
-        self.features = []
+        self.features: list[Feature] = []
 
+        feature: Feature
         for feature in s["features"]:
-            if s["features"][feature] is False:
+            if not s["features"][feature]:
                 continue
             match feature:
                 case "raw_hjorth":
-                    FeatureClass = nm_hjorth_raw.Hjorth
+                    FeatureClass = Hjorth
                 case "return_raw":
-                    FeatureClass = nm_hjorth_raw.Raw
+                    FeatureClass = Raw
                 case "bandpass_filter":
-                    FeatureClass = nm_oscillatory.BandPower
+                    FeatureClass = BandPower
                 case "stft":
-                    FeatureClass = nm_oscillatory.STFT
+                    FeatureClass = STFT
                 case "fft":
-                    FeatureClass = nm_oscillatory.FFT
+                    FeatureClass = FFT
                 case "welch":
-                    FeatureClass = nm_oscillatory.Welch
+                    FeatureClass = Welch
                 case "sharpwave_analysis":
-                    FeatureClass = nm_sharpwaves.SharpwaveAnalyzer
+                    FeatureClass = SharpwaveAnalyzer
                 case "fooof":
-                    FeatureClass = nm_fooof.FooofAnalyzer
+                    FeatureClass = FooofAnalyzer
                 case "nolds":
-                    FeatureClass = nm_nolds.Nolds
+                    FeatureClass = Nolds
                 case "coherence":
-                    FeatureClass = nm_coherence.NM_Coherence
+                    FeatureClass = NM_Coherence
                 case "bursts":
-                    FeatureClass = nm_bursts.Burst
+                    FeatureClass = Burst
                 case "linelength":
-                    FeatureClass = nm_linelength.LineLength
+                    FeatureClass = LineLength
                 case "mne_connectivity":
-                    FeatureClass = nm_mne_connectivity.MNEConnectivity
+                    FeatureClass = MNEConnectivity
                 case "bispectrum":
-                    FeatureClass = nm_bispectra.Bispectra
+                    FeatureClass = Bispectra
                 case _:
                     raise ValueError(f"Unknown feature found. Got: {feature}.")
 
@@ -81,7 +79,7 @@ class Features:
             f_obj = FeatureClass(s, ch_names, sfreq)
             self.features.append(f_obj)
 
-    def register_new_feature(self, feature: nm_features_abc.Feature) -> None:
+    def register_new_feature(self, feature: Feature) -> None:
         """Register new feature.
 
         Parameters
@@ -105,7 +103,7 @@ class Features:
         dat (dict): naming convention : channel_method_feature_(f_band)
         """
 
-        features_compute = {}
+        features_compute: dict = {}
 
         for feature in self.features:
             features_compute = feature.calc_feature(

@@ -1,8 +1,11 @@
 """Module for real-time data normalization."""
+
 from enum import Enum
 
 from sklearn import preprocessing
 import numpy as np
+
+
 class NORM_METHODS(Enum):
     MEAN = "mean"
     MEDIAN = "median"
@@ -15,7 +18,7 @@ class NORM_METHODS(Enum):
 
 
 def test_normalization_settings(
-    normalization_time_s: int | float, normalization_method: str, clip: bool
+    normalization_time_s: float, normalization_method: str, clip: bool
 ):
     assert isinstance(
         normalization_time_s,
@@ -37,11 +40,11 @@ def test_normalization_settings(
 class RawNormalizer:
     def __init__(
         self,
-        sfreq: int | float,
-        sampling_rate_features_hz: int,
+        sfreq: float,
+        sampling_rate_features_hz: float,
         normalization_method: str = "zscore",
-        normalization_time_s: int | float = 30,
-        clip: bool | int | float = False,
+        normalization_time_s: float = 30,
+        clip: float = 0,
     ) -> None:
         """Normalize raw data.
 
@@ -53,7 +56,7 @@ class RawNormalizer:
             data is normalized via subtraction of the 'mean' or 'median' and
             subsequent division by the 'mean' or 'median'. For z-scoring enter
             'zscore'.
-        clip : int | float, optional
+        clip : float, optional
             value at which to clip after normalization
         """
 
@@ -63,11 +66,11 @@ class RawNormalizer:
         self.clip = clip
         self.num_samples_normalize = int(normalization_time_s * sfreq)
         self.add_samples = int(sfreq / sampling_rate_features_hz)
-        self.previous = None
+        self.previous: np.ndarray = np.array([])  # Default empty array
 
     def process(self, data: np.ndarray) -> np.ndarray:
         data = data.T
-        if self.previous is None:
+        if self.previous.size == 0:  # Check if empty
             self.previous = data
             return data.T
 
@@ -85,14 +88,17 @@ class RawNormalizer:
 
         return data.T
 
+    def test_settings(self, normalization_time_s, normalization_method, clip):
+        test_normalization_settings(normalization_time_s, normalization_method, clip)
+
 
 class FeatureNormalizer:
     def __init__(
         self,
-        sampling_rate_features_hz: int,
+        sampling_rate_features_hz: float,
         normalization_method: str = "zscore",
-        normalization_time_s: int | float = 30,
-        clip: bool | int | float = False,
+        normalization_time_s: float = 30,
+        clip: float = 0,
     ) -> None:
         """Normalize raw data.
 
@@ -104,21 +110,20 @@ class FeatureNormalizer:
             data is normalized via subtraction of the 'mean' or 'median' and
             subsequent division by the 'mean' or 'median'. For z-scoring enter
             'zscore'.
-        clip : int | float, optional
+        clip : float, optional
             value at which to clip after normalization
         """
-
-        test_normalization_settings(normalization_time_s, normalization_method, clip)
+        self.test_settings(normalization_time_s, normalization_method, clip)
 
         self.method = normalization_method
         self.clip = clip
         self.num_samples_normalize = int(
             normalization_time_s * sampling_rate_features_hz
         )
-        self.previous = None
+        self.previous: np.ndarray = np.array([])
 
     def process(self, data: np.ndarray) -> np.ndarray:
-        if self.previous is None:
+        if self.previous.size == 0:
             self.previous = data
             return data
 
@@ -136,23 +141,44 @@ class FeatureNormalizer:
 
         return data
 
+    def test_settings(self, normalization_time_s, normalization_method, clip):
+        test_normalization_settings(normalization_time_s, normalization_method, clip)
+
+
 """
 Functions to check for NaN's before deciding which Numpy function to call
 """
+
+
 def nan_mean(data, axis):
-    return np.nanmean(data, axis=axis) if np.any(np.isnan(sum(data))) else np.mean(data, axis=axis)
+    return (
+        np.nanmean(data, axis=axis)
+        if np.any(np.isnan(sum(data)))
+        else np.mean(data, axis=axis)
+    )
+
 
 def nan_std(data, axis):
-    return np.nanstd(data, axis=axis) if np.any(np.isnan(sum(data))) else np.std(data, axis=axis)
+    return (
+        np.nanstd(data, axis=axis)
+        if np.any(np.isnan(sum(data)))
+        else np.std(data, axis=axis)
+    )
+
 
 def nan_median(data, axis):
-    return np.nanmedian(data, axis=axis) if np.any(np.isnan(sum(data))) else np.median(data, axis=axis)
+    return (
+        np.nanmedian(data, axis=axis)
+        if np.any(np.isnan(sum(data)))
+        else np.median(data, axis=axis)
+    )
+
 
 def _normalize_and_clip(
     current: np.ndarray,
     previous: np.ndarray,
     method: str,
-    clip: int | float | bool,
+    clip: float | bool,
     description: str,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Normalize data."""
@@ -166,34 +192,39 @@ def _normalize_and_clip(
         case NORM_METHODS.ZSCORE.value:
             current = (current - nan_mean(previous, axis=0)) / nan_std(previous, axis=0)
         case NORM_METHODS.ZSCORE_MEDIAN.value:
-            current = (current - nan_median(previous, axis=0)) / nan_std(previous, axis=0)
+            current = (current - nan_median(previous, axis=0)) / nan_std(
+                previous, axis=0
+            )
         # For the following methods we check for the shape of current
         # when current is a 1D array, then it is the post-processing normalization,
         # and we need to expand, and remove the extra dimension afterwards
         # When current is a 2D array, then it is pre-processing normalization, and
         # there's no need for expanding.
-        case (NORM_METHODS.QUANTILE.value | 
-              NORM_METHODS.ROBUST.value | 
-              NORM_METHODS.MINMAX.value | 
-              NORM_METHODS.POWER.value):
-            
+        case (
+            NORM_METHODS.QUANTILE.value
+            | NORM_METHODS.ROBUST.value
+            | NORM_METHODS.MINMAX.value
+            | NORM_METHODS.POWER.value
+        ):
             norm_methods = {
-                NORM_METHODS.QUANTILE.value : lambda: preprocessing.QuantileTransformer(n_quantiles=300),
-                NORM_METHODS.ROBUST.value : preprocessing.RobustScaler,
-                NORM_METHODS.MINMAX.value : preprocessing.MinMaxScaler,
-                NORM_METHODS.POWER.value : preprocessing.PowerTransformer
+                NORM_METHODS.QUANTILE.value: lambda: preprocessing.QuantileTransformer(
+                    n_quantiles=300
+                ),
+                NORM_METHODS.ROBUST.value: preprocessing.RobustScaler,
+                NORM_METHODS.MINMAX.value: preprocessing.MinMaxScaler,
+                NORM_METHODS.POWER.value: preprocessing.PowerTransformer,
             }
-                
+
             current = (
                 norm_methods[method]()
                 .fit(np.nan_to_num(previous))
                 .transform(
                     # if post-processing: pad dimensions to 2
-                    np.reshape(current, (2-len(current.shape))*(1,) + current.shape)
-                    )
-                .squeeze() # if post-processing: remove extra dimension
+                    np.reshape(current, (2 - len(current.shape)) * (1,) + current.shape)
+                )
+                .squeeze()  # if post-processing: remove extra dimension
             )
-            
+
         case _:
             raise ValueError(
                 f"Only {[e.value for e in NORM_METHODS]} are supported as "
@@ -205,9 +236,9 @@ def _normalize_and_clip(
     return current, previous
 
 
-def _clip(data: np.ndarray, clip: bool | int | float) -> np.ndarray:
+def _clip(data: np.ndarray, clip: float) -> np.ndarray:
     """Clip data."""
-    if clip is True:
+    if not clip:
         clip = 3.0  # default value
     else:
         clip = float(clip)

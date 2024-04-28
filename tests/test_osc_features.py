@@ -130,8 +130,7 @@ def test_fft_beta_osc():
 
     assert (
         features_out["ch1_fft_beta_mean"] > features_out["ch1_fft_theta_mean"]
-        and features_out["ch1_fft_beta_mean"]
-        > features_out["ch1_fft_gamma_mean"]
+        and features_out["ch1_fft_beta_mean"] > features_out["ch1_fft_gamma_mean"]
     )
 
 
@@ -203,8 +202,7 @@ def test_stft_beta_osc():
 
     assert (
         features_out["ch1_stft_beta_mean"] > features_out["ch1_stft_theta_mean"]
-        and features_out["ch1_stft_beta_mean"]
-        > features_out["ch1_stft_gamma_mean"]
+        and features_out["ch1_stft_beta_mean"] > features_out["ch1_stft_gamma_mean"]
     )
 
 
@@ -243,10 +241,8 @@ def test_welch_beta_osc():
     features_out = stft_obj.calc_feature(data, {})
 
     assert (
-        features_out["ch1_welch_beta_mean"]
-        > features_out["ch1_welch_theta_mean"]
-        and features_out["ch1_welch_beta_mean"]
-        > features_out["ch1_welch_gamma_mean"]
+        features_out["ch1_welch_beta_mean"] > features_out["ch1_welch_theta_mean"]
+        and features_out["ch1_welch_beta_mean"] > features_out["ch1_welch_gamma_mean"]
     )
 
 
@@ -333,9 +329,7 @@ def test_bp_zero_data():
 
     settings["bandpass_filter_settings"]["log_transform"] = False
     settings["bandpass_filter_settings"]["kalman_filter"] = False
-    settings["bandpass_filter_settings"]["bandpower_features"][
-        "activity"
-    ] = True
+    settings["bandpass_filter_settings"]["bandpower_features"]["activity"] = True
 
     settings["frequency_ranges_hz"] = {"theta": [4, 8], "beta": [10, 20]}
     stft_obj = nm_oscillatory.BandPower(settings, ch_names, sfreq)
@@ -361,9 +355,7 @@ def test_bp_random_data():
 
     settings["bandpass_filter_settings"]["log_transform"] = False
     settings["bandpass_filter_settings"]["kalman_filter"] = False
-    settings["bandpass_filter_settings"]["bandpower_features"][
-        "activity"
-    ] = True
+    settings["bandpass_filter_settings"]["bandpower_features"]["activity"] = True
 
     stft_obj = nm_oscillatory.BandPower(settings, ch_names, sfreq)
     stft_obj.test_settings(settings, ch_names, sfreq)
@@ -397,9 +389,7 @@ def test_bp_beta_osc():
 
     settings["bandpass_filter_settings"]["log_transform"] = False
     settings["bandpass_filter_settings"]["kalman_filter"] = False
-    settings["bandpass_filter_settings"]["bandpower_features"][
-        "activity"
-    ] = True
+    settings["bandpass_filter_settings"]["bandpower_features"]["activity"] = True
 
     bp_obj = nm_oscillatory.BandPower(settings, ch_names, sfreq)
     bp_obj.test_settings(settings, ch_names, sfreq)

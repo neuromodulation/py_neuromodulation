@@ -32,7 +32,7 @@ class NewFeature(nm_features_abc.Feature):
         self.s = settings
         self.ch_names = ch_names
 
-    def calc_feature(self, data: np.array, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         for ch_idx, ch in enumerate(self.ch_names):
             features_compute[f"new_feature_{ch}"] = np.mean(data[ch_idx, :])
 

@@ -1,16 +1,16 @@
-import os
-from pathlib import Path
-from re import VERBOSE
-import re
-from typing import Optional
+from pathlib import PurePath
 
-import _pickle as cPickle
+import pickle
 import numpy as np
 import pandas as pd
-from sklearn import base, linear_model, metrics, model_selection
-from scipy import stats
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import r2_score
+from sklearn.model_selection import KFold
 
-from py_neuromodulation import nm_decode, nm_IO, nm_plots
+from scipy.stats import zscore as scipy_zscore
+
+from py_neuromodulation import nm_IO, nm_plots
+from py_neuromodulation.nm_decode import Decoder
 
 target_filter_str = {
     "CLEAN",
@@ -23,21 +23,8 @@ features_reverse_order_plotting = {"stft", "fft", "bandpass"}
 
 
 class Feature_Reader:
-
-    feature_dir: str
-    feature_list: list[str]
-    settings: dict
-    sidecar: dict
-    sfreq: int
-    line_noise: int
-    nm_channels: pd.DataFrame
-    feature_arr: pd.DataFrame
-    ch_names: list[str]
-    ch_names_ECOG: list[str]
-    decoder: nm_decode.Decoder = None
-
     def __init__(
-        self, feature_dir: str, feature_file: str, binarize_label: bool = True
+        self, feature_dir: str, feature_file: str = "", binarize_label: bool = True
     ) -> None:
         """Feature_Reader enables analysis methods on top of NM_reader and NM_Decoder
 
@@ -49,19 +36,18 @@ class Feature_Reader:
             specific feature run, if None it is set to the first feature folder in feature_dir
         binarize_label : bool
             binarize label, by default True
-            
+
         """
-        self.feature_dir = feature_dir
-        self.feature_list = nm_IO.get_run_list_indir(self.feature_dir)
-        if feature_file is None:
+        self.feature_dir: str = feature_dir
+        self.feature_list: list[str] = nm_IO.get_run_list_indir(self.feature_dir)
+        self.feature_file: str
+        if not feature_file:
             self.feature_file = self.feature_list[0]
         else:
             self.feature_file = feature_file
 
-        FILE_BASENAME = Path(self.feature_file).stem
-        PATH_READ_FILE = str(
-            Path(self.feature_dir, FILE_BASENAME, FILE_BASENAME)
-        )
+        FILE_BASENAME = PurePath(self.feature_file).stem
+        PATH_READ_FILE = str(PurePath(self.feature_dir, FILE_BASENAME, FILE_BASENAME))
 
         self.settings = nm_IO.read_settings(PATH_READ_FILE)
         self.sidecar = nm_IO.read_sidecar(PATH_READ_FILE)
@@ -78,8 +64,7 @@ class Feature_Reader:
         self.ch_names = self.nm_channels.new_name
         self.used_chs = list(
             self.nm_channels[
-                (self.nm_channels["target"] == 0)
-                & (self.nm_channels["used"] == 1)
+                (self.nm_channels["target"] == 0) & (self.nm_channels["used"] == 1)
             ]["new_name"]
         )
         self.ch_names_ECOG = self.nm_channels.query(
@@ -98,9 +83,7 @@ class Feature_Reader:
             )
 
     def _get_target_ch(self) -> str:
-        target_names = list(
-            self.nm_channels[self.nm_channels["target"] == 1]["name"]
-        )
+        target_names = list(self.nm_channels[self.nm_channels["target"] == 1]["name"])
         target_clean = [
             target_name
             for target_name in target_names
@@ -134,7 +117,7 @@ class Feature_Reader:
         label_name: str,
         binarize: bool = True,
         binarize_th: float = 0.3,
-    ) -> None:
+    ) -> np.ndarray:
         """_summary_
 
         Parameters
@@ -162,8 +145,8 @@ class Feature_Reader:
     @staticmethod
     def filter_features(
         feature_columns: list,
-        ch_name: str = None,
-        list_feature_keywords: list[str] = None,
+        ch_name: str | None = None,
+        list_feature_keywords: list[str] | None = None,
     ) -> list:
         """filters read features by ch_name and/or modality
 
@@ -189,9 +172,7 @@ class Feature_Reader:
 
         if list_feature_keywords is not None:
             feature_select = [
-                f
-                for f in feature_select
-                if any(x in f for x in list_feature_keywords)
+                f for f in feature_select if any(x in f for x in list_feature_keywords)
             ]
 
             if (
@@ -210,7 +191,7 @@ class Feature_Reader:
         return feature_select
 
     def set_target_ch(self, ch_name: str) -> None:
-        self.label = ch_name
+        self.label_name = ch_name
 
     def normalize_features(
         self,
@@ -221,22 +202,17 @@ class Feature_Reader:
             pd.DataFrame: z-scored feature_arr
         """
         cols_norm = [c for c in self.feature_arr.columns if "time" not in c]
-        feature_arr_norm = stats.zscore(self.feature_arr[cols_norm], nan_policy="omit")
+        feature_arr_norm = scipy_zscore(self.feature_arr[cols_norm], nan_policy="omit")
         feature_arr_norm["time"] = self.feature_arr["time"]
         return feature_arr_norm
 
     def plot_cort_projection(self) -> None:
-        """_summary_
-        """
+        """_summary_"""
 
         if self.sidecar["sess_right"]:
-            ecog_strip = np.array(
-                self.sidecar["coords"]["cortex_right"]["positions"]
-            )
+            ecog_strip = np.array(self.sidecar["coords"]["cortex_right"]["positions"])
         else:
-            ecog_strip = np.array(
-                self.sidecar["coords"]["cortex_left"]["positions"]
-            )
+            ecog_strip = np.array(self.sidecar["coords"]["cortex_left"]["positions"])
         self.nmplotter.plot_cortex(
             grid_cortex=np.array(self.sidecar["grid_cortex"])
             if "grid_cortex" in self.sidecar
@@ -282,9 +258,9 @@ class Feature_Reader:
 
     def plot_target_averaged_channel(
         self,
-        ch: str = None,
-        list_feature_keywords: Optional[list[str]] = None,
-        features_to_plt: list = None,
+        ch: str = "",
+        list_feature_keywords: list[str] | None = None,
+        features_to_plt: list | None = None,
         epoch_len: int = 4,
         threshold: float = 0.1,
         normalize_data: bool = True,
@@ -325,7 +301,6 @@ class Feature_Reader:
         # TODO: This does not work properly when we have bipolar rereferencing
 
         if features_to_plt is None:
-
             filtered_df = self.feature_arr[
                 self.filter_features(
                     self.feature_arr.columns, ch, list_feature_keywords
@@ -354,7 +329,7 @@ class Feature_Reader:
             if list_feature_keywords is not None
             else "all",
             cut_ch_name_cols=True,
-            ch_name=ch if ch is not None else None,
+            ch_name=ch,
             label_name=self.label_name,
             normalize_data=normalize_data,
             show_plot=show_plot,
@@ -364,20 +339,20 @@ class Feature_Reader:
             str_title=title,
             ytick_labelsize=ytick_labelsize,
             figsize_x=figsize_x,
-            figsize_y=figsize_y
+            figsize_y=figsize_y,
         )
 
     def plot_all_features(
         self,
-        ch_used: str = None,
-        time_limit_low_s: float = None,
-        time_limit_high_s: float = None,
+        ch_used: str | None = None,
+        time_limit_low_s: float | None = None,
+        time_limit_high_s: float | None = None,
         normalize: bool = True,
         save: bool = False,
         title="all_feature_plt.pdf",
         ytick_labelsize: int = 10,
-        clim_low: float = None,
-        clim_high: float = None,
+        clim_low: float | None = None,
+        clim_high: float | None = None,
     ):
         """_summary_
 
@@ -407,10 +382,7 @@ class Feature_Reader:
             col_used = [
                 c
                 for c in self.feature_arr.columns
-                if c.startswith(ch_used)
-                or c == "time"
-                or "LABEL" in c
-                or "MOV" in c
+                if c.startswith(ch_used) or c == "time" or "LABEL" in c or "MOV" in c
             ]
             df = self.feature_arr[col_used[::-1]]
         else:
@@ -457,9 +429,7 @@ class Feature_Reader:
         for ch in channels_:
             if "grid" not in ch and "combined" not in ch:
                 ecog_coords_strip.append(performance_sub[ch]["coord"])
-                ecog_strip_performance.append(
-                    performance_sub[ch]["performance_test"]
-                )
+                ecog_strip_performance.append(performance_sub[ch]["performance_test"])
             elif plt_grid is True and "gridcortex_" in ch:
                 cortex_grid.append(performance_sub[ch]["coord"])
                 grid_performance.append(performance_sub[ch]["performance_test"])
@@ -489,9 +459,7 @@ class Feature_Reader:
                 ecog_coords_strip_sub,
                 _,
                 grid_performance_sub,
-            ) = self.get_performace_sub_strip(
-                performance_dict[sub], plt_grid=plt_grid
-            )
+            ) = self.get_performace_sub_strip(performance_dict[sub], plt_grid=plt_grid)
             ecog_strip_performance.extend(ecog_strip_performance_sub)
             ecog_coords_strip.extend(ecog_coords_strip_sub)
             grid_performance.append(grid_performance_sub)
@@ -560,9 +528,7 @@ class Feature_Reader:
             grid_cortex=np.array(self.sidecar["grid_cortex"])
             if "grid_cortex" in self.sidecar
             else None,
-            ecog_strip=ecog_coords_strip
-            if len(ecog_coords_strip) > 0
-            else None,
+            ecog_strip=ecog_coords_strip if len(ecog_coords_strip) > 0 else None,
             grid_color=grid_performance if len(grid_performance) > 0 else None,
             strip_color=ecog_strip_performance
             if len(ecog_strip_performance) > 0
@@ -588,7 +554,9 @@ class Feature_Reader:
         )
 
     @staticmethod
-    def get_epochs(data, y_, epoch_len, sfreq, threshold=0) -> (np.ndarray, np.ndarray):
+    def get_epochs(
+        data, y_, epoch_len, sfreq, threshold=0
+    ) -> tuple[np.ndarray, np.ndarray]:
         """Return epoched data.
 
         Parameters
@@ -624,17 +592,12 @@ class Feature_Reader:
 
         ind_mov = ind_mov[low_limit & up_limit]
 
-        epoch_ = np.zeros(
-            [ind_mov.shape[0], epoch_lim, data.shape[1], data.shape[2]]
-        )
+        epoch_ = np.zeros([ind_mov.shape[0], epoch_lim, data.shape[1], data.shape[2]])
 
         y_arr = np.zeros([ind_mov.shape[0], int(epoch_lim)])
 
         for idx, i in enumerate(ind_mov):
-
-            epoch_[idx, :, :, :] = data[
-                i - epoch_lim // 2 : i + epoch_lim // 2, :, :
-            ]
+            epoch_[idx, :, :, :] = data[i - epoch_lim // 2 : i + epoch_lim // 2, :, :]
 
             y_arr[idx, :] = y_[i - epoch_lim // 2 : i + epoch_lim // 2]
 
@@ -642,15 +605,13 @@ class Feature_Reader:
 
     def set_decoder(
         self,
-        decoder: nm_decode.Decoder = None,
+        decoder: Decoder | None = None,
         TRAIN_VAL_SPLIT=False,
         RUN_BAY_OPT=False,
         save_coef=False,
-        model: base.BaseEstimator = linear_model.LogisticRegression,
-        eval_method=metrics.r2_score,
-        cv_method: model_selection.BaseCrossValidator = model_selection.KFold(
-            n_splits=3, shuffle=False
-        ),
+        model=LogisticRegression,
+        eval_method=r2_score,
+        cv_method=KFold(n_splits=3, shuffle=False),
         get_movement_detection_rate: bool = False,
         mov_detection_threshold=0.5,
         min_consequent_count=3,
@@ -669,8 +630,7 @@ class Feature_Reader:
         if decoder is not None:
             self.decoder = decoder
         else:
-
-            self.decoder = nm_decode.Decoder(
+            self.decoder = Decoder(
                 features=self.feature_arr,
                 label=self.label,
                 label_name=self.label_name,
@@ -700,7 +660,7 @@ class Feature_Reader:
 
     def run_ML_model(
         self,
-        feature_file: str = None,
+        feature_file: str | None = None,
         estimate_gridpoints: bool = False,
         estimate_channels: bool = True,
         estimate_all_channels_combined: bool = False,
@@ -766,7 +726,7 @@ class Feature_Reader:
     def read_results(
         self,
         performance_dict: dict = {},
-        subject_name: str = None,
+        subject_name: str | None = None,
         DEFAULT_PERFORMANCE: float = 0.5,
         read_grid_points: bool = True,
         read_channels: bool = True,
@@ -777,9 +737,9 @@ class Feature_Reader:
         read_mrmr: bool = False,
         model_save: bool = False,
         save_results: bool = False,
-        PATH_OUT: str = None,
-        folder_name: str = None,
-        str_add: str = None,
+        PATH_OUT: str = "",  # Removed None default, save_general_dict does not handle None anyway
+        folder_name: str = "",
+        str_add: str = "",
     ):
         """Save performances of a given patient into performance_dict from saved nm_decoder
 
@@ -808,11 +768,11 @@ class Feature_Reader:
         PATH_OUT : string, by default None
         folder_name : string, by default None
         str_add : string, by default None
-        
+
         Returns
         -------
         performance_dict : dictionary
-            
+
         """
 
         if ".vhdr" in self.feature_file:
@@ -825,7 +785,7 @@ class Feature_Reader:
                 feature_file.find("sub-") : feature_file.find("_ses")
             ][4:]
 
-        PATH_ML_ = os.path.join(
+        PATH_ML_ = PurePath(
             self.feature_dir,
             feature_file,
             feature_file + "_" + ML_model_name + "_ML_RES.p",
@@ -833,7 +793,7 @@ class Feature_Reader:
 
         # read ML results
         with open(PATH_ML_, "rb") as input:
-            ML_res = cPickle.load(input)
+            ML_res = pickle.load(input)
             if self.decoder is None:
                 self.decoder = ML_res
 
@@ -858,15 +818,15 @@ class Feature_Reader:
                 obj_read, obj_write, set_inner_CV_res: bool = False
             ):
                 def set_score(
-                    key_set: str,
-                    key_get: str,
+                    key_set: str = "",
+                    key_get: str = "",
                     take_mean: bool = True,
                     val=None,
                 ):
-                    if set_inner_CV_res is True:
+                    if set_inner_CV_res:
                         key_set = "InnerCV_" + key_set
                         key_get = "InnerCV_" + key_get
-                    if take_mean is True:
+                    if take_mean:
                         val = np.mean(obj_read[key_get])
                     obj_write[key_set] = val
 
@@ -921,56 +881,45 @@ class Feature_Reader:
                         take_mean=True,
                     )
 
-                if read_bay_opt_params is True:
+                if read_bay_opt_params:
                     # transform dict into keys for json saving
                     dict_to_save = transform_list_of_dicts_into_dict_of_lists(
                         obj_read["best_bay_opt_params"]
                     )
                     set_score(
                         key_set="bay_opt_best_params",
-                        key_get=None,
                         take_mean=False,
                         val=dict_to_save,
                     )
 
-                if read_mrmr is True:
+                if read_mrmr:
                     # transform dict into keys for json saving
 
                     set_score(
                         key_set="mrmr_select",
-                        key_get=None,
                         take_mean=False,
                         val=obj_read["mrmr_select"],
                     )
-                if model_save is True:
+                if model_save:
                     set_score(
                         key_set="model_save",
-                        key_get=None,
                         take_mean=False,
                         val=obj_read["model_save"],
                     )
 
             read_ML_performances(obj_read, obj_write)
 
-            if (
-                len([key_ for key_ in obj_read.keys() if "InnerCV_" in key_])
-                > 0
-            ):
+            if len([key_ for key_ in obj_read.keys() if "InnerCV_" in key_]) > 0:
                 read_ML_performances(obj_read, obj_write, set_inner_CV_res=True)
 
         if read_channels:
-
             ch_to_use = self.ch_names_ECOG
             ch_to_use = self.decoder.used_chs
             for ch in ch_to_use:
-
                 performance_dict[subject_name][ch] = {}
 
                 if "coords" in self.sidecar:
-                    if (
-                        len(self.sidecar["coords"]) > 0
-                    ):  # check if coords are empty
-
+                    if len(self.sidecar["coords"]) > 0:  # check if coords are empty
                         coords_exist = False
                         for cortex_loc in self.sidecar["coords"].keys():
                             for ch_name_coord_idx, ch_name_coord in enumerate(
@@ -980,8 +929,10 @@ class Feature_Reader:
                                     coords = self.sidecar["coords"][cortex_loc][
                                         "positions"
                                     ][ch_name_coord_idx]
-                                    coords_exist = True  # optimally break out of the two loops...
-                        if coords_exist is False:
+                                    coords_exist = (
+                                        True  # optimally break out of the two loops...
+                                    )
+                        if not coords_exist:
                             coords = None
                         performance_dict[subject_name][ch]["coord"] = coords
                 write_CV_res_in_performance_dict(
@@ -1001,30 +952,27 @@ class Feature_Reader:
             )
 
         if read_grid_points:
-            performance_dict[subject_name][
-                "active_gridpoints"
-            ] = ML_res.active_gridpoints
+            performance_dict[subject_name]["active_gridpoints"] = (
+                ML_res.active_gridpoints
+            )
 
             for project_settings, grid_type in zip(
                 ["project_cortex", "project_subcortex"],
                 ["gridcortex_", "gridsubcortex_"],
             ):
-                if self.settings["postprocessing"][project_settings] is False:
+                if not self.settings["postprocessing"][project_settings]:
                     continue
 
                 # the sidecar keys are grid_cortex and subcortex_grid
                 for grid_point in range(
                     len(self.sidecar["grid_" + project_settings.split("_")[1]])
                 ):
-
                     gp_str = grid_type + str(grid_point)
 
                     performance_dict[subject_name][gp_str] = {}
-                    performance_dict[subject_name][gp_str][
-                        "coord"
-                    ] = self.sidecar["grid_" + project_settings.split("_")[1]][
-                        grid_point
-                    ]
+                    performance_dict[subject_name][gp_str]["coord"] = self.sidecar[
+                        "grid_" + project_settings.split("_")[1]
+                    ][grid_point]
 
                     if gp_str in ML_res.active_gridpoints:
                         write_CV_res_in_performance_dict(
@@ -1035,12 +983,12 @@ class Feature_Reader:
                         )
                     else:
                         # set non interpolated grid point to default performance
-                        performance_dict[subject_name][gp_str][
-                            "performance_test"
-                        ] = DEFAULT_PERFORMANCE
-                        performance_dict[subject_name][gp_str][
-                            "performance_train"
-                        ] = DEFAULT_PERFORMANCE
+                        performance_dict[subject_name][gp_str]["performance_test"] = (
+                            DEFAULT_PERFORMANCE
+                        )
+                        performance_dict[subject_name][gp_str]["performance_train"] = (
+                            DEFAULT_PERFORMANCE
+                        )
 
         if save_results:
             nm_IO.save_general_dict(

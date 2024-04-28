@@ -1,5 +1,3 @@
-import os
-import unittest
 import pytest
 import numpy as np
 
@@ -75,8 +73,7 @@ def test_zscore_feature_analysis():
         data_normed = norm.process(data_to_norm)
 
     expect_res = (
-        norm.previous[:, 0].std() * data_normed[0, 0]
-        + norm.previous[:, 0].mean()
+        norm.previous[:, 0].std() * data_normed[0, 0] + norm.previous[:, 0].mean()
     )
 
     assert pytest.approx(expect_res, 0.1) == data_to_norm[0, 0]
@@ -98,13 +95,10 @@ def test_zscore_raw_analysis():
         data_normed = norm.process(data_to_norm)
 
     expect_res = (
-        norm.previous[:, 0].std() * data_normed[0, 0]
-        + norm.previous[:, 0].mean()
+        norm.previous[:, 0].std() * data_normed[0, 0] + norm.previous[:, 0].mean()
     )
 
-    np.testing.assert_allclose(
-        expect_res, data_to_norm[0, 0], rtol=0.1, atol=0.1
-    )
+    np.testing.assert_allclose(expect_res, data_to_norm[0, 0], rtol=0.1, atol=0.1)
 
 
 def test_all_norm_methods_raw():

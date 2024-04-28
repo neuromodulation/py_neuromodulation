@@ -1,21 +1,20 @@
 """Re-referencing Module."""
+
 import numpy as np
 import pandas as pd
 
 
 class ReReferencer:
-    ref_matrix: np.ndarray
-
     def __init__(
         self,
-        sfreq: int | float,
+        sfreq: float,
         nm_channels: pd.DataFrame,
     ) -> None:
         """Initialize real-time rereference information.
 
         Parameters
         ----------
-        sfreq : int | float
+        sfreq : float
             Sampling frequency. Is not used, only kept for compatibility.
         nm_channels : Pandas DataFrame
             Dataframe containing information about rereferencing, as
@@ -26,9 +25,10 @@ class ReReferencer:
             ValueError: rereferencing using undefined channel
             ValueError: rereferencing to same channel
         """
-        nm_channels = nm_channels[nm_channels["used"] == 1].reset_index(
-            drop=True
-        )
+
+        self.ref_matrix: np.ndarray | None
+
+        nm_channels = nm_channels[nm_channels["used"] == 1].reset_index(drop=True)
         # (channels_used,) = np.where((nm_channels.used == 1))
 
         ch_names = nm_channels["name"].tolist()
