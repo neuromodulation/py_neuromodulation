@@ -1,12 +1,10 @@
 """Module for filter functionality."""
 
-import logging
-
-logger = logging.getLogger("PynmLogger")
-
-import mne
-from mne.filter import _overlap_add_filter
+from mne.filter import create_filter, _overlap_add_filter
 import numpy as np
+from typing import cast
+
+from py_neuromodulation import logger
 
 from py_neuromodulation.nm_preprocessing import NMPreprocessor
 
@@ -25,13 +23,13 @@ class MNEFilter:
     ----------
     f_ranges : list of lists
         Frequency ranges. Inner lists must be of length 2.
-    sfreq : int | float
+    sfreq : float
         Sampling frequency.
     filter_length : str, optional
         Filter length. Human readable (e.g. "1000ms", "1s"), by default "999ms"
-    l_trans_bandwidth : int | float | str, optional
+    l_trans_bandwidth : float | str, optional
         Length of the lower transition band or "auto", by default 4
-    h_trans_bandwidth : int | float | str, optional
+    h_trans_bandwidth : float | str, optional
         Length of the higher transition band or "auto", by default 4
     verbose : bool | None, optional
         Verbosity level, by default None
@@ -44,11 +42,11 @@ class MNEFilter:
 
     def __init__(
         self,
-        f_ranges: list[list[int | float | None]] | list[int | float | None],
-        sfreq: int | float,
+        f_ranges: list[list[float | None]] | list[float | None],
+        sfreq: float,
         filter_length: str | float = "999ms",
-        l_trans_bandwidth: int | float | str = 4,
-        h_trans_bandwidth: int | float | str = 4,
+        l_trans_bandwidth: float | str = 4,
+        h_trans_bandwidth: float | str = 4,
         verbose: bool | int | str | None = None,
     ) -> None:
         filter_bank = []
@@ -61,7 +59,7 @@ class MNEFilter:
 
         for f_range in f_ranges:
             try:
-                filt = mne.filter.create_filter(
+                filt = create_filter(
                     None,
                     sfreq,
                     l_freq=f_range[0],
@@ -72,8 +70,8 @@ class MNEFilter:
                     filter_length=filter_length,  # type: ignore
                     verbose=verbose,
                 )
-            except:
-                filt = mne.filter.create_filter(
+            except ValueError:
+                filt = create_filter(
                     None,
                     sfreq,
                     l_freq=f_range[0],
@@ -111,10 +109,7 @@ class MNEFilter:
 
         filtered = np.array(
             [
-                [
-                    np.convolve(filt, chan, mode="same")
-                    for filt in self.filter_bank
-                ]
+                [np.convolve(filt, chan, mode="same") for filt in self.filter_bank]
                 for chan in data
             ]
         )
@@ -126,9 +121,7 @@ class MNEFilter:
             filtered = filtered[
                 :,
                 :,
-                middle_index
-                - data.shape[1] // 2 : middle_index
-                + data.shape[1] // 2,
+                middle_index - data.shape[1] // 2 : middle_index + data.shape[1] // 2,
             ]
 
         return filtered
@@ -137,17 +130,14 @@ class MNEFilter:
 class NotchFilter(NMPreprocessor):
     def __init__(
         self,
-        sfreq: int | float,
-        line_noise: int | float | None = None,
+        sfreq: float,
+        line_noise: float | None = None,
         freqs: np.ndarray | None = None,
         notch_widths: int | np.ndarray | None = 3,
-        trans_bandwidth: int = 6.8,
+        trans_bandwidth: float = 6.8,
     ) -> None:
-        if line_noise is None and freqs is None:
-            raise ValueError(
-                "Either line_noise or freqs must be defined if notch_filter is"
-                "activated."
-            )
+        self.test_settings(line_noise, sfreq)
+
         if freqs is None:
             freqs = np.arange(line_noise, sfreq / 2, line_noise, dtype=int)
 
@@ -177,20 +167,16 @@ class NotchFilter(NMPreprocessor):
                 notch_widths = notch_widths[0] * np.ones_like(freqs)
             elif len(notch_widths) != len(freqs):
                 raise ValueError(
-                    "notch_widths must be None, scalar, or the "
-                    "same length as freqs"
+                    "notch_widths must be None, scalar, or the " "same length as freqs"
                 )
+        notch_widths = cast(np.ndarray, notch_widths)  # For MyPy only, no runtime cost
 
         # Speed this up by computing the fourier coefficients once
         tb_half = trans_bandwidth / 2.0
-        lows = [
-            freq - nw / 2.0 - tb_half for freq, nw in zip(freqs, notch_widths)
-        ]
-        highs = [
-            freq + nw / 2.0 + tb_half for freq, nw in zip(freqs, notch_widths)
-        ]
+        lows = [freq - nw / 2.0 - tb_half for freq, nw in zip(freqs, notch_widths)]
+        highs = [freq + nw / 2.0 + tb_half for freq, nw in zip(freqs, notch_widths)]
 
-        self.filter_bank = mne.filter.create_filter(
+        self.filter_bank = create_filter(
             data=None,
             sfreq=sfreq,
             l_freq=highs,
@@ -219,3 +205,10 @@ class NotchFilter(NMPreprocessor):
             copy=True,
             pad="reflect_limited",
         )
+
+    def test_settings(self, line_noise, freqs):
+        if line_noise is None and freqs is None:
+            raise ValueError(
+                "Either line_noise or freqs must be defined if notch_filter is"
+                "activated."
+            )

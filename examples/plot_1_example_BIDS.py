@@ -175,9 +175,9 @@ feature_reader.plot_all_features(
 nm_plots.plot_corr_matrix(
     feature=feature_reader.feature_arr.filter(regex="ECOG_RIGHT_0"),
     ch_name="ECOG_RIGHT_0-avgref",
-    feature_names=feature_reader.feature_arr.filter(
+    feature_names=list(feature_reader.feature_arr.filter(
         regex="ECOG_RIGHT_0-avgref"
-    ).columns,
+    ).columns),
     feature_file=feature_reader.feature_file,
     show_plot=True,
     figsize=(15, 15),

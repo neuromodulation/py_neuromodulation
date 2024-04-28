@@ -2,18 +2,11 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from py_neuromodulation import (
-    nm_settings,
-    nm_stream_offline,
-    nm_define_nmchannels,
-    nm_stream_abc,
-)
+from py_neuromodulation import nm_settings, nm_stream_offline, nm_define_nmchannels
 
 
-def get_example_settings(test_arr: np.array) -> nm_stream_abc.PNStream:
-    settings = nm_settings.set_settings_fast_compute(
-        nm_settings.get_default_settings()
-    )
+def get_example_settings(test_arr: np.ndarray) -> tuple[dict, pd.DataFrame]:
+    settings = nm_settings.set_settings_fast_compute(nm_settings.get_default_settings())
 
     nm_channels = nm_define_nmchannels.get_default_channels_from_data(test_arr)
 
