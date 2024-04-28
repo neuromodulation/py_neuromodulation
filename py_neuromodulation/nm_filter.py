@@ -4,9 +4,8 @@ from mne.filter import create_filter, _overlap_add_filter
 import numpy as np
 from typing import cast
 
-from py_neuromodulation import logger
-
 from py_neuromodulation.nm_preprocessing import NMPreprocessor
+from py_neuromodulation import logger
 
 
 class MNEFilter:

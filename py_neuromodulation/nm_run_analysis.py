@@ -8,11 +8,8 @@ import pandas as pd
 
 from py_neuromodulation import nm_IO, logger
 from py_neuromodulation.nm_types import _PathLike
-
 from py_neuromodulation.nm_features import Features
-
 from py_neuromodulation.nm_preprocessing import NMPreprocessors
-
 from py_neuromodulation.nm_normalization import FeatureNormalizer
 from py_neuromodulation.nm_projection import Projection
 
@@ -309,9 +306,7 @@ class DataProcessor:
                 features_current.loc[features_current.index.str.contains(ch)] = np.nan
 
         if self.verbose:
-            logger.info(
-                "Last batch took: " + str(np.round(time() - start_time, 2)) + " seconds"
-            )
+            logger.info("Last batch took: %.2f seconds", time() - start_time)
 
         return features_current
 
