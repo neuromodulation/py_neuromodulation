@@ -2,18 +2,11 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from py_neuromodulation import (
-    nm_settings,
-    nm_stream_offline,
-    nm_define_nmchannels,
-    nm_stream_abc,
-)
+from py_neuromodulation import nm_settings, nm_stream_offline, nm_define_nmchannels
 
 
-def get_example_settings(test_arr: np.array) -> nm_stream_abc.PNStream:
-    settings = nm_settings.set_settings_fast_compute(
-        nm_settings.get_default_settings()
-    )
+def get_example_settings(test_arr: np.ndarray) -> tuple[dict, pd.DataFrame]:
+    settings = nm_settings.set_settings_fast_compute(nm_settings.get_default_settings())
 
     nm_channels = nm_define_nmchannels.get_default_channels_from_data(test_arr)
 
@@ -93,7 +86,6 @@ def test_different_sampling_rate_0DOT1Hz():
 
 
 def test_wrong_initalization_of_segment_length_features_ms_and_osc_window_length():
-    segment_length_features_ms = 800
 
     arr_test = np.random.random([2, 1200])
     settings, nm_channels = get_example_settings(arr_test)

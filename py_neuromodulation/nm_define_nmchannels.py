@@ -1,6 +1,6 @@
 """Module for handling nm_channels."""
-from typing import Iterable, Optional, Union
 
+from collections.abc import Iterable
 import pandas as pd
 import numpy as np
 
@@ -11,59 +11,59 @@ _LFP_TYPES = ["seeg", "dbs", "lfp"]  # must be lower-case
 def set_channels(
     ch_names: list[str],
     ch_types: list[str],
-    reference: Union[list, str] = "default",
-    bads: Optional[list[str]] = None,
-    new_names: Union[str, list[str]] = "default",
+    reference: list | str = "default",
+    bads: list[str] | None = None,
+    new_names: str | list[str] = "default",
     ecog_only: bool = False,
-    used_types: Optional[Iterable[str]] = ("ecog", "dbs", "seeg"),
-    target_keywords: Optional[Iterable[str]] = ("mov", "squared", "label"),
+    used_types: Iterable[str] | None = ("ecog", "dbs", "seeg"),
+    target_keywords: Iterable[str] | None = ("mov", "squared", "label"),
 ) -> pd.DataFrame:
     """Return dataframe with channel-specific settings in nm_channels format.
 
-        Return an nm_channels dataframe with the columns: "name", "rereference",
-        "used", "target", "type", "status", "new_name"]. "name" is set to ch_names,
-        "rereference" can be specified individually. "used" is set to 1 for all
-        channel types specified in `used_types`, else to 0. "target" is set to 1
-        for all channels containing any of the `target_keywords`, else to 0.
+    Return an nm_channels dataframe with the columns: "name", "rereference",
+    "used", "target", "type", "status", "new_name"]. "name" is set to ch_names,
+    "rereference" can be specified individually. "used" is set to 1 for all
+    channel types specified in `used_types`, else to 0. "target" is set to 1
+    for all channels containing any of the `target_keywords`, else to 0.
 
-        Possible channel types:
-        https://github.com/mne-tools/mne-python/blob/6ae3b22033c745cce5cd5de9b92da54c13c36484/doc/_includes/channel_types.rst
+    Possible channel types:
+    https://github.com/mne-tools/mne-python/blob/6ae3b22033c745cce5cd5de9b92da54c13c36484/doc/_includes/channel_types.rst
 
-        Arguments
-        ---------
-            ch_names : list
-                list of channel names.
-            ch_types : list
-                list of channel types. Should optimally be of the types: "ECOG",
-                "DBS" or "SEEG".
-            reference : str | list of str | None, default: 'default'
-                re-referencing scheme. Default is "default". This sets ECOG channel
-                references to "average" and creates a bipolar referencing scheme
-                for LFP/DBS/SEEG channels, where each channel is referenced to
-                the adjacent lower channel, split by left and right hemisphere.
-                For this, the channel names must contain the substring "_L_" and/or
-                "_R_" (lower or upper case). CAVE: Adjacent channels will be
-                determined using the sort() function.
-            bads :  str | list of str, default: None
-                channels that should be marked as bad and not be used for
-                average re-referencing etc.
-            new_names : list of str | None, default: 'default'
-                new channel names that should be used when writing out the
-                features and results. Useful when applying re-referencing. Set to
-                'None' if no renaming should be performed. 'default' will infer
-                channel renaming from re-referencing information. If a list is
-                given, it should be in the same order as 'ch_names'.
-            ECOG_ONLY : boolean, default: False
-                if True, set only 'ecog' channel type to used
-            used_types : iterable of str | None, default : ("ecog", "dbs", "seeg")
-                data channel types to be used. Set to `None` to use no channel
-                types.
-            target_keywords : iterable of str | None, default : ("ecog", "dbs", "seeg")
-                keywords for target channels
+    Arguments
+    ---------
+        ch_names : list
+            list of channel names.
+        ch_types : list
+            list of channel types. Should optimally be of the types: "ECOG",
+            "DBS" or "SEEG".
+        reference : str | list of str | None, default: 'default'
+            re-referencing scheme. Default is "default". This sets ECOG channel
+            references to "average" and creates a bipolar referencing scheme
+            for LFP/DBS/SEEG channels, where each channel is referenced to
+            the adjacent lower channel, split by left and right hemisphere.
+            For this, the channel names must contain the substring "_L_" and/or
+            "_R_" (lower or upper case). CAVE: Adjacent channels will be
+            determined using the sort() function.
+        bads :  str | list of str, default: None
+            channels that should be marked as bad and not be used for
+            average re-referencing etc.
+        new_names : list of str | None, default: 'default'
+            new channel names that should be used when writing out the
+            features and results. Useful when applying re-referencing. Set to
+            'None' if no renaming should be performed. 'default' will infer
+            channel renaming from re-referencing information. If a list is
+            given, it should be in the same order as 'ch_names'.
+        ECOG_ONLY : boolean, default: False
+            if True, set only 'ecog' channel type to used
+        used_types : iterable of str | None, default : ("ecog", "dbs", "seeg")
+            data channel types to be used. Set to `None` to use no channel
+            types.
+        target_keywords : iterable of str | None, default : ("ecog", "dbs", "seeg")
+            keywords for target channels
 
-        Returns
-        -------
-            df: DataFrame in nm_channels format
+    Returns
+    -------
+        df: DataFrame in nm_channels format
     """
     if not (len(ch_names) == len(ch_types)):
         raise ValueError(
@@ -86,13 +86,13 @@ def set_channels(
     df["name"] = ch_names
 
     if used_types:
-        if type(used_types) is str:
-            used_types = [used_types]          # Even if the user passes only ("ecog"), the if statement bellow will work
+        if isinstance(used_types, str):
+            used_types = [
+                used_types
+            ]  # Even if the user passes only ("ecog"), the if statement bellow will work
         used_list = []
         for ch_type in ch_types:
-            if any(
-                use_type.lower() == ch_type.lower() for use_type in used_types
-            ):
+            if any(use_type.lower() == ch_type.lower() for use_type in used_types):
                 used_list.append(1)
             else:
                 used_list.append(0)
@@ -101,7 +101,7 @@ def set_channels(
         df["used"] = 0
 
     if target_keywords:
-        if type(target_keywords) is str:
+        if isinstance(target_keywords, str):
             target_keywords = [target_keywords]
         targets = []
         for ch_name in ch_names:
@@ -122,9 +122,7 @@ def set_channels(
 
     if isinstance(reference, str):
         if reference.lower() == "default":
-            df = _get_default_references(
-                df=df, ch_names=ch_names, ch_types=ch_types
-            )
+            df = _get_default_references(df=df, ch_names=ch_names, ch_types=ch_types)
         else:
             raise ValueError(
                 "`reference` must be either `default`, `None` or "
@@ -153,9 +151,9 @@ def set_channels(
         if isinstance(bads, str):
             bads = [bads]
         df["status"] = ["bad" if ch in bads else "good" for ch in ch_names]
-        df.loc[
-            df["status"] == "bad", "used"
-        ] = 0  # setting bad channels to not being used
+        df.loc[df["status"] == "bad", "used"] = (
+            0  # setting bad channels to not being used
+        )
     else:
         df["status"] = "good"
 
@@ -172,7 +170,7 @@ def set_channels(
         for name, ref in zip(df["name"], df["rereference"]):
             if ref == "None":
                 new_names.append(name)
-            elif type(ref) == float:
+            elif isinstance(ref, float):
                 if np.isnan(ref):
                     new_names.append(name)
             elif ref == "average":
@@ -226,17 +224,15 @@ def _get_default_references(
         if ("_r_" in lfp_ch.lower()) or ("_right_" in lfp_ch.lower())
     ]
     lfp_r.sort()
-    lfp_l_refs = [
-        lfp_l[i - 1] if i > 0 else lfp_l[-1] for i, _ in enumerate(lfp_l)
-    ]
-    lfp_r_refs = [
-        lfp_r[i - 1] if i > 0 else lfp_r[-1] for i, _ in enumerate(lfp_r)
-    ]
+    lfp_l_refs = [lfp_l[i - 1] if i > 0 else lfp_l[-1] for i, _ in enumerate(lfp_l)]
+    lfp_r_refs = [lfp_r[i - 1] if i > 0 else lfp_r[-1] for i, _ in enumerate(lfp_r)]
     ref_idx = list(df.columns).index("rereference")
     if len(ecog_chs) > 1:
         for ecog_ch in ecog_chs:
             df.iloc[df[df["name"] == ecog_ch].index[0], ref_idx] = "average"
-    if len(lfp_l) > 1:  # if there is only a single channel, the channel would be subtracted from itself
+    if (
+        len(lfp_l) > 1
+    ):  # if there is only a single channel, the channel would be subtracted from itself
         for i, lfp in enumerate(lfp_l):
             df.iloc[df[df["name"] == lfp].index[0], ref_idx] = lfp_l_refs[i]
     if len(lfp_r) > 1:
@@ -244,20 +240,22 @@ def _get_default_references(
             df.iloc[df[df["name"] == lfp].index[0], ref_idx] = lfp_r_refs[i]
     for other_ch in other_chs:
         df.iloc[df[df["name"] == other_ch].index[0], ref_idx] = "None"
-    
+
     df = df.replace(np.nan, "None")
 
     return df
 
+
 def get_default_channels_from_data(
-        data: np.array, car_rereferencing:bool=True,
+    data: np.ndarray,
+    car_rereferencing: bool = True,
 ):
     """Return default nm_channels dataframe with
-    ecog datatype, no bad channels, no targets, common average rereferencing 
+    ecog datatype, no bad channels, no targets, common average rereferencing
 
     Parameters
     ----------
-    data : np.array
+    data : np.ndarray
         Data array in shape (n_channels, n_time)
     car_rereferencing : bool, optional
         use common average rereferencing, by default True
@@ -265,7 +263,7 @@ def get_default_channels_from_data(
     Returns
     -------
     pd.DataFrame
-        nm_channel dataframe containing columns: 
+        nm_channel dataframe containing columns:
          - name
          - rereference
          - used
@@ -279,7 +277,7 @@ def get_default_channels_from_data(
     status = ["good" for _ in range(data.shape[0])]
     type_nm = ["ecog" for _ in range(data.shape[0])]
 
-    if car_rereferencing is True:
+    if car_rereferencing:
         rereference = ["average" for _ in range(data.shape[0])]
         new_name = [f"{ch}-avgref" for ch in ch_name]
     else:

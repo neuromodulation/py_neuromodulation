@@ -1,15 +1,10 @@
-import pytest
-import mne
 import numpy as np
 
 from py_neuromodulation import (
-    nm_analysis,
-    nm_decode,
     nm_define_nmchannels,
     nm_IO,
-    nm_plots,
     nm_settings,
-    nm_stream_offline,
+    Stream,
 )
 
 
@@ -29,9 +24,7 @@ def test_bispectrum():
         line_noise,
         coord_list,
         coord_names,
-    ) = nm_IO.read_BIDS_data(
-        PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype
-    )
+    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype)
 
     ch_names = raw.ch_names[4]
     ch_types = raw.get_channel_types()[4]
@@ -51,7 +44,7 @@ def test_bispectrum():
 
     settings["features"]["bispectrum"] = True
 
-    stream = nm_stream_offline.Stream(
+    stream = Stream(
         settings=settings,
         nm_channels=nm_channels,
         path_grids=None,
@@ -64,7 +57,4 @@ def test_bispectrum():
 
     features = stream.run(np.expand_dims(data[3, :], axis=0))
 
-    assert (
-        features["ECOG_RIGHT_1_Bispectrum_phase_mean_whole_fband_range"].sum()
-        != 0
-    )
+    assert features["ECOG_RIGHT_1_Bispectrum_phase_mean_whole_fband_range"].sum() != 0

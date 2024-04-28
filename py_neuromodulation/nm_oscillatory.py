@@ -1,19 +1,19 @@
-from typing import Iterable
-
+from collections.abc import Iterable
 import numpy as np
-from scipy import fft, signal
+from scipy.signal import welch, stft
+from scipy.fft import rfft, rfftfreq
 
-from py_neuromodulation import nm_filter, nm_features_abc, nm_kalmanfilter
+from py_neuromodulation.nm_features import NMFeature
+from py_neuromodulation.nm_filter import MNEFilter
+from py_neuromodulation.nm_kalmanfilter import define_KF
 
 
-class OscillatoryFeature(nm_features_abc.Feature):
-    def __init__(
-        self, settings: dict, ch_names: Iterable[str], sfreq: float
-    ) -> None:
-        self.s = settings
+class OscillatoryFeature(NMFeature):
+    def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: float) -> None:
+        self.settings = settings
         self.sfreq = sfreq
         self.ch_names = ch_names
-        self.KF_dict = {}
+        self.KF_dict: dict = {}
 
         self.f_ranges_dict = settings["frequency_ranges_hz"]
         self.fband_names = list(settings["frequency_ranges_hz"].keys())
@@ -21,74 +21,72 @@ class OscillatoryFeature(nm_features_abc.Feature):
 
     @staticmethod
     def test_settings_osc(
-        s: dict,
+        settings: dict,
         ch_names: Iterable[str],
-        sfreq: int | float,
+        sfreq: float,
         osc_feature_name: str,
     ):
         assert (
             fb[0] < sfreq / 2 and fb[1] < sfreq / 2
-            for fb in s["frequency_ranges_hz"].values()
+            for fb in settings["frequency_ranges_hz"].values()
         ), (
             "the frequency band ranges need to be smaller than the nyquist frequency"
-            f"got sfreq = {sfreq} and fband ranges {s['frequency_ranges_hz']}"
+            f"got sfreq = {sfreq} and fband ranges {settings['frequency_ranges_hz']}"
         )
 
         if osc_feature_name != "bandpass_filter_settings":
             assert isinstance(
-                s[osc_feature_name]["windowlength_ms"], int
-            ), f"windowlength_ms needs to be type int, got {s[osc_feature_name]['windowlength_ms']}"
+                settings[osc_feature_name]["windowlength_ms"], int
+            ), f"windowlength_ms needs to be type int, got {settings[osc_feature_name]['windowlength_ms']}"
 
             assert (
-                s[osc_feature_name]["windowlength_ms"]
-                <= s["segment_length_features_ms"]
+                settings[osc_feature_name]["windowlength_ms"]
+                <= settings["segment_length_features_ms"]
             ), (
-                f"oscillatory feature windowlength_ms = ({s[osc_feature_name]['windowlength_ms']})"
+                f"oscillatory feature windowlength_ms = ({settings[osc_feature_name]['windowlength_ms']})"
                 f"needs to be smaller than"
-                f"s['segment_length_features_ms'] = {s['segment_length_features_ms']}",
+                f"settings['segment_length_features_ms'] = {settings['segment_length_features_ms']}",
             )
+
         else:
-            for seg_length in s[osc_feature_name][
-                "segment_lengths_ms"
-            ].values():
+            for seg_length in settings[osc_feature_name]["segment_lengths_ms"].values():
                 assert isinstance(
                     seg_length, int
                 ), f"segment length has to be type int, got {seg_length}"
-        assert isinstance(
-            s[osc_feature_name]["log_transform"], bool
-        ), f"log_transform needs to be type bool, got {s[osc_feature_name]['log_transform']}"
 
-        assert isinstance(s["frequency_ranges_hz"], dict)
+        assert isinstance(
+            settings[osc_feature_name]["log_transform"], bool
+        ), f"log_transform needs to be type bool, got {settings[osc_feature_name]['log_transform']}"
+
+        assert isinstance(settings["frequency_ranges_hz"], dict)
 
         assert (
             isinstance(value, list)
-            for value in s["frequency_ranges_hz"].values()
+            for value in settings["frequency_ranges_hz"].values()
         )
-        assert (len(value) == 2 for value in s["frequency_ranges_hz"].values())
+        assert (len(value) == 2 for value in settings["frequency_ranges_hz"].values())
 
         assert (
             isinstance(value[0], list)
-            for value in s["frequency_ranges_hz"].values()
+            for value in settings["frequency_ranges_hz"].values()
         )
 
         assert (
-            len(value[0]) == 2 for value in s["frequency_ranges_hz"].values()
+            len(value[0]) == 2 for value in settings["frequency_ranges_hz"].values()
         )
 
         assert (
             isinstance(value[1], (float, int))
-            for value in s["frequency_ranges_hz"].values()
+            for value in settings["frequency_ranges_hz"].values()
         )
 
     def init_KF(self, feature: str) -> None:
-        for f_band in self.s["kalman_filter_settings"]["frequency_bands"]:
+        for f_band in self.settings["kalman_filter_settings"]["frequency_bands"]:
             for channel in self.ch_names:
-                self.KF_dict[
-                    "_".join([channel, feature, f_band])
-                ] = nm_kalmanfilter.define_KF(
-                    self.s["kalman_filter_settings"]["Tp"],
-                    self.s["kalman_filter_settings"]["sigma_w"],
-                    self.s["kalman_filter_settings"]["sigma_v"],
+                self.KF_dict["_".join([channel, feature, f_band])] = define_KF(
+                    self.settings["kalman_filter_settings"]["Tp"],
+                    self.settings["kalman_filter_settings"]["sigma_w"],
+                    self.settings["kalman_filter_settings"]["sigma_v"],
                 )
 
     def update_KF(self, feature_calc: float, KF_name: str) -> float:
@@ -102,29 +100,29 @@ class OscillatoryFeature(nm_features_abc.Feature):
         self,
         features_compute: dict,
         data: np.ndarray,
-        feature_name: np.ndarray,
+        feature_name: str,
         est_name: str,
     ):
-        for feature_est_name in list(self.s[est_name]["features"].keys()):
-            if self.s[est_name]["features"][feature_est_name] is True:
+        for feature_est_name in list(self.settings[est_name]["features"].keys()):
+            if self.settings[est_name]["features"][feature_est_name]:
                 # switch case for feature_est_name
                 match feature_est_name:
                     case "mean":
-                        features_compute[
-                            f"{feature_name}_{feature_est_name}"
-                        ] = np.nanmean(data)
+                        features_compute[f"{feature_name}_{feature_est_name}"] = (
+                            np.nanmean(data)
+                        )
                     case "median":
-                        features_compute[
-                            f"{feature_name}_{feature_est_name}"
-                        ] = np.nanmedian(data)
+                        features_compute[f"{feature_name}_{feature_est_name}"] = (
+                            np.nanmedian(data)
+                        )
                     case "std":
-                        features_compute[
-                            f"{feature_name}_{feature_est_name}"
-                        ] = np.nanstd(data)
+                        features_compute[f"{feature_name}_{feature_est_name}"] = (
+                            np.nanstd(data)
+                        )
                     case "max":
-                        features_compute[
-                            f"{feature_name}_{feature_est_name}"
-                        ] = np.nanmax(data)
+                        features_compute[f"{feature_name}_{feature_est_name}"] = (
+                            np.nanmax(data)
+                        )
 
         return features_compute
 
@@ -138,16 +136,14 @@ class FFT(OscillatoryFeature):
     ) -> None:
         super().__init__(settings, ch_names, sfreq)
 
-        if self.s["fft_settings"]["log_transform"]:
+        if self.settings["fft_settings"]["log_transform"]:
             self.log_transform = True
         else:
             self.log_transform = False
 
-        window_ms = self.s["fft_settings"]["windowlength_ms"]
+        window_ms = self.settings["fft_settings"]["windowlength_ms"]
         self.window_samples = int(-np.floor(window_ms / 1000 * sfreq))
-        self.freqs = fft.rfftfreq(
-            -self.window_samples, 1 / np.floor(self.sfreq)
-        )
+        self.freqs = rfftfreq(-self.window_samples, 1 / np.floor(self.sfreq))
 
         self.feature_params = []
         for ch_idx, ch_name in enumerate(self.ch_names):
@@ -159,12 +155,12 @@ class FFT(OscillatoryFeature):
                 self.feature_params.append((ch_idx, feature_name, idx_range))
 
     @staticmethod
-    def test_settings(s: dict, ch_names: Iterable[str], sfreq: int | float):
-        OscillatoryFeature.test_settings_osc(s, ch_names, sfreq, "fft_settings")
+    def test_settings(settings: dict, ch_names: Iterable[str], sfreq: float):
+        OscillatoryFeature.test_settings_osc(settings, ch_names, sfreq, "fft_settings")
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         data = data[:, self.window_samples :]
-        Z = np.abs(fft.rfft(data))
+        Z = np.abs(rfft(data))
 
         if self.log_transform:
             Z = np.log10(Z)
@@ -177,7 +173,7 @@ class FFT(OscillatoryFeature):
             )
 
         for ch_idx, ch_name in enumerate(self.ch_names):
-            if self.s["fft_settings"]["return_spectrum"]:
+            if self.settings["fft_settings"]["return_spectrum"]:
                 features_compute.update(
                     {
                         f"{ch_name}_fft_psd_{str(f)}": Z[ch_idx][idx]
@@ -197,7 +193,7 @@ class Welch(OscillatoryFeature):
     ) -> None:
         super().__init__(settings, ch_names, sfreq)
 
-        self.log_transform = self.s["welch_settings"]["log_transform"]
+        self.log_transform = self.settings["welch_settings"]["log_transform"]
 
         self.feature_params = []
         for ch_idx, ch_name in enumerate(self.ch_names):
@@ -206,13 +202,13 @@ class Welch(OscillatoryFeature):
                 self.feature_params.append((ch_idx, feature_name, f_range))
 
     @staticmethod
-    def test_settings(s: dict, ch_names: Iterable[str], sfreq: int | float):
+    def test_settings(settings: dict, ch_names: Iterable[str], sfreq: float):
         OscillatoryFeature.test_settings_osc(
-            s, ch_names, sfreq, "welch_settings"
+            settings, ch_names, sfreq, "welch_settings"
         )
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
-        freqs, Z = signal.welch(
+        freqs, Z = welch(
             data,
             fs=self.sfreq,
             window="hann",
@@ -226,9 +222,7 @@ class Welch(OscillatoryFeature):
         for ch_idx, feature_name, f_range in self.feature_params:
             Z_ch = Z[ch_idx]
 
-            idx_range = np.where((freqs >= f_range[0]) & (freqs <= f_range[1]))[
-                0
-            ]
+            idx_range = np.where((freqs >= f_range[0]) & (freqs <= f_range[1]))[0]
 
             features_compute = self.estimate_osc_features(
                 features_compute,
@@ -238,7 +232,7 @@ class Welch(OscillatoryFeature):
             )
 
         for ch_idx, ch_name in enumerate(self.ch_names):
-            if self.s["welch_settings"]["return_spectrum"]:
+            if self.settings["welch_settings"]["return_spectrum"]:
                 features_compute.update(
                     {
                         f"{ch_name}_welch_psd_{str(f)}": Z[ch_idx][idx]
@@ -258,8 +252,8 @@ class STFT(OscillatoryFeature):
     ) -> None:
         super().__init__(settings, ch_names, sfreq)
 
-        self.nperseg = int(self.s["stft_settings"]["windowlength_ms"])
-        self.log_transform = self.s["stft_settings"]["log_transform"]
+        self.nperseg = int(self.settings["stft_settings"]["windowlength_ms"])
+        self.log_transform = self.settings["stft_settings"]["log_transform"]
 
         self.feature_params = []
         for ch_idx, ch_name in enumerate(self.ch_names):
@@ -268,13 +262,11 @@ class STFT(OscillatoryFeature):
                 self.feature_params.append((ch_idx, feature_name, f_range))
 
     @staticmethod
-    def test_settings(s: dict, ch_names: Iterable[str], sfreq: int | float):
-        OscillatoryFeature.test_settings_osc(
-            s, ch_names, sfreq, "stft_settings"
-        )
+    def test_settings(settings: dict, ch_names: Iterable[str], sfreq: float):
+        OscillatoryFeature.test_settings_osc(settings, ch_names, sfreq, "stft_settings")
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
-        freqs, _, Zxx = signal.stft(
+        freqs, _, Zxx = stft(
             data,
             fs=self.sfreq,
             window="hamming",
@@ -286,9 +278,7 @@ class STFT(OscillatoryFeature):
             Z = np.log10(Z)
         for ch_idx, feature_name, f_range in self.feature_params:
             Z_ch = Z[ch_idx]
-            idx_range = np.where((freqs >= f_range[0]) & (freqs <= f_range[1]))[
-                0
-            ]
+            idx_range = np.where((freqs >= f_range[0]) & (freqs <= f_range[1]))[0]
 
             features_compute = self.estimate_osc_features(
                 features_compute,
@@ -298,7 +288,7 @@ class STFT(OscillatoryFeature):
             )
 
         for ch_idx, ch_name in enumerate(self.ch_names):
-            if self.s["stft_settings"]["return_spectrum"]:
+            if self.settings["stft_settings"]["return_spectrum"]:
                 Z_ch_mean = Z[ch_idx].mean(axis=1)
                 features_compute.update(
                     {
@@ -316,12 +306,12 @@ class BandPower(OscillatoryFeature):
         settings: dict,
         ch_names: Iterable[str],
         sfreq: float,
-        use_kf: bool = None,
+        use_kf: bool | None = None,
     ) -> None:
         super().__init__(settings, ch_names, sfreq)
-        bp_settings = self.s["bandpass_filter_settings"]
+        bp_settings = self.settings["bandpass_filter_settings"]
 
-        self.bandpass_filter = nm_filter.MNEFilter(
+        self.bandpass_filter = MNEFilter(
             f_ranges=list(self.f_ranges_dict.values()),
             sfreq=self.sfreq,
             filter_length=self.sfreq - 1,
@@ -330,9 +320,7 @@ class BandPower(OscillatoryFeature):
 
         self.log_transform = bp_settings["log_transform"]
 
-        if use_kf is True or (
-            use_kf is None and bp_settings["kalman_filter"] is True
-        ):
+        if use_kf is True or (use_kf is None and bp_settings["kalman_filter"] is True):
             self.init_KF("bandpass_activity")
 
         bp_features = ["activity", "mobility", "complexity"]
@@ -344,7 +332,7 @@ class BandPower(OscillatoryFeature):
                 seglength_ms = seglengths[f_band]
                 seglen = int(np.floor(self.sfreq / 1000 * seglength_ms))
                 for bp_feature, v in bp_settings["bandpower_features"].items():
-                    if v is True:
+                    if v:
                         if bp_feature not in bp_features:
                             raise ValueError()
                         feature_name = "_".join(
@@ -363,26 +351,26 @@ class BandPower(OscillatoryFeature):
                         )
 
     @staticmethod
-    def test_settings(s: dict, ch_names: Iterable[str], sfreq: int | float):
+    def test_settings(settings: dict, ch_names: Iterable[str], sfreq: float):
         OscillatoryFeature.test_settings_osc(
-            s, ch_names, sfreq, "bandpass_filter_settings"
+            settings, ch_names, sfreq, "bandpass_filter_settings"
         )
 
         assert (
             isinstance(value, bool)
-            for value in s["bandpass_filter_settings"][
+            for value in settings["bandpass_filter_settings"][
                 "bandpower_features"
             ].values()
         )
 
         assert any(
             value is True
-            for value in s["bandpass_filter_settings"][
+            for value in settings["bandpass_filter_settings"][
                 "bandpower_features"
             ].values()
         ), "Set at least one bandpower_feature to True."
 
-        for fband_name, seg_length_fband in s["bandpass_filter_settings"][
+        for fband_name, seg_length_fband in settings["bandpass_filter_settings"][
             "segment_lengths_ms"
         ].items():
             assert isinstance(seg_length_fband, int), (
@@ -390,17 +378,17 @@ class BandPower(OscillatoryFeature):
                 f"needs to be of type int, got {seg_length_fband}"
             )
 
-            assert seg_length_fband <= s["segment_length_features_ms"], (
+            assert seg_length_fband <= settings["segment_length_features_ms"], (
                 f"segment length {seg_length_fband} needs to be smaller than "
-                f" s['segment_length_features_ms'] = {s['segment_length_features_ms']}"
+                f" settings['segment_length_features_ms'] = {settings['segment_length_features_ms']}"
             )
 
-        for fband_name in list(s["frequency_ranges_hz"].keys()):
+        for fband_name in list(settings["frequency_ranges_hz"].keys()):
             assert fband_name in list(
-                s["bandpass_filter_settings"]["segment_lengths_ms"].keys()
+                settings["bandpass_filter_settings"]["segment_lengths_ms"].keys()
             ), (
                 f"frequency range {fband_name} "
-                "needs to be defined in s['bandpass_filter_settings']['segment_lengths_ms']"
+                "needs to be defined in settings['bandpass_filter_settings']['segment_lengths_ms']"
             )
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
@@ -417,15 +405,11 @@ class BandPower(OscillatoryFeature):
         ) in self.feature_params:
             if bp_feature == "activity":
                 if self.log_transform:
-                    feature_calc = np.log10(
-                        np.var(data[ch_idx, f_band_idx, -seglen:])
-                    )
+                    feature_calc = np.log10(np.var(data[ch_idx, f_band_idx, -seglen:]))
                 else:
                     feature_calc = np.var(data[ch_idx, f_band_idx, -seglen:])
             elif bp_feature == "mobility":
-                deriv_variance = np.var(
-                    np.diff(data[ch_idx, f_band_idx, -seglen:])
-                )
+                deriv_variance = np.var(np.diff(data[ch_idx, f_band_idx, -seglen:]))
                 feature_calc = np.sqrt(
                     deriv_variance / np.var(data[ch_idx, f_band_idx, -seglen:])
                 )

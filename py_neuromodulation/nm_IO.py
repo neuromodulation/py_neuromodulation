@@ -1,22 +1,17 @@
 import json
-import os
-import sys
-from pathlib import Path
-
+from pathlib import PurePath, Path
 
 import mne
 import mne_bids
 import numpy as np
 import pandas as pd
-from scipy import io
+import scipy.io as sio
 
-import pyarrow
-from pyarrow import csv
+from pyarrow import Table as pyarrow_Table
+from pyarrow import csv as pyarrow_csv
 
-import py_neuromodulation
-from py_neuromodulation import logger
-
-_PathLike = str | os.PathLike
+from py_neuromodulation.nm_types import _PathLike
+from py_neuromodulation import logger, PYNM_DIR
 
 
 def load_nm_channels(
@@ -35,7 +30,7 @@ def load_nm_channels(
     if isinstance(nm_channels, pd.DataFrame):
         nm_ch_return = nm_channels
     elif nm_channels:
-        if not os.path.isfile(nm_channels):
+        if not Path(nm_channels).is_file():
             raise ValueError(
                 "PATH_NM_CHANNELS is not a valid file. Got: " f"{nm_channels}"
             )
@@ -49,7 +44,7 @@ def read_BIDS_data(
     BIDS_PATH: _PathLike | None = None,
     datatype: str = "ieeg",
     line_noise: int = 50,
-) -> tuple[mne.io.Raw, np.ndarray, int | float, int, list | None, list | None]:
+) -> tuple[mne.io.Raw, np.ndarray, float, int, list | None, list | None]:
     """Given a run path and bids data path, read the respective data
 
     Parameters
@@ -108,43 +103,30 @@ def get_coord_list(
 
 def read_grid(PATH_GRIDS: _PathLike | None, grid_str: str) -> pd.DataFrame:
     if PATH_GRIDS is None:
-        grid = pd.read_csv(
-            Path(__file__).parent / ("grid_" + grid_str.lower() + ".tsv"),
-            sep="\t",
-        )
+        grid = pd.read_csv(PYNM_DIR / ("grid_" + grid_str.lower() + ".tsv"), sep="\t")
     else:
         grid = pd.read_csv(
-            Path(PATH_GRIDS) / ("grid_" + grid_str.lower() + ".tsv"),
-            sep="\t",
+            PurePath(PATH_GRIDS, "grid_" + grid_str.lower() + ".tsv"), sep="\t"
         )
     return grid
 
 
-def get_annotations(
-    PATH_ANNOTATIONS: str, PATH_RUN: str, raw_arr: mne.io.RawArray
-):
+def get_annotations(PATH_ANNOTATIONS: str, PATH_RUN: str, raw_arr: mne.io.RawArray):
+    filepath = PurePath(PATH_ANNOTATIONS, PurePath(PATH_RUN).name[:-5] + ".txt")
     try:
-        annot = mne.read_annotations(
-            Path(PATH_ANNOTATIONS) / (os.path.basename(PATH_RUN)[:-5] + ".txt")
-        )
+        annot = mne.read_annotations(filepath)
         raw_arr.set_annotations(annot)
 
         # annotations starting with "BAD" are omitted with reject_by_annotations 'omit' param
         annot_data = raw_arr.get_data(reject_by_annotation="omit")
     except FileNotFoundError:
-        logger.critical(
-            "Annotations file could not be found"
-            + "expected location: "
-            + str(
-                Path(PATH_ANNOTATIONS)
-                / (os.path.basename(PATH_RUN)[:-5] + ".txt")
-            )
-        )
+        logger.critical(f"Annotations file could not be found: {filepath}")
+
     return annot, annot_data, raw_arr
 
 
 def read_plot_modules(
-    PATH_PLOT: _PathLike = Path(__file__).absolute().parent / "plots",
+    PATH_PLOT: _PathLike = PYNM_DIR / "plots",
 ):
     """Read required .mat files for plotting
 
@@ -154,10 +136,10 @@ def read_plot_modules(
         path to plotting files, by default
     """
 
-    faces = io.loadmat(os.path.join(PATH_PLOT, "faces.mat"))
-    vertices = io.loadmat(os.path.join(PATH_PLOT, "Vertices.mat"))
-    grid = io.loadmat(os.path.join(PATH_PLOT, "grid.mat"))["grid"]
-    stn_surf = io.loadmat(os.path.join(PATH_PLOT, "STN_surf.mat"))
+    faces = sio.loadmat(PurePath(PATH_PLOT, "faces.mat"))
+    vertices = sio.loadmat(PurePath(PATH_PLOT, "Vertices.mat"))
+    grid = sio.loadmat(PurePath(PATH_PLOT, "grid.mat"))["grid"]
+    stn_surf = sio.loadmat(PurePath(PATH_PLOT, "STN_surf.mat"))
     x_ver = stn_surf["vertices"][::2, 0]
     y_ver = stn_surf["vertices"][::2, 1]
     x_ecog = vertices["Vertices"][::1, 0]
@@ -209,9 +191,9 @@ def save_features_and_settings(
     """
 
     # create out folder if doesn't exist
-    if not os.path.exists(os.path.join(out_path, folder_name)):
-        logger.Info(f"Creating output folder: {folder_name}")
-        os.makedirs(os.path.join(out_path, folder_name))
+    if not Path(out_path, folder_name).exists():
+        logger.info(f"Creating output folder: {folder_name}")
+        Path(out_path, folder_name).mkdir(parents=True)
 
     dict_sidecar = {"fs": fs, "coords": coords, "line_noise": line_noise}
 
@@ -228,17 +210,12 @@ def write_csv(df, path_out):
     Difference with pandas.df.to_csv() is that it does not
     write an index column by default
     """
-    csv.write_csv(pyarrow.Table.from_pandas(df), path_out)
+    pyarrow_csv.write_csv(pyarrow_Table.from_pandas(df), path_out)
 
 
-def save_settings(
-    settings: dict, path_out: _PathLike, folder_name: str | None = None
-) -> None:
-    path_out = _pathlike_to_str(path_out)
-    if folder_name is not None:
-        path_out = os.path.join(
-            path_out, folder_name, folder_name + "_SETTINGS.json"
-        )
+def save_settings(settings: dict, path_out: _PathLike, folder_name: str = "") -> None:
+    if folder_name:
+        path_out = PurePath(path_out, folder_name, folder_name + "_SETTINGS.json")
 
     with open(path_out, "w") as f:
         json.dump(settings, f, indent=4)
@@ -248,13 +225,10 @@ def save_settings(
 def save_nm_channels(
     nmchannels: pd.DataFrame,
     path_out: _PathLike,
-    folder_name: str | None = None,
+    folder_name: str = "",
 ) -> None:
-    path_out = _pathlike_to_str(path_out)
-    if folder_name is not None:
-        path_out = os.path.join(
-            path_out, folder_name, folder_name + "_nm_channels.csv"
-        )
+    if folder_name:
+        path_out = PurePath(path_out, folder_name, folder_name + "_nm_channels.csv")
     write_csv(nmchannels, path_out)
     logger.info(f"nm_channels.csv saved to {path_out}")
 
@@ -262,32 +236,26 @@ def save_nm_channels(
 def save_features(
     df_features: pd.DataFrame,
     path_out: _PathLike,
-    folder_name: str | None = None,
+    folder_name: str = "",
 ) -> None:
-    path_out = _pathlike_to_str(path_out)
-    if folder_name is not None:
-        path_out = os.path.join(
-            path_out, folder_name, folder_name + "_FEATURES.csv"
-        )
+    if folder_name:
+        path_out = PurePath(path_out, folder_name, folder_name + "_FEATURES.csv")
     write_csv(df_features, path_out)
     logger.info(f"FEATURES.csv saved to {str(path_out)}")
 
 
-def save_sidecar(
-    sidecar: dict, path_out: _PathLike, folder_name: str | None = None
-) -> None:
-    path_out = _pathlike_to_str(path_out)
+def save_sidecar(sidecar: dict, path_out: _PathLike, folder_name: str = "") -> None:
     save_general_dict(sidecar, path_out, "_SIDECAR.json", folder_name)
 
 
 def save_general_dict(
     dict_: dict,
     path_out: _PathLike,
-    str_add: str,
-    folder_name: str | None = None,
+    str_add: str = "",
+    folder_name: str = "",
 ) -> None:
-    if folder_name is not None:
-        path_out = os.path.join(path_out, folder_name, folder_name + str_add)
+    if folder_name:
+        path_out = PurePath(path_out, folder_name, folder_name + str_add)
 
     with open(path_out, "w") as f:
         json.dump(
@@ -297,10 +265,10 @@ def save_general_dict(
             indent=4,
             separators=(",", ": "),
         )
-    logger.info(f"{str_add} saved to " + str(path_out))
+    logger.info(f"{str_add} saved to {path_out}")
 
 
-def default_json_convert(obj) -> list | int | float:
+def default_json_convert(obj) -> list | float:
     if isinstance(obj, np.ndarray):
         return obj.tolist()
     if isinstance(obj, pd.DataFrame):
@@ -312,30 +280,33 @@ def default_json_convert(obj) -> list | int | float:
     raise TypeError("Not serializable")
 
 
-def read_sidecar(PATH: str) -> dict:
-    with open(PATH + "_SIDECAR.json") as f:
+def read_sidecar(PATH: _PathLike) -> dict:
+    with open(PurePath(str(PATH) + "_SIDECAR.json")) as f:
         return json.load(f)
 
 
-def read_settings(PATH: str) -> dict:
-    with open(PATH if ".json" in PATH else PATH + "_SETTINGS.json") as f:
+def read_settings(PATH: _PathLike) -> dict:
+    with open(PATH if ".json" in str(PATH) else str(PATH) + "_SETTINGS.json") as f:
         return json.load(f)
 
 
-def read_features(PATH: str) -> pd.DataFrame:
-    return pd.read_csv(PATH + "_FEATURES.csv", engine="pyarrow")
+def read_features(PATH: _PathLike) -> pd.DataFrame:
+    return pd.read_csv(str(PATH) + "_FEATURES.csv", engine="pyarrow")
 
 
-def read_nm_channels(PATH: str) -> pd.DataFrame:
-    return pd.read_csv(PATH + "_nm_channels.csv")
+def read_nm_channels(PATH: _PathLike) -> pd.DataFrame:
+    return pd.read_csv(str(PATH) + "_nm_channels.csv")
 
 
-def get_run_list_indir(PATH: str) -> list:
+def get_run_list_indir(PATH: _PathLike) -> list:
+    from os import walk
+
     f_files = []
-    for dirpath, _, files in os.walk(PATH):
+    # for dirpath, _, files in Path(PATH).walk(): # Only works in python >=3.12
+    for dirpath, _, files in walk(PATH):
         for x in files:
             if "FEATURES" in x:
-                f_files.append(os.path.basename(dirpath))
+                f_files.append(PurePath(dirpath).name)
     return f_files
 
 
@@ -346,7 +317,7 @@ def loadmat(filename) -> dict:
     from mat files. It calls the function check keys to cure all entries
     which are still mat-objects
     """
-    data = io.loadmat(filename, struct_as_record=False, squeeze_me=True)
+    data = sio.loadmat(filename, struct_as_record=False, squeeze_me=True)
     return _check_keys(data)
 
 
@@ -355,8 +326,6 @@ def get_paths_example_data():
     This function should provide RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT and datatype for the example
     dataset used in most examples.
     """
-
-    SCRIPT_DIR = Path(py_neuromodulation.__file__).parent.absolute()
 
     sub = "testsub"
     ses = "EphysMedOff"
@@ -367,16 +336,9 @@ def get_paths_example_data():
     # Define run name and access paths in the BIDS format.
     RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}"
 
-    PATH_BIDS = Path(SCRIPT_DIR) / "data"
+    PATH_BIDS = PYNM_DIR / "data"
 
-    PATH_RUN = (
-        Path(SCRIPT_DIR)
-        / "data"
-        / f"sub-{sub}"
-        / f"ses-{ses}"
-        / datatype
-        / RUN_NAME
-    )
+    PATH_RUN = PYNM_DIR / "data" / f"sub-{sub}" / f"ses-{ses}" / datatype / RUN_NAME
 
     # Provide a path for the output data.
     PATH_OUT = PATH_BIDS / "derivatives"
@@ -390,7 +352,7 @@ def _check_keys(dict):
     todict is called to change them to nested dictionaries
     """
     for key in dict:
-        if isinstance(dict[key], io.matlab.mio5_params.mat_struct):
+        if isinstance(dict[key], sio.matlab.mio5_params.mat_struct):
             dict[key] = _todict(dict[key])
     return dict
 
@@ -402,14 +364,8 @@ def _todict(matobj) -> dict:
     dict = {}
     for strg in matobj._fieldnames:
         elem = matobj.__dict__[strg]
-        if isinstance(elem, io.matlab.mio5_params.mat_struct):
+        if isinstance(elem, sio.matlab.mio5_params.mat_struct):
             dict[strg] = _todict(elem)
         else:
             dict[strg] = elem
     return dict
-
-
-def _pathlike_to_str(path: _PathLike) -> str:
-    if isinstance(path, str):
-        return path
-    return str(path)

@@ -1,16 +1,13 @@
 import numpy as np
-import pandas as pd
-import pytest
 
 from py_neuromodulation import (
     nm_settings,
-    nm_stream_offline,
     nm_define_nmchannels,
-    nm_stream_abc,
+    Stream,
 )
 
 
-def get_example_stream(test_arr: np.array) -> nm_stream_abc.PNStream:
+def get_example_stream(test_arr: np.ndarray) -> Stream:
     settings = nm_settings.get_default_settings()
     settings["features"]["raw_hjorth"] = True
     settings["features"]["return_raw"] = True
@@ -27,15 +24,14 @@ def get_example_stream(test_arr: np.array) -> nm_stream_abc.PNStream:
 
     nm_channels = nm_define_nmchannels.get_default_channels_from_data(test_arr)
 
-    stream = nm_stream_offline.Stream(
+    stream = Stream(
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )
     return stream
 
 
 def test_all_features_random_array():
-    """This test runs's through all enabled features, and check's if they break
-    """
+    """This test runs's through all enabled features, and check's if they break"""
     np.random.seed(0)
     arr = np.random.random([2, 2000])
     stream = get_example_stream(arr)
@@ -46,7 +42,6 @@ def test_all_features_random_array():
 
 
 def test_all_features_zero_array():
-
     arr = np.zeros([2, 2000])
     stream = get_example_stream(arr)
 
@@ -54,7 +49,6 @@ def test_all_features_zero_array():
 
 
 def test_all_features_NaN_array():
-
     arr = np.empty([2, 2000])
     arr[:] = np.nan
 
