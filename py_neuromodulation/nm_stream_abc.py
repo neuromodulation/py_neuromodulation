@@ -171,8 +171,6 @@ class PNStream(ABC):
     ) -> None:
         """Save features, settings, nm_channels and sidecar after run"""
 
-        if out_path_root is None:
-            out_path_root = os.getcwd()
         # create derivate folder_name output folder if doesn't exist
         if os.path.exists(os.path.join(out_path_root, folder_name)) is False:
             os.makedirs(os.path.join(out_path_root, folder_name))

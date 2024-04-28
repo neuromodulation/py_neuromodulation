@@ -318,7 +318,7 @@ class Stream(_OfflineStream):
     def run(
         self,
         data: np.ndarray | pd.DataFrame = None,
-        out_path_root: _PathLike | None = None,
+        out_path_root: _PathLike | None = os.getcwd(),
         folder_name: str = "sub",
         parallel: bool = False,
         n_jobs: int = -2,
@@ -352,6 +352,8 @@ class Stream(_OfflineStream):
 
         if parallel is True:
             self._check_settings_for_parallel()
+
+        logger.log_to_file(os.path.join(out_path_root, folder_name))
 
         return self._run_offline(
             data, out_path_root, folder_name, parallel=parallel, n_jobs=n_jobs

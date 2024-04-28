@@ -36,7 +36,7 @@ class PYNMLogger(logging.Logger):
         self._console_handler.setFormatter(logging.Formatter(LOG_LEVELS[level][1]))
         
     def log_to_file(
-        self, logger: logging.Logger, path: _PathLike, mode: str = "w"
+        self, path: _PathLike, mode: str = "w"
     ):
         """
         Add file handlers to the logger
