@@ -1,8 +1,7 @@
 """Module that contains PNStream ABC."""
 
 from abc import ABC, abstractmethod
-import os
-import pathlib
+from pathlib import Path
 import pickle
 
 import pandas as pd
@@ -144,20 +143,20 @@ class PNStream(ABC):
 
     def save_after_stream(
         self,
-        out_path_root: _PathLike | None = None,
+        out_path_root: _PathLike = "",
         folder_name: str = "sub",
         feature_arr: pd.DataFrame | None = None,
     ) -> None:
         """Save features, settings, nm_channels and sidecar after run"""
 
-        if out_path_root is None:
-            out_path_root = os.getcwd()
+        out_path_root = Path.cwd() if not out_path_root else Path(out_path_root)
+            
         # create derivate folder_name output folder if doesn't exist
-        if os.path.exists(os.path.join(out_path_root, folder_name)) is False:
-            os.makedirs(os.path.join(out_path_root, folder_name))
+        (out_path_root / folder_name).mkdir(parents=True, exist_ok=True)
 
         self.PATH_OUT = out_path_root
         self.PATH_OUT_folder_name = folder_name
+        
         self.save_sidecar(out_path_root, folder_name)
 
         if feature_arr is not None:

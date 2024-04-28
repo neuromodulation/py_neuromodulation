@@ -1,5 +1,4 @@
-import os
-from pathlib import Path
+from pathlib import PurePath
 
 import pickle
 import numpy as np
@@ -48,9 +47,9 @@ class Feature_Reader:
         else:
             self.feature_file = feature_file
 
-        FILE_BASENAME = Path(self.feature_file).stem
+        FILE_BASENAME = PurePath(self.feature_file).stem
         PATH_READ_FILE = str(
-            Path(self.feature_dir, FILE_BASENAME, FILE_BASENAME)
+            PurePath(self.feature_dir, FILE_BASENAME, FILE_BASENAME)
         )
 
         self.settings = nm_IO.read_settings(PATH_READ_FILE)
@@ -815,7 +814,7 @@ class Feature_Reader:
                 feature_file.find("sub-") : feature_file.find("_ses")
             ][4:]
 
-        PATH_ML_ = os.path.join(
+        PATH_ML_ = PurePath(
             self.feature_dir,
             feature_file,
             feature_file + "_" + ML_model_name + "_ML_RES.p",
@@ -968,7 +967,7 @@ class Feature_Reader:
                                         "positions"
                                     ][ch_name_coord_idx]
                                     coords_exist = True  # optimally break out of the two loops...
-                        if coords_exist is False:
+                        if not coords_exist:
                             coords = None
                         performance_dict[subject_name][ch]["coord"] = coords
                 write_CV_res_in_performance_dict(
@@ -996,7 +995,7 @@ class Feature_Reader:
                 ["project_cortex", "project_subcortex"],
                 ["gridcortex_", "gridsubcortex_"],
             ):
-                if self.settings["postprocessing"][project_settings] is False:
+                if not self.settings["postprocessing"][project_settings]:
                     continue
 
                 # the sidecar keys are grid_cortex and subcortex_grid

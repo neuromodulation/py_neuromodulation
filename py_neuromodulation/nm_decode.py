@@ -11,14 +11,12 @@ from scipy.ndimage import binary_dilation, binary_erosion
 from scipy.ndimage import label as label_ndimage
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.under_sampling import RandomUnderSampler
-import pandas as pd
-import os
-import numpy as np
-#from numba import jit
-#import xgboost
-from copy import deepcopy
-
 from mrmr import mrmr_classif
+
+import pandas as pd
+import numpy as np
+from copy import deepcopy
+from pathlib import PurePath
 import pickle
 
 
@@ -68,7 +66,7 @@ class Decoder:
             super().__init__(self.message)
 
         def __str__(self):
-            print(self.message)
+            return self.message
 
     def __init__(
         self,
@@ -583,7 +581,7 @@ class Decoder:
         cv_res.y_train.append(y_train)
         cv_res.y_test.append(y_test)
 
-        if save_probabilities is False:
+        if not save_probabilities:
             cv_res.y_train_pr.append(y_train_pr)
             cv_res.y_test_pr.append(y_test_pr)
         else:
@@ -946,16 +944,18 @@ class Decoder:
         # why is the decoder not saved to a .json?
 
         if str_save_add is None:
-            PATH_OUT = os.path.join(
-                feature_path, feature_file, feature_file + "_ML_RES.p"
+            PATH_OUT = PurePath(
+                feature_path,
+                feature_file,
+                feature_file + "_ML_RES.p"
             )
         else:
-            PATH_OUT = os.path.join(
+            PATH_OUT = PurePath(
                 feature_path,
                 feature_file,
                 feature_file + "_" + str_save_add + "_ML_RES.p",
             )
 
-        print("model being saved to: " + str(PATH_OUT))
+        print(f"model being saved to: {PATH_OUT}")
         with open(PATH_OUT, "wb") as output:  # Overwrites any existing file.
             pickle.dump(self, output)

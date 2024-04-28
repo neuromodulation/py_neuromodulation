@@ -1,6 +1,5 @@
 import json
-import os
-from pathlib import Path
+from pathlib import PurePath, Path
 
 import mne
 import mne_bids
@@ -31,7 +30,7 @@ def load_nm_channels(
     if isinstance(nm_channels, pd.DataFrame):
         nm_ch_return = nm_channels
     elif nm_channels:
-        if not os.path.isfile(nm_channels):
+        if not Path(nm_channels).is_file():
             raise ValueError(
                 "PATH_NM_CHANNELS is not a valid file. Got: " f"{nm_channels}"
             )
@@ -104,38 +103,28 @@ def get_coord_list(
 
 def read_grid(PATH_GRIDS: _PathLike | None, grid_str: str) -> pd.DataFrame:
     if PATH_GRIDS is None:
-        grid = pd.read_csv(
-            PYNM_DIR / ("grid_" + grid_str.lower() + ".tsv"),
-            sep="\t",
-        )
+        grid = pd.read_csv(PYNM_DIR / ("grid_" + grid_str.lower() + ".tsv"), 
+                           sep="\t")
     else:
         grid = pd.read_csv(
-            Path(PATH_GRIDS) / ("grid_" + grid_str.lower() + ".tsv"),
-            sep="\t",
-        )
+            PurePath(PATH_GRIDS, "grid_" + grid_str.lower() + ".tsv"), 
+            sep="\t")
     return grid
 
 
 def get_annotations(
     PATH_ANNOTATIONS: str, PATH_RUN: str, raw_arr: mne.io.RawArray
 ):
+    filepath= PurePath(PATH_ANNOTATIONS, PurePath(PATH_RUN).name[:-5] + ".txt")
     try:
-        annot = mne.read_annotations(
-            Path(PATH_ANNOTATIONS) / (os.path.basename(PATH_RUN)[:-5] + ".txt")
-        )
+        annot = mne.read_annotations(filepath)
         raw_arr.set_annotations(annot)
 
         # annotations starting with "BAD" are omitted with reject_by_annotations 'omit' param
         annot_data = raw_arr.get_data(reject_by_annotation="omit")
     except FileNotFoundError:
-        logger.critical(
-            "Annotations file could not be found"
-            + "expected location: "
-            + str(
-                Path(PATH_ANNOTATIONS)
-                / (os.path.basename(PATH_RUN)[:-5] + ".txt")
-            )
-        )
+        logger.critical(f"Annotations file could not be found: {filepath}")
+    
     return annot, annot_data, raw_arr
 
 
@@ -150,10 +139,10 @@ def read_plot_modules(
         path to plotting files, by default
     """
 
-    faces = sio.loadmat(os.path.join(PATH_PLOT, "faces.mat"))
-    vertices = sio.loadmat(os.path.join(PATH_PLOT, "Vertices.mat"))
-    grid = sio.loadmat(os.path.join(PATH_PLOT, "grid.mat"))["grid"]
-    stn_surf = sio.loadmat(os.path.join(PATH_PLOT, "STN_surf.mat"))
+    faces = sio.loadmat(PurePath(PATH_PLOT, "faces.mat"))
+    vertices = sio.loadmat(PurePath(PATH_PLOT, "Vertices.mat"))
+    grid = sio.loadmat(PurePath(PATH_PLOT, "grid.mat"))["grid"]
+    stn_surf = sio.loadmat(PurePath(PATH_PLOT, "STN_surf.mat"))
     x_ver = stn_surf["vertices"][::2, 0]
     y_ver = stn_surf["vertices"][::2, 1]
     x_ecog = vertices["Vertices"][::1, 0]
@@ -205,9 +194,9 @@ def save_features_and_settings(
     """
 
     # create out folder if doesn't exist
-    if not os.path.exists(os.path.join(out_path, folder_name)):
+    if not Path(out_path, folder_name).exists():
         logger.info(f"Creating output folder: {folder_name}")
-        os.makedirs(os.path.join(out_path, folder_name))
+        Path(out_path, folder_name).mkdir(parents=True)
 
     dict_sidecar = {"fs": fs, "coords": coords, "line_noise": line_noise}
 
@@ -228,13 +217,10 @@ def write_csv(df, path_out):
 
 
 def save_settings(
-    settings: dict, path_out: _PathLike, folder_name: str | None = None
+    settings: dict, path_out: _PathLike, folder_name: str = ""
 ) -> None:
-    path_out = _pathlike_to_str(path_out)
-    if folder_name is not None:
-        path_out = os.path.join(
-            path_out, folder_name, folder_name + "_SETTINGS.json"
-        )
+    if folder_name:
+        path_out = PurePath(path_out, folder_name, folder_name + "_SETTINGS.json")
 
     with open(path_out, "w") as f:
         json.dump(settings, f, indent=4)
@@ -244,13 +230,10 @@ def save_settings(
 def save_nm_channels(
     nmchannels: pd.DataFrame,
     path_out: _PathLike,
-    folder_name: str | None = None,
+    folder_name: str = "",
 ) -> None:
-    path_out = _pathlike_to_str(path_out)
-    if folder_name is not None:
-        path_out = os.path.join(
-            path_out, folder_name, folder_name + "_nm_channels.csv"
-        )
+    if folder_name:
+        path_out = PurePath(path_out, folder_name, folder_name + "_nm_channels.csv")
     write_csv(nmchannels, path_out)
     logger.info(f"nm_channels.csv saved to {path_out}")
 
@@ -258,13 +241,10 @@ def save_nm_channels(
 def save_features(
     df_features: pd.DataFrame,
     path_out: _PathLike,
-    folder_name: str | None = None,
+    folder_name: str = "",
 ) -> None:
-    path_out = _pathlike_to_str(path_out)
-    if folder_name is not None:
-        path_out = os.path.join(
-            path_out, folder_name, folder_name + "_FEATURES.csv"
-        )
+    if folder_name:
+        path_out = PurePath(path_out, folder_name, folder_name + "_FEATURES.csv")
     write_csv(df_features, path_out)
     logger.info(f"FEATURES.csv saved to {str(path_out)}")
 
@@ -272,7 +252,6 @@ def save_features(
 def save_sidecar(
     sidecar: dict, path_out: _PathLike, folder_name: str = ""
 ) -> None:
-    path_out = _pathlike_to_str(path_out)
     save_general_dict(sidecar, path_out, "_SIDECAR.json", folder_name)
 
 
@@ -283,7 +262,7 @@ def save_general_dict(
     folder_name: str = "",
 ) -> None:
     if folder_name:
-        path_out = os.path.join(path_out, folder_name, folder_name + str_add)
+        path_out = PurePath(path_out, folder_name, folder_name + str_add)
 
     with open(path_out, "w") as f:
         json.dump(
@@ -293,7 +272,7 @@ def save_general_dict(
             indent=4,
             separators=(",", ": "),
         )
-    logger.info(f"{str_add} saved to " + str(path_out))
+    logger.info(f"{str_add} saved to {path_out}")
 
 
 def default_json_convert(obj) -> list | float:
@@ -308,30 +287,32 @@ def default_json_convert(obj) -> list | float:
     raise TypeError("Not serializable")
 
 
-def read_sidecar(PATH: str) -> dict:
-    with open(PATH + "_SIDECAR.json") as f:
+def read_sidecar(PATH: _PathLike) -> dict:
+    with open(PurePath(str(PATH) +"_SIDECAR.json")) as f:
         return json.load(f)
 
 
-def read_settings(PATH: str) -> dict:
-    with open(PATH if ".json" in PATH else PATH + "_SETTINGS.json") as f:
+def read_settings(PATH: _PathLike) -> dict:
+    with open(PATH if ".json" in str(PATH) else str(PATH) + "_SETTINGS.json") as f:
         return json.load(f)
 
 
-def read_features(PATH: str) -> pd.DataFrame:
-    return pd.read_csv(PATH + "_FEATURES.csv", engine="pyarrow")
+def read_features(PATH: _PathLike) -> pd.DataFrame:
+    return pd.read_csv(str(PATH) + "_FEATURES.csv", engine="pyarrow")
 
 
-def read_nm_channels(PATH: str) -> pd.DataFrame:
-    return pd.read_csv(PATH + "_nm_channels.csv")
+def read_nm_channels(PATH: _PathLike) -> pd.DataFrame:
+    return pd.read_csv(str(PATH) + "_nm_channels.csv")
 
 
-def get_run_list_indir(PATH: str) -> list:
+def get_run_list_indir(PATH: _PathLike) -> list:
+    from os import walk
     f_files = []
-    for dirpath, _, files in os.walk(PATH):
+    # for dirpath, _, files in Path(PATH).walk(): # Only works in python >=3.12
+    for dirpath, _, files in walk(PATH):
         for x in files:
             if "FEATURES" in x:
-                f_files.append(os.path.basename(dirpath))
+                f_files.append(PurePath(dirpath).name)
     return f_files
 
 
@@ -361,16 +342,9 @@ def get_paths_example_data():
     # Define run name and access paths in the BIDS format.
     RUN_NAME = f"sub-{sub}_ses-{ses}_task-{task}_run-{run}"
 
-    PATH_BIDS = Path(PYNM_DIR) / "data"
+    PATH_BIDS = PYNM_DIR / "data"
 
-    PATH_RUN = (
-        Path(PYNM_DIR)
-        / "data"
-        / f"sub-{sub}"
-        / f"ses-{ses}"
-        / datatype
-        / RUN_NAME
-    )
+    PATH_RUN = PYNM_DIR / "data" / f"sub-{sub}" / f"ses-{ses}" / datatype / RUN_NAME
 
     # Provide a path for the output data.
     PATH_OUT = PATH_BIDS / "derivatives"
@@ -401,9 +375,3 @@ def _todict(matobj) -> dict:
         else:
             dict[strg] = elem
     return dict
-
-
-def _pathlike_to_str(path: _PathLike) -> str:
-    if isinstance(path, str):
-        return path
-    return str(path)

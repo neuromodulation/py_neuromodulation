@@ -41,7 +41,7 @@ class Features:
 
         feature: Feature
         for feature in s["features"]:
-            if s["features"][feature] is False:
+            if not s["features"][feature]:
                 continue
             match feature:
                 case "raw_hjorth":

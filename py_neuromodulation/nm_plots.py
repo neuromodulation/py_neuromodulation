@@ -1,15 +1,14 @@
-import os
 import numpy as np
-
-from scipy.stats import zscore as scipy_zscore
 import pandas as pd
-
+from scipy.stats import zscore as scipy_zscore
 from matplotlib import pyplot as plt
 from matplotlib import gridspec
 import seaborn as sb
+from pathlib import PurePath
 
 from py_neuromodulation.nm_IO import read_plot_modules
 from py_neuromodulation.nm_stats import permutationTestSpearmansRho
+from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
 
 
@@ -19,7 +18,7 @@ def plot_df_subjects(
     y_col="performance_test",
     hue=None,
     title="channel specific performances",
-    PATH_SAVE: str | None = None,
+    PATH_SAVE: _PathLike = "",
     figsize_tuple: tuple[float,float] = (5, 3),
 ):
     alpha_box = 0.4
@@ -68,7 +67,7 @@ def plot_df_subjects(
     plt.title(title)
     plt.ylabel(y_col)
     plt.xticks(rotation=90)
-    if PATH_SAVE is not None:
+    if PATH_SAVE:
         plt.savefig(
             PATH_SAVE,
             bbox_inches="tight",
@@ -156,7 +155,7 @@ def reg_plot(
 def plot_bar_performance_per_channel(
     ch_names,
     performances: dict,
-    PATH_OUT: str,
+    PATH_OUT: _PathLike,
     sub: str | None = None,
     save_str: str = "ch_comp_bar_plt.png",
     performance_metric: str = "Balanced Accuracy",
@@ -175,7 +174,7 @@ def plot_bar_performance_per_channel(
     plt.xlabel("channels")
     plt.ylabel(performance_metric)
     plt.savefig(
-        os.path.join(PATH_OUT, save_str),
+        PurePath(PATH_OUT, save_str),
         bbox_inches="tight",
     )
     plt.close()
@@ -187,7 +186,7 @@ def plot_corr_matrix(
     ch_name: str = "",
     feature_names: list[str] = [],
     show_plot=True,
-    OUT_PATH: str = "",
+    OUT_PATH: _PathLike = "",
     feature_name_plt="Features_corr_matr",
     save_plot: bool = False,
     save_plot_name: str = "",
@@ -229,22 +228,23 @@ def plot_corr_matrix(
     #    plt.xticks([])
     #    plt.yticks([])
 
-    if save_plot and save_plot_name:
-        plt_path = get_plt_path(
-            OUT_PATH=OUT_PATH,
-            feature_file=feature_file,
-            ch_name=ch_name,
-            str_plt_type=feature_name_plt,
-            # feature_name=feature_names.__str__,  # This here raises an error in os.path.join in line 251
-        )
-    if save_plot and save_plot_name is not None:
-        plt_path = os.path.join(OUT_PATH, save_plot_name)
-
     if save_plot:
+        plt_path = (
+            PurePath(OUT_PATH, save_plot_name) 
+            if save_plot_name 
+            else get_plt_path(
+                OUT_PATH=OUT_PATH,
+                feature_file=feature_file,
+                ch_name=ch_name,
+                str_plt_type=feature_name_plt,
+                feature_name='_'.join(feature_names)
+                )
+            )
+
         plt.savefig(plt_path, bbox_inches="tight")
         logger.info(f"Correlation matrix figure saved to {plt_path}")
 
-    if show_plot is False:
+    if not show_plot:
         plt.close()
 
     plt.tight_layout()
@@ -257,12 +257,12 @@ def plot_feature_series_time(features) -> None:
 
 
 def get_plt_path(
-    OUT_PATH: str = "",
+    OUT_PATH: _PathLike = "",
     feature_file: str = "",
     ch_name: str = "",
     str_plt_type: str = "",
     feature_name: str = "",
-) -> str:
+) -> _PathLike:
     """[summary]
 
     Parameters
@@ -278,30 +278,14 @@ def get_plt_path(
     feature_name : str, optional
         e.g. bandpower, stft, sharpwave_prominence, by default None
     """
-    if (ch_name and OUT_PATH and feature_file):
-        if feature_name:
-            plt_path = os.path.join(
-                OUT_PATH,
-                feature_file,
-                str_plt_type + "_ch_" + ch_name + ".png",
-            )
-        else:
-            plt_path = os.path.join(
-                OUT_PATH,
-                feature_file,
-                str_plt_type + "_ch_" + ch_name + "_" + feature_name + ".png",
-            )
-    elif (OUT_PATH and feature_file) and not ch_name:
-        plt_path = os.path.join(
-            OUT_PATH,
-            feature_file,
-            str_plt_type + "_ch_" + feature_name + ".png",
+    filename = (
+        str_plt_type 
+        + (("_ch_" + ch_name) if ch_name else "")
+        + (("_" + feature_name) if feature_name else "") 
+        + ".png"
         )
 
-    else:
-        plt_path = os.getcwd() + ".png"
-    return plt_path
-
+    return PurePath(OUT_PATH, feature_file, filename)
 
 def plot_epochs_avg(
     X_epoch: np.ndarray,
@@ -316,7 +300,7 @@ def plot_epochs_avg(
     normalize_data: bool = True,
     show_plot: bool = True,
     save: bool = False,
-    OUT_PATH: str = "",
+    OUT_PATH: _PathLike = "",
     feature_file: str = "",
     str_title: str = "Movement aligned features",
     ytick_labelsize = None,
@@ -391,7 +375,7 @@ def plot_epochs_avg(
         )
         plt.savefig(plt_path, bbox_inches="tight")
         logger.info(f"Feature epoch average figure saved to: {str(plt_path)}")
-    if show_plot is False:
+    if not show_plot:
         plt.close()
 
 
@@ -443,7 +427,7 @@ def plot_all_features(
     clim_high: float | None = None,
     save: bool = False,
     title="all_feature_plt.pdf",
-    OUT_PATH: str = "",
+    OUT_PATH: _PathLike = "",
     feature_file: str = "",
 ):
     if time_limit_high_s is not None:
@@ -478,7 +462,7 @@ def plot_all_features(
     plt.tight_layout()
 
     if save:
-        plt_path = os.path.join(OUT_PATH, feature_file, title)
+        plt_path = PurePath(OUT_PATH, feature_file, title)
         plt.savefig(plt_path, bbox_inches="tight")
 
 
@@ -523,7 +507,7 @@ class NM_Plot:
         strip_color: np.ndarray | None = None,
         sess_right: bool | None = None,
         save: bool = False,
-        OUT_PATH: str = "",
+        OUT_PATH: _PathLike = "",
         feature_file: str = "",
         feature_str_add: str = "",
         show_plot: bool = True,
@@ -607,5 +591,5 @@ class NM_Plot:
             logger.info(
                 f"Feature epoch average figure saved to: {str(plt_path)}"
             )
-        if show_plot is False:
+        if not show_plot:
             plt.close()

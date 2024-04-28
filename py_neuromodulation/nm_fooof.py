@@ -100,7 +100,7 @@ class FooofAnalyzer(Feature):
                 )
 
             if self.settings_fooof["aperiodic"]["knee"]:
-                if FIT_PASSED is False:
+                if not FIT_PASSED:
                     knee_freq = None
                 else:
                     if fm.get_params("aperiodic_params", "exponent") != 0:

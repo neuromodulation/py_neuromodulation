@@ -157,7 +157,7 @@ class SharpwaveAnalyzer(Feature):
 
                 for detect_troughs in [False, True]:
 
-                    if detect_troughs is False:
+                    if not detect_troughs:
                         if (
                             self.sw_settings["detect_peaks"]["estimate"]
                             is False

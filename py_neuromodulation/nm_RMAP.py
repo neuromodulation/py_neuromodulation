@@ -1,5 +1,5 @@
 import numpy as np
-import os
+from pathlib import PurePath, Path
 import wget
 
 
@@ -10,7 +10,8 @@ import nibabel as nib
 from matplotlib import pyplot as plt
 
 from py_neuromodulation.nm_plots import reg_plot
-from py_neuromodulation import PYNM_DIR 
+from py_neuromodulation.nm_types import _PathLike
+from py_neuromodulation import PYNM_DIR
 
 LIST_STRUC_UNCONNECTED_GRIDPOINTS_HULL = [256, 385, 417, 447, 819, 914]
 LIST_STRUC_UNCONNECTED_GRIDPOINTS_WHOLEBRAIN = [
@@ -102,18 +103,15 @@ class ConnectivityChannelSelector:
         self.whole_brain_connectome = whole_brain_connectome
         self.func_connectivity = func_connectivity
 
-        self.PATH_CONN_DECODING = os.path.join(
-            PYNM_DIR,
-            "ConnectivityDecoding",
-        )
+        self.PATH_CONN_DECODING = PYNM_DIR / "ConnectivityDecoding"
 
         if whole_brain_connectome:
-            self.PATH_GRID = os.path.join(
+            self.PATH_GRID = PurePath(
                 self.PATH_CONN_DECODING,
                 "mni_coords_whole_brain.mat",
             )
             self.grid = sio.loadmat(self.PATH_GRID)["downsample_ctx"]
-            if func_connectivity is False:
+            if not func_connectivity:
                 # reduce the grid to only valid points that are not in LIST_STRUC_UNCONNECTED_GRIDPOINTS_WHOLEBRAIN
                 self.grid = np.delete(
                     self.grid,
@@ -121,12 +119,12 @@ class ConnectivityChannelSelector:
                     axis=0,
                 )
         else:
-            self.PATH_GRID = os.path.join(
+            self.PATH_GRID = PurePath(
                 self.PATH_CONN_DECODING,
                 "mni_coords_cortical_surface.mat",
             )
             self.grid = sio.loadmat(self.PATH_GRID)["downsample_ctx"]
-            if func_connectivity is False:
+            if not func_connectivity:
                 # reduce the grid to only valid points that are not in LIST_STRUC_UNCONNECTED_GRIDPOINTS_HULL
                 self.grid = np.delete(
                     self.grid, LIST_STRUC_UNCONNECTED_GRIDPOINTS_HULL, axis=0
@@ -134,11 +132,11 @@ class ConnectivityChannelSelector:
 
         if func_connectivity:
             self.RMAP_arr = nib.load(
-                os.path.join(self.PATH_CONN_DECODING, "RMAP_func_all.nii")
+                PurePath(self.PATH_CONN_DECODING, "RMAP_func_all.nii")
             ).get_fdata()
         else:
             self.RMAP_arr = nib.load(
-                os.path.join(self.PATH_CONN_DECODING, "RMAP_struc.nii")
+                PurePath(self.PATH_CONN_DECODING, "RMAP_struc.nii")
             ).get_fdata()
 
     def _get_connectome_name(
@@ -164,12 +162,7 @@ class ConnectivityChannelSelector:
         -------
         list_connectomes: list
         """
-        return os.listdir(
-            os.path.join(
-                self.PATH_CONN_DECODING,
-                "connectome_folder",
-            )
-        )
+        return list(Path(self.PATH_CONN_DECODING,"connectome_folder").iterdir())
 
     def plot_grid(self) -> None:
         """Plot the loaded template grid that passed coordinates are matched to."""
@@ -258,13 +251,13 @@ class ConnectivityChannelSelector:
             self.whole_brain_connectome, self.func_connectivity
         )
 
-        PATH_CONNECTOME = os.path.join(
+        PATH_CONNECTOME = Path(
             self.PATH_CONN_DECODING,
             "connectome_folder",
             self.connectome_name + ".mat",
         )
 
-        if os.path.exists(PATH_CONNECTOME) is False:
+        if not PATH_CONNECTOME.exists():
             user_input = input(
                 "Do you want to download the connectome? (yes/no): "
             ).lower()
@@ -289,7 +282,7 @@ class ConnectivityChannelSelector:
 
         wget.download(
             f"https://zenodo.org/api/records/{record_id}/files/{file_name}/content",
-            out=os.path.join(
+            out=PurePath(
                 self.PATH_CONN_DECODING,
                 "connectome_folder",
                 f"{self.connectome_name}.mat",
@@ -314,39 +307,41 @@ class RMAPCross_Val_ChannelSelector:
     ):
 
         if cond_str is not None:
-            l_fps = list(filter(lambda k: cond_str in k, os.listdir(path_dir)))
+            l_fps = list(filter(lambda k: cond_str in str(k), Path(path_dir).iterdir()))
         else:
-            l_fps = os.listdir(path_dir)
+            l_fps = list(Path(path_dir).iterdir())
 
         return l_fps, [
-            self.load_fingerprint(os.path.join(path_dir, f)) for f in l_fps
+            self.load_fingerprint(PurePath(path_dir, f)) for f in l_fps
         ]
 
     def get_fingerprints_from_path_with_cond(
         self,
-        path_dir: str,
-        str_to_omit: str | None = None,
-        str_to_keep: str | None = None,
+        path_dir: _PathLike,
+        str_to_omit: str = "",
+        str_to_keep: str = "",
         keep: bool = True,
-    ):
+    ) -> tuple[list, list]:
 
-        if keep:
+        l_fps = []
+        
+        if keep and str_to_keep:
             l_fps = list(
                 filter(
-                    lambda k: "_AvgR_Fz.nii" in k and str_to_keep in k,
-                    os.listdir(path_dir),
+                    lambda k: "_AvgR_Fz.nii" in str(k) and str_to_keep in str(k),
+                    Path(path_dir).iterdir(),
                 )
             )
-        else:
+        
+        elif not keep and str_to_omit:
             l_fps = list(
                 filter(
-                    lambda k: "_AvgR_Fz.nii" in k and str_to_omit not in k,
-                    os.listdir(path_dir),
+                    lambda k: "_AvgR_Fz.nii" in str(k) and str_to_omit not in str(k),
+                    Path(path_dir).iterdir(),
                 )
             )
-        return l_fps, [
-            self.load_fingerprint(os.path.join(path_dir, f)) for f in l_fps
-        ]
+            
+        return l_fps, [self.load_fingerprint(PurePath(path_dir, f)) for f in l_fps]
 
     @staticmethod
     def save_Nii(

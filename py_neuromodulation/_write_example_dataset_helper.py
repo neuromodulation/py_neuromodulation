@@ -1,7 +1,7 @@
 import mne
 import mne_bids
 import pybv  # pip install pybv
-import os
+from pathlib import PurePath
 
 
 def set_chtypes(vhdr_raw):
@@ -52,7 +52,7 @@ def write_bids_example():
     pybv.write_brainvision(data=data, sfreq=raw_arr.info["sfreq"], ch_names=ch_names,
                            fname_base="example", folder_out=PATH_OUT_TEMP)
 
-    data_to_write = mne.io.read_raw_brainvision(os.path.join(PATH_OUT_TEMP, "example.vhdr"))
+    data_to_write = mne.io.read_raw_brainvision(PurePath(PATH_OUT_TEMP, "example.vhdr"))
 
     # example.eeg / .vhdr need to be deleted afterwards
 
