@@ -2,8 +2,9 @@
 import mne
 import numpy as np
 
+from py_neuromodulation.nm_preprocessing import NMPreprocessor
 
-class Resampler:
+class Resampler(NMPreprocessor):
     """Resample data.
 
     Parameters

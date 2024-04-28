@@ -2,8 +2,9 @@
 import numpy as np
 import pandas as pd
 
+from py_neuromodulation.nm_preprocessing import NMPreprocessor
 
-class ReReferencer:
+class ReReferencer(NMPreprocessor):
     ref_matrix: np.ndarray
 
     def __init__(

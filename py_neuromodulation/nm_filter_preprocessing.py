@@ -2,10 +2,10 @@ import numpy as np
 
 from py_neuromodulation import nm_filter
 
+from py_neuromodulation.nm_preprocessing import NMPreprocessor
 
-class PreprocessingFilter:
-
-    def __init__(self, settings: dict, sfreq: int | float) -> None:
+class PreprocessingFilter(NMPreprocessor):
+    def __init__(self, settings: dict, sfreq: float) -> None:
         self.s = settings
         self.sfreq = sfreq
         self.filters = []

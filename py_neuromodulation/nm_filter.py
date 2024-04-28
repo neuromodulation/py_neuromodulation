@@ -8,6 +8,8 @@ import mne
 from mne.filter import _overlap_add_filter
 import numpy as np
 
+from py_neuromodulation.nm_preprocessing import NMPreprocessor
+
 
 class MNEFilter:
     """mne.filter wrapper
@@ -132,7 +134,7 @@ class MNEFilter:
         return filtered
 
 
-class NotchFilter:
+class NotchFilter(NMPreprocessor):
     def __init__(
         self,
         sfreq: int | float,
