@@ -4,10 +4,10 @@ import numpy as np
 import mne
 from mne_connectivity import spectral_connectivity_epochs
 
-from py_neuromodulation.nm_features_abc import Feature
+from py_neuromodulation.nm_features import NMFeature
 
 
-class MNEConnectivity(Feature):
+class MNEConnectivity(NMFeature):
     def __init__(
         self,
         settings: dict,

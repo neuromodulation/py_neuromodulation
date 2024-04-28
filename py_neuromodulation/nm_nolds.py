@@ -2,12 +2,12 @@ import numpy as np
 from collections.abc import Iterable
 import nolds
 
-from py_neuromodulation.nm_features_abc import Feature
+from py_neuromodulation.nm_features import NMFeature
 from py_neuromodulation.nm_oscillatory import BandPower
 from py_neuromodulation import logger
 
 
-class Nolds(Feature):
+class Nolds(NMFeature):
     def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: float) -> None:
         self.s = settings
         self.ch_names = ch_names

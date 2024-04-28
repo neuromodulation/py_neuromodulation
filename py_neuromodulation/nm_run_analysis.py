@@ -81,9 +81,9 @@ class DataProcessor:
             settings=self.settings,
             nm_channels=self.nm_channels,
             sfreq=self.sfreq_raw,
-            line_noise=self.line_noise
+            line_noise=self.line_noise,
         )
-        
+
         if self.settings["postprocessing"]["feature_normalization"]:
             settings_str = "feature_normalization_settings"
             self.feature_normalizer = FeatureNormalizer(
@@ -92,7 +92,7 @@ class DataProcessor:
             )
 
         self.features = Features(
-            s=self.settings,
+            settings=self.settings,
             ch_names=self.ch_names_used,
             sfreq=self.sfreq_raw,
         )
@@ -279,7 +279,7 @@ class DataProcessor:
         data = np.nan_to_num(data)[self.feature_idx, :]
 
         data = self.preprocessors.process_data(data)
-        
+
         # calculate features
         features_dict = self.features.estimate_features(data)
 

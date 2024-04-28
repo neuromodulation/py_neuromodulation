@@ -2,11 +2,11 @@ import numpy as np
 from collections.abc import Iterable
 from scipy.signal import hilbert as scipy_hilbert
 
-from py_neuromodulation.nm_features_abc import Feature
+from py_neuromodulation.nm_features import NMFeature
 from py_neuromodulation.nm_filter import MNEFilter
 
 
-class Burst(Feature):
+class Burst(NMFeature):
     def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: float) -> None:
         self.s = settings
         self.sfreq = sfreq

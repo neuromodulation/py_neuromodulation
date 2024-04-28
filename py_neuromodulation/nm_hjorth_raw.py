@@ -1,10 +1,10 @@
 import numpy as np
 from collections.abc import Iterable
 
-from py_neuromodulation.nm_features_abc import Feature
+from py_neuromodulation.nm_features import NMFeature
 
 
-class Hjorth(Feature):
+class Hjorth(NMFeature):
     def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: float) -> None:
         self.s = settings
         self.ch_names = ch_names
@@ -36,7 +36,7 @@ class Hjorth(Feature):
         return features_compute
 
 
-class Raw(Feature):
+class Raw(NMFeature):
     def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: float) -> None:
         self.ch_names = ch_names
 
