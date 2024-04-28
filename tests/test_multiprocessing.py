@@ -1,6 +1,5 @@
-import py_neuromodulation as pn
+import py_neuromodulation as nm
 import numpy as np
-from py_neuromodulation import nm_settings
 import pytest
 
 
@@ -13,7 +12,7 @@ def get_stream():
 
     data = np.random.random([NUM_CHANNELS, NUM_DATA])
 
-    stream = pn.Stream(
+    stream = nm.Stream(
         sfreq=sfreq,
         data=data,
         sampling_rate_features_hz=sampling_rate_features_hz,
@@ -53,6 +52,8 @@ def test_multiprocessing_and_sequntial_features(get_stream):
             # This tests fails on Linux and Windows but passes on Mac OS; no idea why
             continue
 
-        assert features_sequential[column].equals(
+        assert features_sequential[
+            column
+        ].equals(
             features_multiprocessing[column]
         ), f"Column {column} is not equal between sequential and parallel dataframes computation"

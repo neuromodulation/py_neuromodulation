@@ -2,6 +2,7 @@ import random
 import copy
 
 import matplotlib.pyplot as plt
+
 # from numba import njit
 import numpy as np
 import pandas as pd
@@ -33,7 +34,7 @@ def fitlm_kfold(x, y, kfold_splits=5):
         scores.append(score)
         coeffs = np.vstack((coeffs, model.coef_))
     coeffs = list(np.delete(coeffs, 0))
-    return scores, coeffs, model, ['scores', 'coeffs', 'model']
+    return scores, coeffs, model, ["scores", "coeffs", "model"]
 
 
 def zscore(data):
@@ -76,14 +77,14 @@ def permutationTestSpearmansRho(x, y, plot_distr=True, x_unit=None, p=5000):
 
     # calculate p value
     if gT < 0:
-        p_val = len(np.where(pD <= gT)[0])/p
+        p_val = len(np.where(pD <= gT)[0]) / p
     else:
-        p_val = len(np.where(pD >= gT)[0])/p
+        p_val = len(np.where(pD >= gT)[0]) / p
 
-    if plot_distr is True:
+    if plot_distr:
         plt.hist(pD, bins=30, label="permutation results")
         plt.axvline(gT, color="orange", label="ground truth")
-        plt.title("ground truth " + x_unit + "="+str(gT) + " p=" + str(p_val))
+        plt.title("ground truth " + x_unit + "=" + str(gT) + " p=" + str(p_val))
         plt.xlabel(x_unit)
         plt.legend()
         plt.show()
@@ -120,19 +121,23 @@ def permutationTest(x, y, plot_distr=True, x_unit=None, p=5000):
         random.shuffle(pS)
         # Compute permuted absolute difference of your two sampled
         # distributions and store it in pD:
-        pD.append(np.abs(np.average(pS[0:int(len(pS)/2)]) - np.average(
-            pS[int(len(pS)/2):])))
+        pD.append(
+            np.abs(
+                np.average(pS[0 : int(len(pS) / 2)])
+                - np.average(pS[int(len(pS) / 2) :])
+            )
+        )
 
     # Calculate p-value
     if gT < 0:
-        p_val = len(np.where(pD <= gT)[0])/p
+        p_val = len(np.where(pD <= gT)[0]) / p
     else:
-        p_val = len(np.where(pD >= gT)[0])/p
+        p_val = len(np.where(pD >= gT)[0]) / p
 
-    if plot_distr is True:
+    if plot_distr:
         plt.hist(pD, bins=30, label="permutation results")
         plt.axvline(gT, color="orange", label="ground truth")
-        plt.title("ground truth "+x_unit+"="+str(gT)+" p="+str(p_val))
+        plt.title("ground truth " + x_unit + "=" + str(gT) + " p=" + str(p_val))
         plt.xlabel(x_unit)
         plt.legend()
         plt.show()
@@ -165,17 +170,18 @@ def permutationTest_relative(x, y, plot_distr=True, x_unit=None, p=5000):
                 l_.append((x[i], y[i]))
             else:
                 l_.append((y[i], x[i]))
-        pD.append(np.abs(np.average(np.array(l_)[:, 0]) - np.average(
-            np.array(l_)[:, 1])))
+        pD.append(
+            np.abs(np.average(np.array(l_)[:, 0]) - np.average(np.array(l_)[:, 1]))
+        )
     if gT < 0:
-        p_val = len(np.where(pD <= gT)[0])/p
+        p_val = len(np.where(pD <= gT)[0]) / p
     else:
-        p_val = len(np.where(pD >= gT)[0])/p
+        p_val = len(np.where(pD >= gT)[0]) / p
 
-    if plot_distr is True:
+    if plot_distr:
         plt.hist(pD, bins=30, label="permutation results")
         plt.axvline(gT, color="orange", label="ground truth")
-        plt.title("ground truth "+x_unit+"="+str(gT)+" p="+str(p_val))
+        plt.title("ground truth " + x_unit + "=" + str(gT) + " p=" + str(p_val))
         plt.xlabel(x_unit)
         plt.legend()
         plt.show()
@@ -209,15 +215,13 @@ def permutation_numba_onesample(x, y, n_perm, two_tailed=True):
     float
         P-value of permutation test
     """
-    if two_tailed is True:
+    if two_tailed:
         zeroed = x - y
-        print(zeroed)
         z = np.abs(np.mean(zeroed))
         p = np.empty(n_perm)
         # Run the simulation n_perm times
         for i in np.arange(n_perm):
-            sign = np.random.choice(
-                a=np.array([-1., 1.]), size=len(x), replace=True)
+            sign = np.random.choice(a=np.array([-1.0, 1.0]), size=len(x), replace=True)
             p[i] = np.abs(np.mean(zeroed * sign))
     else:
         zeroed = x - y
@@ -225,8 +229,7 @@ def permutation_numba_onesample(x, y, n_perm, two_tailed=True):
         p = np.empty(n_perm)
         # Run the simulation n_perm times
         for i in np.arange(n_perm):
-            sign = np.random.choice(
-                a=np.array([-1., 1.]), size=len(x), replace=True)
+            sign = np.random.choice(a=np.array([-1.0, 1.0]), size=len(x), replace=True)
             p[i] = np.mean(zeroed * sign)
         # Return p-value
     return z, (np.sum(p >= z)) / n_perm
@@ -258,7 +261,7 @@ def permutation_numba_twosample(x, y, n_perm, two_tailed=True):
     float
         P-value of permutation test
     """
-    if two_tailed is True:
+    if two_tailed:
         z = np.abs(np.mean(x) - np.mean(y))
         pS = np.concatenate((x, y), axis=0)
         half = int(len(pS) / 2)
@@ -310,8 +313,7 @@ def cluster_wise_p_val_correction(p_arr, p_sig=0.05, num_permutations=10000):
     for cluster_i in np.arange(num_clusters):
         # first cluster is assigned to be 1 from measure.label
         index_cluster[cluster_i] = np.where(labels == cluster_i + 1)[0]
-        p_cluster_sum[cluster_i] = np.sum(
-            np.array(1 - p_arr)[index_cluster[cluster_i]])
+        p_cluster_sum[cluster_i] = np.sum(np.array(1 - p_arr)[index_cluster[cluster_i]])
     # p_min corresponds to the most unlikely cluster
     p_min = np.max(p_cluster_sum)
 
@@ -320,11 +322,9 @@ def cluster_wise_p_val_correction(p_arr, p_sig=0.05, num_permutations=10000):
     # loop through random permutation cycles
     r_per_arr = np.zeros(num_permutations)
     for r in range(num_permutations):
-        r_per = np.random.randint(low=0, high=p_arr.shape[0],
-                                  size=p_arr.shape[0])
+        r_per = np.random.randint(low=0, high=p_arr.shape[0], size=p_arr.shape[0])
 
-        labels, num_clusters = measure.label(p_arr[r_per] <= p_sig,
-                                             return_num=True)
+        labels, num_clusters = measure.label(p_arr[r_per] <= p_sig, return_num=True)
 
         index_cluster = {}
         if num_clusters == 0:
@@ -332,11 +332,12 @@ def cluster_wise_p_val_correction(p_arr, p_sig=0.05, num_permutations=10000):
         else:
             p_cluster_sum = np.zeros(num_clusters)
             for cluster_i in np.arange(num_clusters):
-                index_cluster[cluster_i] = np.where(
-                    labels == cluster_i + 1)[
-                    0]  # first cluster is assigned to be 1 from measure.label
+                index_cluster[cluster_i] = np.where(labels == cluster_i + 1)[
+                    0
+                ]  # first cluster is assigned to be 1 from measure.label
                 p_cluster_sum[cluster_i] = np.sum(
-                    np.array(1 - p_arr[r_per])[index_cluster[cluster_i]])
+                    np.array(1 - p_arr[r_per])[index_cluster[cluster_i]]
+                )
             # corresponds to the most unlikely cluster
             r_per_arr[r] = np.max(p_cluster_sum)
 
@@ -387,7 +388,7 @@ def cluster_wise_p_val_correction_numba(p_arr, p_sig, n_perm):
 
         Returns
         -------
-        cluster_labels : np.array
+        cluster_labels : np.ndarray
             Array of shape (len(iterable), 1), where each value indicates the
             number of the cluster. Values are 0 if the item does not belong to
             a cluster
@@ -431,8 +432,7 @@ def cluster_wise_p_val_correction_numba(p_arr, p_sig, n_perm):
         # loop through random permutation cycles
         r_per_arr = np.zeros(n_perm_)
         for r in range(n_perm_):
-            r_per = np.random.randint(
-                low=0, high=p_arr_.shape[0], size=p_arr_.shape[0])
+            r_per = np.random.randint(low=0, high=p_arr_.shape[0], size=p_arr_.shape[0])
             labels_, n_clusters = cluster(p_arr_[r_per] <= p_sig_)
 
             cluster_ind = {}
@@ -441,10 +441,8 @@ def cluster_wise_p_val_correction_numba(p_arr, p_sig, n_perm):
             else:
                 p_sum = np.zeros(n_clusters)
                 for ind in range(n_clusters):
-                    cluster_ind[ind] = \
-                        np.where(labels_ == ind + 1)[0]
-                    p_sum[ind] = np.sum(
-                        np.asarray(1 - p_arr_[r_per])[cluster_ind[ind]])
+                    cluster_ind[ind] = np.where(labels_ == ind + 1)[0]
+                    p_sum[ind] = np.sum(np.asarray(1 - p_arr_[r_per])[cluster_ind[ind]])
                 r_per_arr[r] = np.max(p_sum)
         return r_per_arr
 

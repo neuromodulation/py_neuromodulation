@@ -1,46 +1,25 @@
-"""Module that contains PNStream ABC."""
+"""Module that contains NMStream ABC."""
+
 from abc import ABC, abstractmethod
-import os
-import pathlib
-import _pickle as cPickle
+from pathlib import Path
+import pickle
 
 import pandas as pd
-from sklearn import base
 
-from py_neuromodulation import (
-    nm_features,
-    nm_IO,
-    nm_plots,
-    nm_run_analysis,
-    nm_settings
-)
-
-_PathLike = str | os.PathLike
+from py_neuromodulation import nm_IO, PYNM_DIR
+from py_neuromodulation.nm_run_analysis import DataProcessor
+from py_neuromodulation.nm_settings import get_default_settings
+from py_neuromodulation.nm_types import _PathLike
 
 
-class PNStream(ABC):
-
-    settings: dict
-    nm_channels: pd.DataFrame
-    run_analysis: nm_run_analysis.DataProcessor
-    features: nm_features.Features
-    coords: dict
-    sfreq: int | float
-    sfreq_feature: int | float = None
-    path_grids: _PathLike | None
-    model: base.BaseEstimator | None
-    sess_right: bool | None
-    verbose: bool
-    PATH_OUT: _PathLike | None
-    PATH_OUT_folder_name: _PathLike | None
-
+class NMStream(ABC):
     def __init__(
         self,
-        sfreq: int | float,
+        sfreq: float,
         nm_channels: pd.DataFrame | _PathLike,
         settings: dict | _PathLike | None = None,
-        line_noise: int | float | None = 50,
-        sampling_rate_features_hz: int | float | None = None,
+        line_noise: float | None = 50,
+        sampling_rate_features_hz: float | None = None,
         path_grids: _PathLike | None = None,
         coord_names: list | None = None,
         coord_list: list | None = None,
@@ -50,15 +29,15 @@ class PNStream(ABC):
 
         Parameters
         ----------
-        sfreq : int | float
+        sfreq : float
             sampling frequency of data in Hertz
         nm_channels : pd.DataFrame | _PathLike
             parametrization of channels (see nm_define_channels.py for initialization)
         settings : dict | _PathLike | None, optional
             features settings can be a dictionary or path to the nm_settings.json, by default the py_neuromodulation/nm_settings.json are read
-        line_noise : int | float | None, optional
+        line_noise : float | None, optional
             line noise, by default 50
-        sampling_rate_features_hz : int | float | None, optional
+        sampling_rate_features_hz : float | None, optional
             feature sampling rate, by default None
         path_grids : _PathLike | None, optional
             path to grid_cortex.tsv and/or gird_subcortex.tsv, by default Non
@@ -76,7 +55,7 @@ class PNStream(ABC):
 
         self.nm_channels = self._load_nm_channels(nm_channels)
         if path_grids is None:
-            path_grids = pathlib.Path(__file__).parent.resolve()
+            path_grids = PYNM_DIR
         self.path_grids = path_grids
         self.verbose = verbose
         self.sfreq = sfreq
@@ -87,7 +66,7 @@ class PNStream(ABC):
         self.projection = None
         self.model = None
 
-        self.run_analysis = nm_run_analysis.DataProcessor(
+        self.run_analysis = DataProcessor(
             sfreq=self.sfreq,
             settings=self.settings,
             nm_channels=self.nm_channels,
@@ -99,12 +78,12 @@ class PNStream(ABC):
         )
 
     @abstractmethod
-    def run(self):
+    def run(self) -> pd.DataFrame:
         """Reinitialize the stream
         This might be handy in case the nm_channels or nm_settings changed
         """
 
-        self.run_analysis = nm_run_analysis.DataProcessor(
+        self.run_analysis = DataProcessor(
             sfreq=self.sfreq,
             settings=self.settings,
             nm_channels=self.nm_channels,
@@ -116,9 +95,7 @@ class PNStream(ABC):
         )
 
     @abstractmethod
-    def _add_timestamp(
-        self, feature_series: pd.Series, idx: int | None = None
-    ) -> pd.Series:
+    def _add_timestamp(self, feature_series: pd.Series, cnt_samples: int) -> pd.Series:
         """Add to feature_series "time" keyword
         For Bids specify with fs_features, for real time analysis with current time stamp
         """
@@ -138,10 +115,12 @@ class PNStream(ABC):
         nm_channels: pd.DataFrame | _PathLike,
     ) -> pd.DataFrame:
         if not isinstance(nm_channels, pd.DataFrame):
-            nm_channels =  nm_IO.load_nm_channels(nm_channels)
-        
-        if nm_channels.query("used == 1 and target == 0").shape[0]  == 0:
-            raise ValueError("No channels selected for analysis that have column 'used' = 1 and 'target' = 0. Please check your nm_channels")
+            nm_channels = nm_IO.load_nm_channels(nm_channels)
+
+        if nm_channels.query("used == 1 and target == 0").shape[0] == 0:
+            raise ValueError(
+                "No channels selected for analysis that have column 'used' = 1 and 'target' = 0. Please check your nm_channels"
+            )
 
         return nm_channels
 
@@ -149,31 +128,31 @@ class PNStream(ABC):
     def _load_settings(settings: dict | _PathLike | None) -> dict:
         if isinstance(settings, dict):
             return settings
-        if settings is None: 
-            return nm_settings.get_default_settings()
+        if settings is None:
+            return get_default_settings()
         return nm_IO.read_settings(str(settings))
 
     def load_model(self, model_name: _PathLike) -> None:
         """Load sklearn model, that utilizes predict"""
         with open(model_name, "rb") as fid:
-            self.model = cPickle.load(fid)
+            self.model = pickle.load(fid)
 
     def save_after_stream(
         self,
-        out_path_root: _PathLike | None = None,
+        out_path_root: _PathLike = "",
         folder_name: str = "sub",
         feature_arr: pd.DataFrame | None = None,
     ) -> None:
         """Save features, settings, nm_channels and sidecar after run"""
 
-        if out_path_root is None:
-            out_path_root = os.getcwd()
+        out_path_root = Path.cwd() if not out_path_root else Path(out_path_root)
+
         # create derivate folder_name output folder if doesn't exist
-        if os.path.exists(os.path.join(out_path_root, folder_name)) is False:
-            os.makedirs(os.path.join(out_path_root, folder_name))
+        (out_path_root / folder_name).mkdir(parents=True, exist_ok=True)
 
         self.PATH_OUT = out_path_root
         self.PATH_OUT_folder_name = folder_name
+
         self.save_sidecar(out_path_root, folder_name)
 
         if feature_arr is not None:
@@ -191,20 +170,14 @@ class PNStream(ABC):
     ) -> None:
         nm_IO.save_features(feature_arr, out_path_root, folder_name)
 
-    def save_nm_channels(
-        self, out_path_root: _PathLike, folder_name: str
-    ) -> None:
+    def save_nm_channels(self, out_path_root: _PathLike, folder_name: str) -> None:
         self.run_analysis.save_nm_channels(out_path_root, folder_name)
 
-    def save_settings(
-        self, out_path_root: _PathLike, folder_name: str
-    ) -> None:
+    def save_settings(self, out_path_root: _PathLike, folder_name: str) -> None:
         self.run_analysis.save_settings(out_path_root, folder_name)
 
     def save_sidecar(self, out_path_root: _PathLike, folder_name: str) -> None:
         """Save sidecar incduing fs, coords, sess_right to
         out_path_root and subfolder 'folder_name'"""
         additional_args = {"sess_right": self.sess_right}
-        self.run_analysis.save_sidecar(
-            out_path_root, folder_name, additional_args
-        )
+        self.run_analysis.save_sidecar(out_path_root, folder_name, additional_args)

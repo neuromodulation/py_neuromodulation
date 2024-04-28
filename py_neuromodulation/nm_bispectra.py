@@ -1,14 +1,13 @@
-from typing import Iterable
+from collections.abc import Iterable, Callable
 import numpy as np
-from pybispectra import compute_fft, get_example_data_paths, WaveShape
+from pybispectra import compute_fft, WaveShape
 
 from py_neuromodulation.nm_features import NMFeature
 
 
 class Bispectra(NMFeature):
-    def __init__(
-        self, settings: dict, ch_names: Iterable[str], sfreq: int | float
-    ) -> None:
+    
+    def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: float) -> None:
         super().__init__(settings, ch_names, sfreq)
         self.sfreq = sfreq
         self.ch_names = ch_names
@@ -20,7 +19,7 @@ class Bispectra(NMFeature):
     def test_settings(
         settings: dict,
         ch_names: Iterable[str],
-        sfreq: int | float,
+        sfreq: float,
     ):
         s = settings
 
@@ -66,12 +65,13 @@ class Bispectra(NMFeature):
 
     def compute_bs_features(
         self,
-        spectrum_ch: np.array,
+        spectrum_ch: np.ndarray,
         features_compute: dict,
         ch_name: str,
         component: str,
-        f_band: str,
+        f_band: str | None,
     ) -> dict:
+        func: Callable
         for bispectrum_feature in self.s["bispectrum"]["bispectrum_features"]:
             if bispectrum_feature == "mean":
                 func = np.nanmean
@@ -105,7 +105,7 @@ class Bispectra(NMFeature):
 
         return features_compute
 
-    def calc_feature(self, data: np.array, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         for ch_idx, ch_name in enumerate(self.ch_names):
             fft_coeffs, freqs = compute_fft(
                 data=np.expand_dims(data[ch_idx, :], axis=(0, 1)),
@@ -148,9 +148,7 @@ class Bispectra(NMFeature):
                 for fb in self.s["bispectrum"]["frequency_bands"]:
                     range_ = (
                         f_spectrum_range >= self.s["frequency_ranges_hz"][fb][0]
-                    ) & (
-                        f_spectrum_range <= self.s["frequency_ranges_hz"][fb][1]
-                    )
+                    ) & (f_spectrum_range <= self.s["frequency_ranges_hz"][fb][1])
                     # waveshape.results.plot()
                     data_bs = spectrum_ch[range_, range_]
 
@@ -158,9 +156,7 @@ class Bispectra(NMFeature):
                         data_bs, features_compute, ch_name, component, fb
                     )
 
-                if self.s["bispectrum"][
-                    "compute_features_for_whole_fband_range"
-                ]:
+                if self.s["bispectrum"]["compute_features_for_whole_fband_range"]:
                     features_compute = self.compute_bs_features(
                         spectrum_ch, features_compute, ch_name, component, None
                     )

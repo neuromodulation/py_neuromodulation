@@ -55,9 +55,7 @@ FEATURE_DICT : dict[str, tuple[str,str]] = {
 class Features:
     """Class for calculating features.p"""
 
-    def __init__(
-        self, s: dict, ch_names: list[str], sfreq: int | float
-    ) -> None:
+    def __init__(self, s: dict, ch_names: list[str], sfreq: float) -> None:
         """_summary_
 
         Parameters
@@ -66,7 +64,7 @@ class Features:
             _description_
         ch_names : list[str]
             _description_
-        sfreq : int | float
+        sfreq : float
             _description_
 
         Raises
@@ -112,7 +110,7 @@ class Features:
         dat (dict): naming convention : channel_method_feature_(f_band)
         """
 
-        features_compute = {}
+        features_compute: dict = {}
 
         for feature in self.features:
             features_compute = feature.calc_feature(

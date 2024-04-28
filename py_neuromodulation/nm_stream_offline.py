@@ -1,35 +1,29 @@
 """Module for offline data streams."""
-import os
-from joblib import Parallel, delayed
+
 import numpy as np
 import pandas as pd
-
 from itertools import count
-
 import mne
 
-from py_neuromodulation import (
-    nm_generator,
-    nm_IO,
-    nm_stream_abc,
-    nm_define_nmchannels,
-)
+from joblib import Parallel, delayed
 
-_PathLike = str | os.PathLike
+from py_neuromodulation.nm_generator import raw_data_generator
+from py_neuromodulation.nm_stream_abc import NMStream
+from py_neuromodulation.nm_define_nmchannels import get_default_channels_from_data
+from py_neuromodulation.nm_types import _PathLike
+from py_neuromodulation import logger
 
 
-class _OfflineStream(nm_stream_abc.PNStream):
+class _OfflineStream(NMStream):
     """Offline stream base class.
     This class can be inhereted for different types of offline streams, e.g. epoch-based or continuous.
 
     Parameters
     ----------
-    nm_stream_abc : nm_stream_abc.PNStream
+    nm_stream_abc : nm_stream_abc.NMStream
     """
 
-    def _add_target(
-        self, feature_series: pd.Series, data: np.ndarray
-    ) -> pd.Series:
+    def _add_target(self, feature_series: pd.Series, data: np.ndarray) -> pd.Series:
         """Add target channels to feature series.
 
         Parameters
@@ -54,15 +48,11 @@ class _OfflineStream(nm_stream_abc.PNStream):
                 ].to_list()
                 self.target_idx_initialized = True
 
-            for target_idx, target_name in zip(
-                self.target_indexes, self.target_names
-            ):
+            for target_idx, target_name in zip(self.target_indexes, self.target_names):
                 feature_series[target_name] = data[target_idx, -1]
         return feature_series
 
-    def _add_timestamp(
-        self, feature_series: pd.Series, cnt_samples: int
-    ) -> pd.Series:
+    def _add_timestamp(self, feature_series: pd.Series, cnt_samples: int) -> pd.Series:
         """Add time stamp in ms.
 
         Due to normalization run_analysis needs to keep track of the counted
@@ -71,7 +61,7 @@ class _OfflineStream(nm_stream_abc.PNStream):
         feature_series["time"] = cnt_samples * 1000 / self.sfreq
 
         if self.verbose:
-            print(
+            logger.info(
                 str(np.round(feature_series["time"] / 1000, 2))
                 + " seconds of data processed"
             )
@@ -85,9 +75,9 @@ class _OfflineStream(nm_stream_abc.PNStream):
             if not len(names_expected) == data.shape[0]:
                 raise ValueError(
                     "If data is passed as an array, the first dimension must"
-                    " match the number of channel names in `nm_channels`. Got:"
-                    f" Data columns: {data.shape[0]}, nm_channels.name:"
-                    f" {len(names_expected)}."
+                    " match the number of channel names in `nm_channels`.\n"
+                    f" Number of data channels (data.shape[0]): {data.shape[0]}\n"
+                    f' Length of nm_channels["name"]: {len(names_expected)}.'
                 )
             return data
         names_data = data.columns.to_list()
@@ -97,10 +87,11 @@ class _OfflineStream(nm_stream_abc.PNStream):
         ):
             raise ValueError(
                 "If data is passed as a DataFrame, the"
-                "columns must match the channel names in `nm_channels`. Got:"
-                f"Data columns: {names_data}, nm_channels.name: {names_data}."
+                "column names must match the channel names in `nm_channels`.\n"
+                f"Input dataframe column names: {names_data}\n"
+                f'Expected (from nm_channels["name"]): : {names_expected}.'
             )
-        return data.to_numpy()
+        return data.to_numpy().transpose()
 
     def _check_settings_for_parallel(self):
         """Check specified settings and raise error if parallel processing is not possible.
@@ -113,19 +104,17 @@ class _OfflineStream(nm_stream_abc.PNStream):
             raise ValueError(
                 "Parallel processing is not possible with raw_normalization normalization."
             )
-        if self.settings["postprocessing"]["feature_normalization"] is True:
+        if self.settings["postprocessing"]["feature_normalization"]:
             raise ValueError(
                 "Parallel processing is not possible with feature normalization."
             )
-        if self.settings["features"]["bursts"] is True:
+        if self.settings["features"]["bursts"]:
             raise ValueError(
                 "Parallel processing is not possible with burst estimation."
             )
 
     def _process_batch(self, data_batch, cnt_samples):
-        feature_series = self.run_analysis.process(
-            data_batch.astype(np.float64)
-        )
+        feature_series = self.run_analysis.process(data_batch.astype(np.float64))
         feature_series = self._add_timestamp(feature_series, cnt_samples)
         feature_series = self._add_target(
             feature_series=feature_series, data=data_batch
@@ -140,7 +129,7 @@ class _OfflineStream(nm_stream_abc.PNStream):
         parallel: bool = False,
         n_jobs: int = -2,
     ) -> pd.DataFrame:
-        generator = nm_generator.raw_data_generator(
+        generator = raw_data_generator(
             data=data,
             settings=self.settings,
             sfreq=self.sfreq,
@@ -170,9 +159,7 @@ class _OfflineStream(nm_stream_abc.PNStream):
                 feature_series = self.run_analysis.process(
                     data_batch.astype(np.float64)
                 )
-                feature_series = self._add_timestamp(
-                    feature_series, cnt_samples
-                )
+                feature_series = self._add_timestamp(feature_series, cnt_samples)
 
                 feature_series = self._add_target(
                     feature_series=feature_series, data=data_batch
@@ -189,11 +176,11 @@ class _OfflineStream(nm_stream_abc.PNStream):
 
     def plot_raw_signal(
         self,
-        sfreq: float = None,
-        data: np.array = None,
-        lowpass: float = None,
-        highpass: float = None,
-        picks: list = None,
+        sfreq: float | None = None,
+        data: np.ndarray | None = None,
+        lowpass: float | None = None,
+        highpass: float | None = None,
+        picks: list | None = None,
         plot_time: bool = True,
         plot_psd: bool = False,
     ) -> None:
@@ -203,7 +190,7 @@ class _OfflineStream(nm_stream_abc.PNStream):
         ----------
         sfreq : float
             sampling frequency [Hz]
-        data : np.array, optional
+        data : np.ndarray, optional
             data (n_channels, n_times), by default None
         plot_time : bool, optional
             mne.io.RawArray.plot(), by default True
@@ -232,9 +219,7 @@ class _OfflineStream(nm_stream_abc.PNStream):
             ch_types = ["ecog" for i in range(data.shape[0])]
 
         # create mne.RawArray
-        info = mne.create_info(
-            ch_names=ch_names, sfreq=sfreq, ch_types=ch_types
-        )
+        info = mne.create_info(ch_names=ch_names, sfreq=sfreq, ch_types=ch_types)
         raw = mne.io.RawArray(data, info)
 
         if picks is not None:
@@ -249,12 +234,12 @@ class _OfflineStream(nm_stream_abc.PNStream):
 class Stream(_OfflineStream):
     def __init__(
         self,
-        sfreq: int | float,
-        data: np.ndarray | pd.DataFrame = None,
-        nm_channels: pd.DataFrame | _PathLike = None,
+        sfreq: float,
+        data: np.ndarray | pd.DataFrame | None = None,
+        nm_channels: pd.DataFrame | _PathLike | None = None,
         settings: dict | _PathLike | None = None,
-        sampling_rate_features_hz: float = None,
-        line_noise: int | float | None = 50,
+        sampling_rate_features_hz: float | None = None,
+        line_noise: float | None = 50,
         path_grids: _PathLike | None = None,
         coord_names: list | None = None,
         coord_list: list | None = None,
@@ -264,7 +249,7 @@ class Stream(_OfflineStream):
 
         Parameters
         ----------
-        sfreq : int | float
+        sfreq : float
             sampling frequency of data in Hertz
         data : np.ndarray | pd.DataFrame | None, optional
             data to be streamed with shape (n_channels, n_time), by default None
@@ -272,9 +257,9 @@ class Stream(_OfflineStream):
             parametrization of channels (see nm_define_channels.py for initialization)
         settings : dict | _PathLike | None, optional
             features settings can be a dictionary or path to the nm_settings.json, by default the py_neuromodulation/nm_settings.json are read
-        line_noise : int | float | None, optional
+        line_noise : float | None, optional
             line noise, by default 50
-        sampling_rate_features_hz : int | float | None, optional
+        sampling_rate_features_hz : float | None, optional
             feature sampling rate, by default None
         path_grids : _PathLike | None, optional
             path to grid_cortex.tsv and/or gird_subcortex.tsv, by default Non
@@ -283,13 +268,11 @@ class Stream(_OfflineStream):
         coord_list : list | None, optional
             coordinates in the form [[coord_1_x, coord_1_y, coord_1_z], [coord_2_x, coord_2_y, coord_2_z],], by default None
         verbose : bool, optional
-            print out stream computation time information, by default True
+            log stream computation time information, by default True
         """
 
         if nm_channels is None and data is not None:
-            nm_channels = nm_define_nmchannels.get_default_channels_from_data(
-                data
-            )
+            nm_channels = get_default_channels_from_data(data)
 
         if nm_channels is None and data is None:
             raise ValueError(
@@ -310,11 +293,11 @@ class Stream(_OfflineStream):
 
         self.data = data
 
-        self.target_idx_initialized = False
+        self.target_idx_initialized: bool = False
 
     def run(
         self,
-        data: np.ndarray | pd.DataFrame = None,
+        data: np.ndarray | pd.DataFrame | None = None,
         out_path_root: _PathLike | None = None,
         folder_name: str = "sub",
         parallel: bool = False,
@@ -347,7 +330,7 @@ class Stream(_OfflineStream):
         elif self.data is None and data is None:
             raise ValueError("No data passed to run function.")
 
-        if parallel is True:
+        if parallel:
             self._check_settings_for_parallel()
 
         return self._run_offline(
