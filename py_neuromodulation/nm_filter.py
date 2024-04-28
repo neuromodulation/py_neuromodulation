@@ -6,6 +6,8 @@ from typing import cast
 
 from py_neuromodulation import logger
 
+from py_neuromodulation.nm_preprocessing import NMPreprocessor
+
 
 class MNEFilter:
     """mne.filter wrapper
@@ -125,7 +127,7 @@ class MNEFilter:
         return filtered
 
 
-class NotchFilter:
+class NotchFilter(NMPreprocessor):
     def __init__(
         self,
         sfreq: float,

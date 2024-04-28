@@ -57,9 +57,6 @@
             "frequency_high_hz": 200
         }
     },
-    "re_referencing_settings": {
-        "reference": "common"
-    },
     "documentation_normalization_options": [
         "mean",
         "median",

@@ -11,18 +11,16 @@ from py_neuromodulation.nm_types import _PathLike
 
 from py_neuromodulation.nm_features import Features
 
-# Perhaps have all the followings in a Preprocessor dictionary like for Features
-from py_neuromodulation.nm_filter_preprocessing import PreprocessingFilter
-from py_neuromodulation.nm_filter import NotchFilter
-from py_neuromodulation.nm_resample import Resampler
-from py_neuromodulation.nm_rereference import ReReferencer
-from py_neuromodulation.nm_normalization import RawNormalizer, FeatureNormalizer
+from py_neuromodulation.nm_preprocessing import NMPreprocessors
+
+from py_neuromodulation.nm_normalization import FeatureNormalizer
 from py_neuromodulation.nm_projection import Projection
 
 
 class Preprocessor(Protocol):
-    def process(self, data: np.ndarray) -> np.ndarray:
-        pass
+    def process(self, data: np.ndarray) -> np.ndarray: ...
+
+    def test_settings(self, settings: dict): ...
 
 
 _PREPROCESSING_CONSTRUCTORS = [
@@ -79,47 +77,13 @@ class DataProcessor:
 
         (self.ch_names_used, _, self.feature_idx, _) = self._get_ch_info()
 
-        self.preprocessors: list[Preprocessor] = []
-        for preprocessing_method in self.settings["preprocessing"]:
-            settings_str = f"{preprocessing_method}_settings"
-            preprocessor: Preprocessor
-            match preprocessing_method:
-                case "raw_resampling":
-                    # Preprocessors are supposed to call test_settings in the constructor
-                    preprocessor = Resampler(
-                        sfreq=self.sfreq_raw, **self.settings[settings_str]
-                    )
-                case "notch_filter":
-                    preprocessor = NotchFilter(
-                        sfreq=self.sfreq_raw,
-                        line_noise=self.line_noise,
-                        **self.settings.get(settings_str, {}),
-                    )
-                case "re_referencing":
-                    preprocessor = ReReferencer(
-                        sfreq=self.sfreq_raw,
-                        nm_channels=self.nm_channels,
-                    )
-                case "raw_normalization":
-                    preprocessor = RawNormalizer(
-                        sfreq=self.sfreq_raw,
-                        sampling_rate_features_hz=self.sfreq_features,
-                        **self.settings.get(settings_str, {}),
-                    )
-                case "preprocessing_filter":
-                    preprocessor = PreprocessingFilter(
-                        settings=self.settings,
-                        sfreq=self.sfreq_raw,
-                    )
-                case _:
-                    raise ValueError(
-                        "Invalid preprocessing method. Must be one of"
-                        f" {_PREPROCESSING_CONSTRUCTORS}. Got"
-                        f" {preprocessing_method}"
-                    )
-
-            self.preprocessors.append(preprocessor)
-
+        self.preprocessors = NMPreprocessors(
+            settings=self.settings,
+            nm_channels=self.nm_channels,
+            sfreq=self.sfreq_raw,
+            line_noise=self.line_noise
+        )
+        
         if self.settings["postprocessing"]["feature_normalization"]:
             settings_str = "feature_normalization_settings"
             self.feature_normalizer = FeatureNormalizer(
@@ -314,9 +278,8 @@ class DataProcessor:
 
         data = np.nan_to_num(data)[self.feature_idx, :]
 
-        for processor in self.preprocessors:
-            data = processor.process(data)
-
+        data = self.preprocessors.process_data(data)
+        
         # calculate features
         features_dict = self.features.estimate_features(data)
 

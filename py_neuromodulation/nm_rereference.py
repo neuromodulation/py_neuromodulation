@@ -3,8 +3,10 @@
 import numpy as np
 import pandas as pd
 
+from py_neuromodulation.nm_preprocessing import NMPreprocessor
 
-class ReReferencer:
+class ReReferencer(NMPreprocessor):
+    
     def __init__(
         self,
         sfreq: float,
