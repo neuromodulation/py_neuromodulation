@@ -353,6 +353,9 @@ class Stream(_OfflineStream):
         if parallel is True:
             self._check_settings_for_parallel()
 
+        if os.path.exists(os.path.join(out_path_root, folder_name)) is False:
+            os.makedirs(os.path.join(out_path_root, folder_name))
+
         logger.log_to_file(os.path.join(out_path_root, folder_name))
 
         return self._run_offline(
