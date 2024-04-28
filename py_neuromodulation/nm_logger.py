@@ -1,4 +1,4 @@
-from pathlib import PurePath
+from pathlib import Path
 from py_neuromodulation.nm_types import _PathLike
 import logging
 
@@ -49,14 +49,15 @@ class PYNMLogger(logging.Logger):
             a: append to files
         """
 
-        self.debug_file_handler = logging.FileHandler(
-            PurePath(path) / "logfile_pynm_debug.log"
-        )
+        path = Path(path)
+        path.mkdir(parents=True, exist_ok=True)
+
+        self.debug_file_handler = logging.FileHandler(path / "logfile_pynm_debug.log")
         self.debug_file_handler.setLevel(logging.DEBUG)
         self.debug_file_handler.setFormatter(logging.Formatter(DEBUGFORMAT))
 
         self.info_file_handler = logging.FileHandler(
-            PurePath(path) / "logfile_pynm_info.log", mode=mode
+            path / "logfile_pynm_info.log", mode=mode
         )
         self.info_file_handler.setLevel(logging.INFO)
         self.info_file_handler.setFormatter(logging.Formatter(INFOFORMAT))
