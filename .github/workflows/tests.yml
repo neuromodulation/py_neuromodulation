@@ -22,21 +22,16 @@ jobs:
   tests:
     name: ${{ matrix.platform.name }} Python ${{ matrix.python }}
     runs-on: ${{ matrix.platform.os }}
-    env:
-      APPDATA: DefaultNonExistingPath 
     strategy:
       fail-fast: false
       matrix:
         platform:
           - os: ubuntu-latest
             name: Linux
-            activate_env: . .venv/bin/activate
           - os: macos-latest
             name: MacOS
-            activate_env: . .venv/bin/activate
           - os: windows-latest
             name: Windows
-            activate_env: .venv\Scripts\activate
         python:
           - '3.10'
     steps:
@@ -50,6 +45,6 @@ jobs:
       - name: Install dependencies
         run: uv pip install .
       - name: Install pytest
-        run: uv pip install pytest pytest-xdist
+        run: uv pip install pytest pytest-xdist pytest-sugar
       - name: Run tests
         run: pytest -n auto tests/
