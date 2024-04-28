@@ -1,4 +1,4 @@
-"""Module that contains PNStream ABC."""
+"""Module that contains NMStream ABC."""
 
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -12,7 +12,7 @@ from py_neuromodulation.nm_settings import get_default_settings
 from py_neuromodulation.nm_types import _PathLike
 
 
-class PNStream(ABC):
+class NMStream(ABC):
     def __init__(
         self,
         sfreq: float,

@@ -97,23 +97,7 @@ packages = ["py_neuromodulation"]
 exclude = [
   "py_neuromodulation/data/derivatives",
   "py_neuromodulation/ConnectivityDecoding/connectome_folder",
+]
 
 [tool.mypy]
 ignore_missing_imports = true
-
-[tool.tox]
-legacy_tox_ini = """
-  [tox]
-  env_list =
-    py3{10, 11}
-  
-  skip_missing_interpreters = true
-  isolated_build = true
-
-  [testenv]
-  description = install pytest in a virtual environment and invoke it on the tests folder
-  deps =
-      pytest>=7
-      pytest-sugar
-  commands = pytest tests {posargs}
-"""

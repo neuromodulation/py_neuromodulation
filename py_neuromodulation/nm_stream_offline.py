@@ -8,19 +8,19 @@ import mne
 from joblib import Parallel, delayed
 
 from py_neuromodulation.nm_generator import raw_data_generator
-from py_neuromodulation.nm_stream_abc import PNStream
+from py_neuromodulation.nm_stream_abc import NMStream
 from py_neuromodulation.nm_define_nmchannels import get_default_channels_from_data
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
 
 
-class _OfflineStream(PNStream):
+class _OfflineStream(NMStream):
     """Offline stream base class.
     This class can be inhereted for different types of offline streams, e.g. epoch-based or continuous.
 
     Parameters
     ----------
-    nm_stream_abc : nm_stream_abc.PNStream
+    nm_stream_abc : nm_stream_abc.NMStream
     """
 
     def _add_target(self, feature_series: pd.Series, data: np.ndarray) -> pd.Series:
