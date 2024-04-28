@@ -1,4 +1,4 @@
-import py_neuromodulation as pn
+import py_neuromodulation as nm
 import numpy as np
 import pytest
 
@@ -12,7 +12,7 @@ def get_stream():
 
     data = np.random.random([NUM_CHANNELS, NUM_DATA])
 
-    stream = pn.Stream(
+    stream = nm.Stream(
         sfreq=sfreq,
         data=data,
         sampling_rate_features_hz=sampling_rate_features_hz,
