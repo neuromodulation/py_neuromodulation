@@ -296,7 +296,7 @@ class Stream(_OfflineStream):
     def run(
         self,
         data: np.ndarray | pd.DataFrame | None = None,
-        out_path_root: _PathLike = "",
+        out_path_root: _PathLike = Path.cwd(),
         folder_name: str = "sub",
         parallel: bool = False,
         n_jobs: int = -2,
