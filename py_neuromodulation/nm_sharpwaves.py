@@ -11,7 +11,6 @@ class NoValidTroughException(Exception):
 
 
 class SharpwaveAnalyzer(NMFeature):
-    
     def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: float) -> None:
         self.sw_settings = settings["sharpwave_analysis_settings"]
         self.sfreq = sfreq

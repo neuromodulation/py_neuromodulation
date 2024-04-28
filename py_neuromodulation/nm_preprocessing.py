@@ -7,10 +7,11 @@ if TYPE_CHECKING:
     import numpy as np
     import pandas as pd
 
+
 class NMPreprocessor(Protocol):
     def __init__(self, settings: dict, sfreq: float) -> None: ...
 
-    def process(self, data: 'np.ndarray') -> 'np.ndarray': ...
+    def process(self, data: "np.ndarray") -> "np.ndarray": ...
 
 
 PREPROCESSOR_DICT: dict[str, ImportDetails] = {
@@ -26,6 +27,7 @@ PREPROCESSOR_DICT: dict[str, ImportDetails] = {
         "py_neuromodulation.nm_normalization", "RawNormalizer"
     ),
 }
+
 
 class NMPreprocessors:
     "Class for initializing and holding data preprocessing classes"
@@ -78,7 +80,7 @@ class NMPreprocessors:
             for preprocessor_name, preprocessor_class in preprocessor_classes.items()
         ]
 
-    def process_data(self, data: 'np.ndarray') -> 'np.ndarray':
+    def process_data(self, data: "np.ndarray") -> "np.ndarray":
         for preprocessor in self.preprocessors:
             data = preprocessor.process(data)
         return data

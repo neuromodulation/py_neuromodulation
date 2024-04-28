@@ -85,12 +85,12 @@ class Projection:
             nmplotter.plot_cortex()
 
     @staticmethod
-    def test_settings(s: dict):
-        if s["postprocessing"]["project_cortex"]:
-            assert isinstance(s["project_cortex_settings"]["max_dist_mm"], (float, int))
-        if s["postprocessing"]["project_subcortex"]:
+    def test_settings(settings: dict):
+        if settings["postprocessing"]["project_cortex"]:
+            assert isinstance(settings["project_cortex_settings"]["max_dist_mm"], (float, int))
+        if settings["postprocessing"]["project_subcortex"]:
             assert isinstance(
-                s["project_subcortex_settings"]["max_dist_mm"], (float, int)
+                settings["project_subcortex_settings"]["max_dist_mm"], (float, int)
             )
 
     def remove_not_used_ch_from_coords(self):

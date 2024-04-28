@@ -6,7 +6,6 @@ from py_neuromodulation.nm_features import NMFeature
 
 
 class Bispectra(NMFeature):
-    
     def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: float) -> None:
         super().__init__(settings, ch_names, sfreq)
         self.sfreq = sfreq

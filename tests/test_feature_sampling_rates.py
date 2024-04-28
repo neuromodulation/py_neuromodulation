@@ -86,7 +86,6 @@ def test_different_sampling_rate_0DOT1Hz():
 
 
 def test_wrong_initalization_of_segment_length_features_ms_and_osc_window_length():
-    segment_length_features_ms = 800
 
     arr_test = np.random.random([2, 1200])
     settings, nm_channels = get_example_settings(arr_test)
