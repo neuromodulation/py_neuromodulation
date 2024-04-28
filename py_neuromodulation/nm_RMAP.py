@@ -1,6 +1,6 @@
 import numpy as np
 from pathlib import PurePath, Path
-import wget
+from urllib.request import urlretrieve
 
 
 # from numba import jit
@@ -280,15 +280,13 @@ class ConnectivityChannelSelector:
         record_id = "10804702"
         file_name = self.connectome_name
 
-        wget.download(
+        filepath = Path(self.PATH_CONN_DECODING, "connectome_folder")
+        filepath.mkdir(parents=True, exist_ok=True)
+        
+        urlretrieve(
             f"https://zenodo.org/api/records/{record_id}/files/{file_name}/content",
-            out=PurePath(
-                self.PATH_CONN_DECODING,
-                "connectome_folder",
-                f"{self.connectome_name}.mat",
-            ),
+            filepath / f"{self.connectome_name}.mat"
         )
-
 
 class RMAPCross_Val_ChannelSelector:
 
