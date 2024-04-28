@@ -77,7 +77,6 @@ LIST_STRUC_UNCONNECTED_GRIDPOINTS_WHOLEBRAIN = [
 
 
 class ConnectivityChannelSelector:
-
     def __init__(
         self,
         whole_brain_connectome: bool = True,
@@ -139,10 +138,7 @@ class ConnectivityChannelSelector:
                 PurePath(self.PATH_CONN_DECODING, "RMAP_struc.nii")
             ).get_fdata()
 
-    def _get_connectome_name(
-        self, whole_brain_connectome: str, func_connectivity: str
-    ):
-
+    def _get_connectome_name(self, whole_brain_connectome: str, func_connectivity: str):
         connectome_name = "connectome_"
         if whole_brain_connectome:
             connectome_name += "whole_brain_"
@@ -162,21 +158,17 @@ class ConnectivityChannelSelector:
         -------
         list_connectomes: list
         """
-        return list(Path(self.PATH_CONN_DECODING,"connectome_folder").iterdir())
+        return list(Path(self.PATH_CONN_DECODING, "connectome_folder").iterdir())
 
     def plot_grid(self) -> None:
         """Plot the loaded template grid that passed coordinates are matched to."""
 
         fig = plt.figure()
         ax = fig.add_subplot(111, projection="3d")
-        ax.scatter(
-            self.grid[:, 0], self.grid[:, 1], self.grid[:, 2], s=50, alpha=0.2
-        )
+        ax.scatter(self.grid[:, 0], self.grid[:, 1], self.grid[:, 2], s=50, alpha=0.2)
         plt.show()
 
-    def get_closest_node(
-        self, coord: list | np.ndarray
-    ) -> tuple[list, list]:
+    def get_closest_node(self, coord: list | np.ndarray) -> tuple[list, list]:
         """Given a list or np.array of coordinates, return the closest nodes in the
         grid and their indices.
 
@@ -199,9 +191,7 @@ class ConnectivityChannelSelector:
         return [self.grid[idx] for idx in idx_], idx_
 
     def get_rmap_correlations(
-        self, 
-        fps: list | np.ndarray, 
-        RMAP_use: np.ndarray | None = None
+        self, fps: list | np.ndarray, RMAP_use: np.ndarray | None = None
     ) -> list:
         """Calculate correlations of passed fingerprints with the RMAP
 
@@ -282,14 +272,14 @@ class ConnectivityChannelSelector:
 
         filepath = Path(self.PATH_CONN_DECODING, "connectome_folder")
         filepath.mkdir(parents=True, exist_ok=True)
-        
+
         urlretrieve(
             f"https://zenodo.org/api/records/{record_id}/files/{file_name}/content",
-            filepath / f"{self.connectome_name}.mat"
+            filepath / f"{self.connectome_name}.mat",
         )
 
-class RMAPCross_Val_ChannelSelector:
 
+class RMAPCross_Val_ChannelSelector:
     def __init__(self) -> None:
         pass
 
@@ -300,18 +290,13 @@ class RMAPCross_Val_ChannelSelector:
         fp = epi_img.get_fdata()
         return fp
 
-    def load_all_fingerprints(
-        self, path_dir: str, cond_str: str = "_AvgR_Fz.nii"
-    ):
-
+    def load_all_fingerprints(self, path_dir: str, cond_str: str = "_AvgR_Fz.nii"):
         if cond_str is not None:
             l_fps = list(filter(lambda k: cond_str in str(k), Path(path_dir).iterdir()))
         else:
             l_fps = list(Path(path_dir).iterdir())
 
-        return l_fps, [
-            self.load_fingerprint(PurePath(path_dir, f)) for f in l_fps
-        ]
+        return l_fps, [self.load_fingerprint(PurePath(path_dir, f)) for f in l_fps]
 
     def get_fingerprints_from_path_with_cond(
         self,
@@ -320,9 +305,8 @@ class RMAPCross_Val_ChannelSelector:
         str_to_keep: str = "",
         keep: bool = True,
     ) -> tuple[list, list]:
-
         l_fps = []
-        
+
         if keep and str_to_keep:
             l_fps = list(
                 filter(
@@ -330,7 +314,7 @@ class RMAPCross_Val_ChannelSelector:
                     Path(path_dir).iterdir(),
                 )
             )
-        
+
         elif not keep and str_to_omit:
             l_fps = list(
                 filter(
@@ -338,7 +322,7 @@ class RMAPCross_Val_ChannelSelector:
                     Path(path_dir).iterdir(),
                 )
             )
-            
+
         return l_fps, [self.load_fingerprint(PurePath(path_dir, f)) for f in l_fps]
 
     @staticmethod
@@ -348,7 +332,6 @@ class RMAPCross_Val_ChannelSelector:
         name: str = "img.nii",
         reshape: bool = True,
     ):
-
         if reshape:
             fp = np.reshape(fp, (91, 109, 91), order="F")
 
@@ -361,8 +344,7 @@ class RMAPCross_Val_ChannelSelector:
         # https://stackoverflow.com/questions/71252740/correlating-an-array-row-wise-with-a-vector/71253141#71253141
 
         r = (
-            len(y) * np.sum(X * y[None, :], axis=-1)
-            - (np.sum(X, axis=-1) * np.sum(y))
+            len(y) * np.sum(X * y[None, :], axis=-1) - (np.sum(X, axis=-1) * np.sum(y))
         ) / (
             np.sqrt(
                 (len(y) * np.sum(X**2, axis=-1) - np.sum(X, axis=-1) ** 2)
@@ -399,9 +381,7 @@ class RMAPCross_Val_ChannelSelector:
         val = np.corrcoef(fp_test, fp)[0][1]
         return val
 
-    def leave_one_ch_out_cv(
-        self, l_fps_names: list, l_fps_dat: list, l_per: list
-    ):
+    def leave_one_ch_out_cv(self, l_fps_names: list, l_fps_dat: list, l_per: list):
         # l_fps_dat is not flattened
 
         per_left_out = []
@@ -424,9 +404,7 @@ class RMAPCross_Val_ChannelSelector:
 
             per_predict.append(
                 np.nan_to_num(
-                    self.get_corr_numba(
-                        rmap_cv, l_fps_dat[idx_left_out].flatten()
-                    )
+                    self.get_corr_numba(rmap_cv, l_fps_dat[idx_left_out].flatten())
                 )
             )
             per_left_out.append(l_per[idx_left_out])
@@ -443,13 +421,9 @@ class RMAPCross_Val_ChannelSelector:
 
         for subject_test in sub_list:
             # print(subject_test)
-            idx_test = [
-                idx for idx, f in enumerate(l_fps_names) if subject_test in f
-            ]
+            idx_test = [idx for idx, f in enumerate(l_fps_names) if subject_test in f]
             idx_train = [
-                idx
-                for idx, f in enumerate(l_fps_names)
-                if subject_test not in f
+                idx for idx, f in enumerate(l_fps_names) if subject_test not in f
             ]
             l_cv = list(np.array(l_fps_dat)[idx_train])
             per_cv = list(np.array(l_per)[idx_train])
@@ -477,7 +451,6 @@ class RMAPCross_Val_ChannelSelector:
         cohorts_train: dict,
         path_dir: str = r"C:\Users\ICN_admin\OneDrive - Charité - Universitätsmedizin Berlin\Connectomics\DecodingToolbox_BerlinPittsburgh_Beijing\functional_connectivity",
     ):
-
         fp_test = self.get_fingerprints_from_path_with_cond(
             path_dir=path_dir,
             str_to_keep=f"{cohort_test}_{sub_test}_ROI_{ch_test}",
@@ -497,9 +470,7 @@ class RMAPCross_Val_ChannelSelector:
                 )
 
                 for fp, fp_name in zip(fps, fps_name):
-                    ch = fp_name[
-                        fp_name.find("ROI") + 4 : fp_name.find("func") - 1
-                    ]
+                    ch = fp_name[fp_name.find("ROI") + 4 : fp_name.find("func") - 1]
                     corr_val = self.get_corr_numba(fp_test, fp)
                     fp_pairs.append([cohort, sub, ch, corr_val])
 

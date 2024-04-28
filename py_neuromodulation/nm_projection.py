@@ -14,7 +14,6 @@ class Projection:
         nm_channels: pd.DataFrame,
         plot_projection: bool = False,
     ) -> None:
-
         self.test_settings(settings)
 
         self.grid_cortex = grid_cortex
@@ -25,8 +24,8 @@ class Projection:
         self.project_subcortex = settings["postprocessing"]["project_subcortex"]
         self.max_dist_cortex = settings["project_cortex_settings"]["max_dist_mm"]
         self.max_dist_subcortex = settings["project_subcortex_settings"]["max_dist_mm"]
-        self.ecog_channels: list # None case never handled, no need for default value
-        self.lfp_channels: list # None case never handled, no need for default value
+        self.ecog_channels: list  # None case never handled, no need for default value
+        self.lfp_channels: list  # None case never handled, no need for default value
 
         self.idx_chs_ecog: list = []  # feature series indexes for ecog channels
         self.names_chs_ecog: list = []  # feature series name of ecog features
@@ -88,24 +87,18 @@ class Projection:
     @staticmethod
     def test_settings(s: dict):
         if s["postprocessing"]["project_cortex"]:
-            assert isinstance(
-                s["project_cortex_settings"]["max_dist_mm"], (float, int)
-            )
+            assert isinstance(s["project_cortex_settings"]["max_dist_mm"], (float, int))
         if s["postprocessing"]["project_subcortex"]:
             assert isinstance(
                 s["project_subcortex_settings"]["max_dist_mm"], (float, int)
             )
 
     def remove_not_used_ch_from_coords(self):
-        ch_not_used = self.nm_channels.query(
-            '(used==0) or (status=="bad")'
-        ).name
+        ch_not_used = self.nm_channels.query('(used==0) or (status=="bad")').name
         if len(ch_not_used) > 0:
             for ch in ch_not_used:
                 for key_ in self.coords:
-                    for idx, ch_coords in enumerate(
-                        self.coords[key_]["ch_names"]
-                    ):
+                    for idx, ch_coords in enumerate(self.coords[key_]["ch_names"]):
                         if ch.startswith(ch_coords):
                             # delete index
                             self.coords[key_]["positions"] = np.delete(
@@ -132,12 +125,10 @@ class Projection:
 
         proj_matrix = np.zeros(distance_matrix.shape)
         for grid_point in range(distance_matrix.shape[0]):
-            used_channels = np.where(distance_matrix[grid_point, :] < max_dist)[
-                0
-            ]
+            used_channels = np.where(distance_matrix[grid_point, :] < max_dist)[0]
 
             rec_distances = distance_matrix[grid_point, used_channels]
-            sum_distances : float = np.sum(1 / rec_distances)
+            sum_distances: float = np.sum(1 / rec_distances)
 
             for _, used_channel in enumerate(used_channels):
                 proj_matrix[grid_point, used_channel] = (
@@ -159,7 +150,6 @@ class Projection:
         proj_matrix_run = np.empty(2, dtype=object)
 
         if self.sess_right:
-
             if self.project_cortex:
                 cortex_grid_right = np.copy(self.grid_cortex)
                 cortex_grid_right[:, 0] = cortex_grid_right[:, 0] * -1
@@ -299,10 +289,7 @@ class Projection:
 
         dat_cortex = (
             np.vstack(
-                [
-                    feature_series.iloc[idx_ch].values
-                    for idx_ch in self.idx_chs_ecog
-                ]
+                [feature_series.iloc[idx_ch].values for idx_ch in self.idx_chs_ecog]
             )
             if self.project_cortex
             else None
@@ -310,33 +297,33 @@ class Projection:
 
         dat_subcortex = (
             np.vstack(
-                [
-                    feature_series.iloc[idx_ch].values
-                    for idx_ch in self.idx_chs_lfp
-                ]
+                [feature_series.iloc[idx_ch].values for idx_ch in self.idx_chs_lfp]
             )
             if self.project_subcortex
             else None
         )
 
         # project data
-        proj_cortex_array: np.ndarray # get_projected_cortex_subcortex_data can return None
-        proj_subcortex_array: np.ndarray # but None is not handled and will throw error in the code below
+        proj_cortex_array: (
+            np.ndarray
+        )  # get_projected_cortex_subcortex_data can return None
+        proj_subcortex_array: (
+            np.ndarray
+        )  # but None is not handled and will throw error in the code below
         (
             proj_cortex_array,
             proj_subcortex_array,
-        ) = self.get_projected_cortex_subcortex_data(dat_cortex, dat_subcortex) # type: ignore # Ingore None return
+        ) = self.get_projected_cortex_subcortex_data(dat_cortex, dat_subcortex)  # type: ignore # Ingore None return
 
-        features_new : dict = {}
+        features_new: dict = {}
         # proj_cortex_array has shape grid_points x feature_number
         if self.project_cortex:
-
             features_new = features_new | {
                 "gridcortex_"
                 + str(act_grid_point)
                 + "_"
                 + feature_name: proj_cortex_array[act_grid_point, feature_idx]
-                for feature_idx, feature_name in enumerate(self.feature_names) # type: ignore # Empty list handled above
+                for feature_idx, feature_name in enumerate(self.feature_names)  # type: ignore # Empty list handled above
                 for act_grid_point in self.active_cortex_gridpoints
             }
         if self.project_subcortex:
@@ -344,10 +331,8 @@ class Projection:
                 "gridsubcortex_"
                 + str(act_grid_point)
                 + "_"
-                + feature_name: proj_subcortex_array[
-                    act_grid_point, feature_idx
-                ]
-                for feature_idx, feature_name in enumerate(self.feature_names) # type: ignore # Empty list handled above
+                + feature_name: proj_subcortex_array[act_grid_point, feature_idx]
+                for feature_idx, feature_name in enumerate(self.feature_names)  # type: ignore # Empty list handled above
                 for act_grid_point in self.active_subcortex_gridpoints
             }
         feature_series = pd.concat([feature_series, pd.Series(features_new)])

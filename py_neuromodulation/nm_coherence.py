@@ -5,6 +5,7 @@ from collections.abc import Iterable
 from py_neuromodulation.nm_features_abc import Feature
 from py_neuromodulation import logger
 
+
 class CoherenceObject:
     def __init__(
         self,
@@ -60,9 +61,7 @@ class CoherenceObject:
             for idx, fband in enumerate(self.fbands):
                 if self.features_coh["mean_fband"]:
                     feature_calc = np.mean(
-                        coh_val[
-                            np.bitwise_and(self.f > fband[0], self.f < fband[1])
-                        ]
+                        coh_val[np.bitwise_and(self.f > fband[0], self.f < fband[1])]
                     )
                     feature_name = "_".join(
                         [
@@ -77,9 +76,7 @@ class CoherenceObject:
                     features_compute[feature_name] = feature_calc
                 if self.features_coh["max_fband"]:
                     feature_calc = np.max(
-                        coh_val[
-                            np.bitwise_and(self.f > fband[0], self.f < fband[1])
-                        ]
+                        coh_val[np.bitwise_and(self.f > fband[0], self.f < fband[1])]
                     )
                     feature_name = "_".join(
                         [
@@ -109,10 +106,7 @@ class CoherenceObject:
 
 
 class NM_Coherence(Feature):
-
-    def __init__(
-        self, settings: dict, ch_names: list[str], sfreq: float
-    ) -> None:
+    def __init__(self, settings: dict, ch_names: list[str], sfreq: float) -> None:
         self.s = settings
         self.sfreq = sfreq
         self.ch_names = ch_names
@@ -125,15 +119,15 @@ class NM_Coherence(Feature):
                 fband_specs.append(self.s["frequency_ranges_hz"][band_name])
 
             ch_1_name = self.s["coherence"]["channels"][idx_coh][0]
-            ch_1_name_reref = [
-                ch for ch in self.ch_names if ch.startswith(ch_1_name)
-            ][0]
+            ch_1_name_reref = [ch for ch in self.ch_names if ch.startswith(ch_1_name)][
+                0
+            ]
             ch_1_idx = self.ch_names.index(ch_1_name_reref)
 
             ch_2_name = self.s["coherence"]["channels"][idx_coh][1]
-            ch_2_name_reref = [
-                ch for ch in self.ch_names if ch.startswith(ch_2_name)
-            ][0]
+            ch_2_name_reref = [ch for ch in self.ch_names if ch.startswith(ch_2_name)][
+                0
+            ]
             ch_2_idx = self.ch_names.index(ch_2_name_reref)
 
             self.coherence_objects.append(
@@ -158,7 +152,6 @@ class NM_Coherence(Feature):
         ch_names: Iterable[str],
         sfreq: float,
     ):
-
         assert (
             len(s["coherence"]["frequency_bands"]) > 0
         ), "coherence frequency_bands list needs to specify at least one frequency band"

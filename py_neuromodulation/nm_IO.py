@@ -103,19 +103,16 @@ def get_coord_list(
 
 def read_grid(PATH_GRIDS: _PathLike | None, grid_str: str) -> pd.DataFrame:
     if PATH_GRIDS is None:
-        grid = pd.read_csv(PYNM_DIR / ("grid_" + grid_str.lower() + ".tsv"), 
-                           sep="\t")
+        grid = pd.read_csv(PYNM_DIR / ("grid_" + grid_str.lower() + ".tsv"), sep="\t")
     else:
         grid = pd.read_csv(
-            PurePath(PATH_GRIDS, "grid_" + grid_str.lower() + ".tsv"), 
-            sep="\t")
+            PurePath(PATH_GRIDS, "grid_" + grid_str.lower() + ".tsv"), sep="\t"
+        )
     return grid
 
 
-def get_annotations(
-    PATH_ANNOTATIONS: str, PATH_RUN: str, raw_arr: mne.io.RawArray
-):
-    filepath= PurePath(PATH_ANNOTATIONS, PurePath(PATH_RUN).name[:-5] + ".txt")
+def get_annotations(PATH_ANNOTATIONS: str, PATH_RUN: str, raw_arr: mne.io.RawArray):
+    filepath = PurePath(PATH_ANNOTATIONS, PurePath(PATH_RUN).name[:-5] + ".txt")
     try:
         annot = mne.read_annotations(filepath)
         raw_arr.set_annotations(annot)
@@ -124,7 +121,7 @@ def get_annotations(
         annot_data = raw_arr.get_data(reject_by_annotation="omit")
     except FileNotFoundError:
         logger.critical(f"Annotations file could not be found: {filepath}")
-    
+
     return annot, annot_data, raw_arr
 
 
@@ -216,9 +213,7 @@ def write_csv(df, path_out):
     pyarrow_csv.write_csv(pyarrow_Table.from_pandas(df), path_out)
 
 
-def save_settings(
-    settings: dict, path_out: _PathLike, folder_name: str = ""
-) -> None:
+def save_settings(settings: dict, path_out: _PathLike, folder_name: str = "") -> None:
     if folder_name:
         path_out = PurePath(path_out, folder_name, folder_name + "_SETTINGS.json")
 
@@ -249,9 +244,7 @@ def save_features(
     logger.info(f"FEATURES.csv saved to {str(path_out)}")
 
 
-def save_sidecar(
-    sidecar: dict, path_out: _PathLike, folder_name: str = ""
-) -> None:
+def save_sidecar(sidecar: dict, path_out: _PathLike, folder_name: str = "") -> None:
     save_general_dict(sidecar, path_out, "_SIDECAR.json", folder_name)
 
 
@@ -288,7 +281,7 @@ def default_json_convert(obj) -> list | float:
 
 
 def read_sidecar(PATH: _PathLike) -> dict:
-    with open(PurePath(str(PATH) +"_SIDECAR.json")) as f:
+    with open(PurePath(str(PATH) + "_SIDECAR.json")) as f:
         return json.load(f)
 
 
@@ -307,6 +300,7 @@ def read_nm_channels(PATH: _PathLike) -> pd.DataFrame:
 
 def get_run_list_indir(PATH: _PathLike) -> list:
     from os import walk
+
     f_files = []
     # for dirpath, _, files in Path(PATH).walk(): # Only works in python >=3.12
     for dirpath, _, files in walk(PATH):

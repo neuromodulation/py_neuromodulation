@@ -2,13 +2,12 @@ import nibabel as nib
 import numpy as np
 from matplotlib import pyplot as plt
 
-class NiiToMNI:
 
+class NiiToMNI:
     def __init__(
         self,
         PATH_nii_file: str = r"C:\code\RMap_ROI_Estimation\Automated Anatomical Labeling 3 (Rolls 2020).nii",
     ) -> None:
-
         self.img = nib.Nifti1Image.from_filename(PATH_nii_file)
         self.data = self.img.get_fdata()
 
@@ -16,7 +15,6 @@ class NiiToMNI:
         self,
         resampling_factor: int = 150,
     ):
-
         # PATH_MNI_TO_ATLAS = r"C:\code\mni_to_atlas\src\mni_to_atlas\atlases\AAL.nii"
         # img_mni_to_atlas = nib.load(PATH_MNI_TO_ATLAS)
 
@@ -54,10 +52,7 @@ class NiiToMNI:
         self,
         mni_coordinates: np.ndarray,
     ):
-
-        coords = np.hstack(
-            (mni_coordinates, np.ones((mni_coordinates.shape[0], 1)))
-        )
+        coords = np.hstack((mni_coordinates, np.ones((mni_coordinates.shape[0], 1))))
 
         # and transform back to get the voxel values
         voxels_downsampled = np.array(
@@ -71,7 +66,7 @@ class NiiToMNI:
             coord_.append(mni_coordinates[i, :])
 
         # get only voxel values non-zero
-        ival_arr  = np.array(ival)
+        ival_arr = np.array(ival)
         coord_arr = np.array(coord_)
         ival_non_zero = ival_arr[ival != 0]
         coord_non_zero = coord_arr[ival != 0]
@@ -93,11 +88,8 @@ class NiiToMNI:
 
 
 if __name__ == "__main__":
-
     nii_to_mni = NiiToMNI(
         PATH_nii_file=r"C:\code\py_neuromodulation\ConnectivityDecoding\Automated Anatomical Labeling 3 (Rolls 2020).nii"
     )
     mni_coordinates = nii_to_mni.downsample_nii(resampling_factor=150)
-    coord_non_zero, ival_non_zero = nii_to_mni.select_non_zero_voxels(
-        mni_coordinates
-    )
+    coord_non_zero, ival_non_zero = nii_to_mni.select_non_zero_voxels(mni_coordinates)

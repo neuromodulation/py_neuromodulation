@@ -13,6 +13,7 @@ from py_neuromodulation.nm_define_nmchannels import get_default_channels_from_da
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
 
+
 class _OfflineStream(PNStream):
     """Offline stream base class.
     This class can be inhereted for different types of offline streams, e.g. epoch-based or continuous.
@@ -22,9 +23,7 @@ class _OfflineStream(PNStream):
     nm_stream_abc : nm_stream_abc.PNStream
     """
 
-    def _add_target(
-        self, feature_series: pd.Series, data: np.ndarray
-    ) -> pd.Series:
+    def _add_target(self, feature_series: pd.Series, data: np.ndarray) -> pd.Series:
         """Add target channels to feature series.
 
         Parameters
@@ -49,15 +48,11 @@ class _OfflineStream(PNStream):
                 ].to_list()
                 self.target_idx_initialized = True
 
-            for target_idx, target_name in zip(
-                self.target_indexes, self.target_names
-            ):
+            for target_idx, target_name in zip(self.target_indexes, self.target_names):
                 feature_series[target_name] = data[target_idx, -1]
         return feature_series
 
-    def _add_timestamp(
-        self, feature_series: pd.Series, cnt_samples: int
-    ) -> pd.Series:
+    def _add_timestamp(self, feature_series: pd.Series, cnt_samples: int) -> pd.Series:
         """Add time stamp in ms.
 
         Due to normalization run_analysis needs to keep track of the counted
@@ -82,7 +77,7 @@ class _OfflineStream(PNStream):
                     "If data is passed as an array, the first dimension must"
                     " match the number of channel names in `nm_channels`.\n"
                     f" Number of data channels (data.shape[0]): {data.shape[0]}\n"
-                    f" Length of nm_channels[\"name\"]: {len(names_expected)}."
+                    f' Length of nm_channels["name"]: {len(names_expected)}.'
                 )
             return data
         names_data = data.columns.to_list()
@@ -94,7 +89,7 @@ class _OfflineStream(PNStream):
                 "If data is passed as a DataFrame, the"
                 "column names must match the channel names in `nm_channels`.\n"
                 f"Input dataframe column names: {names_data}\n"
-                f"Expected (from nm_channels[\"name\"]): : {names_expected}."
+                f'Expected (from nm_channels["name"]): : {names_expected}.'
             )
         return data.to_numpy().transpose()
 
@@ -119,9 +114,7 @@ class _OfflineStream(PNStream):
             )
 
     def _process_batch(self, data_batch, cnt_samples):
-        feature_series = self.run_analysis.process(
-            data_batch.astype(np.float64)
-        )
+        feature_series = self.run_analysis.process(data_batch.astype(np.float64))
         feature_series = self._add_timestamp(feature_series, cnt_samples)
         feature_series = self._add_target(
             feature_series=feature_series, data=data_batch
@@ -166,9 +159,7 @@ class _OfflineStream(PNStream):
                 feature_series = self.run_analysis.process(
                     data_batch.astype(np.float64)
                 )
-                feature_series = self._add_timestamp(
-                    feature_series, cnt_samples
-                )
+                feature_series = self._add_timestamp(feature_series, cnt_samples)
 
                 feature_series = self._add_target(
                     feature_series=feature_series, data=data_batch
@@ -228,9 +219,7 @@ class _OfflineStream(PNStream):
             ch_types = ["ecog" for i in range(data.shape[0])]
 
         # create mne.RawArray
-        info = mne.create_info(
-            ch_names=ch_names, sfreq=sfreq, ch_types=ch_types
-        )
+        info = mne.create_info(ch_names=ch_names, sfreq=sfreq, ch_types=ch_types)
         raw = mne.io.RawArray(data, info)
 
         if picks is not None:
@@ -283,9 +272,7 @@ class Stream(_OfflineStream):
         """
 
         if nm_channels is None and data is not None:
-            nm_channels = get_default_channels_from_data(
-                data
-            )
+            nm_channels = get_default_channels_from_data(data)
 
         if nm_channels is None and data is None:
             raise ValueError(
@@ -306,7 +293,7 @@ class Stream(_OfflineStream):
 
         self.data = data
 
-        self.target_idx_initialized : bool = False
+        self.target_idx_initialized: bool = False
 
     def run(
         self,

@@ -1,8 +1,8 @@
-from .utils import _logging  
+from .utils import _logging
 from pathlib import PurePath
-import importlib.metadata
+from importlib.metadata import version
 
-__version__ = importlib.metadata.version('py_neuromodulation')
+__version__ = version("py_neuromodulation")
 
 # Define constant for py_nm directory
 PYNM_DIR = PurePath(__file__).parent

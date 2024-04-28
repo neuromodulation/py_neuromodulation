@@ -31,8 +31,7 @@ def get_example_stream(test_arr: np.ndarray) -> Stream:
 
 
 def test_all_features_random_array():
-    """This test runs's through all enabled features, and check's if they break
-    """
+    """This test runs's through all enabled features, and check's if they break"""
     np.random.seed(0)
     arr = np.random.random([2, 2000])
     stream = get_example_stream(arr)
@@ -43,7 +42,6 @@ def test_all_features_random_array():
 
 
 def test_all_features_zero_array():
-
     arr = np.zeros([2, 2000])
     stream = get_example_stream(arr)
 
@@ -51,7 +49,6 @@ def test_all_features_zero_array():
 
 
 def test_all_features_NaN_array():
-
     arr = np.empty([2, 2000])
     arr[:] = np.nan
 

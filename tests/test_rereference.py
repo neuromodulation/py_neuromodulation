@@ -61,8 +61,7 @@ def test_rereference_car(setup_databatch):
             ref_dat[ecog_ch_idx, :],
             data_batch[ecog_ch_idx, :]
             - data_batch[
-                (nm_channels["type"] == "ecog")
-                & (nm_channels.index != ecog_ch_idx)
+                (nm_channels["type"] == "ecog") & (nm_channels.index != ecog_ch_idx)
             ].mean(axis=0),
         )
 

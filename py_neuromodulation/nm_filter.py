@@ -54,7 +54,7 @@ class MNEFilter:
 
         if not isinstance(f_ranges[0], list):
             f_ranges = [f_ranges]
-            
+
         for f_range in f_ranges:
             try:
                 filt = create_filter(
@@ -107,10 +107,7 @@ class MNEFilter:
 
         filtered = np.array(
             [
-                [
-                    np.convolve(filt, chan, mode="same")
-                    for filt in self.filter_bank
-                ]
+                [np.convolve(filt, chan, mode="same") for filt in self.filter_bank]
                 for chan in data
             ]
         )
@@ -122,9 +119,7 @@ class MNEFilter:
             filtered = filtered[
                 :,
                 :,
-                middle_index
-                - data.shape[1] // 2 : middle_index
-                + data.shape[1] // 2,
+                middle_index - data.shape[1] // 2 : middle_index + data.shape[1] // 2,
             ]
 
         return filtered
@@ -139,7 +134,6 @@ class NotchFilter:
         notch_widths: int | np.ndarray | None = 3,
         trans_bandwidth: float = 6.8,
     ) -> None:
-        
         self.test_settings(line_noise, sfreq)
 
         if freqs is None:
@@ -171,19 +165,14 @@ class NotchFilter:
                 notch_widths = notch_widths[0] * np.ones_like(freqs)
             elif len(notch_widths) != len(freqs):
                 raise ValueError(
-                    "notch_widths must be None, scalar, or the "
-                    "same length as freqs"
+                    "notch_widths must be None, scalar, or the " "same length as freqs"
                 )
-        notch_widths = cast(np.ndarray, notch_widths) # For MyPy only, no runtime cost
-                
+        notch_widths = cast(np.ndarray, notch_widths)  # For MyPy only, no runtime cost
+
         # Speed this up by computing the fourier coefficients once
         tb_half = trans_bandwidth / 2.0
-        lows = [
-            freq - nw / 2.0 - tb_half for freq, nw in zip(freqs, notch_widths)
-        ]
-        highs = [
-            freq + nw / 2.0 + tb_half for freq, nw in zip(freqs, notch_widths)
-        ]
+        lows = [freq - nw / 2.0 - tb_half for freq, nw in zip(freqs, notch_widths)]
+        highs = [freq + nw / 2.0 + tb_half for freq, nw in zip(freqs, notch_widths)]
 
         self.filter_bank = create_filter(
             data=None,
@@ -221,4 +210,3 @@ class NotchFilter:
                 "Either line_noise or freqs must be defined if notch_filter is"
                 "activated."
             )
-        

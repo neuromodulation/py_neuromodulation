@@ -55,7 +55,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "black>=24.2.0",
+    "ruff",
     "pytest>=8.0.2",
     "pytest-cov",
     "notebook",
@@ -78,7 +78,7 @@ docs = [
 
 [tool.rye]
 dev-dependencies = [
-    "black>=24.2.0",
+    "ruff",
     "pytest>=8.0.2",
     "pytest-cov",
     "notebook",
@@ -100,9 +100,8 @@ dev-dependencies = [
 bugtracker = "https://github.com/neuromodulation/py_neuromodulation/issues"
 repository = "https://github.com/neuromodulation/py_neuromodulation"
 
-[tool.black]
-line-length = 80
-target-version = ['py310']
+[tool.ruff]
+target-version = "py310"
 
 [tool.hatch.build.targets.sdist]
 exclude = ["/.github", "/docs"]

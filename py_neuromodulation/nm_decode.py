@@ -5,7 +5,7 @@ from sklearn import (
     decomposition,
     cross_decomposition,
 )
-from skopt import  Optimizer
+from skopt import Optimizer
 from sklearn.base import clone
 from scipy.ndimage import binary_dilation, binary_erosion
 from scipy.ndimage import label as label_ndimage
@@ -21,7 +21,6 @@ import pickle
 
 
 class CV_res:
-
     def __init__(
         self,
         get_movement_detection_rate: bool = False,
@@ -29,34 +28,32 @@ class CV_res:
         mrmr_select: bool = False,
         model_save: bool = False,
     ) -> None:
-
-        self.score_train : list = []
-        self.score_test : list = []
-        self.y_test : list = []
-        self.y_train : list = []
-        self.y_test_pr : list = []
-        self.y_train_pr : list = []
-        self.X_test : list = []
-        self.X_train : list = []
-        self.coef : list = []
+        self.score_train: list = []
+        self.score_test: list = []
+        self.y_test: list = []
+        self.y_train: list = []
+        self.y_test_pr: list = []
+        self.y_train_pr: list = []
+        self.X_test: list = []
+        self.X_train: list = []
+        self.coef: list = []
 
         if get_movement_detection_rate:
-            self.mov_detection_rates_test : list = []
-            self.tprate_test : list = []
-            self.fprate_test : list = []
-            self.mov_detection_rates_train : list = []
-            self.tprate_train : list = []
-            self.fprate_train : list = []
+            self.mov_detection_rates_test: list = []
+            self.tprate_test: list = []
+            self.fprate_test: list = []
+            self.mov_detection_rates_train: list = []
+            self.tprate_train: list = []
+            self.fprate_train: list = []
         if RUN_BAY_OPT:
             self.best_bay_opt_params: list = []
         if mrmr_select:
-            self.mrmr_select : list = []
+            self.mrmr_select: list = []
         if model_save:
-            self.model_save : list = []
+            self.model_save: list = []
 
 
 class Decoder:
-
     class ClassMissingException(Exception):
         def __init__(
             self,
@@ -168,7 +165,6 @@ class Decoder:
             self.ros = RandomOverSampler(random_state=0)
 
     def set_data(self, features):
-
         if features is not None:
             self.features = features
             self.feature_names = [
@@ -176,9 +172,7 @@ class Decoder:
                 for col in self.features.columns
                 if not (("time" in col) or (self.label_name in col))
             ]
-            self.data = np.nan_to_num(
-                np.array(self.features[self.feature_names])
-            )
+            self.data = np.nan_to_num(np.array(self.features[self.feature_names]))
 
     def set_data_ind_channels(self):
         """specified channel individual data"""
@@ -187,11 +181,7 @@ class Decoder:
             self.ch_ind_data[ch] = np.nan_to_num(
                 np.array(
                     self.features[
-                        [
-                            col
-                            for col in self.features.columns
-                            if col.startswith(ch)
-                        ]
+                        [col for col in self.features.columns if col.startswith(ch)]
                     ]
                 )
             )
@@ -236,9 +226,7 @@ class Decoder:
             if self.save_coef:
                 set_score("coef", cv_res.coef)
             if self.get_movement_detection_rate:
-                set_score(
-                    "mov_detection_rates_test", cv_res.mov_detection_rates_test
-                )
+                set_score("mov_detection_rates_test", cv_res.mov_detection_rates_test)
                 set_score(
                     "mov_detection_rates_train",
                     cv_res.mov_detection_rates_train,
@@ -276,16 +264,12 @@ class Decoder:
             "grid_points",
         ]
         if feature_contacts not in valid_feature_contacts:
-            raise ValueError(
-                f"{feature_contacts} not in {valid_feature_contacts}"
-            )
+            raise ValueError(f"{feature_contacts} not in {valid_feature_contacts}")
 
         if feature_contacts == "grid_points":
             for grid_point in self.active_gridpoints:
                 self.run_CV(self.grid_point_ind_data[grid_point], self.label)
-                self.set_CV_results(
-                    "gridpoint_ind_results", contact_point=grid_point
-                )
+                self.set_CV_results("gridpoint_ind_results", contact_point=grid_point)
             return self.gridpoint_ind_results
 
         if feature_contacts == "ind_channels":
@@ -322,9 +306,7 @@ class Decoder:
 
         if subcortex_only:
             self.active_gridpoints = [
-                i
-                for i in self.active_gridpoints
-                if i.startswith("gridsubcortex")
+                i for i in self.active_gridpoints if i.startswith("gridsubcortex")
             ]
 
         self.feature_names = [
@@ -366,9 +348,7 @@ class Decoder:
             count of individual movement blocks
         """
         mask = prediction > threshold
-        structure = [
-            True
-        ] * min_consequent_count  # used for erosion and dilation
+        structure = [True] * min_consequent_count  # used for erosion and dilation
         eroded = binary_erosion(mask, structure)
         dilated = binary_dilation(eroded, structure)
         labeled_array, labels_count = label_ndimage(dilated)
@@ -411,17 +391,13 @@ class Decoder:
         hit_rate = np.zeros(labels_count)
         pred_group_bin = np.array(pred_grouped > 0)
 
-        for label_number in range(
-            1, labels_count + 1
-        ):  # labeling starts from 1
+        for label_number in range(1, labels_count + 1):  # labeling starts from 1
             hit_rate[label_number - 1] = np.sum(
                 pred_group_bin[np.where(y_grouped == label_number)[0]]
             )
 
         try:
-            mov_detection_rate = (
-                np.where(hit_rate > 0)[0].shape[0] / labels_count
-            )
+            mov_detection_rate = np.where(hit_rate > 0)[0].shape[0] / labels_count
         except ZeroDivisionError:
             print("no movements in label")
             return 0, 0, 0
@@ -465,15 +441,11 @@ class Decoder:
 
     @staticmethod
     def append_samples_val(X_train, y_train, X_val, y_val, n):
-
-        X_train, y_train = Decoder.append_previous_n_samples(
-            X_train, y_train, n=n
-        )
+        X_train, y_train = Decoder.append_previous_n_samples(X_train, y_train, n=n)
         X_val, y_val = Decoder.append_previous_n_samples(X_val, y_val, n=n)
         return X_train, y_train, X_val, y_val
 
     def fit_model(self, model, X_train, y_train):
-
         if self.TRAIN_VAL_SPLIT:
             X_train, X_val, y_train, y_val = model_selection.train_test_split(
                 X_train, y_train, train_size=0.7, shuffle=False
@@ -497,20 +469,20 @@ class Decoder:
             #     )
             # elif type(model) is xgboost.sklearn.XGBRegressor:
             #     # might be necessary to adapt for other classifiers
-            # 
+            #
             #     def evalerror(preds, dtrain):
             #         labels = dtrain.get_label()
             #         # return a pair metric_name, result. The metric name must not contain a
             #         # colon (:) or a space since preds are margin(before logistic
             #         # transformation, cutoff at 0)
-            # 
+            #
             #         r2 = metrics.r2_score(labels, preds)
-            # 
+            #
             #         if r2 < 0:
             #             r2 = 0
-            # 
+            #
             #         return "r2", -r2
-            # 
+            #
             #     model.set_params(eval_metric=evalerror)
             #     model.fit(
             #         X_train,
@@ -522,17 +494,16 @@ class Decoder:
             # else:
             #     model.fit(X_train, y_train, eval_set=[(X_val, y_val)])
         else:
-
             # check for LDA; and apply rebalancing
             if self.oversampling:
                 X_train, y_train = self.ros.fit_resample(X_train, y_train)
             if self.undersampling:
                 X_train, y_train = self.rus.fit_resample(X_train, y_train)
 
-            #if type(model) is xgboost.sklearn.XGBClassifier:
+            # if type(model) is xgboost.sklearn.XGBClassifier:
             #    model.set_params(eval_metric="logloss")
             #    model.fit(X_train, y_train)
-            #else:
+            # else:
             model.fit(X_train, y_train)
 
         return model
@@ -548,7 +519,6 @@ class Decoder:
         save_data=True,
         save_probabilities=False,
     ) -> CV_res:
-
         if self.save_coef:
             cv_res.coef.append(model_train.coef_)
 
@@ -575,9 +545,7 @@ class Decoder:
             cv_res.X_train.append(X_train)
             cv_res.X_test.append(X_test)
         if self.model_save:
-            cv_res.model_save.append(
-                deepcopy(model_train)
-            )  # clone won't copy params
+            cv_res.model_save.append(deepcopy(model_train))  # clone won't copy params
         cv_res.y_train.append(y_train)
         cv_res.y_test.append(y_test)
 
@@ -597,7 +565,6 @@ class Decoder:
         y_train_pr: np.ndarray,
         cv_res: CV_res,
     ) -> CV_res:
-
         mov_detection_rate, fpr, tpr = self.calc_movement_detection_rate(
             y_test,
             y_test_pr,
@@ -632,7 +599,6 @@ class Decoder:
         return_fitted_model_only: bool = False,
         save_data=True,
     ):
-
         if cv_res is None:
             cv_res = CV_res(
                 get_movement_detection_rate=self.get_movement_detection_rate,
@@ -674,8 +640,7 @@ class Decoder:
                 ]
                 if self.columns_names_single_ch is None:
                     self.columns_names_single_ch = [
-                        f[len(self.ch_name_tested) + 1 :]
-                        for f in columns_names
+                        f[len(self.ch_name_tested) + 1 :] for f in columns_names
                     ]
             else:
                 # analyze all_ch_combined
@@ -684,9 +649,7 @@ class Decoder:
             X_test = pd.DataFrame(X_test, columns=columns_names)
 
             y_train = pd.Series(y_train)
-            selected_features = mrmr_classif(
-                X=X_train, y=y_train, K=20, n_jobs=60
-            )
+            selected_features = mrmr_classif(X=X_train, y=y_train, K=20, n_jobs=60)
 
             X_train = X_train[selected_features]
             X_test = X_test[selected_features]
@@ -704,7 +667,6 @@ class Decoder:
             X_test = cca.transform(X_test)
 
         if self.STACK_FEATURES_N_SAMPLES:
-
             if return_fitted_model_only:
                 X_train, y_train = self.append_previous_n_samples(
                     X_train, y_train, self.time_stack_n_samples
@@ -743,13 +705,10 @@ class Decoder:
 
         def split_data(data):
             if self.cv_method == "NonShuffledTrainTestSplit":
-
                 # set outer 10s set to train index
                 # test index is thus in the middle starting at random number
                 N_samples = data.shape[0]
-                test_area_points = (N_samples - self.sfreq * 10) - (
-                    self.sfreq * 10
-                )
+                test_area_points = (N_samples - self.sfreq * 10) - (self.sfreq * 10)
                 test_points = int(N_samples * 0.3)
 
                 if test_area_points > test_points:
@@ -757,9 +716,7 @@ class Decoder:
                         int(self.sfreq * 10),
                         N_samples - self.sfreq * 10 - test_points,
                     )
-                    test_index = np.arange(
-                        start_index, start_index + test_points
-                    )
+                    test_index = np.arange(start_index, start_index + test_points)
                     train_index = np.concatenate(
                         (
                             np.arange(0, start_index),
@@ -805,9 +762,7 @@ class Decoder:
             if self.use_nested_cv:
                 data_inner = data[train_index]
                 label_inner = label[train_index]
-                for train_index_inner, test_index_inner in split_data(
-                    data_inner
-                ):
+                for train_index_inner, test_index_inner in split_data(data_inner):
                     X_train_inner = data_inner[train_index_inner, :]
                     y_train_inner = label_inner[train_index_inner]
                     X_test_inner = data_inner[test_index_inner]
@@ -852,9 +807,7 @@ class Decoder:
         # set bay. opt. obtained best params to model
         params_bo_dict = {}
         for i in range(len(params_bo)):
-            setattr(
-                model_train, self.bay_opt_param_space[i].name, params_bo[i]
-            )
+            setattr(model_train, self.bay_opt_param_space[i].name, params_bo[i])
             params_bo_dict[self.bay_opt_param_space[i].name] = params_bo[i]
 
         self.best_bay_opt_params.append(params_bo_dict)
@@ -906,7 +859,6 @@ class Decoder:
         """
 
         def get_f_val(model_bo):
-
             try:
                 model_bo = self.fit_model(model_bo, X_train, y_train)
             except Decoder.ClassMissingException:
@@ -936,19 +888,13 @@ class Decoder:
         # res is here automatically appended by skopt
         return res.x
 
-    def save(
-        self, feature_path: str, feature_file: str, str_save_add=None
-    ) -> None:
+    def save(self, feature_path: str, feature_file: str, str_save_add=None) -> None:
         """Save decoder object to pickle"""
 
         # why is the decoder not saved to a .json?
 
         if str_save_add is None:
-            PATH_OUT = PurePath(
-                feature_path,
-                feature_file,
-                feature_file + "_ML_RES.p"
-            )
+            PATH_OUT = PurePath(feature_path, feature_file, feature_file + "_ML_RES.p")
         else:
             PATH_OUT = PurePath(
                 feature_path,

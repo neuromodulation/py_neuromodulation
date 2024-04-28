@@ -5,9 +5,7 @@ from collections.abc import Iterable
 
 class Feature(ABC):
     @abstractmethod
-    def __init__(
-        self, settings: dict, ch_names: Iterable[str], sfreq: float
-    ) -> None:
+    def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: float) -> None:
         pass
 
     @staticmethod

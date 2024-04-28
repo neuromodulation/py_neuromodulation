@@ -4,7 +4,6 @@ from py_neuromodulation.nm_filter import MNEFilter
 
 
 class PreprocessingFilter:
-
     def __init__(self, settings: dict, sfreq: float) -> None:
         self.s = settings
         self.sfreq = sfreq
@@ -14,12 +13,12 @@ class PreprocessingFilter:
             self.filters.append(
                 MNEFilter(
                     f_ranges=[
-                        self.s["preprocessing_filter"][
-                            "bandstop_filter_settings"
-                        ]["frequency_high_hz"],
-                        self.s["preprocessing_filter"][
-                            "bandstop_filter_settings"
-                        ]["frequency_low_hz"],
+                        self.s["preprocessing_filter"]["bandstop_filter_settings"][
+                            "frequency_high_hz"
+                        ],
+                        self.s["preprocessing_filter"]["bandstop_filter_settings"][
+                            "frequency_low_hz"
+                        ],
                     ],
                     sfreq=self.sfreq,
                     filter_length=self.sfreq - 1,
@@ -31,12 +30,12 @@ class PreprocessingFilter:
             self.filters.append(
                 MNEFilter(
                     f_ranges=[
-                        self.s["preprocessing_filter"][
-                            "bandpass_filter_settings"
-                        ]["frequency_low_hz"],
-                        self.s["preprocessing_filter"][
-                            "bandpass_filter_settings"
-                        ]["frequency_high_hz"],
+                        self.s["preprocessing_filter"]["bandpass_filter_settings"][
+                            "frequency_low_hz"
+                        ],
+                        self.s["preprocessing_filter"]["bandpass_filter_settings"][
+                            "frequency_high_hz"
+                        ],
                     ],
                     sfreq=self.sfreq,
                     filter_length=self.sfreq - 1,
@@ -48,9 +47,9 @@ class PreprocessingFilter:
                 MNEFilter(
                     f_ranges=[
                         None,
-                        self.s["preprocessing_filter"][
-                            "lowpass_filter_settings"
-                        ]["frequency_cutoff_hz"],
+                        self.s["preprocessing_filter"]["lowpass_filter_settings"][
+                            "frequency_cutoff_hz"
+                        ],
                     ],
                     sfreq=self.sfreq,
                     filter_length=self.sfreq - 1,
@@ -61,9 +60,9 @@ class PreprocessingFilter:
             self.filters.append(
                 MNEFilter(
                     f_ranges=[
-                        self.s["preprocessing_filter"][
-                            "highpass_filter_settings"
-                        ]["frequency_cutoff_hz"],
+                        self.s["preprocessing_filter"]["highpass_filter_settings"][
+                            "frequency_cutoff_hz"
+                        ],
                         None,
                     ],
                     sfreq=self.sfreq,
@@ -85,7 +84,5 @@ class PreprocessingFilter:
         """
 
         for filter in self.filters:
-            data = filter.filter_data(
-                data if len(data.shape) == 2 else data[:, 0, :]
-            )
+            data = filter.filter_data(data if len(data.shape) == 2 else data[:, 0, :])
         return data if len(data.shape) == 2 else data[:, 0, :]

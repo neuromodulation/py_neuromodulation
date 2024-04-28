@@ -1,7 +1,9 @@
 """Module for resampling."""
+
 import numpy as np
 
 from mne.filter import resample as mne_resample
+
 
 class Resampler:
     """Resample data.
@@ -22,10 +24,9 @@ class Resampler:
         sfreq: float,
         resample_freq_hz: float,
     ) -> None:
-
         self.test_settings(resample_freq_hz)
 
-        ratio = float(resample_freq_hz/ sfreq)
+        ratio = float(resample_freq_hz / sfreq)
         if ratio == 1.0:
             self.up = 0.0
         else:
@@ -50,4 +51,3 @@ class Resampler:
 
     def test_settings(self, resample_freq_hz):
         assert isinstance(resample_freq_hz, (float, int))
-        

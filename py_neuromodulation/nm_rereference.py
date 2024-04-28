@@ -1,10 +1,10 @@
 """Re-referencing Module."""
+
 import numpy as np
 import pandas as pd
 
 
 class ReReferencer:
-
     def __init__(
         self,
         sfreq: float,
@@ -25,12 +25,10 @@ class ReReferencer:
             ValueError: rereferencing using undefined channel
             ValueError: rereferencing to same channel
         """
-        
+
         self.ref_matrix: np.ndarray | None
-        
-        nm_channels = nm_channels[nm_channels["used"] == 1].reset_index(
-            drop=True
-        )
+
+        nm_channels = nm_channels[nm_channels["used"] == 1].reset_index(drop=True)
         # (channels_used,) = np.where((nm_channels.used == 1))
 
         ch_names = nm_channels["name"].tolist()
@@ -95,5 +93,3 @@ class ReReferencer:
             return self.ref_matrix @ data
         else:
             return data
-
-        

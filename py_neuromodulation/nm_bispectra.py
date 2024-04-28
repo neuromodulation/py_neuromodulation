@@ -6,9 +6,7 @@ from py_neuromodulation.nm_features_abc import Feature
 
 
 class Bispectra(Feature):
-    def __init__(
-        self, settings: dict, ch_names: Iterable[str], sfreq: float
-    ) -> None:
+    def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: float) -> None:
         super().__init__(settings, ch_names, sfreq)
         self.sfreq = sfreq
         self.ch_names = ch_names
@@ -72,10 +70,10 @@ class Bispectra(Feature):
         component: str,
         f_band: str | None,
     ) -> dict:
-        func : Callable
+        func: Callable
         for bispectrum_feature in self.s["bispectrum"]["bispectrum_features"]:
             if bispectrum_feature == "mean":
-                func  = np.nanmean
+                func = np.nanmean
             if bispectrum_feature == "sum":
                 func = np.nansum
             if bispectrum_feature == "var":
@@ -149,9 +147,7 @@ class Bispectra(Feature):
                 for fb in self.s["bispectrum"]["frequency_bands"]:
                     range_ = (
                         f_spectrum_range >= self.s["frequency_ranges_hz"][fb][0]
-                    ) & (
-                        f_spectrum_range <= self.s["frequency_ranges_hz"][fb][1]
-                    )
+                    ) & (f_spectrum_range <= self.s["frequency_ranges_hz"][fb][1])
                     # waveshape.results.plot()
                     data_bs = spectrum_ch[range_, range_]
 
@@ -159,9 +155,7 @@ class Bispectra(Feature):
                         data_bs, features_compute, ch_name, component, fb
                     )
 
-                if self.s["bispectrum"][
-                    "compute_features_for_whole_fband_range"
-                ]:
+                if self.s["bispectrum"]["compute_features_for_whole_fband_range"]:
                     features_compute = self.compute_bs_features(
                         spectrum_ch, features_compute, ch_name, component, None
                     )

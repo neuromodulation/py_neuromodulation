@@ -5,11 +5,11 @@ from py_neuromodulation.nm_normalization import normalize_features, normalize_ra
 from py_neuromodulation.nm_filter import apply_filter
 from py_neuromodulation.nm_oscillatory import STFT, BandPower
 
-#from py_neuromodulation import (
-    # The following 2 files do not exist in the project, maybe there were deleted?
-    # nm_stft, 
-    # nm_bandpower,
-#)
+# from py_neuromodulation import (
+# The following 2 files do not exist in the project, maybe there were deleted?
+# nm_stft,
+# nm_bandpower,
+# )
 
 
 class NM_Timer:
@@ -19,7 +19,6 @@ class NM_Timer:
         self.get_timings()
 
     def get_timings(self, number_repeat=1000):
-
         features_ = {}
         ch_idx = 0
         fs = self.analyzer.fs
@@ -53,9 +52,7 @@ class NM_Timer:
             data = np.random.random(
                 [
                     N_CH_AFTER_REREF,
-                    self.analyzer.settings["raw_resampling_settings"][
-                        "resample_freq"
-                    ],
+                    self.analyzer.settings["raw_resampling_settings"]["resample_freq"],
                 ]
             )
 
@@ -75,18 +72,18 @@ class NM_Timer:
                         current=data,
                         previous=data.T,
                         normalize_samples=int(
-                            self.analyzer.settings[
-                                "raw_normalization_settings"
-                            ]["normalization_time"]
+                            self.analyzer.settings["raw_normalization_settings"][
+                                "normalization_time"
+                            ]
                             * self.analyzer.fs
                         ),
                         sample_add=int(self.analyzer.fs / self.analyzer.fs_new),
-                        method=self.analyzer.settings[
-                            "raw_normalization_settings"
-                        ]["normalization_method"],
-                        clip=self.analyzer.settings[
-                            "raw_normalization_settings"
-                        ]["clip"],
+                        method=self.analyzer.settings["raw_normalization_settings"][
+                            "normalization_method"
+                        ],
+                        clip=self.analyzer.settings["raw_normalization_settings"][
+                            "clip"
+                        ],
                     ),
                     number=number_repeat,
                 )
@@ -105,12 +102,12 @@ class NM_Timer:
                         current=features_current.to_numpy(),
                         previous=features_previous,
                         normalize_samples=self.analyzer.feat_normalize_samples,
-                        method=self.analyzer.settings[
-                            "feature_normalization_settings"
-                        ]["normalization_method"],
-                        clip=self.analyzer.settings[
-                            "feature_normalization_settings"
-                        ]["clip"],
+                        method=self.analyzer.settings["feature_normalization_settings"][
+                            "normalization_method"
+                        ],
+                        clip=self.analyzer.settings["feature_normalization_settings"][
+                            "clip"
+                        ],
                     ),
                     number=number_repeat,
                 )
@@ -120,9 +117,7 @@ class NM_Timer:
         if self.analyzer.settings["methods"]["project_cortex"]:
             dict_timings["time_projection"] = (
                 timeit.timeit(
-                    lambda: self.analyzer.projection.project_features(
-                        features_current
-                    ),
+                    lambda: self.analyzer.projection.project_features(features_current),
                     number=number_repeat,
                 )
                 / number_repeat

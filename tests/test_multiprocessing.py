@@ -52,6 +52,8 @@ def test_multiprocessing_and_sequntial_features(get_stream):
             # This tests fails on Linux and Windows but passes on Mac OS; no idea why
             continue
 
-        assert features_sequential[column].equals(
+        assert features_sequential[
+            column
+        ].equals(
             features_multiprocessing[column]
         ), f"Column {column} is not equal between sequential and parallel dataframes computation"

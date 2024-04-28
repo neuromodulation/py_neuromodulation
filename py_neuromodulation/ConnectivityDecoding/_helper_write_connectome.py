@@ -13,7 +13,6 @@ def write_connectome_mat(
     ),
     func_: bool = False,
 ):
-
     # connectome = sio.loadmat(PATH_CONNECTOME)  # check if read was successful
 
     # load all fingerprints and put them in .npy
@@ -22,16 +21,13 @@ def write_connectome_mat(
         files_fps = [f for f in os.listdir(PATH_Fingerprints) if ".nii" in f]
     else:
         files_fps = [
-            f
-            for f in os.listdir(PATH_Fingerprints)
-            if "func_seed_AvgR_Fz.nii" in f
+            f for f in os.listdir(PATH_Fingerprints) if "func_seed_AvgR_Fz.nii" in f
         ]
 
     # I except 1025 files, check which ones are missing
     missing_files = []
 
     for i in range(1, 1026):
-
         MISSING = False
 
         if func_ is False:
@@ -48,20 +44,14 @@ def write_connectome_mat(
                 r"D:\Connectome_RMAP_OUT\whole_brain\ROIs", f"ROI-{i}.nii"
             )
             # copy the ROI file to the following folder:
-            PATH_ROI_OUT = (
-                r"D:\Connectome_RMAP_OUT\whole_brain\ROI_missing_struc"
-            )
+            PATH_ROI_OUT = r"D:\Connectome_RMAP_OUT\whole_brain\ROI_missing_struc"
             import shutil
 
             shutil.copy(ROI_file, os.path.join(PATH_ROI_OUT, f"ROI-{i}.nii"))
 
     for idx, f in enumerate(files_fps):
         # load the .nii file and put it all in in a dictionary with the name of the file
-        fp = (
-            nib.load(os.path.join(PATH_Fingerprints, f))
-            .get_fdata()
-            .astype(np.float16)
-        )
+        fp = nib.load(os.path.join(PATH_Fingerprints, f)).get_fdata().astype(np.float16)
         if "struc" in f:
             dict_connectome[f[f.find("ROI-") + 4 : f.find("_struc")]] = fp
         else:
@@ -78,7 +68,6 @@ def write_connectome_mat(
 
 
 if __name__ == "__main__":
-
     write_connectome_mat(
         PATH_Fingerprints=r"D:\Connectome_RMAP_OUT\whole_brain\struc\HCP1000 6K",
         PATH_CONNECTOME=os.path.join(

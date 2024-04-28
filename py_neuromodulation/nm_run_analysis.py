@@ -10,6 +10,7 @@ from py_neuromodulation import nm_IO, logger
 from py_neuromodulation.nm_types import _PathLike
 
 from py_neuromodulation.nm_features import Features
+
 # Perhaps have all the followings in a Preprocessor dictionary like for Features
 from py_neuromodulation.nm_filter_preprocessing import PreprocessingFilter
 from py_neuromodulation.nm_filter import NotchFilter
@@ -19,18 +20,17 @@ from py_neuromodulation.nm_normalization import RawNormalizer, FeatureNormalizer
 from py_neuromodulation.nm_projection import Projection
 
 
-
 class Preprocessor(Protocol):
     def process(self, data: np.ndarray) -> np.ndarray:
         pass
 
 
 _PREPROCESSING_CONSTRUCTORS = [
-        "raw_resampling",
-        "notch_filter",
-        "re_referencing",
-        "raw_normalization",
-        "preprocessing_filter"
+    "raw_resampling",
+    "notch_filter",
+    "re_referencing",
+    "raw_normalization",
+    "preprocessing_filter",
 ]
 
 
@@ -163,7 +163,7 @@ class DataProcessor:
                 return val < 0
             return val > 0
 
-        coords: dict[str, dict[str, list | np.ndarray] ] = {}
+        coords: dict[str, dict[str, list | np.ndarray]] = {}
 
         for coord_region in [
             coord_loc + "_" + lat
@@ -172,25 +172,22 @@ class DataProcessor:
         ]:
             coords[coord_region] = {}
 
-            ch_type = (
-                "ECOG" if "cortex" == coord_region.split("_")[0] else "LFP"
-            )
+            ch_type = "ECOG" if "cortex" == coord_region.split("_")[0] else "LFP"
 
             coords[coord_region]["ch_names"] = [
                 coord_name
                 for coord_name, ch in zip(coord_names, coord_list)
-                if is_left_coord(ch[0], coord_region)
-                and (ch_type in coord_name)
+                if is_left_coord(ch[0], coord_region) and (ch_type in coord_name)
             ]
 
             # multiply by 1000 to get m instead of mm
             positions = []
             for coord, coord_name in zip(coord_list, coord_names):
-                if is_left_coord(coord[0], coord_region) and (
-                    ch_type in coord_name
-                ):
+                if is_left_coord(coord[0], coord_region) and (ch_type in coord_name):
                     positions.append(coord)
-            coords[coord_region]["positions"] = np.array(positions, dtype=np.float64) * 1000
+            coords[coord_region]["positions"] = (
+                np.array(positions, dtype=np.float64) * 1000
+            )
 
         return coords
 
@@ -199,15 +196,11 @@ class DataProcessor:
     ) -> tuple[list[str], list[str], list[int], np.ndarray]:
         """Get used feature and label info from nm_channels"""
         nm_channels = self.nm_channels
-        ch_names_used = nm_channels[nm_channels["used"] == 1][
-            "new_name"
-        ].tolist()
+        ch_names_used = nm_channels[nm_channels["used"] == 1]["new_name"].tolist()
         ch_types_used = nm_channels[nm_channels["used"] == 1]["type"].tolist()
 
         # used channels for feature estimation
-        feature_idx = np.where(nm_channels["used"] & ~nm_channels["target"])[
-            0
-        ].tolist()
+        feature_idx = np.where(nm_channels["used"] & ~nm_channels["target"])[0].tolist()
 
         # If multiple targets exist, select only the first
         label_idx = np.where(nm_channels["target"] == 1)[0]
@@ -237,9 +230,7 @@ class DataProcessor:
         else:
             grid_cortex = None
         if settings["postprocessing"]["project_subcortex"]:
-            grid_subcortex = nm_IO.read_grid(
-                path_grids, "subcortex"
-            )
+            grid_subcortex = nm_IO.read_grid(path_grids, "subcortex")
         else:
             grid_subcortex = None
         return grid_cortex, grid_subcortex
@@ -257,9 +248,7 @@ class DataProcessor:
         ):
             return None
 
-        grid_cortex, grid_subcortex = self._get_grids(
-            self.settings, self.path_grids
-        )
+        grid_cortex, grid_subcortex = self._get_grids(self.settings, self.path_grids)
         projection = Projection(
             settings=settings,
             grid_cortex=grid_cortex,
@@ -302,7 +291,8 @@ class DataProcessor:
             )
 
         return self._add_coordinates(
-            coord_names=coord_names, coord_list=coord_list  # type: ignore # None case handled above
+            coord_names=coord_names,
+            coord_list=coord_list,  # type: ignore # None case handled above
         )
 
     def process(self, data: np.ndarray) -> pd.Series:
@@ -348,22 +338,16 @@ class DataProcessor:
 
         # project features to grid
         if self.projection:
-            features_current = self.projection.project_features(
-                features_current
-            )
+            features_current = self.projection.project_features(features_current)
 
         # check for all features, where the channel had a NaN, that the feature is also put to NaN
         if nan_channels.sum() > 0:
             for ch in list(np.array(self.ch_names_used)[nan_channels]):
-                features_current.loc[
-                    features_current.index.str.contains(ch)
-                ] = np.nan
+                features_current.loc[features_current.index.str.contains(ch)] = np.nan
 
         if self.verbose:
             logger.info(
-                "Last batch took: "
-                + str(np.round(time() - start_time, 2))
-                + " seconds"
+                "Last batch took: " + str(np.round(time() - start_time, 2)) + " seconds"
             )
 
         return features_current
@@ -377,7 +361,7 @@ class DataProcessor:
         """Save sidecar incuding fs, coords, sess_right to
         out_path_root and subfolder 'folder_name'.
         """
-        sidecar : dict = {
+        sidecar: dict = {
             "original_fs": self._sfreq_raw_orig,
             "final_fs": self.sfreq_raw,
             "sfreq": self.sfreq_features,
@@ -386,14 +370,10 @@ class DataProcessor:
             sidecar["coords"] = self.projection.coords
             if self.settings["postprocessing"]["project_cortex"]:
                 sidecar["grid_cortex"] = self.projection.grid_cortex
-                sidecar["proj_matrix_cortex"] = (
-                    self.projection.proj_matrix_cortex
-                )
+                sidecar["proj_matrix_cortex"] = self.projection.proj_matrix_cortex
             if self.settings["postprocessing"]["project_subcortex"]:
                 sidecar["grid_subcortex"] = self.projection.grid_subcortex
-                sidecar["proj_matrix_subcortex"] = (
-                    self.projection.proj_matrix_subcortex
-                )
+                sidecar["proj_matrix_subcortex"] = self.projection.proj_matrix_subcortex
         if additional_args is not None:
             sidecar = sidecar | additional_args
 
@@ -402,9 +382,7 @@ class DataProcessor:
     def save_settings(self, out_path_root: _PathLike, folder_name: str) -> None:
         nm_IO.save_settings(self.settings, out_path_root, folder_name)
 
-    def save_nm_channels(
-        self, out_path_root: _PathLike, folder_name: str
-    ) -> None:
+    def save_nm_channels(self, out_path_root: _PathLike, folder_name: str) -> None:
         nm_IO.save_nm_channels(self.nm_channels, out_path_root, folder_name)
 
     def save_features(

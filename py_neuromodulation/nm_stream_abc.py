@@ -11,8 +11,8 @@ from py_neuromodulation.nm_run_analysis import DataProcessor
 from py_neuromodulation.nm_settings import get_default_settings
 from py_neuromodulation.nm_types import _PathLike
 
-class PNStream(ABC):
 
+class PNStream(ABC):
     def __init__(
         self,
         sfreq: float,
@@ -51,9 +51,7 @@ class PNStream(ABC):
         self.settings = self._load_settings(settings)
 
         if sampling_rate_features_hz is not None:
-            self.settings["sampling_rate_features_hz"] = (
-                sampling_rate_features_hz
-            )
+            self.settings["sampling_rate_features_hz"] = sampling_rate_features_hz
 
         self.nm_channels = self._load_nm_channels(nm_channels)
         if path_grids is None:
@@ -97,9 +95,7 @@ class PNStream(ABC):
         )
 
     @abstractmethod
-    def _add_timestamp(
-        self, feature_series: pd.Series, cnt_samples: int
-    ) -> pd.Series:
+    def _add_timestamp(self, feature_series: pd.Series, cnt_samples: int) -> pd.Series:
         """Add to feature_series "time" keyword
         For Bids specify with fs_features, for real time analysis with current time stamp
         """
@@ -150,13 +146,13 @@ class PNStream(ABC):
         """Save features, settings, nm_channels and sidecar after run"""
 
         out_path_root = Path.cwd() if not out_path_root else Path(out_path_root)
-            
+
         # create derivate folder_name output folder if doesn't exist
         (out_path_root / folder_name).mkdir(parents=True, exist_ok=True)
 
         self.PATH_OUT = out_path_root
         self.PATH_OUT_folder_name = folder_name
-        
+
         self.save_sidecar(out_path_root, folder_name)
 
         if feature_arr is not None:
@@ -174,9 +170,7 @@ class PNStream(ABC):
     ) -> None:
         nm_IO.save_features(feature_arr, out_path_root, folder_name)
 
-    def save_nm_channels(
-        self, out_path_root: _PathLike, folder_name: str
-    ) -> None:
+    def save_nm_channels(self, out_path_root: _PathLike, folder_name: str) -> None:
         self.run_analysis.save_nm_channels(out_path_root, folder_name)
 
     def save_settings(self, out_path_root: _PathLike, folder_name: str) -> None:
@@ -186,6 +180,4 @@ class PNStream(ABC):
         """Save sidecar incduing fs, coords, sess_right to
         out_path_root and subfolder 'folder_name'"""
         additional_args = {"sess_right": self.sess_right}
-        self.run_analysis.save_sidecar(
-            out_path_root, folder_name, additional_args
-        )
+        self.run_analysis.save_sidecar(out_path_root, folder_name, additional_args)

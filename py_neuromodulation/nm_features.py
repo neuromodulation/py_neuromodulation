@@ -12,14 +12,14 @@ from py_neuromodulation.nm_mne_connectivity import MNEConnectivity
 from py_neuromodulation.nm_bispectra import Bispectra
 
 from py_neuromodulation.nm_features_abc import Feature
+
+
 class Features:
     """Class for calculating features.p"""
 
     # features: list[nm_features_abc.Feature] = []
 
-    def __init__(
-        self, s: dict, ch_names: list[str], sfreq: float
-    ) -> None:
+    def __init__(self, s: dict, ch_names: list[str], sfreq: float) -> None:
         """_summary_
 
         Parameters
@@ -37,7 +37,7 @@ class Features:
             _description_
         """
 
-        self.features: list[Feature]  = []
+        self.features: list[Feature] = []
 
         feature: Feature
         for feature in s["features"]:
@@ -103,7 +103,7 @@ class Features:
         dat (dict): naming convention : channel_method_feature_(f_band)
         """
 
-        features_compute : dict = {}
+        features_compute: dict = {}
 
         for feature in self.features:
             features_compute = feature.calc_feature(

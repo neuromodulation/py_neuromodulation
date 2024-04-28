@@ -2,6 +2,7 @@ import numpy as np
 
 import py_neuromodulation as nm
 
+
 def test_post_init_nm_channels_change():
     """Test if post initialization of nm_channels will also be ported to the feature computation."""
 
@@ -32,9 +33,7 @@ def test_post_init_nm_channels_used_channels_change_single_channel():
 
     features = stream.run(data)
 
-    chs_not_used = stream.nm_channels[stream.nm_channels["used"] == 0][
-        "new_name"
-    ]
+    chs_not_used = stream.nm_channels[stream.nm_channels["used"] == 0]["new_name"]
 
     assert (
         np.sum(
@@ -59,9 +58,7 @@ def test_post_init_nm_channels_used_channels_change_multiple_channel():
 
     features = stream.run(data)
 
-    chs_not_used = stream.nm_channels[stream.nm_channels["used"] == 0][
-        "new_name"
-    ]
+    chs_not_used = stream.nm_channels[stream.nm_channels["used"] == 0]["new_name"]
 
     assert (
         np.sum(

@@ -19,7 +19,7 @@ def plot_df_subjects(
     hue=None,
     title="channel specific performances",
     PATH_SAVE: _PathLike = "",
-    figsize_tuple: tuple[float,float] = (5, 3),
+    figsize_tuple: tuple[float, float] = (5, 3),
 ):
     alpha_box = 0.4
     plt.figure(figsize=figsize_tuple, dpi=300)
@@ -37,9 +37,7 @@ def plot_df_subjects(
         notch=False,
         whiskerprops={"linewidth": 2, "zorder": 10, "alpha": alpha_box},
         capprops={"alpha": alpha_box},
-        medianprops=dict(
-            linestyle="-", linewidth=5, color="gray", alpha=alpha_box
-        ),
+        medianprops=dict(linestyle="-", linewidth=5, color="gray", alpha=alpha_box),
     )
 
     ax = sb.stripplot(
@@ -53,17 +51,17 @@ def plot_df_subjects(
     )
 
     if hue is not None:
-        n_hues = df[hue].nunique() 
+        n_hues = df[hue].nunique()
 
         handles, labels = ax.get_legend_handles_labels()
         plt.legend(
-             handles[0:n_hues],
-             labels[0:n_hues],
-             bbox_to_anchor=(1.05, 1),
-             loc=2,
-             title=hue,
-             borderaxespad=0.0,
-         )
+            handles[0:n_hues],
+            labels[0:n_hues],
+            bbox_to_anchor=(1.05, 1),
+            loc=2,
+            title=hue,
+            borderaxespad=0.0,
+        )
     plt.title(title)
     plt.ylabel(y_col)
     plt.xticks(rotation=90)
@@ -97,9 +95,7 @@ def plot_epoch(
     plt.figure(figsize=(6, 6))
     plt.subplot(211)
     plt.imshow(X_epoch, aspect="auto")
-    plt.yticks(
-        np.arange(0, len(feature_names), 1), feature_names, size=ytick_labelsize
-    )
+    plt.yticks(np.arange(0, len(feature_names), 1), feature_names, size=ytick_labelsize)
     plt.xticks(
         np.arange(0, X_epoch.shape[1], 1),
         np.round(np.arange(-epoch_len / 2, epoch_len / 2, 1 / sfreq), 2),
@@ -204,7 +200,9 @@ def plot_corr_matrix(
         feature_col_name = feature.columns
 
     plt.figure(figsize=figsize)
-    if len(feature_names) > 0: # Checking length to accomodate for tests passing a pandas Index
+    if (
+        len(feature_names) > 0
+    ):  # Checking length to accomodate for tests passing a pandas Index
         corr = feature[feature_names].corr()
     else:
         corr = feature.corr()
@@ -230,16 +228,16 @@ def plot_corr_matrix(
 
     if save_plot:
         plt_path = (
-            PurePath(OUT_PATH, save_plot_name) 
-            if save_plot_name 
+            PurePath(OUT_PATH, save_plot_name)
+            if save_plot_name
             else get_plt_path(
                 OUT_PATH=OUT_PATH,
                 feature_file=feature_file,
                 ch_name=ch_name,
                 str_plt_type=feature_name_plt,
-                feature_name='_'.join(feature_names)
-                )
+                feature_name="_".join(feature_names),
             )
+        )
 
         plt.savefig(plt_path, bbox_inches="tight")
         logger.info(f"Correlation matrix figure saved to {plt_path}")
@@ -279,13 +277,14 @@ def get_plt_path(
         e.g. bandpower, stft, sharpwave_prominence, by default None
     """
     filename = (
-        str_plt_type 
+        str_plt_type
         + (("_ch_" + ch_name) if ch_name else "")
-        + (("_" + feature_name) if feature_name else "") 
+        + (("_" + feature_name) if feature_name else "")
         + ".png"
-        )
+    )
 
     return PurePath(OUT_PATH, feature_file, filename)
+
 
 def plot_epochs_avg(
     X_epoch: np.ndarray,
@@ -303,7 +302,7 @@ def plot_epochs_avg(
     OUT_PATH: _PathLike = "",
     feature_file: str = "",
     str_title: str = "Movement aligned features",
-    ytick_labelsize = None,
+    ytick_labelsize=None,
     figsize_x: float = 8,
     figsize_y: float = 8,
 ) -> None:
@@ -311,9 +310,7 @@ def plot_epochs_avg(
     if not feature_names:
         if cut_ch_name_cols and None not in (ch_name, feature_names):
             feature_names = [
-                i[len(ch_name) + 1 :]
-                for i in list(feature_names)
-                if ch_name in i
+                i[len(ch_name) + 1 :] for i in list(feature_names) if ch_name in i
             ]
 
     if normalize_data:
@@ -330,9 +327,7 @@ def plot_epochs_avg(
     gs = gridspec.GridSpec(2, 1, height_ratios=[2.5, 1])
     plt.subplot(gs[0])
     plt.imshow(X_epoch_mean, aspect="auto")
-    plt.yticks(
-        np.arange(0, len(feature_names), 1), feature_names, size=ytick_labelsize
-    )
+    plt.yticks(np.arange(0, len(feature_names), 1), feature_names, size=ytick_labelsize)
     plt.xticks(
         np.arange(0, X_epoch.shape[1], int(X_epoch.shape[1] / 10)),
         np.round(np.arange(-epoch_len / 2, epoch_len / 2, epoch_len / 10), 2),
@@ -388,9 +383,7 @@ def plot_grid_elec_3d(
     ax = plt.axes(projection="3d")
 
     if cortex_grid is not None:
-        grid_color = (
-            np.ones(cortex_grid.shape[0]) if grid_color is None else grid_color
-        )
+        grid_color = np.ones(cortex_grid.shape[0]) if grid_color is None else grid_color
         _ = ax.scatter3D(
             cortex_grid[:, 0],
             cortex_grid[:, 1],
@@ -410,7 +403,7 @@ def plot_grid_elec_3d(
             ecog_strip[:, 1],
             ecog_strip[:, 2],
             c=strip_color,
-            s=500, # Bug? Third argument is s, what is this value?
+            s=500,  # Bug? Third argument is s, what is this value?
             alpha=0.8,
             cmap="gray",
             marker="o",
@@ -523,7 +516,7 @@ class NM_Plot:
 
         if grid_cortex is None:
             if type(self.grid_cortex) is pd.DataFrame:
-                grid_cortex = np.array(self.grid_cortex) 
+                grid_cortex = np.array(self.grid_cortex)
             else:
                 grid_cortex = self.grid_cortex
 
@@ -531,7 +524,7 @@ class NM_Plot:
             ecog_strip = self.ecog_strip
 
         if sess_right:
-            grid_cortex[0, :] = grid_cortex[0, :] * -1 # type: ignore # Handled above
+            grid_cortex[0, :] = grid_cortex[0, :] * -1  # type: ignore # Handled above
 
         fig, axes = plt.subplots(1, 1, facecolor=(1, 1, 1), figsize=(14, 9))
         axes.scatter(self.x_ecog, self.y_ecog, c="gray", s=0.01)
@@ -539,9 +532,7 @@ class NM_Plot:
 
         if grid_cortex is not None:
             grid_color = (
-                np.ones(grid_cortex.shape[0])
-                if grid_color is None
-                else grid_color
+                np.ones(grid_cortex.shape[0]) if grid_color is None else grid_color
             )
 
             pos_ecog = axes.scatter(
@@ -557,9 +548,7 @@ class NM_Plot:
                 pos_ecog.set_clim(lower_clim, upper_clim)
         if ecog_strip is not None:
             strip_color = (
-                np.ones(ecog_strip.shape[0])
-                if strip_color is None
-                else strip_color
+                np.ones(ecog_strip.shape[0]) if strip_color is None else strip_color
             )
 
             pos_ecog = axes.scatter(
@@ -588,8 +577,6 @@ class NM_Plot:
                 feature_name=feature_str_add,
             )
             plt.savefig(plt_path, bbox_inches="tight")
-            logger.info(
-                f"Feature epoch average figure saved to: {str(plt_path)}"
-            )
+            logger.info(f"Feature epoch average figure saved to: {str(plt_path)}")
         if not show_plot:
             plt.close()

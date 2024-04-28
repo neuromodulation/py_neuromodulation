@@ -9,9 +9,7 @@ from py_neuromodulation import (
 
 
 def get_example_settings(test_arr: np.ndarray) -> tuple[dict, pd.DataFrame]:
-    settings = nm_settings.set_settings_fast_compute(
-        nm_settings.get_default_settings()
-    )
+    settings = nm_settings.set_settings_fast_compute(nm_settings.get_default_settings())
 
     nm_channels = nm_define_nmchannels.get_default_channels_from_data(test_arr)
 
