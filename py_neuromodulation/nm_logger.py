@@ -13,7 +13,7 @@ LOG_LEVELS = {
 }
 
 
-class PYNMLogger(logging.Logger):
+class NMLogger(logging.Logger):
     """
     Subclass of logging.Logger with some extra functionality
     """
