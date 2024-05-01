@@ -189,7 +189,7 @@ class _GenericStream(NMStream):
             start_time = None
             while True:
                 next_item = next(generator, None)
-                print(next_item)
+
                 if next_item is not None:
                     time_, data_batch = next_item
                 else:
