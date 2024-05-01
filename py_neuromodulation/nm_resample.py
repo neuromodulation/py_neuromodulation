@@ -1,14 +1,18 @@
 """Module for resampling."""
-import mne
+
 import numpy as np
 
+from mne.filter import resample as mne_resample
 
-class Resampler:
+from py_neuromodulation.nm_preprocessing import NMPreprocessor
+
+
+class Resampler(NMPreprocessor):
     """Resample data.
 
     Parameters
     ----------
-    sfreq : int | float
+    sfreq : float
         Original sampling frequency.
 
     Attributes
@@ -19,14 +23,12 @@ class Resampler:
 
     def __init__(
         self,
-        sfreq: int | float,
-        resample_freq_hz: int | float,
+        sfreq: float,
+        resample_freq_hz: float,
     ) -> None:
+        self.test_settings(resample_freq_hz)
 
-        assert isinstance(resample_freq_hz, (float, int))
-
-        self.sfreq_new: int | float = resample_freq_hz
-        ratio = float(self.sfreq_new / sfreq)
+        ratio = float(resample_freq_hz / sfreq)
         if ratio == 1.0:
             self.up = 0.0
         else:
@@ -47,4 +49,7 @@ class Resampler:
         """
         if not self.up:
             return data
-        return mne.filter.resample(data.astype(np.float64), up=self.up, down=1.0)
+        return mne_resample(data.astype(np.float64), up=self.up, down=1.0)
+
+    def test_settings(self, resample_freq_hz):
+        assert isinstance(resample_freq_hz, (float, int))

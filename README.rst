@@ -40,21 +40,9 @@ py_neuromodulation requires at least python 3.10. For installation you can use p
 
     pip install py-neuromodulation
 
-We recommend however installing the package using `rye <https://rye-up.com/guide/installation/>`_:
-
-.. code-block::
-
-    git clone https://github.com/neuromodulation/py_neuromodulation.git
-    rye pin 3.11
-    rye sync
-
-And then activating the virtual environment e.g. in Windows using:
-
-.. code-block::
-
-    .\.venv\Scripts\activate
-
 Alternatively you can also install the package in a conda environment:
+
+.. code-block::
 
     conda create -n pynm-test python=3.11
     conda activate pynm-test

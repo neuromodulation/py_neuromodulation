@@ -1,16 +1,13 @@
-import os
+from collections.abc import Iterator
+from pathlib import Path
 import time
-import logging
-
-logger = logging.getLogger("PynmLogger")
-
-from typing import Iterator, Union
 from pynput import keyboard
 import numpy as np
-import mne
 from mne_lsl.player import PlayerLSL
 from mne_lsl.stream import StreamLSL
+import mne
 
+from py_neuromodulation import logger
 
 class LSLOfflinePlayer:
 
@@ -18,9 +15,9 @@ class LSLOfflinePlayer:
         self,
         settings: dict,
         stream_name: str = "example_stream",
-        f_name: str = None,
-        sfreq: Union[int, float] = None,
-        data: np.array = None,
+        f_name: str | None = None,
+        sfreq: int | float | None = None,
+        data: np.ndarray | None = None,
     ) -> None:
 
         self.settings = settings
@@ -44,7 +41,7 @@ class LSLOfflinePlayer:
                 sfreq=sfreq,
             )
             raw = mne.io.RawArray(data, info)
-            self._path_raw = os.path.join(os.getcwd() + "temp_raw.fif")
+            self._path_raw = Path.cwd() / "temp_raw.fif"
             raw.save(self._path_raw, overwrite=True)
 
         self.player = PlayerLSL(
@@ -80,7 +77,7 @@ class LSLStream:
             self.key_pressed = True
             return False
 
-    def get_next_batch(self) -> np.array:
+    def get_next_batch(self) -> Iterator[tuple[np.ndarray, np.ndarray]]:
         self.last_time = time.time()
         check_data = None
         data = None
@@ -117,7 +114,7 @@ class LSLStream:
 def raw_data_generator(
     data: np.ndarray,
     settings: dict,
-    sfreq: int,
+    sfreq: float,
 ) -> Iterator[np.ndarray]:
     """
     This generator function mimics online data acquisition.
@@ -127,7 +124,7 @@ def raw_data_generator(
         ieeg_raw (np array): shape (channels, time)
         sfreq: int
         sfreq_new: int
-        offset_time: int | float
+        offset_time: float
     Returns
     -------
         np.array: 1D array of time stamps
@@ -143,12 +140,7 @@ def raw_data_generator(
     for cnt in range(
         data.shape[1] + 1
     ):  # shape + 1 guarantees that the last sample is also included
-
         if (cnt - offset_start) >= ratio_samples_features * ratio_counter:
-
             ratio_counter += 1
 
-            yield (
-                np.arange(cnt - offset_start, cnt) / sfreq,  # what is this exactly? Not in main. need? 
-                data[:, np.floor(cnt - offset_start).astype(int) : cnt]
-            )
+            yield data[:, np.floor(cnt - offset_start).astype(int) : cnt]

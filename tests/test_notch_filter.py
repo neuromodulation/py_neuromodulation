@@ -1,12 +1,10 @@
 import numpy as np
-import pytest
-from scipy import fft, signal
+from scipy import fft
 
 from py_neuromodulation import nm_filter
 
 
 def test_notch_filter_setup():
-
     # by Nyquist theorem, frequencies are computed up to half sfreq
     for sfreq in [150, 200, 500, 1000]:
         line_noise = 50

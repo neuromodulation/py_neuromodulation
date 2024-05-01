@@ -11,94 +11,66 @@ def init_sw_settings() -> dict:
 
 
 def test_sharpwaveinit_wrong_peak_param():
-
     settings = init_sw_settings()
     with pytest.raises(Exception) as e_info:
-
-        settings["sharpwave_analysis_settings"]["sharpwave_features"][
-            "peak_left"
-        ] = 5
-        nm_sharpwaves.SharpwaveAnalyzer.test_settings(
-            settings, ch_names=[], sfreq=1000
-        )
+        settings["sharpwave_analysis_settings"]["sharpwave_features"]["peak_left"] = 5
+        nm_sharpwaves.SharpwaveAnalyzer.test_settings(settings, ch_names=[], sfreq=1000)
 
 
 def test_sharpwaveinit_wrong_filter_range():
     settings = init_sw_settings()
     with pytest.raises(Exception) as e_info:
-        settings["sharpwave_analysis_settings"]["filter_ranges_hz"] = [
-            [5, 1200]
-        ]
-        nm_sharpwaves.SharpwaveAnalyzer.test_settings(
-            settings, ch_names=[], sfreq=1000
-        )
+        settings["sharpwave_analysis_settings"]["filter_ranges_hz"] = [[5, 1200]]
+        nm_sharpwaves.SharpwaveAnalyzer.test_settings(settings, ch_names=[], sfreq=1000)
 
 
 def test_sharpwaveinit_missing_estimator():
     settings = init_sw_settings()
     with pytest.raises(Exception) as e_info:
-
-        settings["sharpwave_analysis_settings"]["sharpwave_features"][
-            "prominence"
-        ] = True
+        settings["sharpwave_analysis_settings"]["sharpwave_features"]["prominence"] = (
+            True
+        )
         settings["sharpwave_analysis_settings"]["estimator"]["mean"] = []
         settings["sharpwave_analysis_settings"]["estimator"]["median"] = []
         settings["sharpwave_analysis_settings"]["estimator"]["max"] = []
         settings["sharpwave_analysis_settings"]["estimator"]["min"] = []
         settings["sharpwave_analysis_settings"]["estimator"]["var"] = []
 
-        nm_sharpwaves.SharpwaveAnalyzer.test_settings(
-            settings, ch_names=[], sfreq=1000
-        )
+        nm_sharpwaves.SharpwaveAnalyzer.test_settings(settings, ch_names=[], sfreq=1000)
 
 
 def test_sharpwaveinit_correct_featurelist():
     settings = init_sw_settings()
-    settings["sharpwave_analysis_settings"]["sharpwave_features"][
-        "prominence"
-    ] = True
-    settings["sharpwave_analysis_settings"]["sharpwave_features"][
-        "interval"
-    ] = True
-    settings["sharpwave_analysis_settings"]["sharpwave_features"][
-        "sharpness"
-    ] = True
+    settings["sharpwave_analysis_settings"]["sharpwave_features"]["prominence"] = True
+    settings["sharpwave_analysis_settings"]["sharpwave_features"]["interval"] = True
+    settings["sharpwave_analysis_settings"]["sharpwave_features"]["sharpness"] = True
     settings["sharpwave_analysis_settings"]["estimator"]["mean"] = [
         "prominence",
         "interval",
     ]
-    settings["sharpwave_analysis_settings"]["estimator"]["median"] = [
-        "sharpness"
-    ]
+    settings["sharpwave_analysis_settings"]["estimator"]["median"] = ["sharpness"]
     settings["sharpwave_analysis_settings"]["estimator"]["max"] = []
     settings["sharpwave_analysis_settings"]["estimator"]["min"] = []
     settings["sharpwave_analysis_settings"]["estimator"]["var"] = []
 
     assert (
-        nm_sharpwaves.SharpwaveAnalyzer.test_settings(
-            settings, ch_names=[], sfreq=1000
-        )
+        nm_sharpwaves.SharpwaveAnalyzer.test_settings(settings, ch_names=[], sfreq=1000)
         == None
     )
 
 
 def test_prominence_features():
-
     settings = init_sw_settings()
     sfreq = 1000
     ch_names = ["ch1", "ch2", "ch3", "ch4"]
 
     # Reset feataures
-    for f in settings["sharpwave_analysis_settings"][
-        "sharpwave_features"
-    ].keys():
+    for f in settings["sharpwave_analysis_settings"]["sharpwave_features"].keys():
         settings["sharpwave_analysis_settings"]["sharpwave_features"][f] = False
     for est in settings["sharpwave_analysis_settings"]["estimator"].keys():
         settings["sharpwave_analysis_settings"]["estimator"][est] = []
 
-    settings["sharpwave_analysis_settings"]["sharpwave_features"][
-        "prominence"
-    ] = True
+    settings["sharpwave_analysis_settings"]["sharpwave_features"]["prominence"] = True
     settings["sharpwave_analysis_settings"]["estimator"]["max"] = ["prominence"]
 
     settings["sharpwave_analysis_settings"]["filter_ranges_hz"] = [[5, 80]]
@@ -122,22 +94,17 @@ def test_prominence_features():
 
 
 def test_interval_feature():
-
     settings = init_sw_settings()
     sfreq = 1000
     ch_names = ["ch1", "ch2", "ch3", "ch4"]
 
     # Reset feataures
-    for f in settings["sharpwave_analysis_settings"][
-        "sharpwave_features"
-    ].keys():
+    for f in settings["sharpwave_analysis_settings"]["sharpwave_features"].keys():
         settings["sharpwave_analysis_settings"]["sharpwave_features"][f] = False
     for est in settings["sharpwave_analysis_settings"]["estimator"].keys():
         settings["sharpwave_analysis_settings"]["estimator"][est] = []
 
-    settings["sharpwave_analysis_settings"]["sharpwave_features"][
-        "interval"
-    ] = True
+    settings["sharpwave_analysis_settings"]["sharpwave_features"]["interval"] = True
     settings["sharpwave_analysis_settings"]["estimator"]["max"] = ["interval"]
 
     # the filter cannot be too high, since adjacent ripples will be detected as peaks

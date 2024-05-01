@@ -39,9 +39,7 @@ def setup_default_stream_fast_compute():
         line_noise,
         coord_list,
         coord_names,
-    ) = nm_IO.read_BIDS_data(
-        PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype
-    )
+    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype)
 
     nm_channels = nm_define_nmchannels.set_channels(
         ch_names=raw.ch_names,
@@ -102,16 +100,12 @@ def setup_databatch():
         line_noise,
         coord_list,
         coord_names,
-    ) = nm_IO.read_BIDS_data(
-        PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype
-    )
+    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype)
 
     settings = nm_settings.get_default_settings()
     settings = nm_settings.set_settings_fast_compute(settings)
 
-    generator = nm_generator.raw_data_generator(
-        data, settings, int(np.floor(sfreq))
-    )
+    generator = nm_generator.raw_data_generator(data, settings, int(np.floor(sfreq)))
     data_batch = next(generator, None)
 
     return [raw.ch_names, raw.get_channel_types(), raw.info["bads"], data_batch[1]]

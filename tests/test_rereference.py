@@ -1,5 +1,3 @@
-import math
-import os
 import numpy as np
 from numpy.testing import assert_allclose
 import pandas as pd
@@ -7,9 +5,6 @@ import pytest
 
 from py_neuromodulation.nm_rereference import ReReferencer
 from py_neuromodulation import (
-    nm_generator,
-    nm_settings,
-    nm_IO,
     nm_define_nmchannels,
 )
 
@@ -66,8 +61,7 @@ def test_rereference_car(setup_databatch):
             ref_dat[ecog_ch_idx, :],
             data_batch[ecog_ch_idx, :]
             - data_batch[
-                (nm_channels["type"] == "ecog")
-                & (nm_channels.index != ecog_ch_idx)
+                (nm_channels["type"] == "ecog") & (nm_channels.index != ecog_ch_idx)
             ].mean(axis=0),
         )
 

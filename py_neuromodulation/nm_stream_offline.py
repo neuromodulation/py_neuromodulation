@@ -1,39 +1,30 @@
 """Module for offline data streams."""
 
-import os
-from joblib import Parallel, delayed
 import numpy as np
 import pandas as pd
 from itertools import count
-import logging
-
-logger = logging.getLogger("PynmLogger")
-
 import mne
-from mne_lsl import stream_viewer
+from pathlib import Path
+from joblib import Parallel, delayed
 
-from py_neuromodulation import (
-    nm_generator,
-    nm_IO,
-    nm_stream_abc,
-    nm_define_nmchannels,
-)
+from py_neuromodulation.nm_generator import raw_data_generator, LSLStream
+from py_neuromodulation.nm_stream_abc import NMStream
+from py_neuromodulation.nm_define_nmchannels import get_default_channels_from_data
+from py_neuromodulation.nm_types import _PathLike
+from py_neuromodulation import logger
 
-_PathLike = str | os.PathLike
+from mne_lsl.stream_viewer import StreamViewer
 
-
-class _GenericStream(nm_stream_abc.PNStream):
+class _GenericStream(NMStream):
     """_GenericStream base class.
     This class can be inhereted for different types of offline streams
 
     Parameters
     ----------
-    nm_stream_abc : nm_stream_abc.PNStream
+    nm_stream_abc : nm_stream_abc.NMStream
     """
 
-    def _add_target(
-        self, feature_series: pd.Series, data: np.ndarray
-    ) -> pd.Series:
+    def _add_target(self, feature_series: pd.Series, data: np.ndarray) -> pd.Series:
         """Add target channels to feature series.
 
         Parameters
@@ -58,15 +49,11 @@ class _GenericStream(nm_stream_abc.PNStream):
                 ].to_list()
                 self.target_idx_initialized = True
 
-            for target_idx, target_name in zip(
-                self.target_indexes, self.target_names
-            ):
+            for target_idx, target_name in zip(self.target_indexes, self.target_names):
                 feature_series[target_name] = data[target_idx, -1]
         return feature_series
 
-    def _add_timestamp(
-        self, feature_series: pd.Series, cnt_samples: int
-    ) -> pd.Series:
+    def _add_timestamp(self, feature_series: pd.Series, cnt_samples: int) -> pd.Series:
         """Add time stamp in ms.
 
         Due to normalization run_analysis needs to keep track of the counted
@@ -75,10 +62,7 @@ class _GenericStream(nm_stream_abc.PNStream):
         feature_series["time"] = cnt_samples * 1000 / self.sfreq
 
         if self.verbose:
-            logging.info(
-                str(np.round(feature_series["time"] / 1000, 2))
-                + " seconds of data processed"
-            )
+            logger.info("%.2f seconds of data processed", feature_series['time'] / 1000)
 
         return feature_series
 
@@ -89,9 +73,9 @@ class _GenericStream(nm_stream_abc.PNStream):
             if not len(names_expected) == data.shape[0]:
                 raise ValueError(
                     "If data is passed as an array, the first dimension must"
-                    " match the number of channel names in `nm_channels`. Got:"
-                    f" Data columns: {data.shape[0]}, nm_channels.name:"
-                    f" {len(names_expected)}."
+                    " match the number of channel names in `nm_channels`.\n"
+                    f" Number of data channels (data.shape[0]): {data.shape[0]}\n"
+                    f' Length of nm_channels["name"]: {len(names_expected)}.'
                 )
             return data
         names_data = data.columns.to_list()
@@ -101,10 +85,11 @@ class _GenericStream(nm_stream_abc.PNStream):
         ):
             raise ValueError(
                 "If data is passed as a DataFrame, the"
-                "columns must match the channel names in `nm_channels`. Got:"
-                f"Data columns: {names_data}, nm_channels.name: {names_data}."
+                "column names must match the channel names in `nm_channels`.\n"
+                f"Input dataframe column names: {names_data}\n"
+                f'Expected (from nm_channels["name"]): : {names_expected}.'
             )
-        return data.to_numpy()
+        return data.to_numpy().transpose()
 
     def _check_settings_for_parallel(self):
         """Check specified settings and raise error if parallel processing is not possible.
@@ -117,11 +102,11 @@ class _GenericStream(nm_stream_abc.PNStream):
             raise ValueError(
                 "Parallel processing is not possible with raw_normalization normalization."
             )
-        if self.settings["postprocessing"]["feature_normalization"] is True:
+        if self.settings["postprocessing"]["feature_normalization"]:
             raise ValueError(
                 "Parallel processing is not possible with feature normalization."
             )
-        if self.settings["features"]["bursts"] is True:
+        if self.settings["features"]["bursts"]:
             raise ValueError(
                 "Parallel processing is not possible with burst estimation."
             )
@@ -142,7 +127,7 @@ class _GenericStream(nm_stream_abc.PNStream):
     def _run(
         self,
         data: np.ndarray,
-        out_path_root: _PathLike | None = None,
+        out_path_root: _PathLike = "",
         folder_name: str = "sub",
         stream_lsl: bool = True,
         stream_lsl_name: str = "example_stream",
@@ -152,18 +137,18 @@ class _GenericStream(nm_stream_abc.PNStream):
     ) -> pd.DataFrame:
 
         if stream_lsl is False:
-            generator = nm_generator.raw_data_generator(
+            generator = raw_data_generator(
                 data=data,
                 settings=self.settings,
                 sfreq=self.sfreq,
             )
         else:
-            self.lsl_stream = nm_generator.LSLStream(
+            self.lsl_stream = LSLStream(
                 settings=self.settings, stream_name=stream_lsl_name
             )
 
             if plot_lsl:
-                viewer = stream_viewer.StreamViewer(stream_name=stream_lsl_name)
+                viewer = StreamViewer(stream_name=stream_lsl_name)
                 viewer.start()
             
             if self.sfreq != self.lsl_stream.stream.sinfo.sfreq:
@@ -199,7 +184,7 @@ class _GenericStream(nm_stream_abc.PNStream):
             )
 
         else:
-            l_features = []
+            l_features : list[pd.Series] = []
             cnt_samples = offset_start
             start_time = None
             while True:
@@ -240,11 +225,11 @@ class _GenericStream(nm_stream_abc.PNStream):
 
     def plot_raw_signal(
         self,
-        sfreq: float = None,
-        data: np.array = None,
-        lowpass: float = None,
-        highpass: float = None,
-        picks: list = None,
+        sfreq: float | None = None,
+        data: np.ndarray | None = None,
+        lowpass: float | None = None,
+        highpass: float | None = None,
+        picks: list | None = None,
         plot_time: bool = True,
         plot_psd: bool = False,
     ) -> None:
@@ -254,7 +239,7 @@ class _GenericStream(nm_stream_abc.PNStream):
         ----------
         sfreq : float
             sampling frequency [Hz]
-        data : np.array, optional
+        data : np.ndarray, optional
             data (n_channels, n_times), by default None
         plot_time : bool, optional
             mne.io.RawArray.plot(), by default True
@@ -283,9 +268,7 @@ class _GenericStream(nm_stream_abc.PNStream):
             ch_types = ["ecog" for i in range(data.shape[0])]
 
         # create mne.RawArray
-        info = mne.create_info(
-            ch_names=ch_names, sfreq=sfreq, ch_types=ch_types
-        )
+        info = mne.create_info(ch_names=ch_names, sfreq=sfreq, ch_types=ch_types)
         raw = mne.io.RawArray(data, info)
 
         if picks is not None:
@@ -300,12 +283,12 @@ class _GenericStream(nm_stream_abc.PNStream):
 class Stream(_GenericStream):
     def __init__(
         self,
-        sfreq: int | float,
-        data: np.ndarray | pd.DataFrame = None,
-        nm_channels: pd.DataFrame | _PathLike = None,
+        sfreq: float,
+        data: np.ndarray | pd.DataFrame | None = None,
+        nm_channels: pd.DataFrame | _PathLike | None = None,
         settings: dict | _PathLike | None = None,
-        sampling_rate_features_hz: float = None,
-        line_noise: int | float | None = 50,
+        sampling_rate_features_hz: float | None = None,
+        line_noise: float | None = 50,
         path_grids: _PathLike | None = None,
         coord_names: list | None = None,
         coord_list: list | None = None,
@@ -315,7 +298,7 @@ class Stream(_GenericStream):
 
         Parameters
         ----------
-        sfreq : int | float
+        sfreq : float
             sampling frequency of data in Hertz
         data : np.ndarray | pd.DataFrame | None, optional
             data to be streamed with shape (n_channels, n_time), by default None
@@ -323,9 +306,9 @@ class Stream(_GenericStream):
             parametrization of channels (see nm_define_channels.py for initialization)
         settings : dict | _PathLike | None, optional
             features settings can be a dictionary or path to the nm_settings.json, by default the py_neuromodulation/nm_settings.json are read
-        line_noise : int | float | None, optional
+        line_noise : float | None, optional
             line noise, by default 50
-        sampling_rate_features_hz : int | float | None, optional
+        sampling_rate_features_hz : float | None, optional
             feature sampling rate, by default None
         path_grids : _PathLike | None, optional
             path to grid_cortex.tsv and/or gird_subcortex.tsv, by default Non
@@ -338,9 +321,7 @@ class Stream(_GenericStream):
         """
 
         if nm_channels is None and data is not None:
-            nm_channels = nm_define_nmchannels.get_default_channels_from_data(
-                data
-            )
+            nm_channels = get_default_channels_from_data(data)
 
         if nm_channels is None and data is None:
             raise ValueError(
@@ -361,12 +342,12 @@ class Stream(_GenericStream):
 
         self.data = data
 
-        self.target_idx_initialized = False
+        self.target_idx_initialized: bool = False
 
     def run(
         self,
-        data: np.ndarray | pd.DataFrame = None,
-        out_path_root: _PathLike | None = None,
+        data: np.ndarray | pd.DataFrame | None = None,
+        out_path_root: _PathLike = Path.cwd(),
         folder_name: str = "sub",
         parallel: bool = False,
         n_jobs: int = -2,
@@ -404,8 +385,12 @@ class Stream(_GenericStream):
         elif self.data is None and data is None and self.stream_lsl is False:
             raise ValueError("No data passed to run function.")
 
-        if parallel is True:
+        if parallel:
             self._check_settings_for_parallel()
+
+        out_path = Path(out_path_root, folder_name)
+        out_path.mkdir(parents=True, exist_ok=True)
+        logger.log_to_file(out_path)
 
         return self._run(
             data,

@@ -1,14 +1,14 @@
 [build-system]
-build-backend = "flit_core.buildapi"
-requires = ["flit_core >=3.2,<4"]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
 
 [project]
 name = "py_neuromodulation"
-version = "0.0.1"
-authors = [{name = "Timon Merk", email="timon.merk@charite.de"}]
+version = "0.0.4"
+authors = [{ name = "Timon Merk", email = "timon.merk@charite.de" }]
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",
-  "License :: OSI Approved :: MIT License ",
+  "License :: OSI Approved :: MIT License",
   "Programming Language :: Python",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
@@ -23,63 +23,83 @@ keywords = [
   "deep-brain-stimulation",
   "machine-learning",
 ]
-license = {file = "LICENSE"}
-maintainers = [{name = "Timon Merk"}]
+license = { file = "LICENSE" }
+maintainers = [{ name = "Timon Merk" }]
 readme = "README.rst"
 requires-python = ">=3.10"
 
 dependencies = [
-    "mne",
-    "filterpy >= 1.4.5",
-    "fooof",
-    "imbalanced-learn",
-    "matplotlib >= 3.3.4",
-    "mne-bids >= 0.8",
-    "mne-connectivity",
-    "mrmr-selection",
-    "nolds",
-    "numpy >= 1.21.2",
-    "pandas >= 1.2.2",
-    "pip",
-    "pynput",
-    "pybids",
-    "scikit-image",
-    "scikit-learn >= 0.24.2",
-    "scikit-optimize",
-    "scipy >= 1.7.1",
-    "seaborn >= 0.11",
-    "notebook",
-    "ipython",
-    "pybispectra>=1.1.0",
-    "pyparrm",
-    "pyarrow>=14.0.2",
-    "joblib>=1.3.2",
-    "pytest>=8.0.2",
-    "mne-lsl>=1.2.0",
-    "pyside6>=6.6.3.1"
+  "mne",
+  "filterpy >= 1.4.5",
+  "fooof",
+  "imbalanced-learn",
+  "matplotlib >= 3.3.4",
+  "mne-bids >= 0.8",
+  "mne-connectivity",
+  "mrmr_selection",
+  "nolds",
+  "numpy >= 1.21.2",
+  "pandas >= 1.2.2",
+  "scikit-image",
+  "scikit-learn >= 0.24.2",
+  "scikit-optimize",
+  "scipy >= 1.7.1",
+  "seaborn >= 0.11",
+  "pybispectra>=1.0.0",
+  "pyparrm",
+  "pyarrow>=14.0.2",
+  "joblib>=1.3.2",
+  "hatch>=1.9.4",
+  "statsmodels",
+  "mne-lsl>=1.2.0",
+  "pynput"
 ]
 
 [project.optional-dependencies]
-dev = ["black", "pytest", "pytest-cov"]
+dev = [
+    "ruff",
+    "pytest>=8.0.2",
+    "pytest-cov",
+    "pytest-sugar",
+    "notebook",
+]
+
+docs = [
+    "py-neuromodulation[dev]",
+    "nbsphinx",
+    "sphinx",
+    "pandoc",
+    "recommonmark",
+    "sphinx",
+    "numpydoc",
+    "sphinx-gallery",
+    "nbsphinx_link",
+    "pydata-sphinx-theme",
+    "pypandoc",
+    "sphinx_togglebutton",
+]
+
+[tool.rye]
+dev-dependencies = [
+    "py-neuromodulation[dev]",
+]
 
 [project.urls]
 bugtracker = "https://github.com/neuromodulation/py_neuromodulation/issues"
 repository = "https://github.com/neuromodulation/py_neuromodulation"
 
-[tool.black]
-exclude = '''
-/(
-  __pycache__
-)/
-'''
-include = '''
-(
-  /src/
-  # | /tests
-)
-'''
-line-length = 80
-target-version = ['py310']
+[tool.ruff]
+target-version = "py310"
 
-[tool.flit.module]
-name = "py_neuromodulation"
+[tool.hatch.build.targets.sdist]
+exclude = ["/.github", "/docs"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["py_neuromodulation"]
+exclude = [
+  "py_neuromodulation/data/derivatives",
+  "py_neuromodulation/ConnectivityDecoding/connectome_folder",
+]
+
+[tool.mypy]
+ignore_missing_imports = true
