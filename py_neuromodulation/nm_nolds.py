@@ -3,7 +3,6 @@ from collections.abc import Iterable
 import nolds
 
 from py_neuromodulation.nm_features_abc import Feature
-from py_neuromodulation.nm_oscillatory import BandPower
 from py_neuromodulation import logger
 
 
@@ -13,11 +12,12 @@ class Nolds(Feature):
         self.ch_names = ch_names
 
         if len(self.settings["nolds_features"]["data"]["frequency_bands"]) > 0:
+            from py_neuromodulation.nm_oscillatory import BandPower
             self.bp_filter = BandPower(settings, ch_names, sfreq, use_kf=False)
 
     @staticmethod
     def test_settings(
-        s: dict,
+        settings: dict,
         ch_names: Iterable[str],
         sfreq: float,
     ):
@@ -28,12 +28,12 @@ class Nolds(Feature):
             "hurst_exponent",
             "detrended_fluctutaion_analysis",
         ]
-        if sum([s["nolds_features"][f] for f in nolds_feature_cols]) == 0:
+        if sum([settings["nolds_features"][f] for f in nolds_feature_cols]) == 0:
             logger.warn("nolds feature enabled, but no nolds_feature type selected")
 
-        for fb in s["nolds_features"]["data"]["frequency_bands"]:
+        for fb in settings["nolds_features"]["data"]["frequency_bands"]:
             assert (
-                fb in list(s["frequency_ranges_hz"].keys())
+                fb in list(settings["frequency_ranges_hz"].keys())
             ), f"{fb} selected in nolds_features, but not defined in s['frequency_ranges_hz']"
 
     def calc_feature(

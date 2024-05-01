@@ -4,9 +4,7 @@ import numpy as np
 import pandas as pd
 import mne
 
-from py_neuromodulation.nm_generator import raw_data_generator
 from py_neuromodulation.nm_stream_abc import PNStream
-from py_neuromodulation.nm_define_nmchannels import get_default_channels_from_data
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
 
@@ -126,6 +124,9 @@ class _OfflineStream(PNStream):
         parallel: bool = False,
         n_jobs: int = -2,
     ) -> pd.DataFrame:
+        
+        from py_neuromodulation.nm_generator import raw_data_generator
+
         generator = raw_data_generator(
             data=data,
             settings=self.settings,
@@ -273,6 +274,7 @@ class Stream(_OfflineStream):
         """
 
         if nm_channels is None and data is not None:
+            from py_neuromodulation.nm_define_nmchannels import get_default_channels_from_data
             nm_channels = get_default_channels_from_data(data)
 
         if nm_channels is None and data is None:

@@ -1,25 +1,13 @@
-from sklearn import (
-    model_selection,
-    metrics,
-    linear_model,
-    decomposition,
-    cross_decomposition,
-)
-from skopt import Optimizer
+from sklearn import model_selection
+from sklearn.linear_model import LinearRegression
 from sklearn.base import clone
-from scipy.ndimage import binary_dilation, binary_erosion
-from scipy.ndimage import label as label_ndimage
-from imblearn.over_sampling import RandomOverSampler
-from imblearn.under_sampling import RandomUnderSampler
-from mrmr import mrmr_classif
+from sklearn.metrics import r2_score
 
 import pandas as pd
 import numpy as np
 from copy import deepcopy
 from pathlib import PurePath
 import pickle
-
-
 class CV_res:
     def __init__(
         self,
@@ -71,8 +59,8 @@ class Decoder:
         label: np.ndarray | None = None,
         label_name: str | None = None,
         used_chs: list[str] | None = None,
-        model=linear_model.LinearRegression(),
-        eval_method=metrics.r2_score,
+        model=LinearRegression(),
+        eval_method=r2_score,
         cv_method=model_selection.KFold(n_splits=3, shuffle=False),
         use_nested_cv: bool = False,
         threshold_score=True,
@@ -158,10 +146,13 @@ class Decoder:
         self.all_ch_results = {}
         self.columns_names_single_ch = None
 
+
         if undersampling:
+            from imblearn.under_sampling import RandomUnderSampler
             self.rus = RandomUnderSampler(random_state=0)
 
         if oversampling:
+            from imblearn.over_sampling import RandomOverSampler
             self.ros = RandomOverSampler(random_state=0)
 
     def set_data(self, features):
@@ -347,6 +338,10 @@ class Decoder:
         labels_count : int
             count of individual movement blocks
         """
+        
+        from scipy.ndimage import label as label_ndimage
+        from scipy.ndimage import binary_dilation, binary_erosion
+
         mask = prediction > threshold
         structure = [True] * min_consequent_count  # used for erosion and dilation
         eroded = binary_erosion(mask, structure)
@@ -380,7 +375,8 @@ class Decoder:
         tpr : np.ndarray
             sklearn.metrics true positive rate np.ndarray
         """
-
+        from sklearn.metrics import confusion_matrix
+        
         pred_grouped, _ = self.get_movement_grouped_array(
             prediction, threshold, min_consequent_count
         )
@@ -403,7 +399,7 @@ class Decoder:
             return 0, 0, 0
 
         # calculating TPR and FPR: https://stackoverflow.com/a/40324184/5060208
-        CM = metrics.confusion_matrix(y_label, prediction)
+        CM = confusion_matrix(y_label, prediction)
 
         TN = CM[0][0]
         FN = CM[1][0]
@@ -631,6 +627,8 @@ class Decoder:
             model_train = self.bay_opt_wrapper(model_train, X_train, y_train)
 
         if self.mrmr_select:
+            from mrmr import mrmr_classif
+
             if len(self.feature_names) > X_train.shape[1]:
                 # analyze induvidual ch
                 columns_names = [
@@ -655,13 +653,15 @@ class Decoder:
             X_test = X_test[selected_features]
 
         if self.pca:
-            pca = decomposition.PCA(n_components=10)
+            from sklearn.decomposition import PCA
+            pca = PCA(n_components=10)
             pca.fit(X_train)
             X_train = pca.transform(X_train)
             X_test = pca.transform(X_test)
 
         if self.cca:
-            cca = cross_decomposition.CCA(n_components=10)
+            from sklearn.cross_decomposition import CCA
+            cca = CCA(n_components=10)
             cca.fit(X_train, y_train)
             X_train = cca.transform(X_train)
             X_test = cca.transform(X_test)
@@ -865,6 +865,8 @@ class Decoder:
                 pass
 
             return self.eval_method(y_test, model_bo.predict(X_test))
+
+        from skopt import Optimizer
 
         opt = Optimizer(
             self.bay_opt_param_space,

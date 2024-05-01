@@ -6,10 +6,9 @@ import pickle
 
 import pandas as pd
 
-from py_neuromodulation import nm_IO, PYNM_DIR
 from py_neuromodulation.nm_run_analysis import DataProcessor
-from py_neuromodulation.nm_settings import get_default_settings
 from py_neuromodulation.nm_types import _PathLike
+from py_neuromodulation import nm_IO, PYNM_DIR
 
 
 class PNStream(ABC):
@@ -129,6 +128,7 @@ class PNStream(ABC):
         if isinstance(settings, dict):
             return settings
         if settings is None:
+            from py_neuromodulation.nm_settings import get_default_settings
             return get_default_settings()
         return nm_IO.read_settings(str(settings))
 

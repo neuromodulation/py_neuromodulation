@@ -2,7 +2,6 @@ import json
 from pathlib import PurePath, Path
 from typing import TYPE_CHECKING
 
-import mne_bids
 import numpy as np
 import pandas as pd
 import scipy.io as sio
@@ -16,7 +15,7 @@ from py_neuromodulation import logger, PYNM_DIR
 if TYPE_CHECKING:
     from mne_bids import BIDSPath
     from mne import io as mne_io
-    
+
 
 def load_nm_channels(
     nm_channels: pd.DataFrame | _PathLike,
@@ -44,11 +43,11 @@ def load_nm_channels(
 
 
 def read_BIDS_data(
-    PATH_RUN: _PathLike | 'BIDSPath',
+    PATH_RUN: "_PathLike | BIDSPath",
     BIDS_PATH: _PathLike | None = None,
     datatype: str = "ieeg",
     line_noise: int = 50,
-) -> tuple['mne_io.Raw', np.ndarray, float, int, list | None, list | None]:
+) -> tuple["mne_io.Raw", np.ndarray, float, int, list | None, list | None]:
     """Given a run path and bids data path, read the respective data
 
     Parameters
@@ -64,12 +63,10 @@ def read_BIDS_data(
     fs : int
     line_noise : int
     """
-    
-    from mne_bids import read_raw_bids, get_bids_path_from_fname
-    
-    if isinstance(PATH_RUN, 'mne_bids.BIDSPath'):
-        bids_path = PATH_RUN
-    else:
+
+    from mne_bids import read_raw_bids, get_bids_path_from_fname, BIDSPath
+
+    if not isinstance(PATH_RUN, BIDSPath):
         bids_path = get_bids_path_from_fname(PATH_RUN)
 
     raw_arr = read_raw_bids(bids_path)
@@ -91,7 +88,7 @@ def read_BIDS_data(
 
 
 def get_coord_list(
-    raw: 'mne_io.BaseRaw',
+    raw: "mne_io.BaseRaw",
 ) -> tuple[list, list] | tuple[None, None]:
     montage = raw.get_montage()
     if montage is not None:
@@ -118,9 +115,10 @@ def read_grid(PATH_GRIDS: _PathLike | None, grid_str: str) -> pd.DataFrame:
     return grid
 
 
-def get_annotations(PATH_ANNOTATIONS: str, PATH_RUN: str, raw_arr: 'mne_io.RawArray'):
+def get_annotations(PATH_ANNOTATIONS: str, PATH_RUN: str, raw_arr: "mne_io.RawArray"):
     filepath = PurePath(PATH_ANNOTATIONS, PurePath(PATH_RUN).name[:-5] + ".txt")
     from mne import read_annotations
+
     try:
         annot = read_annotations(filepath)
         raw_arr.set_annotations(annot)
