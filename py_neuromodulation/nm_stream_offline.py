@@ -2,7 +2,6 @@
 
 import numpy as np
 import pandas as pd
-import mne
 
 from py_neuromodulation.nm_stream_abc import PNStream
 from py_neuromodulation.nm_types import _PathLike
@@ -220,9 +219,11 @@ class _OfflineStream(PNStream):
             ch_names = [f"ch_{i}" for i in range(data.shape[0])]
             ch_types = ["ecog" for i in range(data.shape[0])]
 
-        # create mne.RawArray
-        info = mne.create_info(ch_names=ch_names, sfreq=sfreq, ch_types=ch_types)
-        raw = mne.io.RawArray(data, info)
+        from mne import create_info
+        from mne.io import RawArray
+        
+        info = create_info(ch_names=ch_names, sfreq=sfreq, ch_types=ch_types)
+        raw = RawArray(data, info)
 
         if picks is not None:
             raw = raw.pick(picks)

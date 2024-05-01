@@ -4,10 +4,6 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
-import scipy.io as sio
-
-from pyarrow import Table as pyarrow_Table
-from pyarrow import csv as pyarrow_csv
 
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger, PYNM_DIR
@@ -142,10 +138,10 @@ def read_plot_modules(
         path to plotting files, by default
     """
 
-    faces = sio.loadmat(PurePath(PATH_PLOT, "faces.mat"))
-    vertices = sio.loadmat(PurePath(PATH_PLOT, "Vertices.mat"))
-    grid = sio.loadmat(PurePath(PATH_PLOT, "grid.mat"))["grid"]
-    stn_surf = sio.loadmat(PurePath(PATH_PLOT, "STN_surf.mat"))
+    faces = loadmat(PurePath(PATH_PLOT, "faces.mat"))
+    vertices = loadmat(PurePath(PATH_PLOT, "Vertices.mat"))
+    grid = loadmat(PurePath(PATH_PLOT, "grid.mat"))["grid"]
+    stn_surf = loadmat(PurePath(PATH_PLOT, "STN_surf.mat"))
     x_ver = stn_surf["vertices"][::2, 0]
     y_ver = stn_surf["vertices"][::2, 1]
     x_ecog = vertices["Vertices"][::1, 0]
@@ -216,7 +212,8 @@ def write_csv(df, path_out):
     Difference with pandas.df.to_csv() is that it does not
     write an index column by default
     """
-    pyarrow_csv.write_csv(pyarrow_Table.from_pandas(df), path_out)
+    from pyarrow import csv, Table
+    csv.write_csv(Table.from_pandas(df), path_out)
 
 
 def save_settings(settings: dict, path_out: _PathLike, folder_name: str = "") -> None:
@@ -323,7 +320,8 @@ def loadmat(filename) -> dict:
     from mat files. It calls the function check keys to cure all entries
     which are still mat-objects
     """
-    data = sio.loadmat(filename, struct_as_record=False, squeeze_me=True)
+    from scipy.io import loadmat as sio_loadmat
+    data = sio_loadmat(filename, struct_as_record=False, squeeze_me=True)
     return _check_keys(data)
 
 
@@ -357,8 +355,10 @@ def _check_keys(dict):
     checks if entries in dictionary are mat-objects. If yes
     todict is called to change them to nested dictionaries
     """
+    from scipy.io.matlab import mat_struct
+
     for key in dict:
-        if isinstance(dict[key], sio.matlab.mio5_params.mat_struct):
+        if isinstance(dict[key], mat_struct):
             dict[key] = _todict(dict[key])
     return dict
 
@@ -367,10 +367,11 @@ def _todict(matobj) -> dict:
     """
     A recursive function which constructs from matobjects nested dictionaries
     """
+    from scipy.io.matlab import mat_struct
     dict = {}
     for strg in matobj._fieldnames:
         elem = matobj.__dict__[strg]
-        if isinstance(elem, sio.matlab.mio5_params.mat_struct):
+        if isinstance(elem, mat_struct):
             dict[strg] = _todict(elem)
         else:
             dict[strg] = elem
