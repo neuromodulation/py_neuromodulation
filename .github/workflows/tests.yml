@@ -22,21 +22,16 @@ jobs:
   tests:
     name: ${{ matrix.platform.name }} Python ${{ matrix.python }}
     runs-on: ${{ matrix.platform.os }}
-    env:
-      MNE_LSL_LIB: ${{ github.workspace }}/liblsl/${{ matrix.platform.liblsl }}
     strategy:
       fail-fast: false
       matrix:
         platform:
           - os: ubuntu-latest
             name: Linux
-            liblsl: liblsl.so.1.16.2
           - os: macos-latest
             name: MacOS
-            liblsl: liblsl.1.16.0.dylib
           - os: windows-latest
             name: Windows
-            liblsl: lsl.dll
         python:
           - '3.10'
     steps:
@@ -52,13 +47,7 @@ jobs:
           python-version: ${{ matrix.python }}
           cache: packages
           cache-dependency-path: pyproject.toml
-      - name: Install dependencies
-        run: uv pip install -q .
-      - name: Install pytest
-        run: uv pip install -q pytest pytest-xdist pytest-sugar
-      - name: Run tests on Linux
-        if: ${{ runner.os == 'Linux' }}
-        run: xvfb-run pytest -n auto tests/
-      - name: Run tests on Windows/MacOs
-        if: ${{ runner.os == 'Windows' || runner.os == 'macOS' }}
-        run: pytest -n auto tests/
+      - name: Install test dependencies
+        run: uv pip install -q .[test]
+      - name: Run tests
+        run: ${{ runner.os == 'Linux' && 'xvfb-run' || '' }} pytest -n auto tests/

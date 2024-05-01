@@ -3,6 +3,7 @@ from pathlib import Path
 import time
 from pynput import keyboard
 import numpy as np
+
 from mne_lsl.player import PlayerLSL
 from mne_lsl.stream import StreamLSL
 import mne
