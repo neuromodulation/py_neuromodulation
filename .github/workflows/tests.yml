@@ -23,50 +23,29 @@ jobs:
     name: ${{ matrix.platform.name }} Python ${{ matrix.python }}
     runs-on: ${{ matrix.platform.os }}
     env:
-      MNE_LSL_LIB: ${{ github.workspace }}/liblsl.1.16.0.dylib
+      MNE_LSL_LIB: ${{ github.workspace }}/liblsl/${{ matrix.platform.liblsl }}
     strategy:
       fail-fast: false
       matrix:
         platform:
           - os: ubuntu-latest
             name: Linux
+            liblsl: liblsl.so.1.16.2
           - os: macos-latest
             name: MacOS
+            liblsl: liblsl.1.16.0.dylib
           - os: windows-latest
             name: Windows
+            liblsl: lsl.dll
         python:
           - '3.10'
     steps:
       - uses: actions/checkout@v4
-      - name: Cache liblsl
-        id: cache-liblsl
-        uses: actions/cache@v4
+      - name: Install and cache Linux packages
         if: ${{ runner.os == 'Linux' }}
+        uses: tecolicom/actions-use-apt-tools@v1
         with:
-          path: |
-            /usr/bin/lslver
-            /usr/include/lsl/
-            /usr/include/lsl_c.h
-            /usr/include/lsl_cpp.h
-            /usr/lib/liblsl.so.1.16.2
-            /usr/lib/liblsl.so
-            /usr/lib/liblsl.so.2
-          # /usr/lib/cmake/LSL/LSLCMake.cmake
-          # /usr/lib/cmake/LSL/LSLConfig.cmake
-          # /usr/lib/cmake/LSL/LSLConfigVersion.cmake
-          # /usr/lib/cmake/LSL/LSLTargets-release.cmake
-          # /usr/lib/cmake/LSL/LSLTargets.cmake
-          key: ${{ runner.os }}-lsl
-      - name: Install Linux packages
-        if: ${{ runner.os == 'Linux' }}
-        uses: awalsh128/cache-apt-pkgs-action@latest
-        with:
-          packages: "binutils libpugixml-dev qtbase5-dev qt5-qmake libpugixml1v5 xvfb"
-      - name: Download and install liblsl
-        if: ${{ runner.os == 'Linux' &&  steps.cache-liblsl.outputs.cache-hit != 'true' }}
-        run: |
-          curl -L https://github.com/sccn/liblsl/releases/download/v1.16.2/liblsl-1.16.2-jammy_amd64.deb -o ./liblsl-1.16.2-jammy_amd64.deb
-          sudo apt install ./liblsl-1.16.2-jammy_amd64.deb
+          tools: binutils libpugixml-dev qtbase5-dev qt5-qmake libpugixml1v5 xvfb
       - name: Set up Python with uv
         uses: drivendataorg/setup-python-uv-action@v1
         with:
