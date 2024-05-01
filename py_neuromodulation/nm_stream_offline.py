@@ -3,18 +3,18 @@
 import numpy as np
 import pandas as pd
 
-from py_neuromodulation.nm_stream_abc import PNStream
+from py_neuromodulation.nm_stream_abc import NMStream
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
 
 
-class _OfflineStream(PNStream):
+class _OfflineStream(NMStream):
     """Offline stream base class.
     This class can be inhereted for different types of offline streams, e.g. epoch-based or continuous.
 
     Parameters
     ----------
-    nm_stream_abc : nm_stream_abc.PNStream
+    nm_stream_abc : nm_stream_abc.NMStream
     """
 
     def _add_target(self, feature_series: pd.Series, data: np.ndarray) -> pd.Series:
@@ -55,10 +55,7 @@ class _OfflineStream(PNStream):
         feature_series["time"] = cnt_samples * 1000 / self.sfreq
 
         if self.verbose:
-            logger.info(
-                str(np.round(feature_series["time"] / 1000, 2))
-                + " seconds of data processed"
-            )
+            logger.info("%.2f seconds of data processed", feature_series['time'] / 1000)
 
         return feature_series
 
@@ -302,7 +299,7 @@ class Stream(_OfflineStream):
     def run(
         self,
         data: np.ndarray | pd.DataFrame | None = None,
-        out_path_root: _PathLike | None = None,
+        out_path_root: _PathLike = Path.cwd(),
         folder_name: str = "sub",
         parallel: bool = False,
         n_jobs: int = -2,
@@ -336,6 +333,10 @@ class Stream(_OfflineStream):
 
         if parallel:
             self._check_settings_for_parallel()
+
+        out_path = Path(out_path_root, folder_name)
+        out_path.mkdir(parents=True, exist_ok=True)
+        logger.log_to_file(out_path)
 
         return self._run_offline(
             data, out_path_root, folder_name, parallel=parallel, n_jobs=n_jobs

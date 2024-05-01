@@ -2,7 +2,7 @@ from scipy import signal
 import numpy as np
 from collections.abc import Iterable
 
-from py_neuromodulation.nm_features_abc import Feature
+from py_neuromodulation.nm_features import NMFeature
 from py_neuromodulation import logger
 
 
@@ -105,7 +105,7 @@ class CoherenceObject:
         return features_compute
 
 
-class NM_Coherence(Feature):
+class NM_Coherence(NMFeature):
     def __init__(self, settings: dict, ch_names: list[str], sfreq: float) -> None:
         self.settings = settings
         self.sfreq = sfreq

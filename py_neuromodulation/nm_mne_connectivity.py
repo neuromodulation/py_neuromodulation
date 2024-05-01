@@ -6,10 +6,10 @@ if TYPE_CHECKING:
     from mne.io import RawArray
     from mne import Epochs
 
-from py_neuromodulation.nm_features_abc import Feature
+from py_neuromodulation.nm_features import NMFeature
 
 
-class MNEConnectivity(Feature):
+class MNEConnectivity(NMFeature):
     def __init__(
         self,
         settings: dict,

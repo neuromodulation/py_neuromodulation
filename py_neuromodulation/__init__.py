@@ -1,4 +1,4 @@
-from .utils import _logging
+from .nm_logger import NMLogger
 from pathlib import PurePath
 from importlib.metadata import version
 
@@ -8,7 +8,7 @@ __version__ = version("py_neuromodulation")
 PYNM_DIR = PurePath(__file__).parent
 
 # logger initialization first to prevent circular import
-logger = _logging.logger
+logger = NMLogger(__name__)
 
 # Bring Stream and DataProcessor classes to top namespace
 from .nm_stream_offline import Stream

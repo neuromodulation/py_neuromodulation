@@ -5,6 +5,8 @@ from enum import Enum
 from sklearn import preprocessing
 import numpy as np
 
+from py_neuromodulation.nm_preprocessing import NMPreprocessor
+
 
 class NORM_METHODS(Enum):
     MEAN = "mean"
@@ -37,7 +39,7 @@ def test_normalization_settings(
     assert isinstance(clip, (float, int, bool))
 
 
-class RawNormalizer:
+class RawNormalizer(NMPreprocessor):
     def __init__(
         self,
         sfreq: float,

@@ -3,11 +3,11 @@ import numpy as np
 from fooof import FOOOF
 from scipy import fft
 
-from py_neuromodulation.nm_features_abc import Feature
+from py_neuromodulation.nm_features import NMFeature
 from py_neuromodulation import logger
 
 
-class FooofAnalyzer(Feature):
+class FooofAnalyzer(NMFeature):
     def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: float) -> None:
         self.settings_fooof = settings["fooof"]
         self.sfreq = sfreq

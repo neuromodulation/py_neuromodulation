@@ -1,25 +1,70 @@
-import numpy as np
+from typing import Protocol, TYPE_CHECKING
+from collections.abc import Iterable
 
-from py_neuromodulation.nm_hjorth_raw import Hjorth, Raw
-from py_neuromodulation.nm_oscillatory import BandPower, STFT, FFT, Welch
-from py_neuromodulation.nm_sharpwaves import SharpwaveAnalyzer
-from py_neuromodulation.nm_fooof import FooofAnalyzer
-from py_neuromodulation.nm_nolds import Nolds
-from py_neuromodulation.nm_coherence import NM_Coherence
-from py_neuromodulation.nm_bursts import Burst
-from py_neuromodulation.nm_linelength import LineLength
-from py_neuromodulation.nm_mne_connectivity import MNEConnectivity
-from py_neuromodulation.nm_bispectra import Bispectra
+if TYPE_CHECKING:
+    import numpy as np
 
-from py_neuromodulation.nm_features_abc import Feature
+from py_neuromodulation.nm_types import ImportDetails, get_class
+
+
+class NMFeature(Protocol):
+    def __init__(
+        self, settings: dict, ch_names: Iterable[str], sfreq: int | float
+    ) -> None:
+        """Method to check passed settings"""
+
+    @staticmethod
+    def test_settings(
+        settings: dict,
+        ch_names: Iterable[str],
+        sfreq: int | float,
+    ):
+        """Method to check passed settings"""
+
+    def calc_feature(self, data: "np.ndarray", features_compute: dict) -> dict:
+        """
+        Feature calculation method. Each method needs to loop through all channels
+
+        Parameters
+        ----------
+        data : 'np.ndarray'
+            (channels, time)
+        features_compute : dict
+        ch_names : Iterable[str]
+
+        Returns
+        -------
+        dict
+        """
+        ...
+
+
+FEATURE_DICT: dict[str, ImportDetails] = {
+    "raw_hjorth": ImportDetails("py_neuromodulation.nm_hjorth_raw", "Hjorth"),
+    "return_raw": ImportDetails("py_neuromodulation.nm_hjorth_raw", "Raw"),
+    "bandpass_filter": ImportDetails("py_neuromodulation.nm_oscillatory", "BandPower"),
+    "stft": ImportDetails("py_neuromodulation.nm_oscillatory", "STFT"),
+    "fft": ImportDetails("py_neuromodulation.nm_oscillatory", "FFT"),
+    "welch": ImportDetails("py_neuromodulation.nm_oscillatory", "Welch"),
+    "sharpwave_analysis": ImportDetails(
+        "py_neuromodulation.nm_sharpwaves", "SharpwaveAnalyzer"
+    ),
+    "fooof": ImportDetails("py_neuromodulation.nm_fooof", "FooofAnalyzer"),
+    "nolds": ImportDetails("py_neuromodulation.nm_nolds", "Nolds"),
+    "coherence": ImportDetails("py_neuromodulation.nm_coherence", "NM_Coherence"),
+    "bursts": ImportDetails("py_neuromodulation.nm_bursts", "Burst"),
+    "linelength": ImportDetails("py_neuromodulation.nm_linelength", "LineLength"),
+    "mne_connectivity": ImportDetails(
+        "py_neuromodulation.nm_mne_connectivity", "MNEConnectivity"
+    ),
+    "bispectrum": ImportDetails("py_neuromodulation.nm_bispectra", "Bispectra"),
+}
 
 
 class Features:
     """Class for calculating features.p"""
 
-    # features: list[nm_features_abc.Feature] = []
-
-    def __init__(self, s: dict, ch_names: list[str], sfreq: float) -> None:
+    def __init__(self, settings: dict, ch_names: list[str], sfreq: float) -> None:
         """_summary_
 
         Parameters
@@ -37,49 +82,20 @@ class Features:
             _description_
         """
 
-        self.features: list[Feature] = []
+        for feature_name in settings["features"]:
+            if feature_name not in FEATURE_DICT:
+                raise ValueError(f"Unknown feature found. Got: {feature_name}.")
 
-        feature: Feature
-        for feature in s["features"]:
-            if not s["features"][feature]:
-                continue
-            match feature:
-                case "raw_hjorth":
-                    FeatureClass = Hjorth
-                case "return_raw":
-                    FeatureClass = Raw
-                case "bandpass_filter":
-                    FeatureClass = BandPower
-                case "stft":
-                    FeatureClass = STFT
-                case "fft":
-                    FeatureClass = FFT
-                case "welch":
-                    FeatureClass = Welch
-                case "sharpwave_analysis":
-                    FeatureClass = SharpwaveAnalyzer
-                case "fooof":
-                    FeatureClass = FooofAnalyzer
-                case "nolds":
-                    FeatureClass = Nolds
-                case "coherence":
-                    FeatureClass = NM_Coherence
-                case "bursts":
-                    FeatureClass = Burst
-                case "linelength":
-                    FeatureClass = LineLength
-                case "mne_connectivity":
-                    FeatureClass = MNEConnectivity
-                case "bispectrum":
-                    FeatureClass = Bispectra
-                case _:
-                    raise ValueError(f"Unknown feature found. Got: {feature}.")
+        self.features: list[NMFeature] = [
+            get_class(FEATURE_DICT[feature_name])(settings, ch_names, sfreq)
+            for feature_name, feature_enabled in settings["features"].items()
+            if feature_enabled
+        ]
+        
+        for feature in self.features:
+            feature.test_settings(settings, ch_names, sfreq)
 
-            FeatureClass.test_settings(s, ch_names, sfreq)
-            f_obj = FeatureClass(s, ch_names, sfreq)
-            self.features.append(f_obj)
-
-    def register_new_feature(self, feature: Feature) -> None:
+    def register_new_feature(self, feature: NMFeature) -> None:
         """Register new feature.
 
         Parameters
@@ -89,7 +105,7 @@ class Features:
         """
         self.features.append(feature)
 
-    def estimate_features(self, data: np.ndarray) -> dict:
+    def estimate_features(self, data: "np.ndarray") -> dict:
         """Calculate features, as defined in settings.json
         Features are based on bandpower, raw Hjorth parameters and sharp wave
         characteristics.

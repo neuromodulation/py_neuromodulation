@@ -1,9 +1,10 @@
 from collections.abc import Iterable
 import numpy as np
 
-from py_neuromodulation.nm_features_abc import Feature
+from py_neuromodulation.nm_features import NMFeature
 
-class OscillatoryFeature(Feature):
+
+class OscillatoryFeature(NMFeature):
     def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: float) -> None:
         self.settings = settings
         self.sfreq = sfreq
@@ -42,11 +43,13 @@ class OscillatoryFeature(Feature):
                 f"needs to be smaller than"
                 f"settings['segment_length_features_ms'] = {settings['segment_length_features_ms']}",
             )
+
         else:
             for seg_length in settings[osc_feature_name]["segment_lengths_ms"].values():
                 assert isinstance(
                     seg_length, int
                 ), f"segment length has to be type int, got {seg_length}"
+
         assert isinstance(
             settings[osc_feature_name]["log_transform"], bool
         ), f"log_transform needs to be type bool, got {settings[osc_feature_name]['log_transform']}"

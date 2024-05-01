@@ -6,7 +6,7 @@ from py_neuromodulation import PYNM_DIR
 def get_default_settings() -> dict:
     from py_neuromodulation.nm_IO import read_settings
     """Read default settings from nm_settings.json"""
-    settings_path = str(PYNM_DIR / "nm_settings.json")
+    settings_path = PYNM_DIR / "nm_settings.json"
     return read_settings(settings_path)
 
 
