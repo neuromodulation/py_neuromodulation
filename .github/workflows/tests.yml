@@ -77,5 +77,9 @@ jobs:
         run: uv pip install -q .
       - name: Install pytest
         run: uv pip install -q pytest pytest-xdist pytest-sugar
-      - name: Run tests
+      - name: Run tests on Linux
+        if: ${{ runner.os == 'Linux' }}
         run: xvfb-run pytest -n auto tests/
+      - name: Run tests on Windows/MacOs
+        if: ${{ runner.os == 'Windows' || runner.os == 'macOS' }}
+        run: pytest -n auto tests/
