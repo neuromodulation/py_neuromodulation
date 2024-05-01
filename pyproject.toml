@@ -52,37 +52,30 @@ dependencies = [
   "hatch>=1.9.4",
   "statsmodels",
   "mne-lsl>=1.2.0",
-  "pynput"
+  "pynput",
+  "pyside6>=6.6.3.1",
 ]
 
 [project.optional-dependencies]
-dev = [
-    "ruff",
-    "pytest>=8.0.2",
-    "pytest-cov",
-    "pytest-sugar",
-    "notebook",
-]
+dev = ["ruff", "pytest>=8.0.2", "pytest-cov", "pytest-sugar", "notebook"]
 
 docs = [
-    "py-neuromodulation[dev]",
-    "nbsphinx",
-    "sphinx",
-    "pandoc",
-    "recommonmark",
-    "sphinx",
-    "numpydoc",
-    "sphinx-gallery",
-    "nbsphinx_link",
-    "pydata-sphinx-theme",
-    "pypandoc",
-    "sphinx_togglebutton",
+  "py-neuromodulation[dev]",
+  "nbsphinx",
+  "sphinx",
+  "pandoc",
+  "recommonmark",
+  "sphinx",
+  "numpydoc",
+  "sphinx-gallery",
+  "nbsphinx_link",
+  "pydata-sphinx-theme",
+  "pypandoc",
+  "sphinx_togglebutton",
 ]
 
 [tool.rye]
-dev-dependencies = [
-    "py-neuromodulation[dev]",
-]
+dev-dependencies = ["py-neuromodulation[dev]"]
 
 [project.urls]
 bugtracker = "https://github.com/neuromodulation/py_neuromodulation/issues"
