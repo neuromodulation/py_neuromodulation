@@ -14,13 +14,13 @@ class MNEConnectivity(Feature):
         ch_names: Iterable[str],
         sfreq: float,
     ) -> None:
-        self.s = settings
+        self.settings = settings
         self.ch_names = ch_names
         self.mode = settings["mne_connectiviy"]["mode"]
         self.method = settings["mne_connectiviy"]["method"]
         self.sfreq = sfreq
 
-        self.fbands = list(self.s["frequency_ranges_hz"].keys())
+        self.fbands = list(self.settings["frequency_ranges_hz"].keys())
         self.fband_ranges: list = []
 
     @staticmethod
@@ -91,9 +91,9 @@ class MNEConnectivity(Feature):
                     np.where(
                         np.logical_and(
                             np.array(spec_out.freqs)
-                            > self.s["frequency_ranges_hz"][fband][0],
+                            > self.settings["frequency_ranges_hz"][fband][0],
                             np.array(spec_out.freqs)
-                            < self.s["frequency_ranges_hz"][fband][1],
+                            < self.settings["frequency_ranges_hz"][fband][1],
                         )
                     )[0]
                 )

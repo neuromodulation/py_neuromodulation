@@ -2,10 +2,7 @@
 
 import numpy as np
 import pandas as pd
-from itertools import count
 import mne
-
-from joblib import Parallel, delayed
 
 from py_neuromodulation.nm_generator import raw_data_generator
 from py_neuromodulation.nm_stream_abc import PNStream
@@ -142,6 +139,10 @@ class _OfflineStream(PNStream):
         offset_start = offset_time / 1000 * self.sfreq
 
         if parallel:
+            # Required imports for parallel processing
+            from joblib import Parallel, delayed
+            from itertools import count
+
             l_features = Parallel(n_jobs=n_jobs, verbose=10)(
                 delayed(self._process_batch)(data_batch, cnt_samples)
                 for data_batch, cnt_samples in zip(

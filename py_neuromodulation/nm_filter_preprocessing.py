@@ -5,18 +5,18 @@ from py_neuromodulation.nm_filter import MNEFilter
 
 class PreprocessingFilter:
     def __init__(self, settings: dict, sfreq: float) -> None:
-        self.s = settings
+        self.settings = settings
         self.sfreq = sfreq
         self.filters = []
 
-        if self.s["preprocessing_filter"]["bandstop_filter"]:
+        if self.settings["preprocessing_filter"]["bandstop_filter"]:
             self.filters.append(
                 MNEFilter(
                     f_ranges=[
-                        self.s["preprocessing_filter"]["bandstop_filter_settings"][
+                        self.settings["preprocessing_filter"]["bandstop_filter_settings"][
                             "frequency_high_hz"
                         ],
-                        self.s["preprocessing_filter"]["bandstop_filter_settings"][
+                        self.settings["preprocessing_filter"]["bandstop_filter_settings"][
                             "frequency_low_hz"
                         ],
                     ],
@@ -26,14 +26,14 @@ class PreprocessingFilter:
                 )
             )
 
-        if self.s["preprocessing_filter"]["bandpass_filter"]:
+        if self.settings["preprocessing_filter"]["bandpass_filter"]:
             self.filters.append(
                 MNEFilter(
                     f_ranges=[
-                        self.s["preprocessing_filter"]["bandpass_filter_settings"][
+                        self.settings["preprocessing_filter"]["bandpass_filter_settings"][
                             "frequency_low_hz"
                         ],
-                        self.s["preprocessing_filter"]["bandpass_filter_settings"][
+                        self.settings["preprocessing_filter"]["bandpass_filter_settings"][
                             "frequency_high_hz"
                         ],
                     ],
@@ -42,12 +42,12 @@ class PreprocessingFilter:
                     verbose=False,
                 )
             )
-        if self.s["preprocessing_filter"]["lowpass_filter"]:
+        if self.settings["preprocessing_filter"]["lowpass_filter"]:
             self.filters.append(
                 MNEFilter(
                     f_ranges=[
                         None,
-                        self.s["preprocessing_filter"]["lowpass_filter_settings"][
+                        self.settings["preprocessing_filter"]["lowpass_filter_settings"][
                             "frequency_cutoff_hz"
                         ],
                     ],
@@ -56,11 +56,11 @@ class PreprocessingFilter:
                     verbose=False,
                 )
             )
-        if self.s["preprocessing_filter"]["highpass_filter"]:
+        if self.settings["preprocessing_filter"]["highpass_filter"]:
             self.filters.append(
                 MNEFilter(
                     f_ranges=[
-                        self.s["preprocessing_filter"]["highpass_filter_settings"][
+                        self.settings["preprocessing_filter"]["highpass_filter_settings"][
                             "frequency_cutoff_hz"
                         ],
                         None,

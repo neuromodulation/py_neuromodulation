@@ -8,27 +8,27 @@ from py_neuromodulation.nm_filter import MNEFilter
 
 class Burst(Feature):
     def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: float) -> None:
-        self.s = settings
+        self.settings = settings
         self.sfreq = sfreq
         self.ch_names = ch_names
-        self.threshold = self.s["burst_settings"]["threshold"]
-        self.time_duration_s = self.s["burst_settings"]["time_duration_s"]
+        self.threshold = self.settings["burst_settings"]["threshold"]
+        self.time_duration_s = self.settings["burst_settings"]["time_duration_s"]
         self.samples_overlap = int(
             self.sfreq
-            * (self.s["segment_length_features_ms"] / 1000)
-            / self.s["sampling_rate_features_hz"]
+            * (self.settings["segment_length_features_ms"] / 1000)
+            / self.settings["sampling_rate_features_hz"]
         )
 
-        self.fband_names = self.s["burst_settings"]["frequency_bands"]
+        self.fband_names = self.settings["burst_settings"]["frequency_bands"]
         self.f_ranges = [
-            self.s["frequency_ranges_hz"][fband_name] for fband_name in self.fband_names
+            self.settings["frequency_ranges_hz"][fband_name] for fband_name in self.fband_names
         ]
         self.seglengths = np.floor(
             self.sfreq
             / 1000
             * np.array(
                 [
-                    self.s["bandpass_filter_settings"]["segment_lengths_ms"][fband]
+                    self.settings["bandpass_filter_settings"]["segment_lengths_ms"][fband]
                     for fband in self.fband_names
                 ]
             )
@@ -137,7 +137,7 @@ class Burst(Feature):
 
                 features_compute[f"{ch_name}_bursts_{fband_name}_burst_rate_per_s"] = (
                     np.mean(burst_length)
-                    / (self.s["segment_length_features_ms"] / 1000)
+                    / (self.settings["segment_length_features_ms"] / 1000)
                     if len(burst_length) != 0
                     else 0
                 )
