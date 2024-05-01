@@ -189,7 +189,7 @@ class _GenericStream(NMStream):
             start_time = None
             while True:
                 next_item = next(generator, None)
-
+                print(next_item)
                 if next_item is not None:
                     time_, data_batch = next_item
                 else:
@@ -201,7 +201,7 @@ class _GenericStream(NMStream):
                     data_batch.astype(np.float64)
                 )
 
-                start_time = time_[0] if start_time is None else start_time
+                # start_time = time_[0] if start_time is None else start_time
 
                 # feature_series["time"] = (
                 #     time_[-1] - start_time

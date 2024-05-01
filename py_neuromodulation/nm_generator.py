@@ -115,7 +115,7 @@ def raw_data_generator(
     data: np.ndarray,
     settings: dict,
     sfreq: float,
-) -> Iterator[np.ndarray]:
+) -> Iterator[tuple[None, np.ndarray]]:
     """
     This generator function mimics online data acquisition.
     The data are iteratively sampled with sfreq_new.
@@ -143,4 +143,4 @@ def raw_data_generator(
         if (cnt - offset_start) >= ratio_samples_features * ratio_counter:
             ratio_counter += 1
 
-            yield data[:, np.floor(cnt - offset_start).astype(int) : cnt]
+            yield None, data[:, np.floor(cnt - offset_start).astype(int) : cnt]
