@@ -38,13 +38,35 @@ jobs:
           - '3.10'
     steps:
       - uses: actions/checkout@v4
-      - name: Install liblsl (linux)
-        if: ${{ matrix.platform.name == 'Linux' }}
+      - name: Cache liblsl
+        id: cache-liblsl
+        uses: actions/cache@v4
+        if: ${{ runner.os == 'Linux' }}
+        with:
+          path: |
+            /usr/bin/lslver
+            /usr/include/lsl/
+            /usr/include/lsl_c.h
+            /usr/include/lsl_cpp.h
+            /usr/lib/liblsl.so.1.16.2
+            /usr/lib/liblsl.so
+            /usr/lib/liblsl.so.2
+          # /usr/lib/cmake/LSL/LSLCMake.cmake
+          # /usr/lib/cmake/LSL/LSLConfig.cmake
+          # /usr/lib/cmake/LSL/LSLConfigVersion.cmake
+          # /usr/lib/cmake/LSL/LSLTargets-release.cmake
+          # /usr/lib/cmake/LSL/LSLTargets.cmake
+          key: ${{ runner.os }}-lsl
+      - name: Install Linux packages
+        if: ${{ runner.os == 'Linux' }}
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        with:
+          packages: "binutils libpugixml-dev qtbase5-dev qt5-qmake libpugixml1v5 xvfb"
+      - name: Download and install liblsl
+        if: ${{ runner.os == 'Linux' &&  steps.cache-liblsl.outputs.cache-hit != 'true' }}
         run: |
-          curl -L https://github.com/sccn/liblsl/releases/download/v1.16.2/liblsl-1.16.2-jammy_amd64.deb -o liblsl-1.16.2-jammy_amd64.deb
-          sudo apt update
-          sudo apt install -y binutils libpugixml-dev qtbase5-dev qt5-qmake ./liblsl-1.16.2-jammy_amd64.deb
-          rm liblsl-1.16.2-jammy_amd64.deb
+          curl -L https://github.com/sccn/liblsl/releases/download/v1.16.2/liblsl-1.16.2-jammy_amd64.deb -o ./liblsl-1.16.2-jammy_amd64.deb
+          sudo apt install ./liblsl-1.16.2-jammy_amd64.deb
       - name: Set up Python with uv
         uses: drivendataorg/setup-python-uv-action@v1
         with:
@@ -56,4 +78,4 @@ jobs:
       - name: Install pytest
         run: uv pip install -q pytest pytest-xdist pytest-sugar
       - name: Run tests
-        run: pytest -n auto tests/
+        run: xvfb-run pytest -n auto tests/
