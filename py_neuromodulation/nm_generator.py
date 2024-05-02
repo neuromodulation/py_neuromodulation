@@ -38,7 +38,7 @@ class LSLOfflinePlayer:
 
             info = mne.create_info(
                 ch_names=[f"ch{i}" for i in range(data.shape[0])],
-                ch_types=[f"dbs" for _ in range(data.shape[0])],
+                ch_types=["dbs" for _ in range(data.shape[0])],
                 sfreq=sfreq,
             )
             raw = mne.io.RawArray(data, info)
