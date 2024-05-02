@@ -2,6 +2,7 @@
 
 import numpy as np
 import pandas as pd
+from pathlib import Path
 
 from py_neuromodulation.nm_stream_abc import NMStream
 from py_neuromodulation.nm_types import _PathLike

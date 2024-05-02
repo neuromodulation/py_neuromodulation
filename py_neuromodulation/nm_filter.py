@@ -6,6 +6,7 @@ from typing import cast
 from py_neuromodulation.nm_preprocessing import NMPreprocessor
 from py_neuromodulation import logger
 
+from mne.filter import create_filter
 
 class MNEFilter:
     """mne.filter wrapper
@@ -47,9 +48,7 @@ class MNEFilter:
         h_trans_bandwidth: float | str = 4,
         verbose: bool | int | str | None = None,
     ) -> None:
-        
-        from mne.filter import create_filter
-        
+                
         filter_bank = []
         # mne create_filter function only accepts str and int for filter_length
         if isinstance(filter_length, float):
