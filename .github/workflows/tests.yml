@@ -40,7 +40,7 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
         uses: tecolicom/actions-use-apt-tools@v1
         with:
-          tools: binutils libpugixml-dev qtbase5-dev qt5-qmake libpugixml1v5 xvfb
+          tools: binutils qtbase5-dev qt5-qmake libpugixml1v5 xvfb
       - name: Set up Python with uv
         uses: drivendataorg/setup-python-uv-action@v1
         with:
