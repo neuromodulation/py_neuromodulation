@@ -21,9 +21,5 @@ def test_stream_with_none_data():
 
     # and check if all features of the second channel are not None
     assert len(
-        [
-            f
-            for f in features.columns
-            if "ch1" in f and features[f].notna().all()
-        ]
+        [f for f in features.columns if "ch1" in f and features[f].notna().all()]
     ) == len([f for f in features if "ch1" in f])

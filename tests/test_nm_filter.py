@@ -1,4 +1,5 @@
 """Test the nm_filter module."""
+
 import numpy as np
 from py_neuromodulation import nm_filter
 import pytest

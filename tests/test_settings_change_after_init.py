@@ -1,7 +1,6 @@
 import numpy as np
 
 import py_neuromodulation as nm
-from py_neuromodulation import nm_settings
 
 
 def test_post_init_nm_channels_change():
@@ -34,9 +33,7 @@ def test_post_init_nm_channels_used_channels_change_single_channel():
 
     features = stream.run(data)
 
-    chs_not_used = stream.nm_channels[stream.nm_channels["used"] == 0][
-        "new_name"
-    ]
+    chs_not_used = stream.nm_channels[stream.nm_channels["used"] == 0]["new_name"]
 
     assert (
         np.sum(
@@ -61,9 +58,7 @@ def test_post_init_nm_channels_used_channels_change_multiple_channel():
 
     features = stream.run(data)
 
-    chs_not_used = stream.nm_channels[stream.nm_channels["used"] == 0][
-        "new_name"
-    ]
+    chs_not_used = stream.nm_channels[stream.nm_channels["used"] == 0]["new_name"]
 
     assert (
         np.sum(

@@ -3,9 +3,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# C extensions
-*.so
-
 # Distribution / packaging
 .pypirc/
 .Python
@@ -160,9 +157,12 @@ sub/
 
 py_neuromodulation/data/derivatives/*
 
+.python-version
+
+py_neuromodulation/ConnectivityDecoding/connectome_folder/*
+
 plot_0_first_demo.py
+plot_1_example_BIDS.py
 
 requirements.lock
 requirements-dev.lock
-
-py_neuromodulation/ConnectivityDecoding/connectome_struct.mat

@@ -6,7 +6,7 @@ Adding New Features
 """
 
 import py_neuromodulation as nm
-from py_neuromodulation import nm_features_abc
+from py_neuromodulation.nm_features import NMFeature
 import numpy as np
 from typing import Iterable
 
@@ -25,14 +25,14 @@ stream = nm.Stream(
 )
 
 
-class NewFeature(nm_features_abc.Feature):
+class NewFeature(NMFeature):
     def __init__(
         self, settings: dict, ch_names: Iterable[str], sfreq: float
     ) -> None:
         self.s = settings
         self.ch_names = ch_names
 
-    def calc_feature(self, data: np.array, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         for ch_idx, ch in enumerate(self.ch_names):
             features_compute[f"new_feature_{ch}"] = np.mean(data[ch_idx, :])
 

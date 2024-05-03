@@ -109,7 +109,7 @@ if test_offline_lsl:
 
     player = nm_generator.LSLOfflinePlayer(f_name = f_name, settings = settings)
 
-    def get_example_stream(test_arr: np.array) -> nm_stream_abc.PNStream:
+    def get_example_stream(test_arr: np.ndarray) -> nm_stream_abc.NMStream:
 
         settings["features"]["welch"] = True
         settings["features"]["fft"] = True
@@ -164,7 +164,7 @@ if test_live_lsl:
     settings = nm_settings.get_default_settings()
     settings = nm_settings.set_settings_fast_compute(settings)
 
-    def get_example_stream(test_arr: np.array) -> nm_stream_abc.PNStream:
+    def get_example_stream(test_arr: np.ndarray) -> nm_stream_abc.NMStream:
 
         settings["features"]["welch"] = False
         settings["features"]["fft"] = True
