@@ -1,9 +1,6 @@
 import numpy as np
 import pandas as pd
 
-from py_neuromodulation.nm_plots import NM_Plot
-
-
 class Projection:
     def __init__(
         self,
@@ -75,6 +72,9 @@ class Projection:
             )[0]
 
         if plot_projection:
+            
+            from py_neuromodulation.nm_plots import NM_Plot
+
             nmplotter = NM_Plot(
                 ecog_strip=self.ecog_strip,
                 grid_cortex=self.grid_cortex.to_numpy(),

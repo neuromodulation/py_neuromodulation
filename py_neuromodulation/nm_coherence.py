@@ -107,24 +107,24 @@ class CoherenceObject:
 
 class NM_Coherence(NMFeature):
     def __init__(self, settings: dict, ch_names: list[str], sfreq: float) -> None:
-        self.s = settings
+        self.settings = settings
         self.sfreq = sfreq
         self.ch_names = ch_names
         self.coherence_objects: Iterable[CoherenceObject] = []
 
-        for idx_coh in range(len(self.s["coherence"]["channels"])):
-            fband_names = self.s["coherence"]["frequency_bands"]
+        for idx_coh in range(len(self.settings["coherence"]["channels"])):
+            fband_names = self.settings["coherence"]["frequency_bands"]
             fband_specs = []
             for band_name in fband_names:
-                fband_specs.append(self.s["frequency_ranges_hz"][band_name])
+                fband_specs.append(self.settings["frequency_ranges_hz"][band_name])
 
-            ch_1_name = self.s["coherence"]["channels"][idx_coh][0]
+            ch_1_name = self.settings["coherence"]["channels"][idx_coh][0]
             ch_1_name_reref = [ch for ch in self.ch_names if ch.startswith(ch_1_name)][
                 0
             ]
             ch_1_idx = self.ch_names.index(ch_1_name_reref)
 
-            ch_2_name = self.s["coherence"]["channels"][idx_coh][1]
+            ch_2_name = self.settings["coherence"]["channels"][idx_coh][1]
             ch_2_name_reref = [ch for ch in self.ch_names if ch.startswith(ch_2_name)][
                 0
             ]
@@ -140,9 +140,9 @@ class NM_Coherence(NMFeature):
                     ch_2_name,
                     ch_1_idx,
                     ch_2_idx,
-                    self.s["coherence"]["method"]["coh"],
-                    self.s["coherence"]["method"]["icoh"],
-                    self.s["coherence"]["features"],
+                    self.settings["coherence"]["method"]["coh"],
+                    self.settings["coherence"]["method"]["icoh"],
+                    self.settings["coherence"]["features"],
                 )
             )
 

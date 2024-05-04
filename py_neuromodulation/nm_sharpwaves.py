@@ -1,6 +1,5 @@
 import numpy as np
 from scipy import signal
-from mne.filter import create_filter
 from collections.abc import Iterable
 
 from py_neuromodulation.nm_features import NMFeature
@@ -23,6 +22,8 @@ class SharpwaveAnalyzer(NMFeature):
             if filter_range[0] is None:
                 self.list_filter.append(("no_filter", None))
             else:
+                from mne.filter import create_filter
+
                 self.list_filter.append(
                     (
                         f"range_{filter_range[0]}_{filter_range[1]}",

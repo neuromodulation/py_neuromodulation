@@ -1,6 +1,5 @@
 import numpy as np
 from pathlib import PurePath, Path
-from urllib.request import urlretrieve
 
 
 # from numba import jit
@@ -264,6 +263,9 @@ class ConnectivityChannelSelector:
     def download_connectome(
         self,
     ):
+        
+        from urllib.request import urlretrieve
+
         # download the connectome from the Zenodo API
         print("Downloading the connectome...")
 

@@ -1,12 +1,12 @@
 """Module for filter functionality."""
 
-from mne.filter import create_filter, _overlap_add_filter
 import numpy as np
 from typing import cast
 
 from py_neuromodulation.nm_preprocessing import NMPreprocessor
 from py_neuromodulation import logger
 
+from mne.filter import create_filter
 
 class MNEFilter:
     """mne.filter wrapper
@@ -48,6 +48,7 @@ class MNEFilter:
         h_trans_bandwidth: float | str = 4,
         verbose: bool | int | str | None = None,
     ) -> None:
+                
         filter_bank = []
         # mne create_filter function only accepts str and int for filter_length
         if isinstance(filter_length, float):
@@ -194,6 +195,9 @@ class NotchFilter(NMPreprocessor):
     def process(self, data: np.ndarray) -> np.ndarray:
         if self.filter_bank is None:
             return data
+        
+        from mne.filter import _overlap_add_filter
+
         return _overlap_add_filter(
             x=data,
             h=self.filter_bank,
