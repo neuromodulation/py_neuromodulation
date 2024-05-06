@@ -1,19 +1,16 @@
 import numpy as np
-import os
-import wget
+from pathlib import PurePath, Path
 
 
 # from numba import jit
-from scipy import stats
 import scipy.io as sio
 import pandas as pd
-from typing import Union, Tuple, List
 import nibabel as nib
 from matplotlib import pyplot as plt
 
-import py_neuromodulation
-
-from py_neuromodulation import nm_plots
+from py_neuromodulation.nm_plots import reg_plot
+from py_neuromodulation.nm_types import _PathLike
+from py_neuromodulation import PYNM_DIR
 
 LIST_STRUC_UNCONNECTED_GRIDPOINTS_HULL = [256, 385, 417, 447, 819, 914]
 LIST_STRUC_UNCONNECTED_GRIDPOINTS_WHOLEBRAIN = [
@@ -79,7 +76,6 @@ LIST_STRUC_UNCONNECTED_GRIDPOINTS_WHOLEBRAIN = [
 
 
 class ConnectivityChannelSelector:
-
     def __init__(
         self,
         whole_brain_connectome: bool = True,
@@ -105,18 +101,15 @@ class ConnectivityChannelSelector:
         self.whole_brain_connectome = whole_brain_connectome
         self.func_connectivity = func_connectivity
 
-        self.PATH_CONN_DECODING = os.path.join(
-            py_neuromodulation.__path__[0],
-            "ConnectivityDecoding",
-        )
+        self.PATH_CONN_DECODING = PYNM_DIR / "ConnectivityDecoding"
 
         if whole_brain_connectome:
-            self.PATH_GRID = os.path.join(
+            self.PATH_GRID = PurePath(
                 self.PATH_CONN_DECODING,
                 "mni_coords_whole_brain.mat",
             )
             self.grid = sio.loadmat(self.PATH_GRID)["downsample_ctx"]
-            if func_connectivity is False:
+            if not func_connectivity:
                 # reduce the grid to only valid points that are not in LIST_STRUC_UNCONNECTED_GRIDPOINTS_WHOLEBRAIN
                 self.grid = np.delete(
                     self.grid,
@@ -124,12 +117,12 @@ class ConnectivityChannelSelector:
                     axis=0,
                 )
         else:
-            self.PATH_GRID = os.path.join(
+            self.PATH_GRID = PurePath(
                 self.PATH_CONN_DECODING,
                 "mni_coords_cortical_surface.mat",
             )
             self.grid = sio.loadmat(self.PATH_GRID)["downsample_ctx"]
-            if func_connectivity is False:
+            if not func_connectivity:
                 # reduce the grid to only valid points that are not in LIST_STRUC_UNCONNECTED_GRIDPOINTS_HULL
                 self.grid = np.delete(
                     self.grid, LIST_STRUC_UNCONNECTED_GRIDPOINTS_HULL, axis=0
@@ -137,17 +130,14 @@ class ConnectivityChannelSelector:
 
         if func_connectivity:
             self.RMAP_arr = nib.load(
-                os.path.join(self.PATH_CONN_DECODING, "RMAP_func_all.nii")
+                PurePath(self.PATH_CONN_DECODING, "RMAP_func_all.nii")
             ).get_fdata()
         else:
             self.RMAP_arr = nib.load(
-                os.path.join(self.PATH_CONN_DECODING, "RMAP_struc.nii")
+                PurePath(self.PATH_CONN_DECODING, "RMAP_struc.nii")
             ).get_fdata()
 
-    def _get_connectome_name(
-        self, whole_brain_connectome: str, func_connectivity: str
-    ):
-
+    def _get_connectome_name(self, whole_brain_connectome: str, func_connectivity: str):
         connectome_name = "connectome_"
         if whole_brain_connectome:
             connectome_name += "whole_brain_"
@@ -167,37 +157,28 @@ class ConnectivityChannelSelector:
         -------
         list_connectomes: list
         """
-        return os.listdir(
-            os.path.join(
-                self.PATH_CONN_DECODING,
-                "connectome_folder",
-            )
-        )
+        return list(Path(self.PATH_CONN_DECODING, "connectome_folder").iterdir())
 
     def plot_grid(self) -> None:
         """Plot the loaded template grid that passed coordinates are matched to."""
 
         fig = plt.figure()
         ax = fig.add_subplot(111, projection="3d")
-        ax.scatter(
-            self.grid[:, 0], self.grid[:, 1], self.grid[:, 2], s=50, alpha=0.2
-        )
+        ax.scatter(self.grid[:, 0], self.grid[:, 1], self.grid[:, 2], s=50, alpha=0.2)
         plt.show()
 
-    def get_closest_node(
-        self, coord: Union[List, np.array]
-    ) -> Tuple[List, List]:
+    def get_closest_node(self, coord: list | np.ndarray) -> tuple[list, list]:
         """Given a list or np.array of coordinates, return the closest nodes in the
         grid and their indices.
 
         Parameters
         ----------
-        coord : np.array
+        coord : np.ndarray
             MNI coordinates with shape (num_channels, 3)
 
         Returns
         -------
-        Tuple[List, List]
+        Tuple[list, list]
             Grid coordinates, grid indices
         """
 
@@ -209,15 +190,15 @@ class ConnectivityChannelSelector:
         return [self.grid[idx] for idx in idx_], idx_
 
     def get_rmap_correlations(
-        self, fps: Union[list, np.array], RMAP_use: np.array = None
-    ) -> List:
+        self, fps: list | np.ndarray, RMAP_use: np.ndarray | None = None
+    ) -> list:
         """Calculate correlations of passed fingerprints with the RMAP
 
         Parameters
         ----------
         fps : Union[list, np.array]
             List of fingerprints
-        RMAP_use : np.array, optional
+        RMAP_use : np.ndarray, optional
             Passed RMAP, by default None
 
         Returns
@@ -235,8 +216,8 @@ class ConnectivityChannelSelector:
 
     def load_connectome(
         self,
-        whole_brain_connectome: bool = None,
-        func_connectivity: bool = None,
+        whole_brain_connectome: bool | None = None,
+        func_connectivity: bool | None = None,
     ) -> None:
         """Load connectome, if not available download connectome from
         Zenodo.
@@ -259,13 +240,13 @@ class ConnectivityChannelSelector:
             self.whole_brain_connectome, self.func_connectivity
         )
 
-        PATH_CONNECTOME = os.path.join(
+        PATH_CONNECTOME = Path(
             self.PATH_CONN_DECODING,
             "connectome_folder",
             self.connectome_name + ".mat",
         )
 
-        if os.path.exists(PATH_CONNECTOME) is False:
+        if not PATH_CONNECTOME.exists():
             user_input = input(
                 "Do you want to download the connectome? (yes/no): "
             ).lower()
@@ -276,30 +257,31 @@ class ConnectivityChannelSelector:
 
         self.connectome = sio.loadmat(PATH_CONNECTOME)
 
-    def get_grid_fingerprints(self, grid_idx: Union[list, np.array]) -> list:
+    def get_grid_fingerprints(self, grid_idx: list | np.ndarray) -> list:
         return [self.connectome[str(grid_idx)] for grid_idx in grid_idx]
 
     def download_connectome(
         self,
     ):
+        
+        from urllib.request import urlretrieve
+
         # download the connectome from the Zenodo API
         print("Downloading the connectome...")
 
         record_id = "10804702"
         file_name = self.connectome_name
 
-        wget.download(
+        filepath = Path(self.PATH_CONN_DECODING, "connectome_folder")
+        filepath.mkdir(parents=True, exist_ok=True)
+
+        urlretrieve(
             f"https://zenodo.org/api/records/{record_id}/files/{file_name}/content",
-            out=os.path.join(
-                self.PATH_CONN_DECODING,
-                "connectome_folder",
-                f"{self.connectome_name}.mat",
-            ),
+            filepath / f"{self.connectome_name}.mat",
         )
 
 
 class RMAPCross_Val_ChannelSelector:
-
     def __init__(self) -> None:
         pass
 
@@ -310,53 +292,48 @@ class RMAPCross_Val_ChannelSelector:
         fp = epi_img.get_fdata()
         return fp
 
-    def load_all_fingerprints(
-        self, path_dir: str, cond_str: str = "_AvgR_Fz.nii"
-    ):
-
+    def load_all_fingerprints(self, path_dir: str, cond_str: str = "_AvgR_Fz.nii"):
         if cond_str is not None:
-            l_fps = list(filter(lambda k: cond_str in k, os.listdir(path_dir)))
+            l_fps = list(filter(lambda k: cond_str in str(k), Path(path_dir).iterdir()))
         else:
-            l_fps = os.listdir(path_dir)
+            l_fps = list(Path(path_dir).iterdir())
 
-        return l_fps, [
-            self.load_fingerprint(os.path.join(path_dir, f)) for f in l_fps
-        ]
+        return l_fps, [self.load_fingerprint(PurePath(path_dir, f)) for f in l_fps]
 
     def get_fingerprints_from_path_with_cond(
         self,
-        path_dir: str,
-        str_to_omit: str = None,
-        str_to_keep: str = None,
+        path_dir: _PathLike,
+        str_to_omit: str = "",
+        str_to_keep: str = "",
         keep: bool = True,
-    ):
+    ) -> tuple[list, list]:
+        l_fps = []
 
-        if keep:
+        if keep and str_to_keep:
             l_fps = list(
                 filter(
-                    lambda k: "_AvgR_Fz.nii" in k and str_to_keep in k,
-                    os.listdir(path_dir),
+                    lambda k: "_AvgR_Fz.nii" in str(k) and str_to_keep in str(k),
+                    Path(path_dir).iterdir(),
                 )
             )
-        else:
+
+        elif not keep and str_to_omit:
             l_fps = list(
                 filter(
-                    lambda k: "_AvgR_Fz.nii" in k and str_to_omit not in k,
-                    os.listdir(path_dir),
+                    lambda k: "_AvgR_Fz.nii" in str(k) and str_to_omit not in str(k),
+                    Path(path_dir).iterdir(),
                 )
             )
-        return l_fps, [
-            self.load_fingerprint(os.path.join(path_dir, f)) for f in l_fps
-        ]
+
+        return l_fps, [self.load_fingerprint(PurePath(path_dir, f)) for f in l_fps]
 
     @staticmethod
     def save_Nii(
-        fp: np.array,
-        affine: np.array,
+        fp: np.ndarray,
+        affine: np.ndarray,
         name: str = "img.nii",
         reshape: bool = True,
     ):
-
         if reshape:
             fp = np.reshape(fp, (91, 109, 91), order="F")
 
@@ -364,13 +341,12 @@ class RMAPCross_Val_ChannelSelector:
 
         nib.save(img, name)
 
-    def get_RMAP(self, X: np.array, y: np.array):
+    def get_RMAP(self, X: np.ndarray, y: np.ndarray):
         # faster than calculate_RMap_numba
         # https://stackoverflow.com/questions/71252740/correlating-an-array-row-wise-with-a-vector/71253141#71253141
 
         r = (
-            len(y) * np.sum(X * y[None, :], axis=-1)
-            - (np.sum(X, axis=-1) * np.sum(y))
+            len(y) * np.sum(X * y[None, :], axis=-1) - (np.sum(X, axis=-1) * np.sum(y))
         ) / (
             np.sqrt(
                 (len(y) * np.sum(X**2, axis=-1) - np.sum(X, axis=-1) ** 2)
@@ -407,9 +383,7 @@ class RMAPCross_Val_ChannelSelector:
         val = np.corrcoef(fp_test, fp)[0][1]
         return val
 
-    def leave_one_ch_out_cv(
-        self, l_fps_names: list, l_fps_dat: list, l_per: list
-    ):
+    def leave_one_ch_out_cv(self, l_fps_names: list, l_fps_dat: list, l_per: list):
         # l_fps_dat is not flattened
 
         per_left_out = []
@@ -432,9 +406,7 @@ class RMAPCross_Val_ChannelSelector:
 
             per_predict.append(
                 np.nan_to_num(
-                    self.get_corr_numba(
-                        rmap_cv, l_fps_dat[idx_left_out].flatten()
-                    )
+                    self.get_corr_numba(rmap_cv, l_fps_dat[idx_left_out].flatten())
                 )
             )
             per_left_out.append(l_per[idx_left_out])
@@ -451,13 +423,9 @@ class RMAPCross_Val_ChannelSelector:
 
         for subject_test in sub_list:
             # print(subject_test)
-            idx_test = [
-                idx for idx, f in enumerate(l_fps_names) if subject_test in f
-            ]
+            idx_test = [idx for idx, f in enumerate(l_fps_names) if subject_test in f]
             idx_train = [
-                idx
-                for idx, f in enumerate(l_fps_names)
-                if subject_test not in f
+                idx for idx, f in enumerate(l_fps_names) if subject_test not in f
             ]
             l_cv = list(np.array(l_fps_dat)[idx_train])
             per_cv = list(np.array(l_per)[idx_train])
@@ -485,7 +453,6 @@ class RMAPCross_Val_ChannelSelector:
         cohorts_train: dict,
         path_dir: str = r"C:\Users\ICN_admin\OneDrive - Charité - Universitätsmedizin Berlin\Connectomics\DecodingToolbox_BerlinPittsburgh_Beijing\functional_connectivity",
     ):
-
         fp_test = self.get_fingerprints_from_path_with_cond(
             path_dir=path_dir,
             str_to_keep=f"{cohort_test}_{sub_test}_ROI_{ch_test}",
@@ -505,9 +472,7 @@ class RMAPCross_Val_ChannelSelector:
                 )
 
                 for fp, fp_name in zip(fps, fps_name):
-                    ch = fp_name[
-                        fp_name.find("ROI") + 4 : fp_name.find("func") - 1
-                    ]
+                    ch = fp_name[fp_name.find("ROI") + 4 : fp_name.find("func") - 1]
                     corr_val = self.get_corr_numba(fp_test, fp)
                     fp_pairs.append([cohort, sub, ch, corr_val])
 
@@ -515,7 +480,7 @@ class RMAPCross_Val_ChannelSelector:
         return fp_pairs[idx_max][0:3]
 
     def plot_performance_prediction_correlation(
-        per_left_out, per_predict, out_path_save: str = None
+        per_left_out, per_predict, out_path_save: str | None = None
     ):
         df_plt_corr = pd.DataFrame()
         df_plt_corr["test_performance"] = per_left_out
@@ -523,7 +488,7 @@ class RMAPCross_Val_ChannelSelector:
             per_predict  # change "struct" with "funct" for functional connectivity
         )
 
-        nm_plots.reg_plot(
+        reg_plot(
             x_col="test_performance",
             y_col="struct_conn_predict",
             data=df_plt_corr,

@@ -1,53 +1,54 @@
-from typing import Iterable
+from collections.abc import Iterable
 import numpy as np
+from typing import TYPE_CHECKING
 
-import mne
-from mne_connectivity import spectral_connectivity_epochs
+if TYPE_CHECKING:
+    from mne.io import RawArray
+    from mne import Epochs
 
-from py_neuromodulation import nm_features_abc
+from py_neuromodulation.nm_features import NMFeature
 
 
-class MNEConnectivity(nm_features_abc.Feature):
+class MNEConnectivity(NMFeature):
     def __init__(
         self,
         settings: dict,
         ch_names: Iterable[str],
         sfreq: float,
     ) -> None:
-        self.s = settings
+        self.settings = settings
         self.ch_names = ch_names
         self.mode = settings["mne_connectiviy"]["mode"]
         self.method = settings["mne_connectiviy"]["method"]
         self.sfreq = sfreq
 
-        self.fbands = list(self.s["frequency_ranges_hz"].keys())
-        self.fband_ranges = []
+        self.fbands = list(self.settings["frequency_ranges_hz"].keys())
+        self.fband_ranges: list = []
 
     @staticmethod
     def test_settings(
         settings: dict,
         ch_names: Iterable[str],
-        sfreq: int | float,
+        sfreq: float,
     ):
         # TODO: Double check passed parameters with mne_connectivity
         pass
 
     @staticmethod
-    def get_epoched_data(
-        raw: mne.io.RawArray, epoch_length: float = 1
-    ) -> np.array:
+    def get_epoched_data(raw: 'RawArray', epoch_length: float = 1) -> 'Epochs':
         time_samples_s = raw.get_data().shape[1] / raw.info["sfreq"]
         if epoch_length > time_samples_s:
-             raise ValueError(
+            raise ValueError(
                 f"the intended epoch length for mne connectivity: {epoch_length}s"
                 f" are longer than the passed data array {np.round(time_samples_s, 2)}s"
-             )
-        events = mne.make_fixed_length_events(
-            raw, duration=epoch_length, overlap=0
-        )
+            )
+        
+        from mne import make_fixed_length_events, Epochs
+        
+        events = make_fixed_length_events(raw, duration=epoch_length, overlap=0)
         event_id = {"rest": 1}
 
-        epochs = mne.Epochs(
+        epochs = Epochs(
             raw,
             events=events,
             event_id=event_id,
@@ -63,9 +64,10 @@ class MNEConnectivity(nm_features_abc.Feature):
             )
         return epochs
 
-    def estimate_connectivity(self, epochs: mne.Epochs):
-        # n_jobs is here kept to 1, since setup of the multiprocessing Pool 
+    def estimate_connectivity(self, epochs: 'Epochs'):
+        # n_jobs is here kept to 1, since setup of the multiprocessing Pool
         # takes longer than most batch computing sizes
+        from mne_connectivity import spectral_connectivity_epochs
 
         spec_out = spectral_connectivity_epochs(
             data=epochs,
@@ -79,14 +81,17 @@ class MNEConnectivity(nm_features_abc.Feature):
         )
         return spec_out
 
-    def calc_feature(self, data: np.array, features_compute: dict) -> dict:
-
-        raw = mne.io.RawArray(
+    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
+        
+        from mne.io import RawArray
+        from mne import create_info
+        
+        raw = RawArray(
             data=data,
-            info=mne.create_info(ch_names=self.ch_names, sfreq=self.sfreq),
+            info=create_info(ch_names=self.ch_names, sfreq=self.sfreq),
         )
         epochs = self.get_epoched_data(raw)
-        # there need to be minimum 2 of two epochs, otherwise mne_connectivity 
+        # there need to be minimum 2 of two epochs, otherwise mne_connectivity
         # is not correctly initialized
 
         spec_out = self.estimate_connectivity(epochs)
@@ -96,17 +101,17 @@ class MNEConnectivity(nm_features_abc.Feature):
                     np.where(
                         np.logical_and(
                             np.array(spec_out.freqs)
-                            > self.s["frequency_ranges_hz"][fband][0],
+                            > self.settings["frequency_ranges_hz"][fband][0],
                             np.array(spec_out.freqs)
-                            < self.s["frequency_ranges_hz"][fband][1],
+                            < self.settings["frequency_ranges_hz"][fband][1],
                         )
                     )[0]
                 )
         dat_conn = spec_out.get_data()
         for conn in np.arange(dat_conn.shape[0]):
             for fband_idx, fband in enumerate(self.fbands):
-                features_compute[
-                    "_".join(["ch1", self.method, str(conn), fband])
-                ] = np.mean(dat_conn[conn, self.fband_ranges[fband_idx]])
+                features_compute["_".join(["ch1", self.method, str(conn), fband])] = (
+                    np.mean(dat_conn[conn, self.fband_ranges[fband_idx]])
+                )
 
         return features_compute
