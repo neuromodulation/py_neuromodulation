@@ -1,11 +1,7 @@
 from collections.abc import Iterable
 import numpy as np
-from scipy.signal import welch, stft
-from scipy.fft import rfft, rfftfreq
 
 from py_neuromodulation.nm_features import NMFeature
-from py_neuromodulation.nm_filter import MNEFilter
-from py_neuromodulation.nm_kalmanfilter import define_KF
 
 
 class OscillatoryFeature(NMFeature):
@@ -60,20 +56,14 @@ class OscillatoryFeature(NMFeature):
 
         assert isinstance(settings["frequency_ranges_hz"], dict)
 
-        assert (
-            isinstance(value, list)
-            for value in settings["frequency_ranges_hz"].values()
-        )
+        assert (isinstance(value, list) for value in settings["frequency_ranges_hz"].values())
         assert (len(value) == 2 for value in settings["frequency_ranges_hz"].values())
 
         assert (
-            isinstance(value[0], list)
-            for value in settings["frequency_ranges_hz"].values()
+            isinstance(value[0], list) for value in settings["frequency_ranges_hz"].values()
         )
 
-        assert (
-            len(value[0]) == 2 for value in settings["frequency_ranges_hz"].values()
-        )
+        assert (len(value[0]) == 2 for value in settings["frequency_ranges_hz"].values())
 
         assert (
             isinstance(value[1], (float, int))
@@ -81,6 +71,9 @@ class OscillatoryFeature(NMFeature):
         )
 
     def init_KF(self, feature: str) -> None:
+        
+        from py_neuromodulation.nm_kalmanfilter import define_KF
+
         for f_band in self.settings["kalman_filter_settings"]["frequency_bands"]:
             for channel in self.ch_names:
                 self.KF_dict["_".join([channel, feature, f_band])] = define_KF(
@@ -134,6 +127,9 @@ class FFT(OscillatoryFeature):
         ch_names: Iterable[str],
         sfreq: float,
     ) -> None:
+        
+        from scipy.fft import rfftfreq
+
         super().__init__(settings, ch_names, sfreq)
 
         if self.settings["fft_settings"]["log_transform"]:
@@ -160,6 +156,9 @@ class FFT(OscillatoryFeature):
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         data = data[:, self.window_samples :]
+        
+        from scipy.fft import rfft
+
         Z = np.abs(rfft(data))
 
         if self.log_transform:
@@ -203,11 +202,12 @@ class Welch(OscillatoryFeature):
 
     @staticmethod
     def test_settings(settings: dict, ch_names: Iterable[str], sfreq: float):
-        OscillatoryFeature.test_settings_osc(
-            settings, ch_names, sfreq, "welch_settings"
-        )
+        OscillatoryFeature.test_settings_osc(settings, ch_names, sfreq, "welch_settings")
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
+        
+        from scipy.signal import welch
+        
         freqs, Z = welch(
             data,
             fs=self.sfreq,
@@ -266,6 +266,9 @@ class STFT(OscillatoryFeature):
         OscillatoryFeature.test_settings_osc(settings, ch_names, sfreq, "stft_settings")
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
+        
+        from scipy.signal import stft
+
         freqs, _, Zxx = stft(
             data,
             fs=self.sfreq,
@@ -310,6 +313,8 @@ class BandPower(OscillatoryFeature):
     ) -> None:
         super().__init__(settings, ch_names, sfreq)
         bp_settings = self.settings["bandpass_filter_settings"]
+
+        from py_neuromodulation.nm_filter import MNEFilter
 
         self.bandpass_filter = MNEFilter(
             f_ranges=list(self.f_ranges_dict.values()),
@@ -358,16 +363,12 @@ class BandPower(OscillatoryFeature):
 
         assert (
             isinstance(value, bool)
-            for value in settings["bandpass_filter_settings"][
-                "bandpower_features"
-            ].values()
+            for value in settings["bandpass_filter_settings"]["bandpower_features"].values()
         )
 
         assert any(
             value is True
-            for value in settings["bandpass_filter_settings"][
-                "bandpower_features"
-            ].values()
+            for value in settings["bandpass_filter_settings"]["bandpower_features"].values()
         ), "Set at least one bandpower_feature to True."
 
         for fband_name, seg_length_fband in settings["bandpass_filter_settings"][

@@ -1,17 +1,16 @@
 import json
 from pathlib import PurePath, Path
+from typing import TYPE_CHECKING
 
-import mne
-import mne_bids
 import numpy as np
 import pandas as pd
-import scipy.io as sio
-
-from pyarrow import Table as pyarrow_Table
-from pyarrow import csv as pyarrow_csv
 
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger, PYNM_DIR
+
+if TYPE_CHECKING:
+    from mne_bids import BIDSPath
+    from mne import io as mne_io
 
 
 def load_nm_channels(
@@ -40,11 +39,11 @@ def load_nm_channels(
 
 
 def read_BIDS_data(
-    PATH_RUN: _PathLike | mne_bids.BIDSPath,
+    PATH_RUN: "_PathLike | BIDSPath",
     BIDS_PATH: _PathLike | None = None,
     datatype: str = "ieeg",
     line_noise: int = 50,
-) -> tuple[mne.io.Raw, np.ndarray, float, int, list | None, list | None]:
+) -> tuple["mne_io.Raw", np.ndarray, float, int, list | None, list | None]:
     """Given a run path and bids data path, read the respective data
 
     Parameters
@@ -60,12 +59,13 @@ def read_BIDS_data(
     fs : int
     line_noise : int
     """
-    if isinstance(PATH_RUN, mne_bids.BIDSPath):
-        bids_path = PATH_RUN
-    else:
-        bids_path = mne_bids.get_bids_path_from_fname(PATH_RUN)
 
-    raw_arr = mne_bids.read_raw_bids(bids_path)
+    from mne_bids import read_raw_bids, get_bids_path_from_fname, BIDSPath
+
+    if not isinstance(PATH_RUN, BIDSPath):
+        bids_path = get_bids_path_from_fname(PATH_RUN)
+
+    raw_arr = read_raw_bids(bids_path)
     coord_list, coord_names = get_coord_list(raw_arr)
     if raw_arr.info["line_freq"] is not None:
         line_noise = int(raw_arr.info["line_freq"])
@@ -84,7 +84,7 @@ def read_BIDS_data(
 
 
 def get_coord_list(
-    raw: mne.io.BaseRaw,
+    raw: "mne_io.BaseRaw",
 ) -> tuple[list, list] | tuple[None, None]:
     montage = raw.get_montage()
     if montage is not None:
@@ -111,10 +111,12 @@ def read_grid(PATH_GRIDS: _PathLike | None, grid_str: str) -> pd.DataFrame:
     return grid
 
 
-def get_annotations(PATH_ANNOTATIONS: str, PATH_RUN: str, raw_arr: mne.io.RawArray):
+def get_annotations(PATH_ANNOTATIONS: str, PATH_RUN: str, raw_arr: "mne_io.RawArray"):
     filepath = PurePath(PATH_ANNOTATIONS, PurePath(PATH_RUN).name[:-5] + ".txt")
+    from mne import read_annotations
+
     try:
-        annot = mne.read_annotations(filepath)
+        annot = read_annotations(filepath)
         raw_arr.set_annotations(annot)
 
         # annotations starting with "BAD" are omitted with reject_by_annotations 'omit' param
@@ -136,10 +138,10 @@ def read_plot_modules(
         path to plotting files, by default
     """
 
-    faces = sio.loadmat(PurePath(PATH_PLOT, "faces.mat"))
-    vertices = sio.loadmat(PurePath(PATH_PLOT, "Vertices.mat"))
-    grid = sio.loadmat(PurePath(PATH_PLOT, "grid.mat"))["grid"]
-    stn_surf = sio.loadmat(PurePath(PATH_PLOT, "STN_surf.mat"))
+    faces = loadmat(PurePath(PATH_PLOT, "faces.mat"))
+    vertices = loadmat(PurePath(PATH_PLOT, "Vertices.mat"))
+    grid = loadmat(PurePath(PATH_PLOT, "grid.mat"))["grid"]
+    stn_surf = loadmat(PurePath(PATH_PLOT, "STN_surf.mat"))
     x_ver = stn_surf["vertices"][::2, 0]
     y_ver = stn_surf["vertices"][::2, 1]
     x_ecog = vertices["Vertices"][::1, 0]
@@ -210,7 +212,8 @@ def write_csv(df, path_out):
     Difference with pandas.df.to_csv() is that it does not
     write an index column by default
     """
-    pyarrow_csv.write_csv(pyarrow_Table.from_pandas(df), path_out)
+    from pyarrow import csv, Table
+    csv.write_csv(Table.from_pandas(df), path_out)
 
 
 def save_settings(settings: dict, path_out: _PathLike, folder_name: str = "") -> None:
@@ -317,7 +320,8 @@ def loadmat(filename) -> dict:
     from mat files. It calls the function check keys to cure all entries
     which are still mat-objects
     """
-    data = sio.loadmat(filename, struct_as_record=False, squeeze_me=True)
+    from scipy.io import loadmat as sio_loadmat
+    data = sio_loadmat(filename, struct_as_record=False, squeeze_me=True)
     return _check_keys(data)
 
 
@@ -351,8 +355,10 @@ def _check_keys(dict):
     checks if entries in dictionary are mat-objects. If yes
     todict is called to change them to nested dictionaries
     """
+    from scipy.io.matlab import mat_struct
+
     for key in dict:
-        if isinstance(dict[key], sio.matlab.mio5_params.mat_struct):
+        if isinstance(dict[key], mat_struct):
             dict[key] = _todict(dict[key])
     return dict
 
@@ -361,10 +367,11 @@ def _todict(matobj) -> dict:
     """
     A recursive function which constructs from matobjects nested dictionaries
     """
+    from scipy.io.matlab import mat_struct
     dict = {}
     for strg in matobj._fieldnames:
         elem = matobj.__dict__[strg]
-        if isinstance(elem, sio.matlab.mio5_params.mat_struct):
+        if isinstance(elem, mat_struct):
             dict[strg] = _todict(elem)
         else:
             dict[strg] = elem

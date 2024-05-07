@@ -2,14 +2,9 @@
 
 import numpy as np
 import pandas as pd
-from itertools import count
-import mne
 from pathlib import Path
-from joblib import Parallel, delayed
-
-from py_neuromodulation.nm_generator import raw_data_generator, LSLStream
+from py_neuromodulation.nm_generator import LSLStream
 from py_neuromodulation.nm_stream_abc import NMStream
-from py_neuromodulation.nm_define_nmchannels import get_default_channels_from_data
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
 
@@ -136,6 +131,8 @@ class _GenericStream(NMStream):
         n_jobs: int = -2,
     ) -> pd.DataFrame:
 
+        from py_neuromodulation.nm_generator import raw_data_generator
+
         if stream_lsl is False:
             generator = raw_data_generator(
                 data=data,
@@ -168,6 +165,9 @@ class _GenericStream(NMStream):
         offset_start = offset_time / 1000 * self.sfreq
 
         if parallel:
+
+          from joblib import Parallel, delayed
+          from itertools import count
             # parallel processing can not be utilized if a LSL stream is used
             if stream_lsl is True:
                 error_msg = (
@@ -267,9 +267,11 @@ class _GenericStream(NMStream):
             ch_names = [f"ch_{i}" for i in range(data.shape[0])]
             ch_types = ["ecog" for i in range(data.shape[0])]
 
-        # create mne.RawArray
-        info = mne.create_info(ch_names=ch_names, sfreq=sfreq, ch_types=ch_types)
-        raw = mne.io.RawArray(data, info)
+        from mne import create_info
+        from mne.io import RawArray
+        
+        info = create_info(ch_names=ch_names, sfreq=sfreq, ch_types=ch_types)
+        raw = RawArray(data, info)
 
         if picks is not None:
             raw = raw.pick(picks)
@@ -321,6 +323,7 @@ class Stream(_GenericStream):
         """
 
         if nm_channels is None and data is not None:
+            from py_neuromodulation.nm_define_nmchannels import get_default_channels_from_data
             nm_channels = get_default_channels_from_data(data)
 
         if nm_channels is None and data is None:

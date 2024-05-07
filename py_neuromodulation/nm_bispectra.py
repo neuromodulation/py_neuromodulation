@@ -10,7 +10,7 @@ class Bispectra(NMFeature):
         super().__init__(settings, ch_names, sfreq)
         self.sfreq = sfreq
         self.ch_names = ch_names
-        self.s = settings
+        self.settings = settings
         self.f1s = settings["bispectrum"]["f1s"]
         self.f2s = settings["bispectrum"]["f2s"]
 
@@ -71,7 +71,7 @@ class Bispectra(NMFeature):
         f_band: str | None,
     ) -> dict:
         func: Callable
-        for bispectrum_feature in self.s["bispectrum"]["bispectrum_features"]:
+        for bispectrum_feature in self.settings["bispectrum"]["bispectrum_features"]:
             if bispectrum_feature == "mean":
                 func = np.nanmean
             if bispectrum_feature == "sum":
@@ -133,8 +133,8 @@ class Bispectra(NMFeature):
 
             bispectrum = np.squeeze(waveshape.results._data)
 
-            for component in self.s["bispectrum"]["components"]:
-                if self.s["bispectrum"]["components"][component]:
+            for component in self.settings["bispectrum"]["components"]:
+                if self.settings["bispectrum"]["components"][component]:
                     if component == "real":
                         spectrum_ch = bispectrum.real
                     if component == "imag":
@@ -144,10 +144,10 @@ class Bispectra(NMFeature):
                     if component == "phase":
                         spectrum_ch = np.angle(bispectrum)
 
-                for fb in self.s["bispectrum"]["frequency_bands"]:
+                for fb in self.settings["bispectrum"]["frequency_bands"]:
                     range_ = (
-                        f_spectrum_range >= self.s["frequency_ranges_hz"][fb][0]
-                    ) & (f_spectrum_range <= self.s["frequency_ranges_hz"][fb][1])
+                        f_spectrum_range >= self.settings["frequency_ranges_hz"][fb][0]
+                    ) & (f_spectrum_range <= self.settings["frequency_ranges_hz"][fb][1])
                     # waveshape.results.plot()
                     data_bs = spectrum_ch[range_, range_]
 
@@ -155,7 +155,7 @@ class Bispectra(NMFeature):
                         data_bs, features_compute, ch_name, component, fb
                     )
 
-                if self.s["bispectrum"]["compute_features_for_whole_fband_range"]:
+                if self.settings["bispectrum"]["compute_features_for_whole_fband_range"]:
                     features_compute = self.compute_bs_features(
                         spectrum_ch, features_compute, ch_name, component, None
                     )

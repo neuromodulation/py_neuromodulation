@@ -9,17 +9,15 @@ import pandas as pd
 import scipy.stats as stats
 
 
-from skimage import measure
-from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import KFold
-import statsmodels.api as sm
-
-
 def fitlm(x, y):
+    import statsmodels.api as sm
     return sm.OLS(y, sm.add_constant(x)).fit()
 
 
 def fitlm_kfold(x, y, kfold_splits=5):
+    from sklearn.linear_model import LinearRegression
+    from sklearn.model_selection import KFold
+
     model = LinearRegression()
     if isinstance(x, type(np.array([]))) or isinstance(x, type([])):
         x = pd.DataFrame(x)
@@ -305,7 +303,9 @@ def cluster_wise_p_val_correction(p_arr, p_sig=0.05, num_permutations=10000):
     p (float) : significance level of highest cluster
     p_min_index : indices of significant samples
     """
-    labels, num_clusters = measure.label(p_arr <= p_sig, return_num=True)
+    from skimage.measure import label as measure_label
+
+    labels, num_clusters = measure_label(p_arr <= p_sig, return_num=True)
 
     # loop through clusters of p_val series or image
     index_cluster = {}
@@ -324,7 +324,7 @@ def cluster_wise_p_val_correction(p_arr, p_sig=0.05, num_permutations=10000):
     for r in range(num_permutations):
         r_per = np.random.randint(low=0, high=p_arr.shape[0], size=p_arr.shape[0])
 
-        labels, num_clusters = measure.label(p_arr[r_per] <= p_sig, return_num=True)
+        labels, num_clusters = measure_label(p_arr[r_per] <= p_sig, return_num=True)
 
         index_cluster = {}
         if num_clusters == 0:
