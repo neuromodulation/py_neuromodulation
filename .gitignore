@@ -152,6 +152,7 @@ examples/other_examples/*
 
 examples/sub/*
 examples/utils/*
+examples/temp_raw.fif
 
 sub/
 
