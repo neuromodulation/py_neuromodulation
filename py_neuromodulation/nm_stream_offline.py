@@ -166,8 +166,8 @@ class _GenericStream(NMStream):
 
         if parallel:
 
-          from joblib import Parallel, delayed
-          from itertools import count
+            from joblib import Parallel, delayed
+            from itertools import count
             # parallel processing can not be utilized if a LSL stream is used
             if stream_lsl is True:
                 error_msg = (
