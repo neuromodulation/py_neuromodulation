@@ -46,7 +46,7 @@ class LSLOfflinePlayer:
             raw.save(self._path_raw, overwrite=True)
 
         self.player = PlayerLSL(
-            self._path_raw, name = stream_name, chunk_size=100, n_repeat=1
+            self._path_raw, name = stream_name, chunk_size=10, n_repeat=1
         )
         self.interval = self.player.chunk_size / self.player.info["sfreq"]
 
