@@ -90,7 +90,7 @@ class LSLStream:
             time_diff = time.time() - self.last_time  # in s
             if time_diff >= self.sampling_interval:
                 self.last_time = time.time()
-                logger.info(f"Current time: {self.last_time}")
+                # logger.info(f"Current time: {self.last_time}")
 
                 if time_diff >= 2 * self.sampling_interval:
                     logger.warning(
@@ -101,10 +101,15 @@ class LSLStream:
                     check_data = data
 
                 data, timestamp = self.stream.get_data(winsize=self.winsize)
-                # Checking if new data is incoming # TODO check for cleaner solution
-                if data is not None and check_data is not None and np.array_equal(data, check_data):
-                    logger.warning("No new data incoming. Stopping stream.")
-                    self.stream.disconnect()
+                for i in range(3):
+                    if data is not None and check_data is not None and np.array_equal(data, check_data):
+                        logger.warning(f"No new data incoming. Disconnecting stream in {3-i} seconds.")
+                        time.sleep(1)
+                        i += 1
+                        if i == 3:
+                            self.stream.disconnect()
+                            logger.warning("Stream disconnected.")
+                            break
 
                 yield timestamp, data
                 if not listener.running:
@@ -144,4 +149,7 @@ def raw_data_generator(
         if (cnt - offset_start) >= ratio_samples_features * ratio_counter:
             ratio_counter += 1
 
-            yield None, data[:, np.floor(cnt - offset_start).astype(int) : cnt]
+            yield(
+                np.arange(cnt - offset_start, cnt) / sfreq, 
+                data[:, np.floor(cnt - offset_start).astype(int) : cnt]
+            )

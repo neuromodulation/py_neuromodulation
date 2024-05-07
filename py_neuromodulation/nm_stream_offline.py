@@ -126,7 +126,7 @@ class _GenericStream(NMStream):
 
     def _run(
         self,
-        data: np.ndarray,
+        data: np.ndarray | pd.DataFrame | None = None,
         out_path_root: _PathLike = "",
         folder_name: str = "sub",
         stream_lsl: bool = True,
@@ -207,7 +207,7 @@ class _GenericStream(NMStream):
                 #     time_[-1] - start_time
                 # )  # check if results in same
                 feature_series = self._add_timestamp(
-                   feature_series, cnt_samples
+                   feature_series, cnt_samples  
                 )
 
                 feature_series = self._add_target(
@@ -352,7 +352,7 @@ class Stream(_GenericStream):
         parallel: bool = False,
         n_jobs: int = -2,
         stream_lsl: bool = False,
-        stream_name: str = "example_stream",
+        stream_lsl_name: str = "example_stream",
         plot_lsl: bool = False,
     ) -> pd.DataFrame:
         """Call run function for offline stream.
@@ -376,7 +376,7 @@ class Stream(_GenericStream):
         super().run()  # reinitialize the stream
 
         self.stream_lsl = stream_lsl
-        self.stream_lsl_name = stream_name
+        self.stream_lsl_name = stream_lsl_name
 
         if data is not None:
             data = self._handle_data(data)
@@ -399,6 +399,6 @@ class Stream(_GenericStream):
             parallel=parallel,
             n_jobs=n_jobs,
             stream_lsl=stream_lsl,
-            stream_lsl_name=stream_name,
+            stream_lsl_name=stream_lsl_name,
             plot_lsl=plot_lsl,
         )
