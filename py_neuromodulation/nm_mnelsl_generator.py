@@ -54,11 +54,11 @@ class LSLOfflinePlayer:
 
             info = mne.create_info(
                 ch_names=[f"ch{i}" for i in range(data.shape[0])],
-                ch_types=["dbs" for _ in range(data.shape[0])],
+                ch_types=["dbs" for _ in range(data.shape[0])], # TODO Maybe change this to somehow auto detect channel type? Or make it a parameter?
                 sfreq=sfreq,
             )
             raw = mne.io.RawArray(data, info)
-            self._path_raw = Path.cwd() / "temp_raw.fif"
+            self._path_raw = Path.cwd() / "temp_raw.fif" # should we keep this (writing the raw data always to a file) ?
             raw.save(self._path_raw, overwrite=True)
 
     def start_player(self, chunk_size: int = 1, n_repeat: int = 1):

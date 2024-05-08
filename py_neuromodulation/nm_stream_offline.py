@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from py_neuromodulation.nm_mnelsl_generator import LSLOfflinePlayer
+from py_neuromodulation.nm_mnelsl_stream import LSLStream
 from py_neuromodulation.nm_stream_abc import NMStream
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
@@ -139,7 +140,7 @@ class _GenericStream(NMStream):
                 sfreq=self.sfreq,
             )
         else:
-            self.lsl_stream = LSLOfflinePlayer(
+            self.lsl_stream = LSLStream ( # Why a Player here? Shouldn't it be a Stream? (changed it back to run the code)
                 settings=self.settings, stream_name=stream_lsl_name
             )
 
