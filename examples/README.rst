@@ -3,3 +3,4 @@
 Examples
 ========
 
+examples/example_cebra_decoding
