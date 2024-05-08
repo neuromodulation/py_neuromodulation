@@ -36,15 +36,18 @@ jobs:
           - '3.10'
     steps:
       - uses: actions/checkout@v4
+      - name: Install and cache Linux packages
+        if: ${{ runner.os == 'Linux' }}
+        uses: tecolicom/actions-use-apt-tools@v1
+        with:
+          tools: binutils qtbase5-dev qt5-qmake libpugixml1v5 xvfb
       - name: Set up Python with uv
         uses: drivendataorg/setup-python-uv-action@v1
         with:
           python-version: ${{ matrix.python }}
           cache: packages
           cache-dependency-path: pyproject.toml
-      - name: Install dependencies
-        run: uv pip install .
-      - name: Install pytest
-        run: uv pip install pytest pytest-xdist pytest-sugar
+      - name: Install test dependencies
+        run: uv pip install -q .[test]
       - name: Run tests
-        run: pytest -n auto tests/
+        run: ${{ runner.os == 'Linux' && 'xvfb-run' || '' }} pytest -n auto tests/

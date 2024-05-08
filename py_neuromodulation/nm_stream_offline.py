@@ -3,15 +3,16 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
-
+from py_neuromodulation.nm_generator import LSLStream
 from py_neuromodulation.nm_stream_abc import NMStream
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
 
+from mne_lsl.stream_viewer import StreamViewer
 
-class _OfflineStream(NMStream):
-    """Offline stream base class.
-    This class can be inhereted for different types of offline streams, e.g. epoch-based or continuous.
+class _GenericStream(NMStream):
+    """_GenericStream base class.
+    This class can be inhereted for different types of offline streams
 
     Parameters
     ----------
@@ -106,29 +107,56 @@ class _OfflineStream(NMStream):
             )
 
     def _process_batch(self, data_batch, cnt_samples):
-        feature_series = self.run_analysis.process(data_batch.astype(np.float64))
+        # if isinstance(data_batch, tuple):
+        #     data_batch = np.array(data_batch[1])
+
+        feature_series = self.run_analysis.process(
+            data_batch[1].astype(np.float64)
+        )
         feature_series = self._add_timestamp(feature_series, cnt_samples)
         feature_series = self._add_target(
-            feature_series=feature_series, data=data_batch
+            feature_series=feature_series, data=data_batch[1]
         )
         return feature_series
 
-    def _run_offline(
+    def _run(
         self,
-        data: np.ndarray,
-        out_path_root: _PathLike | None = None,
+        data: np.ndarray | pd.DataFrame | None = None,
+        out_path_root: _PathLike = "",
         folder_name: str = "sub",
+        stream_lsl: bool = True,
+        stream_lsl_name: str = "example_stream",
+        plot_lsl: bool = False,
         parallel: bool = False,
         n_jobs: int = -2,
     ) -> pd.DataFrame:
-        
+
         from py_neuromodulation.nm_generator import raw_data_generator
 
-        generator = raw_data_generator(
-            data=data,
-            settings=self.settings,
-            sfreq=self.sfreq,
-        )
+        if stream_lsl is False:
+            generator = raw_data_generator(
+                data=data,
+                settings=self.settings,
+                sfreq=self.sfreq,
+            )
+        else:
+            self.lsl_stream = LSLStream(
+                settings=self.settings, stream_name=stream_lsl_name
+            )
+
+            if plot_lsl:
+                viewer = StreamViewer(stream_name=stream_lsl_name)
+                viewer.start()
+            
+            if self.sfreq != self.lsl_stream.stream.sinfo.sfreq:
+                error_msg = (
+                    f"Sampling frequency of the lsl-stream ({self.lsl_stream.stream.sinfo.sfreq}) "
+                    f"does not match the settings ({self.sfreq})."
+                )
+                logger.critical(error_msg)
+                raise Exception(error_msg)
+            
+            generator = self.lsl_stream.get_next_batch()
 
         sample_add = self.sfreq / self.run_analysis.sfreq_features
 
@@ -137,9 +165,16 @@ class _OfflineStream(NMStream):
         offset_start = offset_time / 1000 * self.sfreq
 
         if parallel:
-            # Required imports for parallel processing
+
             from joblib import Parallel, delayed
             from itertools import count
+            # parallel processing can not be utilized if a LSL stream is used
+            if stream_lsl is True:
+                error_msg = (
+                    "Parallel processing is not possible with LSL stream."
+                )
+                logger.error(error_msg)
+                raise ValueError(error_msg)
 
             l_features = Parallel(n_jobs=n_jobs, verbose=10)(
                 delayed(self._process_batch)(data_batch, cnt_samples)
@@ -149,16 +184,31 @@ class _OfflineStream(NMStream):
             )
 
         else:
-            l_features = []
+            l_features : list[pd.Series] = []
             cnt_samples = offset_start
+            start_time = None
             while True:
-                data_batch = next(generator, None)
+                next_item = next(generator, None)
+
+                if next_item is not None:
+                    time_, data_batch = next_item
+                else:
+                    break 
+
                 if data_batch is None:
                     break
                 feature_series = self.run_analysis.process(
                     data_batch.astype(np.float64)
                 )
-                feature_series = self._add_timestamp(feature_series, cnt_samples)
+
+                # start_time = time_[0] if start_time is None else start_time
+
+                # feature_series["time"] = (
+                #     time_[-1] - start_time
+                # )  # check if results in same
+                feature_series = self._add_timestamp(
+                   feature_series, cnt_samples  
+                )
 
                 feature_series = self._add_target(
                     feature_series=feature_series, data=data_batch
@@ -232,7 +282,7 @@ class _OfflineStream(NMStream):
             raw.compute_psd().plot()
 
 
-class Stream(_OfflineStream):
+class Stream(_GenericStream):
     def __init__(
         self,
         sfreq: float,
@@ -282,15 +332,15 @@ class Stream(_OfflineStream):
             )
 
         super().__init__(
-            sfreq,
-            nm_channels,
-            settings,
-            line_noise,
-            sampling_rate_features_hz,
-            path_grids,
-            coord_names,
-            coord_list,
-            verbose,
+            sfreq=sfreq,
+            nm_channels=nm_channels,
+            settings=settings,
+            line_noise=line_noise,
+            sampling_rate_features_hz = sampling_rate_features_hz,
+            path_grids = path_grids,
+            coord_names = coord_names,
+            coord_list = coord_list,
+            verbose = verbose,
         )
 
         self.data = data
@@ -304,6 +354,9 @@ class Stream(_OfflineStream):
         folder_name: str = "sub",
         parallel: bool = False,
         n_jobs: int = -2,
+        stream_lsl: bool = False,
+        stream_lsl_name: str = "example_stream",
+        plot_lsl: bool = False,
     ) -> pd.DataFrame:
         """Call run function for offline stream.
 
@@ -325,11 +378,14 @@ class Stream(_OfflineStream):
 
         super().run()  # reinitialize the stream
 
+        self.stream_lsl = stream_lsl
+        self.stream_lsl_name = stream_lsl_name
+
         if data is not None:
             data = self._handle_data(data)
         elif self.data is not None:
             data = self._handle_data(self.data)
-        elif self.data is None and data is None:
+        elif self.data is None and data is None and self.stream_lsl is False:
             raise ValueError("No data passed to run function.")
 
         if parallel:
@@ -339,6 +395,13 @@ class Stream(_OfflineStream):
         out_path.mkdir(parents=True, exist_ok=True)
         logger.log_to_file(out_path)
 
-        return self._run_offline(
-            data, out_path_root, folder_name, parallel=parallel, n_jobs=n_jobs
+        return self._run(
+            data,
+            out_path_root,
+            folder_name,
+            parallel=parallel,
+            n_jobs=n_jobs,
+            stream_lsl=stream_lsl,
+            stream_lsl_name=stream_lsl_name,
+            plot_lsl=plot_lsl,
         )
