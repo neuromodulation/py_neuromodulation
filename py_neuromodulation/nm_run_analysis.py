@@ -270,10 +270,6 @@ class DataProcessor:
             Features calculated from current data
         """
         start_time = time()
-
-        if isinstance(data, tuple):
-            print(f"Data shape: {data[0].shape}")
-            data = np.array(data[1])
             
         nan_channels = np.isnan(data).any(axis=1)
 

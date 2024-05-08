@@ -4,44 +4,43 @@ import time
 from pynput import keyboard
 import numpy as np
 
-from mne_lsl.player import PlayerLSL
-from mne_lsl.stream import StreamLSL
-import mne
-
 from py_neuromodulation import logger
 
 class LSLOfflinePlayer:
 
     def __init__(
         self,
-        settings: dict,
         stream_name: str = "example_stream",
         f_name: str | None = None,
         sfreq: int | float | None = None,
         data: np.ndarray | None = None,
     ) -> None:
 
-        self.settings = settings
+        from mne_lsl.player import PlayerLSL
+
         self.sfreq = sfreq
         self.stream_name = stream_name
-        got_fname = f_name is not None
-        got_sfreq_data = sfreq is not None and data is not None
-        if not (got_fname or got_sfreq_data):
+        
+        if not (f_name or (sfreq and data)):
             error_msg = "Either f_name or sfreq and data must be provided."
             logger.critical(error_msg)
             raise ValueError(error_msg)
-
-        if f_name is not None:
+        
+        if (f_name and (sfreq and data)):
+            logger.warning(f"Both f_name '{f_name}' and data provided. Data from '{f_name}' will by used.")
+        
+        if f_name:
             self._path_raw = f_name
+        else:
+            from mne import create_info
+            from mne.io import RawArray
 
-        if sfreq is not None and data is not None:
-
-            info = mne.create_info(
+            info = create_info(
                 ch_names=[f"ch{i}" for i in range(data.shape[0])],
                 ch_types=["dbs" for _ in range(data.shape[0])],
                 sfreq=sfreq,
             )
-            raw = mne.io.RawArray(data, info)
+            raw = RawArray(data, info)
             self._path_raw = Path.cwd() / "temp_raw.fif"
             raw.save(self._path_raw, overwrite=True)
 
@@ -56,10 +55,12 @@ class LSLOfflinePlayer:
 class LSLStream:
 
     def __init__(
-        self, settings: dict, stream_name: str
+        self, settings: dict, stream_name: str = "example_stream"
     ) -> None:
 
-        self.stream_name = "example_stream"
+        from mne_lsl.stream import StreamLSL
+
+        self.stream_name = stream_name
         self.settings = settings
         try:
             self.stream = StreamLSL(name=stream_name, bufsize=2).connect(timeout=2)
@@ -74,9 +75,7 @@ class LSLStream:
         self.sampling_interval = 1 / self.settings["sampling_rate_features_hz"]
 
     def on_press(self, key):
-        if key == keyboard.Key.esc:
-            self.key_pressed = True
-            return False
+        return key != keyboard.Key.esc
 
     def get_next_batch(self) -> Iterator[tuple[np.ndarray, np.ndarray]]:
         self.last_time = time.time()
@@ -121,7 +120,7 @@ def raw_data_generator(
     data: np.ndarray,
     settings: dict,
     sfreq: float,
-) -> Iterator[tuple[None, np.ndarray]]:
+) -> Iterator[tuple[np.ndarray, np.ndarray]]:
     """
     This generator function mimics online data acquisition.
     The data are iteratively sampled with sfreq_new.

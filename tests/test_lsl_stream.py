@@ -73,7 +73,7 @@ def test_offline_lsl():
     settings = nm_settings.get_default_settings()
     settings = nm_settings.set_settings_fast_compute(settings)
 
-    player = nm_generator.LSLOfflinePlayer(f_name = f_name, settings = settings)
+    player = nm_generator.LSLOfflinePlayer(f_name = f_name)
 
     def get_example_stream() -> nm_stream_abc.NMStream:
 
