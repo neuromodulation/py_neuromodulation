@@ -125,7 +125,7 @@ class _GenericStream(NMStream):
         out_path_root: _PathLike = "",
         folder_name: str = "sub",
         stream_lsl: bool = True,
-        stream_lsl_name: str = "example_stream",
+        stream_lsl_name: str = None,
         plot_lsl: bool = False,
         parallel: bool = False,
         n_jobs: int = -2,
@@ -355,7 +355,7 @@ class Stream(_GenericStream):
         parallel: bool = False,
         n_jobs: int = -2,
         stream_lsl: bool = False,
-        stream_lsl_name: str = "example_stream",
+        stream_lsl_name: str = None,
         plot_lsl: bool = False,
     ) -> pd.DataFrame:
         """Call run function for offline stream.

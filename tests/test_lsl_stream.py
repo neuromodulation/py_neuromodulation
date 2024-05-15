@@ -1,7 +1,7 @@
 from mne_lsl.player import PlayerLSL
 from mne_lsl.stream import StreamLSL
 import numpy as np
-from py_neuromodulation import (nm_mnelsl_generator, nm_IO, nm_define_nmchannels, nm_stream_offline, nm_settings, nm_generator)
+from py_neuromodulation import (nm_mnelsl_generator, nm_mnelsl_stream, nm_IO, nm_settings)
 import threading
 
 (
@@ -32,6 +32,7 @@ def test_mne_lsl():
     stream1 = StreamLSL(name="general_stream", bufsize=2).connect()
     ch_types = stream1.get_channel_types(unique=True)
     assert "eeg" in ch_types, "Expected EEG channels in the stream"
+    # TODO adjust this test after fixing channel types in player
 
     data_l = []
     timestamps_l = []
@@ -59,25 +60,30 @@ def test_mne_lsl():
     player1.stop()
 
 
+def test_lsl_stream_search():
+    player = nm_mnelsl_generator.LSLOfflinePlayer(f_name = f_name)
+    player.start_player()
+    streams = nm_mnelsl_stream.resolve_streams()
+    assert len(streams) != 0, "No streams found in search"
+
 
 def test_offline_lsl(setup_default_stream_fast_compute):
     settings = nm_settings.get_default_settings()
     settings = nm_settings.set_settings_fast_compute(settings)
 
-    player = nm_mnelsl_generator.LSLOfflinePlayer(f_name = f_name)
+    player = nm_mnelsl_generator.LSLOfflinePlayer(f_name = raw)
     player.start_player()
 
     data, stream = setup_default_stream_fast_compute
 
-    features = stream.run(stream_lsl = True, plot_lsl= False, stream_lsl_name = "example_stream")
+    features = stream.run(stream_lsl = True, plot_lsl= False)
     # check sfreq
     assert raw.info['sfreq'] == stream.sfreq, "Expected same sampling frequency in the stream and input file"
     assert player.player.info['sfreq'] == stream.sfreq, "Expected same sampling frequency in the stream and player"
 
     # check types
     assert all(raw.get_channel_types() == stream.nm_channels['type']) == True, "Channel types in data file are not matching the stream"
-    # assert all(player.player.get_channel_types() == stream.nm_channels['type']) == True, "Channel types in stream are not matching the player" 
-    # TODO this fails super weird. At some point all channel types in the player are set to eeg and i really don't get where this hppens! Is it us or mnelsl?
+    assert all(player.player.get_channel_types() == stream.nm_channels['type']) == True, "Channel types in stream are not matching the player" 
 
     # check names 
     assert all(raw.ch_names == stream.nm_channels['name']) == True, "Expected same channel names in the stream and input file"
@@ -85,3 +91,8 @@ def test_offline_lsl(setup_default_stream_fast_compute):
 
 
     assert features is not None
+
+
+# def compare_data():
+#     player = nm_mnelsl_generator.LSLOfflinePlayer(f_name = f_name)
+#     player.start_player()

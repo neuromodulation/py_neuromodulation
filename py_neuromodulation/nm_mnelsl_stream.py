@@ -3,9 +3,8 @@ from pathlib import Path
 import time
 from pynput import keyboard
 import numpy as np
-
 from mne_lsl.stream import StreamLSL
-
+from mne_lsl.lsl import resolve_streams
 from py_neuromodulation import logger
 
 
@@ -15,6 +14,9 @@ class LSLStream:
 
         self.settings = settings
         try:
+            if stream_name is None:
+                stream_name = resolve_streams()[0].name
+                logger.info(f"Stream name not provided. Using first available stream: {stream_name}")
             self.stream = StreamLSL(name=stream_name, bufsize=2).connect(timeout=2)
         except Exception as e:
             msg = f"Could not connect to stream: {e}. No stream is running under the name {stream_name}"
