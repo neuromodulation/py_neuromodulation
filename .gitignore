@@ -169,3 +169,5 @@ plot_1_example_BIDS.py
 
 requirements.lock
 requirements-dev.lock
+
+docs/source/bin/pandoc
