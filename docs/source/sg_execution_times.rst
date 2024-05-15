@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:29.682** total execution time for 7 files **from all galleries**:
+**00:00.274** total execution time for 7 files **from all galleries**:
 
 .. container::
 
@@ -32,24 +32,24 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - :ref:`sphx_glr_auto_examples_plot_1_example_BIDS.py` (``..\..\examples\plot_1_example_BIDS.py``)
-     - 00:29.621
+   * - :ref:`sphx_glr_auto_examples_plot_6_real_time_demo.py` (``../../examples/plot_6_real_time_demo.py``)
+     - 00:00.274
      - 0.0
-   * - :ref:`sphx_glr_auto_examples_plot_2_example_add_feature.py` (``..\..\examples\plot_2_example_add_feature.py``)
-     - 00:00.061
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_plot_0_first_demo.py` (``..\..\examples\plot_0_first_demo.py``)
+   * - :ref:`sphx_glr_auto_examples_plot_0_first_demo.py` (``../../examples/plot_0_first_demo.py``)
      - 00:00.000
      - 0.0
-   * - :ref:`sphx_glr_auto_examples_plot_3_example_sharpwave_analysis.py` (``..\..\examples\plot_3_example_sharpwave_analysis.py``)
+   * - :ref:`sphx_glr_auto_examples_plot_1_example_BIDS.py` (``../../examples/plot_1_example_BIDS.py``)
      - 00:00.000
      - 0.0
-   * - :ref:`sphx_glr_auto_examples_plot_4_example_gridPointProjection.py` (``..\..\examples\plot_4_example_gridPointProjection.py``)
+   * - :ref:`sphx_glr_auto_examples_plot_2_example_add_feature.py` (``../../examples/plot_2_example_add_feature.py``)
      - 00:00.000
      - 0.0
-   * - :ref:`sphx_glr_auto_examples_plot_5_example_rmap_computing.py` (``..\..\examples\plot_5_example_rmap_computing.py``)
+   * - :ref:`sphx_glr_auto_examples_plot_3_example_sharpwave_analysis.py` (``../../examples/plot_3_example_sharpwave_analysis.py``)
      - 00:00.000
      - 0.0
-   * - :ref:`sphx_glr_auto_examples_plot_6_real_time_demo.py` (``..\..\examples\plot_6_real_time_demo.py``)
+   * - :ref:`sphx_glr_auto_examples_plot_4_example_gridPointProjection.py` (``../../examples/plot_4_example_gridPointProjection.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_plot_5_example_rmap_computing.py` (``../../examples/plot_5_example_rmap_computing.py``)
      - 00:00.000
      - 0.0

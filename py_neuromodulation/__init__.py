@@ -13,3 +13,4 @@ logger = NMLogger(__name__)
 # Bring Stream and DataProcessor classes to top namespace
 from .nm_stream_offline import Stream
 from .nm_run_analysis import DataProcessor
+
