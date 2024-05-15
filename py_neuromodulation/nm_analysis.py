@@ -101,10 +101,10 @@ class Feature_Reader:
         else:
             for target_ in target_clean:
                 # try to select contralateral label
-                if self.sidecar["sess_right"] is True and "LEFT" in target_:
+                if self.sidecar["sess_right"] and "LEFT" in target_:
                     target = target_
                     continue
-                elif self.sidecar["sess_right"] is False and "RIGHT" in target_:
+                elif not self.sidecar["sess_right"] and "RIGHT" in target_:
                     target = target_
                     continue
                 if target_ == target_clean[-1]:
@@ -430,7 +430,7 @@ class Feature_Reader:
             if "grid" not in ch and "combined" not in ch:
                 ecog_coords_strip.append(performance_sub[ch]["coord"])
                 ecog_strip_performance.append(performance_sub[ch]["performance_test"])
-            elif plt_grid is True and "gridcortex_" in ch:
+            elif plt_grid and "gridcortex_" in ch:
                 cortex_grid.append(performance_sub[ch]["coord"])
                 grid_performance.append(performance_sub[ch]["performance_test"])
 

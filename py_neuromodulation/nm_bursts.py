@@ -2,39 +2,64 @@ import numpy as np
 from collections.abc import Iterable
 from scipy.signal import hilbert as scipy_hilbert
 
+from pydantic.dataclasses import dataclass
+from pydantic import Field
+
 from py_neuromodulation.nm_features import NMFeature
 from py_neuromodulation.nm_filter import MNEFilter
+from py_neuromodulation.nm_settings import NMSettings
+
+
+@dataclass
+class BurstFeatures:
+    duration: bool = True
+    amplitude: bool = True
+    burst_rate_per_s: bool = True
+    in_burst: bool = True
+
+
+@dataclass
+class BurstSettings:
+    threshold: float = Field(default=75, ge=0, le=100)
+    time_duration_s: float = Field(default=30, ge=0)
+    frequency_bands: list[str] = ["low beta", "high beta", "low gamma"]
+    # TONI: burst_features are not used for anything currently
+    burst_features: BurstFeatures = BurstFeatures(True, True, True, True)
 
 
 class Burst(NMFeature):
-    def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: float) -> None:
-        self.settings = settings
+    def __init__(
+        self, settings: NMSettings, ch_names: Iterable[str], sfreq: float
+    ) -> None:
+        self.settings = settings.burst_settings
         self.sfreq = sfreq
         self.ch_names = ch_names
-        self.threshold = self.settings["burst_settings"]["threshold"]
-        self.time_duration_s = self.settings["burst_settings"]["time_duration_s"]
         self.samples_overlap = int(
             self.sfreq
-            * (self.settings["segment_length_features_ms"] / 1000)
-            / self.settings["sampling_rate_features_hz"]
+            * (settings.segment_length_features_ms / 1000)
+            / settings.sampling_rate_features_hz
         )
 
-        self.fband_names = self.settings["burst_settings"]["frequency_bands"]
+        self.segment_length_features_s = settings.segment_length_features_ms / 1000
+
+        self.fband_names = settings.burst_settings.frequency_bands
         self.f_ranges = [
-            self.settings["frequency_ranges_hz"][fband_name] for fband_name in self.fband_names
+            settings.frequency_ranges_hz[fband_name] for fband_name in self.fband_names
         ]
         self.seglengths = np.floor(
             self.sfreq
             / 1000
             * np.array(
                 [
-                    self.settings["bandpass_filter_settings"]["segment_lengths_ms"][fband]
+                    settings.bandpass_filter_settings.segment_lengths_ms[fband]
                     for fband in self.fband_names
                 ]
             )
         ).astype(int)
 
-        self.num_max_samples_ring_buffer = int(self.sfreq * self.time_duration_s)
+        self.num_max_samples_ring_buffer = int(
+            self.sfreq * self.settings.time_duration_s
+        )
 
         self.bandpass_filter = MNEFilter(
             f_ranges=self.f_ranges,
@@ -57,37 +82,11 @@ class Burst(NMFeature):
         self.data_buffer = init_ch_fband_dict()
 
     @staticmethod
-    def test_settings(
-        settings: dict,
-        ch_names: Iterable[str],
-        sfreq: float,
-    ):
-        assert isinstance(
-            settings["burst_settings"]["threshold"], (float, int)
-        ), f"burst settings threshold needs to be type int or float, got: {settings['burst_settings']['threshold']}"
-        assert (
-            0 < settings["burst_settings"]["threshold"] < 100
-        ), f"burst setting threshold needs to be between 0 and 100, got: {settings['burst_settings']['threshold']}"
-        assert isinstance(
-            settings["burst_settings"]["time_duration_s"], (float, int)
-        ), f"burst settings time_duration_s needs to be type int or float, got: {settings['burst_settings']['time_duration_s']}"
-        assert (
-            settings["burst_settings"]["time_duration_s"] > 0
-        ), f"burst setting time_duration_s needs to be greater than 0, got: {settings['burst_settings']['time_duration_s']}"
-
-        for fband_burst in settings["burst_settings"]["frequency_bands"]:
+    def test_settings(settings: NMSettings):
+        for fband_burst in settings.burst_settings.frequency_bands:
             assert (
-                fband_burst in list(settings["frequency_ranges_hz"].keys())
+                fband_burst in list(settings.frequency_ranges_hz.keys())
             ), f"bursting {fband_burst} needs to be defined in settings['frequency_ranges_hz']"
-
-        for burst_feature in settings["burst_settings"]["burst_features"].keys():
-            assert isinstance(
-                settings["burst_settings"]["burst_features"][burst_feature],
-                bool,
-            ), (
-                f"bursting feature {burst_feature} needs to be type bool, "
-                f"got: {settings['burst_settings']['burst_features'][burst_feature]}"
-            )
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         # filter_data returns (n_channels, n_fbands, n_samples)
@@ -110,34 +109,35 @@ class Burst(NMFeature):
 
                 # calc features
                 burst_thr: float = np.percentile(
-                    self.data_buffer[ch_name][fband_name], q=self.threshold
+                    self.data_buffer[ch_name][fband_name], q=self.settings.threshold
                 )
 
                 burst_amplitude, burst_length = self.get_burst_amplitude_length(
                     new_dat, burst_thr, self.sfreq
                 )
 
-                features_compute[f"{ch_name}_bursts_{fband_name}_duration_mean"] = (
+                feature_name = f"{ch_name}_bursts_{fband_name}"
+
+                features_compute[f"{feature_name}_duration_mean"] = (
                     np.mean(burst_length) if len(burst_length) != 0 else 0
                 )
-                features_compute[f"{ch_name}_bursts_{fband_name}_amplitude_mean"] = (
+                features_compute[f"{feature_name}_amplitude_mean"] = (
                     np.mean([np.mean(a) for a in burst_amplitude])
                     if len(burst_length) != 0
                     else 0
                 )
 
-                features_compute[f"{ch_name}_bursts_{fband_name}_duration_max"] = (
+                features_compute[f"{feature_name}_duration_max"] = (
                     np.max(burst_length) if len(burst_length) != 0 else 0
                 )
-                features_compute[f"{ch_name}_bursts_{fband_name}_amplitude_max"] = (
+                features_compute[f"{feature_name}_amplitude_max"] = (
                     np.max([np.max(a) for a in burst_amplitude])
                     if len(burst_amplitude) != 0
                     else 0
                 )
 
-                features_compute[f"{ch_name}_bursts_{fband_name}_burst_rate_per_s"] = (
-                    np.mean(burst_length)
-                    / (self.settings["segment_length_features_ms"] / 1000)
+                features_compute[f"{feature_name}_burst_rate_per_s"] = (
+                    np.mean(burst_length) / self.segment_length_features_s
                     if len(burst_length) != 0
                     else 0
                 )
@@ -146,7 +146,7 @@ class Burst(NMFeature):
                 if self.data_buffer[ch_name][fband_name][-1] > burst_thr:
                     in_burst = True
 
-                features_compute[f"{ch_name}_bursts_{fband_name}_in_burst"] = in_burst
+                features_compute[f"{feature_name}_in_burst"] = in_burst
         return features_compute
 
     @staticmethod

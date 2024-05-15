@@ -1,65 +1,69 @@
-from collections.abc import Iterable, Callable
+from collections.abc import Iterable
+from pydantic import Field, field_validator
+from pydantic.dataclasses import dataclass
+
 import numpy as np
-from pybispectra import compute_fft, WaveShape
 
 from py_neuromodulation.nm_features import NMFeature
+from py_neuromodulation.nm_types import FeatureSelector, FrequencyRange
+from py_neuromodulation.nm_settings import NMSettings
+
+
+@dataclass
+class BispectraComponents(FeatureSelector):
+    absolute: bool = True
+    real: bool = True
+    imag: bool = True
+    phase: bool = True
+
+
+@dataclass
+class BispectraFeatures(FeatureSelector):
+    mean = True
+    sum = True
+    var = True
+
+
+@dataclass
+class BispectraSettings:
+    @staticmethod
+    def default_bands() -> list[str]:
+        return ["theta", "alpha", "low_beta", "high_beta"]
+
+    f1s: FrequencyRange = Field(default=(5, 35), min_length=2, max_length=2)
+    f2s: FrequencyRange = Field(default=(5, 35), min_length=2, max_length=2)
+    compute_features_for_whole_fband_range: bool = True
+    frequency_bands: list[str] = Field(default_factory=default_bands)
+
+    components: BispectraComponents = BispectraComponents()
+    bispectrum_features: BispectraFeatures = BispectraFeatures()
+
+    @field_validator("f1s", "f2s")
+    def test_range(cls, filter_range):
+        assert (
+            filter_range[1] > filter_range[0]
+        ), f"second frequency range value needs to be higher than first one, got {filter_range}"
+        return filter_range
 
 
 class Bispectra(NMFeature):
-    def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: float) -> None:
-        super().__init__(settings, ch_names, sfreq)
+    def __init__(
+        self, settings: NMSettings, ch_names: Iterable[str], sfreq: float
+    ) -> None:
         self.sfreq = sfreq
         self.ch_names = ch_names
-        self.settings = settings
-        self.f1s = settings["bispectrum"]["f1s"]
-        self.f2s = settings["bispectrum"]["f2s"]
+        self.frequency_ranges_hz = settings.frequency_ranges_hz
+        self.settings: BispectraSettings = settings.bispectrum
 
-    @staticmethod
-    def test_settings(
-        settings: dict,
-        ch_names: Iterable[str],
-        sfreq: float,
-    ):
-        s = settings
-
-        def test_range(f_name, filter_range):
-            assert isinstance(
-                filter_range[0],
-                int,
-            ), f"bispectrum frequency range {f_name} needs to be of type int, got {filter_range[0]}"
-            assert isinstance(
-                filter_range[1],
-                int,
-            ), f"bispectrum frequency range {f_name} needs to be of type int, got {filter_range[1]}"
-            assert (
-                filter_range[1] > filter_range[0]
-            ), f"second frequency range value needs to be higher than first one, got {filter_range}"
-            assert filter_range[0] < sfreq and filter_range[1] < sfreq, (
-                "filter frequency range has to be smaller than sfreq, "
-                f"got sfreq {sfreq} and filter range {filter_range}"
-            )
-
-        test_range("f1s", s["bispectrum"]["f1s"])
-        test_range("f2s", s["bispectrum"]["f2s"])
-
-        for feature_name, val in s["bispectrum"]["components"].items():
-            assert isinstance(
-                val, bool
-            ), f"bispectrum component {feature_name} has to be of type bool, got {val}"
-
-        for feature_name, val in s["bispectrum"]["bispectrum_features"].items():
-            assert isinstance(
-                val, bool
-            ), f"bispectrum feature {feature_name} has to be of type bool, got {val}"
-
+    def test_settings(self, settings: NMSettings):
         assert (
-            f_band_bispectrum in s["frequency_ranges_hz"]
-            for f_band_bispectrum in s["bispectrum"]["frequency_bands"]
+            f_band_bispectrum in settings.frequency_ranges_hz
+            for f_band_bispectrum in self.settings.frequency_bands
         ), (
             "bispectrum selected frequency bands don't match the ones"
             "specified in s['frequency_ranges_hz']"
-            f"bispectrum frequency bands: {s['bispectrum']['frequency_bands']}"
-            f"specified frequency_ranges_hz: {s['frequency_ranges_hz']}"
+            f"bispectrum frequency bands: {self.settings.frequency_bands}"
+            f"specified frequency_ranges_hz: {settings.frequency_ranges_hz}"
         )
 
     def compute_bs_features(
@@ -68,44 +72,29 @@ class Bispectra(NMFeature):
         features_compute: dict,
         ch_name: str,
         component: str,
-        f_band: str | None,
+        f_band: str = "whole_fband_range",
     ) -> dict:
-        func: Callable
-        for bispectrum_feature in self.settings["bispectrum"]["bispectrum_features"]:
-            if bispectrum_feature == "mean":
-                func = np.nanmean
-            if bispectrum_feature == "sum":
-                func = np.nansum
-            if bispectrum_feature == "var":
-                func = np.nanvar
+        for bispectrum_feature in self.settings.bispectrum_features.get_enabled():
+            match bispectrum_feature:
+                case "mean":
+                    result = np.nanmean(spectrum_ch)
+                case "sum":
+                    result = np.nansum(spectrum_ch)
+                case "var":
+                    result = np.nanvar(spectrum_ch)
+                case _:
+                    raise ValueError(f"Unknown bispectrum feature {bispectrum_feature}")
 
-            if f_band is not None:
-                str_feature = "_".join(
-                    [
-                        ch_name,
-                        "Bispectrum",
-                        component,
-                        bispectrum_feature,
-                        f_band,
-                    ]
-                )
-            else:
-                str_feature = "_".join(
-                    [
-                        ch_name,
-                        "Bispectrum",
-                        component,
-                        bispectrum_feature,
-                        "whole_fband_range",
-                    ]
-                )
-
-            features_compute[str_feature] = func(spectrum_ch)
+            features_compute[
+                f"{ch_name}_Bispectrum_{component}_{bispectrum_feature}_{f_band}"
+            ] = result
 
         return features_compute
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         for ch_idx, ch_name in enumerate(self.ch_names):
+            from pybispectra import compute_fft, WaveShape
+
             fft_coeffs, freqs = compute_fft(
                 data=np.expand_dims(data[ch_idx, :], axis=(0, 1)),
                 sampling_freq=self.sfreq,
@@ -115,8 +104,8 @@ class Bispectra(NMFeature):
 
             f_spectrum_range = freqs[
                 np.logical_and(
-                    freqs >= np.min([self.f1s, self.f2s]),
-                    freqs <= np.max([self.f1s, self.f2s]),
+                    freqs >= np.min([self.settings.f1s, self.settings.f2s]),
+                    freqs <= np.max([self.settings.f1s, self.settings.f2s]),
                 )
             ]
 
@@ -128,26 +117,29 @@ class Bispectra(NMFeature):
             )
 
             waveshape.compute(
-                f1s=(self.f1s[0], self.f1s[-1]), f2s=(self.f2s[0], self.f2s[-1])
+                f1s=(self.settings.f1s[0], self.settings.f1s[-1]),
+                f2s=(self.settings.f2s[0], self.settings.f2s[-1]),
             )
 
             bispectrum = np.squeeze(waveshape.results._data)
 
-            for component in self.settings["bispectrum"]["components"]:
-                if self.settings["bispectrum"]["components"][component]:
-                    if component == "real":
+            for component in self.settings.components.get_enabled():
+                match component:
+                    case "real":
                         spectrum_ch = bispectrum.real
-                    if component == "imag":
+                    case "imag":
                         spectrum_ch = bispectrum.imag
-                    if component == "absolute":
+                    case "absolute":
                         spectrum_ch = np.abs(bispectrum)
-                    if component == "phase":
+                    case "phase":
                         spectrum_ch = np.angle(bispectrum)
+                    case _:
+                        raise ValueError(f"Unknown component {component}")
 
-                for fb in self.settings["bispectrum"]["frequency_bands"]:
-                    range_ = (
-                        f_spectrum_range >= self.settings["frequency_ranges_hz"][fb][0]
-                    ) & (f_spectrum_range <= self.settings["frequency_ranges_hz"][fb][1])
+                for fb in self.settings.frequency_bands:
+                    range_ = (f_spectrum_range >= self.frequency_ranges_hz[fb][0]) & (
+                        f_spectrum_range <= self.frequency_ranges_hz[fb][1]
+                    )
                     # waveshape.results.plot()
                     data_bs = spectrum_ch[range_, range_]
 
@@ -155,9 +147,13 @@ class Bispectra(NMFeature):
                         data_bs, features_compute, ch_name, component, fb
                     )
 
-                if self.settings["bispectrum"]["compute_features_for_whole_fband_range"]:
+                if self.settings.compute_features_for_whole_fband_range:
                     features_compute = self.compute_bs_features(
-                        spectrum_ch, features_compute, ch_name, component, None
+                        spectrum_ch,
+                        features_compute,
+                        ch_name,
+                        component,
+                        "whole_fband_range",
                     )
 
         return features_compute

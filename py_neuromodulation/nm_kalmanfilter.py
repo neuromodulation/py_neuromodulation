@@ -1,7 +1,28 @@
 from numpy import array, cov
-from collections.abc import Iterable
+from pydantic.dataclasses import dataclass
+from pydantic import Field
 
 from filterpy.kalman import KalmanFilter
+
+
+@dataclass
+class KalmanSettings:
+    @staticmethod
+    def default_bands() -> list[str]:
+        return [
+            "theta",
+            "alpha",
+            "low_beta",
+            "high_beta",
+            "low_gamma",
+            "high_gamma",
+            "HFA",
+        ]
+
+    Tp: float = 0.1
+    sigma_w: float = 0.7
+    sigma_v: float = 1.0
+    frequency_bands: list[str] = Field(default_factory=default_bands, min_length=1)
 
 
 def define_KF(Tp, sigma_w, sigma_v):
@@ -37,26 +58,3 @@ def define_KF(Tp, sigma_w, sigma_v):
     )
     f.P = cov([[1, 0], [0, 1]])
     return f
-
-
-def test_kf_settings(
-    s: dict,
-    ch_names: Iterable[str],
-    sfreq: float,
-):
-    assert isinstance(s["kalman_filter_settings"]["Tp"], (float, int))
-    assert isinstance(s["kalman_filter_settings"]["sigma_w"], (float, int))
-    assert isinstance(s["kalman_filter_settings"]["sigma_v"], (float, int))
-    assert s["kalman_filter_settings"][
-        "frequency_bands"
-    ], "No frequency bands specified for Kalman filter."
-    assert isinstance(
-        s["kalman_filter_settings"]["frequency_bands"], list
-    ), "Frequency bands for Kalman filter must be specified as a list."
-    assert (
-        item in s["frequency_ranges_hz"].values()
-        for item in s["kalman_filter_settings"]["frequency_bands"]
-    ), (
-        "Frequency bands for Kalman filter must also be specified in "
-        "bandpass_filter_settings."
-    )

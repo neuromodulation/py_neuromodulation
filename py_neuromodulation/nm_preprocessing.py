@@ -1,7 +1,7 @@
 from typing import Protocol, TYPE_CHECKING
 from inspect import getfullargspec
 from typing import Type
-from py_neuromodulation.nm_types import ImportDetails, get_class
+from py_neuromodulation.nm_types import ImportDetails, get_class, PreprocessorName
 
 if TYPE_CHECKING:
     import numpy as np
@@ -14,18 +14,14 @@ class NMPreprocessor(Protocol):
     def process(self, data: "np.ndarray") -> "np.ndarray": ...
 
 
-PREPROCESSOR_DICT: dict[str, ImportDetails] = {
+PREPROCESSOR_DICT: dict[PreprocessorName, ImportDetails] = {
     "preprocessing_filter": ImportDetails(
-        "py_neuromodulation.nm_filter_preprocessing", "PreprocessingFilter"
+        "nm_filter_preprocessing", "PreprocessingFilter"
     ),
-    "notch_filter": ImportDetails("py_neuromodulation.nm_filter", "NotchFilter"),
-    "raw_resampling": ImportDetails("py_neuromodulation.nm_resample", "Resampler"),
-    "re_referencing": ImportDetails(
-        "py_neuromodulation.nm_rereference", "ReReferencer"
-    ),
-    "raw_normalization": ImportDetails(
-        "py_neuromodulation.nm_normalization", "RawNormalizer"
-    ),
+    "notch_filter": ImportDetails("nm_filter", "NotchFilter"),
+    "raw_resampling": ImportDetails("nm_resample", "Resampler"),
+    "re_referencing": ImportDetails("nm_rereference", "ReReferencer"),
+    "raw_normalization": ImportDetails("nm_normalization", "RawNormalizer"),
 }
 
 

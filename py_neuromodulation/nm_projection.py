@@ -1,26 +1,33 @@
 import numpy as np
 import pandas as pd
+from pydantic.dataclasses import dataclass
+
+from py_neuromodulation.nm_settings import NMSettings
+
+
+@dataclass
+class ProjectionSettings:
+    max_dist_mm: float
+
 
 class Projection:
     def __init__(
         self,
-        settings: dict,
+        settings: NMSettings,
         grid_cortex: pd.DataFrame,
         grid_subcortex: pd.DataFrame,
         coords: dict,
         nm_channels: pd.DataFrame,
         plot_projection: bool = False,
     ) -> None:
-        self.test_settings(settings)
-
         self.grid_cortex = grid_cortex
         self.grid_subcortex = grid_subcortex
         self.coords = coords
         self.nm_channels = nm_channels
-        self.project_cortex = settings["postprocessing"]["project_cortex"]
-        self.project_subcortex = settings["postprocessing"]["project_subcortex"]
-        self.max_dist_cortex = settings["project_cortex_settings"]["max_dist_mm"]
-        self.max_dist_subcortex = settings["project_subcortex_settings"]["max_dist_mm"]
+        self.project_cortex = settings.postprocessing.project_cortex
+        self.project_subcortex = settings.postprocessing.project_subcortex
+        self.max_dist_cortex = settings.project_cortex_settings.max_dist_mm
+        self.max_dist_subcortex = settings.project_subcortex_settings.max_dist_mm
         self.ecog_channels: list  # None case never handled, no need for default value
         self.lfp_channels: list  # None case never handled, no need for default value
 
@@ -43,7 +50,7 @@ class Projection:
             self.ecog_strip_names = self.coords["cortex_left"]["ch_names"]
 
         if (
-            self.sess_right is True
+            self.sess_right
             and len(self.coords["subcortex_right"]["positions"]) > 0
         ):
             self.lfp_elec = self.coords["subcortex_right"]["positions"]
@@ -72,7 +79,6 @@ class Projection:
             )[0]
 
         if plot_projection:
-            
             from py_neuromodulation.nm_plots import NM_Plot
 
             nmplotter = NM_Plot(
@@ -83,15 +89,6 @@ class Projection:
                 proj_matrix_cortex=self.proj_matrix_cortex,
             )
             nmplotter.plot_cortex()
-
-    @staticmethod
-    def test_settings(settings: dict):
-        if settings["postprocessing"]["project_cortex"]:
-            assert isinstance(settings["project_cortex_settings"]["max_dist_mm"], (float, int))
-        if settings["postprocessing"]["project_subcortex"]:
-            assert isinstance(
-                settings["project_subcortex_settings"]["max_dist_mm"], (float, int)
-            )
 
     def remove_not_used_ch_from_coords(self):
         ch_not_used = self.nm_channels.query('(used==0) or (status=="bad")').name

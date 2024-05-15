@@ -1,5 +1,6 @@
 """Module for filter functionality."""
 
+from math import isnan
 import numpy as np
 from typing import cast
 
@@ -7,6 +8,9 @@ from py_neuromodulation.nm_preprocessing import NMPreprocessor
 from py_neuromodulation import logger
 
 from mne.filter import create_filter
+
+from py_neuromodulation.nm_types import FrequencyRange
+
 
 class MNEFilter:
     """mne.filter wrapper
@@ -20,8 +24,7 @@ class MNEFilter:
 
     Parameters
     ----------
-    f_ranges : list of lists
-        Frequency ranges. Inner lists must be of length 2.
+    f_ranges : list[FrequencyRange]
     sfreq : float
         Sampling frequency.
     filter_length : str, optional
@@ -41,29 +44,30 @@ class MNEFilter:
 
     def __init__(
         self,
-        f_ranges: list[list[float | None]] | list[float | None],
+        f_ranges: list[FrequencyRange],
         sfreq: float,
         filter_length: str | float = "999ms",
         l_trans_bandwidth: float | str = 4,
         h_trans_bandwidth: float | str = 4,
         verbose: bool | int | str | None = None,
     ) -> None:
-                
         filter_bank = []
         # mne create_filter function only accepts str and int for filter_length
         if isinstance(filter_length, float):
             filter_length = int(filter_length)
 
-        if not isinstance(f_ranges[0], list):
-            f_ranges = [f_ranges]
-
         for f_range in f_ranges:
+            # Convert Nan to None for MNE create_filter
+            mne_range = [
+                f_range[i] if not isnan(f_range[i]) else None for i in range(2)
+            ]
+
             try:
                 filt = create_filter(
                     None,
                     sfreq,
-                    l_freq=f_range[0],
-                    h_freq=f_range[1],
+                    l_freq=mne_range[0],
+                    h_freq=mne_range[1],
                     fir_design="firwin",
                     l_trans_bandwidth=l_trans_bandwidth,  # type: ignore
                     h_trans_bandwidth=h_trans_bandwidth,  # type: ignore
@@ -74,8 +78,8 @@ class MNEFilter:
                 filt = create_filter(
                     None,
                     sfreq,
-                    l_freq=f_range[0],
-                    h_freq=f_range[1],
+                    l_freq=mne_range[0],
+                    h_freq=mne_range[1],
                     fir_design="firwin",
                     verbose=verbose,
                     # filter_length=filter_length,
@@ -195,7 +199,7 @@ class NotchFilter(NMPreprocessor):
     def process(self, data: np.ndarray) -> np.ndarray:
         if self.filter_bank is None:
             return data
-        
+
         from mne.filter import _overlap_add_filter
 
         return _overlap_add_filter(

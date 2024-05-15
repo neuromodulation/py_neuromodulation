@@ -2,8 +2,32 @@ from scipy import signal
 import numpy as np
 from collections.abc import Iterable
 
+from pydantic.dataclasses import dataclass
+
+from py_neuromodulation.nm_settings import NMSettings
 from py_neuromodulation.nm_features import NMFeature
+from py_neuromodulation.nm_types import FeatureSelector
 from py_neuromodulation import logger
+
+
+@dataclass
+class CoherenceMethods(FeatureSelector):
+    coh: bool = True
+    icoh: bool = True
+
+
+@dataclass
+class CoherenceFeatures(FeatureSelector):
+    mean_fband: bool = True
+    max_fband: bool = True
+    max_allfbands: bool = True
+
+
+class CoherenceSettings:
+    features: CoherenceFeatures = CoherenceFeatures()
+    method: CoherenceMethods = CoherenceMethods()
+    channels: list[tuple[str, str]] = [("STN_RIGHT_0", "ECOG_RIGHT_0")]
+    frequency_bands: list[str] = ["high beta"]
 
 
 class CoherenceObject:
@@ -106,25 +130,26 @@ class CoherenceObject:
 
 
 class NM_Coherence(NMFeature):
-    def __init__(self, settings: dict, ch_names: list[str], sfreq: float) -> None:
-        self.settings = settings
+    def __init__(self, settings: NMSettings, ch_names: list[str], sfreq: float) -> None:
+        self.settings = settings.coherence
+        self.frequency_ranges_hz = settings.frequency_ranges_hz
         self.sfreq = sfreq
         self.ch_names = ch_names
         self.coherence_objects: Iterable[CoherenceObject] = []
 
-        for idx_coh in range(len(self.settings["coherence"]["channels"])):
-            fband_names = self.settings["coherence"]["frequency_bands"]
+        for idx_coh in range(len(self.settings.channels)):
+            fband_names = self.settings.frequency_bands
             fband_specs = []
             for band_name in fband_names:
-                fband_specs.append(self.settings["frequency_ranges_hz"][band_name])
+                fband_specs.append(self.frequency_ranges_hz[band_name])
 
-            ch_1_name = self.settings["coherence"]["channels"][idx_coh][0]
+            ch_1_name = self.settings.channels[idx_coh][0]
             ch_1_name_reref = [ch for ch in self.ch_names if ch.startswith(ch_1_name)][
                 0
             ]
             ch_1_idx = self.ch_names.index(ch_1_name_reref)
 
-            ch_2_name = self.settings["coherence"]["channels"][idx_coh][1]
+            ch_2_name = self.settings.channels[idx_coh][1]
             ch_2_name_reref = [ch for ch in self.ch_names if ch.startswith(ch_2_name)][
                 0
             ]
@@ -140,9 +165,9 @@ class NM_Coherence(NMFeature):
                     ch_2_name,
                     ch_1_idx,
                     ch_2_idx,
-                    self.settings["coherence"]["method"]["coh"],
-                    self.settings["coherence"]["method"]["icoh"],
-                    self.settings["coherence"]["features"],
+                    self.settings.method.coh,
+                    self.settings.method.icoh,
+                    self.settings.features,
                 )
             )
 
