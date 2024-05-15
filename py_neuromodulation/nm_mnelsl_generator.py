@@ -58,7 +58,7 @@ class LSLOfflinePlayer:
                 sfreq=sfreq,
             )
             raw = mne.io.RawArray(data, info)
-            self._path_raw = Path.cwd() / "temp_raw.fif" # should we keep this (writing the raw data always to a file) ?
+            # self._path_raw = Path.cwd() / "temp_raw.fif" # should we keep this (writing the raw data always to a file) ?
             raw.save(self._path_raw, overwrite=True)
 
     def start_player(self, chunk_size: int = 1, n_repeat: int = 1):
