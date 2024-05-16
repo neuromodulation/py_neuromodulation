@@ -1,27 +1,21 @@
 """Module for real-time data normalization."""
 
-from enum import StrEnum
 from pydantic import BaseModel, Field
+from typing import Literal, Callable
 
 import numpy as np
 
 from py_neuromodulation.nm_preprocessing import NMPreprocessor
 
 
-class NormMethod(StrEnum):
-    MEAN = "mean"
-    MEDIAN = "median"
-    ZSCORE = "zscore"
-    ZSCORE_MEDIAN = "zscore-median"
-    QUANTILE = "quantile"
-    POWER = "power"
-    ROBUST = "robust"
-    MINMAX = "minmax"
+NormMethod = Literal[
+    "mean", "median", "zscore", "zscore-median", "quantile", "power", "robust", "minmax"
+]
 
 
 class NormalizationSettings(BaseModel):
     normalization_time_s: float = 30
-    normalization_method: NormMethod = NormMethod.ZSCORE
+    normalization_method: NormMethod = "zscore"
     clip: float = Field(default=3, ge=0)
 
 
@@ -153,15 +147,15 @@ def _normalize_and_clip(
 ) -> tuple[np.ndarray, np.ndarray]:
     """Normalize data."""
     match method:
-        case NormMethod.MEAN:
+        case "mean":
             mean = nan_mean(previous, axis=0)
             current = (current - mean) / mean
-        case NormMethod.MEDIAN:
+        case "median":
             median = nan_median(previous, axis=0)
             current = (current - median) / median
-        case NormMethod.ZSCORE:
+        case "zscore":
             current = (current - nan_mean(previous, axis=0)) / nan_std(previous, axis=0)
-        case NormMethod.ZSCORE_MEDIAN:
+        case "zscore-median":
             current = (current - nan_median(previous, axis=0)) / nan_std(
                 previous, axis=0
             )
@@ -170,12 +164,7 @@ def _normalize_and_clip(
         # and we need to expand, and remove the extra dimension afterwards
         # When current is a 2D array, then it is pre-processing normalization, and
         # there's no need for expanding.
-        case (
-            NormMethod.QUANTILE
-            | NormMethod.ROBUST
-            | NormMethod.MINMAX
-            | NormMethod.POWER
-        ):
+        case "quantile" | "power" | "robust" | "minmax":
             from sklearn.preprocessing import (
                 QuantileTransformer,
                 RobustScaler,
@@ -183,11 +172,11 @@ def _normalize_and_clip(
                 PowerTransformer,
             )
 
-            norm_methods = {
-                NormMethod.QUANTILE: lambda: QuantileTransformer(n_quantiles=300),
-                NormMethod.ROBUST: RobustScaler,
-                NormMethod.MINMAX: MinMaxScaler,
-                NormMethod.POWER: PowerTransformer,
+            norm_methods: dict[NormMethod, Callable] = {
+                "quantile": lambda: QuantileTransformer(n_quantiles=300),
+                "robust": RobustScaler,
+                "minmax": MinMaxScaler,
+                "power": PowerTransformer,
             }
 
             current = (
