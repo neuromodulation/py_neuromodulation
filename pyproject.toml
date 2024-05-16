@@ -50,7 +50,8 @@ dependencies = [
   "pyarrow>=14.0.2",
   "joblib>=1.3.2",
   "hatch>=1.9.4",
-  "statsmodels"
+  "statsmodels",
+  "pydantic"
 ]
 
 [project.optional-dependencies]
