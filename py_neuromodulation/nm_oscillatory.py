@@ -1,16 +1,16 @@
 from collections.abc import Iterable
 import numpy as np
 
-from pydantic import field_validator
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel, field_validator
+from typing import TYPE_CHECKING
 
 from py_neuromodulation.nm_features import NMFeature
-from py_neuromodulation.nm_settings import NMSettings
-from py_neuromodulation.nm_kalmanfilter import KalmanSettings
 from py_neuromodulation.nm_types import FeatureSelector
 
+if TYPE_CHECKING:
+    from py_neuromodulation.nm_settings import NMSettings
+    from py_neuromodulation.nm_kalmanfilter import KalmanSettings
 
-@dataclass
 class OscillatoryFeatures(FeatureSelector):
     mean: bool = True
     median: bool = False
@@ -18,8 +18,7 @@ class OscillatoryFeatures(FeatureSelector):
     max: bool = False
 
 
-@dataclass
-class OscillatorySettings:
+class OscillatorySettings(BaseModel):
     windowlength_ms: int
     log_transform: bool
     features: OscillatoryFeatures = OscillatoryFeatures(
@@ -28,15 +27,13 @@ class OscillatorySettings:
     return_spectrum: bool = False
 
 
-@dataclass
 class BandpowerFeatures(FeatureSelector):
     activity: bool = True
     mobility: bool = False
     complexity: bool = False
 
 
-@dataclass
-class BandpassSettings:
+class BandpassSettings(BaseModel):
     segment_lengths_ms: dict[str, int] = {
         "theta": 1000,
         "alpha": 500,
@@ -46,7 +43,7 @@ class BandpassSettings:
         "high gamma": 100,
         "HFA": 100,
     }
-    bandpower_features: BandpowerFeatures = BandpowerFeatures(True, False, False)
+    bandpower_features: BandpowerFeatures
     log_transform: bool = True
     kalman_filter: bool = False
 
@@ -61,7 +58,7 @@ class BandpassSettings:
 
 class OscillatoryFeature(NMFeature):
     def __init__(
-        self, settings: NMSettings, ch_names: Iterable[str], sfreq: float
+        self, settings: 'NMSettings', ch_names: Iterable[str], sfreq: float
     ) -> None:
         # self.settings = settings
         self.settings: OscillatorySettings  # Assignment in subclass __init__
@@ -111,7 +108,7 @@ class OscillatoryFeature(NMFeature):
 class FFT(OscillatoryFeature):
     def __init__(
         self,
-        settings: NMSettings,
+        settings: 'NMSettings',
         ch_names: Iterable[str],
         sfreq: float,
     ) -> None:
@@ -145,7 +142,7 @@ class FFT(OscillatoryFeature):
         if self.settings.log_transform:
             Z = np.log10(Z)
 
-        for ch_idx, feature_name, idx_range in self.feature_params:
+        for ch_idx, idx_range in self.feature_params:
             Z_ch = Z[ch_idx, idx_range]
 
             features_compute = self.estimate_osc_features(
@@ -168,7 +165,7 @@ class FFT(OscillatoryFeature):
 class Welch(OscillatoryFeature):
     def __init__(
         self,
-        settings: NMSettings,
+        settings: 'NMSettings',
         ch_names: Iterable[str],
         sfreq: float,
     ) -> None:
@@ -196,7 +193,7 @@ class Welch(OscillatoryFeature):
         if self.settings.log_transform:
             Z = np.log10(Z)
 
-        for ch_idx, feature_name, f_range in self.feature_params:
+        for ch_idx, f_range in self.feature_params:
             Z_ch = Z[ch_idx]
 
             idx_range = np.where((freqs >= f_range[0]) & (freqs <= f_range[1]))[0]
@@ -221,7 +218,7 @@ class Welch(OscillatoryFeature):
 class STFT(OscillatoryFeature):
     def __init__(
         self,
-        settings: NMSettings,
+        settings: 'NMSettings',
         ch_names: Iterable[str],
         sfreq: float,
     ) -> None:
@@ -275,7 +272,7 @@ class STFT(OscillatoryFeature):
 class BandPower(NMFeature):
     def __init__(
         self,
-        settings: NMSettings,
+        settings: 'NMSettings',
         ch_names: Iterable[str],
         sfreq: float,
         use_kf: bool | None = None,

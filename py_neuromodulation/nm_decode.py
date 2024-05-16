@@ -8,6 +8,9 @@ import numpy as np
 from copy import deepcopy
 from pathlib import PurePath
 import pickle
+
+from py_neuromodulation import logger
+
 class CV_res:
     def __init__(
         self,
@@ -395,7 +398,7 @@ class Decoder:
         try:
             mov_detection_rate = np.where(hit_rate > 0)[0].shape[0] / labels_count
         except ZeroDivisionError:
-            print("no movements in label")
+            logger.warning("no movements in label")
             return 0, 0, 0
 
         # calculating TPR and FPR: https://stackoverflow.com/a/40324184/5060208
@@ -797,7 +800,7 @@ class Decoder:
         )
 
         if y_train_bo.sum() == 0 or y_test_bo.sum() == 0:
-            print("could not start Bay. Opt. with no labels > 0")
+            logger.critical("could not start Bay. Opt. with no labels > 0")
             raise Decoder.ClassMissingException
 
         params_bo = self.run_Bay_Opt(
@@ -885,7 +888,7 @@ class Decoder:
             f_val = get_f_val(model_bo)
             res = opt.tell(next_x, f_val)
             if self.VERBOSE:
-                print(f_val)
+                logger.info(f_val)
 
         # res is here automatically appended by skopt
         return res.x
@@ -904,6 +907,6 @@ class Decoder:
                 feature_file + "_" + str_save_add + "_ML_RES.p",
             )
 
-        print(f"model being saved to: {PATH_OUT}")
+        logger.info(f"model being saved to: {PATH_OUT}")
         with open(PATH_OUT, "wb") as output:  # Overwrites any existing file.
             pickle.dump(self, output)

@@ -1,15 +1,16 @@
 import numpy as np
 from collections.abc import Iterable
-import nolds
 
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel
+from typing import TYPE_CHECKING
 
 from py_neuromodulation.nm_features import NMFeature
-from py_neuromodulation.nm_settings import NMSettings
 from py_neuromodulation.nm_types import FeatureSelector
 
+if TYPE_CHECKING:
+    from py_neuromodulation.nm_settings import NMSettings
 
-@dataclass
+
 class NoldsFeatures(FeatureSelector):
     sample_entropy: bool = False
     correlation_dimension: bool = False
@@ -18,16 +19,15 @@ class NoldsFeatures(FeatureSelector):
     detrended_fluctuation_analysis: bool = False
 
 
-@dataclass
-class NoldsSettings:
+class NoldsSettings(BaseModel):
     raw: bool = True
     frequency_bands: list[str] = ["low_beta"]
-    features: NoldsFeatures = NoldsFeatures(False, False, True, False, False)
+    features: NoldsFeatures = NoldsFeatures()
 
 
 class Nolds(NMFeature):
     def __init__(
-        self, settings: NMSettings, ch_names: Iterable[str], sfreq: float
+        self, settings: "NMSettings", ch_names: Iterable[str], sfreq: float
     ) -> None:
         self.settings = settings.nolds_features
         self.ch_names = ch_names
@@ -76,6 +76,8 @@ class Nolds(NMFeature):
 
     @staticmethod
     def calc_nolds_feature(f_name: str, dat: np.ndarray):
+        import nolds
+
         match f_name:
             case "sample_entropy":
                 return nolds.sampen(dat)

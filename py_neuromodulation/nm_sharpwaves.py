@@ -3,23 +3,23 @@ from scipy import signal
 from collections.abc import Iterable
 from itertools import product
 
-from pydantic.dataclasses import dataclass
-from pydantic import model_validator
-from typing import NamedTuple, Any, Callable
+from pydantic import BaseModel, model_validator, field_validator
+from typing import TYPE_CHECKING, Any, Callable
 
 from py_neuromodulation.nm_features import NMFeature
 from py_neuromodulation.nm_types import FeatureSelector, FrequencyRange
-from py_neuromodulation.nm_settings import NMSettings
+
+if TYPE_CHECKING:
+    from py_neuromodulation.nm_settings import NMSettings
 
 
-class PeakDetectionSettings(NamedTuple):
+class PeakDetectionSettings(BaseModel):
     estimate: bool = True
     distance_troughs_ms: float = 10
     distance_peaks_ms: float = 5
 
 
-@dataclass
-class SharpwaveFeatures(FeatureSelector):
+class SharpwaveFeatures(FeatureSelector, BaseModel):
     peak_left: bool = False
     peak_right: bool = False
     trough: bool = False
@@ -34,8 +34,7 @@ class SharpwaveFeatures(FeatureSelector):
     slope_ratio: bool = False
 
 
-@dataclass
-class SharpwaveSettings:
+class SharpwaveSettings(BaseModel):
     sharpwave_features: SharpwaveFeatures = SharpwaveFeatures()
     # TONI: coudl add restriction for min_length = 1
     filter_ranges_hz: list[FrequencyRange] = [
@@ -65,14 +64,13 @@ class SharpwaveSettings:
 
         return settings
 
-
 class NoValidTroughException(Exception):
     pass
 
 
 class SharpwaveAnalyzer(NMFeature):
     def __init__(
-        self, settings: NMSettings, ch_names: Iterable[str], sfreq: float
+        self, settings: "NMSettings", ch_names: Iterable[str], sfreq: float
     ) -> None:
         self.sw_settings = settings.sharpwave_analysis_settings
         self.sfreq = sfreq
@@ -83,11 +81,6 @@ class SharpwaveAnalyzer(NMFeature):
 
         for filter_range in settings.sharpwave_analysis_settings.filter_ranges_hz:
             # Test settings
-            assert filter_range[0] < sfreq and filter_range[1] < sfreq, (
-                "Filter range has to be smaller than sfreq, "
-                f"got sfreq {sfreq} and filter range {filter_range}"
-            )
-
             # TODO: handle None values
             if filter_range[0] is None:
                 self.list_filter.append(("no_filter", None))

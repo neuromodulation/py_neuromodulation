@@ -1,30 +1,31 @@
 """Module for handling settings."""
 
-from pydantic.dataclasses import dataclass
-from pydantic import Field, BaseModel, model_validator
-from typing import Iterable, TYPE_CHECKING
+from pathlib import PurePath
+from pydantic import Field, BaseModel, field_validator, model_validator
+from typing import Iterable
 
-from py_neuromodulation.nm_filter_preprocessing import FilterSettings
+from py_neuromodulation import PYNM_DIR, logger
 from py_neuromodulation.nm_types import (
     FeatureSelector,
     FrequencyRange,
     FeatureName,
     PreprocessorName,
+    _PathLike,
 )
 
-if TYPE_CHECKING:
-    from py_neuromodulation.nm_kalmanfilter import KalmanSettings
-    from py_neuromodulation.nm_types import FrequencyRange
-    from py_neuromodulation.nm_projection import ProjectionSettings
-    from py_neuromodulation.nm_bispectra import BispectraSettings
-    from py_neuromodulation.nm_nolds import NoldsSettings
-    from py_neuromodulation.nm_mne_connectivity import MNEConnectivitySettings
-    from py_neuromodulation.nm_fooof import FooofSettings
-    from py_neuromodulation.nm_coherence import CoherenceSettings
-    from py_neuromodulation.nm_sharpwaves import SharpwaveSettings
-    from py_neuromodulation.nm_oscillatory import OscillatorySettings, BandpassSettings
-    from py_neuromodulation.nm_bursts import BurstSettings
-    from py_neuromodulation.nm_normalization import NormalizationSettings
+from py_neuromodulation.nm_filter_preprocessing import FilterSettings
+from py_neuromodulation.nm_kalmanfilter import KalmanSettings
+from py_neuromodulation.nm_projection import ProjectionSettings
+from py_neuromodulation.nm_bispectra import BispectraSettings
+from py_neuromodulation.nm_nolds import NoldsSettings
+from py_neuromodulation.nm_mne_connectivity import MNEConnectivitySettings
+from py_neuromodulation.nm_fooof import FooofSettings
+from py_neuromodulation.nm_coherence import CoherenceSettings
+from py_neuromodulation.nm_sharpwaves import SharpwaveSettings
+from py_neuromodulation.nm_oscillatory import OscillatorySettings, BandpassSettings
+from py_neuromodulation.nm_bursts import BurstSettings
+from py_neuromodulation.nm_normalization import NormalizationSettings
+from py_neuromodulation.nm_resample import ResamplerSettings
 
 
 def get_invalid_keys(
@@ -34,12 +35,10 @@ def get_invalid_keys(
     return [v for v in input_seq if v not in validation_dict]
 
 
-@dataclass
 class ProcessorSettings:
     pass
 
 
-@dataclass
 class Features(FeatureSelector):
     raw_hjorth: bool = True
     return_raw: bool = True
@@ -57,7 +56,6 @@ class Features(FeatureSelector):
     bispectrum: bool = False
 
 
-@dataclass
 class PostprocessingSettings(FeatureSelector):
     feature_normalization: bool = True
     project_cortex: bool = False
@@ -71,10 +69,10 @@ class NMSettings(BaseModel):
     frequency_ranges_hz: dict[str, FrequencyRange]
 
     # Preproceessing settings
-    # raw_resampling_settings: # TONI: is this ever used?
-    preprocessing_filter: FilterSettings
-    raw_normalization_settings: NormalizationSettings
-    feature_normalization_settings: NormalizationSettings
+    raw_resampling_settings: "ResamplerSettings"
+    preprocessing_filter: "FilterSettings"
+    raw_normalization_settings: "NormalizationSettings"
+    feature_normalization_settings: "NormalizationSettings"
 
     # Postprocessing settings
     preprocessing: list[PreprocessorName] = [
@@ -82,9 +80,9 @@ class NMSettings(BaseModel):
         "notch_filter",
         "re_referencing",
     ]
-    postprocessing: PostprocessingSettings
-    project_cortex_settings: ProjectionSettings
-    project_subcortex_settings: ProjectionSettings
+    postprocessing: "PostprocessingSettings"
+    project_cortex_settings: "ProjectionSettings"
+    project_subcortex_settings: "ProjectionSettings"
 
     # Feature settings
     # Maybe this should be a subclass of FeatureSelector
@@ -104,21 +102,20 @@ class NMSettings(BaseModel):
         "mne_connectivity": False,
         "bispectrum": False,
     }
-    
-    fft_settings: OscillatorySettings
-    welch_settings: OscillatorySettings
-    stft_settings: OscillatorySettings
-    bandpass_filter_settings: BandpassSettings
-    kalman_filter_settings: KalmanSettings
-    burst_settings: BurstSettings
-    sharpwave_analysis_settings: SharpwaveSettings
-    mne_connectivity: MNEConnectivitySettings
-    coherence: CoherenceSettings
-    fooof: FooofSettings
-    nolds_features: NoldsSettings
-    bispectrum: BispectraSettings
 
-    # Validation
+    fft_settings: "OscillatorySettings"
+    welch_settings: "OscillatorySettings"
+    stft_settings: "OscillatorySettings"
+    bandpass_filter_settings: "BandpassSettings"
+    kalman_filter_settings: "KalmanSettings"
+    burst_settings: "BurstSettings"
+    sharpwave_analysis_settings: "SharpwaveSettings"
+    mne_connectivity: "MNEConnectivitySettings"
+    coherence: "CoherenceSettings"
+    fooof: "FooofSettings"
+    nolds_features: "NoldsSettings"
+    bispectrum: "BispectraSettings"
+ 
     @model_validator(mode="after")
     def validate_settings(self):
         # Check Kalman filter frequency bands
@@ -153,6 +150,55 @@ class NMSettings(BaseModel):
         self.postprocessing.project_cortex = False
         self.postprocessing.project_subcortex = False
 
+    @classmethod
+    def load(cls, settings: "NMSettings | _PathLike | None") -> "NMSettings":
+        if isinstance(settings, cls):
+            return settings
+        if settings is None:
+            return cls.get_default()
+        return cls.from_file(str(settings))
 
-# def get_default_settings() -> NMSettings:
-#     return NMSettings()
+    @staticmethod
+    def from_file(PATH: _PathLike) -> "NMSettings":
+        match PurePath(PATH).suffix:
+            case ".json":
+                import json
+
+                with open(PATH) as f:
+                    model_dict = json.load(f)
+            case ".yaml":
+                import yaml
+
+                with open(PATH) as f:
+                    model_dict = yaml.safe_load(f)
+            case _:
+                raise ValueError("File format not supported.")
+
+        return NMSettings(**model_dict)
+
+    @staticmethod
+    def get_default() -> "NMSettings":
+        return NMSettings.from_file(PYNM_DIR / "nm_settings.json")
+
+    def save(
+        self, path_out: _PathLike, folder_name: str = "", format: str = "json"
+    ) -> None:
+        path_out = PurePath(path_out)
+        filename = f"SETTINGS.{format}"
+
+        if folder_name:
+            path_out = path_out / folder_name
+            filename = f"{folder_name}_{filename}"
+
+        path_out = path_out / filename
+
+        with open(path_out, "w") as f:
+            match format:
+                case "json":
+                    f.write(self.model_dump_json(indent=4))
+                case "yaml":
+                    import yaml
+
+                    yaml.dump(self.model_dump(), f, default_flow_style=False)
+
+        logger.info(f"Settings saved to {path_out}")

@@ -1,39 +1,34 @@
 from collections.abc import Iterable
-from pydantic import Field, field_validator
-from pydantic.dataclasses import dataclass
+from pydantic import field_validator, BaseModel
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 from py_neuromodulation.nm_features import NMFeature
 from py_neuromodulation.nm_types import FeatureSelector, FrequencyRange
-from py_neuromodulation.nm_settings import NMSettings
+
+if TYPE_CHECKING:
+    from py_neuromodulation.nm_settings import NMSettings
 
 
-@dataclass
-class BispectraComponents(FeatureSelector):
+class BispectraComponents(FeatureSelector, BaseModel):
     absolute: bool = True
     real: bool = True
     imag: bool = True
     phase: bool = True
 
 
-@dataclass
-class BispectraFeatures(FeatureSelector):
-    mean = True
-    sum = True
-    var = True
+class BispectraFeatures(FeatureSelector, BaseModel):
+    mean: bool = True
+    sum: bool = True
+    var: bool = True
 
 
-@dataclass
-class BispectraSettings:
-    @staticmethod
-    def default_bands() -> list[str]:
-        return ["theta", "alpha", "low_beta", "high_beta"]
-
-    f1s: FrequencyRange = Field(default=(5, 35), min_length=2, max_length=2)
-    f2s: FrequencyRange = Field(default=(5, 35), min_length=2, max_length=2)
+class BispectraSettings(BaseModel):
+    f1s: FrequencyRange = FrequencyRange(5, 35)
+    f2s: FrequencyRange = FrequencyRange(5, 35)
     compute_features_for_whole_fband_range: bool = True
-    frequency_bands: list[str] = Field(default_factory=default_bands)
+    frequency_bands: list[str] = ["theta", "alpha", "low_beta", "high_beta"]
 
     components: BispectraComponents = BispectraComponents()
     bispectrum_features: BispectraFeatures = BispectraFeatures()
@@ -48,14 +43,13 @@ class BispectraSettings:
 
 class Bispectra(NMFeature):
     def __init__(
-        self, settings: NMSettings, ch_names: Iterable[str], sfreq: float
+        self, settings: "NMSettings", ch_names: Iterable[str], sfreq: float
     ) -> None:
         self.sfreq = sfreq
         self.ch_names = ch_names
         self.frequency_ranges_hz = settings.frequency_ranges_hz
         self.settings: BispectraSettings = settings.bispectrum
 
-    def test_settings(self, settings: NMSettings):
         assert (
             f_band_bispectrum in settings.frequency_ranges_hz
             for f_band_bispectrum in self.settings.frequency_bands

@@ -1,32 +1,37 @@
 import numpy as np
 
-from pydantic.dataclasses import dataclass
 from pydantic import Field
+from typing import TYPE_CHECKING
 
-from py_neuromodulation.nm_preprocessing import NMPreprocessor
-from py_neuromodulation.nm_settings import NMSettings
 from py_neuromodulation.nm_types import FeatureSelector, FrequencyRange
+from py_neuromodulation.nm_preprocessing import NMPreprocessor
+
+if TYPE_CHECKING:
+    from py_neuromodulation.nm_settings import NMSettings
 
 
-@dataclass
 class FrequencyLowpass(FrequencyRange):
     frequency_low_hz: float = float("nan")
-    frequency_high_hz: float = Field(default=None, alias="frequency_cutoff_hz")
+    frequency_high_hz: float = Field(default=200, alias="frequency_cutoff_hz")
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
 
 
-@dataclass
 class FrequencyHighpass(FrequencyRange):
-    frequency_low_hz: float = Field(default=None, alias="frequency_cutoff_hz")
+    frequency_low_hz: float = Field(default=3, alias="frequency_cutoff_hz")
     frequency_high_hz: float = float("nan")
 
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
 
-@dataclass
+
 class FilterSettings(FeatureSelector):
     bandstop_filter: bool = True
     lowpass_filter: bool = True
     highpass_filter: bool = True
     bandpass_filter: bool = True
-
+    
     bandstop_filter_settings: FrequencyRange = FrequencyRange(100, 160)
     bandpass_filter_settings: FrequencyRange = FrequencyRange(2, 200)
     lowpass_filter_settings: FrequencyLowpass = FrequencyLowpass(float("nan"), 200)
@@ -49,7 +54,7 @@ class FilterSettings(FeatureSelector):
 
 
 class PreprocessingFilter(NMPreprocessor):
-    def __init__(self, settings: NMSettings, sfreq: float) -> None:
+    def __init__(self, settings: "NMSettings", sfreq: float) -> None:
         from py_neuromodulation.nm_filter import MNEFilter
 
         self.filters = [

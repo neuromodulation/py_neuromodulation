@@ -1,28 +1,22 @@
 from numpy import array, cov
-from pydantic.dataclasses import dataclass
-from pydantic import Field
+from pydantic import BaseModel
 
 from filterpy.kalman import KalmanFilter
 
 
-@dataclass
-class KalmanSettings:
-    @staticmethod
-    def default_bands() -> list[str]:
-        return [
-            "theta",
-            "alpha",
-            "low_beta",
-            "high_beta",
-            "low_gamma",
-            "high_gamma",
-            "HFA",
-        ]
-
+class KalmanSettings(BaseModel):
     Tp: float = 0.1
     sigma_w: float = 0.7
     sigma_v: float = 1.0
-    frequency_bands: list[str] = Field(default_factory=default_bands, min_length=1)
+    frequency_bands: list[str] = [
+        "theta",
+        "alpha",
+        "low_beta",
+        "high_beta",
+        "low_gamma",
+        "high_gamma",
+        "HFA",
+    ]
 
 
 def define_KF(Tp, sigma_w, sigma_v):

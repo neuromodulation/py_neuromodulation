@@ -1,25 +1,26 @@
+from typing import TYPE_CHECKING
 import numpy as np
 from collections.abc import Iterable
 from scipy.signal import hilbert as scipy_hilbert
 
-from pydantic.dataclasses import dataclass
-from pydantic import Field
+from pydantic import Field, BaseModel
+from py_neuromodulation.nm_types import NMBaseModel
 
 from py_neuromodulation.nm_features import NMFeature
-from py_neuromodulation.nm_filter import MNEFilter
-from py_neuromodulation.nm_settings import NMSettings
+
+if TYPE_CHECKING:
+    from py_neuromodulation.nm_settings import NMSettings
 
 
-@dataclass
-class BurstFeatures:
+
+class BurstFeatures(NMBaseModel):
     duration: bool = True
     amplitude: bool = True
     burst_rate_per_s: bool = True
     in_burst: bool = True
 
 
-@dataclass
-class BurstSettings:
+class BurstSettings(BaseModel):
     threshold: float = Field(default=75, ge=0, le=100)
     time_duration_s: float = Field(default=30, ge=0)
     frequency_bands: list[str] = ["low beta", "high beta", "low gamma"]
@@ -29,8 +30,16 @@ class BurstSettings:
 
 class Burst(NMFeature):
     def __init__(
-        self, settings: NMSettings, ch_names: Iterable[str], sfreq: float
+        self, settings: "NMSettings", ch_names: Iterable[str], sfreq: float
     ) -> None:
+        # Test settings
+        for fband_burst in settings.burst_settings.frequency_bands:
+            assert (
+                fband_burst in list(settings.frequency_ranges_hz.keys())
+            ), f"bursting {fband_burst} needs to be defined in settings['frequency_ranges_hz']"
+
+        from py_neuromodulation.nm_filter import MNEFilter
+
         self.settings = settings.burst_settings
         self.sfreq = sfreq
         self.ch_names = ch_names
@@ -80,13 +89,6 @@ class Burst(NMFeature):
             return d
 
         self.data_buffer = init_ch_fband_dict()
-
-    @staticmethod
-    def test_settings(settings: NMSettings):
-        for fband_burst in settings.burst_settings.frequency_bands:
-            assert (
-                fband_burst in list(settings.frequency_ranges_hz.keys())
-            ), f"bursting {fband_burst} needs to be defined in settings['frequency_ranges_hz']"
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         # filter_data returns (n_channels, n_fbands, n_samples)

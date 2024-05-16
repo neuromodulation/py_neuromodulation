@@ -7,6 +7,7 @@ import pickle
 import pandas as pd
 
 from py_neuromodulation.nm_run_analysis import DataProcessor
+from py_neuromodulation.nm_settings import NMSettings
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import nm_IO, PYNM_DIR
 
@@ -16,7 +17,7 @@ class NMStream(ABC):
         self,
         sfreq: float,
         nm_channels: pd.DataFrame | _PathLike,
-        settings: dict | _PathLike | None = None,
+        settings: "NMSettings | _PathLike | None" = None,
         line_noise: float | None = 50,
         sampling_rate_features_hz: float | None = None,
         path_grids: _PathLike | None = None,
@@ -47,10 +48,10 @@ class NMStream(ABC):
         verbose : bool, optional
             print out stream computation time information, by default True
         """
-        self.settings = self._load_settings(settings)
+        self.settings = NMSettings.load(settings)
 
         if sampling_rate_features_hz is not None:
-            self.settings["sampling_rate_features_hz"] = sampling_rate_features_hz
+            self.settings.sampling_rate_features_hz = sampling_rate_features_hz
 
         self.nm_channels = self._load_nm_channels(nm_channels)
         if path_grids is None:
@@ -122,15 +123,6 @@ class NMStream(ABC):
             )
 
         return nm_channels
-
-    @staticmethod
-    def _load_settings(settings: dict | _PathLike | None) -> dict:
-        if isinstance(settings, dict):
-            return settings
-        if settings is None:
-            from py_neuromodulation.nm_settings import get_default_settings
-            return get_default_settings()
-        return nm_IO.read_settings(str(settings))
 
     def load_model(self, model_name: _PathLike) -> None:
         """Load sklearn model, that utilizes predict"""

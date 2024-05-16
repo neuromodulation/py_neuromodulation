@@ -92,15 +92,15 @@ class _OfflineStream(NMStream):
             ValueError: depending on the settings, parallel processing is not possible
         """
 
-        if "raw_normalization" in self.settings["preprocessing"]:
+        if "raw_normalization" in self.settings.preprocessing:
             raise ValueError(
                 "Parallel processing is not possible with raw_normalization normalization."
             )
-        if self.settings["postprocessing"]["feature_normalization"]:
+        if self.settings.postprocessing.feature_normalization:
             raise ValueError(
                 "Parallel processing is not possible with feature normalization."
             )
-        if self.settings["features"]["bursts"]:
+        if self.settings.features["bursts"]:
             raise ValueError(
                 "Parallel processing is not possible with burst estimation."
             )
@@ -132,7 +132,7 @@ class _OfflineStream(NMStream):
 
         sample_add = self.sfreq / self.run_analysis.sfreq_features
 
-        offset_time = self.settings["segment_length_features_ms"]
+        offset_time = self.settings.segment_length_features_ms
         # offset_start = np.ceil(offset_time / 1000 * self.sfreq).astype(int)
         offset_start = offset_time / 1000 * self.sfreq
 

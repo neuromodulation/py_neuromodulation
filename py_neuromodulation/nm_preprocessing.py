@@ -6,6 +6,7 @@ from py_neuromodulation.nm_types import ImportDetails, get_class, PreprocessorNa
 if TYPE_CHECKING:
     import numpy as np
     import pandas as pd
+    from py_neuromodulation.nm_settings import NMSettings
 
 
 class NMPreprocessor(Protocol):
@@ -30,7 +31,7 @@ class NMPreprocessors:
 
     def __init__(
         self,
-        settings: dict,
+        settings: "NMSettings",
         nm_channels: "pd.DataFrame",
         sfreq: float,
         line_noise: float | None = None,
@@ -42,7 +43,7 @@ class NMPreprocessors:
             "line_noise": line_noise,
         }
 
-        for preprocessing_method in settings["preprocessing"]:
+        for preprocessing_method in settings.preprocessing:
             if preprocessing_method not in PREPROCESSOR_DICT.keys():
                 raise ValueError(
                     f"Invalid preprocessing method '{preprocessing_method}'. Must be one of {PREPROCESSOR_DICT.keys()}"
@@ -52,7 +53,7 @@ class NMPreprocessors:
         preprocessor_classes: dict[str, Type[NMPreprocessor]] = {
             preprocessor_name: get_class(import_details)
             for preprocessor_name, import_details in PREPROCESSOR_DICT.items()
-            if preprocessor_name in settings["preprocessing"]
+            if preprocessor_name in settings.preprocessing
         }
 
         # Function to instantiate preprocessor with settings
@@ -67,7 +68,8 @@ class NMPreprocessors:
                 if arg in possible_arguments
             }
             # Retrieve more possible arguments from settings
-            args |= settings.get(settings_str, {})
+            # TODO
+            args |= getattr(settings, settings_str, {})
             # Pass arguments to preprocessor class and return instance
             return preprocessor_class(**args)
 

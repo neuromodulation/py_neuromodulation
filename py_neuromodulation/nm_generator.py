@@ -1,10 +1,14 @@
 from collections.abc import Iterator
+from typing import TYPE_CHECKING
 import numpy as np
+
+if TYPE_CHECKING:
+    from py_neuromodulation.nm_settings import NMSettings
 
 
 def raw_data_generator(
     data: np.ndarray,
-    settings: dict,
+    settings: "NMSettings",
     sfreq: float,
 ) -> Iterator[np.ndarray]:
     """
@@ -20,8 +24,8 @@ def raw_data_generator(
     -------
         np.array: new batch for run function of full segment length shape
     """
-    sfreq_new = settings["sampling_rate_features_hz"]
-    offset_time = settings["segment_length_features_ms"]
+    sfreq_new = settings.sampling_rate_features_hz
+    offset_time = settings.segment_length_features_ms
     offset_start = offset_time / 1000 * sfreq
 
     ratio_samples_features = sfreq / sfreq_new

@@ -11,6 +11,7 @@ from scipy.stats import zscore as scipy_zscore
 
 from py_neuromodulation import nm_IO, nm_plots
 from py_neuromodulation.nm_decode import Decoder
+from py_neuromodulation.nm_settings import NMSettings
 
 target_filter_str = {
     "CLEAN",
@@ -49,7 +50,7 @@ class Feature_Reader:
         FILE_BASENAME = PurePath(self.feature_file).stem
         PATH_READ_FILE = str(PurePath(self.feature_dir, FILE_BASENAME, FILE_BASENAME))
 
-        self.settings = nm_IO.read_settings(PATH_READ_FILE)
+        self.settings = NMSettings.from_file(PATH_READ_FILE)
         self.sidecar = nm_IO.read_sidecar(PATH_READ_FILE)
         if self.sidecar["sess_right"] is None:
             if "coords" in self.sidecar:
@@ -315,7 +316,7 @@ class Feature_Reader:
             data,
             self.label,
             epoch_len=epoch_len,
-            sfreq=self.settings["sampling_rate_features_hz"],
+            sfreq=self.settings.sampling_rate_features_hz,
             threshold=threshold,
         )
 
@@ -323,7 +324,7 @@ class Feature_Reader:
             X_epoch=X_epoch,
             y_epoch=y_epoch,
             epoch_len=epoch_len,
-            sfreq=self.settings["sampling_rate_features_hz"],
+            sfreq=self.settings.sampling_rate_features_hz,
             feature_names=list(filtered_df.columns),
             feature_str_add="_".join(list_feature_keywords)
             if list_feature_keywords is not None
@@ -960,7 +961,7 @@ class Feature_Reader:
                 ["project_cortex", "project_subcortex"],
                 ["gridcortex_", "gridsubcortex_"],
             ):
-                if not self.settings["postprocessing"][project_settings]:
+                if not getattr(self.settings.postprocessing, project_settings):
                     continue
 
                 # the sidecar keys are grid_cortex and subcortex_grid

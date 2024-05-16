@@ -1,19 +1,20 @@
 import numpy as np
 import pandas as pd
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel
+from typing import TYPE_CHECKING
 
-from py_neuromodulation.nm_settings import NMSettings
+if TYPE_CHECKING:
+    from py_neuromodulation.nm_settings import NMSettings
 
 
-@dataclass
-class ProjectionSettings:
+class ProjectionSettings(BaseModel):
     max_dist_mm: float
 
 
 class Projection:
     def __init__(
         self,
-        settings: NMSettings,
+        settings: "NMSettings",
         grid_cortex: pd.DataFrame,
         grid_subcortex: pd.DataFrame,
         coords: dict,
@@ -49,10 +50,7 @@ class Projection:
             self.ecog_strip = self.coords["cortex_left"]["positions"]
             self.ecog_strip_names = self.coords["cortex_left"]["ch_names"]
 
-        if (
-            self.sess_right
-            and len(self.coords["subcortex_right"]["positions"]) > 0
-        ):
+        if self.sess_right and len(self.coords["subcortex_right"]["positions"]) > 0:
             self.lfp_elec = self.coords["subcortex_right"]["positions"]
             self.lfp_elec_names = self.coords["subcortex_right"]["ch_names"]
         elif (

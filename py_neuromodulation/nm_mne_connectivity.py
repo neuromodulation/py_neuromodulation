@@ -2,17 +2,16 @@ from collections.abc import Iterable
 import numpy as np
 from typing import TYPE_CHECKING
 
+from py_neuromodulation.nm_features import NMFeature
+from pydantic import BaseModel
+
 if TYPE_CHECKING:
+    from py_neuromodulation.nm_settings import NMSettings
     from mne.io import RawArray
     from mne import Epochs
 
-from py_neuromodulation.nm_features import NMFeature
-from py_neuromodulation.nm_settings import NMSettings
-from pydantic.dataclasses import dataclass
 
-
-@dataclass
-class MNEConnectivitySettings:
+class MNEConnectivitySettings(BaseModel):
     method: str
     mode: str
 
@@ -20,7 +19,7 @@ class MNEConnectivitySettings:
 class MNEConnectivity(NMFeature):
     def __init__(
         self,
-        settings: NMSettings,
+        settings: "NMSettings",
         ch_names: Iterable[str],
         sfreq: float,
     ) -> None:
@@ -104,7 +103,7 @@ class MNEConnectivity(NMFeature):
                         )
                     )[0]
                 )
-                
+
         dat_conn = spec_out.get_data()
         for conn in np.arange(dat_conn.shape[0]):
             for fband_idx, fband in enumerate(self.fbands):

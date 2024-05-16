@@ -2,32 +2,33 @@ from scipy import signal
 import numpy as np
 from collections.abc import Iterable
 
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel, Field
+from typing import TYPE_CHECKING
 
-from py_neuromodulation.nm_settings import NMSettings
 from py_neuromodulation.nm_features import NMFeature
 from py_neuromodulation.nm_types import FeatureSelector
 from py_neuromodulation import logger
 
+if TYPE_CHECKING:
+    from py_neuromodulation.nm_settings import NMSettings
 
-@dataclass
-class CoherenceMethods(FeatureSelector):
+
+class CoherenceMethods(FeatureSelector, BaseModel):
     coh: bool = True
     icoh: bool = True
 
 
-@dataclass
-class CoherenceFeatures(FeatureSelector):
+class CoherenceFeatures(FeatureSelector, BaseModel):
     mean_fband: bool = True
     max_fband: bool = True
     max_allfbands: bool = True
 
 
-class CoherenceSettings:
+class CoherenceSettings(BaseModel):
     features: CoherenceFeatures = CoherenceFeatures()
     method: CoherenceMethods = CoherenceMethods()
     channels: list[tuple[str, str]] = [("STN_RIGHT_0", "ECOG_RIGHT_0")]
-    frequency_bands: list[str] = ["high beta"]
+    frequency_bands: list[str] = Field(default=["high beta"], min_length=1)
 
 
 class CoherenceObject:
@@ -130,13 +131,17 @@ class CoherenceObject:
 
 
 class NM_Coherence(NMFeature):
-    def __init__(self, settings: NMSettings, ch_names: list[str], sfreq: float) -> None:
+    def __init__(
+        self, settings: "NMSettings", ch_names: list[str], sfreq: float
+    ) -> None:
         self.settings = settings.coherence
         self.frequency_ranges_hz = settings.frequency_ranges_hz
         self.sfreq = sfreq
         self.ch_names = ch_names
         self.coherence_objects: Iterable[CoherenceObject] = []
 
+        self.test_settings(settings, ch_names, sfreq)
+        
         for idx_coh in range(len(self.settings.channels)):
             fband_names = self.settings.frequency_bands
             fband_specs = []
@@ -173,38 +178,38 @@ class NM_Coherence(NMFeature):
 
     @staticmethod
     def test_settings(
-        s: dict,
+        settings: "NMSettings",
         ch_names: Iterable[str],
         sfreq: float,
     ):
-        assert (
-            len(s["coherence"]["frequency_bands"]) > 0
-        ), "coherence frequency_bands list needs to specify at least one frequency band"
-        assert (ch_coh in ch_names for ch_coh in s["coherence"]["channels"]), (
+        flat_channels = [
+            ch for ch_pair in settings.coherence.channels for ch in ch_pair
+        ]
+        assert all(ch_coh in ch_names for ch_coh in flat_channels), (
             f"coherence selected channels don't match the ones in nm_channels"
-            f"ch_names: {ch_names} settings['coherence']['channels']: {s['coherence']['channels']}"
+            f"ch_names: {ch_names} settings['coherence']['channels']: {settings.coherence.channels}"
         )
 
-        assert (
-            f_band_coh in s["frequency_ranges_hz"]
-            for f_band_coh in s["coherence"]["frequency_bands"]
+        assert all(
+            f_band_coh in settings.frequency_ranges_hz
+            for f_band_coh in settings.coherence.frequency_bands
         ), (
             "coherence selected frequency bands don't match the ones"
             "specified in s['frequency_ranges_hz']"
-            f"coherence frequency bands: {s['coherence']['frequency_bands']}"
-            f"specified frequency_ranges_hz: {s['frequency_ranges_hz']}"
+            f"coherence frequency bands: {settings.coherence.frequency_bands}"
+            f"specified frequency_ranges_hz: {settings.frequency_ranges_hz}"
         )
 
-        assert (
-            s["frequency_ranges_hz"][fb][0] < sfreq / 2
-            and s["frequency_ranges_hz"][fb][1] < sfreq / 2
-            for fb in s["coherence"]["frequency_bands"]
+        assert all(
+            settings.frequency_ranges_hz[fb][0] < sfreq / 2
+            and settings.frequency_ranges_hz[fb][1] < sfreq / 2
+            for fb in settings.coherence.frequency_bands
         ), (
             "the coherence frequency band ranges need to be smaller than the nyquist frequency"
-            f"got sfreq = {sfreq} and fband ranges {s['coherence']['frequency_bands']}"
+            f"got sfreq = {sfreq} and fband ranges {settings.coherence.frequency_bands}"
         )
 
-        if sum(list(s["coherence"]["method"].values())) == 0:
+        if not settings.coherence.method.get_enabled():
             logger.warn(
                 "feature coherence enabled, but no coherence['method'] selected"
             )

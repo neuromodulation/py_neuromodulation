@@ -2,14 +2,15 @@
 
 from math import isnan
 import numpy as np
-from typing import cast
+from typing import cast, TYPE_CHECKING
 
 from py_neuromodulation.nm_preprocessing import NMPreprocessor
 from py_neuromodulation import logger
 
 from mne.filter import create_filter
 
-from py_neuromodulation.nm_types import FrequencyRange
+if TYPE_CHECKING:
+    from py_neuromodulation.nm_types import FrequencyRange
 
 
 class MNEFilter:
@@ -44,7 +45,7 @@ class MNEFilter:
 
     def __init__(
         self,
-        f_ranges: list[FrequencyRange],
+        f_ranges: list["FrequencyRange"],
         sfreq: float,
         filter_length: str | float = "999ms",
         l_trans_bandwidth: float | str = 4,

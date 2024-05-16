@@ -9,6 +9,7 @@ from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger, PYNM_DIR
 
 if TYPE_CHECKING:
+    from py_neuromodulation.nm_settings import NMSettings
     from mne_bids import BIDSPath
     from mne import io as mne_io
 
@@ -172,7 +173,7 @@ def save_features_and_settings(
     run_analysis,
     folder_name,
     out_path,
-    settings,
+    settings: 'NMSettings',
     nm_channels,
     coords,
     fs,
@@ -201,7 +202,7 @@ def save_features_and_settings(
 
     save_sidecar(dict_sidecar, out_path, folder_name)
     save_features(df_features, out_path, folder_name)
-    save_settings(settings, out_path, folder_name)
+    settings.save(out_path, folder_name)
     save_nm_channels(nm_channels, out_path, folder_name)
 
 
@@ -213,17 +214,8 @@ def write_csv(df, path_out):
     write an index column by default
     """
     from pyarrow import csv, Table
+
     csv.write_csv(Table.from_pandas(df), path_out)
-
-
-def save_settings(settings: dict, path_out: _PathLike, folder_name: str = "") -> None:
-    if folder_name:
-        path_out = PurePath(path_out, folder_name, folder_name + "_SETTINGS.json")
-
-    with open(path_out, "w") as f:
-        json.dump(settings, f, indent=4)
-    logger.info(f"settings.json saved to {path_out}")
-
 
 def save_nm_channels(
     nmchannels: pd.DataFrame,
@@ -288,11 +280,6 @@ def read_sidecar(PATH: _PathLike) -> dict:
         return json.load(f)
 
 
-def read_settings(PATH: _PathLike) -> dict:
-    with open(PATH if ".json" in str(PATH) else str(PATH) + "_SETTINGS.json") as f:
-        return json.load(f)
-
-
 def read_features(PATH: _PathLike) -> pd.DataFrame:
     return pd.read_csv(str(PATH) + "_FEATURES.csv", engine="pyarrow")
 
@@ -321,6 +308,7 @@ def loadmat(filename) -> dict:
     which are still mat-objects
     """
     from scipy.io import loadmat as sio_loadmat
+
     data = sio_loadmat(filename, struct_as_record=False, squeeze_me=True)
     return _check_keys(data)
 
@@ -368,6 +356,7 @@ def _todict(matobj) -> dict:
     A recursive function which constructs from matobjects nested dictionaries
     """
     from scipy.io.matlab import mat_struct
+
     dict = {}
     for strg in matobj._fieldnames:
         elem = matobj.__dict__[strg]

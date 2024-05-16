@@ -1,32 +1,30 @@
 from collections.abc import Iterable
 import numpy as np
-from fooof import FOOOF
-from scipy import fft
 
-from pydantic.dataclasses import dataclass
-from nm_types import FrequencyRange
+from typing import TYPE_CHECKING
+from pydantic import BaseModel
+
 from py_neuromodulation.nm_features import NMFeature
-from py_neuromodulation.nm_settings import NMSettings
-from py_neuromodulation.nm_types import FeatureSelector
+from py_neuromodulation.nm_types import FeatureSelector, FrequencyRange
 from py_neuromodulation import logger
 
+if TYPE_CHECKING:
+    from py_neuromodulation.nm_settings import NMSettings
 
-@dataclass
+
 class FooofAperiodicSettings(FeatureSelector):
     exponent: bool = True
     offset: bool = True
     knee: bool = True
 
 
-@dataclass
 class FooofPeriodicSettings(FeatureSelector):
     center_frequency: bool = False
     band_width: bool = False
     height_over_ap: bool = False
 
 
-@dataclass
-class FooofSettings:
+class FooofSettings(BaseModel):
     aperiodic: FooofAperiodicSettings
     periodic: FooofPeriodicSettings
     windowlength_ms: float = 800
@@ -49,7 +47,7 @@ class FooofAnalyzer(NMFeature):
     }
 
     def __init__(
-        self, settings: NMSettings, ch_names: Iterable[str], sfreq: float
+        self, settings: "NMSettings", ch_names: Iterable[str], sfreq: float
     ) -> None:
         self.settings = settings.fooof
         self.sfreq = sfreq
@@ -71,10 +69,12 @@ class FooofAnalyzer(NMFeature):
         ), f"fooof frequency range needs to be below sfreq, got {settings.fooof.freq_range_hz}"
 
     def _get_spectrum(self, data: np.ndarray):
+        from scipy.fft import rfft
+
         """return absolute value fft spectrum"""
 
         data = data[-self.num_samples :]
-        Z = np.abs(fft.rfft(data))
+        Z = np.abs(rfft(data))
 
         return Z
 
@@ -83,6 +83,8 @@ class FooofAnalyzer(NMFeature):
         data: np.ndarray,
         features_compute: dict,
     ) -> dict:
+        from fooof import FOOOF
+
         for ch_idx, ch_name in enumerate(self.ch_names):
             spectrum = self._get_spectrum(data[ch_idx, :])
 

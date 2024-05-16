@@ -1,8 +1,7 @@
 """Module for real-time data normalization."""
 
 from enum import StrEnum
-from pydantic.dataclasses import dataclass
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 import numpy as np
 
@@ -20,8 +19,7 @@ class NormMethod(StrEnum):
     MINMAX = "minmax"
 
 
-@dataclass
-class NormalizationSettings:
+class NormalizationSettings(BaseModel):
     normalization_time_s: float = 30
     normalization_method: NormMethod = NormMethod.ZSCORE
     clip: float = Field(default=3, ge=0)
@@ -32,7 +30,7 @@ class RawNormalizer(NMPreprocessor):
         self,
         sfreq: float,
         sampling_rate_features_hz: float,
-        settings: NormalizationSettings = NormalizationSettings()
+        settings: NormalizationSettings = NormalizationSettings(),
     ) -> None:
         """Normalize raw data.
 
@@ -77,7 +75,7 @@ class FeatureNormalizer:
     def __init__(
         self,
         sampling_rate_features_hz: float,
-        settings: NormalizationSettings = NormalizationSettings()
+        settings: NormalizationSettings = NormalizationSettings(),
     ) -> None:
         """Normalize raw data.
 
@@ -202,11 +200,7 @@ def _normalize_and_clip(
                 .squeeze()  # if post-processing: remove extra dimension
             )
 
-    if clip != 0:
-        current = _clip(data=current, clip=clip)
+    if clip:
+        current = np.nan_to_num(current).clip(min=-clip, max=clip)
+
     return current, previous
-
-
-def _clip(data: np.ndarray, clip: float) -> np.ndarray:
-    """Clip data."""
-    return np.nan_to_num(data).clip(min=-clip, max=clip)
