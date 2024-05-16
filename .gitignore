@@ -164,6 +164,7 @@ py_neuromodulation/ConnectivityDecoding/connectome_folder/*
 
 plot_0_first_demo.py
 plot_1_example_BIDS.py
+temp_raw.fif
 
 requirements.lock
 requirements-dev.lock

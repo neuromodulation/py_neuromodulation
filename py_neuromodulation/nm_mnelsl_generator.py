@@ -10,7 +10,7 @@ class LSLOfflinePlayer:
 
     def __init__(
         self,
-        stream_name: str = "example_stream",
+        stream_name: str = "lsl_offline_player",
         f_name: str | nm_types.PathLike = None,
         sfreq: int | float | None = None,
         data: np.ndarray | None = None,
@@ -54,12 +54,12 @@ class LSLOfflinePlayer:
 
             info = mne.create_info(
                 ch_names=[f"ch{i}" for i in range(data.shape[0])],
-                ch_types=["dbs" for _ in range(data.shape[0])], # TODO Maybe change this to somehow auto detect channel type? Or make it a parameter?
+                ch_types=["dbs" for _ in range(data.shape[0])], # TODO Maybe change this to auto detect channel type? Or make it a parameter?
                 sfreq=sfreq,
             )
             raw = mne.io.RawArray(data, info)
-            # self._path_raw = Path.cwd() / "temp_raw.fif" # should we keep this (writing the raw data always to a file) ?
-            raw.save(self._path_raw, overwrite=True)
+            self._path_raw = Path.cwd() / "temp_raw.fif" 
+            raw.save(self._path_raw, overwrite=True) # should we keep this (writing the raw data always to a file) ? if no -> need to change example 7 as well
 
     def start_player(self, chunk_size: int = 1, n_repeat: int = 1):
         """Start MNE-LSL Player
@@ -80,3 +80,8 @@ class LSLOfflinePlayer:
         self.interval = self.player.chunk_size / self.player.info["sfreq"]
 
         self.player = self.player.start()
+
+    def stop_player(self):
+        """Stop MNE-LSL Player
+        """
+        self.player.stop()

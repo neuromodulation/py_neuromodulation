@@ -19,7 +19,7 @@ class LSLStream:
                 logger.info(f"Stream name not provided. Using first available stream: {stream_name}")
             self.stream = StreamLSL(name=stream_name, bufsize=2).connect(timeout=2)
         except Exception as e:
-            msg = f"Could not connect to stream: {e}. No stream is running under the name {stream_name}"
+            msg = f"Could not connect to stream: {e}. Either no stream is running under the name {stream_name} or there is several streams under this name."
             logger.warning(msg)
             raise RuntimeError(msg)
 
