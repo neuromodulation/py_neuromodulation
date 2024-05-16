@@ -1,6 +1,7 @@
 from mne_lsl.player import PlayerLSL
 from mne_lsl.stream import StreamLSL
 import numpy as np
+import time
 from py_neuromodulation import (nm_mnelsl_generator, nm_mnelsl_stream, nm_IO, nm_settings)
 import threading
 
@@ -21,19 +22,16 @@ import threading
 ) = nm_IO.read_BIDS_data(
     PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype
 )
-f_name = f"{PATH_RUN}_ieeg.vhdr"
     
 def test_mne_lsl():
-    raw = nm_IO.read_BIDS_data(f_name)
 
-    player1 = PlayerLSL(f_name,  name="general_stream", chunk_size=10)
+    player1 = PlayerLSL(raw,  name="general_lsl_test_stream", chunk_size=10)
     player1 = player1.start()
 
-    stream1 = StreamLSL(name="general_stream", bufsize=2).connect()
+    stream1 = StreamLSL(name="general_lsl_test_stream", bufsize=2).connect()
     ch_types = stream1.get_channel_types(unique=True)
-    assert "eeg" in ch_types, "Expected EEG channels in the stream"
-    # TODO adjust this test after fixing channel types in player
-
+    assert 'dbs' in ch_types, "Expected at least one dbs channel from example data"
+    assert player1.info['nchan'] == 10, "Expected 10 channels from example data"
     data_l = []
     timestamps_l = []
 
@@ -45,7 +43,7 @@ def test_mne_lsl():
     t = threading.Timer(0.1, call_every_100ms)
     t.start()
 
-    import time
+    # import time
 
     time_start = time.time()
 
@@ -61,7 +59,7 @@ def test_mne_lsl():
 
 
 def test_lsl_stream_search():
-    player = nm_mnelsl_generator.LSLOfflinePlayer(f_name = f_name)
+    player = nm_mnelsl_generator.LSLOfflinePlayer(f_name = raw)
     player.start_player()
     streams = nm_mnelsl_stream.resolve_streams()
     assert len(streams) != 0, "No streams found in search"
@@ -93,6 +91,38 @@ def test_offline_lsl(setup_default_stream_fast_compute):
     assert features is not None
 
 
-# def compare_data():
-#     player = nm_mnelsl_generator.LSLOfflinePlayer(f_name = f_name)
-#     player.start_player()
+def test_lsl_data(setup_default_stream_fast_compute):
+    import pandas as pd
+    data_l = pd.DataFrame()
+    player = nm_mnelsl_generator.LSLOfflinePlayer(f_name=raw, stream_name="data_test_stream")
+    player.start_player(chunk_size=1)
+    # data, stream = setup_default_stream_fast_compute
+    stream_player_check = StreamLSL(name="data_test_stream", bufsize=2).connect()
+    time.sleep(0.5)
+    winsize = stream_player_check.n_new_samples / stream_player_check.info["sfreq"]
+    while(stream_player_check.n_new_samples != 0):
+        winsize = stream_player_check.n_new_samples / stream_player_check.info["sfreq"]
+        data, ts = stream_player_check.get_data(winsize)
+        data_l = pd.concat([data_l, pd.DataFrame(data)],axis=1)
+        time.sleep(0.5)
+
+    raw_equals_player = []
+    raw_sliced = pd.DataFrame(raw.get_data()).iloc[:, -data_l.shape[1]:]
+    data_l.columns = range(len(data_l.columns))
+    data_l_array = data_l.to_numpy()
+    raw_sliced_array = raw_sliced.to_numpy()
+
+
+    data_l_reshaped = data_l_array[:, np.newaxis, :]
+
+    raw_row_equals_player = np.all(data_l_reshaped.transpose() == raw_sliced_array[:, np.newaxis].transpose(), axis=(2, 1))
+    true_counts = np.sum(raw_row_equals_player, axis=0)
+    matching_percentage = (true_counts / raw_row_equals_player.shape[0]) * 100
+
+    raw_equals_player = np.all(data_l_array == raw_sliced_array, axis=0)
+   
+    # testing if at least 10% of rows match
+    assert np.any(matching_percentage >= 10), f"Expected same data in at least 10 percent of the samples but got {np.max(matching_percentage)} percent"
+
+    # 'testing if at least 10% of the data matches exactly, not allowing for index shifts'
+    # assert np.count_nonzero(raw_equals_player) >= (len(raw_equals_player)/10), f"Expected same data in at least 10 percent of the samples but got {(np.count_nonzero(raw_equals_player)/len(raw_equals_player))*100} percent"
