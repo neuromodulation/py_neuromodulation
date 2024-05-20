@@ -1,5 +1,6 @@
 """Module for offline data streams."""
 
+from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -7,6 +8,9 @@ from pathlib import Path
 from py_neuromodulation.nm_stream_abc import NMStream
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
+
+if TYPE_CHECKING:
+    from py_neuromodulation.nm_settings import NMSettings
 
 
 class _OfflineStream(NMStream):
@@ -238,7 +242,7 @@ class Stream(_OfflineStream):
         sfreq: float,
         data: np.ndarray | pd.DataFrame | None = None,
         nm_channels: pd.DataFrame | _PathLike | None = None,
-        settings: dict | _PathLike | None = None,
+        settings: "NMSettings | _PathLike | None" = None,
         sampling_rate_features_hz: float | None = None,
         line_noise: float | None = 50,
         path_grids: _PathLike | None = None,

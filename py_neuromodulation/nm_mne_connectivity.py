@@ -12,8 +12,8 @@ if TYPE_CHECKING:
 
 
 class MNEConnectivitySettings(BaseModel):
-    method: str
-    mode: str
+    method: str = "plv"
+    mode: str = "multitaper"
 
 
 class MNEConnectivity(NMFeature):

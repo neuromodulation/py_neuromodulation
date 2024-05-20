@@ -11,14 +11,14 @@ if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
 
 
-class BispectraComponents(FeatureSelector, BaseModel):
+class BispectraComponents(FeatureSelector):
     absolute: bool = True
     real: bool = True
     imag: bool = True
     phase: bool = True
 
 
-class BispectraFeatures(FeatureSelector, BaseModel):
+class BispectraFeatures(FeatureSelector):
     mean: bool = True
     sum: bool = True
     var: bool = True
@@ -98,8 +98,24 @@ class Bispectra(NMFeature):
 
             f_spectrum_range = freqs[
                 np.logical_and(
-                    freqs >= np.min([self.settings.f1s, self.settings.f2s]),
-                    freqs <= np.max([self.settings.f1s, self.settings.f2s]),
+                    freqs
+                    >= np.min(
+                        [
+                            self.settings.f1s[0],
+                            self.settings.f1s[1],
+                            self.settings.f2s[0],
+                            self.settings.f2s[1],
+                        ]
+                    ),
+                    freqs
+                    <= np.max(
+                        [
+                            self.settings.f1s[0],
+                            self.settings.f1s[1],
+                            self.settings.f2s[0],
+                            self.settings.f2s[1],
+                        ]
+                    ),
                 )
             ]
 
@@ -110,9 +126,10 @@ class Bispectra(NMFeature):
                 verbose=False,
             )
 
+            # TODO don't understand this part, f1s is supposed to have 2 values right?
             waveshape.compute(
-                f1s=(self.settings.f1s[0], self.settings.f1s[-1]),
-                f2s=(self.settings.f2s[0], self.settings.f2s[-1]),
+                f1s=self.settings.f1s.as_tuple(),
+                f2s=self.settings.f2s.as_tuple(),
             )
 
             bispectrum = np.squeeze(waveshape.results._data)

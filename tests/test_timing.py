@@ -1,6 +1,6 @@
 import py_neuromodulation as nm
 from py_neuromodulation import (
-    nm_settings,
+    NMSettings,
 )
 
 import numpy as np
@@ -16,11 +16,10 @@ def test_setting_computation_time():
     fs = 1000
     data = np.random.random((1, int(data_duration_s * fs)))
 
-    settings = nm_settings.get_default_settings()
-    settings = nm_settings.set_settings_fast_compute(settings)
-    settings["segment_length_features_ms"] = 1000  # start afte 1 second
-    settings["features"]["fft"] = False
-    settings["features"]["raw_hjorth"] = True
+    settings = NMSettings.get_default().set_fast_compute()
+    settings.segment_length_features_ms = 1000  # start afte 1 second
+    settings.features["fft"] = False
+    settings.features["raw_hjorth"] = True
     stream = nm.Stream(
         sfreq=fs,
         data=data,
@@ -40,7 +39,7 @@ def test_setting_computation_time():
         features["time"].iloc[1] - features["time"].iloc[0]
     ) == 1000 / sampling_rate_features_hz
 
-    assert features["time"].iloc[0] == settings["segment_length_features_ms"]
+    assert features["time"].iloc[0] == settings.segment_length_features_ms
 
 
 def test_float_fs():
@@ -53,12 +52,11 @@ def test_float_fs():
     fs = 1111.111
     data = np.random.random((1, int(data_duration_s * fs)))
 
-    settings = nm_settings.get_default_settings()
-    settings = nm_settings.set_settings_fast_compute(settings)
-    settings["segment_length_features_ms"] = 333  # start afte 1 second
+    settings = NMSettings.get_default().set_fast_compute()
+    settings.segment_length_features_ms = 333  # start afte 1 second
 
-    settings["features"]["fft"] = False
-    settings["features"]["raw_hjorth"] = True
+    settings.features["fft"] = False
+    settings.features["raw_hjorth"] = True
     stream = nm.Stream(
         sfreq=fs,
         data=data,
@@ -77,4 +75,4 @@ def test_float_fs():
         features["time"].iloc[1] - features["time"].iloc[0]
     ) == 1000 / sampling_rate_features_hz
 
-    assert features["time"].iloc[0] == settings["segment_length_features_ms"]
+    assert features["time"].iloc[0] == settings.segment_length_features_ms

@@ -1,7 +1,7 @@
 """Module for handling settings."""
 
 from pathlib import PurePath
-from pydantic import Field, BaseModel, field_validator, model_validator
+from pydantic import Field, model_validator
 from typing import Iterable
 
 from py_neuromodulation import PYNM_DIR, logger
@@ -13,6 +13,7 @@ from py_neuromodulation.nm_types import (
     _PathLike,
 )
 
+from py_neuromodulation.nm_types import NMBaseModel
 from py_neuromodulation.nm_filter_preprocessing import FilterSettings
 from py_neuromodulation.nm_kalmanfilter import KalmanSettings
 from py_neuromodulation.nm_projection import ProjectionSettings
@@ -62,7 +63,7 @@ class PostprocessingSettings(FeatureSelector):
     project_subcortex: bool = False
 
 
-class NMSettings(BaseModel):
+class NMSettings(NMBaseModel):
     # General settings
     sampling_rate_features_hz: float = Field(default=10, gt=0, alias="sfreq")
     segment_length_features_ms: float = Field(default=1000, gt=0)
@@ -103,19 +104,19 @@ class NMSettings(BaseModel):
         "bispectrum": False,
     }
 
-    fft_settings: "OscillatorySettings"
-    welch_settings: "OscillatorySettings"
-    stft_settings: "OscillatorySettings"
-    bandpass_filter_settings: "BandpassSettings"
-    kalman_filter_settings: "KalmanSettings"
-    burst_settings: "BurstSettings"
-    sharpwave_analysis_settings: "SharpwaveSettings"
-    mne_connectivity: "MNEConnectivitySettings"
-    coherence: "CoherenceSettings"
-    fooof: "FooofSettings"
-    nolds_features: "NoldsSettings"
-    bispectrum: "BispectraSettings"
- 
+    fft_settings: OscillatorySettings = OscillatorySettings()
+    welch_settings: OscillatorySettings = OscillatorySettings()
+    stft_settings: OscillatorySettings = OscillatorySettings()
+    bandpass_filter_settings: BandpassSettings = BandpassSettings()
+    kalman_filter_settings: KalmanSettings = KalmanSettings()
+    burst_settings: BurstSettings = BurstSettings()
+    sharpwave_analysis_settings: SharpwaveSettings = SharpwaveSettings()
+    mne_connectivity: MNEConnectivitySettings = MNEConnectivitySettings()
+    coherence: CoherenceSettings = CoherenceSettings()
+    fooof: FooofSettings = FooofSettings()
+    nolds_features: NoldsSettings = NoldsSettings()
+    bispectrum: BispectraSettings = BispectraSettings()
+
     @model_validator(mode="after")
     def validate_settings(self):
         # Check Kalman filter frequency bands
@@ -134,11 +135,12 @@ class NMSettings(BaseModel):
 
         return self
 
-    def reset(self) -> None:
+    def reset(self) -> "NMSettings":
         self.features = {k: False for k in self.features}
         self.preprocessing = []
+        return self
 
-    def set_fast_compute(self) -> None:
+    def set_fast_compute(self) -> "NMSettings":
         self.reset()
         self.features["fft"] = True
         self.preprocessing = [
@@ -149,6 +151,8 @@ class NMSettings(BaseModel):
         self.postprocessing.feature_normalization = True
         self.postprocessing.project_cortex = False
         self.postprocessing.project_subcortex = False
+
+        return self
 
     @classmethod
     def load(cls, settings: "NMSettings | _PathLike | None") -> "NMSettings":

@@ -3,7 +3,6 @@ from math import isnan
 from typing import NamedTuple, Type, Any, Literal
 from importlib import import_module
 from pydantic import Field, model_validator, BaseModel
-from dataclasses import fields
 
 _PathLike = str | PathLike
 
@@ -18,6 +17,10 @@ class NMBaseModel(BaseModel):
             for i in range(len(args)):
                 kwargs[field_names[i]] = args[i]
             super().__init__(**kwargs)
+            
+            
+    def __str__(self):
+        return print(str(self.dict()))
 
 
 class ImportDetails(NamedTuple):
@@ -40,6 +43,9 @@ class FrequencyRange(NMBaseModel):
                 return self.frequency_high_hz
             case _:
                 raise IndexError(f"Index {item} out of range")
+            
+    def as_tuple(self) -> tuple[float, float]:
+        return (self.frequency_low_hz, self.frequency_high_hz)
 
     @model_validator(mode="after")
     def validate_range(self):
@@ -76,6 +82,10 @@ class FeatureSelector(BaseModel):
     def print_all(cls):
         for f in cls.list_all():
             print(f)
+    
+    @classmethod 
+    def get_fields(cls):
+        return cls.model_fields
 
 
 FeatureName = Literal[

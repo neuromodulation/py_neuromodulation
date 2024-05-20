@@ -11,6 +11,7 @@ from scipy.stats import zscore as scipy_zscore
 
 from py_neuromodulation import nm_IO, nm_plots
 from py_neuromodulation.nm_decode import Decoder
+from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation.nm_settings import NMSettings
 
 target_filter_str = {
@@ -25,7 +26,7 @@ features_reverse_order_plotting = {"stft", "fft", "bandpass"}
 
 class Feature_Reader:
     def __init__(
-        self, feature_dir: str, feature_file: str = "", binarize_label: bool = True
+        self, feature_dir: _PathLike, feature_file: _PathLike = "", binarize_label: bool = True
     ) -> None:
         """Feature_Reader enables analysis methods on top of NM_reader and NM_Decoder
 
@@ -39,13 +40,9 @@ class Feature_Reader:
             binarize label, by default True
 
         """
-        self.feature_dir: str = feature_dir
+        self.feature_dir = feature_dir
         self.feature_list: list[str] = nm_IO.get_run_list_indir(self.feature_dir)
-        self.feature_file: str
-        if not feature_file:
-            self.feature_file = self.feature_list[0]
-        else:
-            self.feature_file = feature_file
+        self.feature_file = feature_file if feature_file else self.feature_list[0]
 
         FILE_BASENAME = PurePath(self.feature_file).stem
         PATH_READ_FILE = str(PurePath(self.feature_dir, FILE_BASENAME, FILE_BASENAME))

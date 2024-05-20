@@ -1,4 +1,4 @@
-from typing import Protocol, TYPE_CHECKING
+from typing import Protocol, TYPE_CHECKING, cast
 from collections.abc import Iterable
 
 if TYPE_CHECKING:
@@ -72,13 +72,16 @@ class Features:
             _description_
         """
 
-        self.features: list[NMFeature] = [
-            get_class(FEATURE_DICT[feature_name])(settings, ch_names, sfreq)
+        # Accept 'str' for custom features
+        self.features: dict[FeatureName | str, NMFeature] = {
+            feature_name: get_class(FEATURE_DICT[feature_name])(
+                settings, ch_names, sfreq
+            )
             for feature_name, feature_enabled in settings.features.items()
             if feature_enabled
-        ]
+        }
 
-    def register_new_feature(self, feature: NMFeature) -> None:
+    def register_new_feature(self, feature_name: str, feature: NMFeature) -> None:
         """Register new feature.
 
         Parameters
@@ -86,7 +89,7 @@ class Features:
         feature : nm_features_abc.Feature
             New feature to add to feature list
         """
-        self.features.append(feature)
+        self.features[feature_name] = feature  # type: ignore
 
     def estimate_features(self, data: "np.ndarray") -> dict:
         """Calculate features, as defined in settings.json
@@ -104,10 +107,13 @@ class Features:
 
         features_compute: dict = {}
 
-        for feature in self.features:
+        for feature in self.features.values():
             features_compute = feature.calc_feature(
                 data,
                 features_compute,
             )
 
         return features_compute
+
+    def get_feature(self, fname: FeatureName) -> NMFeature:
+        return self.features[fname]

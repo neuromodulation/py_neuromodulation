@@ -25,8 +25,8 @@ class FooofPeriodicSettings(FeatureSelector):
 
 
 class FooofSettings(BaseModel):
-    aperiodic: FooofAperiodicSettings
-    periodic: FooofPeriodicSettings
+    aperiodic: FooofAperiodicSettings = FooofAperiodicSettings()
+    periodic: FooofPeriodicSettings = FooofPeriodicSettings()
     windowlength_ms: float = 800
     peak_width_limits: FrequencyRange = FrequencyRange(0.5, 12)
     max_n_peaks: int = 3

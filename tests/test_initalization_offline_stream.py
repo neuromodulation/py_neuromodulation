@@ -12,7 +12,7 @@ def test_stream_init():
     stream = nm.Stream(sfreq=sfreq, data=data, sampling_rate_features_hz=11)
 
     assert stream.nm_channels.shape[0] == 10
-    assert stream.settings["sampling_rate_features_hz"] == 11
+    assert stream.settings.sampling_rate_features_hz == 11
 
 
 def test_stream_init_no_sfreq():

@@ -2,14 +2,14 @@ import numpy as np
 import pandas as pd
 
 from py_neuromodulation import (
-    nm_settings,
+    NMSettings,
     nm_stream_offline,
     nm_define_nmchannels,
 )
 
 
-def get_example_settings(test_arr: np.ndarray) -> tuple[dict, pd.DataFrame]:
-    settings = nm_settings.set_settings_fast_compute(nm_settings.get_default_settings())
+def get_example_settings(test_arr: np.ndarray) -> tuple[NMSettings, pd.DataFrame]:
+    settings = NMSettings.get_default().set_fast_compute()
 
     nm_channels = nm_define_nmchannels.get_default_channels_from_data(test_arr)
 
@@ -28,7 +28,7 @@ def test_label_add_single_target():
     nm_channels["used"] = [1, 0]
     nm_channels.loc[1, "name"] = "target_ch"
 
-    settings["sampling_rate_features_hz"] = sampling_rate_features
+    settings.sampling_rate_features_hz = sampling_rate_features
 
     stream = nm_stream_offline.Stream(
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
@@ -60,7 +60,7 @@ def test_label_add_multidimensional_target():
     nm_channels.loc[0, "name"] = "target_ch_0"
     nm_channels.loc[2, "name"] = "target_ch_1"
 
-    settings["sampling_rate_features_hz"] = sampling_rate_features
+    settings.sampling_rate_features_hz = sampling_rate_features
 
     stream = nm_stream_offline.Stream(
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
@@ -85,7 +85,7 @@ def test_label_add_no_target():
 
     settings, nm_channels = get_example_settings(arr_test)
 
-    settings["sampling_rate_features_hz"] = sampling_rate_features
+    settings.sampling_rate_features_hz = sampling_rate_features
 
     stream = nm_stream_offline.Stream(
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True

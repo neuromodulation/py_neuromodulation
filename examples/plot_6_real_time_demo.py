@@ -51,12 +51,11 @@ import timeit
 
 
 def get_fast_compute_settings():
-    settings = nm.nm_settings.get_default_settings()
-    settings = nm.nm_settings.reset_settings(settings)
-    settings = nm.nm_settings.set_settings_fast_compute(settings)
-    settings["preprocessing"] = ["re_referencing", "notch_filter"]
-    settings["features"]["fft"] = True
-    settings["postprocessing"]["feature_normalization"] = True
+    settings = nm.NMSettings.get_default().set_fast_compute()
+    
+    settings.preprocessing = ["re_referencing", "notch_filter"]
+    settings.features["fft"] = True
+    settings.postprocessing.feature_normalization = True
     return settings
 
 

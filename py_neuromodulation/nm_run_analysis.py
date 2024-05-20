@@ -1,7 +1,7 @@
 """This module contains the class to process a given batch of data."""
 
 from time import time
-from typing import Protocol
+from typing import  Protocol
 
 import numpy as np
 import pandas as pd
@@ -173,7 +173,7 @@ class DataProcessor:
 
     @staticmethod
     def _get_grids(
-        settings: dict,
+        settings: "NMSettings",
         path_grids: _PathLike | None,
     ) -> tuple[pd.DataFrame | None, pd.DataFrame | None]:
         """Read settings specified grids

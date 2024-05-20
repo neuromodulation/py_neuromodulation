@@ -19,7 +19,7 @@ class PeakDetectionSettings(BaseModel):
     distance_peaks_ms: float = 5
 
 
-class SharpwaveFeatures(FeatureSelector, BaseModel):
+class SharpwaveFeatures(FeatureSelector):
     peak_left: bool = False
     peak_right: bool = False
     trough: bool = False
@@ -79,6 +79,8 @@ class SharpwaveAnalyzer(NMFeature):
         self.trough: list = []
         self.troughs_idx: list = []
 
+        # TODO check freq ranges against sfreq
+        
         for filter_range in settings.sharpwave_analysis_settings.filter_ranges_hz:
             # Test settings
             # TODO: handle None values

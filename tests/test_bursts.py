@@ -2,13 +2,13 @@ import pytest
 import numpy as np
 from py_neuromodulation import (
     nm_bursts,
-    nm_settings,
+    NMSettings,
 )
 
 
 def test_init_wrong_fband():
-    settings = nm_settings.get_default_settings()
-    settings["burst_settings"]["frequency_bands"] = ["wrong_band"]
+    settings = NMSettings.get_default()
+    settings.burst_settings.frequency_bands = ["wrong_band"]
     with pytest.raises(Exception):
         nm_bursts.Burst.test_settings(
             settings,
@@ -21,8 +21,8 @@ def test_init_wrong_fband():
 
 
 def test_init_wrong_treshold():
-    settings = nm_settings.get_default_settings()
-    settings["burst_settings"]["threshold"] = -1
+    settings = NMSettings.get_default()
+    settings.burst_settings.threshold = -1
     with pytest.raises(Exception):
         nm_bursts.Burst.test_settings(
             settings,
@@ -35,8 +35,8 @@ def test_init_wrong_treshold():
 
 
 def test_init_wrong_timeduration():
-    settings = nm_settings.get_default_settings()
-    settings["burst_settings"]["time_duration_s"] = -1
+    settings = NMSettings.get_default()
+    settings.burst_settings.time_duration_s = -1
     with pytest.raises(Exception):
         nm_bursts.Burst.test_settings(
             settings,
@@ -49,8 +49,8 @@ def test_init_wrong_timeduration():
 
 
 def test_init_wrong_burst_feature_init():
-    settings = nm_settings.get_default_settings()
-    settings["burst_settings"]["burst_features"]["duration"] = -1
+    settings = NMSettings.get_default()
+    settings.burst_settings.burst_features.duration = -1
     with pytest.raises(Exception):
         nm_bursts.Burst.test_settings(
             settings,
@@ -64,9 +64,9 @@ def test_init_wrong_burst_feature_init():
 
 def test_bursting_duration():
     np.random.seed(0)
-    settings = nm_settings.get_default_settings()
-    settings["features"]["bursts"] = True
-    settings["postprocessing"]["feature_normalization"] = False
+    settings = NMSettings.get_default()
+    settings.features["bursts"] = True
+    settings.postprocessing.feature_normalization = False
     TIME_DURATION = 10
     sfreq = 1000
     NUM_CH = 1

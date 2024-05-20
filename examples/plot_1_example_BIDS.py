@@ -1,5 +1,5 @@
 """
-ECoG Movement decoding example 
+ECoG Movement decoding example
 ==============================
 
 """
@@ -26,7 +26,7 @@ from py_neuromodulation import (
     nm_define_nmchannels,
     nm_IO,
     nm_plots,
-    nm_settings,
+    NMSettings,
 )
 
 # %%
@@ -49,9 +49,7 @@ from py_neuromodulation import (
     line_noise,
     coord_list,
     coord_names,
-) = nm_IO.read_BIDS_data(
-    PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype
-)
+) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype)
 
 nm_channels = nm_define_nmchannels.set_channels(
     ch_names=raw.ch_names,
@@ -63,7 +61,6 @@ nm_channels = nm_define_nmchannels.set_channels(
     target_keywords=["MOV_RIGHT"],
 )
 
-nm_channels
 
 # %%
 # This example contains the grip force movement traces, we'll use the *MOV_RIGHT* channel as a decoding target channel.
@@ -87,26 +84,21 @@ plt.ylabel("Voltage a.u.")
 plt.xlim(0, 20)
 
 # %%
-settings = nm_settings.get_default_settings()
-settings = nm_settings.set_settings_fast_compute(settings)
+settings = NMSettings.get_default().set_fast_compute()
 
-settings["features"]["welch"] = True
-settings["features"]["fft"] = True
-settings["features"]["bursts"] = True
-settings["features"]["sharpwave_analysis"] = True
-settings["features"]["coherence"] = True
-settings["coherence"]["channels"] = [["LFP_RIGHT_0", "ECOG_RIGHT_0"]]
-settings["coherence"]["frequency_bands"] = ["high beta", "low gamma"]
-settings["sharpwave_analysis_settings"]["estimator"]["mean"] = []
+settings.features["welch"] = True
+settings.features["fft"] = True
+settings.features["bursts"] = True
+settings.features["sharpwave_analysis"] = True
+settings.features["coherence"] = True
+settings.coherence.channels = [["LFP_RIGHT_0", "ECOG_RIGHT_0"]]
+settings.coherence["frequency_bands"] = ["high beta", "low gamma"]
+settings.sharpwave_analysis_settings["estimator"]["mean"] = []
 for sw_feature in list(
-    settings["sharpwave_analysis_settings"]["sharpwave_features"].keys()
+    settings.sharpwave_analysis_settings.sharpwave_features.list_all()
 ):
-    settings["sharpwave_analysis_settings"]["sharpwave_features"][
-        sw_feature
-    ] = True
-    settings["sharpwave_analysis_settings"]["estimator"]["mean"].append(
-        sw_feature
-    )
+    setattr(settings.sharpwave_analysis_settings.sharpwave_features, sw_feature, True)
+    settings.sharpwave_analysis_settings.estimator["mean"].append(sw_feature)
 
 # %%
 stream = nm.Stream(
@@ -175,9 +167,9 @@ feature_reader.plot_all_features(
 nm_plots.plot_corr_matrix(
     feature=feature_reader.feature_arr.filter(regex="ECOG_RIGHT_0"),
     ch_name="ECOG_RIGHT_0-avgref",
-    feature_names=list(feature_reader.feature_arr.filter(
-        regex="ECOG_RIGHT_0-avgref"
-    ).columns),
+    feature_names=list(
+        feature_reader.feature_arr.filter(regex="ECOG_RIGHT_0-avgref").columns
+    ),
     feature_file=feature_reader.feature_file,
     show_plot=True,
     figsize=(15, 15),

@@ -17,10 +17,26 @@ class FrequencyLowpass(FrequencyRange):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
+    @property
+    def frequency_cutoff_hz(self):
+        return self.frequency_high_hz
+
+    @frequency_cutoff_hz.setter
+    def frequency_cutoff_hz(self, value):
+        self.frequency_high_hz = value
+
 
 class FrequencyHighpass(FrequencyRange):
     frequency_low_hz: float = Field(default=3, alias="frequency_cutoff_hz")
     frequency_high_hz: float = float("nan")
+
+    @property
+    def frequency_cutoff_hz(self):
+        return self.frequency_low_hz
+
+    @frequency_cutoff_hz.setter
+    def frequency_cutoff_hz(self, value):
+        self.frequency_low_hz = value
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -31,7 +47,7 @@ class FilterSettings(FeatureSelector):
     lowpass_filter: bool = True
     highpass_filter: bool = True
     bandpass_filter: bool = True
-    
+
     bandstop_filter_settings: FrequencyRange = FrequencyRange(100, 160)
     bandpass_filter_settings: FrequencyRange = FrequencyRange(2, 200)
     lowpass_filter_settings: FrequencyLowpass = FrequencyLowpass(float("nan"), 200)

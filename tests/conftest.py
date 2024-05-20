@@ -7,6 +7,7 @@ from py_neuromodulation import (
     nm_settings,
     nm_IO,
     nm_define_nmchannels,
+    NMSettings
 )
 
 
@@ -51,11 +52,11 @@ def setup_default_stream_fast_compute():
         target_keywords=("MOV_RIGHT_CLEAN",),
     )
 
-    settings = nm_settings.get_default_settings()
-    settings = nm_settings.reset_settings(settings)
-    settings["fooof"]["aperiodic"]["exponent"] = True
-    settings["fooof"]["aperiodic"]["offset"] = True
-    settings["features"]["fooof"] = True
+    settings = NMSettings.get_default()
+    settings.reset()
+    settings.fooof.aperiodic.exponent = True
+    settings.fooof.aperiodic.offset = True
+    settings.features["fooof"] = True
 
     stream = nm_stream_offline.Stream(
         settings=settings,
@@ -102,8 +103,7 @@ def setup_databatch():
         coord_names,
     ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype)
 
-    settings = nm_settings.get_default_settings()
-    settings = nm_settings.set_settings_fast_compute(settings)
+    settings = NMSettings.get_default().set_fast_compute()
 
     generator = nm_generator.raw_data_generator(data, settings, int(np.floor(sfreq)))
     data_batch = next(generator, None)

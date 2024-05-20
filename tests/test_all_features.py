@@ -1,26 +1,26 @@
 import numpy as np
 
 from py_neuromodulation import (
-    nm_settings,
     nm_define_nmchannels,
     Stream,
+    NMSettings
 )
 
 
 def get_example_stream(test_arr: np.ndarray) -> Stream:
-    settings = nm_settings.get_default_settings()
-    settings["features"]["raw_hjorth"] = True
-    settings["features"]["return_raw"] = True
-    settings["features"]["bandpass_filter"] = True
-    settings["features"]["stft"] = True
-    settings["features"]["fft"] = True
-    settings["features"]["sharpwave_analysis"] = True
-    settings["features"]["fooof"] = True
-    settings["features"]["bursts"] = True
-    settings["features"]["linelength"] = True
-    settings["features"]["nolds"] = False
-    settings["features"]["mne_connectivity"] = False
-    settings["features"]["coherence"] = False
+    settings = NMSettings.get_default()
+    settings.features["raw_hjorth"] = True
+    settings.features["return_raw"] = True
+    settings.features["bandpass_filter"] = True
+    settings.features["stft"] = True
+    settings.features["fft"] = True
+    settings.features["sharpwave_analysis"] = True
+    settings.features["fooof"] = True
+    settings.features["bursts"] = True
+    settings.features["linelength"] = True
+    settings.features["nolds"] = False
+    settings.features["mne_connectivity"] = False
+    settings.features["coherence"] = False
 
     nm_channels = nm_define_nmchannels.get_default_channels_from_data(test_arr)
 
