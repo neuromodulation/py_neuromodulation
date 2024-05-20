@@ -3,6 +3,7 @@ from math import isnan
 from typing import NamedTuple, Type, Any, Literal
 from importlib import import_module
 from pydantic import Field, model_validator, BaseModel
+from pprint import pformat 
 
 _PathLike = str | PathLike
 
@@ -20,7 +21,7 @@ class NMBaseModel(BaseModel):
             
             
     def __str__(self):
-        return print(str(self.dict()))
+        return pformat(self.model_dump())
 
 
 class ImportDetails(NamedTuple):

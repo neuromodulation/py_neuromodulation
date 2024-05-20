@@ -114,19 +114,18 @@ class FFT(OscillatoryFeature):
         self.window_samples = int(-np.floor(window_ms / 1000 * sfreq))
         self.freqs = rfftfreq(-self.window_samples, 1 / np.floor(self.sfreq))
 
-        idx_range = (
+        # Pre-calculate frequency ranges
+        self.idx_range = [
             (
                 f_band,
                 np.where((self.freqs >= f_range[0]) & (self.freqs < f_range[1]))[0],
             )
             for f_band, f_range in self.frequency_ranges.items()
-        )
+        ]
 
-        estimators = (
+        self.estimators = [
             (est, ESTIMATOR_DICT[est]) for est in self.settings.features.get_enabled()
-        )
-
-        self.feature_params = product(enumerate(self.ch_names), idx_range, estimators)
+        ]
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         data = data[:, self.window_samples :]
@@ -138,14 +137,17 @@ class FFT(OscillatoryFeature):
         if self.settings.log_transform:
             Z = np.log10(Z)
 
-        for (ch_idx, ch_name), (f_band_name, idx_range), (
-            est_name,
-            est_fun,
-        ) in self.feature_params:
-            # TODO Can we get rid of this for-loop?
-            Z_ch = Z[ch_idx, idx_range]
-            col_name = f"{ch_name}_{self.osc_feature_name}_{f_band_name}_{est_name}"
-            features_compute[col_name] = est_fun(Z_ch)
+        for f_band_name, idx_range in self.idx_range:
+            # TODO Can we get rid of this for-loop? Hard to vectorize windows of different lengths...
+            Z_band = Z[:, idx_range]  # Data for all channels
+
+            for est_name, est_fun in self.estimators:
+                result = est_fun(Z_band, axis=1)
+
+                for ch_idx, ch_name in enumerate(self.ch_names):
+                    features_compute[
+                        f"{ch_name}_{self.osc_feature_name}_{f_band_name}_{est_name}"
+                    ] = result[ch_idx]
 
         if self.settings.return_spectrum:
             combinations = product(enumerate(self.ch_names), enumerate(self.freqs))
@@ -171,19 +173,17 @@ class Welch(OscillatoryFeature):
 
         self.freqs = rfftfreq(self.sfreq, 1 / self.sfreq)
 
-        idx_range = (
+        self.idx_range = [
             (
                 f_band,
                 np.where((self.freqs >= f_range[0]) & (self.freqs < f_range[1]))[0],
             )
             for f_band, f_range in self.frequency_ranges.items()
-        )
+        ]
 
-        estimators = (
+        self.estimators = [
             (est, ESTIMATOR_DICT[est]) for est in self.settings.features.get_enabled()
-        )
-
-        self.feature_params = product(enumerate(self.ch_names), idx_range, estimators)
+        ]
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         from scipy.signal import welch
@@ -199,13 +199,16 @@ class Welch(OscillatoryFeature):
         if self.settings.log_transform:
             Z = np.log10(Z)
 
-        for (ch_idx, ch_name), (f_band_name, idx_range), (
-            est_name,
-            est_fun,
-        ) in self.feature_params:
-            Z_ch = Z[ch_idx, idx_range]
-            col_name = f"{ch_name}_{self.osc_feature_name}_{f_band_name}_{est_name}"
-            features_compute[col_name] = est_fun(Z_ch)
+        for f_band_name, idx_range in self.idx_range:
+            Z_band = Z[:, idx_range]
+
+            for est_name, est_fun in self.estimators:
+                result = est_fun(Z_band, axis=1)
+
+                for ch_idx, ch_name in enumerate(self.ch_names):
+                    features_compute[
+                        f"{ch_name}_{self.osc_feature_name}_{f_band_name}_{est_name}"
+                    ] = result[ch_idx]
 
         if self.settings.return_spectrum:
             combinations = product(enumerate(self.ch_names), enumerate(self.freqs))
@@ -231,21 +234,19 @@ class STFT(OscillatoryFeature):
 
         self.nperseg = self.settings.windowlength_ms
 
-        self.freqs = rfftfreq(self.sfreq, 1 / self.sfreq)
-
-        idx_range = (
+        self.freqs = rfftfreq(self.nperseg, 1 / self.sfreq)
+        
+        self.idx_range = [
             (
                 f_band,
                 np.where((self.freqs >= f_range[0]) & (self.freqs < f_range[1]))[0],
             )
             for f_band, f_range in self.frequency_ranges.items()
-        )
+        ]
 
-        estimators = (
+        self.estimators = [
             (est, ESTIMATOR_DICT[est]) for est in self.settings.features.get_enabled()
-        )
-
-        self.feature_params = product(enumerate(self.ch_names), idx_range, estimators)
+        ]
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         from scipy.signal import stft
@@ -262,13 +263,16 @@ class STFT(OscillatoryFeature):
         if self.settings.log_transform:
             Z = np.log10(Z)
 
-        for (ch_idx, ch_name), (f_band_name, idx_range), (
-            est_name,
-            est_fun,
-        ) in self.feature_params:
-            Z_ch = Z[ch_idx, idx_range, :]
-            col_name = f"{ch_name}_{self.osc_feature_name}_{f_band_name}_{est_name}"
-            features_compute[col_name] = est_fun(Z_ch)
+        for f_band_name, idx_range in self.idx_range:
+            Z_band = Z[:, idx_range, :]
+
+            for est_name, est_fun in self.estimators:
+                result = est_fun(Z_band, axis=(1, 2))
+
+                for ch_idx, ch_name in enumerate(self.ch_names):
+                    features_compute[
+                        f"{ch_name}_{self.osc_feature_name}_{f_band_name}_{est_name}"
+                    ] = result[ch_idx]
 
         if self.settings.return_spectrum:
             combinations = product(enumerate(self.ch_names), enumerate(self.freqs))

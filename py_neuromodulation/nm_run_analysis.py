@@ -1,7 +1,7 @@
 """This module contains the class to process a given batch of data."""
 
 from time import time
-from typing import  Protocol
+from typing import Protocol
 
 import numpy as np
 import pandas as pd
@@ -88,7 +88,7 @@ class DataProcessor:
             settings_str = "feature_normalization_settings"
             self.feature_normalizer = FeatureNormalizer(
                 sampling_rate_features_hz=self.sfreq_features,
-                settings=getattr(self.settings, settings_str, {})
+                settings=getattr(self.settings, settings_str, {}),
             )
 
         self.features = Features(

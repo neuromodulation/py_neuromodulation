@@ -154,6 +154,10 @@ class NMSettings(NMBaseModel):
 
         return self
 
+    def set_all_features(self) -> "NMSettings":
+        self.features = {k: True for k in self.features}
+        return self
+
     @classmethod
     def load(cls, settings: "NMSettings | _PathLike | None") -> "NMSettings":
         if isinstance(settings, cls):
