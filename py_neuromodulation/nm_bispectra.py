@@ -1,6 +1,8 @@
 from collections.abc import Iterable
+from re import A
+from matplotlib.pylab import f
 from pydantic import field_validator, BaseModel
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 import numpy as np
 
@@ -41,6 +43,20 @@ class BispectraSettings(BaseModel):
         return filter_range
 
 
+FEATURE_DICT: dict[str, Callable] = {
+    "mean": np.nanmean,
+    "sum": np.nansum,
+    "var": np.nanvar,
+}
+
+COMPONENT_DICT: dict[str, Callable] = {
+    "real": lambda obj: getattr(obj, "real"),
+    "imag": lambda obj: getattr(obj, "imag"),
+    "absolute": np.abs,
+    "phase": np.angle,
+}
+
+
 class Bispectra(NMFeature):
     def __init__(
         self, settings: "NMSettings", ch_names: Iterable[str], sfreq: float
@@ -50,7 +66,7 @@ class Bispectra(NMFeature):
         self.frequency_ranges_hz = settings.frequency_ranges_hz
         self.settings: BispectraSettings = settings.bispectrum
 
-        assert (
+        assert all(
             f_band_bispectrum in settings.frequency_ranges_hz
             for f_band_bispectrum in self.settings.frequency_bands
         ), (
@@ -60,92 +76,55 @@ class Bispectra(NMFeature):
             f"specified frequency_ranges_hz: {settings.frequency_ranges_hz}"
         )
 
-    def compute_bs_features(
-        self,
-        spectrum_ch: np.ndarray,
-        features_compute: dict,
-        ch_name: str,
-        component: str,
-        f_band: str = "whole_fband_range",
-    ) -> dict:
-        for bispectrum_feature in self.settings.bispectrum_features.get_enabled():
-            match bispectrum_feature:
-                case "mean":
-                    result = np.nanmean(spectrum_ch)
-                case "sum":
-                    result = np.nansum(spectrum_ch)
-                case "var":
-                    result = np.nanvar(spectrum_ch)
-                case _:
-                    raise ValueError(f"Unknown bispectrum feature {bispectrum_feature}")
+        self.used_features = self.settings.bispectrum_features.get_enabled()
 
-            features_compute[
-                f"{ch_name}_Bispectrum_{component}_{bispectrum_feature}_{f_band}"
-            ] = result
-
-        return features_compute
+        self.min_freq = min(
+            self.settings.f1s.frequency_low_hz, self.settings.f2s.frequency_low_hz
+        )
+        self.max_freq = max(
+            self.settings.f1s.frequency_high_hz, self.settings.f2s.frequency_high_hz
+        )
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
+        from pybispectra import compute_fft, WaveShape
+
+        # PyBispectra's compute_fft uses PQDM to parallelize the calculation per channel
+        # Is this necessary? Maybe the overhead of parallelization is not worth it
+        # considering that we incur in it once per batch of data
+        fft_coeffs, freqs = compute_fft(
+            data=np.expand_dims(data, axis=(0)),
+            sampling_freq=self.sfreq,
+            n_points=data.shape[1],
+            verbose=False,
+        )
+
+        # fft_coeffs shape: [epochs, channels, frequencies]
+
+        # freqs is batch independent, except for the last batch perhaps
+        # freqs = np.fft.rfftfreq(n=data.shape[1], d = 1 / sfreq)
+
+        f_spectrum_range = freqs[
+            np.logical_and(freqs >= self.min_freq, freqs <= self.max_freq)
+        ]
+
+        waveshape = WaveShape(
+            data=fft_coeffs,
+            freqs=freqs,
+            sampling_freq=self.sfreq,
+            verbose=False,
+        )
+        
+        waveshape.compute(
+            f1s=self.settings.f1s.as_tuple(),  # type: ignore
+            f2s=self.settings.f2s.as_tuple(),  # type: ignore
+        )
+
         for ch_idx, ch_name in enumerate(self.ch_names):
-            from pybispectra import compute_fft, WaveShape
-
-            fft_coeffs, freqs = compute_fft(
-                data=np.expand_dims(data[ch_idx, :], axis=(0, 1)),
-                sampling_freq=self.sfreq,
-                n_points=data.shape[1],
-                verbose=False,
-            )
-
-            f_spectrum_range = freqs[
-                np.logical_and(
-                    freqs
-                    >= np.min(
-                        [
-                            self.settings.f1s[0],
-                            self.settings.f1s[1],
-                            self.settings.f2s[0],
-                            self.settings.f2s[1],
-                        ]
-                    ),
-                    freqs
-                    <= np.max(
-                        [
-                            self.settings.f1s[0],
-                            self.settings.f1s[1],
-                            self.settings.f2s[0],
-                            self.settings.f2s[1],
-                        ]
-                    ),
-                )
-            ]
-
-            waveshape = WaveShape(
-                data=fft_coeffs,
-                freqs=freqs,
-                sampling_freq=self.sfreq,
-                verbose=False,
-            )
-
-            # TODO don't understand this part, f1s is supposed to have 2 values right?
-            waveshape.compute(
-                f1s=self.settings.f1s.as_tuple(),
-                f2s=self.settings.f2s.as_tuple(),
-            )
-
-            bispectrum = np.squeeze(waveshape.results._data)
+            
+            bispectrum = waveshape._bicoherence[ch_idx]  # Same as waveshape.results._data, skips a copy
 
             for component in self.settings.components.get_enabled():
-                match component:
-                    case "real":
-                        spectrum_ch = bispectrum.real
-                    case "imag":
-                        spectrum_ch = bispectrum.imag
-                    case "absolute":
-                        spectrum_ch = np.abs(bispectrum)
-                    case "phase":
-                        spectrum_ch = np.angle(bispectrum)
-                    case _:
-                        raise ValueError(f"Unknown component {component}")
+                spectrum_ch = COMPONENT_DICT[component](bispectrum)
 
                 for fb in self.settings.frequency_bands:
                     range_ = (f_spectrum_range >= self.frequency_ranges_hz[fb][0]) & (
@@ -154,17 +133,14 @@ class Bispectra(NMFeature):
                     # waveshape.results.plot()
                     data_bs = spectrum_ch[range_, range_]
 
-                    features_compute = self.compute_bs_features(
-                        data_bs, features_compute, ch_name, component, fb
-                    )
+                    for bispectrum_feature in self.used_features:
+                        features_compute[
+                            f"{ch_name}_Bispectrum_{component}_{bispectrum_feature}_{fb}"
+                        ] = FEATURE_DICT[bispectrum_feature](data_bs)
 
-                if self.settings.compute_features_for_whole_fband_range:
-                    features_compute = self.compute_bs_features(
-                        spectrum_ch,
-                        features_compute,
-                        ch_name,
-                        component,
-                        "whole_fband_range",
-                    )
+                        if self.settings.compute_features_for_whole_fband_range:
+                            features_compute[
+                                f"{ch_name}_Bispectrum_{component}_{bispectrum_feature}_whole_fband_range"
+                            ] = FEATURE_DICT[bispectrum_feature](spectrum_ch)
 
         return features_compute
