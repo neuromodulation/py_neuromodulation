@@ -239,7 +239,7 @@ class STFT(OscillatoryFeature):
         self.idx_range = [
             (
                 f_band,
-                np.where((self.freqs >= f_range[0]) & (self.freqs < f_range[1]))[0],
+                np.where((self.freqs >= f_range[0]) & (self.freqs <= f_range[1]))[0],
             )
             for f_band, f_range in self.frequency_ranges.items()
         ]
