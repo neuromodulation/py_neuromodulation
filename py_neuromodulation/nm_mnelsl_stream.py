@@ -13,6 +13,7 @@ class LSLStream:
     def __init__(self, settings: dict, stream_name: str = None) -> None:
 
         self.settings = settings
+        self._n_seconds_wait_before_disconnect = 3
         try:
             if stream_name is None:
                 stream_name = resolve_streams()[0].name
@@ -56,7 +57,7 @@ class LSLStream:
 
                 data, timestamp = self.stream.get_data(winsize=self.winsize)
 
-                for i in range(3):
+                for i in range(self._n_seconds_wait_before_disconnect):
                     if (
                         data is not None
                         and check_data is not None
@@ -67,7 +68,7 @@ class LSLStream:
                         )
                         time.sleep(1)
                         i += 1
-                        if i == 3:
+                        if i == self._n_seconds_wait_before_disconnect:
                             self.stream.disconnect()
                             logger.warning("Stream disconnected.")
                             break
