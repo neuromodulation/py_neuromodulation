@@ -6,7 +6,7 @@ def raw_data_generator(
     data: np.ndarray,
     settings: dict,
     sfreq: float,
-) -> Iterator[tuple[None, np.ndarray]]:
+) -> Iterator[tuple[np.ndarray, np.ndarray]]:
     """
     This generator function mimics online data acquisition.
     The data are iteratively sampled with sfreq_new.

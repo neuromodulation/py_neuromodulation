@@ -3,13 +3,9 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from py_neuromodulation.nm_mnelsl_generator import LSLOfflinePlayer
-from py_neuromodulation.nm_mnelsl_stream import LSLStream
 from py_neuromodulation.nm_stream_abc import NMStream
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
-
-from mne_lsl.stream_viewer import StreamViewer
 
 
 class _GenericStream(NMStream):
@@ -124,7 +120,7 @@ class _GenericStream(NMStream):
         data: np.ndarray | pd.DataFrame | None = None,
         out_path_root: _PathLike = "",
         folder_name: str = "sub",
-        stream_lsl: bool = True,
+        is_stream_lsl: bool = True,
         stream_lsl_name: str = None,
         plot_lsl: bool = False,
         parallel: bool = False,
@@ -133,18 +129,22 @@ class _GenericStream(NMStream):
 
         from py_neuromodulation.nm_generator import raw_data_generator
 
-        if stream_lsl is False:
+        if not is_stream_lsl:
             generator = raw_data_generator(
                 data=data,
                 settings=self.settings,
                 sfreq=self.sfreq,
             )
         else:
-            self.lsl_stream = LSLStream ( # Why a Player here? Shouldn't it be a Stream? (changed it back to run the code)
+            from py_neuromodulation.nm_generator import LSLStream
+
+            self.lsl_stream = LSLStream(
                 settings=self.settings, stream_name=stream_lsl_name
             )
 
             if plot_lsl:
+                from mne_lsl.stream_viewer import StreamViewer
+
                 viewer = StreamViewer(stream_name=stream_lsl_name)
                 viewer.start()
 
@@ -152,10 +152,11 @@ class _GenericStream(NMStream):
                 error_msg = (
                     f"Sampling frequency of the lsl-stream ({self.lsl_stream.stream.sinfo.sfreq}) "
                     f"does not match the settings ({self.sfreq})."
+                    "The sampling frequency read from the stream will be used"
                 )
-                logger.critical(error_msg)
-                raise Exception(error_msg)
-
+                logger.warning(error_msg)
+                self.sfreq = self.lsl_stream.stream.sinfo.sfreq
+            
             generator = self.lsl_stream.get_next_batch()
 
         sample_add = self.sfreq / self.run_analysis.sfreq_features
@@ -170,8 +171,10 @@ class _GenericStream(NMStream):
             from itertools import count
 
             # parallel processing can not be utilized if a LSL stream is used
-            if stream_lsl is True:
-                error_msg = "Parallel processing is not possible with LSL stream."
+            if is_stream_lsl:
+                error_msg = (
+                    "Parallel processing is not possible with LSL stream."
+                )
                 logger.error(error_msg)
                 raise ValueError(error_msg)
 
@@ -185,7 +188,7 @@ class _GenericStream(NMStream):
         else:
             l_features: list[pd.Series] = []
             cnt_samples = offset_start
-            start_time = None
+
             while True:
                 next_item = next(generator, None)
 
@@ -200,12 +203,9 @@ class _GenericStream(NMStream):
                     data_batch.astype(np.float64)
                 )
 
-                # start_time = time_[0] if start_time is None else start_time
-
-                # feature_series["time"] = (
-                #     time_[-1] - start_time
-                # )  # check if results in same
-                feature_series = self._add_timestamp(feature_series, cnt_samples)
+                feature_series = self._add_timestamp(
+                   feature_series, cnt_samples  
+                )
 
                 feature_series = self._add_target(
                     feature_series=feature_series, data=data_batch
@@ -401,7 +401,7 @@ class Stream(_GenericStream):
             folder_name,
             parallel=parallel,
             n_jobs=n_jobs,
-            stream_lsl=stream_lsl,
+            is_stream_lsl=stream_lsl,
             stream_lsl_name=stream_lsl_name,
             plot_lsl=plot_lsl,
         )
