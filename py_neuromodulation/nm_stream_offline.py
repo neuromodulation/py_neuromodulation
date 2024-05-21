@@ -136,7 +136,7 @@ class _GenericStream(NMStream):
                 sfreq=self.sfreq,
             )
         else:
-            from py_neuromodulation.nm_generator import LSLStream
+            from py_neuromodulation.nm_mnelsl_stream import LSLStream
 
             self.lsl_stream = LSLStream(
                 settings=self.settings, stream_name=stream_lsl_name
