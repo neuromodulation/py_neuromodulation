@@ -93,27 +93,24 @@ def test_offline_lsl(setup_default_stream_fast_compute):
 
 def test_lsl_data(setup_default_stream_fast_compute):
     import pandas as pd
-    data_l = pd.DataFrame()
+    df_stream = pd.DataFrame()
     player = nm_mnelsl_generator.LSLOfflinePlayer(f_name=raw, stream_name="data_test_stream")
     player.start_player(chunk_size=2)
-    # data, stream = setup_default_stream_fast_compute
     stream_player_check = StreamLSL(name="data_test_stream", bufsize=2).connect()
-    time.sleep(0.5)
-    winsize = stream_player_check.n_new_samples / stream_player_check.info["sfreq"]
+    time.sleep(0.2)
     while(stream_player_check.n_new_samples != 0):
         winsize = stream_player_check.n_new_samples / stream_player_check.info["sfreq"]
         data, ts = stream_player_check.get_data(winsize)
-        data_l = pd.concat([data_l, pd.DataFrame(data)],axis=1)
+        df_stream = pd.concat([df_stream, pd.DataFrame(data)],axis=1)
         time.sleep(0.5)
 
-    raw_sliced = pd.DataFrame(raw.get_data()).iloc[:, -data_l.shape[1]:]
-    data_l.columns = range(len(data_l.columns))
+    raw_sliced = pd.DataFrame(raw.get_data()).iloc[:, -df_stream.shape[1]:]
+    df_stream.columns = range(len(df_stream.columns))
     raw_sliced_values = raw_sliced.values
-    data_l_values = data_l.values
+    df_stream_values = df_stream.values
     same_values = np.zeros(raw_sliced.shape[1], dtype=bool)
     for i in range(raw_sliced.shape[1]):
-        same_values[i] = np.any(np.all(raw_sliced_values == data_l_values[:, i][:, np.newaxis], axis=0))
+        same_values[i] = np.any(np.all(raw_sliced_values == df_stream_values[:, i][:, np.newaxis], axis=0))
     matching_percentage = np.sum(same_values)/len(same_values)*100
 
-    # testing if at least 99% of datapoints match (in all channels)
-    assert np.any(matching_percentage >= 99), f"Expected same data in at least 10 percent of the samples but got {np.max(matching_percentage)} percent"
+    assert np.any(matching_percentage >= 99), f"Expected same data in at least 99 percent of the samples but got {np.max(matching_percentage)} percent"
