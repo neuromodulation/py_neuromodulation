@@ -1,7 +1,11 @@
 from numpy import array, cov
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationInfo, field_validator
+from typing import TYPE_CHECKING
 
 from filterpy.kalman import KalmanFilter
+
+if TYPE_CHECKING:
+    from py_neuromodulation.nm_settings import NMSettings
 
 
 class KalmanSettings(BaseModel):
@@ -17,6 +21,14 @@ class KalmanSettings(BaseModel):
         "high_gamma",
         "HFA",
     ]
+
+    def validate_fbands(self, settings: "NMSettings") -> None:
+        assert all(
+            (item in settings.frequency_ranges_hz for item in self.frequency_bands)
+        ), (
+            "Frequency bands for Kalman filter must also be specified in "
+            "bandpass_filter_settings."
+        )
 
 
 def define_KF(Tp, sigma_w, sigma_v):

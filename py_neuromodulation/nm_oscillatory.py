@@ -2,7 +2,7 @@ from collections.abc import Iterable
 import numpy as np
 from itertools import product
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, ValidationInfo
 from typing import TYPE_CHECKING
 
 from py_neuromodulation.nm_features import NMFeature
@@ -37,35 +37,6 @@ ESTIMATOR_DICT = {
 }
 
 
-class BandpowerFeatures(FeatureSelector):
-    activity: bool = True
-    mobility: bool = False
-    complexity: bool = False
-
-
-class BandpassSettings(BaseModel):
-    segment_lengths_ms: dict[str, int] = {
-        "theta": 1000,
-        "alpha": 500,
-        "low beta": 333,
-        "high beta": 333,
-        "low gamma": 100,
-        "high gamma": 100,
-        "HFA": 100,
-    }
-    bandpower_features: BandpowerFeatures = BandpowerFeatures()
-    log_transform: bool = True
-    kalman_filter: bool = False
-
-    @field_validator("bandpower_features")
-    @classmethod
-    def bandpower_features_validator(cls, bandpower_features: BandpowerFeatures):
-        assert (
-            len(bandpower_features.get_enabled()) > 0
-        ), "Set at least one bandpower_feature to True."
-        return bandpower_features
-
-
 class OscillatoryFeature(NMFeature):
     def __init__(
         self, settings: "NMSettings", ch_names: Iterable[str], sfreq: float
@@ -79,15 +50,7 @@ class OscillatoryFeature(NMFeature):
 
         self.frequency_ranges = settings.frequency_ranges_hz
 
-        # TONI: This could be tested at the NMSettings level, or is it only needed when oscillatory features are enabled?
-        assert (
-            fb[0] < sfreq / 2 and fb[1] < sfreq / 2
-            for fb in settings.frequency_ranges_hz.values()
-        ), (
-            "the frequency band ranges need to be smaller than the nyquist frequency"
-            f"got sfreq = {sfreq} and fband ranges {settings.frequency_ranges_hz}"
-        )
-
+        # Test settings
         assert self.settings.windowlength_ms <= settings.segment_length_features_ms, (
             f"oscillatory feature windowlength_ms = ({self.settings.windowlength_ms})"
             f"needs to be smaller than"
@@ -132,7 +95,7 @@ class FFT(OscillatoryFeature):
 
         from scipy.fft import rfft
 
-        Z = np.abs(rfft(data))
+        Z = np.abs(rfft(data)) # type: ignore
 
         if self.settings.log_transform:
             Z = np.log10(Z)
@@ -235,7 +198,7 @@ class STFT(OscillatoryFeature):
         self.nperseg = self.settings.windowlength_ms
 
         self.freqs = rfftfreq(self.nperseg, 1 / self.sfreq)
-        
+
         self.idx_range = [
             (
                 f_band,
@@ -282,6 +245,54 @@ class STFT(OscillatoryFeature):
                 )[idx]
 
         return features_compute
+
+
+class BandpowerFeatures(FeatureSelector):
+    activity: bool = True
+    mobility: bool = False
+    complexity: bool = False
+
+
+###################################
+######## BANDPOWER FEATURE ########
+###################################
+
+
+class BandpassSettings(BaseModel):
+    segment_lengths_ms: dict[str, int] = {
+        "theta": 1000,
+        "alpha": 500,
+        "low beta": 333,
+        "high beta": 333,
+        "low gamma": 100,
+        "high gamma": 100,
+        "HFA": 100,
+    }
+    bandpower_features: BandpowerFeatures = BandpowerFeatures()
+    log_transform: bool = True
+    kalman_filter: bool = False
+
+    @field_validator("bandpower_features")
+    @classmethod
+    def bandpower_features_validator(cls, bandpower_features: BandpowerFeatures):
+        assert (
+            len(bandpower_features.get_enabled()) > 0
+        ), "Set at least one bandpower_feature to True."
+
+        return bandpower_features
+
+    def validate_fbands(self, settings: "NMSettings") -> None:
+        for fband_name, seg_length_fband in self.segment_lengths_ms.items():
+            assert seg_length_fband <= settings.segment_length_features_ms, (
+                f"segment length {seg_length_fband} needs to be smaller than "
+                f" settings['segment_length_features_ms'] = {settings.segment_length_features_ms}"
+            )
+
+        for fband_name in settings.frequency_ranges_hz.keys():
+            assert fband_name in self.segment_lengths_ms, (
+                f"frequency range {fband_name} "
+                "needs to be defined in settings.bandpass_filter_settings.segment_lengths_ms]"
+            )
 
 
 class BandPower(NMFeature):
@@ -346,27 +357,6 @@ class BandPower(NMFeature):
             self.KF_dict[KF_name].update(feature_calc)
             feature_calc = self.KF_dict[KF_name].x[0]
         return feature_calc
-
-    # @staticmethod
-    # def test_settings(settings: dict, ch_names: Iterable[str], sfreq: float):
-
-    # TODO needs to be checked at the NMSettings level or context needs to be passed
-    # for fband_name, seg_length_fband in settings["bandpass_filter_settings"][
-    #     "segment_lengths_ms"
-    # ].items():
-
-    #     assert seg_length_fband <= settings["segment_length_features_ms"], (
-    #         f"segment length {seg_length_fband} needs to be smaller than "
-    #         f" settings['segment_length_features_ms'] = {settings['segment_length_features_ms']}"
-    #     )
-
-    # for fband_name in list(settings["frequency_ranges_hz"].keys()):
-    #     assert fband_name in list(
-    #         settings["bandpass_filter_settings"]["segment_lengths_ms"].keys()
-    #     ), (
-    #         f"frequency range {fband_name} "
-    #         "needs to be defined in settings['bandpass_filter_settings']['segment_lengths_ms']"
-    #     )
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         data = self.bandpass_filter.filter_data(data)

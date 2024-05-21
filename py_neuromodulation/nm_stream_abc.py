@@ -8,7 +8,7 @@ import pandas as pd
 
 from py_neuromodulation.nm_run_analysis import DataProcessor
 from py_neuromodulation.nm_settings import NMSettings
-from py_neuromodulation.nm_types import _PathLike
+from py_neuromodulation.nm_types import _PathLike, FeatureName
 from py_neuromodulation import nm_IO, PYNM_DIR
 
 
@@ -48,7 +48,31 @@ class NMStream(ABC):
         verbose : bool, optional
             print out stream computation time information, by default True
         """
-        self.settings = NMSettings.load(settings)
+        self.settings: NMSettings = NMSettings.load(settings)
+        
+        # If features that use frequency ranges are on, test them against nyquist frequency
+        use_freq_ranges: list[FeatureName] = [
+            "bandpass_filter",
+            "stft",
+            "fft",
+            "welch",
+            "bursts",
+            "coherence",
+            "nolds",
+            "bispectrum",
+        ]
+        
+        need_nyquist_check = any((self.settings.features.get(f) for f in use_freq_ranges))
+        
+        if need_nyquist_check:          
+            assert all(
+                fb.frequency_high_hz < sfreq / 2
+                for fb in self.settings.frequency_ranges_hz.values()
+            ), (
+                "If a feature that uses frequency ranges is selected, "
+                "the frequency band ranges need to be smaller than the nyquist frequency"
+                f"got sfreq = {sfreq} and fband ranges {self.settings.frequency_ranges_hz}"
+            )
 
         if sampling_rate_features_hz is not None:
             self.settings.sampling_rate_features_hz = sampling_rate_features_hz

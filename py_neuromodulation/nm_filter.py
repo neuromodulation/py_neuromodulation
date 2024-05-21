@@ -141,22 +141,26 @@ class NotchFilter(NMPreprocessor):
         notch_widths: int | np.ndarray | None = 3,
         trans_bandwidth: float = 6.8,
     ) -> None:
-        self.test_settings(line_noise, sfreq)
+        
+        if line_noise is None and freqs is None:
+            raise ValueError(
+                "Either line_noise or freqs must be defined if notch_filter is"
+                "activated."
+            )
 
         if freqs is None:
             freqs = np.arange(line_noise, sfreq / 2, line_noise, dtype=int)
 
-        if freqs.size > 0:
-            if freqs[-1] >= sfreq / 2:
-                freqs = freqs[:-1]
+        if freqs.size > 0 and freqs[-1] >= sfreq / 2:
+            freqs = freqs[:-1]
 
         # Code is copied from filter.py notch_filter
         if freqs.size == 0:
             self.filter_bank = None
             logger.warning(
                 "WARNING: notch_filter is activated but data is not being"
-                f" filtered. This may be due to a low sampling frequency or"
-                f" incorrect specifications. Make sure your settings are"
+                " filtered. This may be due to a low sampling frequency or"
+                " incorrect specifications. Make sure your settings are"
                 f" correct. Got: {sfreq = }, {line_noise = }, {freqs = }."
             )
             return
@@ -213,10 +217,3 @@ class NotchFilter(NMPreprocessor):
             copy=True,
             pad="reflect_limited",
         )
-
-    def test_settings(self, line_noise, freqs):
-        if line_noise is None and freqs is None:
-            raise ValueError(
-                "Either line_noise or freqs must be defined if notch_filter is"
-                "activated."
-            )

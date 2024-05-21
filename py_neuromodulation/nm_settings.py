@@ -65,7 +65,7 @@ class PostprocessingSettings(FeatureSelector):
 
 class NMSettings(NMBaseModel):
     # General settings
-    sampling_rate_features_hz: float = Field(default=10, gt=0, alias="sfreq")
+    sampling_rate_features_hz: float = Field(default=10, gt=0)
     segment_length_features_ms: float = Field(default=1000, gt=0)
     frequency_ranges_hz: dict[str, FrequencyRange]
 
@@ -119,19 +119,15 @@ class NMSettings(NMBaseModel):
 
     @model_validator(mode="after")
     def validate_settings(self):
-        # Check Kalman filter frequency bands
-        assert all(
-            [
-                item in self.frequency_ranges_hz
-                for item in self.kalman_filter_settings.frequency_bands
-            ]
-        ), (
-            "Frequency bands for Kalman filter must also be specified in "
-            "bandpass_filter_settings."
-        )
-
         if not any(self.features.values()):
             raise ValueError("At least one feature must be selected.")
+
+        # Check Kalman filter frequency bands
+        self.kalman_filter_settings.validate_fbands(self)
+
+        # Check BandPass settings frequency bands
+        self.bandpass_filter_settings.validate_fbands(self)
+
 
         return self
 
