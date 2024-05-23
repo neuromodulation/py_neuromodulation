@@ -64,16 +64,16 @@ dev = [
 
 docs = [
     "py-neuromodulation[dev]",
-    "nbsphinx",
+#    "nbsphinx",
     "sphinx",
-    "pandoc",
+#    "pandoc",
     "recommonmark",
     "sphinx",
     "numpydoc",
     "sphinx-gallery",
-    "nbsphinx_link",
+#    "nbsphinx_link",
     "pydata-sphinx-theme",
-    "pypandoc",
+#    "pypandoc",
     "sphinx_togglebutton",
 ]
 
