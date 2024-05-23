@@ -11,3 +11,6 @@ Examples
             :file: ..\\..\\..\\examples\\example_cebra_decoding.html
 
 - next example
+
+
+Python-generated examples:
