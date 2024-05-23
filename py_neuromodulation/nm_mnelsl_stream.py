@@ -9,8 +9,26 @@ from py_neuromodulation import logger
 
 
 class LSLStream:
+    """
+    Class is used to create and connect to a LSL stream and pull data from it.
+    """
 
     def __init__(self, settings: dict, stream_name: str = None) -> None:
+        """
+        Initialize the LSL stream.
+
+        Parameters:
+        -----------
+        settings : dict
+            Settings dictionary
+        stream_name : str, optional
+            Name of the stream to connect to. If not provided, the first available stream is used.
+
+        Raises:
+        -------
+        RuntimeError
+            If no stream is running under the provided name or if there are multiple streams running under the same name.
+        """
 
         self.settings = settings
         self._n_seconds_wait_before_disconnect = 3
@@ -28,6 +46,9 @@ class LSLStream:
         self.sampling_interval = 1 / self.settings["sampling_rate_features_hz"]
 
     def on_press(self, key):
+        """
+        Function to stop the generator when the escape key is pressed.
+        """
         if key == keyboard.Key.esc:
             self.key_pressed = True
             return False

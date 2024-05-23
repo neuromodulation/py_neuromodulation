@@ -2,28 +2,12 @@ from mne_lsl.player import PlayerLSL
 from mne_lsl.stream import StreamLSL
 import numpy as np
 import time
-from py_neuromodulation import (nm_mnelsl_generator, nm_mnelsl_stream, nm_IO, nm_settings)
 import threading
 
-(
-    RUN_NAME,
-    PATH_RUN,
-    PATH_BIDS,
-    PATH_OUT,
-    datatype,
-) = nm_IO.get_paths_example_data()
-(
-    raw,
-    data,
-    sfreq,
-    line_noise,
-    coord_list,
-    coord_names,
-) = nm_IO.read_BIDS_data(
-    PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype
-)
     
-def test_mne_lsl():
+def test_mne_lsl(setup_default_data):
+    """ Test the mne-lsl package and the core functionality of the player and stream classes. """
+    raw, data, sfreq = setup_default_data
 
     player1 = PlayerLSL(raw,  name="general_lsl_test_stream", chunk_size=10)
     player1 = player1.start()
@@ -35,15 +19,13 @@ def test_mne_lsl():
     data_l = []
     timestamps_l = []
 
-    def call_every_100ms():
+    def call_every_100ms(): 
         data, timestamps = stream1.get_data(winsize=10)
         data_l.append(data)
         timestamps_l.append(timestamps)
 
     t = threading.Timer(0.1, call_every_100ms)
     t.start()
-
-    # import time
 
     time_start = time.time()
 
@@ -58,18 +40,20 @@ def test_mne_lsl():
     player1.stop()
 
 
-def test_lsl_stream_search():
-    player = nm_mnelsl_generator.LSLOfflinePlayer(f_name = raw)
+def test_lsl_stream_search(setup_lsl_player):
+    from py_neuromodulation import nm_mnelsl_stream
+    """ Test if the lsl stream search can find any streams after starting a player."""
+    player = setup_lsl_player
     player.start_player()
     streams = nm_mnelsl_stream.resolve_streams()
     assert len(streams) != 0, "No streams found in search"
 
 
-def test_offline_lsl(setup_default_stream_fast_compute):
-    settings = nm_settings.get_default_settings()
-    settings = nm_settings.set_settings_fast_compute(settings)
+def test_offline_lsl(setup_default_stream_fast_compute, setup_lsl_player, setup_default_data):
+    """" Test the offline lsl player and stream, checking for sfreq, channel types and channel names."""
 
-    player = nm_mnelsl_generator.LSLOfflinePlayer(f_name = raw)
+    raw, data, sfreq = setup_default_data
+    player = setup_lsl_player
     player.start_player()
 
     data, stream = setup_default_stream_fast_compute
@@ -87,16 +71,18 @@ def test_offline_lsl(setup_default_stream_fast_compute):
     assert all(raw.ch_names == stream.nm_channels['name']) == True, "Expected same channel names in the stream and input file"
     assert all(player.player.info['ch_names'] == stream.nm_channels['name']) == True, "Expected same channel names in the stream and player"
 
-
     assert features is not None
 
 
-def test_lsl_data(setup_default_stream_fast_compute):
+def test_lsl_data(setup_default_stream_fast_compute, setup_default_data, setup_lsl_player):
+    """ Check if 99% of the data is the same in the stream and the raw data."""
     import pandas as pd
+
+    raw, data, sfreq = setup_default_data
     df_stream = pd.DataFrame()
-    player = nm_mnelsl_generator.LSLOfflinePlayer(f_name=raw, stream_name="data_test_stream")
+    player = setup_lsl_player
     player.start_player(chunk_size=2)
-    stream_player_check = StreamLSL(name="data_test_stream", bufsize=2).connect()
+    stream_player_check = StreamLSL(bufsize=2).connect()
     time.sleep(0.2)
     while(stream_player_check.n_new_samples != 0):
         winsize = stream_player_check.n_new_samples / stream_player_check.info["sfreq"]

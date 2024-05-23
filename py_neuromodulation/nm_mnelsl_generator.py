@@ -14,6 +14,7 @@ class LSLOfflinePlayer:
         f_name: str | nm_types.PathLike = None,
         sfreq: int | float | None = None,
         data: np.ndarray | None = None,
+        ch_types: str | None = "dbs",
     ) -> None:
         """Initialization of MNE-LSL offline player.
         Either a filename (PathLike) is provided,
@@ -54,12 +55,12 @@ class LSLOfflinePlayer:
 
             info = mne.create_info(
                 ch_names=[f"ch{i}" for i in range(data.shape[0])],
-                ch_types=["dbs" for _ in range(data.shape[0])], # TODO Maybe change this to auto detect channel type? Or make it a parameter?
+                ch_types=[ch_types for _ in range(data.shape[0])],
                 sfreq=sfreq,
             )
             raw = mne.io.RawArray(data, info)
             self._path_raw = Path.cwd() / "temp_raw.fif" 
-            raw.save(self._path_raw, overwrite=True) # should we keep this (writing the raw data always to a file) ? if no -> need to change example 7 as well
+            raw.save(self._path_raw, overwrite=True) 
 
     def start_player(self, chunk_size: int = 1, n_repeat: int = 1):
         """Start MNE-LSL Player
