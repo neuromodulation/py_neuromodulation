@@ -60,18 +60,18 @@ dependencies = [
 test = ["pytest>=8.0.2", "pytest-xdist"]
 dev = ["ruff", "pytest>=8.0.2", "pytest-cov", "pytest-sugar", "notebook"]
 docs = [
-  "py-neuromodulation[dev]",
-  "nbsphinx",
-  "sphinx",
-  "pandoc",
-  "recommonmark",
-  "sphinx",
-  "numpydoc",
-  "sphinx-gallery",
-  "nbsphinx_link",
-  "pydata-sphinx-theme",
-  "pypandoc",
-  "sphinx_togglebutton",
+    "py-neuromodulation[dev]",
+#    "nbsphinx",
+    "sphinx",
+#    "pandoc",
+    "recommonmark",
+    "sphinx",
+    "numpydoc",
+    "sphinx-gallery",
+#    "nbsphinx_link",
+    "pydata-sphinx-theme",
+#    "pypandoc",
+    "sphinx_togglebutton",
 ]
 
 [tool.rye]

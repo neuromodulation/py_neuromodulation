@@ -25,7 +25,6 @@ Feature Estimation
 .. toctree::
    :maxdepth: 4
 
-   nm_features_abc
    nm_features
    nm_filter
    nm_oscillatory
@@ -50,5 +49,3 @@ Analysis
    nm_plots
    nm_RMAP
    nm_stats
-   nm_cohortwrapper
-   nm_across_patient_decoding

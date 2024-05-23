@@ -168,3 +168,7 @@ temp_raw.fif
 
 requirements.lock
 requirements-dev.lock
+
+docs/source/bin/pandoc
+
+docs/source/sg_execution_times.rst
