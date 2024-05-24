@@ -59,8 +59,8 @@ class LSLOfflinePlayer:
                 sfreq=sfreq,
             )
             raw = mne.io.RawArray(data, info)
-            self._path_raw = Path.cwd() / "temp_raw.fif" 
-            raw.save(self._path_raw, overwrite=True) 
+            self._path_raw = Path.cwd() / "temp_raw.fif"
+            raw.save(self._path_raw, overwrite=True)
 
     def start_player(self, chunk_size: int = 1, n_repeat: int = 1):
         """Start MNE-LSL Player
@@ -83,6 +83,5 @@ class LSLOfflinePlayer:
         self.player = self.player.start()
 
     def stop_player(self):
-        """Stop MNE-LSL Player
-        """
+        """Stop MNE-LSL Player"""
         self.player.stop()

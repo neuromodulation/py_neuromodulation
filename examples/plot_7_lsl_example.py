@@ -2,11 +2,9 @@
 Lab Streaming Layer (LSL) Example
 =================================
 
-This toolbox implemnts the lsl ecosystem which can be utilized for offline use cases as well as live streamings
----------------------------------------------------------------------------------------------------------------
-
+This toolbox implements the lsl ecosystem which can be utilized for offline use cases as well as live streamings
 In this example the data introduced in the first demo is being analyzed
-in a similar manner, This time however integrating a lsl stream.
+in a similar manner, This time however integrating an lsl stream.
 
 """
 
@@ -19,13 +17,10 @@ from py_neuromodulation import (
     nm_analysis,
     nm_stream_offline,
     nm_settings,
-    nm_generator,
 )
 
 # %%
-######################################################################
-# Let’s get the examples data from the provided BIDS dataset and create the nm_channels DataFrame.
-#
+# Let’s get the example data from the provided BIDS dataset and create the nm_channels DataFrame.
 
 (
     RUN_NAME,
@@ -55,50 +50,41 @@ nm_channels = nm_define_nmchannels.set_channels(
 )
 
 # %%
-######################################################################
 # Playing the Data
-# ~~~~~~~~~~~~~~~~
+# ----------------
 #
-# | Now we need our Data to be produced in some way.
-# | For this example a LSL Player is utilized which is playing our earlier
-#   recorderd data. However, you could make use of any LSL source (live or
-#   offline).
-# | If you want to bind your own data source, make sure to specify the
-#   necessariy parameters (data type, type, name) accordingly.
-# | If you are unsure about the parameters of your data source you can
-#   always search for available lsl streams.
+# Now we need our data to be represeted in the LSL stream.
+# For this example an mne_lsl.Player is utilized, which is playing our earlier
+# recorded data. However, you could make use of any LSL source (live or
+# offline).
+# If you want to bind your own data source, make sure to specify the
+# necessary parameters (data type, type, name) accordingly.
+# If you are unsure about the parameters of your data source you can
+# always search for available lsl streams.
 #
 
 settings = nm_settings.get_default_settings()
 settings = nm_settings.set_settings_fast_compute(settings)
 
 player = nm_mnelsl_generator.LSLOfflinePlayer(
-    data=data, sfreq=1000, stream_name="example_stream"
-)
-player.start_player()
+    f_name=raw, stream_name="example_stream"
+)  # TODO: add different keyword
+
+player.start_player(chunk_size=50)
 # %%
-######################################################################
-# Creating the LSLSTream Object
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Creating the LSLStream object
+# -----------------------------
 #
 # Next let’s create a Stream analog to the First Demo’s example However as
 # we run the stream, we will set the *lsl-stream* value to True and pass
 # the stream name we earlier declared when initializing the player object
-#
-# %%
+
 settings["features"]["welch"] = False
 settings["features"]["fft"] = True
 settings["features"]["bursts"] = False
 settings["features"]["sharpwave_analysis"] = False
 settings["features"]["coherence"] = False
-settings["coherence"]["channels"] = [["LFP_RIGHT_0", "ECOG_RIGHT_0"]]
-settings["coherence"]["frequency_bands"] = ["high beta", "low gamma"]
-settings["sharpwave_analysis_settings"]["estimator"]["mean"] = []
-for sw_feature in list(
-    settings["sharpwave_analysis_settings"]["sharpwave_features"].keys()
-):
-    settings["sharpwave_analysis_settings"]["sharpwave_features"][sw_feature] = True
-    settings["sharpwave_analysis_settings"]["estimator"]["mean"].append(sw_feature)
+
 # %%
 stream = nm_stream_offline.Stream(
     sfreq=sfreq,
@@ -109,29 +95,30 @@ stream = nm_stream_offline.Stream(
     line_noise=line_noise,
 )
 # %%
-features = stream.run(stream_lsl=True, stream_lsl_name="example_stream")
+# We then simply have to set the `stream_lsl` parameter to be `True` and specify the `stream_lsl_name`.
+
+features = stream.run(stream_lsl=True, plot_lsl=False, stream_lsl_name="example_stream")
+
 # %%
-features.head()
+# We can then look at the computed features and check if the streamed data was processed correctly.
+# This can be verified by the time label:
+
+plt.plot(features["time"], features["MOV_RIGHT"])
 
 
 ######################################################################
 # Feature Analysis of Movement
 # ----------------------------
-#
+# We can now check the movement averaged features of an ECoG channel.
+# Note that the path was here adapted to be documentation build compliant.
 # %%
-# print current path
 
-feature_reader = nm_analysis.Feature_Reader(feature_dir="../", feature_file="sub")
+feature_reader = nm_analysis.Feature_Reader(
+    feature_dir="../docs/source", feature_file="sub"
+)
 feature_reader.label_name = "MOV_RIGHT"
 feature_reader.label = feature_reader.feature_arr["MOV_RIGHT"]
-feature_reader.feature_arr.iloc[100:108, -6:]
 
-# %%
-print(feature_reader.feature_arr.shape)
-print(feature_reader._get_target_ch())
-
-
-# %%
 feature_reader.plot_target_averaged_channel(
     ch="ECOG_RIGHT_0",
     list_feature_keywords=None,
