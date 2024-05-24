@@ -9,6 +9,7 @@ in a similar manner, This time however integrating an lsl stream.
 """
 
 # %%
+import os
 from matplotlib import pyplot as plt
 from py_neuromodulation import (
     nm_mnelsl_generator,
@@ -114,7 +115,7 @@ plt.plot(features["time"], features["MOV_RIGHT"])
 # %%
 
 feature_reader = nm_analysis.Feature_Reader(
-    feature_dir="../docs/source", feature_file="sub"
+    feature_dir=os.path.join("docs", "source"), feature_file="sub"  # "..",
 )
 feature_reader.label_name = "MOV_RIGHT"
 feature_reader.label = feature_reader.feature_arr["MOV_RIGHT"]
