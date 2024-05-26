@@ -78,8 +78,6 @@ class LSLOfflinePlayer:
             chunk_size=chunk_size,
             n_repeat=n_repeat,
         )
-        self.interval = self.player.chunk_size / self.player.info["sfreq"]
-
         self.player = self.player.start()
 
     def stop_player(self):

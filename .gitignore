@@ -149,6 +149,8 @@ docs/source/data/*
 
 examples/data/derivatives/*
 examples/other_examples/*
+examples/plot_7_lsl_example.ipynb
+examples/lange_n8.ipynb
 
 examples/sub/*
 examples/utils/*

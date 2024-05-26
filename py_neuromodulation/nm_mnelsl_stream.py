@@ -82,7 +82,7 @@ class LSLStream:
                     if (
                         data is not None
                         and check_data is not None
-                        and np.array_equal(data, check_data)
+                        and np.allclose(data, check_data, atol=1e-7, rtol=1e-7)
                     ):
                         logger.warning(
                             f"No new data incoming. Disconnecting stream in {3-i} seconds."
