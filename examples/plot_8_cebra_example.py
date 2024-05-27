@@ -6,6 +6,10 @@ The following example show how to use the Cebra decoding without training.
 
 """
 
+# %%
+# sphinx_gallery_thumbnail_path = '_static/CEBRA_embedding.png'
+
+
 import os
 
 # load example_cebra_decoding.html

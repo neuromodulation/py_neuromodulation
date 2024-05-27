@@ -71,7 +71,7 @@ player = nm_mnelsl_generator.LSLOfflinePlayer(
     f_name=raw, stream_name="example_stream"
 )  # TODO: add different keyword
 
-player.start_player(chunk_size=50)
+player.start_player(chunk_size=30)
 # %%
 # Creating the LSLStream object
 # -----------------------------
