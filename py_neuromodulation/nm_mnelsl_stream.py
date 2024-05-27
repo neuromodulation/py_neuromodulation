@@ -63,6 +63,7 @@ class LSLStream:
 
         while self.stream.connected:
             time_diff = time.time() - self.last_time  # in s
+            time.sleep(0.005)
             if time_diff >= self.sampling_interval:
                 self.last_time = time.time()
 
