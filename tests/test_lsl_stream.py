@@ -1,6 +1,7 @@
 from mne_lsl.player import PlayerLSL
 from mne_lsl.stream import StreamLSL
 import numpy as np
+import pytest
 import time
 import threading
 
@@ -39,7 +40,7 @@ def test_mne_lsl(setup_default_data):
     stream1.disconnect()
     player1.stop()
 
-
+@pytest.mark.parametrize('setup_lsl_player', ['search'], indirect=True)
 def test_lsl_stream_search(setup_lsl_player):
     from py_neuromodulation import nm_mnelsl_stream
     """ Test if the lsl stream search can find any streams after starting a player."""
@@ -48,7 +49,7 @@ def test_lsl_stream_search(setup_lsl_player):
     streams = nm_mnelsl_stream.resolve_streams()
     assert len(streams) != 0, "No streams found in search"
 
-
+@pytest.mark.parametrize('setup_lsl_player', ['offline_test'], indirect=True)
 def test_offline_lsl(setup_default_stream_fast_compute, setup_lsl_player, setup_default_data):
     """" Test the offline lsl player and stream, checking for sfreq, channel types and channel names."""
 
@@ -58,7 +59,7 @@ def test_offline_lsl(setup_default_stream_fast_compute, setup_lsl_player, setup_
 
     data, stream = setup_default_stream_fast_compute
 
-    features = stream.run(stream_lsl = True, plot_lsl= False)
+    features = stream.run(stream_lsl = True, plot_lsl= False, stream_lsl_name='offline_test')
     # check sfreq
     assert raw.info['sfreq'] == stream.sfreq, "Expected same sampling frequency in the stream and input file"
     assert player.player.info['sfreq'] == stream.sfreq, "Expected same sampling frequency in the stream and player"
@@ -73,8 +74,8 @@ def test_offline_lsl(setup_default_stream_fast_compute, setup_lsl_player, setup_
 
     assert features is not None
 
-
-def test_lsl_data(setup_default_stream_fast_compute, setup_default_data, setup_lsl_player):
+@pytest.mark.parametrize('setup_lsl_player', ['data_test'], indirect=True)
+def test_lsl_data(setup_default_data, setup_lsl_player):
     """ Check if 99% of the data is the same in the stream and the raw data."""
     import pandas as pd
 
@@ -82,7 +83,7 @@ def test_lsl_data(setup_default_stream_fast_compute, setup_default_data, setup_l
     df_stream = pd.DataFrame()
     player = setup_lsl_player
     player.start_player(chunk_size=2)
-    stream_player_check = StreamLSL(bufsize=2).connect()
+    stream_player_check = StreamLSL(bufsize=2, name= "data_test").connect()
     time.sleep(0.2)
     while(stream_player_check.n_new_samples != 0):
         winsize = stream_player_check.n_new_samples / stream_player_check.info["sfreq"]

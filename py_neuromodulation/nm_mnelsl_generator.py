@@ -10,7 +10,7 @@ class LSLOfflinePlayer:
 
     def __init__(
         self,
-        stream_name: str = "lsl_offline_player",
+        stream_name: str | None = "lsl_offline_player",
         f_name: str | nm_types.PathLike = None,
         sfreq: int | float | None = None,
         data: np.ndarray | None = None,

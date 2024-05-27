@@ -93,7 +93,7 @@ def setup_default_stream_fast_compute():
 
 
 @pytest.fixture
-def setup_lsl_player():
+def setup_lsl_player(request):
     """ This test function sets a data batch and automatic initialized dataframe 
     
     Args:
@@ -103,6 +103,7 @@ def setup_lsl_player():
         player (mne_lsl.player.PlayerLSL): LSL player object
     """
 
+    name = request.param
     (
         RUN_NAME,
         PATH_RUN,
@@ -118,10 +119,9 @@ def setup_lsl_player():
         coord_list,
         coord_names,
     ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype)
-    player = nm_mnelsl_generator.LSLOfflinePlayer(f_name = raw)
+    player = nm_mnelsl_generator.LSLOfflinePlayer(f_name = raw, stream_name=name)
     return player
-
-
+    
 
 @pytest.fixture
 def setup_databatch():
