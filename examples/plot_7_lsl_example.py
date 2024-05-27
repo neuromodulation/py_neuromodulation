@@ -98,7 +98,13 @@ stream = nm_stream_offline.Stream(
 # %%
 # We then simply have to set the `stream_lsl` parameter to be `True` and specify the `stream_lsl_name`.
 
-features = stream.run(stream_lsl=True, plot_lsl=False, stream_lsl_name="example_stream")
+features = stream.run(
+    stream_lsl=True,
+    plot_lsl=False,
+    stream_lsl_name="example_stream",
+    out_path_root=PATH_OUT,
+    folder_name=RUN_NAME,
+)
 
 # %%
 # We can then look at the computed features and check if the streamed data was processed correctly.
@@ -114,9 +120,7 @@ plt.plot(features["time"], features["MOV_RIGHT"])
 # Note that the path was here adapted to be documentation build compliant.
 # %%
 
-feature_reader = nm_analysis.Feature_Reader(
-    feature_dir=os.path.join("docs", "source"), feature_file="sub"  # "..",
-)
+feature_reader = nm_analysis.Feature_Reader(feature_dir=PATH_OUT, feature_file=RUN_NAME)
 feature_reader.label_name = "MOV_RIGHT"
 feature_reader.label = feature_reader.feature_arr["MOV_RIGHT"]
 
