@@ -119,7 +119,7 @@ def setup_lsl_player(request):
         coord_list,
         coord_names,
     ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype)
-    player = nm_mnelsl_generator.LSLOfflinePlayer(f_name = raw, stream_name=name)
+    player = nm_mnelsl_generator.LSLOfflinePlayer(raw = raw, stream_name=name)
     return player
     
 

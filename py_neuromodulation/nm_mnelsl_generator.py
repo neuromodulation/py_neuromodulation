@@ -3,7 +3,7 @@ import numpy as np
 import mne
 from pathlib import Path
 
-from py_neuromodulation import logger, nm_types
+from py_neuromodulation import logger, nm_types, nm_IO
 
 
 class LSLOfflinePlayer:
@@ -12,6 +12,7 @@ class LSLOfflinePlayer:
         self,
         stream_name: str | None = "lsl_offline_player",
         f_name: str | nm_types.PathLike = None,
+        raw: mne.io.Raw | None = None,
         sfreq: int | float | None = None,
         data: np.ndarray | None = None,
         ch_types: str | None = "dbs",
@@ -41,18 +42,22 @@ class LSLOfflinePlayer:
         """
         self.sfreq = sfreq
         self.stream_name = stream_name
+        got_raw = raw is not None
         got_fname = f_name is not None
         got_sfreq_data = sfreq is not None and data is not None
-        if not (got_fname or got_sfreq_data):
-            error_msg = "Either f_name or sfreq and data must be provided."
+
+        if not (got_fname or got_sfreq_data or got_raw):
+            error_msg = "Either f_name or raw or sfreq and data must be provided."
             logger.critical(error_msg)
             raise ValueError(error_msg)
 
-        if f_name is not None:
-            self._path_raw = f_name
+        if got_fname: 
+            (self._path_raw, data, sfreq, line_noise, coord_list, coord_names) = nm_IO.read_BIDS_data(f_name)
 
-        if sfreq is not None and data is not None:
+        elif got_raw: 
+            self._path_raw = raw
 
+        elif got_sfreq_data:
             info = mne.create_info(
                 ch_names=[f"ch{i}" for i in range(data.shape[0])],
                 ch_types=[ch_types for _ in range(data.shape[0])],

@@ -68,7 +68,7 @@ settings = nm_settings.get_default_settings()
 settings = nm_settings.set_settings_fast_compute(settings)
 
 player = nm_mnelsl_generator.LSLOfflinePlayer(
-    f_name=raw, stream_name="example_stream"
+    raw=raw, stream_name="example_stream"
 )  # TODO: add different keyword
 
 player.start_player(chunk_size=30)

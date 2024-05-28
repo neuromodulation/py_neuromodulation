@@ -40,8 +40,8 @@ def load_nm_channels(
 
 def read_BIDS_data(
     PATH_RUN: "_PathLike | BIDSPath",
-    BIDS_PATH: _PathLike | None = None,
-    datatype: str = "ieeg",
+    BIDS_PATH: _PathLike | None = None, # TODO never accessed - delete or make this useful? -> Need to change examples, tests
+    datatype: str = "ieeg", # TODO never accessed - delete? -> Need to change examples, tests
     line_noise: int = 50,
 ) -> tuple["mne_io.Raw", np.ndarray, float, int, list | None, list | None]:
     """Given a run path and bids data path, read the respective data
