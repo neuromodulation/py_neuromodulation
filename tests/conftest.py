@@ -27,7 +27,7 @@ def setup_default_data():
         line_noise,
         coord_list,
         coord_names,
-    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype)
+    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
     
     return raw, data, sfreq
 
@@ -60,7 +60,7 @@ def setup_default_stream_fast_compute():
         line_noise,
         coord_list,
         coord_names,
-    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype)
+    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
 
     nm_channels = nm_define_nmchannels.set_channels(
         ch_names=raw.ch_names,
@@ -118,7 +118,7 @@ def setup_lsl_player(request):
         line_noise,
         coord_list,
         coord_names,
-    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype)
+    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
     player = nm_mnelsl_generator.LSLOfflinePlayer(raw = raw, stream_name=name)
     return player
     
@@ -152,7 +152,7 @@ def setup_databatch():
         line_noise,
         coord_list,
         coord_names,
-    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype)
+    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
 
     settings = nm_settings.get_default_settings()
     settings = nm_settings.set_settings_fast_compute(settings)

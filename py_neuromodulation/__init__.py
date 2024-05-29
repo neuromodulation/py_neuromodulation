@@ -5,7 +5,7 @@ from importlib.metadata import version
 from .nm_logger import NMLogger
 import matplotlib
 
-matplotlib.use("tkagg")  # Set matplotlib backend to TkAgg (Qt backend crashes)
+matplotlib.use("qtagg")  # Set matplotlib backend to TkAgg (Qt backend crashes)
 
 __version__ = version(__package__)  # get version from pyproject.toml
 

@@ -174,3 +174,8 @@ requirements-dev.lock
 docs/source/bin/pandoc
 
 docs/source/sg_execution_times.rst
+
+figures_ucsf/*
+catboost_info/*
+out_per
+.DS_Store

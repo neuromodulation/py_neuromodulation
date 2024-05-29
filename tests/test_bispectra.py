@@ -24,7 +24,7 @@ def test_bispectrum():
         line_noise,
         coord_list,
         coord_names,
-    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype)
+    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
 
     ch_names = raw.ch_names[4]
     ch_types = raw.get_channel_types()[4]

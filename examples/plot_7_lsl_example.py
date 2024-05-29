@@ -38,7 +38,7 @@ from py_neuromodulation import (
     line_noise,
     coord_list,
     coord_names,
-) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype)
+) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
 
 nm_channels = nm_define_nmchannels.set_channels(
     ch_names=raw.ch_names,
