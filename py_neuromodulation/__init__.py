@@ -1,11 +1,13 @@
 import os
+from sys import platform
 import platform
 from pathlib import PurePath
 from importlib.metadata import version
 from .nm_logger import NMLogger
 import matplotlib
 
-matplotlib.use("qtagg")  # Set matplotlib backend to TkAgg (Qt backend crashes)
+if platform.startswith('linux') is False:
+    matplotlib.use("qtagg")
 
 __version__ = version(__package__)  # get version from pyproject.toml
 
