@@ -6,7 +6,9 @@ from importlib.metadata import version
 from .nm_logger import NMLogger
 import matplotlib
 
-if sys.platform.startswith("linux") is False:
+if sys.platform.startswith("linux"):
+    matplotlib.use("tkagg")
+else:
     matplotlib.use("qtagg")
 
 __version__ = version(__package__)  # get version from pyproject.toml
