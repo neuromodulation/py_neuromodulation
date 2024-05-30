@@ -20,7 +20,7 @@ LSL_DICT = {
     "Darwin": "liblsl.1.16.0.dylib",
 }
 
-os.environ["MNE_LSL_LIB"] = os.path.join(PurePath(__file__).parent, "liblsl", LSL_DICT[platform.system()])
+os.environ["MNE_LSL_LIB"] = os.path.join(os.path.abspath(""), "liblsl", LSL_DICT[platform.system()])
 
 from py_neuromodulation import (
     nm_mnelsl_generator,
