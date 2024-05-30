@@ -48,6 +48,6 @@ jobs:
           cache: packages
           cache-dependency-path: pyproject.toml
       - name: Install test dependencies
-        run: uv pip install -q .[test]
+        run: uv pip install .[test]
       - name: Run tests
         run: ${{ runner.os == 'Linux' && 'xvfb-run' || '' }} pytest -n auto tests/
