@@ -23,7 +23,7 @@ LSL_DICT = {
     "Linux": "liblsl.so.1.16.2",
     "Darwin": "liblsl.1.16.0.dylib",
 }
-os.environ["MNE_LSL_LIB"] = f"{PYNM_DIR.parent}/liblsl/{LSL_DICT[platform.system()]}"
+os.environ["MNE_LSL_LIB"] = os.path.join(PYNM_DIR.parent, liblsl, LSL_DICT[platform.system()])
 
 # Bring Stream and DataProcessor classes to top namespace
 from .nm_stream_offline import Stream
