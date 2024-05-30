@@ -10,6 +10,7 @@ in a similar manner, This time however integrating an lsl stream.
 
 # %%
 import os
+import platform
 from matplotlib import pyplot as plt
 from py_neuromodulation import (
     nm_mnelsl_generator,
@@ -19,6 +20,16 @@ from py_neuromodulation import (
     nm_stream_offline,
     nm_settings,
 )
+
+from pathlib import PurePath
+
+LSL_DICT = {
+    "Windows": "lsl.dll",
+    "Linux": "liblsl.so.1.16.2",
+    "Darwin": "liblsl.1.16.0.dylib",
+}
+
+os.environ["MNE_LSL_LIB"] = os.path.join(PurePath(__file__).parent, "liblsl", LSL_DICT[platform.system()])
 
 # %%
 # Let’s get the example data from the provided BIDS dataset and create the nm_channels DataFrame.
