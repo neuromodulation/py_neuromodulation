@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 
 import py_neuromodulation as nm
 
-from py_neuromodulation import nm_analysis, nm_define_nmchannels, nm_plots
+from py_neuromodulation import nm_analysis, nm_define_nmchannels, nm_plots, nm_settings
 
 # %%
 # Data Simulation
@@ -107,8 +107,8 @@ nm_channels
 # -----------
 # Next, we will initialize the nm_settings dictionary and use the default settings, reset them, and enable a subset of features:
 
-settings = nm.nm_settings.get_default_settings()
-settings = nm.nm_settings.reset_settings(settings)
+settings = nm_settings.get_default_settings()
+settings = nm_settings.reset_settings(settings)
 
 
 # %%

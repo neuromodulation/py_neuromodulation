@@ -3,12 +3,10 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from py_neuromodulation.nm_generator import LSLStream
 from py_neuromodulation.nm_stream_abc import NMStream
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
 
-from mne_lsl.stream_viewer import StreamViewer
 
 class _GenericStream(NMStream):
     """_GenericStream base class.
@@ -57,7 +55,7 @@ class _GenericStream(NMStream):
         feature_series["time"] = cnt_samples * 1000 / self.sfreq
 
         if self.verbose:
-            logger.info("%.2f seconds of data processed", feature_series['time'] / 1000)
+            logger.info("%.2f seconds of data processed", feature_series["time"] / 1000)
 
         return feature_series
 
@@ -110,9 +108,7 @@ class _GenericStream(NMStream):
         # if isinstance(data_batch, tuple):
         #     data_batch = np.array(data_batch[1])
 
-        feature_series = self.run_analysis.process(
-            data_batch[1].astype(np.float64)
-        )
+        feature_series = self.run_analysis.process(data_batch[1].astype(np.float64))
         feature_series = self._add_timestamp(feature_series, cnt_samples)
         feature_series = self._add_target(
             feature_series=feature_series, data=data_batch[1]
@@ -124,8 +120,8 @@ class _GenericStream(NMStream):
         data: np.ndarray | pd.DataFrame | None = None,
         out_path_root: _PathLike = "",
         folder_name: str = "sub",
-        stream_lsl: bool = True,
-        stream_lsl_name: str = "example_stream",
+        is_stream_lsl: bool = True,
+        stream_lsl_name: str = None,
         plot_lsl: bool = False,
         parallel: bool = False,
         n_jobs: int = -2,
@@ -133,28 +129,33 @@ class _GenericStream(NMStream):
 
         from py_neuromodulation.nm_generator import raw_data_generator
 
-        if stream_lsl is False:
+        if not is_stream_lsl:
             generator = raw_data_generator(
                 data=data,
                 settings=self.settings,
                 sfreq=self.sfreq,
             )
         else:
+            from py_neuromodulation.nm_mnelsl_stream import LSLStream
+
             self.lsl_stream = LSLStream(
                 settings=self.settings, stream_name=stream_lsl_name
             )
 
             if plot_lsl:
+                from mne_lsl.stream_viewer import StreamViewer
+
                 viewer = StreamViewer(stream_name=stream_lsl_name)
                 viewer.start()
-            
+
             if self.sfreq != self.lsl_stream.stream.sinfo.sfreq:
                 error_msg = (
                     f"Sampling frequency of the lsl-stream ({self.lsl_stream.stream.sinfo.sfreq}) "
                     f"does not match the settings ({self.sfreq})."
+                    "The sampling frequency read from the stream will be used"
                 )
-                logger.critical(error_msg)
-                raise Exception(error_msg)
+                logger.warning(error_msg)
+                self.sfreq = self.lsl_stream.stream.sinfo.sfreq
             
             generator = self.lsl_stream.get_next_batch()
 
@@ -168,8 +169,9 @@ class _GenericStream(NMStream):
 
             from joblib import Parallel, delayed
             from itertools import count
+
             # parallel processing can not be utilized if a LSL stream is used
-            if stream_lsl is True:
+            if is_stream_lsl:
                 error_msg = (
                     "Parallel processing is not possible with LSL stream."
                 )
@@ -184,16 +186,16 @@ class _GenericStream(NMStream):
             )
 
         else:
-            l_features : list[pd.Series] = []
+            l_features: list[pd.Series] = []
             cnt_samples = offset_start
-            start_time = None
+
             while True:
                 next_item = next(generator, None)
 
                 if next_item is not None:
                     time_, data_batch = next_item
                 else:
-                    break 
+                    break
 
                 if data_batch is None:
                     break
@@ -201,11 +203,6 @@ class _GenericStream(NMStream):
                     data_batch.astype(np.float64)
                 )
 
-                # start_time = time_[0] if start_time is None else start_time
-
-                # feature_series["time"] = (
-                #     time_[-1] - start_time
-                # )  # check if results in same
                 feature_series = self._add_timestamp(
                    feature_series, cnt_samples  
                 )
@@ -269,7 +266,7 @@ class _GenericStream(NMStream):
 
         from mne import create_info
         from mne.io import RawArray
-        
+
         info = create_info(ch_names=ch_names, sfreq=sfreq, ch_types=ch_types)
         raw = RawArray(data, info)
 
@@ -323,7 +320,10 @@ class Stream(_GenericStream):
         """
 
         if nm_channels is None and data is not None:
-            from py_neuromodulation.nm_define_nmchannels import get_default_channels_from_data
+            from py_neuromodulation.nm_define_nmchannels import (
+                get_default_channels_from_data,
+            )
+
             nm_channels = get_default_channels_from_data(data)
 
         if nm_channels is None and data is None:
@@ -336,11 +336,11 @@ class Stream(_GenericStream):
             nm_channels=nm_channels,
             settings=settings,
             line_noise=line_noise,
-            sampling_rate_features_hz = sampling_rate_features_hz,
-            path_grids = path_grids,
-            coord_names = coord_names,
-            coord_list = coord_list,
-            verbose = verbose,
+            sampling_rate_features_hz=sampling_rate_features_hz,
+            path_grids=path_grids,
+            coord_names=coord_names,
+            coord_list=coord_list,
+            verbose=verbose,
         )
 
         self.data = data
@@ -355,7 +355,7 @@ class Stream(_GenericStream):
         parallel: bool = False,
         n_jobs: int = -2,
         stream_lsl: bool = False,
-        stream_lsl_name: str = "example_stream",
+        stream_lsl_name: str = None,
         plot_lsl: bool = False,
     ) -> pd.DataFrame:
         """Call run function for offline stream.
@@ -401,7 +401,7 @@ class Stream(_GenericStream):
             folder_name,
             parallel=parallel,
             n_jobs=n_jobs,
-            stream_lsl=stream_lsl,
+            is_stream_lsl=stream_lsl,
             stream_lsl_name=stream_lsl_name,
             plot_lsl=plot_lsl,
         )

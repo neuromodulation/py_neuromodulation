@@ -46,14 +46,15 @@ Real-time feature estimation
 
 # %%
 import py_neuromodulation as nm
+from py_neuromodulation import nm_settings
 import numpy as np
 import timeit
 
 
 def get_fast_compute_settings():
-    settings = nm.nm_settings.get_default_settings()
-    settings = nm.nm_settings.reset_settings(settings)
-    settings = nm.nm_settings.set_settings_fast_compute(settings)
+    settings = nm_settings.get_default_settings()
+    settings = nm_settings.reset_settings(settings)
+    settings = nm_settings.set_settings_fast_compute(settings)
     settings["preprocessing"] = ["re_referencing", "notch_filter"]
     settings["features"]["fft"] = True
     settings["postprocessing"]["feature_normalization"] = True

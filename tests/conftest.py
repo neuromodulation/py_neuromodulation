@@ -5,10 +5,31 @@ from py_neuromodulation import (
     nm_generator,
     nm_stream_offline,
     nm_settings,
+    nm_mnelsl_generator,
     nm_IO,
     nm_define_nmchannels,
 )
 
+@pytest.fixture
+def setup_default_data():
+    (
+        RUN_NAME,
+        PATH_RUN,
+        PATH_BIDS,
+        PATH_OUT,
+        datatype,
+    ) = nm_IO.get_paths_example_data()
+
+    (
+        raw,
+        data,
+        sfreq,
+        line_noise,
+        coord_list,
+        coord_names,
+    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
+    
+    return raw, data, sfreq
 
 @pytest.fixture
 def setup_default_stream_fast_compute():
@@ -39,7 +60,7 @@ def setup_default_stream_fast_compute():
         line_noise,
         coord_list,
         coord_names,
-    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype)
+    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
 
     nm_channels = nm_define_nmchannels.set_channels(
         ch_names=raw.ch_names,
@@ -72,6 +93,37 @@ def setup_default_stream_fast_compute():
 
 
 @pytest.fixture
+def setup_lsl_player(request):
+    """ This test function sets a data batch and automatic initialized dataframe 
+    
+    Args:
+        PATH_PYNEUROMODULATION (string): Path to py_neuromodulation repository
+        
+    Returns:
+        player (mne_lsl.player.PlayerLSL): LSL player object
+    """
+
+    name = request.param
+    (
+        RUN_NAME,
+        PATH_RUN,
+        PATH_BIDS,
+        PATH_OUT,
+        datatype,
+    ) = nm_IO.get_paths_example_data()
+    (
+        raw,
+        data,
+        sfreq,
+        line_noise,
+        coord_list,
+        coord_names,
+    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
+    player = nm_mnelsl_generator.LSLOfflinePlayer(raw = raw, stream_name=name)
+    return player
+    
+
+@pytest.fixture
 def setup_databatch():
     """This test function sets a data batch and automatic initialized M1 dataframe
 
@@ -100,7 +152,7 @@ def setup_databatch():
         line_noise,
         coord_list,
         coord_names,
-    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype)
+    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
 
     settings = nm_settings.get_default_settings()
     settings = nm_settings.set_settings_fast_compute(settings)

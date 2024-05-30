@@ -56,8 +56,7 @@ RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data
     coord_list,
     coord_names,
 ) = nm_IO.read_BIDS_data(
-        PATH_RUN=PATH_RUN,
-        BIDS_PATH=PATH_BIDS, datatype=datatype
+        PATH_RUN=PATH_RUN
 )
 
 settings = nm_settings.get_default_settings()
