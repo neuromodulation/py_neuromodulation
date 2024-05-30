@@ -1,11 +1,12 @@
 import os
-from sys import platform
+import sys
+import platform
 from pathlib import PurePath
 from importlib.metadata import version
 from .nm_logger import NMLogger
 import matplotlib
 
-if platform.startswith('linux') is False:
+if sys.platform.startswith("linux") is False:
     matplotlib.use("qtagg")
 
 __version__ = version(__package__)  # get version from pyproject.toml
@@ -25,4 +26,3 @@ os.environ["MNE_LSL_LIB"] = f"{PYNM_DIR.parent}/liblsl/{LSL_DICT[platform.system
 # Bring Stream and DataProcessor classes to top namespace
 from .nm_stream_offline import Stream
 from .nm_run_analysis import DataProcessor
-
