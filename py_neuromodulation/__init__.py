@@ -1,6 +1,5 @@
 import os
 from sys import platform
-import platform
 from pathlib import PurePath
 from importlib.metadata import version
 from .nm_logger import NMLogger
