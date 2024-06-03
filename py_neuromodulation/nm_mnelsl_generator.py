@@ -1,10 +1,8 @@
-from mne_lsl.player import PlayerLSL
 import numpy as np
 import mne
 from pathlib import Path
 
 from py_neuromodulation import logger, nm_types, nm_IO
-
 
 class LSLOfflinePlayer:
 
@@ -77,6 +75,8 @@ class LSLOfflinePlayer:
         n_repeat : int, optional
             _description_, by default 1
         """
+        from mne_lsl.player import PlayerLSL
+
         self.player = PlayerLSL(
             self._path_raw,
             name=self.stream_name,

@@ -1,11 +1,9 @@
 from collections.abc import Iterator
-from pathlib import Path
 import time
 from pynput import keyboard
 import numpy as np
-from mne_lsl.stream import StreamLSL
-from mne_lsl.lsl import resolve_streams
 from py_neuromodulation import logger
+from mne_lsl.lsl import resolve_streams
 
 
 class LSLStream:
@@ -13,7 +11,7 @@ class LSLStream:
     Class is used to create and connect to a LSL stream and pull data from it.
     """
 
-    def __init__(self, settings: dict, stream_name: str = None) -> None:
+    def __init__(self, settings: dict, stream_name: str | None = None) -> None:
         """
         Initialize the LSL stream.
 
@@ -29,6 +27,7 @@ class LSLStream:
         RuntimeError
             If no stream is running under the provided name or if there are multiple streams running under the same name.
         """
+        from mne_lsl.stream import StreamLSL
 
         self.settings = settings
         self._n_seconds_wait_before_disconnect = 3

@@ -32,20 +32,18 @@ LSL_DICT = {
 }
 
 PLATFORM = platform.system().lower().strip()
-known_platform = True
 match PLATFORM:
     case "windows":
-        LSL_DIR = LSL_DICT[PLATFORM + "_" +  platform.architecture()[0]]
+        KEY = PLATFORM + "_" +  platform.architecture()[0]
     case "darwin":
-        LSL_DIR = LSL_DICT[PLATFORM + "_" +  platform.processor()]
+        KEY = PLATFORM + "_" +  platform.processor()
     case "linux":
-        LSL_DIR = LSL_DICT[PLATFORM + "_" + platform.freedesktop_os_release()["VERSION_CODENAME"]  + "_" + platform.architecture()[0]]
+        KEY = PLATFORM + "_" + platform.freedesktop_os_release()["VERSION_CODENAME"]  + "_" + platform.architecture()[0]
     case _: 
-        LSL_DIR = ""
-        known_platform = False
-
-if known_platform:
-    os.environ["MNE_LSL_LIB"] = str(PYNM_DIR.parent / "liblsl" / LSL_DIR)
+        KEY = ""
+        
+if KEY in LSL_DICT:
+    os.environ["MNE_LSL_LIB"] = str(PYNM_DIR / "liblsl" / LSL_DICT[KEY])
 
 # Bring Stream and DataProcessor classes to top namespace
 from .nm_stream_offline import Stream

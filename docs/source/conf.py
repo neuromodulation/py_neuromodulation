@@ -6,24 +6,22 @@
 
 # -- Path setup --------------------------------------------------------------
 import sys
-from pathlib import Path
 import os
 from sphinx_gallery.sorting import FileNameSortKey
 
 print("CURRENT WORKING DIRECTORY")
-print(Path.cwd())
-
-SCRIPT_DIR = Path(__file__).absolute().parent
-
-if SCRIPT_DIR.name == "source":
+print(os.getcwd())
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+if os.path.basename(SCRIPT_DIR) == "source":
     # this check is necessary, so we can also run the script from the root directory
-    SCRIPT_DIR = SCRIPT_DIR.parent.parent / "py_neuromodulation"
+    SCRIPT_DIR = os.path.join(
+        os.path.dirname(os.path.dirname(SCRIPT_DIR)), "py_neuromodulation"
+    )
 print(f"Script Directory to add: {SCRIPT_DIR}")
-sys.path.append(str(SCRIPT_DIR))
+sys.path.append(SCRIPT_DIR)
 
 print(sys.path)
 
-os.environ["MNE_LSL_LIB"] = str(SCRIPT_DIR.parent / "liblsl/noble_amd64/liblsl.1.16.2.so")
 
 exclude_patterns = ["_build", "_templates"]
 
@@ -65,6 +63,17 @@ sphinx_gallery_conf = {
     "gallery_dirs": "auto_examples",
     "within_subsection_order": FileNameSortKey,
 }
+
+# sphinx_gallery_conf = {
+#    "examples_dirs": "../../examples",
+#    "gallery_dirs": "auto_examples",
+#    #'plot_gallery': True,
+#    'thumbnail_size': (160, 112),
+#    'image_scrapers': ("matplotlib", ),
+#    'show_memory': True,
+#    'notebook_images': 'https://py-neuromodulation.readthedocs.io/en/latest/',
+#    'default_thumb_file': os.path.join('_static', 'RMAP_figure.png'),
+# }
 
 templates_path = ["_templates"]
 exclude_patterns = []
