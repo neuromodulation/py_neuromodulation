@@ -9,18 +9,7 @@ in a similar manner, This time however integrating an lsl stream.
 """
 
 # %%
-import os
-import platform
 from matplotlib import pyplot as plt
-from pathlib import PurePath
-
-LSL_DICT = {
-    "Windows": "lsl.dll",
-    "Linux": "liblsl.so.1.16.2",
-    "Darwin": "liblsl.1.16.0.dylib",
-}
-
-os.environ["MNE_LSL_LIB"] = os.path.join(os.path.abspath(""), "liblsl", LSL_DICT[platform.system()])
 
 from py_neuromodulation import (
     nm_mnelsl_generator,

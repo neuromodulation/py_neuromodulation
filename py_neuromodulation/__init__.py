@@ -19,11 +19,33 @@ logger = NMLogger(__name__)  # logger initialization first to prevent circular i
 
 # Set  environment variable MNE_LSL_LIB (required to import Stream below)
 LSL_DICT = {
-    "Windows": "lsl.dll",
-    "Linux": "liblsl.so.1.16.2",
-    "Darwin": "liblsl.1.16.0.dylib",
+    "windows_32bit": "windows/x86/liblsl.1.16.2.dll",
+    "windows_64bit": "windows/amd64/liblsl.1.16.2.dll",
+    "darwin_i386": "macos/amd64/liblsl.1.16.2.dylib",
+    "darwin_arm": "macos/arm64/liblsl.1.16.0.dylib",
+    "linux_jammy_32bit": "linux/jammy_x86/liblsl.1.16.2.so",
+    "linux_jammy_64bit": "linux/jammy_amd64/liblsl.1.16.2.so",
+    "linux_focal_64bit": "linux/focal_amd64/liblsl.1.16.2.so",
+    "linux_bionic_64bit": "linux/bionic_amd64/liblsl.1.16.2.so",
+    "linux_bookworm_64bit": "linux/bookworm_amd64/liblsl.1.16.2.so",
+    "linux_noble_64bit": "linux/noble_amd64/liblsl.1.16.2.so",
 }
-os.environ["MNE_LSL_LIB"] = os.path.join(PYNM_DIR.parent, "liblsl", LSL_DICT[platform.system()])
+
+PLATFORM = platform.system().lower().strip()
+known_platform = True
+match PLATFORM:
+    case "windows":
+        LSL_DIR = LSL_DICT[PLATFORM + "_" +  platform.architecture()[0]]
+    case "darwin":
+        LSL_DIR = LSL_DICT[PLATFORM + "_" +  platform.processor()]
+    case "linux":
+        LSL_DIR = LSL_DICT[PLATFORM + "_" + platform.freedesktop_os_release()["VERSION_CODENAME"]  + "_" + platform.architecture()[0]]
+    case _: 
+        LSL_DIR = ""
+        known_platform = False
+
+if known_platform:
+    os.environ["MNE_LSL_LIB"] = str(PYNM_DIR.parent / "liblsl" / LSL_DIR)
 
 # Bring Stream and DataProcessor classes to top namespace
 from .nm_stream_offline import Stream
