@@ -84,6 +84,8 @@ class Bispectra(NMFeature):
         self.max_freq = max(
             self.settings.f1s.frequency_high_hz, self.settings.f2s.frequency_high_hz
         )
+    
+        # self.freqs: np.ndarray = np.array([]) # In case we pre-computed this
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         from pybispectra import compute_fft, WaveShape
@@ -98,10 +100,11 @@ class Bispectra(NMFeature):
             verbose=False,
         )
 
-        # fft_coeffs shape: [epochs, channels, frequencies]
+        # freqs is batch independent, except for the last batch perhaps (if it has different shape)
+        # but it's computed by compute_fft regardless so no advantage in pre-computing it
+        # if not self.freqs = self.freqs = np.fft.rfftfreq(n=data.shape[1], d = 1 / sfreq)
 
-        # freqs is batch independent, except for the last batch perhaps
-        # freqs = np.fft.rfftfreq(n=data.shape[1], d = 1 / sfreq)
+        # fft_coeffs shape: [epochs, channels, frequencies]
 
         f_spectrum_range = freqs[
             np.logical_and(freqs >= self.min_freq, freqs <= self.max_freq)

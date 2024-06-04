@@ -1,5 +1,5 @@
 from numpy import array, cov
-from pydantic import BaseModel, ValidationInfo, field_validator
+from pydantic import BaseModel
 from typing import TYPE_CHECKING
 
 from filterpy.kalman import KalmanFilter
