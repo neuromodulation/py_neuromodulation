@@ -29,16 +29,22 @@ LSL_DICT = {
     "linux_bionic_64bit": "linux/bionic_amd64/liblsl.1.16.2.so",
     "linux_bookworm_64bit": "linux/bookworm_amd64/liblsl.1.16.2.so",
     "linux_noble_64bit": "linux/noble_amd64/liblsl.1.16.2.so",
+    "linux_32bit": "linux/jammy_x86/liblsl.1.16.2.so",
+    "linux_64bit": "linux/jammy_amd64/liblsl.1.16.2.so",
 }
 
 PLATFORM = platform.system().lower().strip()
+ARCH = platform.architecture()[0]
 match PLATFORM:
     case "windows":
-        KEY = PLATFORM + "_" +  platform.architecture()[0]
+        KEY = PLATFORM + "_" +  ARCH
     case "darwin":
         KEY = PLATFORM + "_" +  platform.processor()
     case "linux":
-        KEY = PLATFORM + "_" + platform.freedesktop_os_release()["VERSION_CODENAME"]  + "_" + platform.architecture()[0]
+        DIST = platform.freedesktop_os_release()["VERSION_CODENAME"]
+        KEY = PLATFORM + "_" + DIST + "_" + ARCH
+        if KEY not in LSL_DICT:
+            KEY = PLATFORM + "_" + ARCH
     case _: 
         KEY = ""
         
