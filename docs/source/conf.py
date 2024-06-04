@@ -7,11 +7,7 @@
 # -- Path setup --------------------------------------------------------------
 import sys
 import os
-import json
-import re
 from sphinx_gallery.sorting import FileNameSortKey
-import sphinx_gallery
-import py_neuromodulation
 
 print("CURRENT WORKING DIRECTORY")
 print(os.getcwd())
@@ -65,7 +61,7 @@ PYDEVD_DISABLE_FILE_VALIDATION = 1
 sphinx_gallery_conf = {
     "examples_dirs": "../../examples",
     "gallery_dirs": "auto_examples",
-    "within_subsection_order": sphinx_gallery.sorting.FileNameSortKey,
+    "within_subsection_order": FileNameSortKey,
 }
 
 # sphinx_gallery_conf = {
