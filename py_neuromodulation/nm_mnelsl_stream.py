@@ -1,9 +1,9 @@
 from collections.abc import Iterator
 import time
-from pynput import keyboard
 import numpy as np
 from py_neuromodulation import logger
 from mne_lsl.lsl import resolve_streams
+import os
 
 
 class LSLStream:
@@ -34,7 +34,9 @@ class LSLStream:
         try:
             if stream_name is None:
                 stream_name = resolve_streams()[0].name
-                logger.info(f"Stream name not provided. Using first available stream: {stream_name}")
+                logger.info(
+                    f"Stream name not provided. Using first available stream: {stream_name}"
+                )
             self.stream = StreamLSL(name=stream_name, bufsize=2).connect(timeout=2)
         except Exception as e:
             msg = f"Could not connect to stream: {e}. Either no stream is running under the name {stream_name} or there is several streams under this name."
@@ -44,21 +46,20 @@ class LSLStream:
         self.winsize = settings["segment_length_features_ms"] / self.stream.sinfo.sfreq
         self.sampling_interval = 1 / self.settings["sampling_rate_features_hz"]
 
-    def on_press(self, key):
-        """
-        Function to stop the generator when the escape key is pressed.
-        """
-        if key == keyboard.Key.esc:
-            self.key_pressed = True
-            return False
+        # If not running the generator when the escape key is pressed.
+        self.headless: bool = not os.environ.get("DISPLAY")
+        if not self.headless:
+            from pynput import keyboard
+
+            self.listener = keyboard.Listener(
+                on_press=lambda key: key != keyboard.Key.esc  # type: ignore
+            )
+            self.listener.start()
 
     def get_next_batch(self) -> Iterator[tuple[np.ndarray, np.ndarray]]:
         self.last_time = time.time()
         check_data = None
         data = None
-
-        listener = keyboard.Listener(on_press=self.on_press)
-        listener.start()
 
         while self.stream.connected:
             time_diff = time.time() - self.last_time  # in s
@@ -96,6 +97,6 @@ class LSLStream:
 
                 yield timestamp, data
 
-                if not listener.running:
+                if not self.headless and not self.listener.running:
                     logger.info("Keyboard interrupt")
                     self.stream.disconnect()
