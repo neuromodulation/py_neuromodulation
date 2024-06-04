@@ -6,7 +6,6 @@
 
 # -- Path setup --------------------------------------------------------------
 import sys
-import os
 from pathlib import Path
 from sphinx_gallery.sorting import FileNameSortKey
 
@@ -64,17 +63,6 @@ sphinx_gallery_conf = {
     "gallery_dirs": "auto_examples",
     "within_subsection_order": FileNameSortKey,
 }
-
-# sphinx_gallery_conf = {
-#    "examples_dirs": "../../examples",
-#    "gallery_dirs": "auto_examples",
-#    #'plot_gallery': True,
-#    'thumbnail_size': (160, 112),
-#    'image_scrapers': ("matplotlib", ),
-#    'show_memory': True,
-#    'notebook_images': 'https://py-neuromodulation.readthedocs.io/en/latest/',
-#    'default_thumb_file': os.path.join('_static', 'RMAP_figure.png'),
-# }
 
 templates_path = ["_templates"]
 exclude_patterns = []
