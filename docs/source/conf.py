@@ -6,79 +6,70 @@
 
 # -- Path setup --------------------------------------------------------------
 import sys
-import os
-import json
-import re
+from pathlib import Path
 from sphinx_gallery.sorting import FileNameSortKey
-import sphinx_gallery
-import py_neuromodulation
 
 print("CURRENT WORKING DIRECTORY")
-print(os.getcwd())
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-if os.path.basename(SCRIPT_DIR) == "source":
+print(Path.cwd())
+
+SCRIPT_DIR = Path(__file__).absolute().parent
+
+if SCRIPT_DIR.name == "source":
     # this check is necessary, so we can also run the script from the root directory
-    SCRIPT_DIR = os.path.join(os.path.dirname(os.path.dirname(SCRIPT_DIR)), "py_neuromodulation")
+    SCRIPT_DIR = SCRIPT_DIR.parent.parent / "py_neuromodulation"
+    
 print(f"Script Directory to add: {SCRIPT_DIR}")
-sys.path.append(SCRIPT_DIR)
+sys.path.append(str(SCRIPT_DIR))
 
 print(sys.path)
-
 
 exclude_patterns = ["_build", "_templates"]
 
 
 # -- Project information -----------------------------------------------------
-project = 'py_neuromodulation'
-copyright = '2021, Timon Merk'
-author = 'Timon Merk'
+project = "py_neuromodulation"
+copyright = "2021, Timon Merk"
+author = "Timon Merk"
 
 source_parsers = {
-    '.md': 'recommonmark.parser.CommonMarkParser',
+    ".md": "recommonmark.parser.CommonMarkParser",
 }
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.doctest',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.autosectionlabel',
-    'sphinx_gallery.gen_gallery',
-    'sphinx_togglebutton',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.doctest",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.autosectionlabel",
+    "sphinx_gallery.gen_gallery",
+    "sphinx_togglebutton",
+    # "nbsphinx",
 ]
 
-source_suffix = ['.rst', '.md', ]
+source_suffix = [
+    ".rst",
+    ".md",
+]
 
 autosummary_generate = True
 
-PYDEVD_DISABLE_FILE_VALIDATION=1
+PYDEVD_DISABLE_FILE_VALIDATION = 1
 
 sphinx_gallery_conf = {
     "examples_dirs": "../../examples",
     "gallery_dirs": "auto_examples",
-    "within_subsection_order" : sphinx_gallery.sorting.FileNameSortKey,
+    "within_subsection_order": FileNameSortKey,
 }
-
-#sphinx_gallery_conf = {
-#    "examples_dirs": "../../examples",
-#    "gallery_dirs": "auto_examples",
-#    #'plot_gallery': True,
-#    'thumbnail_size': (160, 112),
-#    'image_scrapers': ("matplotlib", ),
-#    'show_memory': True,
-#    'notebook_images': 'https://py-neuromodulation.readthedocs.io/en/latest/',
-#    'default_thumb_file': os.path.join('_static', 'RMAP_figure.png'),
-#}
 
 templates_path = ["_templates"]
 exclude_patterns = []
 
 
 html_theme = "pydata_sphinx_theme"
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 html_theme_options = {
     "show_nav_level": 4,
@@ -100,6 +91,5 @@ intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org/stable", None),
     "numba": ("https://numba.readthedocs.io/en/latest", None),
     "mne": ("https://mne.tools/stable", None),
-    "pandas" : ("https://pandas.pydata.org/docs", None),
+    "pandas": ("https://pandas.pydata.org/docs", None),
 }
-

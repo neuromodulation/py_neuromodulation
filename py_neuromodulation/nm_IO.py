@@ -41,8 +41,6 @@ def load_nm_channels(
 
 def read_BIDS_data(
     PATH_RUN: "_PathLike | BIDSPath",
-    BIDS_PATH: _PathLike | None = None,
-    datatype: str = "ieeg",
     line_noise: int = 50,
 ) -> tuple["mne_io.Raw", np.ndarray, float, int, list | None, list | None]:
     """Given a run path and bids data path, read the respective data
@@ -50,8 +48,6 @@ def read_BIDS_data(
     Parameters
     ----------
     PATH_RUN : string
-    BIDS_PATH : string
-    datatype : string
 
     Returns
     -------
@@ -63,8 +59,7 @@ def read_BIDS_data(
 
     from mne_bids import read_raw_bids, get_bids_path_from_fname, BIDSPath
 
-    if not isinstance(PATH_RUN, BIDSPath):
-        bids_path = get_bids_path_from_fname(PATH_RUN)
+    bids_path = get_bids_path_from_fname(PATH_RUN)
 
     raw_arr = read_raw_bids(bids_path)
     coord_list, coord_names = get_coord_list(raw_arr)

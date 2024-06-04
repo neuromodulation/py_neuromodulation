@@ -267,7 +267,7 @@ class DataProcessor:
             Features calculated from current data
         """
         start_time = time()
-
+            
         nan_channels = np.isnan(data).any(axis=1)
 
         data = np.nan_to_num(data)[self.feature_idx, :]

@@ -10,7 +10,7 @@ def raw_data_generator(
     data: np.ndarray,
     settings: "NMSettings",
     sfreq: float,
-) -> Iterator[np.ndarray]:
+) -> Iterator[tuple[np.ndarray, np.ndarray]]:
     """
     This generator function mimics online data acquisition.
     The data are iteratively sampled with sfreq_new.
@@ -22,6 +22,7 @@ def raw_data_generator(
         offset_time: float
     Returns
     -------
+        np.array: 1D array of time stamps
         np.array: new batch for run function of full segment length shape
     """
     sfreq_new = settings.sampling_rate_features_hz
@@ -37,4 +38,7 @@ def raw_data_generator(
         if (cnt - offset_start) >= ratio_samples_features * ratio_counter:
             ratio_counter += 1
 
-            yield data[:, np.floor(cnt - offset_start).astype(int) : cnt]
+            yield (
+                np.arange(cnt - offset_start, cnt) / sfreq,
+                data[:, np.floor(cnt - offset_start).astype(int) : cnt],
+            )

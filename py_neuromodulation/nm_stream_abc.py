@@ -22,6 +22,8 @@ class NMStream(ABC):
         sampling_rate_features_hz: float | None = None,
         path_grids: _PathLike | None = None,
         coord_names: list | None = None,
+        stream_name: str | None = "example_stream",
+        stream_lsl: bool = False,
         coord_list: list | None = None,
         verbose: bool = True,
     ) -> None:

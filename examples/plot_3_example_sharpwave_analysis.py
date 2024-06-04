@@ -56,7 +56,9 @@ RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data
     line_noise,
     coord_list,
     coord_names,
-) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN, BIDS_PATH=PATH_BIDS, datatype=datatype)
+) = nm_IO.read_BIDS_data(
+        PATH_RUN=PATH_RUN
+)
 
 # %%
 settings = NMSettings.get_default().set_fast_compute()

@@ -46,6 +46,7 @@ Real-time feature estimation
 
 # %%
 import py_neuromodulation as nm
+from py_neuromodulation import nm_settings
 import numpy as np
 import timeit
 

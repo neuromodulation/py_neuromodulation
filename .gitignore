@@ -3,9 +3,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# C extensions
-*.so
-
 # Distribution / packaging
 .pypirc/
 .Python
@@ -152,9 +149,12 @@ docs/source/data/*
 
 examples/data/derivatives/*
 examples/other_examples/*
+examples/plot_7_lsl_example.ipynb
+examples/lange_n8.ipynb
 
 examples/sub/*
 examples/utils/*
+examples/temp_raw.fif
 
 sub/
 
@@ -166,6 +166,16 @@ py_neuromodulation/ConnectivityDecoding/connectome_folder/*
 
 plot_0_first_demo.py
 plot_1_example_BIDS.py
+temp_raw.fif
 
 requirements.lock
 requirements-dev.lock
+
+docs/source/bin/pandoc
+
+docs/source/sg_execution_times.rst
+
+figures_ucsf/*
+catboost_info/*
+out_per
+.DS_Store

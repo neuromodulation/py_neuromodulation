@@ -7,9 +7,13 @@ version: 2
 
 # Set the version of Python and other tools you might need
 build:
-  os: ubuntu-22.04
+  os: ubuntu-lts-latest
   tools:
-    python: "3.11"
+    python: "mambaforge-latest"
+
+# Use conda to setup the environment
+conda:
+  environment: docs/environment.yml
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
@@ -17,9 +21,3 @@ sphinx:
    builder: html
    fail_on_warning: false
 
-# Optionally declare the Python requirements required to build your docs
-python:
-   install:
-   - method: pip
-     path: .
-   - requirements: requirements_rtd.txt
