@@ -7,7 +7,7 @@ from .nm_logger import NMLogger
 import matplotlib
 
 if sys.platform.startswith("linux"):
-    matplotlib.use("tkagg")
+    matplotlib.use("Agg")
 else:
     matplotlib.use("qtagg")
 
