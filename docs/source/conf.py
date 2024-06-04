@@ -7,21 +7,22 @@
 # -- Path setup --------------------------------------------------------------
 import sys
 import os
+from pathlib import Path
 from sphinx_gallery.sorting import FileNameSortKey
 
 print("CURRENT WORKING DIRECTORY")
-print(os.getcwd())
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-if os.path.basename(SCRIPT_DIR) == "source":
+print(Path.cwd())
+
+SCRIPT_DIR = Path(__file__).absolute().parent
+
+if SCRIPT_DIR.name == "source":
     # this check is necessary, so we can also run the script from the root directory
-    SCRIPT_DIR = os.path.join(
-        os.path.dirname(os.path.dirname(SCRIPT_DIR)), "py_neuromodulation"
-    )
+    SCRIPT_DIR = SCRIPT_DIR.parent.parent / "py_neuromodulation"
+    
 print(f"Script Directory to add: {SCRIPT_DIR}")
-sys.path.append(SCRIPT_DIR)
+sys.path.append(str(SCRIPT_DIR))
 
 print(sys.path)
-
 
 exclude_patterns = ["_build", "_templates"]
 
