@@ -30,6 +30,7 @@ class LSLStream:
         from mne_lsl.stream import StreamLSL
 
         self.settings = settings
+        self.manual_disconnect = False
         self._n_seconds_wait_before_disconnect = 3
         try:
             if stream_name is None:
@@ -91,7 +92,8 @@ class LSLStream:
                         time.sleep(1)
                         i += 1
                         if i == self._n_seconds_wait_before_disconnect:
-                            self.stream.disconnect()
+                            if not self.manual_disconnect:
+                                self.stream.disconnect()
                             logger.warning("Stream disconnected.")
                             break
 
@@ -100,3 +102,11 @@ class LSLStream:
                 if not self.headless and not self.listener.running:
                     logger.info("Keyboard interrupt")
                     self.stream.disconnect()
+                    self.listener.stop()
+
+    # TODO This is probably not optimally positioned, 
+    # however putting it in the nm_offline and into the stream does not work as
+    # lsl_stream is initialized in the nm_offline.run()
+    def disconnect(self): 
+        self.manual_disconnect = True
+        self.stream.disconnect()
