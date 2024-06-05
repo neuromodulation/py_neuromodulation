@@ -24,7 +24,6 @@ if os.path.exists(tmp_dir):
 # %%
 # CEBRA example
 # -------------
-# Show example
 #
 # .. raw:: html
 #     :file: out.html
