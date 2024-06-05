@@ -7,13 +7,19 @@ on:
 jobs:
  
   build_docs_job:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
  
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.4
+
+      - name: Install and cache Linux packages
+        if: ${{ runner.os == 'Linux' }}
+        uses: tecolicom/actions-use-apt-tools@v1
+        with:
+          tools: binutils qtbase5-dev qt5-qmake libpugixml1v5
 
       - name: Set up Python with uv
         uses: drivendataorg/setup-python-uv-action@v1
