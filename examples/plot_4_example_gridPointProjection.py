@@ -59,7 +59,7 @@ RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data
         PATH_RUN=PATH_RUN
 )
 
-settings = NMSettings.get_default().set_fast_compute()
+settings = NMSettings.get_fast_compute()
 
 settings.postprocessing.project_cortex = True
 

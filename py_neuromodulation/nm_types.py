@@ -2,13 +2,17 @@ from os import PathLike
 from math import isnan
 from typing import NamedTuple, Type, Any, Literal
 from importlib import import_module
-from pydantic import Field, model_validator, BaseModel
-from pprint import pformat 
+from pydantic import ConfigDict, Field, model_validator, BaseModel
+from pydantic_core import SchemaValidator
+from pprint import pformat
+from collections.abc import Sequence
 
 _PathLike = str | PathLike
 
 
 class NMBaseModel(BaseModel):
+    model_config = ConfigDict(validate_assignment=False)
+
     def __init__(self, *args, **kwargs) -> None:
         if kwargs:
             super().__init__(**kwargs)
@@ -18,11 +22,12 @@ class NMBaseModel(BaseModel):
             for i in range(len(args)):
                 kwargs[field_names[i]] = args[i]
             super().__init__(**kwargs)
-            
-            
+
     def __str__(self):
         return pformat(self.model_dump())
-
+    
+    def validate(self) -> Any: # type: ignore
+        return self.model_validate(self.model_dump())
 
 class ImportDetails(NamedTuple):
     module_name: str
@@ -44,7 +49,7 @@ class FrequencyRange(NMBaseModel):
                 return self.frequency_high_hz
             case _:
                 raise IndexError(f"Index {item} out of range")
-            
+
     def as_tuple(self) -> tuple[float, float]:
         return (self.frequency_low_hz, self.frequency_high_hz)
 
@@ -56,24 +61,43 @@ class FrequencyRange(NMBaseModel):
             ), "Frequency high must be greater than frequency low"
         return self
 
+    @classmethod
+    def create_from(cls, input) -> "FrequencyRange":
+        match input:
+            case FrequencyRange():
+                return input
+            case dict() if "frequency_low_hz" in input and "frequency_high_hz" in input:
+                return FrequencyRange(
+                    input["frequency_low_hz"], input["frequency_high_hz"]
+                )
+            case Sequence() if len(input) == 2:
+                return FrequencyRange(input[0], input[1])
+            case _:
+                raise ValueError("Invalid input for FrequencyRange creation.")
+
     @model_validator(mode="before")
     @classmethod
-    def check_freq_ranges(cls, input):
-        if not (isinstance(input, cls) or isinstance(input, dict)):
-            if len(input) == 2:
+    def check_input(cls, input):
+        match input:
+            case dict() if "frequency_low_hz" in input and "frequency_high_hz" in input:
+                return input
+            case Sequence() if len(input) == 2:
                 return {"frequency_low_hz": input[0], "frequency_high_hz": input[1]}
-            else:
+            case _:
                 raise ValueError(
-                    "Value for FrequencyRange must be a diciontary,"
-                    "a FrequencyRange object or an iterable of 2 numeric values,"
+                    "Value for FrequencyRange must be a dictionary, "
+                    "or a sequence of 2 numeric values, "
                     f"but got {input} instead."
                 )
-        else:
-            return input
 
-class FeatureSelector(BaseModel):
+
+class FeatureSelector(NMBaseModel):
     def get_enabled(self):
-        return [f for f in self.model_fields.keys() if getattr(self, f)]
+        return [
+            f
+            for f in self.model_fields.keys()
+            if (isinstance(getattr(self, f), bool) and getattr(self, f))
+        ]
 
     @classmethod
     def list_all(cls):
@@ -83,8 +107,8 @@ class FeatureSelector(BaseModel):
     def print_all(cls):
         for f in cls.list_all():
             print(f)
-    
-    @classmethod 
+
+    @classmethod
     def get_fields(cls):
         return cls.model_fields
 
@@ -118,4 +142,7 @@ PreprocessorName = Literal[
 
 def get_class(module_details: ImportDetails) -> Type[Any]:
     # return getattr(import_module(module_details.module_name), module_details.class_name)
-    return getattr(import_module("py_neuromodulation." + module_details.module_name), module_details.class_name)
+    return getattr(
+        import_module("py_neuromodulation." + module_details.module_name),
+        module_details.class_name,
+    )

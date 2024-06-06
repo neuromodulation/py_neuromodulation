@@ -1,7 +1,7 @@
 """Module for real-time data normalization."""
 
-from pydantic import BaseModel, Field
-from typing import Literal, Callable
+from py_neuromodulation.nm_types import NMBaseModel, Field
+from typing import Literal, Callable, get_args
 
 import numpy as np
 
@@ -13,10 +13,14 @@ NormMethod = Literal[
 ]
 
 
-class NormalizationSettings(BaseModel):
+class NormalizationSettings(NMBaseModel):
     normalization_time_s: float = 30
     normalization_method: NormMethod = "zscore"
     clip: float = Field(default=3, ge=0)
+
+    @staticmethod
+    def list_normalization_methods() -> list[NormMethod]:
+        return list(get_args(NormMethod))
 
 
 class RawNormalizer(NMPreprocessor):
@@ -39,7 +43,7 @@ class RawNormalizer(NMPreprocessor):
         clip : float, optional
             value at which to clip after normalization
         """
-        self.settings = settings
+        self.settings = settings.validate()
 
         self.num_samples_normalize = int(settings.normalization_time_s * sfreq)
         self.add_samples = int(sfreq / sampling_rate_features_hz)
@@ -71,6 +75,7 @@ class FeatureNormalizer:
         sampling_rate_features_hz: float,
         settings: NormalizationSettings = NormalizationSettings(),
     ) -> None:
+        # TONI: this docstring is outdated, update!
         """Normalize raw data.
 
         normalize_samples : int
@@ -84,7 +89,7 @@ class FeatureNormalizer:
         clip : float, optional
             value at which to clip after normalization
         """
-        self.settings = settings
+        self.settings = settings.validate()
 
         self.num_samples_normalize = int(
             settings.normalization_time_s * sampling_rate_features_hz

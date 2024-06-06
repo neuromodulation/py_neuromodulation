@@ -2,7 +2,7 @@ from scipy import signal
 import numpy as np
 from collections.abc import Iterable
 
-from pydantic import BaseModel, Field
+from py_neuromodulation.nm_types import NMBaseModel, Field
 from typing import TYPE_CHECKING
 
 from py_neuromodulation.nm_features import NMFeature
@@ -13,18 +13,18 @@ if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
 
 
-class CoherenceMethods(FeatureSelector, BaseModel):
+class CoherenceMethods(FeatureSelector):
     coh: bool = True
     icoh: bool = True
 
 
-class CoherenceFeatures(FeatureSelector, BaseModel):
+class CoherenceFeatures(FeatureSelector):
     mean_fband: bool = True
     max_fband: bool = True
     max_allfbands: bool = True
 
 
-class CoherenceSettings(BaseModel):
+class CoherenceSettings(NMBaseModel):
     features: CoherenceFeatures = CoherenceFeatures()
     method: CoherenceMethods = CoherenceMethods()
     channels: list[tuple[str, str]] = [("STN_RIGHT_0", "ECOG_RIGHT_0")]
@@ -84,7 +84,7 @@ class CoherenceObject:
                     coh_name = "icoh"
 
             for idx, fband in enumerate(self.fbands):
-                if self.features_coh["mean_fband"]:
+                if self.features_coh.mean_fband:
                     feature_calc = np.mean(
                         coh_val[np.bitwise_and(self.f > fband[0], self.f < fband[1])]
                     )
@@ -99,7 +99,7 @@ class CoherenceObject:
                         ]
                     )
                     features_compute[feature_name] = feature_calc
-                if self.features_coh["max_fband"]:
+                if self.features_coh.max_fband:
                     feature_calc = np.max(
                         coh_val[np.bitwise_and(self.f > fband[0], self.f < fband[1])]
                     )
@@ -114,7 +114,7 @@ class CoherenceObject:
                         ]
                     )
                     features_compute[feature_name] = feature_calc
-            if self.features_coh["max_allfbands"]:
+            if self.features_coh.max_allfbands:
                 feature_calc = self.f[np.argmax(coh_val)]
                 feature_name = "_".join(
                     [
@@ -130,7 +130,7 @@ class CoherenceObject:
         return features_compute
 
 
-class NM_Coherence(NMFeature):
+class NMCoherence(NMFeature):
     def __init__(
         self, settings: "NMSettings", ch_names: list[str], sfreq: float
     ) -> None:
@@ -186,8 +186,8 @@ class NM_Coherence(NMFeature):
             ch for ch_pair in settings.coherence.channels for ch in ch_pair
         ]
         assert all(ch_coh in ch_names for ch_coh in flat_channels), (
-            f"coherence selected channels don't match the ones in nm_channels"
-            f"ch_names: {ch_names} settings['coherence']['channels']: {settings.coherence.channels}"
+            f"coherence selected channels don't match the ones in nm_channels. \n"
+            f"ch_names: {ch_names} \n settings.coherence.channels: {settings.coherence.channels}"
         )
 
         assert all(
@@ -205,7 +205,7 @@ class NM_Coherence(NMFeature):
             and settings.frequency_ranges_hz[fb][1] < sfreq / 2
             for fb in settings.coherence.frequency_bands
         ), (
-            "the coherence frequency band ranges need to be smaller than the nyquist frequency"
+            "the coherence frequency band ranges need to be smaller than the Nyquist frequency"
             f"got sfreq = {sfreq} and fband ranges {settings.coherence.frequency_bands}"
         )
 

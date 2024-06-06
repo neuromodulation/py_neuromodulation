@@ -3,7 +3,8 @@ from scipy import signal
 from collections.abc import Iterable
 from itertools import product
 
-from pydantic import BaseModel, model_validator, field_validator
+from py_neuromodulation.nm_types import NMBaseModel
+from pydantic import model_validator
 from typing import TYPE_CHECKING, Any, Callable
 
 from py_neuromodulation.nm_features import NMFeature
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
 
 
-class PeakDetectionSettings(BaseModel):
+class PeakDetectionSettings(NMBaseModel):
     estimate: bool = True
     distance_troughs_ms: float = 10
     distance_peaks_ms: float = 5
@@ -34,7 +35,7 @@ class SharpwaveFeatures(FeatureSelector):
     slope_ratio: bool = False
 
 
-class SharpwaveSettings(BaseModel):
+class SharpwaveSettings(NMBaseModel):
     sharpwave_features: SharpwaveFeatures = SharpwaveFeatures()
     # TONI: coudl add restriction for min_length = 1
     filter_ranges_hz: list[FrequencyRange] = [
@@ -80,7 +81,15 @@ class SharpwaveAnalyzer(NMFeature):
         self.trough: list = []
         self.troughs_idx: list = []
 
-        # TODO check freq ranges against sfreq
+        settings.validate()
+
+        # FrequencyRange's are already ensured to have high > low
+        # Test that the higher frequency is smaller than the sampling frequency
+        for filter_range in settings.sharpwave_analysis_settings.filter_ranges_hz:
+            assert filter_range[1] < sfreq, (
+                "Filter range has to be smaller than sfreq, "
+                f"got sfreq {sfreq} and filter range {filter_range}"
+            )
 
         for filter_range in settings.sharpwave_analysis_settings.filter_ranges_hz:
             # Test settings
@@ -92,7 +101,7 @@ class SharpwaveAnalyzer(NMFeature):
 
                 self.list_filter.append(
                     (
-                        f"range_{filter_range[0]}_{filter_range[1]}",
+                        f"range_{filter_range[0]:.0f}_{filter_range[1]:.0f}",
                         create_filter(
                             None,
                             sfreq,
@@ -186,7 +195,7 @@ class SharpwaveAnalyzer(NMFeature):
                 for estimator_name, estimator in self.estimator_dict[
                     feature_name
                 ].items():
-                    key_name = f"{ch_name}_Sharpwave_{estimator_name}_{feature_name}_{filter_name}"
+                    key_name = f"{ch_name}_Sharpwave_{estimator_name.title()}_{feature_name}_{filter_name}"
 
                     # zero check because no peaks can be also detected
                     dict_ch_features.setdefault(key_name, {})[key_name_pt] = (
@@ -241,8 +250,8 @@ class SharpwaveAnalyzer(NMFeature):
 
         """ Find left and right peak indexes for each trough """
         peak_pointer = 0
-        peak_idx_left_list = []
-        peak_idx_right_list = []
+        peak_idx_left_list: list[int] = []
+        peak_idx_right_list: list[int] = []
         first_valid = last_valid = 0
 
         for i, trough_idx in enumerate(troughs):
@@ -265,8 +274,8 @@ class SharpwaveAnalyzer(NMFeature):
 
         troughs = troughs[first_valid : last_valid + 1]  # Remove non valid troughs
 
-        peak_idx_left = np.array(peak_idx_left_list, dtype=np.integer)
-        peak_idx_right = np.array(peak_idx_right_list, dtype=np.integer)
+        peak_idx_left = np.array(peak_idx_left_list, dtype=int)
+        peak_idx_right = np.array(peak_idx_right_list, dtype=int)
 
         self.peak_left = self.data_process_sw[peak_idx_left]
         self.peak_right = self.data_process_sw[peak_idx_right]

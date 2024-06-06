@@ -45,7 +45,7 @@ class MNEFilter:
 
     def __init__(
         self,
-        f_ranges: list["FrequencyRange"],
+        f_ranges: list[tuple[float | None, float | None]],
         sfreq: float,
         filter_length: str | float = "999ms",
         l_trans_bandwidth: float | str = 4,
@@ -58,17 +58,13 @@ class MNEFilter:
             filter_length = int(filter_length)
 
         for f_range in f_ranges:
-            # Convert Nan to None for MNE create_filter
-            mne_range = [
-                f_range[i] if not isnan(f_range[i]) else None for i in range(2)
-            ]
 
             try:
                 filt = create_filter(
                     None,
                     sfreq,
-                    l_freq=mne_range[0],
-                    h_freq=mne_range[1],
+                    l_freq=f_range[0],
+                    h_freq=f_range[1],
                     fir_design="firwin",
                     l_trans_bandwidth=l_trans_bandwidth,  # type: ignore
                     h_trans_bandwidth=h_trans_bandwidth,  # type: ignore
@@ -79,8 +75,8 @@ class MNEFilter:
                 filt = create_filter(
                     None,
                     sfreq,
-                    l_freq=mne_range[0],
-                    h_freq=mne_range[1],
+                    l_freq=f_range[0],
+                    h_freq=f_range[1],
                     fir_design="firwin",
                     verbose=verbose,
                     # filter_length=filter_length,

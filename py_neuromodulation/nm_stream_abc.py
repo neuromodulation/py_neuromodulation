@@ -72,8 +72,8 @@ class NMStream(ABC):
                 for fb in self.settings.frequency_ranges_hz.values()
             ), (
                 "If a feature that uses frequency ranges is selected, "
-                "the frequency band ranges need to be smaller than the nyquist frequency"
-                f"got sfreq = {sfreq} and fband ranges {self.settings.frequency_ranges_hz}"
+                "the frequency band ranges need to be smaller than the nyquist frequency.\n"
+                f"Got sfreq = {sfreq} and fband ranges:\n {self.settings.frequency_ranges_hz}"
             )
 
         if sampling_rate_features_hz is not None:

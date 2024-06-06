@@ -1,3 +1,4 @@
+from pydantic import ValidationError
 import pytest
 import numpy as np
 
@@ -12,21 +13,26 @@ def init_sw_settings() -> NMSettings:
 
 def test_sharpwaveinit_wrong_peak_param():
     settings = init_sw_settings()
-    with pytest.raises(Exception) as e_info:
+    with pytest.raises(ValidationError):
         settings.sharpwave_analysis_settings.sharpwave_features.peak_left = 5
-        # nm_sharpwaves.SharpwaveAnalyzer.test_settings(settings, ch_names=[], sfreq=1000)
+
+        nm_sharpwaves.SharpwaveAnalyzer(settings, ch_names=[], sfreq=1000)
 
 
 def test_sharpwaveinit_wrong_filter_range():
+    """ Test sharpwave initialization with frequency higher than sampling freq"""
     settings = init_sw_settings()
-    with pytest.raises(Exception) as e_info:
+    with pytest.raises(Exception):
         settings.sharpwave_analysis_settings.filter_ranges_hz = [[5, 1200]]
-        # nm_sharpwaves.SharpwaveAnalyzer.test_settings(settings, ch_names=[], sfreq=1000)
+
+        nm_sharpwaves.SharpwaveAnalyzer(settings, ch_names=[], sfreq=1000)
 
 
 def test_sharpwaveinit_missing_estimator():
+    """ Test sharpwave initialization with empty feature list (must fail to validate)"""
+
     settings = init_sw_settings()
-    with pytest.raises(Exception) as e_info:
+    with pytest.raises(ValidationError):
         settings.sharpwave_analysis_settings.sharpwave_features.prominence = True
         settings.sharpwave_analysis_settings.estimator["mean"] = []
         settings.sharpwave_analysis_settings.estimator["median"] = []
@@ -34,10 +40,11 @@ def test_sharpwaveinit_missing_estimator():
         settings.sharpwave_analysis_settings.estimator["min"] = []
         settings.sharpwave_analysis_settings.estimator["var"] = []
 
-        # nm_sharpwaves.SharpwaveAnalyzer.test_settings(settings, ch_names=[], sfreq=1000)
+        nm_sharpwaves.SharpwaveAnalyzer(settings, ch_names=[], sfreq=1000)
 
 
 def test_sharpwaveinit_correct_featurelist():
+    """ Test sharpwave initialization with correct feature list"""
     settings = init_sw_settings()
     settings.sharpwave_analysis_settings.sharpwave_features.prominence = True
     settings.sharpwave_analysis_settings.sharpwave_features.interval = True
@@ -51,10 +58,7 @@ def test_sharpwaveinit_correct_featurelist():
     settings.sharpwave_analysis_settings.estimator["min"] = []
     settings.sharpwave_analysis_settings.estimator["var"] = []
 
-    # assert (
-    #     nm_sharpwaves.SharpwaveAnalyzer.test_settings(settings, ch_names=[], sfreq=1000)
-    #     == None
-    # )
+    nm_sharpwaves.SharpwaveAnalyzer(settings, ch_names=[], sfreq=1000)
 
 
 def test_prominence_features():
@@ -98,7 +102,7 @@ def test_interval_feature():
 
     # Reset feataures
     for f in settings.sharpwave_analysis_settings.sharpwave_features.list_all():
-        setattr(settings.sharpwave_analysis_settings.sharpwave_features, f, False) 
+        setattr(settings.sharpwave_analysis_settings.sharpwave_features, f, False)
     for est in settings.sharpwave_analysis_settings.estimator.keys():
         settings.sharpwave_analysis_settings.estimator[est] = []
 
@@ -122,6 +126,7 @@ def test_interval_feature():
 
     features = sw.calc_feature(data, {})
 
+    print(features.keys())
     assert (
         features["ch1_Sharpwave_Max_interval_range_5_200"]
         < features["ch2_Sharpwave_Max_interval_range_5_200"]

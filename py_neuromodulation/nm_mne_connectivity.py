@@ -3,7 +3,7 @@ import numpy as np
 from typing import TYPE_CHECKING
 
 from py_neuromodulation.nm_features import NMFeature
-from pydantic import BaseModel
+from py_neuromodulation.nm_types import NMBaseModel
 
 if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from mne import Epochs
 
 
-class MNEConnectivitySettings(BaseModel):
+class MNEConnectivitySettings(NMBaseModel):
     method: str = "plv"
     mode: str = "multitaper"
 

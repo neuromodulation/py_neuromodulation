@@ -16,7 +16,7 @@ def test_setting_computation_time():
     fs = 1000
     data = np.random.random((1, int(data_duration_s * fs)))
 
-    settings = NMSettings.get_default().set_fast_compute()
+    settings = NMSettings.get_fast_compute()
     settings.segment_length_features_ms = 1000  # start afte 1 second
     settings.features["fft"] = False
     settings.features["raw_hjorth"] = True
@@ -52,7 +52,7 @@ def test_float_fs():
     fs = 1111.111
     data = np.random.random((1, int(data_duration_s * fs)))
 
-    settings = NMSettings.get_default().set_fast_compute()
+    settings = NMSettings.get_fast_compute()
     settings.segment_length_features_ms = 333  # start afte 1 second
 
     settings.features["fft"] = False

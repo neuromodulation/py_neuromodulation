@@ -46,16 +46,12 @@
             "frequency_low_hz": 100,
             "frequency_high_hz": 160
         },
-        "lowpass_filter_settings": {
-            "frequency_cutoff_hz": 200
-        },
-        "highpass_filter_settings": {
-            "frequency_cutoff_hz": 3
-        },
         "bandpass_filter_settings": {
             "frequency_low_hz": 3,
             "frequency_high_hz": 200
-        }
+        },
+        "lowpass_filter_cutoff_hz": 200,
+        "highpass_filter_cutoff_hz": 3    
     },
     "documentation_normalization_options": [
         "mean",
@@ -226,13 +222,13 @@
             "mean": [
                 "interval"
             ],
-            "median": null,
+            "median": [],
             "max": [
                 "prominence",
                 "sharpness"
             ],
-            "min": null,
-            "var": null
+            "min": [],
+            "var": []
         },
         "apply_estimator_between_peaks_and_troughs": true
     },

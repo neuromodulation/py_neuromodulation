@@ -2,7 +2,8 @@ from collections.abc import Iterable
 import numpy as np
 from itertools import product
 
-from pydantic import BaseModel, field_validator, ValidationInfo
+from py_neuromodulation.nm_types import NMBaseModel
+from pydantic import field_validator, ValidationInfo
 from typing import TYPE_CHECKING
 
 from py_neuromodulation.nm_features import NMFeature
@@ -20,7 +21,7 @@ class OscillatoryFeatures(FeatureSelector):
     max: bool = False
 
 
-class OscillatorySettings(BaseModel):
+class OscillatorySettings(NMBaseModel):
     windowlength_ms: int = 1000
     log_transform: bool = True
     features: OscillatoryFeatures = OscillatoryFeatures(
@@ -39,13 +40,13 @@ ESTIMATOR_DICT = {
 
 class OscillatoryFeature(NMFeature):
     def __init__(
-        self, settings: "NMSettings", ch_names: Iterable[str], sfreq: float
+        self, settings: "NMSettings", ch_names: Iterable[str], sfreq: int
     ) -> None:
-        # self.settings = settings
+        settings.validate()
         self.settings: OscillatorySettings  # Assignment in subclass __init__
         self.osc_feature_name: str  # Required for output
 
-        self.sfreq = sfreq
+        self.sfreq = int(sfreq)
         self.ch_names = ch_names
 
         self.frequency_ranges = settings.frequency_ranges_hz
@@ -125,7 +126,7 @@ class Welch(OscillatoryFeature):
         self,
         settings: "NMSettings",
         ch_names: Iterable[str],
-        sfreq: float,
+        sfreq: int,
     ) -> None:
         from scipy.fft import rfftfreq
 
@@ -258,7 +259,7 @@ class BandpowerFeatures(FeatureSelector):
 ###################################
 
 
-class BandpassSettings(BaseModel):
+class BandpassSettings(NMBaseModel):
     segment_lengths_ms: dict[str, int] = {
         "theta": 1000,
         "alpha": 500,
@@ -303,6 +304,8 @@ class BandPower(NMFeature):
         sfreq: float,
         use_kf: bool | None = None,
     ) -> None:
+        settings.validate()
+        
         self.bp_settings: BandpassSettings = settings.bandpass_filter_settings
         self.kalman_filter_settings: KalmanSettings = settings.kalman_filter_settings
         self.sfreq = sfreq

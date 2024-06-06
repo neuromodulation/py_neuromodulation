@@ -41,7 +41,7 @@ FEATURE_DICT: dict[FeatureName, ImportDetails] = {
     "sharpwave_analysis": ImportDetails("nm_sharpwaves", "SharpwaveAnalyzer"),
     "fooof": ImportDetails("nm_fooof", "FooofAnalyzer"),
     "nolds": ImportDetails("nm_nolds", "Nolds"),
-    "coherence": ImportDetails("nm_coherence", "NM_Coherence"),
+    "coherence": ImportDetails("nm_coherence", "NMCoherence"),
     "bursts": ImportDetails("nm_bursts", "Burst"),
     "linelength": ImportDetails("nm_linelength", "LineLength"),
     "mne_connectivity": ImportDetails("nm_mne_connectivity", "MNEConnectivity"),

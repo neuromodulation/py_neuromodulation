@@ -3,7 +3,7 @@ import numpy as np
 
 
 def get_fast_compute_settings():
-    settings = nm.NMSettings.get_default().set_fast_compute()
+    settings = nm.NMSettings.get_fast_compute()
     settings.preprocessing = ["re_referencing", "notch_filter"]
     settings.features["fft"] = True
     settings.postprocessing.feature_normalization = True
@@ -21,6 +21,7 @@ def get_features(time_end_ms: int, segment_length_features_ms: int):
         "low gamma": [60, 80],
         "high gamma": [90, 200],
     }
+        
     stream = nm.Stream(
         sfreq=1000,
         data=data,

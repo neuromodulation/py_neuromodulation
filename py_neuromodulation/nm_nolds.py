@@ -1,7 +1,7 @@
 import numpy as np
 from collections.abc import Iterable
 
-from pydantic import BaseModel
+from py_neuromodulation.nm_types import NMBaseModel
 from typing import TYPE_CHECKING
 
 from py_neuromodulation.nm_features import NMFeature
@@ -19,7 +19,7 @@ class NoldsFeatures(FeatureSelector):
     detrended_fluctuation_analysis: bool = False
 
 
-class NoldsSettings(BaseModel):
+class NoldsSettings(NMBaseModel):
     raw: bool = True
     frequency_bands: list[str] = ["low_beta"]
     features: NoldsFeatures = NoldsFeatures()

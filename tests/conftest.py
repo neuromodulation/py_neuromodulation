@@ -33,7 +33,7 @@ def setup_default_data():
     return raw, data, sfreq
 
 @pytest.fixture
-def setup_default_stream_fast_compute():
+def setup_default_stream_fast_compute() -> tuple[np.ndarray, nm_stream_offline.Stream]:
     """This test function sets a data batch and automatic initialized M1 dataframe
 
     Args:
@@ -155,7 +155,7 @@ def setup_databatch():
         coord_names,
     ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
 
-    settings = NMSettings.get_default().set_fast_compute()
+    settings = NMSettings.get_fast_compute()
 
     generator = nm_generator.raw_data_generator(data, settings, int(np.floor(sfreq)))
     data_batch = next(generator, None)

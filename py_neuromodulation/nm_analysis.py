@@ -47,6 +47,7 @@ class Feature_Reader:
         FILE_BASENAME = PurePath(self.feature_file).stem
         PATH_READ_FILE = str(PurePath(self.feature_dir, FILE_BASENAME, FILE_BASENAME))
 
+        print("como", PATH_READ_FILE)
         self.settings = NMSettings.from_file(PATH_READ_FILE)
         self.sidecar = nm_IO.read_sidecar(PATH_READ_FILE)
         if self.sidecar["sess_right"] is None:

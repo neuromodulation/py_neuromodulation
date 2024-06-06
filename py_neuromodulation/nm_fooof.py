@@ -2,7 +2,7 @@ from collections.abc import Iterable
 import numpy as np
 
 from typing import TYPE_CHECKING
-from pydantic import BaseModel
+from py_neuromodulation.nm_types import NMBaseModel
 
 from py_neuromodulation.nm_features import NMFeature
 from py_neuromodulation.nm_types import FeatureSelector, FrequencyRange
@@ -24,7 +24,7 @@ class FooofPeriodicSettings(FeatureSelector):
     height_over_ap: bool = False
 
 
-class FooofSettings(BaseModel):
+class FooofSettings(NMBaseModel):
     aperiodic: FooofAperiodicSettings = FooofAperiodicSettings()
     periodic: FooofPeriodicSettings = FooofPeriodicSettings()
     windowlength_ms: float = 800
@@ -91,7 +91,7 @@ class FooofAnalyzer(NMFeature):
             try:
                 fm = FOOOF(
                     aperiodic_mode=self.ap_mode,
-                    peak_width_limits=self.settings.peak_width_limits,
+                    peak_width_limits=self.settings.peak_width_limits.as_tuple(),
                     max_n_peaks=self.settings.max_n_peaks,
                     min_peak_height=self.settings.min_peak_height,
                     peak_threshold=self.settings.peak_threshold,

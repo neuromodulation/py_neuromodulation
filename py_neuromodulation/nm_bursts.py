@@ -3,7 +3,7 @@ import numpy as np
 from collections.abc import Iterable
 from scipy.signal import hilbert as scipy_hilbert
 
-from pydantic import Field, BaseModel
+from pydantic import Field
 from py_neuromodulation.nm_types import NMBaseModel
 
 from py_neuromodulation.nm_features import NMFeature
@@ -20,7 +20,7 @@ class BurstFeatures(NMBaseModel):
     in_burst: bool = True
 
 
-class BurstSettings(BaseModel):
+class BurstSettings(NMBaseModel):
     threshold: float = Field(default=75, ge=0, le=100)
     time_duration_s: float = Field(default=30, ge=0)
     frequency_bands: list[str] = ["low beta", "high beta", "low gamma"]

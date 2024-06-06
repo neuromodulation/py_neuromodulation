@@ -17,7 +17,7 @@ from py_neuromodulation import (
     nm_define_nmchannels,
     nm_analysis,
     nm_stream_offline,
-    nm_settings,
+    NMSettings,
 )
 
 # %%
@@ -64,8 +64,7 @@ nm_channels = nm_define_nmchannels.set_channels(
 # always search for available lsl streams.
 #
 
-settings = nm_settings.get_default_settings()
-settings = nm_settings.set_settings_fast_compute(settings)
+settings = NMSettings.get_fast_compute()
 
 player = nm_mnelsl_generator.LSLOfflinePlayer(
     raw=raw, stream_name="example_stream"
@@ -80,11 +79,11 @@ player.start_player(chunk_size=30)
 # we run the stream, we will set the *lsl-stream* value to True and pass
 # the stream name we earlier declared when initializing the player object
 
-settings["features"]["welch"] = False
-settings["features"]["fft"] = True
-settings["features"]["bursts"] = False
-settings["features"]["sharpwave_analysis"] = False
-settings["features"]["coherence"] = False
+settings.features["welch"] = False
+settings.features["fft"] = True
+settings.features["bursts"] = False
+settings.features["sharpwave_analysis"] = False
+settings.features["coherence"] = False
 
 # %%
 stream = nm_stream_offline.Stream(

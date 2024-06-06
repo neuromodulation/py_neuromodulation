@@ -1,7 +1,6 @@
 from collections.abc import Iterable
-from re import A
-from matplotlib.pylab import f
-from pydantic import field_validator, BaseModel
+from pydantic import field_validator
+from py_neuromodulation.nm_types import NMBaseModel
 from typing import TYPE_CHECKING, Callable
 
 import numpy as np
@@ -26,7 +25,7 @@ class BispectraFeatures(FeatureSelector):
     var: bool = True
 
 
-class BispectraSettings(BaseModel):
+class BispectraSettings(NMBaseModel):
     f1s: FrequencyRange = FrequencyRange(5, 35)
     f2s: FrequencyRange = FrequencyRange(5, 35)
     compute_features_for_whole_fband_range: bool = True

@@ -1,5 +1,5 @@
 from numpy import array, cov
-from pydantic import BaseModel
+from py_neuromodulation.nm_types import NMBaseModel
 from typing import TYPE_CHECKING
 
 from filterpy.kalman import KalmanFilter
@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
 
 
-class KalmanSettings(BaseModel):
+class KalmanSettings(NMBaseModel):
     Tp: float = 0.1
     sigma_w: float = 0.7
     sigma_v: float = 1.0

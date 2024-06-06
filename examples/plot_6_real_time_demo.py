@@ -46,13 +46,13 @@ Real-time feature estimation
 
 # %%
 import py_neuromodulation as nm
-from py_neuromodulation import nm_settings
+from py_neuromodulation import NMSettings
 import numpy as np
 import timeit
 
 
 def get_fast_compute_settings():
-    settings = nm.NMSettings.get_default().set_fast_compute()
+    settings = NMSettings.get_fast_compute()
     
     settings.preprocessing = ["re_referencing", "notch_filter"]
     settings.features["fft"] = True
@@ -79,7 +79,7 @@ print(
 print("Computation time for 6 ECoG channels: ")
 data = np.random.random([6, 1000])
 stream = nm.Stream(
-    sfreq=500,
+    sfreq=1000, # TONI: At 500 Hz, this was failing the nyquist frequency check
     data=data,
     sampling_rate_features_hz=10,
     verbose=False,

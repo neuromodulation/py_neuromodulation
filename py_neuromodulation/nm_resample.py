@@ -1,14 +1,14 @@
 """Module for resampling."""
 
 import numpy as np
-from pydantic import BaseModel, Field
+from py_neuromodulation.nm_types import NMBaseModel, Field
 
 from mne.filter import resample as mne_resample
 
 from py_neuromodulation.nm_preprocessing import NMPreprocessor
 
 
-class ResamplerSettings(BaseModel):
+class ResamplerSettings(NMBaseModel):
     resample_freq_hz: float = Field(default=1000, gt=0)
 
 

@@ -1,6 +1,6 @@
 """Module for handling settings."""
 
-from pathlib import PurePath
+from pathlib import PurePath, Path
 from pydantic import Field, model_validator
 from typing import Iterable
 
@@ -25,7 +25,7 @@ from py_neuromodulation.nm_coherence import CoherenceSettings
 from py_neuromodulation.nm_sharpwaves import SharpwaveSettings
 from py_neuromodulation.nm_oscillatory import OscillatorySettings, BandpassSettings
 from py_neuromodulation.nm_bursts import BurstSettings
-from py_neuromodulation.nm_normalization import NormalizationSettings
+from py_neuromodulation.nm_normalization import NormMethod, NormalizationSettings
 from py_neuromodulation.nm_resample import ResamplerSettings
 
 
@@ -119,15 +119,23 @@ class NMSettings(NMBaseModel):
 
     @model_validator(mode="after")
     def validate_settings(self):
-        if not any(self.features.values()):
-            raise ValueError("At least one feature must be selected.")
+        # TONI: This test cannot be here if validate_assignment = True
+        # we could move it to a function that runs when Stream is initialized
 
-        # Check Kalman filter frequency bands
-        self.kalman_filter_settings.validate_fbands(self)
+        # if not any(self.features.values()):
+        #     raise ValueError("At least one feature must be selected.")
 
-        # Check BandPass settings frequency bands
-        self.bandpass_filter_settings.validate_fbands(self)
+        if self.features["bandpass_filter"]:
+            # Check BandPass settings frequency bands
+            self.bandpass_filter_settings.validate_fbands(self)
 
+            # Check Kalman filter frequency bands
+            if self.bandpass_filter_settings.kalman_filter:
+                self.kalman_filter_settings.validate_fbands(self)
+
+        for k, v in self.frequency_ranges_hz.items():
+            if not isinstance(v, FrequencyRange):
+                self.frequency_ranges_hz[k] = FrequencyRange.create_from(v)
 
         return self
 
@@ -150,6 +158,10 @@ class NMSettings(NMBaseModel):
 
         return self
 
+    @staticmethod
+    def get_fast_compute() -> "NMSettings":
+        return NMSettings.get_default().set_fast_compute()
+
     def set_all_features(self) -> "NMSettings":
         self.features = {k: True for k in self.features}
         return self
@@ -157,32 +169,75 @@ class NMSettings(NMBaseModel):
     @classmethod
     def load(cls, settings: "NMSettings | _PathLike | None") -> "NMSettings":
         if isinstance(settings, cls):
-            return settings
+            return settings.validate()
         if settings is None:
             return cls.get_default()
         return cls.from_file(str(settings))
 
     @staticmethod
     def from_file(PATH: _PathLike) -> "NMSettings":
-        match PurePath(PATH).suffix:
+        """Load settings from file.
+
+        Args:
+            PATH (_PathLike): Path to settings file or to directory containing settings file,
+                              or path to experiment including experiment prefix
+                              (e.g. /path/to/exp/exp_prefix[_SETTINGS.json])
+
+        Raises:
+            ValueError: when file format is not supported.
+
+        Returns:
+            NMSettings: PyNM settings object
+        """
+        path = Path(PATH)
+
+        # If directory is passed, look for settings file inside
+        if path.is_dir():
+            for child in path.iterdir():
+                if child.is_file() and child.suffix in [".json", ".yaml"]:
+                    path = child
+                    break
+                
+        # If prefix is passed, look for settings file matching prefix       
+        if not path.is_dir() and not path.is_file():
+            for child in path.parent.iterdir():
+                ext = child.suffix.lower()
+                if (
+                    child.is_file()
+                    and ext in [".json", ".yaml"]
+                    and child.name == path.stem + "_SETTINGS" + ext
+                ):
+                    path = child
+                    break
+
+        match path.suffix:
             case ".json":
                 import json
 
-                with open(PATH) as f:
+                with open(path) as f:
                     model_dict = json.load(f)
             case ".yaml":
                 import yaml
 
-                with open(PATH) as f:
+                with open(path) as f:
                     model_dict = yaml.safe_load(f)
             case _:
                 raise ValueError("File format not supported.")
 
         return NMSettings(**model_dict)
 
+    def enable_all_features(self):
+        self.features = {k: True for k in self.features}
+        return self
+    
     @staticmethod
     def get_default() -> "NMSettings":
         return NMSettings.from_file(PYNM_DIR / "nm_settings.json")
+
+    
+    @staticmethod
+    def list_normalization_methods() -> list[NormMethod]:
+        return NormalizationSettings.list_normalization_methods()
 
     def save(
         self, path_out: _PathLike, folder_name: str = "", format: str = "json"
