@@ -46,4 +46,5 @@ model = RandomForestClassifier(n_estimators=100, random_state=42)
 # start model trainer
 trainer = nm_train.Trainer(stream=stream, stream_name=stream_name, classes = classes, model = model)
 trainer.start()
+trainer.app.exit()
 

@@ -30,6 +30,7 @@ class StreamWorker(QThread):
 
 class Trainer(QWidget):
     def __init__(self, model, stream, stream_name: str, classes: list | None = ['relax', 'perform task']):
+        self.app = QApplication([])
         super().__init__()
         self.init_ui()
         self.stream = stream
@@ -114,6 +115,4 @@ class Trainer(QWidget):
 
     def start(self):
         self.show()
-        app.exec()
-
-app = QApplication([])
+        self.app.exec()
