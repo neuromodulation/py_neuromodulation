@@ -53,7 +53,7 @@ dependencies = [
     "statsmodels",
     "mne-lsl>=1.2.0",
     "pynput",
-    "pyqt5",
+    "pyside6",
 ]
 
 [project.optional-dependencies]

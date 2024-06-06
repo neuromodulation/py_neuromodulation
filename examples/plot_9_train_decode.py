@@ -1,3 +1,4 @@
+from sklearn.ensemble import RandomForestClassifier
 from py_neuromodulation import nm_train
 from py_neuromodulation import (nm_settings, nm_define_nmchannels, nm_mnelsl_generator, nm_stream_offline)
 from mne_lsl.lsl import resolve_streams
@@ -40,6 +41,9 @@ stream_name = exg_stream.name
 classes = ['relax', 'clench']
 stream = nm_stream_offline.Stream(sfreq=exg_stream.sfreq, nm_channels=nm_channels, settings=settings, verbose=True, line_noise=50)
 
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+
 # start model trainer
-trainer = nm_train.Trainer(stream=stream, stream_name=stream_name)
+trainer = nm_train.Trainer(stream=stream, stream_name=stream_name, classes = classes, model = model)
 trainer.start()
+
