@@ -3,7 +3,6 @@ from PySide6.QtCore import Signal, QThread
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.discriminant_analysis import StandardScaler
 from sklearn.pipeline import make_pipeline
-from py_neuromodulation import (nm_mnelsl_stream)
 from py_neuromodulation import logger
 import pandas as pd
 from sklearn.model_selection import train_test_split
