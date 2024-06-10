@@ -136,7 +136,7 @@ class NMSettings(NMBaseModel):
         return self
 
     def enable_all_features(self):
-        self.features.disable_all()
+        self.features.enable_all()
         return self
 
     @staticmethod
