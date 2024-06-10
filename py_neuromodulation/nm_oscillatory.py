@@ -96,7 +96,7 @@ class FFT(OscillatoryFeature):
 
         from scipy.fft import rfft
 
-        Z = np.abs(rfft(data)) # type: ignore
+        Z = np.abs(rfft(data))  # type: ignore
 
         if self.settings.log_transform:
             Z = np.log10(Z)
@@ -305,7 +305,7 @@ class BandPower(NMFeature):
         use_kf: bool | None = None,
     ) -> None:
         settings.validate()
-        
+
         self.bp_settings: BandpassSettings = settings.bandpass_filter_settings
         self.kalman_filter_settings: KalmanSettings = settings.kalman_filter_settings
         self.sfreq = sfreq
@@ -315,7 +315,9 @@ class BandPower(NMFeature):
         from py_neuromodulation.nm_filter import MNEFilter
 
         self.bandpass_filter = MNEFilter(
-            f_ranges= [tuple(frange) for frange in settings.frequency_ranges_hz.values()],
+            f_ranges=[
+                tuple(frange) for frange in settings.frequency_ranges_hz.values()
+            ],
             sfreq=self.sfreq,
             filter_length=self.sfreq - 1,
             verbose=False,

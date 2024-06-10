@@ -61,7 +61,7 @@ class NMSettings(NMBaseModel):
         "high beta": FrequencyRange(20, 35),
         "low gamma": FrequencyRange(60, 80),
         "high gamma": FrequencyRange(90, 200),
-        "HFA": FrequencyRange(200, 400)
+        "HFA": FrequencyRange(200, 400),
     }
 
     # Preproceessing settings
@@ -99,11 +99,8 @@ class NMSettings(NMBaseModel):
 
     @model_validator(mode="after")
     def validate_settings(self):
-        # TONI: This test cannot be here if validate_assignment = True
-        # we could move it to a function that runs when Stream is initialized
-
-        # if not any(self.features.values()):
-        #     raise ValueError("At least one feature must be selected.")
+        if not any(self.features.values()):
+            raise ValueError("At least one feature must be selected.")
 
         if self.features.bandpass_filter:
             # Check BandPass settings frequency bands
