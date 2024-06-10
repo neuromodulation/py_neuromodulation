@@ -54,6 +54,7 @@ dependencies = [
   "mne-lsl>=1.2.0",
   "pynput",
   "pyqt5",
+  "pydantic"
 ]
 
 [project.optional-dependencies]
