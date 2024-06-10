@@ -99,7 +99,7 @@ class NMSettings(NMBaseModel):
 
     @model_validator(mode="after")
     def validate_settings(self):
-        if not any(self.features.values()):
+        if not self.features.get_enabled():
             raise ValueError("At least one feature must be selected.")
 
         if self.features.bandpass_filter:
