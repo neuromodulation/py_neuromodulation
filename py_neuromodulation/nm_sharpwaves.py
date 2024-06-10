@@ -1,5 +1,4 @@
 import numpy as np
-from scipy import signal
 from collections.abc import Iterable
 from itertools import product
 
@@ -52,6 +51,11 @@ class SharpwaveSettings(NMBaseModel):
         "var": [],
     }
     apply_estimator_between_peaks_and_troughs: bool = True
+    
+    def disable_all_features(self):
+        self.sharpwave_features.disable_all()
+        for est in self.estimator.keys():
+            self.estimator[est] = []
 
     @model_validator(mode="after")
     def test_settings(cls, settings):
@@ -167,12 +171,13 @@ class SharpwaveAnalyzer(NMFeature):
             enumerate(self.ch_names), self.list_filter, [False, True]
         )
         estimator_key_map: dict[str, Callable] = {}
+        from scipy.signal import fftconvolve
 
         for (ch_idx, ch_name), (filter_name, filter), detect_troughs in combinations:
             self.data_process_sw = (
                 data[ch_idx, :]
                 if filter_name == "no_filter"
-                else signal.fftconvolve(data[ch_idx, :], filter, mode="same")
+                else fftconvolve(data[ch_idx, :], filter, mode="same")
             )
 
             key_name_pt = "Trough" if detect_troughs else "Peak"
@@ -238,12 +243,13 @@ class SharpwaveAnalyzer(NMFeature):
             NoValidTroughException: Return if no adjacent peak can be found
 
         """
-
-        peaks = signal.find_peaks(
+        from scipy.signal import find_peaks
+        
+        peaks = find_peaks(
             self.data_process_sw,
             distance=self.sw_settings.detect_troughs.distance_peaks_ms,
         )[0]
-        troughs = signal.find_peaks(
+        troughs = find_peaks(
             -self.data_process_sw,
             distance=self.sw_settings.detect_troughs.distance_troughs_ms,
         )[0]

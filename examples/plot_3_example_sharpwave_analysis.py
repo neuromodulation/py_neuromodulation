@@ -63,16 +63,14 @@ RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data
 # %%
 settings = NMSettings.get_fast_compute()
 
-settings.features["fft"] = True
-settings.features["bursts"] = False
-settings.features["sharpwave_analysis"] = True
-settings.features["coherence"] = False
+settings.features.fft = True
+settings.features.bursts = False
+settings.features.sharpwave_analysis = True
+settings.features.coherence = False
 
 settings.sharpwave_analysis_settings.estimator["mean"] = []
-for sw_feature in list(
-    settings.sharpwave_analysis_settings.sharpwave_features.list_all()
-):
-    setattr(settings.sharpwave_analysis_settings.sharpwave_features, sw_feature, True)
+settings.sharpwave_analysis_settings.sharpwave_features.enable_all()
+for sw_feature in settings.sharpwave_analysis_settings.sharpwave_features.list_all():
     settings.sharpwave_analysis_settings.estimator["mean"].append(sw_feature)
 
 nm_channels = nm_define_nmchannels.set_channels(
@@ -299,7 +297,7 @@ plt.tight_layout()
 
 settings = NMSettings.get_default().reset()
 
-settings.features["sharpwave_analysis"] = True
+settings.features.sharpwave_analysis = True
 # settings.sharpwave_analysis_settings.sharpwave_features.interval = False # TONI: Why was interval disabled? It's required below
 settings.sharpwave_analysis_settings.filter_ranges_hz = [[5, 80]]
 
@@ -326,7 +324,7 @@ print(df_features.columns)
 plt.scatter(
     df_features["ECOG_RIGHT_0-avgref_Sharpwave_Max_prominence_range_5_80"],
     df_features["ECOG_RIGHT_5-avgref_Sharpwave_Mean_interval_range_5_80"],
-    c=df_features["MOV_RIGHT"],
+    c=df_features.MOV_RIGHT,
     alpha=0.8,
     s=30,
 )

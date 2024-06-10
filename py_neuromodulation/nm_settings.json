@@ -6,13 +6,6 @@
         "notch_filter",
         "re_referencing"
     ],
-    "documentation_preprocessing_options": [
-        "raw_resampling",
-        "notch_filter",
-        "re_referencing",
-        "raw_normalization",
-        "preprocessing_filter"
-    ],
     "features": {
         "raw_hjorth": true,
         "return_raw": true,
@@ -51,18 +44,8 @@
             "frequency_high_hz": 200
         },
         "lowpass_filter_cutoff_hz": 200,
-        "highpass_filter_cutoff_hz": 3    
+        "highpass_filter_cutoff_hz": 3
     },
-    "documentation_normalization_options": [
-        "mean",
-        "median",
-        "zscore",
-        "zscore-median",
-        "quantile",
-        "power",
-        "robust",
-        "minmax"
-    ],
     "raw_normalization_settings": {
         "normalization_time_s": 30,
         "normalization_method": "zscore",

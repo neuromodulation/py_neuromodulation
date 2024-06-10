@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from pydantic import Field
 from py_neuromodulation.nm_types import NMBaseModel
 from typing import TYPE_CHECKING
 
@@ -8,7 +9,7 @@ if TYPE_CHECKING:
 
 
 class ProjectionSettings(NMBaseModel):
-    max_dist_mm: float
+    max_dist_mm: float = Field(default=20.0, gt=0.0)
 
 
 class Projection:

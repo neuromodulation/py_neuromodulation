@@ -117,8 +117,8 @@ class Bispectra(NMFeature):
         )
         
         waveshape.compute(
-            f1s=self.settings.f1s.as_tuple(),  # type: ignore
-            f2s=self.settings.f2s.as_tuple(),  # type: ignore
+            f1s=tuple(self.settings.f1s),  # type: ignore
+            f2s=tuple(self.settings.f2s),  # type: ignore
         )
 
         for ch_idx, ch_name in enumerate(self.ch_names):

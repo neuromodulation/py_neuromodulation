@@ -1,10 +1,9 @@
 from typing import TYPE_CHECKING
 import numpy as np
 from collections.abc import Iterable
-from scipy.signal import hilbert as scipy_hilbert
 
 from pydantic import Field
-from py_neuromodulation.nm_types import NMBaseModel
+from py_neuromodulation.nm_types import FeatureSelector, NMBaseModel
 
 from py_neuromodulation.nm_features import NMFeature
 
@@ -12,8 +11,7 @@ if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
 
 
-
-class BurstFeatures(NMBaseModel):
+class BurstFeatures(FeatureSelector):
     duration: bool = True
     amplitude: bool = True
     burst_rate_per_s: bool = True
@@ -92,9 +90,10 @@ class Burst(NMFeature):
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         # filter_data returns (n_channels, n_fbands, n_samples)
-        filtered_data = np.abs(
-            scipy_hilbert(self.bandpass_filter.filter_data(data), axis=2)
-        )
+        from scipy.signal import hilbert
+
+        filtered_data = np.abs(hilbert(self.bandpass_filter.filter_data(data), axis=2))
+        
         for ch_idx, ch_name in enumerate(self.ch_names):
             for fband_idx, fband_name in enumerate(self.fband_names):
                 new_dat = filtered_data[ch_idx, fband_idx, :]

@@ -26,6 +26,8 @@ stream = nm.Stream(
 
 
 class NewFeature(NMFeature):
+    settings: dict = {}
+    
     def __init__(self, settings: nm.NMSettings, ch_names: Iterable[str], sfreq: float) -> None:
         self.s = settings
         self.ch_names = ch_names
@@ -35,9 +37,6 @@ class NewFeature(NMFeature):
             features_compute[f"new_feature_{ch}"] = np.mean(data[ch_idx, :])
 
         return features_compute
-
-    def test_settings(self):
-        pass
 
 
 newFeature = NewFeature(stream.settings, list(stream.nm_channels["name"]), stream.sfreq)

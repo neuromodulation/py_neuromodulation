@@ -3,7 +3,6 @@
 import numpy as np
 from py_neuromodulation.nm_types import NMBaseModel, Field
 
-from mne.filter import resample as mne_resample
 
 from py_neuromodulation.nm_preprocessing import NMPreprocessor
 
@@ -54,4 +53,7 @@ class Resampler(NMPreprocessor):
         """
         if not self.up:
             return data
-        return mne_resample(data.astype(np.float64), up=self.up, down=1.0)
+
+        from mne.filter import resample
+
+        return resample(data.astype(np.float64), up=self.up, down=1.0)

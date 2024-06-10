@@ -65,7 +65,7 @@ def test_init_wrong_burst_feature_init():
 def test_bursting_duration():
     np.random.seed(0)
     settings = NMSettings.get_default()
-    settings.features["bursts"] = True
+    settings.features.bursts = True
     settings.postprocessing.feature_normalization = False
     TIME_DURATION = 10
     sfreq = 1000

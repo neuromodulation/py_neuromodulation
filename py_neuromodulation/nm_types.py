@@ -3,11 +3,71 @@ from math import isnan
 from typing import NamedTuple, Type, Any, Literal
 from importlib import import_module
 from pydantic import ConfigDict, Field, model_validator, BaseModel
-from pydantic_core import SchemaValidator
 from pprint import pformat
 from collections.abc import Sequence
 
+###################################
+########## TYPE ALIASES  ##########
+###################################
+
 _PathLike = str | PathLike
+
+FeatureName = Literal[
+    "raw_hjorth",
+    "return_raw",
+    "bandpass_filter",
+    "stft",
+    "fft",
+    "welch",
+    "sharpwave_analysis",
+    "fooof",
+    "nolds",
+    "coherence",
+    "bursts",
+    "linelength",
+    "mne_connectivity",
+    "bispectrum",
+]
+
+PreprocessorName = Literal[
+    "preprocessing_filter",
+    "notch_filter",
+    "raw_resampling",
+    "re_referencing",
+    "raw_normalization",
+]
+
+NormMethod = Literal[
+    "mean",
+    "median",
+    "zscore",
+    "zscore-median",
+    "quantile",
+    "power",
+    "robust",
+    "minmax",
+]
+
+
+###################################
+###### LAZY MODULE IMPORTS  #######
+###################################
+class ImportDetails(NamedTuple):
+    module_name: str
+    class_name: str
+
+
+def get_class(module_details: ImportDetails) -> Type[Any]:
+    # return getattr(import_module(module_details.module_name), module_details.class_name)
+    return getattr(
+        import_module("py_neuromodulation." + module_details.module_name),
+        module_details.class_name,
+    )
+
+
+###################################
+######## PYDANTIC CLASSES  ########
+###################################
 
 
 class NMBaseModel(BaseModel):
@@ -25,14 +85,18 @@ class NMBaseModel(BaseModel):
 
     def __str__(self):
         return pformat(self.model_dump())
-    
-    def validate(self) -> Any: # type: ignore
+
+    def __repr__(self):
+        return pformat(self.model_dump())
+
+    def validate(self) -> Any:  # type: ignore
         return self.model_validate(self.model_dump())
+    
+    def __getitem__(self, key):
+        return getattr(self, key)
 
-class ImportDetails(NamedTuple):
-    module_name: str
-    class_name: str
-
+    def __setitem__(self, key, value):
+        return setattr(self, key, value)
 
 class FrequencyRange(NMBaseModel):
     frequency_low_hz: float = Field(default=0, gt=0)
@@ -53,6 +117,9 @@ class FrequencyRange(NMBaseModel):
     def as_tuple(self) -> tuple[float, float]:
         return (self.frequency_low_hz, self.frequency_high_hz)
 
+    def __iter__(self): # type: ignore
+        return iter(self.as_tuple())
+     
     @model_validator(mode="after")
     def validate_range(self):
         if not (isnan(self.frequency_high_hz) or isnan(self.frequency_low_hz)):
@@ -99,6 +166,19 @@ class FeatureSelector(NMBaseModel):
             if (isinstance(getattr(self, f), bool) and getattr(self, f))
         ]
 
+    def enable_all(self):
+        for f in self.model_fields.keys():
+            if isinstance(getattr(self, f), bool):
+                setattr(self, f, True)
+
+    def disable_all(self):
+        for f in self.model_fields.keys():
+            if isinstance(getattr(self, f), bool):
+                setattr(self, f, False)
+
+    def __iter__(self): # type: ignore
+        return iter(self.model_dump().keys())
+
     @classmethod
     def list_all(cls):
         return list(cls.model_fields.keys())
@@ -111,38 +191,3 @@ class FeatureSelector(NMBaseModel):
     @classmethod
     def get_fields(cls):
         return cls.model_fields
-
-
-FeatureName = Literal[
-    "raw_hjorth",
-    "return_raw",
-    "bandpass_filter",
-    "stft",
-    "fft",
-    "welch",
-    "sharpwave_analysis",
-    "fooof",
-    "nolds",
-    "coherence",
-    "bursts",
-    "linelength",
-    "mne_connectivity",
-    "bispectrum",
-]
-
-
-PreprocessorName = Literal[
-    "preprocessing_filter",
-    "notch_filter",
-    "raw_resampling",
-    "re_referencing",
-    "raw_normalization",
-]
-
-
-def get_class(module_details: ImportDetails) -> Type[Any]:
-    # return getattr(import_module(module_details.module_name), module_details.class_name)
-    return getattr(
-        import_module("py_neuromodulation." + module_details.module_name),
-        module_details.class_name,
-    )

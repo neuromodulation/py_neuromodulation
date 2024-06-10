@@ -3,7 +3,7 @@ import numpy as np
 from itertools import product
 
 from py_neuromodulation.nm_types import NMBaseModel
-from pydantic import field_validator, ValidationInfo
+from pydantic import field_validator
 from typing import TYPE_CHECKING
 
 from py_neuromodulation.nm_features import NMFeature
@@ -64,7 +64,7 @@ class FFT(OscillatoryFeature):
         self,
         settings: "NMSettings",
         ch_names: Iterable[str],
-        sfreq: float,
+        sfreq: int,
     ) -> None:
         from scipy.fft import rfftfreq
 
@@ -187,7 +187,7 @@ class STFT(OscillatoryFeature):
         self,
         settings: "NMSettings",
         ch_names: Iterable[str],
-        sfreq: float,
+        sfreq: int,
     ) -> None:
         from scipy.fft import rfftfreq
 
@@ -315,7 +315,7 @@ class BandPower(NMFeature):
         from py_neuromodulation.nm_filter import MNEFilter
 
         self.bandpass_filter = MNEFilter(
-            f_ranges=list(settings.frequency_ranges_hz.values()),
+            f_ranges= [tuple(frange) for frange in settings.frequency_ranges_hz.values()],
             sfreq=self.sfreq,
             filter_length=self.sfreq - 1,
             verbose=False,

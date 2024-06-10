@@ -1,4 +1,4 @@
-from typing import Protocol, TYPE_CHECKING, cast
+from typing import Protocol, TYPE_CHECKING
 from collections.abc import Iterable
 
 if TYPE_CHECKING:
@@ -31,7 +31,7 @@ class NMFeature(Protocol):
         ...
 
 
-FEATURE_DICT: dict[FeatureName, ImportDetails] = {
+FEATURE_DICT: dict[FeatureName | str, ImportDetails] = {
     "raw_hjorth": ImportDetails("nm_hjorth_raw", "Hjorth"),
     "return_raw": ImportDetails("nm_hjorth_raw", "Raw"),
     "bandpass_filter": ImportDetails("nm_oscillatory", "BandPower"),
@@ -77,8 +77,7 @@ class Features:
             feature_name: get_class(FEATURE_DICT[feature_name])(
                 settings, ch_names, sfreq
             )
-            for feature_name, feature_enabled in settings.features.items()
-            if feature_enabled
+            for feature_name in settings.features.get_enabled()
         }
 
     def register_new_feature(self, feature_name: str, feature: NMFeature) -> None:

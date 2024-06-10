@@ -1,16 +1,12 @@
 """Module for filter functionality."""
 
-from math import isnan
 import numpy as np
-from typing import cast, TYPE_CHECKING
+from typing import cast
 
 from py_neuromodulation.nm_preprocessing import NMPreprocessor
 from py_neuromodulation import logger
 
 from mne.filter import create_filter
-
-if TYPE_CHECKING:
-    from py_neuromodulation.nm_types import FrequencyRange
 
 
 class MNEFilter:
@@ -25,7 +21,7 @@ class MNEFilter:
 
     Parameters
     ----------
-    f_ranges : list[FrequencyRange]
+    f_ranges : list[tuple[float | None, float | None]]
     sfreq : float
         Sampling frequency.
     filter_length : str, optional
@@ -58,7 +54,6 @@ class MNEFilter:
             filter_length = int(filter_length)
 
         for f_range in f_ranges:
-
             try:
                 filt = create_filter(
                     None,
@@ -137,7 +132,6 @@ class NotchFilter(NMPreprocessor):
         notch_widths: int | np.ndarray | None = 3,
         trans_bandwidth: float = 6.8,
     ) -> None:
-        
         if line_noise is None and freqs is None:
             raise ValueError(
                 "Either line_noise or freqs must be defined if notch_filter is"

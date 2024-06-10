@@ -11,6 +11,9 @@ import pickle
 
 from py_neuromodulation import logger
 
+from typing import Callable
+
+
 class CV_res:
     def __init__(
         self,
@@ -58,15 +61,15 @@ class Decoder:
 
     def __init__(
         self,
-        features: pd.DataFrame | None = None,
+        features: "pd.DataFrame| None " = None,
         label: np.ndarray | None = None,
         label_name: str | None = None,
-        used_chs: list[str] | None = None,
-        model=LinearRegression(),
-        eval_method=r2_score,
-        cv_method=model_selection.KFold(n_splits=3, shuffle=False),
+        used_chs: list[str] = [],
+        model = LinearRegression(),
+        eval_method: Callable = r2_score,
+        cv_method = model_selection.KFold(n_splits=3, shuffle=False),
         use_nested_cv: bool = False,
-        threshold_score=True,
+        threshold_score = True,
         mov_detection_threshold: float = 0.5,
         TRAIN_VAL_SPLIT: bool = False,
         RUN_BAY_OPT: bool = False,
@@ -94,7 +97,7 @@ class Decoder:
         model : machine learning model
             model that utilizes fit and predict functions
         eval_method : sklearn metrics
-            evaluation scoring method
+            evaluation scoring method, will default to r2_score if not passed
         cv_method : sklearm model_selection method
         threshold_score : boolean
             if True set lower threshold at zero (useful for r2),
@@ -149,13 +152,14 @@ class Decoder:
         self.all_ch_results = {}
         self.columns_names_single_ch = None
 
-
         if undersampling:
             from imblearn.under_sampling import RandomUnderSampler
+
             self.rus = RandomUnderSampler(random_state=0)
 
         if oversampling:
             from imblearn.over_sampling import RandomOverSampler
+
             self.ros = RandomOverSampler(random_state=0)
 
     def set_data(self, features):
@@ -341,7 +345,7 @@ class Decoder:
         labels_count : int
             count of individual movement blocks
         """
-        
+
         from scipy.ndimage import label as label_ndimage
         from scipy.ndimage import binary_dilation, binary_erosion
 
@@ -379,7 +383,7 @@ class Decoder:
             sklearn.metrics true positive rate np.ndarray
         """
         from sklearn.metrics import confusion_matrix
-        
+
         pred_grouped, _ = self.get_movement_grouped_array(
             prediction, threshold, min_consequent_count
         )
@@ -657,6 +661,7 @@ class Decoder:
 
         if self.pca:
             from sklearn.decomposition import PCA
+
             pca = PCA(n_components=10)
             pca.fit(X_train)
             X_train = pca.transform(X_train)
@@ -664,6 +669,7 @@ class Decoder:
 
         if self.cca:
             from sklearn.cross_decomposition import CCA
+
             cca = CCA(n_components=10)
             cca.fit(X_train, y_train)
             X_train = cca.transform(X_train)

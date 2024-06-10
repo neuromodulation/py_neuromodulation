@@ -18,8 +18,8 @@ def test_setting_computation_time():
 
     settings = NMSettings.get_fast_compute()
     settings.segment_length_features_ms = 1000  # start afte 1 second
-    settings.features["fft"] = False
-    settings.features["raw_hjorth"] = True
+    settings.features.fft = False
+    settings.features.raw_hjorth = True
     stream = nm.Stream(
         sfreq=fs,
         data=data,
@@ -31,15 +31,15 @@ def test_setting_computation_time():
 
     # test if features up till the last sample was computed
     assert (
-        data_duration_s * 1000 - features["time"].iloc[-1]
+        data_duration_s * 1000 - features.time.iloc[-1]
     ) < 1000 / sampling_rate_features_hz
 
     # test that the time difference between two samples is the feature sampling rate
     assert (
-        features["time"].iloc[1] - features["time"].iloc[0]
+        features.time.iloc[1] - features.time.iloc[0]
     ) == 1000 / sampling_rate_features_hz
 
-    assert features["time"].iloc[0] == settings.segment_length_features_ms
+    assert features.time.iloc[0] == settings.segment_length_features_ms
 
 
 def test_float_fs():
@@ -55,8 +55,8 @@ def test_float_fs():
     settings = NMSettings.get_fast_compute()
     settings.segment_length_features_ms = 333  # start afte 1 second
 
-    settings.features["fft"] = False
-    settings.features["raw_hjorth"] = True
+    settings.features.fft = False
+    settings.features.raw_hjorth = True
     stream = nm.Stream(
         sfreq=fs,
         data=data,
@@ -68,11 +68,11 @@ def test_float_fs():
 
     # test if features up till the last sample was computed
     assert (
-        data_duration_s * 1000 - features["time"].iloc[-1]
+        data_duration_s * 1000 - features.time.iloc[-1]
     ) < 1000 / sampling_rate_features_hz
 
     assert (
-        features["time"].iloc[1] - features["time"].iloc[0]
+        features.time.iloc[1] - features.time.iloc[0]
     ) == 1000 / sampling_rate_features_hz
 
-    assert features["time"].iloc[0] == settings.segment_length_features_ms
+    assert features.time.iloc[0] == settings.segment_length_features_ms

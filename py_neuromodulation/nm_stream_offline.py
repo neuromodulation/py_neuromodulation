@@ -103,7 +103,7 @@ class _GenericStream(NMStream):
             raise ValueError(
                 "Parallel processing is not possible with feature normalization."
             )
-        if self.settings.features["bursts"]:
+        if self.settings.features.bursts:
             raise ValueError(
                 "Parallel processing is not possible with burst estimation."
             )

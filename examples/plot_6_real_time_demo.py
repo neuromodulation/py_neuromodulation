@@ -55,7 +55,7 @@ def get_fast_compute_settings():
     settings = NMSettings.get_fast_compute()
     
     settings.preprocessing = ["re_referencing", "notch_filter"]
-    settings.features["fft"] = True
+    settings.features.fft = True
     settings.postprocessing.feature_normalization = True
     return settings
 

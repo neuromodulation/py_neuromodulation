@@ -3,6 +3,7 @@ from pathlib import PurePath
 import pickle
 import numpy as np
 import pandas as pd
+
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import r2_score
 from sklearn.model_selection import KFold
@@ -13,6 +14,7 @@ from py_neuromodulation import nm_IO, nm_plots
 from py_neuromodulation.nm_decode import Decoder
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation.nm_settings import NMSettings
+
 
 target_filter_str = {
     "CLEAN",
@@ -26,7 +28,10 @@ features_reverse_order_plotting = {"stft", "fft", "bandpass"}
 
 class Feature_Reader:
     def __init__(
-        self, feature_dir: _PathLike, feature_file: _PathLike = "", binarize_label: bool = True
+        self,
+        feature_dir: _PathLike,
+        feature_file: _PathLike = "",
+        binarize_label: bool = True,
     ) -> None:
         """Feature_Reader enables analysis methods on top of NM_reader and NM_Decoder
 
@@ -112,7 +117,7 @@ class Feature_Reader:
 
     @staticmethod
     def read_target_ch(
-        feature_arr: pd.DataFrame,
+        feature_arr: "pd.DataFrame",
         label_name: str,
         binarize: bool = True,
         binarize_th: float = 0.3,
@@ -194,7 +199,7 @@ class Feature_Reader:
 
     def normalize_features(
         self,
-    ) -> pd.DataFrame:
+    ) -> "pd.DataFrame":
         """Normalize feature_arr feature columns
 
         Returns:
@@ -999,7 +1004,7 @@ class Feature_Reader:
         return performance_dict
 
     @staticmethod
-    def get_dataframe_performances(p: dict) -> pd.DataFrame:
+    def get_dataframe_performances(p: dict) -> "pd.DataFrame":
         performances = []
         for sub in p.keys():
             for ch in p[sub].keys():
@@ -1016,6 +1021,5 @@ class Feature_Reader:
                 else:
                     dict_add["ch_type"] = "electrode ch"
                 performances.append(dict_add)
-        df = pd.DataFrame(performances)
 
-        return df
+        return pd.DataFrame(performances)

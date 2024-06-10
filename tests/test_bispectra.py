@@ -42,7 +42,7 @@ def test_bispectrum():
     settings = NMSettings.get_default()
     settings.reset()
 
-    settings.features["bispectrum"] = True
+    settings.features.bispectrum = True
 
     stream = Stream(
         settings=settings,

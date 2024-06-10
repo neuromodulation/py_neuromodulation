@@ -1,16 +1,11 @@
 """Module for real-time data normalization."""
 
-from py_neuromodulation.nm_types import NMBaseModel, Field
-from typing import Literal, Callable, get_args
+from py_neuromodulation.nm_types import NMBaseModel, Field, NormMethod
+from typing import Callable, get_args
 
 import numpy as np
 
 from py_neuromodulation.nm_preprocessing import NMPreprocessor
-
-
-NormMethod = Literal[
-    "mean", "median", "zscore", "zscore-median", "quantile", "power", "robust", "minmax"
-]
 
 
 class NormalizationSettings(NMBaseModel):

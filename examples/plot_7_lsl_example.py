@@ -79,11 +79,11 @@ player.start_player(chunk_size=30)
 # we run the stream, we will set the *lsl-stream* value to True and pass
 # the stream name we earlier declared when initializing the player object
 
-settings.features["welch"] = False
-settings.features["fft"] = True
-settings.features["bursts"] = False
-settings.features["sharpwave_analysis"] = False
-settings.features["coherence"] = False
+settings.features.welch = False
+settings.features.fft = True
+settings.features.bursts = False
+settings.features.sharpwave_analysis = False
+settings.features.coherence = False
 
 # %%
 stream = nm_stream_offline.Stream(
@@ -109,7 +109,7 @@ features = stream.run(
 # We can then look at the computed features and check if the streamed data was processed correctly.
 # This can be verified by the time label:
 
-plt.plot(features["time"], features["MOV_RIGHT"])
+plt.plot(features.time, features.MOV_RIGHT)
 
 
 ######################################################################

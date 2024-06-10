@@ -7,7 +7,7 @@ from py_neuromodulation import nm_sharpwaves, NMSettings
 
 def init_sw_settings() -> NMSettings:
     settings = NMSettings.get_default()
-    settings.features["sharpwave_analysis"] = True
+    settings.features.sharpwave_analysis = True
     return settings
 
 
@@ -67,15 +67,12 @@ def test_prominence_features():
     ch_names = ["ch1", "ch2", "ch3", "ch4"]
 
     # Reset feataures
-    for f in settings.sharpwave_analysis_settings.sharpwave_features.list_all():
-        setattr(settings.sharpwave_analysis_settings.sharpwave_features, f, False)
-    for est in settings.sharpwave_analysis_settings.estimator.keys():
-        settings.sharpwave_analysis_settings.estimator[est] = []
+    settings.sharpwave_analysis_settings.disable_all_features()
 
     settings.sharpwave_analysis_settings.sharpwave_features.prominence = True
     settings.sharpwave_analysis_settings.estimator["max"] = ["prominence"]
 
-    settings.sharpwave_analysis_settings.filter_ranges_hz = [[5, 80]]
+    settings.sharpwave_analysis_settings.filter_ranges_hz = [(5, 80)]
 
     sw = nm_sharpwaves.SharpwaveAnalyzer(settings, ch_names, sfreq)
 
@@ -101,10 +98,7 @@ def test_interval_feature():
     ch_names = ["ch1", "ch2", "ch3", "ch4"]
 
     # Reset feataures
-    for f in settings.sharpwave_analysis_settings.sharpwave_features.list_all():
-        setattr(settings.sharpwave_analysis_settings.sharpwave_features, f, False)
-    for est in settings.sharpwave_analysis_settings.estimator.keys():
-        settings.sharpwave_analysis_settings.estimator[est] = []
+    settings.sharpwave_analysis_settings.disable_all_features()
 
     settings.sharpwave_analysis_settings.sharpwave_features.interval = True
     settings.sharpwave_analysis_settings.estimator["max"] = ["interval"]

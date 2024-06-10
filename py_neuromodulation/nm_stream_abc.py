@@ -51,7 +51,7 @@ class NMStream(ABC):
             print out stream computation time information, by default True
         """
         self.settings: NMSettings = NMSettings.load(settings)
-        
+
         # If features that use frequency ranges are on, test them against nyquist frequency
         use_freq_ranges: list[FeatureName] = [
             "bandpass_filter",
@@ -63,10 +63,12 @@ class NMStream(ABC):
             "nolds",
             "bispectrum",
         ]
-        
-        need_nyquist_check = any((self.settings.features.get(f) for f in use_freq_ranges))
-        
-        if need_nyquist_check:          
+
+        need_nyquist_check = any(
+            (f in use_freq_ranges for f in self.settings.features.get_enabled())
+        )
+
+        if need_nyquist_check:
             assert all(
                 fb.frequency_high_hz < sfreq / 2
                 for fb in self.settings.frequency_ranges_hz.values()

@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 def load_nm_channels(
     nm_channels: pd.DataFrame | _PathLike,
-) -> pd.DataFrame:
+) -> "pd.DataFrame":
     """Read nm_channels from path or specify via BIDS arguments.
     Nexessary parameters are then
     ch_names (list),
@@ -57,7 +57,7 @@ def read_BIDS_data(
     line_noise : int
     """
 
-    from mne_bids import read_raw_bids, get_bids_path_from_fname, BIDSPath
+    from mne_bids import read_raw_bids, get_bids_path_from_fname
 
     bids_path = get_bids_path_from_fname(PATH_RUN)
 

@@ -77,7 +77,7 @@ def setup_default_stream_fast_compute() -> tuple[np.ndarray, nm_stream_offline.S
     settings.reset()
     settings.fooof.aperiodic.exponent = True
     settings.fooof.aperiodic.offset = True
-    settings.features["fooof"] = True
+    settings.features.fooof = True
 
     stream = nm_stream_offline.Stream(
         settings=settings,

@@ -1,8 +1,7 @@
-from scipy import signal
 import numpy as np
 from collections.abc import Iterable
 
-from py_neuromodulation.nm_types import NMBaseModel, Field
+from py_neuromodulation.nm_types import FrequencyRange, NMBaseModel, Field
 from typing import TYPE_CHECKING
 
 from py_neuromodulation.nm_features import NMFeature
@@ -34,40 +33,43 @@ class CoherenceSettings(NMBaseModel):
 class CoherenceObject:
     def __init__(
         self,
-        sfreq,
-        window,
-        fbands,
-        fband_names,
-        ch_1_name,
-        ch_2_name,
-        ch_1_idx,
-        ch_2_idx,
-        coh,
-        icoh,
-        features_coh,
+        sfreq: float,
+        window: str,
+        fbands: list[FrequencyRange],
+        fband_names: list[str],
+        ch_1_name: str,
+        ch_2_name: str,
+        ch_1_idx: int,
+        ch_2_idx: int,
+        coh: bool,
+        icoh: bool,
+        features_coh: CoherenceFeatures,
     ) -> None:
         self.sfreq = sfreq
         self.window = window
-        self.Pxx = None
-        self.Pyy = None
-        self.Pxy = None
-        self.f = None
-        self.coh = coh
-        self.icoh = icoh
-        self.coh_val = None
-        self.icoh_val = None
+        self.fbands = fbands
+        self.fband_names = fband_names
         self.ch_1 = ch_1_name
         self.ch_2 = ch_2_name
         self.ch_1_idx = ch_1_idx
         self.ch_2_idx = ch_2_idx
-        self.fbands = fbands  # list of lists, e.g. [[10, 15], [15, 20]]
-        self.fband_names = fband_names
+        self.coh = coh
+        self.icoh = icoh
         self.features_coh = features_coh
+        
+        self.Pxx = None
+        self.Pyy = None
+        self.Pxy = None
+        self.f = None
+        self.coh_val = None
+        self.icoh_val = None
 
     def get_coh(self, features_compute, x, y):
-        self.f, self.Pxx = signal.welch(x, self.sfreq, self.window, nperseg=128)
-        self.Pyy = signal.welch(y, self.sfreq, self.window, nperseg=128)[1]
-        self.Pxy = signal.csd(x, y, self.sfreq, self.window, nperseg=128)[1]
+        from scipy.signal import welch, csd 
+
+        self.f, self.Pxx = welch(x, self.sfreq, self.window, nperseg=128)
+        self.Pyy = welch(y, self.sfreq, self.window, nperseg=128)[1]
+        self.Pxy = csd(x, y, self.sfreq, self.window, nperseg=128)[1]
 
         if self.coh:
             self.coh_val = np.abs(self.Pxy**2) / (self.Pxx * self.Pyy)

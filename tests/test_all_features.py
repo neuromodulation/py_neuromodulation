@@ -9,9 +9,9 @@ from py_neuromodulation import (
 
 def get_example_stream(test_arr: np.ndarray) -> Stream:
     settings = NMSettings.get_default().enable_all_features()
-    settings.features["nolds"] = False
-    settings.features["mne_connectivity"] = False
-    settings.features["coherence"] = False
+    settings.features.nolds = False
+    settings.features.mne_connectivity = False
+    settings.features.coherence = False
     
     nm_channels = nm_define_nmchannels.get_default_channels_from_data(test_arr)
 
@@ -36,7 +36,7 @@ def test_all_features_zero_array():
     arr = np.zeros([2, 2000])
     
     stream = get_example_stream(arr)
-    stream.settings.features["fooof"] = False # Can't use fooof with zero values (log(0) undefined)
+    stream.settings.features.fooof = False # Can't use fooof with zero values (log(0) undefined)
     
     df = stream.run(arr)
 
@@ -46,6 +46,6 @@ def test_all_features_NaN_array():
     arr[:] = np.nan
 
     stream = get_example_stream(arr)
-    stream.settings.features["fooof"] = False # Can't use fooof nan values
+    stream.settings.features.fooof = False # Can't use fooof nan values
 
     df = stream.run(arr)

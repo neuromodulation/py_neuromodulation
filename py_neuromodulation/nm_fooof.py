@@ -91,7 +91,7 @@ class FooofAnalyzer(NMFeature):
             try:
                 fm = FOOOF(
                     aperiodic_mode=self.ap_mode,
-                    peak_width_limits=self.settings.peak_width_limits.as_tuple(),
+                    peak_width_limits=tuple(self.settings.peak_width_limits),
                     max_n_peaks=self.settings.max_n_peaks,
                     min_peak_height=self.settings.min_peak_height,
                     peak_threshold=self.settings.peak_threshold,

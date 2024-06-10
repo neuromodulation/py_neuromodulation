@@ -2,13 +2,11 @@
 
 from pathlib import PurePath, Path
 from pydantic import Field, model_validator
-from typing import Iterable
 
 from py_neuromodulation import PYNM_DIR, logger
 from py_neuromodulation.nm_types import (
     FeatureSelector,
     FrequencyRange,
-    FeatureName,
     PreprocessorName,
     _PathLike,
 )
@@ -27,17 +25,6 @@ from py_neuromodulation.nm_oscillatory import OscillatorySettings, BandpassSetti
 from py_neuromodulation.nm_bursts import BurstSettings
 from py_neuromodulation.nm_normalization import NormMethod, NormalizationSettings
 from py_neuromodulation.nm_resample import ResamplerSettings
-
-
-def get_invalid_keys(
-    input_seq: Iterable[str],
-    validation_dict: dict,
-) -> list[str]:
-    return [v for v in input_seq if v not in validation_dict]
-
-
-class ProcessorSettings:
-    pass
 
 
 class Features(FeatureSelector):
@@ -67,13 +54,21 @@ class NMSettings(NMBaseModel):
     # General settings
     sampling_rate_features_hz: float = Field(default=10, gt=0)
     segment_length_features_ms: float = Field(default=1000, gt=0)
-    frequency_ranges_hz: dict[str, FrequencyRange]
+    frequency_ranges_hz: dict[str, FrequencyRange] = {
+        "theta": FrequencyRange(4, 8),
+        "alpha": FrequencyRange(8, 12),
+        "low beta": FrequencyRange(13, 20),
+        "high beta": FrequencyRange(20, 35),
+        "low gamma": FrequencyRange(60, 80),
+        "high gamma": FrequencyRange(90, 200),
+        "HFA": FrequencyRange(200, 400)
+    }
 
     # Preproceessing settings
-    raw_resampling_settings: "ResamplerSettings"
-    preprocessing_filter: "FilterSettings"
-    raw_normalization_settings: "NormalizationSettings"
-    feature_normalization_settings: "NormalizationSettings"
+    raw_resampling_settings: ResamplerSettings = ResamplerSettings()
+    preprocessing_filter: FilterSettings = FilterSettings()
+    raw_normalization_settings: NormalizationSettings = NormalizationSettings()
+    feature_normalization_settings: NormalizationSettings = NormalizationSettings()
 
     # Postprocessing settings
     preprocessing: list[PreprocessorName] = [
@@ -81,28 +76,13 @@ class NMSettings(NMBaseModel):
         "notch_filter",
         "re_referencing",
     ]
-    postprocessing: "PostprocessingSettings"
-    project_cortex_settings: "ProjectionSettings"
-    project_subcortex_settings: "ProjectionSettings"
+    postprocessing: PostprocessingSettings = PostprocessingSettings()
+    project_cortex_settings: ProjectionSettings = ProjectionSettings(max_dist_mm=20)
+    project_subcortex_settings: ProjectionSettings = ProjectionSettings(max_dist_mm=5)
 
     # Feature settings
     # Maybe this should be a subclass of FeatureSelector
-    features: dict[FeatureName, bool] = {
-        "raw_hjorth": True,
-        "return_raw": True,
-        "bandpass_filter": False,
-        "stft": False,
-        "fft": True,
-        "welch": True,
-        "sharpwave_analysis": True,
-        "fooof": False,
-        "bursts": True,
-        "linelength": True,
-        "coherence": False,
-        "nolds": False,
-        "mne_connectivity": False,
-        "bispectrum": False,
-    }
+    features: Features = Features()
 
     fft_settings: OscillatorySettings = OscillatorySettings()
     welch_settings: OscillatorySettings = OscillatorySettings()
@@ -125,7 +105,7 @@ class NMSettings(NMBaseModel):
         # if not any(self.features.values()):
         #     raise ValueError("At least one feature must be selected.")
 
-        if self.features["bandpass_filter"]:
+        if self.features.bandpass_filter:
             # Check BandPass settings frequency bands
             self.bandpass_filter_settings.validate_fbands(self)
 
@@ -140,13 +120,13 @@ class NMSettings(NMBaseModel):
         return self
 
     def reset(self) -> "NMSettings":
-        self.features = {k: False for k in self.features}
+        self.features.disable_all()
         self.preprocessing = []
         return self
 
     def set_fast_compute(self) -> "NMSettings":
         self.reset()
-        self.features["fft"] = True
+        self.features.fft = True
         self.preprocessing = [
             "raw_resampling",
             "notch_filter",
@@ -158,13 +138,13 @@ class NMSettings(NMBaseModel):
 
         return self
 
+    def enable_all_features(self):
+        self.features.disable_all()
+        return self
+
     @staticmethod
     def get_fast_compute() -> "NMSettings":
         return NMSettings.get_default().set_fast_compute()
-
-    def set_all_features(self) -> "NMSettings":
-        self.features = {k: True for k in self.features}
-        return self
 
     @classmethod
     def load(cls, settings: "NMSettings | _PathLike | None") -> "NMSettings":
@@ -176,7 +156,7 @@ class NMSettings(NMBaseModel):
 
     @staticmethod
     def from_file(PATH: _PathLike) -> "NMSettings":
-        """Load settings from file.
+        """Load settings from file or a directory.
 
         Args:
             PATH (_PathLike): Path to settings file or to directory containing settings file,
@@ -197,8 +177,8 @@ class NMSettings(NMBaseModel):
                 if child.is_file() and child.suffix in [".json", ".yaml"]:
                     path = child
                     break
-                
-        # If prefix is passed, look for settings file matching prefix       
+
+        # If prefix is passed, look for settings file matching prefix
         if not path.is_dir() and not path.is_file():
             for child in path.parent.iterdir():
                 ext = child.suffix.lower()
@@ -226,15 +206,10 @@ class NMSettings(NMBaseModel):
 
         return NMSettings(**model_dict)
 
-    def enable_all_features(self):
-        self.features = {k: True for k in self.features}
-        return self
-    
     @staticmethod
     def get_default() -> "NMSettings":
         return NMSettings.from_file(PYNM_DIR / "nm_settings.json")
 
-    
     @staticmethod
     def list_normalization_methods() -> list[NormMethod]:
         return NormalizationSettings.list_normalization_methods()
@@ -261,3 +236,20 @@ class NMSettings(NMBaseModel):
                     yaml.dump(self.model_dump(), f, default_flow_style=False)
 
         logger.info(f"Settings saved to {path_out}")
+
+
+# For retrocompatibility with previous versions of PyNM
+def get_default_settings() -> NMSettings:
+    return NMSettings.get_default()
+
+
+def reset_settings(settings: NMSettings) -> NMSettings:
+    return settings.reset()
+
+
+def set_settings_fast_compute() -> NMSettings:
+    return NMSettings.get_fast_compute()
+
+
+def test_settings(settings: NMSettings) -> NMSettings:
+    return settings.validate()

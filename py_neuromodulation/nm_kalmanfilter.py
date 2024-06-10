@@ -2,8 +2,6 @@ from numpy import array, cov
 from py_neuromodulation.nm_types import NMBaseModel
 from typing import TYPE_CHECKING
 
-from filterpy.kalman import KalmanFilter
-
 if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
 
@@ -50,6 +48,7 @@ def define_KF(Tp, sigma_w, sigma_v):
     filterpy.KalmanFilter
         initialized KalmanFilter object
     """
+    from filterpy.kalman import KalmanFilter
 
     f = KalmanFilter(dim_x=2, dim_z=1)
     f.x = array([0, 1])  # x here sensor signal and it's first derivative
