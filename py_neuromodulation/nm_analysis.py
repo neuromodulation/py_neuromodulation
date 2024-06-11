@@ -964,7 +964,7 @@ class Feature_Reader:
                 ["project_cortex", "project_subcortex"],
                 ["gridcortex_", "gridsubcortex_"],
             ):
-                if not getattr(self.settings.postprocessing, project_settings):
+                if not self.settings.postprocessing[project_settings]:
                     continue
 
                 # the sidecar keys are grid_cortex and subcortex_grid

@@ -15,8 +15,8 @@ def setup_osc_settings(
     settings = NMSettings.get_default().reset()
 
     settings.features[osc_feature_name] = True
-    getattr(settings, osc_feature_setting).windowlength_ms = windowlength_ms
-    getattr(settings, osc_feature_setting).log_transform = log_transform
+    settings[osc_feature_setting].windowlength_ms = windowlength_ms
+    settings[osc_feature_setting].log_transform = log_transform
 
     return settings
 

@@ -58,7 +58,6 @@ class ImportDetails(NamedTuple):
 
 
 def get_class(module_details: ImportDetails) -> Type[Any]:
-    # return getattr(import_module(module_details.module_name), module_details.class_name)
     return getattr(
         import_module("py_neuromodulation." + module_details.module_name),
         module_details.class_name,
@@ -95,8 +94,8 @@ class NMBaseModel(BaseModel):
     def __getitem__(self, key):
         return getattr(self, key)
 
-    def __setitem__(self, key, value):
-        return setattr(self, key, value)
+    def __setitem__(self, key, value) -> None:
+        setattr(self, key, value)
 
 
 class FrequencyRange(NMBaseModel):
@@ -164,18 +163,18 @@ class FeatureSelector(NMBaseModel):
         return [
             f
             for f in self.model_fields.keys()
-            if (isinstance(getattr(self, f), bool) and getattr(self, f))
+            if (isinstance(self[f], bool) and self[f])
         ]
 
     def enable_all(self):
         for f in self.model_fields.keys():
-            if isinstance(getattr(self, f), bool):
-                setattr(self, f, True)
+            if isinstance(self[f], bool):
+                self[f] = True
 
     def disable_all(self):
         for f in self.model_fields.keys():
-            if isinstance(getattr(self, f), bool):
-                setattr(self, f, False)
+            if isinstance(self[f], bool):
+                self[f] = False
 
     def __iter__(self):  # type: ignore
         return iter(self.model_dump().keys())

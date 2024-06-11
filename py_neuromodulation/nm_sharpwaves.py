@@ -50,7 +50,7 @@ class SharpwaveSettings(NMBaseModel):
         "var": [],
     }
     apply_estimator_between_peaks_and_troughs: bool = True
-    
+
     def disable_all_features(self):
         self.sharpwave_features.disable_all()
         for est in self.estimator.keys():
@@ -139,7 +139,7 @@ class SharpwaveAnalyzer(NMFeature):
     def _initialize_sw_features(self) -> None:
         """Resets used attributes to empty lists"""
         for feature_name in self.used_features:
-            setattr(self, feature_name, [])
+            self[feature_name] = []
         if "trough" not in self.used_features:
             # trough attribute is still necessary, even if it is not specified in settings
             self.trough = []
@@ -243,7 +243,7 @@ class SharpwaveAnalyzer(NMFeature):
 
         """
         from scipy.signal import find_peaks
-        
+
         peaks = find_peaks(
             self.data_process_sw,
             distance=self.sw_settings.detect_troughs.distance_peaks_ms,

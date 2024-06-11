@@ -68,7 +68,6 @@ class NMPreprocessors:
                 if arg in possible_arguments
             }
             # Retrieve more possible arguments from settings
-            # TODO
             args |= getattr(settings, settings_str, {})
             # Pass arguments to preprocessor class and return instance
             return preprocessor_class(**args)

@@ -84,11 +84,9 @@ class DataProcessor:
         if self.settings.postprocessing.feature_normalization:
             from py_neuromodulation.nm_normalization import FeatureNormalizer
 
-            # TODO
-            settings_str = "feature_normalization_settings"
             self.feature_normalizer = FeatureNormalizer(
                 sampling_rate_features_hz=self.sfreq_features,
-                settings=getattr(self.settings, settings_str, {}),
+                settings=self.settings.feature_normalization_settings,
             )
 
         self.features = Features(
@@ -267,7 +265,7 @@ class DataProcessor:
             Features calculated from current data
         """
         start_time = time()
-            
+
         nan_channels = np.isnan(data).any(axis=1)
 
         data = np.nan_to_num(data)[self.feature_idx, :]

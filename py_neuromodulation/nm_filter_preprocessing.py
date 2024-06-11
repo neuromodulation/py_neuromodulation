@@ -30,7 +30,7 @@ class FilterSettings(FeatureSelector):
     highpass_filter_cutoff_hz: float = Field(default=3)
 
     def get_filter_tuple(self, filter_name) -> tuple[float | None, float | None]:
-        filter_value = getattr(self, FILTER_SETTINGS_MAP[filter_name])
+        filter_value = self[FILTER_SETTINGS_MAP[filter_name]]
 
         match filter_name:
             case "bandstop_filter":
