@@ -119,6 +119,7 @@ class NMSettings(NMBaseModel):
     def reset(self) -> "NMSettings":
         self.features.disable_all()
         self.preprocessing = []
+        self.postprocessing.disable_all()
         return self
 
     def set_fast_compute(self) -> "NMSettings":

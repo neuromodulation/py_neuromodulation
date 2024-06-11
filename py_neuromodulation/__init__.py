@@ -3,7 +3,6 @@ import platform
 from pathlib import PurePath
 from importlib.metadata import version
 from .nm_logger import NMLogger
-import polars as pl
 
 #####################################
 # Globals and environment variables #
