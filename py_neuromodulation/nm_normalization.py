@@ -70,7 +70,6 @@ class FeatureNormalizer:
         sampling_rate_features_hz: float,
         settings: NormalizationSettings = NormalizationSettings(),
     ) -> None:
-        # TONI: this docstring is outdated, update!
         """Normalize raw data.
 
         normalize_samples : int

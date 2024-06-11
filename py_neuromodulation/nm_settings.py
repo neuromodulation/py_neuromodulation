@@ -99,11 +99,9 @@ class NMSettings(NMBaseModel):
 
     @model_validator(mode="after")
     def validate_settings(self):
-        # TONI: This test cannot be here if validate_assignment = True
-        # we could move it to a function that runs when Stream is initialized
 
-        # if not any(self.features.values()):
-        #     raise ValueError("At least one feature must be selected.")
+        if len(self.features.get_enabled()) == 0:
+            raise ValueError("At least one feature must be selected.")
 
         if self.features.bandpass_filter:
             # Check BandPass settings frequency bands
@@ -139,7 +137,7 @@ class NMSettings(NMBaseModel):
         return self
 
     def enable_all_features(self):
-        self.features.disable_all()
+        self.features.enable_all()
         return self
 
     @staticmethod

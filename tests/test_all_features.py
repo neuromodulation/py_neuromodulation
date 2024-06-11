@@ -40,6 +40,8 @@ def test_all_features_zero_array():
     
     df = stream.run(arr)
 
+    assert df.shape[0] != 0  # terrible test
+
 
 def test_all_features_NaN_array():
     arr = np.empty([2, 2000])
@@ -49,3 +51,5 @@ def test_all_features_NaN_array():
     stream.settings.features.fooof = False # Can't use fooof nan values
 
     df = stream.run(arr)
+
+    assert df.shape[0] != 0  # terrible test

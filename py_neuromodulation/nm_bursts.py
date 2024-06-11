@@ -22,8 +22,9 @@ class BurstSettings(NMBaseModel):
     threshold: float = Field(default=75, ge=0, le=100)
     time_duration_s: float = Field(default=30, ge=0)
     frequency_bands: list[str] = ["low beta", "high beta", "low gamma"]
-    # TONI: burst_features are not used for anything currently
-    burst_features: BurstFeatures = BurstFeatures(True, True, True, True)
+    burst_features: BurstFeatures = BurstFeatures(
+        duration=True, amplitude=True, burst_rate_per_s=True, in_burst=True
+    )
 
 
 class Burst(NMFeature):
@@ -119,35 +120,41 @@ class Burst(NMFeature):
 
                 feature_name = f"{ch_name}_bursts_{fband_name}"
 
-                features_compute[f"{feature_name}_duration_mean"] = (
-                    np.mean(burst_length) if len(burst_length) != 0 else 0
-                )
-                features_compute[f"{feature_name}_amplitude_mean"] = (
-                    np.mean([np.mean(a) for a in burst_amplitude])
-                    if len(burst_length) != 0
-                    else 0
-                )
+                if self.settings.burst_features.duration is True:
+                    features_compute[f"{feature_name}_duration_mean"] = (
+                        np.mean(burst_length) if len(burst_length) != 0 else 0
+                    )
 
-                features_compute[f"{feature_name}_duration_max"] = (
-                    np.max(burst_length) if len(burst_length) != 0 else 0
-                )
-                features_compute[f"{feature_name}_amplitude_max"] = (
-                    np.max([np.max(a) for a in burst_amplitude])
-                    if len(burst_amplitude) != 0
-                    else 0
-                )
+                    features_compute[f"{feature_name}_duration_max"] = (
+                        np.max(burst_length) if len(burst_length) != 0 else 0
+                    )
+                
+                if self.settings.burst_features.amplitude is True:
+                    features_compute[f"{feature_name}_amplitude_mean"] = (
+                        np.mean([np.mean(a) for a in burst_amplitude])
+                        if len(burst_length) != 0
+                        else 0
+                    )
+                
+                    features_compute[f"{feature_name}_amplitude_max"] = (
+                        np.max([np.max(a) for a in burst_amplitude])
+                        if len(burst_amplitude) != 0
+                        else 0
+                    )
 
-                features_compute[f"{feature_name}_burst_rate_per_s"] = (
-                    np.mean(burst_length) / self.segment_length_features_s
-                    if len(burst_length) != 0
-                    else 0
-                )
+                if self.settings.burst_features.burst_rate_per_s is True:
+                    features_compute[f"{feature_name}_burst_rate_per_s"] = (
+                        np.mean(burst_length) / self.segment_length_features_s
+                        if len(burst_length) != 0
+                        else 0
+                    )
 
-                in_burst = False
-                if self.data_buffer[ch_name][fband_name][-1] > burst_thr:
-                    in_burst = True
+                if self.settings.burst_features.in_burst is True:
+                    in_burst = False
+                    if self.data_buffer[ch_name][fband_name][-1] > burst_thr:
+                        in_burst = True
 
-                features_compute[f"{feature_name}_in_burst"] = in_burst
+                    features_compute[f"{feature_name}_in_burst"] = in_burst
         return features_compute
 
     @staticmethod

@@ -36,7 +36,6 @@ class SharpwaveFeatures(FeatureSelector):
 
 class SharpwaveSettings(NMBaseModel):
     sharpwave_features: SharpwaveFeatures = SharpwaveFeatures()
-    # TONI: coudl add restriction for min_length = 1
     filter_ranges_hz: list[FrequencyRange] = [
         FrequencyRange(5, 80),
         FrequencyRange(5, 30),

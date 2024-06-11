@@ -130,9 +130,10 @@ settings = NMSettings.get_fast_compute()
 #
 # and use *z-score* postprocessing normalization.
 
-settings.features["fft"] = True
-settings.features["bursts"] = True
-settings.features["sharpwave_analysis"] = True
+settings.features.fooof = True
+settings.features.fft = True
+settings.features.bursts = True
+settings.features.sharpwave_analysis = True
 
 # %%
 # We are now ready to go to instantiate the *Stream* and call the *run* method for feature estimation:

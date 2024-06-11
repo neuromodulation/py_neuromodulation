@@ -79,7 +79,7 @@ print(
 print("Computation time for 6 ECoG channels: ")
 data = np.random.random([6, 1000])
 stream = nm.Stream(
-    sfreq=1000, # TONI: At 500 Hz, this was failing the nyquist frequency check
+    sfreq=1000,
     data=data,
     sampling_rate_features_hz=10,
     verbose=False,

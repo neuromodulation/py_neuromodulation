@@ -298,7 +298,6 @@ plt.tight_layout()
 settings = NMSettings.get_default().reset()
 
 settings.features.sharpwave_analysis = True
-# settings.sharpwave_analysis_settings.sharpwave_features.interval = False # TONI: Why was interval disabled? It's required below
 settings.sharpwave_analysis_settings.filter_ranges_hz = [[5, 80]]
 
 nm_channels["used"] = 0  # set only two ECoG channels for faster computation to true

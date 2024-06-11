@@ -9,7 +9,6 @@ NORM_METHODS = nm_normalization.NormalizationSettings.list_normalization_methods
 
 def test_raw_normalization_init():
     """Test to check that raw normalizer can't be instantiated with a wrong normalization method."""
-    # TONI: is this necessary? NormalizationSettings is check as a pydantic model
 
     with pytest.raises(Exception):
         norm_settings = nm_normalization.NormalizationSettings()
@@ -22,7 +21,7 @@ def test_raw_normalization_init():
 
 def test_feature_normalization_init():
     """Test to check that feature normalizer can't be instantiated with a wrong normalization method."""
-    # TONI: is this necessary? NormalizationSettings is check as a pydantic model
+
     with pytest.raises(Exception):
         norm_settings = nm_normalization.NormalizationSettings()
         norm_settings.normalization_method = "meann"  # type: ignore
@@ -35,9 +34,6 @@ def test_feature_normalization_init():
 def test_process_norm_features():
     """Test that FeatureNormalizer returns correct values (not nan or infinite).
     Also test that the previous data is stored correctly."""
-
-    # TONI: sometimes during runs I get warnings about divisions of 0/0,
-    # maybe we should check for that if it may be a problem
 
     norm_settings = nm_normalization.NormalizationSettings()
     norm_settings.normalization_method = "mean"

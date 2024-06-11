@@ -35,7 +35,6 @@ def test_fft_wrong_logtransform_param_init():
     ch_names = ["ch1", "ch2", "ch3", "ch4"]
     sfreq = 1000
 
-    # TONI: Move with before settings assignment because pydantic will validate the settings
     with pytest.raises(ValidationError):
         settings = setup_osc_settings(
             osc_feature_name="fft",
@@ -43,20 +42,8 @@ def test_fft_wrong_logtransform_param_init():
             windowlength_ms=1000,
             log_transform="123",
         )
-        # Toni: in order to make this tests work, I had to force validation of the settings
-        # in the OscillatoryFeature class __init__ method. This is not ideal because at that
-        # point settings would already have been  validate I think, but probably not a big deal in terms of performance
 
-        # TONI: from here down the code won't even be executed...
-        settings.frequency_ranges_hz = {"theta": (4, 8), "beta": (10, 20)}
-        nm_oscillatory.FFT(settings, ch_names, sfreq)
-
-
-def test_fft_wrong_frequencyband_range_init():
-    """???"""
-    # TONI: I don't get this test, one should be able to define any frequency range with any name in theory
-    # this test fails because FFT does not test the ranges against the bandpass_filter_settings ranges
-    # but those are not used by FFT so it should not be teste in the first place
+def test_fft_frequencyband_range_passing_nyquist_range():
 
     ch_names = ["ch1", "ch2", "ch3", "ch4"]
     sfreq = 1000
@@ -66,7 +53,7 @@ def test_fft_wrong_frequencyband_range_init():
         osc_feature_name="fft",
         osc_feature_setting="fft_settings",
         windowlength_ms=1000,
-        log_transform=False,  # TONI: Should not be testing a bad log_transform value here
+        log_transform=False,
     )
 
     settings.frequency_ranges_hz = {"theta": [4, 8], "broadband": [10, 600]}
