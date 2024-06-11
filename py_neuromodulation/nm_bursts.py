@@ -45,9 +45,7 @@ class BurstSettings(NMBaseModel):
     threshold: float = Field(default=75, ge=0, le=100)
     time_duration_s: float = Field(default=30, ge=0)
     frequency_bands: list[str] = ["low beta", "high beta", "low gamma"]
-    burst_features: BurstFeatures = BurstFeatures(
-        duration=True, amplitude=True, burst_rate_per_s=True, in_burst=True
-    )
+    burst_features: BurstFeatures = BurstFeatures()
 
 
 class Burst(NMFeature):
@@ -137,10 +135,6 @@ class Burst(NMFeature):
             "in_burst": self.store_in_burst,
         }
 
-        self.need_duration_mean = (
-            "duration" in self.used_features or "burst_rate_per_s" in self.used_features
-        )
-
         self.batch = 0
 
         self.connectivity = np.zeros((3, 3, 3))
@@ -195,7 +189,7 @@ class Burst(NMFeature):
         # Now we're ready to calculate features
         burst_lengths = label_sum(bursts, burst_labels, index=valid_labels) / self.sfreq
 
-        if "duration" in self.used_features:
+        if "duration" in self.used_features or "burst_rate_per_s" in self.used_features:
             # Handle division by zero using np.divide
             self.burst_duration_mean = (
                 np.divide(
@@ -206,6 +200,8 @@ class Burst(NMFeature):
                 )
                 / self.sfreq
             )
+            
+        if "duration" in self.used_features:
             # The max needs to be calculated per channel
             # TODO: it might be interesting to write a C function for this
             duration_max_flat = np.zeros(self.n_channels * self.n_fbands)
@@ -214,81 +210,11 @@ class Burst(NMFeature):
                     burst_lengths[label_positions == idx], initial=0
                 )
 
-                burst_amplitude, burst_length = self.get_burst_amplitude_length(
-                    new_dat, burst_thr, self.sfreq
-                )
-
-                feature_name = f"{ch_name}_bursts_{fband_name}"
-
-                if self.settings.burst_features.duration is True:
-                    features_compute[f"{feature_name}_duration_mean"] = (
-                        np.mean(burst_length) if len(burst_length) != 0 else 0
-                    )
-
-                    features_compute[f"{feature_name}_duration_max"] = (
-                        np.max(burst_length) if len(burst_length) != 0 else 0
-                    )
-                
-                if self.settings.burst_features.amplitude is True:
-                    features_compute[f"{feature_name}_amplitude_mean"] = (
-                        np.mean([np.mean(a) for a in burst_amplitude])
-                        if len(burst_length) != 0
-                        else 0
-                    )
-                
-                    features_compute[f"{feature_name}_amplitude_max"] = (
-                        np.max([np.max(a) for a in burst_amplitude])
-                        if len(burst_amplitude) != 0
-                        else 0
-                    )
-
-                if self.settings.burst_features.burst_rate_per_s is True:
-                    features_compute[f"{feature_name}_burst_rate_per_s"] = (
-                        np.mean(burst_length) / self.segment_length_features_s
-                        if len(burst_length) != 0
-                        else 0
-                    )
-
-                if self.settings.burst_features.in_burst is True:
-                    in_burst = False
-                    if self.data_buffer[ch_name][fband_name][-1] > burst_thr:
-                        in_burst = True
-
-                    features_compute[f"{feature_name}_in_burst"] = in_burst
-        if "burst_rate_per_s" in self.used_features:
-            self.burst_rate_per_s = (
-                self.burst_duration_mean / self.segment_length_features_s
+            self.burst_duration_max = duration_max_flat.reshape(
+                (self.n_channels, self.n_fbands)
             )
 
-        if "in_burst" in self.used_features:
-            self.end_in_burst = bursts[:, :, -1]  # End in burst
-
-        # Create dictionary to return
-        for (ch_i, ch), (fb_i, fb), feat in self.feature_combinations:
-            self.STORE_FEAT_DICT[feat](features_compute, ch_i, ch, fb_i, fb)
-
-        return features_compute
-
-    @staticmethod
-    def get_burst_amplitude_length(beta_averp_norm, burst_thr: float, sfreq: float):
-        """
-        Analysing the duration of beta burst
-        """
-        bursts = np.zeros((beta_averp_norm.shape[0] + 1), dtype=bool)
-        bursts[1:] = beta_averp_norm >= burst_thr
-        deriv = np.diff(bursts)
-        burst_length = []
-        burst_amplitude = []
-
-        burst_time_points = np.where(deriv)[0]
-
-        for i in range(burst_time_points.size // 2):
-            burst_length.append(burst_time_points[2 * i + 1] - burst_time_points[2 * i])
-            burst_amplitude.append(
-                beta_averp_norm[burst_time_points[2 * i] : burst_time_points[2 * i + 1]]
-            )
-
-        if self.need_duration_mean:
+        if "amplitude" in self.used_features:
             self.burst_amplitude_max = (filtered_data * bursts).max(axis=2)
             # The mean is actually a mean of means, so we need the mean for each individual burst
             label_means = label_mean(filtered_data, burst_labels, index=valid_labels)

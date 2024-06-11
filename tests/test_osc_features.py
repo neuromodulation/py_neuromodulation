@@ -42,6 +42,8 @@ def test_fft_wrong_logtransform_param_init():
             windowlength_ms=1000,
             log_transform="123",
         )
+        settings.frequency_ranges_hz = {"theta": (4, 8), "beta": (10, 20)}
+        nm_oscillatory.FFT(settings, ch_names, sfreq)
 
 def test_fft_frequencyband_range_passing_nyquist_range():
 
