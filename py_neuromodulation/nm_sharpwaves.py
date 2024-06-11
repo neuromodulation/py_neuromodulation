@@ -50,7 +50,7 @@ class SharpwaveSettings(NMBaseModel):
         "var": [],
     }
     apply_estimator_between_peaks_and_troughs: bool = True
-
+    
     def disable_all_features(self):
         self.sharpwave_features.disable_all()
         for est in self.estimator.keys():
@@ -67,11 +67,6 @@ class SharpwaveSettings(NMBaseModel):
             ), f"Add estimator key for {used_feature}"
 
         return settings
-
-
-class NoValidTroughException(Exception):
-    pass
-
 
 class SharpwaveAnalyzer(NMFeature):
     def __init__(
@@ -139,7 +134,7 @@ class SharpwaveAnalyzer(NMFeature):
     def _initialize_sw_features(self) -> None:
         """Resets used attributes to empty lists"""
         for feature_name in self.used_features:
-            self[feature_name] = []
+            setattr(self, feature_name, [])
         if "trough" not in self.used_features:
             # trough attribute is still necessary, even if it is not specified in settings
             self.trough = []
@@ -231,19 +226,12 @@ class SharpwaveAnalyzer(NMFeature):
         return features_compute
 
     def analyze_waveform(self) -> None:
-        """Given the scipy.signal.find_peaks  trough/peak distance
+        """Given the scipy.signal.find_peaks trough/peak distance
         settings specified sharpwave features are estimated.
-
-        Parameters
-        ----------
-
-        Raises:
-            NoValidTroughException: Return if no adjacent peak can be found
-            NoValidTroughException: Return if no adjacent peak can be found
-
         """
-        from scipy.signal import find_peaks
 
+        from scipy.signal import find_peaks
+        
         peaks = find_peaks(
             self.data_process_sw,
             distance=self.sw_settings.detect_troughs.distance_peaks_ms,
