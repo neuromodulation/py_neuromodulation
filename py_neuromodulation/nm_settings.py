@@ -61,7 +61,7 @@ class NMSettings(NMBaseModel):
         "high beta": FrequencyRange(20, 35),
         "low gamma": FrequencyRange(60, 80),
         "high gamma": FrequencyRange(90, 200),
-        "HFA": FrequencyRange(200, 400)
+        "HFA": FrequencyRange(200, 400),
     }
 
     # Preproceessing settings
@@ -120,6 +120,7 @@ class NMSettings(NMBaseModel):
     def reset(self) -> "NMSettings":
         self.features.disable_all()
         self.preprocessing = []
+        self.postprocessing.disable_all()
         return self
 
     def set_fast_compute(self) -> "NMSettings":

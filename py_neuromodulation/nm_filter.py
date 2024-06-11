@@ -2,6 +2,7 @@
 
 import numpy as np
 from typing import cast
+from collections.abc import Sequence
 
 from py_neuromodulation.nm_preprocessing import NMPreprocessor
 from py_neuromodulation import logger
@@ -41,7 +42,7 @@ class MNEFilter:
 
     def __init__(
         self,
-        f_ranges: list[tuple[float | None, float | None]],
+        f_ranges: Sequence[tuple[float | None, float | None]],
         sfreq: float,
         filter_length: str | float = "999ms",
         l_trans_bandwidth: float | str = 4,

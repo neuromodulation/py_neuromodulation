@@ -91,12 +91,13 @@ class NMBaseModel(BaseModel):
 
     def validate(self) -> Any:  # type: ignore
         return self.model_validate(self.model_dump())
-    
+
     def __getitem__(self, key):
         return getattr(self, key)
 
     def __setitem__(self, key, value):
         return setattr(self, key, value)
+
 
 class FrequencyRange(NMBaseModel):
     frequency_low_hz: float = Field(default=0, gt=0)
@@ -117,9 +118,9 @@ class FrequencyRange(NMBaseModel):
     def as_tuple(self) -> tuple[float, float]:
         return (self.frequency_low_hz, self.frequency_high_hz)
 
-    def __iter__(self): # type: ignore
+    def __iter__(self):  # type: ignore
         return iter(self.as_tuple())
-     
+
     @model_validator(mode="after")
     def validate_range(self):
         if not (isnan(self.frequency_high_hz) or isnan(self.frequency_low_hz)):
@@ -176,7 +177,7 @@ class FeatureSelector(NMBaseModel):
             if isinstance(getattr(self, f), bool):
                 setattr(self, f, False)
 
-    def __iter__(self): # type: ignore
+    def __iter__(self):  # type: ignore
         return iter(self.model_dump().keys())
 
     @classmethod
