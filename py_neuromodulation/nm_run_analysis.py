@@ -84,10 +84,7 @@ class DataProcessor:
         if self.settings.postprocessing.feature_normalization:
             from py_neuromodulation.nm_normalization import FeatureNormalizer
 
-            self.feature_normalizer = FeatureNormalizer(
-                sampling_rate_features_hz=self.sfreq_features,
-                settings=self.settings.feature_normalization_settings,
-            )
+            self.feature_normalizer = FeatureNormalizer(self.settings)
 
         self.features = Features(
             settings=self.settings,

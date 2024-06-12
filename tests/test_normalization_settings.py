@@ -10,37 +10,32 @@ NORM_METHODS = nm_normalization.NormalizationSettings.list_normalization_methods
 def test_raw_normalization_init():
     """Test to check that raw normalizer can't be instantiated with a wrong normalization method."""
 
-    with pytest.raises(Exception):
-        norm_settings = nm_normalization.NormalizationSettings()
-        norm_settings.normalization_method = "meann"  # type: ignore
+    settings = NMSettings.get_default()
+    settings.raw_normalization_settings.normalization_method = "meann"  # type: ignore
 
-        nm_normalization.RawNormalizer(
-            sfreq=1000, sampling_rate_features_hz=500, settings=norm_settings
-        )
+    with pytest.raises(Exception):
+        nm_normalization.RawNormalizer(sfreq=1000, settings=settings)
 
 
 def test_feature_normalization_init():
     """Test to check that feature normalizer can't be instantiated with a wrong normalization method."""
 
-    with pytest.raises(Exception):
-        norm_settings = nm_normalization.NormalizationSettings()
-        norm_settings.normalization_method = "meann"  # type: ignore
+    settings = NMSettings.get_default()
+    settings.feature_normalization_settings.normalization_method = "meann"  # type: ignore
 
-        nm_normalization.FeatureNormalizer(
-            sampling_rate_features_hz=500, settings=norm_settings
-        )
+    with pytest.raises(Exception):
+        nm_normalization.FeatureNormalizer(settings=settings)
 
 
 def test_process_norm_features():
     """Test that FeatureNormalizer returns correct values (not nan or infinite).
     Also test that the previous data is stored correctly."""
 
-    norm_settings = nm_normalization.NormalizationSettings()
-    norm_settings.normalization_method = "mean"
+    settings = NMSettings.get_default()
+    settings.feature_normalization_settings.normalization_method = "mean"
 
-    norm = nm_normalization.FeatureNormalizer(
-        sampling_rate_features_hz=500, settings=norm_settings
-    )
+    norm = nm_normalization.FeatureNormalizer(settings=settings)
+
     data = np.ones([1, 5])
     data_normed = norm.process(data)
 
@@ -50,9 +45,7 @@ def test_process_norm_features():
 
 def test_previous_size_FeatureNorm():
     """Test that previous batch data is clipped correctly when clip is enabled (default clip = 3)"""
-    norm = nm_normalization.FeatureNormalizer(
-        sampling_rate_features_hz=10, settings=nm_normalization.NormalizationSettings()
-    )
+    norm = nm_normalization.FeatureNormalizer(settings=NMSettings())
 
     num_features = 5
 
@@ -66,12 +59,10 @@ def test_previous_size_FeatureNorm():
 def test_zscore_feature_analysis():
     """Test that previous data is not clipped  when clip is set to False"""
 
-    norm_settings = nm_normalization.NormalizationSettings()
-    norm_settings.clip = False
+    settings = NMSettings.get_default()
+    settings.feature_normalization_settings.clip = False
 
-    norm = nm_normalization.FeatureNormalizer(
-        sampling_rate_features_hz=10, settings=norm_settings
-    )
+    norm = nm_normalization.FeatureNormalizer(settings=settings)
 
     num_features = 5
 
@@ -92,12 +83,11 @@ def test_zscore_feature_analysis():
 
 def test_zscore_raw_analysis():
     """Test that zscore is giving the expected results"""
-    norm_settings = nm_normalization.NormalizationSettings()
-    norm_settings.clip = False
 
-    norm = nm_normalization.RawNormalizer(
-        sampling_rate_features_hz=10, sfreq=10, settings=norm_settings
-    )
+    settings = NMSettings.get_default()
+    settings.raw_normalization_settings.clip = False
+
+    norm = nm_normalization.RawNormalizer(sfreq=10, settings=settings)
 
     num_samples = 100
     data_to_norm = np.zeros([1, num_samples])
@@ -116,15 +106,14 @@ def test_zscore_raw_analysis():
 
 def test_all_norm_methods_raw():
     """Test that all raw normalization methods return correct values (not nan or infinite)"""
-    norm_settings = nm_normalization.NormalizationSettings()
-    norm_settings.clip = False
+    
+    settings = NMSettings.get_default()
+    settings.raw_normalization_settings.clip = False
 
     for norm_method in NMSettings.list_normalization_methods():
-        norm_settings.normalization_method = norm_method
+        settings.raw_normalization_settings.normalization_method = norm_method
 
-        norm = nm_normalization.RawNormalizer(
-            sfreq=10, sampling_rate_features_hz=10, settings=norm_settings
-        )
+        norm = nm_normalization.RawNormalizer(sfreq=10, settings=settings)
 
         num_samples = 10
 
@@ -141,15 +130,14 @@ def test_all_norm_methods_raw():
 
 def test_all_norm_methods_feature():
     """Test that all feature normalization methods return correct values (not nan or infinite)"""
-    norm_settings = nm_normalization.NormalizationSettings()
-    norm_settings.clip = False
+    
+    settings = NMSettings.get_default()
+    settings.feature_normalization_settings.clip = False
 
     for norm_method in NMSettings.list_normalization_methods():
-        norm_settings.normalization_method = norm_method
+        settings.feature_normalization_settings.normalization_method = norm_method
 
-        norm = nm_normalization.FeatureNormalizer(
-            sampling_rate_features_hz=10, settings=norm_settings
-        )
+        norm = nm_normalization.FeatureNormalizer(settings=settings)
 
         num_samples = 10
 

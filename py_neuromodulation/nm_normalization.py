@@ -1,11 +1,16 @@
 """Module for real-time data normalization."""
 
-from py_neuromodulation.nm_types import NMBaseModel, Field, NormMethod
-from typing import Callable, get_args
-
 import numpy as np
+from typing import TYPE_CHECKING, Callable, Literal, get_args
 
+from py_neuromodulation.nm_types import NMBaseModel, Field, NormMethod
 from py_neuromodulation.nm_preprocessing import NMPreprocessor
+
+
+if TYPE_CHECKING:
+    from py_neuromodulation.nm_settings import NMSettings
+
+NormalizerType = Literal["raw", "feature"]
 
 
 class NormalizationSettings(NMBaseModel):
@@ -18,12 +23,12 @@ class NormalizationSettings(NMBaseModel):
         return list(get_args(NormMethod))
 
 
-class RawNormalizer(NMPreprocessor):
+class Normalizer(NMPreprocessor):
     def __init__(
         self,
         sfreq: float,
-        sampling_rate_features_hz: float,
-        settings: NormalizationSettings = NormalizationSettings(),
+        settings: "NMSettings",
+        type: NormalizerType,
     ) -> None:
         """Normalize raw data.
 
@@ -38,17 +43,31 @@ class RawNormalizer(NMPreprocessor):
         clip : float, optional
             value at which to clip after normalization
         """
-        self.settings = settings.validate()
 
-        self.num_samples_normalize = int(settings.normalization_time_s * sfreq)
-        self.add_samples = int(sfreq / sampling_rate_features_hz)
-        self.previous: np.ndarray = np.array([])  # Default empty array
+        self.type = type
+        self.settings: NormalizationSettings
+
+        match self.type:
+            case "raw":
+                self.settings = settings.raw_normalization_settings.validate()
+                self.add_samples = int(sfreq / settings.sampling_rate_features_hz)
+            case "feature":
+                self.settings = settings.feature_normalization_settings.validate()
+                self.add_samples = 0
+
+        # For type = "feature" sfreq = sampling_rate_features_hz
+        self.num_samples_normalize = int(self.settings.normalization_time_s * sfreq)
+
+        self.previous: np.ndarray = np.empty((0, 0))  # Default empty array
 
     def process(self, data: np.ndarray) -> np.ndarray:
-        data = data.T
+        # TODO: does feature normalization need to be transposed too?
+        if self.type == "raw":
+            data = data.T
+
         if self.previous.size == 0:  # Check if empty
             self.previous = data
-            return data.T
+            return data if self.type == "raw" else data.T
 
         self.previous = np.vstack((self.previous, data[-self.add_samples :]))
 
@@ -58,60 +77,24 @@ class RawNormalizer(NMPreprocessor):
             method=self.settings.normalization_method,
             clip=self.settings.clip,
         )
+
         if self.previous.shape[0] >= self.num_samples_normalize:
             self.previous = self.previous[1:]
 
-        return data.T
+        return data if self.type == "raw" else data.T
 
 
-class FeatureNormalizer:
-    def __init__(
-        self,
-        sampling_rate_features_hz: float,
-        settings: NormalizationSettings = NormalizationSettings(),
-    ) -> None:
-        """Normalize raw data.
-
-        normalize_samples : int
-            number of past samples considered for normalization
-        sample_add : int
-            number of samples to add to previous
-        method : str | default is 'mean'
-            data is normalized via subtraction of the 'mean' or 'median' and
-            subsequent division by the 'mean' or 'median'. For z-scoring enter
-            'zscore'.
-        clip : float, optional
-            value at which to clip after normalization
-        """
-        self.settings = settings.validate()
-
-        self.num_samples_normalize = int(
-            settings.normalization_time_s * sampling_rate_features_hz
-        )
-        self.previous: np.ndarray = np.array([])
-
-    def process(self, data: np.ndarray) -> np.ndarray:
-        if self.previous.size == 0:
-            self.previous = data
-            return data
-
-        self.previous = np.vstack((self.previous, data))
-
-        data, self.previous = _normalize_and_clip(
-            current=data,
-            previous=self.previous,
-            method=self.settings.normalization_method,
-            clip=self.settings.clip,
-        )
-        if self.previous.shape[0] >= self.num_samples_normalize:
-            self.previous = self.previous[1:]
-
-        return data
+class RawNormalizer(Normalizer):
+    def __init__(self, sfreq: float, settings: "NMSettings") -> None:
+        super().__init__(sfreq, settings, "raw")
 
 
-"""
-Functions to check for NaN's before deciding which Numpy function to call
-"""
+class FeatureNormalizer(Normalizer):
+    def __init__(self, settings: "NMSettings") -> None:
+        super().__init__(settings.sampling_rate_features_hz, settings, "feature")
+
+
+""" Functions to check for NaN's before deciding which Numpy function to call """
 
 
 def nan_mean(data, axis):
