@@ -71,6 +71,7 @@ class Burst(NMFeature):
         )
 
         self.fband_names = settings.burst_settings.frequency_bands
+        
         f_ranges: list[tuple[float, float]] = [
             (
                 settings.frequency_ranges_hz[fband_name][0],
@@ -79,21 +80,6 @@ class Burst(NMFeature):
             for fband_name in self.fband_names
         ]
 
-        self.seglengths = np.floor(
-            self.sfreq
-            / 1000
-            * np.array(
-                [
-                    settings.bandpass_filter_settings.segment_lengths_ms[fband]
-                    for fband in self.fband_names
-                ]
-            )
-        ).astype(int)
-
-        self.num_max_samples_ring_buffer = int(
-            self.sfreq * self.settings.time_duration_s
-        )
-
         self.bandpass_filter = MNEFilter(
             f_ranges=f_ranges,
             sfreq=self.sfreq,
@@ -101,6 +87,11 @@ class Burst(NMFeature):
             verbose=False,
         )
         self.filter_data = self.bandpass_filter.filter_data
+        
+        
+        self.num_max_samples_ring_buffer = int(
+            self.sfreq * self.settings.time_duration_s
+        )
 
         self.n_channels = len(self.ch_names)
         self.n_fbands = len(self.fband_names)
@@ -137,6 +128,8 @@ class Burst(NMFeature):
 
         self.batch = 0
 
+        # Structure matrix for np.ndimage.label
+        # pixels are connected only to adjacent neighbors along the last axis
         self.connectivity = np.zeros((3, 3, 3))
         self.connectivity[1, 1, :] = 1
 
@@ -163,10 +156,11 @@ class Burst(NMFeature):
         # Call low-level numpy function directly, extra checks not needed
         burst_thr = np_quantile(self.data_buffer, self.settings.threshold / 100)[
             :, :, None
-        ]
+        ] # Add back the extra dimension
 
         bursts = filtered_data >= burst_thr
 
+        # Use np.diff to find the places where bursts start and end
         # Prepend False at the beginning ensures that data never starts on a burst
         # Floor division to ignore last burst if series ends in a burst (true burst length unknown)
         num_bursts = (
