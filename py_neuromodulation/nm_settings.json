@@ -182,14 +182,14 @@
             "slope_ratio": false
         },
         "filter_ranges_hz": [
-            [
-                5,
-                80
-            ],
-            [
-                5,
-                30
-            ]
+            {
+                "frequency_low_hz": 5,
+                "frequency_high_hz": 80
+            },
+            {
+                "frequency_low_hz": 5,
+                "frequency_high_hz": 30
+            }
         ],
         "detect_troughs": {
             "estimate": true,

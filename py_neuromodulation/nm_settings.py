@@ -65,23 +65,22 @@ class NMSettings(NMBaseModel):
     }
 
     # Preproceessing settings
-    raw_resampling_settings: ResamplerSettings = ResamplerSettings()
-    preprocessing_filter: FilterSettings = FilterSettings()
-    raw_normalization_settings: NormalizationSettings = NormalizationSettings()
-    feature_normalization_settings: NormalizationSettings = NormalizationSettings()
-
-    # Postprocessing settings
     preprocessing: list[PreprocessorName] = [
         "raw_resampling",
         "notch_filter",
         "re_referencing",
     ]
+    raw_resampling_settings: ResamplerSettings = ResamplerSettings()
+    preprocessing_filter: FilterSettings = FilterSettings()
+    raw_normalization_settings: NormalizationSettings = NormalizationSettings()
+
+    # Postprocessing settings
     postprocessing: PostprocessingSettings = PostprocessingSettings()
+    feature_normalization_settings: NormalizationSettings = NormalizationSettings()
     project_cortex_settings: ProjectionSettings = ProjectionSettings(max_dist_mm=20)
     project_subcortex_settings: ProjectionSettings = ProjectionSettings(max_dist_mm=5)
 
     # Feature settings
-    # Maybe this should be a subclass of FeatureSelector
     features: Features = Features()
 
     fft_settings: OscillatorySettings = OscillatorySettings()
@@ -207,7 +206,7 @@ class NMSettings(NMBaseModel):
 
     @staticmethod
     def get_default() -> "NMSettings":
-        return NMSettings.from_file(PYNM_DIR / "nm_settings.json")
+        return NMSettings.from_file(PYNM_DIR / "nm_settings.yaml")
 
     @staticmethod
     def list_normalization_methods() -> list[NormMethod]:
