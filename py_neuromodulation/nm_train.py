@@ -5,6 +5,7 @@ from sklearn.discriminant_analysis import StandardScaler
 from sklearn.pipeline import make_pipeline
 from py_neuromodulation import logger
 import pandas as pd
+import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 
@@ -27,6 +28,7 @@ class StreamWorker(QThread):
         logger.info(data)
         logger.info("Data received")
 
+
 class Trainer(QWidget):
     def __init__(self, model, stream, stream_name: str, classes: list | None = ['relax', 'perform task']):
         self.app = QApplication([])
@@ -37,6 +39,7 @@ class Trainer(QWidget):
         self.classes = classes
         self.model = model
         self.df_train = pd.DataFrame()
+        self.app.aboutToQuit.connect(self.closeEvent)
 
     def init_ui(self):
         self.layout = QVBoxLayout()
@@ -71,7 +74,6 @@ class Trainer(QWidget):
     def update_df(self, data):
         logger.info ('Adding new data to the train dataframe')
         self.df_train = pd.concat([self.df_train, data], ignore_index=True)
-        
 
     def stop_thread(self):
         self.label.setText("Recording stopped.")
@@ -89,7 +91,6 @@ class Trainer(QWidget):
     def update_label(self, value):
         self.label.setText(f"Count: {value}")
 
-
     def train_model(self):
         logger.info("Training model...")
         logger.info(f'Shape of training data: {self.df_train.shape}')
@@ -98,7 +99,8 @@ class Trainer(QWidget):
         self.df_train['task'] = self.df_train['task'].apply(lambda x: max_value - x)
 
         df_filtered = self.df_train.drop(columns=['task', 'time'])
-        features = df_filtered.columns[~df_filtered.columns.str.endswith('LineLength')]
+        features = df_filtered.columns # [~df_filtered.columns.str.endswith('LineLength')]
+        print(features)
 
         X = self.df_train[features]
         y = self.df_train['task']
@@ -107,10 +109,17 @@ class Trainer(QWidget):
 
         pipeline = make_pipeline(StandardScaler(), self.model)
         pipeline.fit(X_train, y_train)
+        
+        live_model = "./sub/model.joblib"
+        joblib.dump(pipeline, live_model)
 
         y_pred = pipeline.predict(X_test)
         print("Accuracy:", accuracy_score(y_test, y_pred))
         print(classification_report(y_test, y_pred))
+
+    def closeEvent(self, event=None):
+        print("Application is closing...")
+        # self.app.quit()
 
     def start(self):
         self.show()

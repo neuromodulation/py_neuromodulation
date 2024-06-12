@@ -123,6 +123,8 @@ class _GenericStream(NMStream):
         is_stream_lsl: bool = True,
         stream_lsl_name: str = None,
         plot_lsl: bool = False,
+        live_decode: bool = False,
+        model_path: _PathLike | None = None,
         parallel: bool = False,
         n_jobs: int = -2,
     ) -> pd.DataFrame:
@@ -188,6 +190,9 @@ class _GenericStream(NMStream):
         else:
             l_features: list[pd.Series] = []
             cnt_samples = offset_start
+            if live_decode: 
+                from py_neuromodulation.nm_live_decode import LiveDecoder
+                live_decoder = LiveDecoder()
 
             while True:
                 next_item = next(generator, None)
@@ -212,6 +217,10 @@ class _GenericStream(NMStream):
                 )
 
                 l_features.append(feature_series)
+
+                if live_decode:
+                    live_decode_result = live_decoder.get_results(l_features)
+                    logger.info(f'results: {live_decode_result}')
 
                 cnt_samples += sample_add
         feature_df = pd.DataFrame(l_features)
@@ -357,6 +366,8 @@ class Stream(_GenericStream):
         stream_lsl: bool = False,
         stream_lsl_name: str = None,
         plot_lsl: bool = False,
+        live_decode: bool = False,
+        model_path: _PathLike = None,
     ) -> pd.DataFrame:
         """Call run function for offline stream.
 
@@ -404,4 +415,6 @@ class Stream(_GenericStream):
             is_stream_lsl=stream_lsl,
             stream_lsl_name=stream_lsl_name,
             plot_lsl=plot_lsl,
+            live_decode = live_decode,
+            model_path = model_path,
         )
