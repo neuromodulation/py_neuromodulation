@@ -289,14 +289,26 @@ class Projection:
         if not self.initialized:
             self.init_projection_run(feature_dict)
 
+        print([idx_ch for idx_ch in self.idx_chs_ecog])
+
         dat_cortex = (
-            np.array([feature_dict[idx_ch] for idx_ch in self.idx_chs_ecog])
+            np.array(
+                [
+                    np.array([feature_dict[ch] for ch in ch_names])
+                    for ch_names in self.names_chs_ecog
+                ]
+            )
             if self.project_cortex
             else None
         )
 
         dat_subcortex = (
-            np.array([feature_dict[idx_ch] for idx_ch in self.idx_chs_lfp])
+            np.array(
+                [
+                    np.array([feature_dict[ch] for ch in ch_names])
+                    for ch_names in self.names_chs_lfp
+                ]
+            )
             if self.project_subcortex
             else None
         )
