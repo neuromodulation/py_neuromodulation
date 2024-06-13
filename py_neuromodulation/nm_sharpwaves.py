@@ -50,7 +50,7 @@ class SharpwaveSettings(NMBaseModel):
         "var": [],
     }
     apply_estimator_between_peaks_and_troughs: bool = True
-    
+
     def disable_all_features(self):
         self.sharpwave_features.disable_all()
         for est in self.estimator.keys():
@@ -67,6 +67,7 @@ class SharpwaveSettings(NMBaseModel):
             ), f"Add estimator key for {used_feature}"
 
         return settings
+
 
 class SharpwaveAnalyzer(NMFeature):
     def __init__(
@@ -114,11 +115,7 @@ class SharpwaveAnalyzer(NMFeature):
                     )
                 )
 
-        # initialize used features
         self.used_features = self.sw_settings.sharpwave_features.get_enabled()
-
-        # initialize attributes
-        self._initialize_sw_features()
 
         # initializing estimator functions, respecitive for all sharpwave features
         self.estimator_dict: dict[str, dict[str, Callable]] = {
@@ -131,14 +128,30 @@ class SharpwaveAnalyzer(NMFeature):
             for feat in feat_list
         }
 
-    def _initialize_sw_features(self) -> None:
-        """Resets used attributes to empty lists"""
-        for feature_name in self.used_features:
-            setattr(self, feature_name, [])
-        if "trough" not in self.used_features:
-            # trough attribute is still necessary, even if it is not specified in settings
-            self.trough = []
-        self.troughs_idx = []
+        self.need_peak_left = (
+            self.sw_settings.sharpwave_features.peak_left
+            or self.sw_settings.sharpwave_features.prominence
+        )
+        self.need_peak_right = (
+            self.sw_settings.sharpwave_features.peak_right
+            or self.sw_settings.sharpwave_features.prominence
+        )
+        self.need_trough = (
+            self.sw_settings.sharpwave_features.trough
+            or self.sw_settings.sharpwave_features.prominence
+        )
+
+        self.need_decay_steepness = (
+            self.sw_settings.sharpwave_features.decay_steepness
+            or self.sw_settings.sharpwave_features.slope_ratio
+        )
+
+        self.need_rise_steepness = (
+            self.sw_settings.sharpwave_features.rise_steepness
+            or self.sw_settings.sharpwave_features.slope_ratio
+        )
+
+        self.need_steepness = self.need_rise_steepness or self.need_decay_steepness
 
     def calc_feature(
         self,
@@ -186,7 +199,6 @@ class SharpwaveAnalyzer(NMFeature):
             if detect_troughs:
                 self.data_process_sw = -self.data_process_sw
 
-            self._initialize_sw_features()  # reset sharpwave feature attriubtes to empty lists
             self.analyze_waveform()
 
             # for each feature take the respective fun.
@@ -231,25 +243,27 @@ class SharpwaveAnalyzer(NMFeature):
         """
 
         from scipy.signal import find_peaks
-        
-        peaks = find_peaks(
+
+        peak_idx = find_peaks(
             self.data_process_sw,
             distance=self.sw_settings.detect_troughs.distance_peaks_ms,
         )[0]
-        troughs = find_peaks(
+        trough_idx = find_peaks(
             -self.data_process_sw,
             distance=self.sw_settings.detect_troughs.distance_troughs_ms,
         )[0]
 
         """ Find left and right peak indexes for each trough """
-        peak_pointer = 0
+        peak_pointer = first_valid = last_valid = 0
         peak_idx_left_list: list[int] = []
         peak_idx_right_list: list[int] = []
-        first_valid = last_valid = 0
+        
 
-        for i, trough_idx in enumerate(troughs):
+        for i in range(len(trough_idx)):
             # Locate peak right of current trough
-            while peak_pointer < peaks.size and peaks[peak_pointer] < trough_idx:
+            while (
+                peak_pointer < peak_idx.size and peak_idx[peak_pointer] < trough_idx[i]
+            ):
                 peak_pointer += 1
 
             if peak_pointer - 1 < 0:
@@ -257,37 +271,42 @@ class SharpwaveAnalyzer(NMFeature):
                 first_valid = i + 1  # Try with next one
                 continue
 
-            if peak_pointer == peaks.size:
+            if peak_pointer == peak_idx.size:
                 # If we went past the end of the peaks list, trough had no peak to its right
                 continue
 
             last_valid = i
-            peak_idx_left_list.append(peaks[peak_pointer - 1])
-            peak_idx_right_list.append(peaks[peak_pointer])
+            peak_idx_left_list.append(peak_idx[peak_pointer - 1])
+            peak_idx_right_list.append(peak_idx[peak_pointer])
 
-        troughs = troughs[first_valid : last_valid + 1]  # Remove non valid troughs
-
+        # Remove non valid troughs and make array of left and right peaks for  each trough
+        trough_idx = trough_idx[first_valid : last_valid + 1]
         peak_idx_left = np.array(peak_idx_left_list, dtype=int)
         peak_idx_right = np.array(peak_idx_right_list, dtype=int)
 
-        self.peak_left = self.data_process_sw[peak_idx_left]
-        self.peak_right = self.data_process_sw[peak_idx_right]
-        trough_values = self.data_process_sw[troughs]
-
         """ Calculate features (vectorized) """
 
+        if self.need_peak_left:
+            self.peak_left: np.ndarray = self.data_process_sw[peak_idx_left]
+
+        if self.need_peak_right:
+            self.peak_right: np.ndarray = self.data_process_sw[peak_idx_right]
+
+        if self.need_trough:
+            self.trough: np.ndarray = self.data_process_sw[trough_idx]
+
         if self.sw_settings.sharpwave_features.interval:
-            self.interval = np.concatenate((np.zeros(1), np.diff(troughs))) * (
+            self.interval = np.concatenate((np.zeros(1), np.diff(trough_idx))) * (
                 1000 / self.sfreq
             )
 
         if self.sw_settings.sharpwave_features.sharpness:
             # sharpess is calculated on a +- 5 ms window
             # valid troughs need 5 ms of margin on both siddes
-            troughs_valid = troughs[
+            troughs_valid = trough_idx[
                 np.logical_and(
-                    troughs - int(5 * (1000 / self.sfreq)) > 0,
-                    troughs + int(5 * (1000 / self.sfreq))
+                    trough_idx - int(5 * (1000 / self.sfreq)) > 0,
+                    trough_idx + int(5 * (1000 / self.sfreq))
                     < self.data_process_sw.shape[0],
                 )
             ]
@@ -303,51 +322,46 @@ class SharpwaveAnalyzer(NMFeature):
                 )
             ) / 2
 
-        if (
-            self.sw_settings.sharpwave_features.rise_steepness
-            or self.sw_settings.sharpwave_features.decay_steepness
-        ):
+        if self.need_steepness:
             # steepness is calculated as the first derivative
             steepness: np.ndarray = np.concatenate(
                 (np.zeros(1), np.diff(self.data_process_sw))
             )
 
-            if self.sw_settings.sharpwave_features.rise_steepness:
+            if self.need_rise_steepness:
                 # left peak -> trough
                 # + 1 due to python syntax, s.t. the last element is included
                 self.rise_steepness = np.array(
                     [
-                        np.max(np.abs(steepness[peak_idx_left[i] : troughs[i] + 1]))
-                        for i in range(troughs.size)
+                        np.max(np.abs(steepness[peak_idx_left[i] : trough_idx[i] + 1]))
+                        for i in range(trough_idx.size)
                     ]
                 )
 
-            if self.sw_settings.sharpwave_features.decay_steepness:
+            if self.need_decay_steepness:
                 # trough -> right peak
                 self.decay_steepness = np.array(
                     [
-                        np.max(np.abs(steepness[troughs[i] : peak_idx_right[i] + 1]))
-                        for i in range(troughs.size)
+                        np.max(
+                            np.abs(steepness[trough_idx[i] : peak_idx_right[i] + 1])
+                        )
+                        for i in range(trough_idx.size)
                     ]
                 )
 
-            if (
-                self.sw_settings.sharpwave_features.rise_steepness
-                and self.sw_settings.sharpwave_features.decay_steepness
-                and self.sw_settings.sharpwave_features.slope_ratio
-            ):
+            if self.sw_settings.sharpwave_features.slope_ratio:
                 self.slope_ratio = self.rise_steepness - self.decay_steepness
 
         if self.sw_settings.sharpwave_features.prominence:
             self.prominence = np.abs(
-                (self.peak_right + self.peak_left) / 2 - trough_values
+                (self.peak_right + self.peak_left) / 2 - self.trough
             )
 
         if self.sw_settings.sharpwave_features.decay_time:
-            self.decay_time = (peak_idx_left - troughs) * (1000 / self.sfreq)  # ms
+            self.decay_time = (peak_idx_left - trough_idx) * (1000 / self.sfreq)  # ms
 
         if self.sw_settings.sharpwave_features.rise_time:
-            self.rise_time = (peak_idx_right - troughs) * (1000 / self.sfreq)  # ms
+            self.rise_time = (peak_idx_right - trough_idx) * (1000 / self.sfreq)  # ms
 
         if self.sw_settings.sharpwave_features.width:
             self.width = peak_idx_right - peak_idx_left  # ms
