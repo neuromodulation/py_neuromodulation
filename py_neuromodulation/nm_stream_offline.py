@@ -46,13 +46,15 @@ class _GenericStream(NMStream):
                 feature_series[target_name] = data[target_idx, -1]
         return feature_series
 
-    def _add_timestamp(self, feature_series: pd.Series, cnt_samples: int) -> pd.Series:
+    def _add_timestamp(self, feature_series: pd.Series, cnt_samples: int) -> pd.Series: # TODO Änderungen time -> Methode unnötig?
         """Add time stamp in ms.
 
         Due to normalization run_analysis needs to keep track of the counted
         samples. These are accessed here for time conversion.
         """
         feature_series["time"] = cnt_samples * 1000 / self.sfreq
+
+
 
         if self.verbose:
             logger.info("%.2f seconds of data processed", feature_series["time"] / 1000)
@@ -108,10 +110,10 @@ class _GenericStream(NMStream):
         # if isinstance(data_batch, tuple):
         #     data_batch = np.array(data_batch[1])
 
-        feature_series = self.run_analysis.process(data_batch[1].astype(np.float64))
+        feature_series = self.run_analysis.process(data_batch[1].astype(np.float64)) # TODO Take a look at this again
         feature_series = self._add_timestamp(feature_series, cnt_samples)
         feature_series = self._add_target(
-            feature_series=feature_series, data=data_batch[1]
+            feature_series=feature_series, data=data_batch[1] # TODO also here
         )
         return feature_series
 
@@ -187,7 +189,7 @@ class _GenericStream(NMStream):
 
         else:
             l_features: list[pd.Series] = []
-            cnt_samples = offset_start
+            last_time = None
 
             while True:
                 next_item = next(generator, None)
@@ -203,9 +205,11 @@ class _GenericStream(NMStream):
                     data_batch.astype(np.float64)
                 )
 
-                feature_series = self._add_timestamp(
-                   feature_series, cnt_samples  
-                )
+                feature_series["time"] = time_[-1]
+                if self.verbose:
+                    if last_time is not None:
+                        logger.info("%.2f seconds of data processed", time_[-1] - last_time)
+                    last_time = time_[-1]
 
                 feature_series = self._add_target(
                     feature_series=feature_series, data=data_batch
@@ -213,7 +217,6 @@ class _GenericStream(NMStream):
 
                 l_features.append(feature_series)
 
-                cnt_samples += sample_add
         feature_df = pd.DataFrame(l_features)
 
         self.save_after_stream(out_path_root, folder_name, feature_df)
