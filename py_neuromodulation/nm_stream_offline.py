@@ -180,7 +180,7 @@ class _GenericStream(NMStream):
 
         else:
             l_features: list[dict] = []
-            cnt_samples: int = int(offset_start)
+            cnt_samples = offset_start
 
             while True:
                 next_item = next(generator, None)
@@ -202,7 +202,7 @@ class _GenericStream(NMStream):
 
                 cnt_samples += sample_add
 
-        feature_df = pd.DataFrame.from_records(l_features)
+        feature_df = pd.DataFrame.from_records(l_features).astype(np.float64)
 
         self.save_after_stream(out_path_root, folder_name, feature_df)
 

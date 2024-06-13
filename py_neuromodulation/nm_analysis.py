@@ -22,7 +22,7 @@ target_filter_str = {
 features_reverse_order_plotting = {"stft", "fft", "bandpass"}
 
 
-class Feature_Reader:
+class FeatureReader:
     def __init__(
         self, feature_dir: str, feature_file: str = "", binarize_label: bool = True
     ) -> None:

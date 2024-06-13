@@ -273,20 +273,21 @@ class DataProcessor:
                 for idx, key in enumerate(features_dict.keys())
             }
 
-        # features_current = pd.DataFrame(
-        #     data=list(features_dict.values()),
-        #     index=list(features_dict.keys()),
-        #     dtype=np.float64,
-        # )
-
         # project features to grid
-        # if self.projection:
-        #     features_current = self.projection.project_features(features_current)
+        if self.projection:
+            self.projection.project_features(features_dict)
 
         # check for all features, where the channel had a NaN, that the feature is also put to NaN
-        # if nan_channels.sum() > 0:
-        #     for ch in list(np.array(self.ch_names_used)[nan_channels]):
-        #         features_current.loc[features_current.index.str.contains(ch)] = np.nan
+        if nan_channels.sum() > 0:
+            # TONI: no need to do this if we store both old and new names for the channels
+            new_nan_channels = []
+            for ch in list(np.array(self.ch_names_used)[nan_channels]):
+                for key in features_dict.keys():
+                    if ch in key:
+                        new_nan_channels.append(key)
+                
+            for ch in new_nan_channels:
+                features_dict[ch] = np.nan
 
         if self.verbose:
             logger.info("Last batch took: %.2f seconds", time() - start_time)

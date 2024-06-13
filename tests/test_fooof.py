@@ -6,7 +6,7 @@ def test_fooof_features(setup_default_stream_fast_compute):
 
     generator = nm_generator.raw_data_generator(data, stream.settings, stream.sfreq)
     _, data_batch = next(generator, None)
-    feature_series = stream.run_analysis.process(data_batch)
+    feature_series = stream.data_processor.process(data_batch)
     # since the settings can define searching for "max_n_peaks" peaks
     # there can be None's in the feature_series
     # with a non successful fit, aperiodic features can also be None
