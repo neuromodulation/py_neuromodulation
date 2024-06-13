@@ -17,6 +17,15 @@ LARGE_NUM = 2**24
 
 
 def get_label_pos(burst_labels, valid_labels):
+    """_summary_
+
+    Args:
+        burst_labels (_type_): _description_
+        valid_labels (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     max_label = np.max(burst_labels, axis=2).flatten()
     min_label = np.min(
         burst_labels, axis=2, initial=LARGE_NUM, where=burst_labels != 0
@@ -71,7 +80,7 @@ class Burst(NMFeature):
         )
 
         self.fband_names = settings.burst_settings.frequency_bands
-        
+
         f_ranges: list[tuple[float, float]] = [
             (
                 settings.frequency_ranges_hz[fband_name][0],
@@ -87,8 +96,7 @@ class Burst(NMFeature):
             verbose=False,
         )
         self.filter_data = self.bandpass_filter.filter_data
-        
-        
+
         self.num_max_samples_ring_buffer = int(
             self.sfreq * self.settings.time_duration_s
         )
@@ -130,8 +138,8 @@ class Burst(NMFeature):
 
         # Structure matrix for np.ndimage.label
         # pixels are connected only to adjacent neighbors along the last axis
-        self.connectivity = np.zeros((3, 3, 3))
-        self.connectivity[1, 1, :] = 1
+        self.label_structure_matrix = np.zeros((3, 3, 3))
+        self.label_structure_matrix[1, 1, :] = 1
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         from scipy.signal import hilbert
@@ -156,8 +164,9 @@ class Burst(NMFeature):
         # Call low-level numpy function directly, extra checks not needed
         burst_thr = np_quantile(self.data_buffer, self.settings.threshold / 100)[
             :, :, None
-        ] # Add back the extra dimension
+        ]  # Add back the extra dimension
 
+        # Get burst locations as a boolean array, True where data is above threshold (i.e. a burst)
         bursts = filtered_data >= burst_thr
 
         # Use np.diff to find the places where bursts start and end
@@ -167,8 +176,8 @@ class Burst(NMFeature):
             np.sum(np.diff(bursts, axis=2, prepend=False), axis=2) // 2
         ).astype(np.float64)  # np.astype added to avoid casting error in np.divide
 
-        # Label each burst with a unique id, limiting connectivity to last axis
-        burst_labels = label(bursts, self.connectivity)[0]  # type: ignore
+        # Label each burst with a unique id, limiting connectivity to last axis (see scipy.ndimage.label docs for details)
+        burst_labels = label(bursts, self.label_structure_matrix)[0]  # type: ignore # wrong return type in scipy
 
         # Remove labels of bursts that are at the end of the dataset, and 0
         labels_at_end = np.concatenate((np.unique(burst_labels[:, :, -1]), (0,)))
@@ -177,14 +186,15 @@ class Burst(NMFeature):
             ~np.isin(valid_labels, labels_at_end, assume_unique=True)
         ]
 
-        # Precalculate (channel, band) coordinates for each valid label
+        # Find (channel, band) coordinates for each valid label and get an array that maps each valid label to its channel/band
+        # Channel band coordinate is flattened to a 1D array of length (n_channels x n_fbands) 
         label_positions = get_label_pos(burst_labels, valid_labels)
 
         # Now we're ready to calculate features
-        burst_lengths = label_sum(bursts, burst_labels, index=valid_labels) / self.sfreq
+
 
         if "duration" in self.used_features or "burst_rate_per_s" in self.used_features:
-            # Handle division by zero using np.divide
+            # Handle division by zero using np.divide. Where num_bursts is 0, the result is 0
             self.burst_duration_mean = (
                 np.divide(
                     np.sum(bursts, axis=2),
@@ -194,9 +204,14 @@ class Burst(NMFeature):
                 )
                 / self.sfreq
             )
-            
+
         if "duration" in self.used_features:
-            # The max needs to be calculated per channel
+            # First get burst length for each valid burst
+            burst_lengths = label_sum(bursts, burst_labels, index=valid_labels) / self.sfreq
+
+            # Now the max needs to be calculated per channel/band
+            # For that, loop over channels/bands, get the corresponding burst lengths, and get the max
+            # Give parameter initial=0 so that when there are no bursts, the max is 0
             # TODO: it might be interesting to write a C function for this
             duration_max_flat = np.zeros(self.n_channels * self.n_fbands)
             for idx in range(self.n_channels * self.n_fbands):
@@ -209,9 +224,12 @@ class Burst(NMFeature):
             )
 
         if "amplitude" in self.used_features:
+            # Max amplitude is just the max of the filtered data where there is a burst
             self.burst_amplitude_max = (filtered_data * bursts).max(axis=2)
+            
             # The mean is actually a mean of means, so we need the mean for each individual burst
             label_means = label_mean(filtered_data, burst_labels, index=valid_labels)
+            # Now, loop over channels/bands, get the corresponding burst means, and calculate the mean of means
             # TODO: it might be interesting to write a C function for this
             amplitude_mean_flat = np.zeros(self.n_channels * self.n_fbands)
             for idx in range(self.n_channels * self.n_fbands):
@@ -232,7 +250,7 @@ class Burst(NMFeature):
         if "in_burst" in self.used_features:
             self.end_in_burst = bursts[:, :, -1]  # End in burst
 
-        # Create dictionary to return
+        # Create dictionary of features which is the correct return format
         for (ch_i, ch), (fb_i, fb), feat in self.feature_combinations:
             self.STORE_FEAT_DICT[feat](features_compute, ch_i, ch, fb_i, fb)
 
