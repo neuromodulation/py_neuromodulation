@@ -364,9 +364,7 @@ class SharpwaveAnalyzer(NMFeature):
             left_height = data[troughs_valid - int(5 * (1000 / self.sfreq))]
             right_height = data[troughs_valid + int(5 * (1000 / self.sfreq))]
             # results["sharpness"] = ((trough_height - left_height) + (trough_height - right_height)) / 2
-            results["sharpness"] = trough_height - 0.5 * (
-                left_height - right_height
-            )  # Simplified
+            results["sharpness"] = trough_height - 0.5 * (left_height + right_height) 
 
         if self.need_steepness:
             # steepness is calculated as the first derivative
