@@ -289,8 +289,6 @@ class Projection:
         if not self.initialized:
             self.init_projection_run(feature_dict)
 
-        print([idx_ch for idx_ch in self.idx_chs_ecog])
-
         dat_cortex = (
             np.array(
                 [
