@@ -21,7 +21,7 @@ class NoldsFeatures(FeatureSelector):
 
 class NoldsSettings(NMBaseModel):
     raw: bool = True
-    frequency_bands: list[str] = ["low_beta"]
+    frequency_bands: list[str] = ["low beta"]
     features: NoldsFeatures = NoldsFeatures()
 
 
