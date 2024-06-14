@@ -32,16 +32,23 @@ class MNEConnectivity(NMFeature):
         self.fbands = settings.frequency_ranges_hz
         self.fband_ranges: list = []
 
-    @staticmethod
-    def get_epoched_data(raw: "RawArray", epoch_length: float = 1) -> "Epochs":
-        time_samples_s = raw.get_data().shape[1] / raw.info["sfreq"]
+    def get_epoched_data(
+        self, data: np.ndarray, time_samples_s: float, epoch_length: float = 1
+    ) -> "Epochs":
+        from mne.io import RawArray
+        from mne import create_info, make_fixed_length_events, Epochs
+
         if epoch_length > time_samples_s:
             raise ValueError(
                 f"the intended epoch length for mne connectivity: {epoch_length}s"
                 f" are longer than the passed data array {np.round(time_samples_s, 2)}s"
             )
 
-        from mne import make_fixed_length_events, Epochs
+        raw = RawArray(
+            data=data,
+            info=create_info(ch_names=self.ch_names, sfreq=self.sfreq),
+            verbose=False,
+        )
 
         events = make_fixed_length_events(raw, duration=epoch_length, overlap=0)
         event_id = {"rest": 1}
@@ -82,15 +89,10 @@ class MNEConnectivity(NMFeature):
         return spec_out
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
-        from mne.io import RawArray
-        from mne import create_info
+        
+        time_samples_s = data.shape[1] / self.sfreq
 
-        raw = RawArray(
-            data=data,
-            info=create_info(ch_names=self.ch_names, sfreq=self.sfreq),
-            verbose=False
-        )
-        epochs = self.get_epoched_data(raw)
+        epochs = self.get_epoched_data(data, time_samples_s=time_samples_s)
         # there need to be minimum 2 of two epochs, otherwise mne_connectivity
         # is not correctly initialized
 
