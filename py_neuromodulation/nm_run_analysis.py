@@ -1,8 +1,6 @@
 """This module contains the class to process a given batch of data."""
 
 from time import time
-from typing import Protocol
-
 import numpy as np
 import pandas as pd
 
@@ -12,21 +10,6 @@ from py_neuromodulation.nm_features import Features
 from py_neuromodulation.nm_preprocessing import NMPreprocessors
 from py_neuromodulation.nm_normalization import FeatureNormalizer
 from py_neuromodulation.nm_projection import Projection
-
-
-class Preprocessor(Protocol):
-    def process(self, data: np.ndarray) -> np.ndarray: ...
-
-    def test_settings(self, settings: dict): ...
-
-
-_PREPROCESSING_CONSTRUCTORS = [
-    "raw_resampling",
-    "notch_filter",
-    "re_referencing",
-    "raw_normalization",
-    "preprocessing_filter",
-]
 
 
 class DataProcessor:
@@ -256,7 +239,7 @@ class DataProcessor:
             coord_list=coord_list,  # type: ignore # None case handled above
         )
 
-    def process(self, data: np.ndarray) -> pd.Series:
+    def process(self, data: np.ndarray) -> dict[str, float]:
         """Given a new data batch, calculate and return features.
 
         Parameters
@@ -290,25 +273,26 @@ class DataProcessor:
                 for idx, key in enumerate(features_dict.keys())
             }
 
-        features_current = pd.Series(
-            data=list(features_dict.values()),
-            index=list(features_dict.keys()),
-            dtype=np.float64,
-        )
-
         # project features to grid
         if self.projection:
-            features_current = self.projection.project_features(features_current)
+            self.projection.project_features(features_dict)
 
         # check for all features, where the channel had a NaN, that the feature is also put to NaN
         if nan_channels.sum() > 0:
+            # TONI: no need to do this if we store both old and new names for the channels
+            new_nan_channels = []
             for ch in list(np.array(self.ch_names_used)[nan_channels]):
-                features_current.loc[features_current.index.str.contains(ch)] = np.nan
+                for key in features_dict.keys():
+                    if ch in key:
+                        new_nan_channels.append(key)
+                
+            for ch in new_nan_channels:
+                features_dict[ch] = np.nan
 
         if self.verbose:
             logger.info("Last batch took: %.2f seconds", time() - start_time)
 
-        return features_current
+        return features_dict
 
     def save_sidecar(
         self,

@@ -17,7 +17,7 @@ class _GenericStream(NMStream):
     nm_stream_abc : nm_stream_abc.NMStream
     """
 
-    def _add_target(self, feature_series: pd.Series, data: np.ndarray) -> pd.Series:
+    def _add_target(self, feature_dict: dict, data: np.ndarray) -> None:
         """Add target channels to feature series.
 
         Parameters
@@ -43,21 +43,19 @@ class _GenericStream(NMStream):
                 self.target_idx_initialized = True
 
             for target_idx, target_name in zip(self.target_indexes, self.target_names):
-                feature_series[target_name] = data[target_idx, -1]
-        return feature_series
+                feature_dict[target_name] = data[target_idx, -1]
 
-    def _add_timestamp(self, feature_series: pd.Series, cnt_samples: int) -> pd.Series:
+    def _add_timestamp(self, feature_dict: dict, cnt_samples: int) -> None:
         """Add time stamp in ms.
 
-        Due to normalization run_analysis needs to keep track of the counted
+        Due to normalization DataProcessor needs to keep track of the counted
         samples. These are accessed here for time conversion.
         """
-        feature_series["time"] = cnt_samples * 1000 / self.sfreq
+        timestamp = cnt_samples * 1000 / self.sfreq
+        feature_dict["time"] = timestamp
 
         if self.verbose:
-            logger.info("%.2f seconds of data processed", feature_series["time"] / 1000)
-
-        return feature_series
+            logger.info("%.2f seconds of data processed", timestamp / 1000)
 
     def _handle_data(self, data: np.ndarray | pd.DataFrame) -> np.ndarray:
         names_expected = self.nm_channels["name"].to_list()
@@ -71,6 +69,7 @@ class _GenericStream(NMStream):
                     f' Length of nm_channels["name"]: {len(names_expected)}.'
                 )
             return data
+
         names_data = data.columns.to_list()
         if not (
             len(names_expected) == len(names_data)
@@ -108,12 +107,10 @@ class _GenericStream(NMStream):
         # if isinstance(data_batch, tuple):
         #     data_batch = np.array(data_batch[1])
 
-        feature_series = self.run_analysis.process(data_batch[1].astype(np.float64))
-        feature_series = self._add_timestamp(feature_series, cnt_samples)
-        feature_series = self._add_target(
-            feature_series=feature_series, data=data_batch[1]
-        )
-        return feature_series
+        feature_dict = self.data_processor.process(data_batch[1].astype(np.float64))
+        self._add_timestamp(feature_dict, cnt_samples)
+        self._add_target(feature_dict, data_batch[1])
+        return feature_dict
 
     def _run(
         self,
@@ -126,7 +123,6 @@ class _GenericStream(NMStream):
         parallel: bool = False,
         n_jobs: int = -2,
     ) -> pd.DataFrame:
-
         from py_neuromodulation.nm_generator import raw_data_generator
 
         if not is_stream_lsl:
@@ -156,25 +152,22 @@ class _GenericStream(NMStream):
                 )
                 logger.warning(error_msg)
                 self.sfreq = self.lsl_stream.stream.sinfo.sfreq
-            
+
             generator = self.lsl_stream.get_next_batch()
 
-        sample_add = self.sfreq / self.run_analysis.sfreq_features
+        sample_add = self.sfreq / self.data_processor.sfreq_features
 
         offset_time = self.settings["segment_length_features_ms"]
         # offset_start = np.ceil(offset_time / 1000 * self.sfreq).astype(int)
         offset_start = offset_time / 1000 * self.sfreq
 
         if parallel:
-
             from joblib import Parallel, delayed
             from itertools import count
 
             # parallel processing can not be utilized if a LSL stream is used
             if is_stream_lsl:
-                error_msg = (
-                    "Parallel processing is not possible with LSL stream."
-                )
+                error_msg = "Parallel processing is not possible with LSL stream."
                 logger.error(error_msg)
                 raise ValueError(error_msg)
 
@@ -186,7 +179,7 @@ class _GenericStream(NMStream):
             )
 
         else:
-            l_features: list[pd.Series] = []
+            l_features: list[dict] = []
             cnt_samples = offset_start
 
             while True:
@@ -199,22 +192,17 @@ class _GenericStream(NMStream):
 
                 if data_batch is None:
                     break
-                feature_series = self.run_analysis.process(
+                feature_dict = self.data_processor.process(
                     data_batch.astype(np.float64)
                 )
+                self._add_timestamp(feature_dict, cnt_samples)
+                self._add_target(feature_dict, data_batch)
 
-                feature_series = self._add_timestamp(
-                   feature_series, cnt_samples  
-                )
-
-                feature_series = self._add_target(
-                    feature_series=feature_series, data=data_batch
-                )
-
-                l_features.append(feature_series)
+                l_features.append(feature_dict)
 
                 cnt_samples += sample_add
-        feature_df = pd.DataFrame(l_features)
+
+        feature_df = pd.DataFrame.from_records(l_features).astype(np.float64)
 
         self.save_after_stream(out_path_root, folder_name, feature_df)
 

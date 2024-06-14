@@ -94,7 +94,7 @@ stream = nm.Stream(
     coord_names=coord_names,
     verbose=False,
 )
-sw_analyzer = stream.run_analysis.features.features[1]
+sw_analyzer = stream.data_processor.features.features[1]
 
 # %%
 # The plotted example time series, visualized on a short time scale, shows the relation of identified peaks, troughs, and estimated features:
