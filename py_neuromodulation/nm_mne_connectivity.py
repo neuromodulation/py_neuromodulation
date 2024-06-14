@@ -89,7 +89,6 @@ class MNEConnectivity(NMFeature):
         return spec_out
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
-        
         time_samples_s = data.shape[1] / self.sfreq
 
         epochs = self.get_epoched_data(data, time_samples_s=time_samples_s)
@@ -109,11 +108,13 @@ class MNEConnectivity(NMFeature):
                     )[0]
                 )
 
-        dat_conn = spec_out.get_data()
-        for conn in np.arange(dat_conn.shape[0]):
-            for fband_idx, fband in enumerate(self.fbands):
-                features_compute["_".join(["ch1", self.method, str(conn), fband])] = (
-                    np.mean(dat_conn[conn, self.fband_ranges[fband_idx]])
-                )
+        dat_conn: np.ndarray = spec_out.get_data()
+
+        for fband_idx, fband in enumerate(self.fbands):
+            conn_mean = np.mean(dat_conn, axis=0)
+            
+            for conn in np.arange(dat_conn.shape[0]):
+                key = "_".join(["ch1", self.method, str(conn), fband])
+                features_compute[key] =conn_mean[self.fband_ranges[fband_idx]]
 
         return features_compute
