@@ -54,6 +54,7 @@ class MNEConnectivity(NMFeature):
             tmax=epoch_length,
             baseline=None,
             reject_by_annotation=True,
+            verbose=False,
         )
         if epochs.events.shape[0] < 2:
             raise Exception(
@@ -76,6 +77,7 @@ class MNEConnectivity(NMFeature):
             indices=(np.array([0, 0, 1, 1]), np.array([2, 3, 2, 3])),
             faverage=False,
             block_size=1000,
+            verbose=False,
         )
         return spec_out
 
@@ -86,6 +88,7 @@ class MNEConnectivity(NMFeature):
         raw = RawArray(
             data=data,
             info=create_info(ch_names=self.ch_names, sfreq=self.sfreq),
+            verbose=False
         )
         epochs = self.get_epoched_data(raw)
         # there need to be minimum 2 of two epochs, otherwise mne_connectivity
@@ -94,7 +97,7 @@ class MNEConnectivity(NMFeature):
         spec_out = self.estimate_connectivity(epochs)
 
         if not self.fband_ranges:
-            for fband_name, fband_range in self.fbands:
+            for fband_name, fband_range in self.fbands.items():
                 self.fband_ranges.append(
                     np.where(
                         np.logical_and(
