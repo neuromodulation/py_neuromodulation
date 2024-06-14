@@ -280,7 +280,6 @@ class SharpwaveAnalyzer(NMFeature):
                     ]
                 )
         else:
-            print("hi")
             # otherwise, save all write all "flattened" key value pairs in features_compute
             for key, subdict in dict_ch_features.items():
                 for key_sub, value_sub in subdict.items():
