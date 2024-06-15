@@ -92,7 +92,7 @@ stream = nm.Stream(
     coord_names=coord_names,
     verbose=False,
 )
-sw_analyzer: SharpwaveAnalyzer = stream.run_analysis.features.get_feature(  # type: ignore
+sw_analyzer: SharpwaveAnalyzer = stream.data_processor.features.get_feature(  # type: ignore
     "sharpwave_analysis"
 )
 

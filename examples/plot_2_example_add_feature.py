@@ -39,10 +39,12 @@ class NewFeature(NMFeature):
         return features_compute
 
 
-newFeature = NewFeature(stream.settings, list(stream.nm_channels["name"]), stream.sfreq)
-stream.run_analysis.features.features["new_feature"] = newFeature
+newFeature = NewFeature(
+    stream.settings, list(stream.nm_channels["name"]), stream.sfreq
+)
+stream.data_processor.features.features.append(newFeature)
 
-features = stream.run_analysis.process(data)
+features = stream.data_processor.process(data)
 feature_name = f"new_feature_{stream.nm_channels['name'][0]}"
 
 print(f"{feature_name}: {features[feature_name]}")

@@ -155,7 +155,7 @@ features = stream.run(data)
 # There is a lot of output, which we could omit by verbose being False, but let's have a look what was being computed.
 # We will therefore use the :class:`~nm_analysis` class to showcase some functions. For multi-run -or subject analysis we will pass here the feature_file "sub" as default directory:
 
-analyzer = nm_analysis.Feature_Reader(
+analyzer = nm_analysis.FeatureReader(
     feature_dir=stream.PATH_OUT, feature_file=stream.PATH_OUT_folder_name
 )
 

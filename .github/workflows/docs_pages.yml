@@ -1,0 +1,57 @@
+name: docs_pages_workflow
+ 
+on:
+  push:
+    branches: [ main ]
+ 
+jobs:
+ 
+  build_docs_job:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+ 
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+      
+      - name: Install and cache Linux packages
+        if: ${{ runner.os == 'Linux' }}
+        uses: tecolicom/actions-use-apt-tools@v1
+        with:
+          tools: binutils qtbase5-dev qt5-qmake libpugixml1v5
+
+      - name: Set up Python with uv
+        uses: drivendataorg/setup-python-uv-action@v1
+        with:
+          python-version: '3.10'
+          cache: packages
+          cache-dependency-path: pyproject.toml
+ 
+      - name: Install dependencies
+        run: |
+          uv pip install .[docs]
+
+      - name: make the sphinx docs
+        run: |
+          make -C docs clean 
+          make -C docs html
+
+      - name: Init new repo in dist folder and commit generated files
+        run: |
+          cd docs/build/html/
+          git init
+          touch .nojekyll
+          git add -A
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit -m 'deploy'
+          git config --global --add safe.directory /github/workspace/docs/build/html
+
+      - name: Force push to destination branch
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          force: true
+          directory: ./docs/build/html

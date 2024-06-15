@@ -94,7 +94,7 @@ class NMStream(ABC):
         self.projection = None
         self.model = None
 
-        self.run_analysis = DataProcessor(
+        self.data_processor = DataProcessor(
             sfreq=self.sfreq,
             settings=self.settings,
             nm_channels=self.nm_channels,
@@ -111,7 +111,7 @@ class NMStream(ABC):
         This might be handy in case the nm_channels or nm_settings changed
         """
 
-        self.run_analysis = DataProcessor(
+        self.data_processor = DataProcessor(
             sfreq=self.sfreq,
             settings=self.settings,
             nm_channels=self.nm_channels,
@@ -191,13 +191,13 @@ class NMStream(ABC):
         nm_IO.save_features(feature_arr, out_path_root, folder_name)
 
     def save_nm_channels(self, out_path_root: _PathLike, folder_name: str) -> None:
-        self.run_analysis.save_nm_channels(out_path_root, folder_name)
+        self.data_processor.save_nm_channels(out_path_root, folder_name)
 
     def save_settings(self, out_path_root: _PathLike, folder_name: str) -> None:
-        self.run_analysis.save_settings(out_path_root, folder_name)
+        self.data_processor.save_settings(out_path_root, folder_name)
 
     def save_sidecar(self, out_path_root: _PathLike, folder_name: str) -> None:
         """Save sidecar incduing fs, coords, sess_right to
         out_path_root and subfolder 'folder_name'"""
         additional_args = {"sess_right": self.sess_right}
-        self.run_analysis.save_sidecar(out_path_root, folder_name, additional_args)
+        self.data_processor.save_sidecar(out_path_root, folder_name, additional_args)

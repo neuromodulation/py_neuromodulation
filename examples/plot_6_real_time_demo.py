@@ -73,7 +73,7 @@ stream = nm.Stream(
     settings=get_fast_compute_settings(),
 )
 print(
-    f"{np.round(timeit.timeit(lambda: stream.run_analysis.process(data), number=100)/100, 3)} s"
+    f"{np.round(timeit.timeit(lambda: stream.data_processor.process(data), number=100)/100, 3)} s"
 )
 
 print("Computation time for 6 ECoG channels: ")
@@ -86,7 +86,7 @@ stream = nm.Stream(
     settings=get_fast_compute_settings(),
 )
 print(
-    f"{np.round(timeit.timeit(lambda: stream.run_analysis.process(data), number=100)/100, 3)} s"
+    f"{np.round(timeit.timeit(lambda: stream.data_processor.process(data), number=100)/100, 3)} s"
 )
 
 print(
@@ -98,7 +98,7 @@ stream = nm.Stream(
     sfreq=1000, data=data, sampling_rate_features_hz=10, verbose=False
 )
 print(
-    f"{np.round(timeit.timeit(lambda: stream.run_analysis.process(data), number=10)/10, 3)} s"
+    f"{np.round(timeit.timeit(lambda: stream.data_processor.process(data), number=10)/10, 3)} s"
 )
 
 

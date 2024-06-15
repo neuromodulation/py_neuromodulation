@@ -6,10 +6,6 @@ The following example show how to use the Cebra decoding without training.
 
 """
 
-# %%
-# sphinx_gallery_thumbnail_path = '_static/CEBRA_embedding.png'
-
-
 import os
 
 # load example_cebra_decoding.html
@@ -21,11 +17,13 @@ if os.path.exists(tmp_dir):
     # building the docs with sphinx-gallery
     with open(os.path.join(tmp_dir, "out.html"), "wt") as fh:
         fh.write(html_data)
+# set example path for thumbnail
+# sphinx_gallery_thumbnail_path = '_static/CEBRA_embedding.png'
+
 
 # %%
 # CEBRA example
 # -------------
-# Show example
 #
 # .. raw:: html
 #     :file: out.html

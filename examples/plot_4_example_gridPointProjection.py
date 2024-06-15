@@ -93,7 +93,7 @@ features = stream.run(
 # From nm_analysis.py, we use the :class:~`nm_analysis.FeatureReader` class to load the data.
 
 # init analyzer
-feature_reader = nm_analysis.Feature_Reader(
+feature_reader = nm_analysis.FeatureReader(
     feature_dir=PATH_OUT, feature_file=RUN_NAME
 )
 

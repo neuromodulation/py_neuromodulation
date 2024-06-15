@@ -119,7 +119,7 @@ plt.plot(features.time, features.MOV_RIGHT)
 # Note that the path was here adapted to be documentation build compliant.
 # %%
 
-feature_reader = nm_analysis.Feature_Reader(feature_dir=PATH_OUT, feature_file=RUN_NAME)
+feature_reader = nm_analysis.FeatureReader(feature_dir=PATH_OUT, feature_file=RUN_NAME)
 feature_reader.label_name = "MOV_RIGHT"
 feature_reader.label = feature_reader.feature_arr["MOV_RIGHT"]
 

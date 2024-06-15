@@ -128,7 +128,7 @@ features = stream.run(
 # The obtained performances can now be read and visualized using the :class:`nm_analysis.Feature_Reader`.
 
 # initialize analyzer
-feature_reader = nm_analysis.Feature_Reader(
+feature_reader = nm_analysis.FeatureReader(
     feature_dir=PATH_OUT,
     feature_file=RUN_NAME,
 )
