@@ -275,7 +275,7 @@ class DataProcessor:
         # normalize features
         if self.settings.postprocessing.feature_normalization:
             normed_features = self.feature_normalizer.process(
-                np.fromiter(features_dict.values(), dtype="float")
+                np.fromiter(features_dict.values(), dtype=np.float64)
             )
             features_dict = {
                 key: normed_features[idx]
