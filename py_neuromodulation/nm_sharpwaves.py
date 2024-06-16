@@ -6,7 +6,7 @@ from itertools import product
 from py_neuromodulation.nm_types import NMBaseModel
 from pydantic import model_validator
 from typing import TYPE_CHECKING, Any, Callable
-from numpy.core._methods import _mean as np_mean
+from numpy._core._methods import _mean as np_mean
 
 from py_neuromodulation.nm_features import NMFeature
 from py_neuromodulation.nm_types import FeatureSelector, FrequencyRange
