@@ -68,6 +68,16 @@ class FooofAnalyzer(NMFeature):
             and settings.fooof.freq_range_hz[1] < sfreq
         ), f"fooof frequency range needs to be below sfreq, got {settings.fooof.freq_range_hz}"
 
+        from fooof import FOOOF
+        self.fm = FOOOF(
+                    aperiodic_mode=self.ap_mode,
+                    peak_width_limits=tuple(self.settings.peak_width_limits),
+                    max_n_peaks=self.settings.max_n_peaks,
+                    min_peak_height=self.settings.min_peak_height,
+                    peak_threshold=self.settings.peak_threshold,
+                    verbose=False,
+                )
+
     def _get_spectrum(self, data: np.ndarray):
         from scipy.fft import rfft
 
@@ -83,26 +93,17 @@ class FooofAnalyzer(NMFeature):
         data: np.ndarray,
         features_compute: dict,
     ) -> dict:
-        from fooof import FOOOF
 
         for ch_idx, ch_name in enumerate(self.ch_names):
             spectrum = self._get_spectrum(data[ch_idx, :])
 
             try:
-                fm = FOOOF(
-                    aperiodic_mode=self.ap_mode,
-                    peak_width_limits=tuple(self.settings.peak_width_limits),
-                    max_n_peaks=self.settings.max_n_peaks,
-                    min_peak_height=self.settings.min_peak_height,
-                    peak_threshold=self.settings.peak_threshold,
-                    verbose=False,
-                )
-                fm.fit(self.f_vec, spectrum, self.settings.freq_range_hz)
+                self.fm.fit(self.f_vec, spectrum, self.settings.freq_range_hz)
             except Exception as e:
                 logger.critical(e, exc_info=True)
                 raise e
 
-            FIT_PASSED = fm.fooofed_spectrum_ is not None
+            FIT_PASSED = self.fm.fooofed_spectrum_ is not None
 
             for feat in self.settings.aperiodic.get_enabled():
                 f_name = f"{ch_name}_fooof_a_{self.feat_name_map[feat]}"
@@ -112,24 +113,25 @@ class FooofAnalyzer(NMFeature):
 
                 elif (
                     feat == "knee"
-                    and fm.get_params("aperiodic_params", "exponent") == 0
+                    and self.fm.get_params("aperiodic_params", "exponent") == 0
                 ):
                     features_compute[f_name] = None
 
                 else:
-                    params = fm.get_params("aperiodic_params", feat)
-
+                    params = self.fm.get_params("aperiodic_params", feat)
                     if feat == "knee":
-                        params = params ** (
-                            1 / fm.get_params("aperiodic_params", "exponent")
-                        )
-
+                        # If knee parameter is negative, set knee frequency to 0
+                        if params < 0:
+                            params = 0
+                        else:
+                            params = params ** (1 / self.fm.get_params("aperiodic_params", "exponent"))
+                    
                     features_compute[f_name] = np.nan_to_num(params)
 
             peaks_dict: dict[str, np.ndarray | None] = {
-                "bw": fm.get_params("peak_params", "BW") if FIT_PASSED else None,
-                "cf": fm.get_params("peak_params", "CF") if FIT_PASSED else None,
-                "pw": fm.get_params("peak_params", "PW") if FIT_PASSED else None,
+                "bw": self.fm.get_params("peak_params", "BW") if FIT_PASSED else None,
+                "cf": self.fm.get_params("peak_params", "CF") if FIT_PASSED else None,
+                "pw": self.fm.get_params("peak_params", "PW") if FIT_PASSED else None,
             }
 
             if type(peaks_dict["bw"]) is np.float64 or peaks_dict["bw"] is None:
