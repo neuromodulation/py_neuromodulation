@@ -33,6 +33,7 @@ Analyzing temporal features
 import seaborn as sb
 from matplotlib import pyplot as plt
 from scipy import signal
+from scipy.signal import fftconvolve
 import numpy as np
 
 import py_neuromodulation as nm
@@ -100,15 +101,12 @@ sw_analyzer: SharpwaveAnalyzer = stream.data_processor.features.get_feature(  # 
 # The plotted example time series, visualized on a short time scale, shows the relation of identified peaks, troughs, and estimated features:
 data_plt = data[5, 1000:4000]
 
-sw_analyzer._initialize_sw_features()
-filtered_dat = np.convolve(data_plt, sw_analyzer.list_filter[0][1], mode="same")
-# filtered_dat = filtered_dat[500:-500]
+filtered_dat = fftconvolve(data_plt, sw_analyzer.list_filter[0][1], mode="same")
 
 troughs = signal.find_peaks(-filtered_dat, distance=10)[0]
 peaks = signal.find_peaks(filtered_dat, distance=5)[0]
 
-sw_analyzer.data_process_sw = filtered_dat
-sw_analyzer.analyze_waveform()
+sw_results = sw_analyzer.analyze_waveform(filtered_dat)
 
 WIDTH = BAR_WIDTH = 4
 BAR_OFFSET = 50
@@ -151,7 +149,7 @@ plt.plot(
 
 plt.bar(
     troughs + BAR_WIDTH,
-    np.array(sw_analyzer.prominence) * 4,
+    np.array(sw_results["prominence"]) * 4,
     bottom=BAR_OFFSET,
     width=WIDTH,
     color=hue_colors[0],
@@ -160,7 +158,7 @@ plt.bar(
 )
 plt.bar(
     troughs + BAR_WIDTH * 2,
-    -np.array(sw_analyzer.sharpness) * 6,
+    -np.array(sw_results["sharpness"]) * 6,
     bottom=BAR_OFFSET,
     width=WIDTH,
     color=hue_colors[1],
@@ -169,7 +167,7 @@ plt.bar(
 )
 plt.bar(
     troughs + BAR_WIDTH * 3,
-    np.array(sw_analyzer.interval) * 5,
+    np.array(sw_results["interval"]) * 5,
     bottom=BAR_OFFSET,
     width=WIDTH,
     color=hue_colors[2],
@@ -178,7 +176,7 @@ plt.bar(
 )
 plt.bar(
     troughs + BAR_WIDTH * 4,
-    np.array(sw_analyzer.rise_time) * 5,
+    np.array(sw_results["rise_time"]) * 5,
     bottom=BAR_OFFSET,
     width=WIDTH,
     color=hue_colors[3],
@@ -235,7 +233,7 @@ plt.plot(
 
 plt.bar(
     troughs + BAR_WIDTH,
-    np.array(sw_analyzer.prominence) * 4,
+    np.array(sw_results["prominence"]) * 4,
     bottom=BAR_OFFSET,
     width=WIDTH,
     color=hue_colors[0],
@@ -244,7 +242,7 @@ plt.bar(
 )
 plt.bar(
     troughs + BAR_WIDTH * 2,
-    -np.array(sw_analyzer.sharpness) * 6,
+    -np.array(sw_results["sharpness"]) * 6,
     bottom=BAR_OFFSET,
     width=WIDTH,
     color=hue_colors[1],
@@ -253,7 +251,7 @@ plt.bar(
 )
 plt.bar(
     troughs + BAR_WIDTH * 3,
-    np.array(sw_analyzer.interval) * 5,
+    np.array(sw_results["interval"]) * 5,
     bottom=BAR_OFFSET,
     width=WIDTH,
     color=hue_colors[2],
@@ -262,7 +260,7 @@ plt.bar(
 )
 plt.bar(
     troughs + BAR_WIDTH * 4,
-    np.array(sw_analyzer.rise_time) * 5,
+    np.array(sw_results["rise_time"]) * 5,
     bottom=BAR_OFFSET,
     width=WIDTH,
     color=hue_colors[3],
