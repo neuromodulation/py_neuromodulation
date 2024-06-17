@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from itertools import product
 
 from pydantic import Field
-from py_neuromodulation.nm_types import FeatureSelector, NMBaseModel
+from py_neuromodulation.nm_types import BoolSelector, NMBaseModel
 from py_neuromodulation.nm_features import NMFeature
 
 from typing import TYPE_CHECKING, Callable
@@ -43,7 +43,7 @@ def get_label_pos(burst_labels, valid_labels):
     return label_positions
 
 
-class BurstFeatures(FeatureSelector):
+class BurstFeatures(BoolSelector):
     duration: bool = True
     amplitude: bool = True
     burst_rate_per_s: bool = True

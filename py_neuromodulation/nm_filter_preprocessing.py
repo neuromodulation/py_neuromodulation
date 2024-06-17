@@ -3,7 +3,7 @@ import numpy as np
 from pydantic import Field
 from typing import TYPE_CHECKING
 
-from py_neuromodulation.nm_types import FeatureSelector, FrequencyRange
+from py_neuromodulation.nm_types import BoolSelector, FrequencyRange
 from py_neuromodulation.nm_preprocessing import NMPreprocessor
 
 if TYPE_CHECKING:
@@ -18,7 +18,7 @@ FILTER_SETTINGS_MAP = {
 }
 
 
-class FilterSettings(FeatureSelector):
+class FilterSettings(BoolSelector):
     bandstop_filter: bool = True
     bandpass_filter: bool = True
     lowpass_filter: bool = True

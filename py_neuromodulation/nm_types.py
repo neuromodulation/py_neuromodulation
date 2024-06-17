@@ -70,7 +70,7 @@ def get_class(module_details: ImportDetails) -> Type[Any]:
 
 
 class NMBaseModel(BaseModel):
-    model_config = ConfigDict(validate_assignment=False)
+    model_config = ConfigDict(validate_assignment=False, extra="allow")
 
     def __init__(self, *args, **kwargs) -> None:
         if kwargs:
@@ -158,7 +158,7 @@ class FrequencyRange(NMBaseModel):
                 )
 
 
-class FeatureSelector(NMBaseModel):
+class BoolSelector(NMBaseModel):
     def get_enabled(self):
         return [
             f

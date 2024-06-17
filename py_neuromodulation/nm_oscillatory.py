@@ -7,14 +7,14 @@ from pydantic import field_validator
 from typing import TYPE_CHECKING
 
 from py_neuromodulation.nm_features import NMFeature
-from py_neuromodulation.nm_types import FeatureSelector
+from py_neuromodulation.nm_types import BoolSelector
 
 if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
     from py_neuromodulation.nm_kalmanfilter import KalmanSettings
 
 
-class OscillatoryFeatures(FeatureSelector):
+class OscillatoryFeatures(BoolSelector):
     mean: bool = True
     median: bool = False
     std: bool = False
@@ -248,7 +248,7 @@ class STFT(OscillatoryFeature):
         return features_compute
 
 
-class BandpowerFeatures(FeatureSelector):
+class BandpowerFeatures(BoolSelector):
     activity: bool = True
     mobility: bool = False
     complexity: bool = False

@@ -30,6 +30,7 @@ Analyzing temporal features
 # Additionally, different filter ranges can be parametrized using the *filter_ranges_hz* setting.
 # Filtering is necessary to remove high frequent signal fluctuations, but limits also the true estimation of sharpness and prominence due to signal smoothing.
 
+from typing import cast
 import seaborn as sb
 from matplotlib import pyplot as plt
 from scipy import signal
@@ -57,9 +58,7 @@ RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data
     line_noise,
     coord_list,
     coord_names,
-) = nm_IO.read_BIDS_data(
-        PATH_RUN=PATH_RUN
-)
+) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
 
 # %%
 settings = NMSettings.get_fast_compute()
@@ -93,8 +92,8 @@ stream = nm.Stream(
     coord_names=coord_names,
     verbose=False,
 )
-sw_analyzer: SharpwaveAnalyzer = stream.data_processor.features.get_feature(  # type: ignore
-    "sharpwave_analysis"
+sw_analyzer = cast(
+    SharpwaveAnalyzer, stream.data_processor.features.get_feature("sharpwave_analysis")
 )
 
 # %%

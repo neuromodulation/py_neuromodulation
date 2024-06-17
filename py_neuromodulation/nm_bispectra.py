@@ -6,20 +6,20 @@ from typing import TYPE_CHECKING, Callable
 import numpy as np
 
 from py_neuromodulation.nm_features import NMFeature
-from py_neuromodulation.nm_types import FeatureSelector, FrequencyRange
+from py_neuromodulation.nm_types import BoolSelector, FrequencyRange
 
 if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
 
 
-class BispectraComponents(FeatureSelector):
+class BispectraComponents(BoolSelector):
     absolute: bool = True
     real: bool = True
     imag: bool = True
     phase: bool = True
 
 
-class BispectraFeatures(FeatureSelector):
+class BispectraFeatures(BoolSelector):
     mean: bool = True
     sum: bool = True
     var: bool = True

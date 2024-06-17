@@ -5,20 +5,20 @@ from typing import TYPE_CHECKING
 from py_neuromodulation.nm_types import NMBaseModel
 
 from py_neuromodulation.nm_features import NMFeature
-from py_neuromodulation.nm_types import FeatureSelector, FrequencyRange
+from py_neuromodulation.nm_types import BoolSelector, FrequencyRange
 from py_neuromodulation import logger
 
 if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
 
 
-class FooofAperiodicSettings(FeatureSelector):
+class FooofAperiodicSettings(BoolSelector):
     exponent: bool = True
     offset: bool = True
     knee: bool = True
 
 
-class FooofPeriodicSettings(FeatureSelector):
+class FooofPeriodicSettings(BoolSelector):
     center_frequency: bool = False
     band_width: bool = False
     height_over_ap: bool = False
@@ -68,41 +68,36 @@ class FooofAnalyzer(NMFeature):
             and settings.fooof.freq_range_hz[1] < sfreq
         ), f"fooof frequency range needs to be below sfreq, got {settings.fooof.freq_range_hz}"
 
-    def _get_spectrum(self, data: np.ndarray):
-        from scipy.fft import rfft
+        from fooof import FOOOFGroup
 
-        """return absolute value fft spectrum"""
-
-        data = data[-self.num_samples :]
-        Z = np.abs(rfft(data))
-
-        return Z
+        self.fm = FOOOFGroup(
+            aperiodic_mode=self.ap_mode,
+            peak_width_limits=tuple(self.settings.peak_width_limits),
+            max_n_peaks=self.settings.max_n_peaks,
+            min_peak_height=self.settings.min_peak_height,
+            peak_threshold=self.settings.peak_threshold,
+            verbose=False,
+        )
 
     def calc_feature(
         self,
         data: np.ndarray,
         features_compute: dict,
     ) -> dict:
-        from fooof import FOOOF
+        from scipy.fft import rfft
+
+        spectra = np.abs(rfft(data[:, -self.num_samples :]))  # type: ignore
+
+        self.fm.fit(self.f_vec, spectra, self.settings.freq_range_hz)
+
+        if not self.fm.has_model or self.fm.null_inds_ is None:
+            raise RuntimeError("FOOOF failed to fit model to data.")
+
+        failed_fits: list[int] = self.fm.null_inds_
 
         for ch_idx, ch_name in enumerate(self.ch_names):
-            spectrum = self._get_spectrum(data[ch_idx, :])
-
-            try:
-                fm = FOOOF(
-                    aperiodic_mode=self.ap_mode,
-                    peak_width_limits=tuple(self.settings.peak_width_limits),
-                    max_n_peaks=self.settings.max_n_peaks,
-                    min_peak_height=self.settings.min_peak_height,
-                    peak_threshold=self.settings.peak_threshold,
-                    verbose=False,
-                )
-                fm.fit(self.f_vec, spectrum, self.settings.freq_range_hz)
-            except Exception as e:
-                logger.critical(e, exc_info=True)
-                raise e
-
-            FIT_PASSED = fm.fooofed_spectrum_ is not None
+            FIT_PASSED = ch_idx not in failed_fits
+            exp = self.fm.get_params("aperiodic_params", "exponent")[ch_idx]
 
             for feat in self.settings.aperiodic.get_enabled():
                 f_name = f"{ch_name}_fooof_a_{self.feat_name_map[feat]}"
@@ -110,26 +105,24 @@ class FooofAnalyzer(NMFeature):
                 if not FIT_PASSED:
                     features_compute[f_name] = None
 
-                elif (
-                    feat == "knee"
-                    and fm.get_params("aperiodic_params", "exponent") == 0
-                ):
+                elif feat == "knee" and exp == 0:
                     features_compute[f_name] = None
 
                 else:
-                    params = fm.get_params("aperiodic_params", feat)
-
+                    params = self.fm.get_params("aperiodic_params", feat)[ch_idx]
                     if feat == "knee":
-                        params = params ** (
-                            1 / fm.get_params("aperiodic_params", "exponent")
-                        )
+                        # If knee parameter is negative, set knee frequency to 0
+                        if params < 0:
+                            params = 0
+                        else:
+                            params = params ** (1 / exp)
 
                     features_compute[f_name] = np.nan_to_num(params)
 
             peaks_dict: dict[str, np.ndarray | None] = {
-                "bw": fm.get_params("peak_params", "BW") if FIT_PASSED else None,
-                "cf": fm.get_params("peak_params", "CF") if FIT_PASSED else None,
-                "pw": fm.get_params("peak_params", "PW") if FIT_PASSED else None,
+                "bw": self.fm.get_params("peak_params", "BW") if FIT_PASSED else None,
+                "cf": self.fm.get_params("peak_params", "CF") if FIT_PASSED else None,
+                "pw": self.fm.get_params("peak_params", "PW") if FIT_PASSED else None,
             }
 
             if type(peaks_dict["bw"]) is np.float64 or peaks_dict["bw"] is None:

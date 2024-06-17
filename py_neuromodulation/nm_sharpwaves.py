@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, Callable
 from numpy._core._methods import _mean as np_mean
 
 from py_neuromodulation.nm_features import NMFeature
-from py_neuromodulation.nm_types import FeatureSelector, FrequencyRange
+from py_neuromodulation.nm_types import BoolSelector, FrequencyRange
 
 if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
@@ -30,7 +30,7 @@ class PeakDetectionSettings(NMBaseModel):
     distance_peaks_ms: float = 5
 
 
-class SharpwaveFeatures(FeatureSelector):
+class SharpwaveFeatures(BoolSelector):
     peak_left: bool = False
     peak_right: bool = False
     trough: bool = False
