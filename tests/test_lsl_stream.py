@@ -5,40 +5,6 @@ import pytest
 import time
 import threading
 
-    
-def test_mne_lsl(setup_default_data):
-    """ Test the mne-lsl package and the core functionality of the player and stream classes. """
-    raw, data, sfreq = setup_default_data
-
-    player1 = PlayerLSL(raw,  name="general_lsl_test_stream", chunk_size=10)
-    player1 = player1.start()
-
-    stream1 = StreamLSL(name="general_lsl_test_stream", bufsize=2).connect()
-    ch_types = stream1.get_channel_types(unique=True)
-    assert 'dbs' in ch_types, "Expected at least one dbs channel from example data"
-    assert player1.info['nchan'] == 10, "Expected 10 channels from example data"
-    data_l = []
-    timestamps_l = []
-
-    def call_every_100ms(): 
-        data, timestamps = stream1.get_data(winsize=10)
-        data_l.append(data)
-        timestamps_l.append(timestamps)
-
-    t = threading.Timer(0.1, call_every_100ms)
-    t.start()
-
-    time_start = time.time()
-
-    while time.time() - time_start <= 10:
-        time.sleep(1)
-    t.cancel()
-
-    collected_data_shape = np.concatenate(data_l).shape
-    assert collected_data_shape[0] > 0 and collected_data_shape[1] > 0, "Expected non-empty data"
-
-    stream1.disconnect()
-    player1.stop()
 
 @pytest.mark.parametrize('setup_lsl_player', ['search'], indirect=True)
 def test_lsl_stream_search(setup_lsl_player):

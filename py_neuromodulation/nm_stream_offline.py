@@ -145,9 +145,8 @@ class _GenericStream(NMStream):
 
             self._add_target(feature_dict, data_batch)
 
-                l_features.append(feature_dict)
+            l_features.append(feature_dict)
 
-                cnt_samples += sample_add
         feature_df = pd.DataFrame(l_features)
 
         self.save_after_stream(out_path_root, folder_name, feature_df)
