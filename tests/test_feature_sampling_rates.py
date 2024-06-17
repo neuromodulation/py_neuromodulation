@@ -27,8 +27,8 @@ def test_different_sampling_rate_100Hz():
     df = stream.run(arr_test)
 
     # check the difference between time points
-    print(df["time"].iloc[:2])
-    print(sampling_rate_features)
+    #print(df["time"].iloc[:2])
+    #print(sampling_rate_features)
 
     assert np.diff(df["time"].iloc[:2]) / 1000 == (1 / sampling_rate_features)
 
