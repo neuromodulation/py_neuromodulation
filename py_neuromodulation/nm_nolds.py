@@ -5,13 +5,13 @@ from py_neuromodulation.nm_types import NMBaseModel
 from typing import TYPE_CHECKING
 
 from py_neuromodulation.nm_features import NMFeature
-from py_neuromodulation.nm_types import FeatureSelector
+from py_neuromodulation.nm_types import BoolSelector
 
 if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
 
 
-class NoldsFeatures(FeatureSelector):
+class NoldsFeatures(BoolSelector):
     sample_entropy: bool = False
     correlation_dimension: bool = False
     lyapunov_exponent: bool = True

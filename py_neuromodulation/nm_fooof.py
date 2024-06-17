@@ -5,20 +5,20 @@ from typing import TYPE_CHECKING
 from py_neuromodulation.nm_types import NMBaseModel
 
 from py_neuromodulation.nm_features import NMFeature
-from py_neuromodulation.nm_types import FeatureSelector, FrequencyRange
+from py_neuromodulation.nm_types import BoolSelector, FrequencyRange
 from py_neuromodulation import logger
 
 if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
 
 
-class FooofAperiodicSettings(FeatureSelector):
+class FooofAperiodicSettings(BoolSelector):
     exponent: bool = True
     offset: bool = True
     knee: bool = True
 
 
-class FooofPeriodicSettings(FeatureSelector):
+class FooofPeriodicSettings(BoolSelector):
     center_frequency: bool = False
     band_width: bool = False
     height_over_ap: bool = False

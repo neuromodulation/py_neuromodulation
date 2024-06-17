@@ -1,5 +1,5 @@
-from typing import Protocol, TYPE_CHECKING
-from collections.abc import Iterable
+from typing import Protocol, Type, runtime_checkable, TYPE_CHECKING, TypeVar
+from collections.abc import Sequence
 
 if TYPE_CHECKING:
     import numpy as np
@@ -7,10 +7,10 @@ if TYPE_CHECKING:
 
 from py_neuromodulation.nm_types import ImportDetails, get_class, FeatureName
 
-
+@runtime_checkable
 class NMFeature(Protocol):
     def __init__(
-        self, settings: "NMSettings", ch_names: Iterable[str], sfreq: int | float
+        self, settings: "NMSettings", ch_names: Sequence[str], sfreq: int | float
     ) -> None: ...
 
     def calc_feature(self, data: "np.ndarray", features_compute: dict) -> dict:
@@ -31,6 +31,8 @@ class NMFeature(Protocol):
         ...
 
 
+NMFeatureType = TypeVar("NMFeatureType", bound=NMFeature)
+
 FEATURE_DICT: dict[FeatureName | str, ImportDetails] = {
     "raw_hjorth": ImportDetails("nm_hjorth_raw", "Hjorth"),
     "return_raw": ImportDetails("nm_hjorth_raw", "Raw"),
@@ -49,7 +51,7 @@ FEATURE_DICT: dict[FeatureName | str, ImportDetails] = {
 }
 
 
-class Features:
+class FeatureProcessors:
     """Class for calculating features.p"""
 
     def __init__(
@@ -71,7 +73,8 @@ class Features:
         ValueError
             _description_
         """
-
+        from py_neuromodulation import user_features
+    
         # Accept 'str' for custom features
         self.features: dict[FeatureName | str, NMFeature] = {
             feature_name: get_class(FEATURE_DICT[feature_name])(
@@ -79,6 +82,9 @@ class Features:
             )
             for feature_name in settings.features.get_enabled()
         }
+        
+        for feature_name, feature in user_features.items():
+            self.features[feature_name] = feature(settings, ch_names, sfreq)
 
     def register_new_feature(self, feature_name: str, feature: NMFeature) -> None:
         """Register new feature.
@@ -116,3 +122,36 @@ class Features:
 
     def get_feature(self, fname: FeatureName) -> NMFeature:
         return self.features[fname]
+
+
+def AddCustomFeature(feature_name: str, new_feature: Type[NMFeature]):
+    """Add a custom feature to the dictionary of user-defined features.
+        The feature will be automatically enabled in the settings,
+        and computed when the Stream.run() method is called.
+
+    Args:
+        feature_name (str): A name for the feature that will be used to
+        enable/disable the feature in settings and to store the feature
+        class instance in the DataProcessor
+
+        new_feature (NMFeature): Class that implements the user-defined
+        feature. It should implement the NMSettings protocol (defined
+        in this file).
+    """
+    from py_neuromodulation import user_features
+    from py_neuromodulation.nm_settings import NMSettings
+
+    user_features[feature_name] = new_feature
+    NMSettings._add_feature(feature_name)
+
+
+def RemoveCustomFeature(feature_name: str):
+    """Remove a custom feature from the dictionary of user-defined features.
+
+    Args:
+        feature_name (str): Name of the feature to remove
+    """
+    from py_neuromodulation import user_features
+
+    user_features.pop(feature_name)
+    NMSettings._remove_feature(feature_name)

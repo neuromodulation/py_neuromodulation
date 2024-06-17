@@ -3,7 +3,6 @@ import platform
 from pathlib import PurePath
 from importlib.metadata import version
 from .nm_logger import NMLogger
-#import polars as pl
 
 #####################################
 # Globals and environment variables #
@@ -51,6 +50,11 @@ match PLATFORM:
 if KEY in LSL_DICT:
     os.environ["MNE_LSL_LIB"] = str(PYNM_DIR / "liblsl" / LSL_DICT[KEY])
 
+
+# Create global dictionary to store user-defined features
+user_features = {}
+
+
 ######################################
 # Logger initialization and settings #
 ######################################
@@ -63,3 +67,4 @@ logger = NMLogger(__name__)  # logger initialization first to prevent circular i
 from .nm_stream_offline import Stream as Stream
 from .nm_run_analysis import DataProcessor as DataProcessor
 from .nm_settings import NMSettings as NMSettings
+from .nm_features import AddCustomFeature as AddCustomFeature, NMFeature as NMFeature

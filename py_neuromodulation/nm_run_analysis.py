@@ -6,7 +6,7 @@ import pandas as pd
 
 from py_neuromodulation import nm_IO, logger
 from py_neuromodulation.nm_types import _PathLike
-from py_neuromodulation.nm_features import Features
+from py_neuromodulation.nm_features import FeatureProcessors
 from py_neuromodulation.nm_preprocessing import NMPreprocessors
 from py_neuromodulation.nm_projection import Projection
 from py_neuromodulation.nm_settings import NMSettings
@@ -69,7 +69,7 @@ class DataProcessor:
 
             self.feature_normalizer = FeatureNormalizer(self.settings)
 
-        self.features = Features(
+        self.features = FeatureProcessors(
             settings=self.settings,
             ch_names=self.ch_names_used,
             sfreq=self.sfreq_raw,

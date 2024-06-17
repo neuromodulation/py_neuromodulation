@@ -5,19 +5,19 @@ from py_neuromodulation.nm_types import FrequencyRange, NMBaseModel, Field
 from typing import TYPE_CHECKING
 
 from py_neuromodulation.nm_features import NMFeature
-from py_neuromodulation.nm_types import FeatureSelector
+from py_neuromodulation.nm_types import BoolSelector
 from py_neuromodulation import logger
 
 if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
 
 
-class CoherenceMethods(FeatureSelector):
+class CoherenceMethods(BoolSelector):
     coh: bool = True
     icoh: bool = True
 
 
-class CoherenceFeatures(FeatureSelector):
+class CoherenceFeatures(BoolSelector):
     mean_fband: bool = True
     max_fband: bool = True
     max_allfbands: bool = True

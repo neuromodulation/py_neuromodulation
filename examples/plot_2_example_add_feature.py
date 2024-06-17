@@ -4,70 +4,83 @@ Adding New Features
 ===================
 
 """
-
+# %%
 import py_neuromodulation as nm
-from py_neuromodulation.nm_features import NMFeature
 import numpy as np
 from typing import Iterable
 
 # %%
 # In this example we will demonstrate how a new feature can be added to the existing feature pipeline.
-# This can be done simply by adding an object of the inherited :class:`~nm_features_abc.Feature`
-# class to the stream `stream.run_analysis.features.features` list.
+# This can be done by creating a new feature class that implements the protocol class :class:`~nm_features.NMFeature`
+# and registering it with the :func:`~nm_features.AddCustomFeature` function.
 
-data = np.random.random([1, 1000])
 
+# %%
+# Let's create a new feature class called `ChannelMean` that calculates the mean signal for each channel.
+# We can optinally make it inherit from :class:`~nm_features.NMFeature` but as long as it has an adequate constructor
+# and a `calc_feature` method with the appropriate signatures it will work.
+# The :func:`__init__` method should take the settings, channel names and sampling frequency as arguments.
+# The `calc_feature` method should take the data and a dictionary of features as arguments and return the updated dictionary.
+class ChannelMean:
+    def __init__(
+        self, settings: nm.NMSettings, ch_names: Iterable[str], sfreq: float
+    ) -> None:
+        # If required for feature calculation, store the settings,
+        # channel names and sampling frequency (optional)
+        self.settings = settings
+        self.ch_names = ch_names
+        self.sfreq = sfreq
+
+        # Here you can add any additional initialization code
+        # For example, you could store parameters for the functions\
+        # used in the calc_feature method
+        
+        self.feature_name = "channel_mean"
+
+    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
+        # Here you can add any feature calculation code
+        # This example simply calculates the mean signal for each channel
+        ch_means = np.mean(data, axis=1)
+
+        # Store the calculated features in the features_compute dictionary
+        # Be careful to use a unique keyfor each channel and metric you compute
+        for ch_idx, ch in enumerate(self.ch_names):
+            features_compute[f"{self.feature_name}_{ch}"] = ch_means[ch_idx]
+
+        # Return the updated features_compute dictionary to the stream
+        return features_compute
+
+
+nm.AddCustomFeature("channel_mean", ChannelMean)
+
+# %%
+# Now we can instantiate settings and observe that the new feature has been added to the list of features
+settings = nm.NMSettings() # Get default settings
+
+settings.features
+
+# %% 
+# Let's create some artificial data to demonstrate the feature calculation.
+N_CHANNELS = 5
+N_SAMPLES = 10000 # 10 seconds of random data at 1000 Hz sampling frequency
+
+data = np.random.random([N_CHANNELS, N_SAMPLES]) 
 stream = nm.Stream(
     sfreq=1000,
     data=data,
+    settings = settings,
     sampling_rate_features_hz=10,
     verbose=False,
 )
 
+feature_df = stream.run()
+columns = [col for col in feature_df.columns if "channel_mean" in col]
 
-class NewFeature(NMFeature):
-    settings: dict = {}
-    
-    def __init__(self, settings: nm.NMSettings, ch_names: Iterable[str], sfreq: float) -> None:
-        self.s = settings
-        self.ch_names = ch_names
-
-    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
-        for ch_idx, ch in enumerate(self.ch_names):
-            features_compute[f"new_feature_{ch}"] = np.mean(data[ch_idx, :])
-
-        return features_compute
+feature_df[columns]
 
 
-newFeature = NewFeature(
-    stream.settings, list(stream.nm_channels["name"]), stream.sfreq
-)
-stream.data_processor.features.features["new_feature_name"] = newFeature
+# %% 
+# The new feature is added to the settings object 
 
-features = stream.data_processor.process(data)
-feature_name = f"new_feature_{stream.nm_channels['name'][0]}"
 
-print(f"{feature_name}: {features[feature_name]}")
 
-# %%
-# This example shows a simple newly instantiated feature class called `NewFeature`.
-# The instantiated `newFeature` object could then be added to the existing feature list by calling
-# `stream.run_analysis.features.features.append(newFeature)`.
-#
-# To permanently add a novel feature, the new feature class needs to be added to
-# the :class:`~nm_features` class. This can be done by inserting the feature_name in
-# in the :class:`~nm_features.Feature` init function:
-#
-# .. code-block:: python
-#
-#    for feature in s["features"]:
-#        if s["features"][feature] is False:
-#            continue
-#        match feature:
-#            case "new_feature":
-#                FeatureClass = nm_new_feature.NewFeature
-#            ...
-#
-# The new feature class can then be used by setting the `settings.feature["new_feature"]` value in the
-# settings to true.
-#

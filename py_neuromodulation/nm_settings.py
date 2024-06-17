@@ -1,11 +1,12 @@
 """Module for handling settings."""
 
 from pathlib import PurePath, Path
+from typing import ClassVar
 from pydantic import Field, model_validator
 
-from py_neuromodulation import PYNM_DIR, logger
+from py_neuromodulation import PYNM_DIR, logger, user_features
 from py_neuromodulation.nm_types import (
-    FeatureSelector,
+    BoolSelector,
     FrequencyRange,
     PreprocessorName,
     _PathLike,
@@ -27,7 +28,7 @@ from py_neuromodulation.nm_normalization import NormMethod, NormalizationSetting
 from py_neuromodulation.nm_resample import ResamplerSettings
 
 
-class Features(FeatureSelector):
+class FeatureSelection(BoolSelector):
     raw_hjorth: bool = True
     return_raw: bool = True
     bandpass_filter: bool = False
@@ -36,21 +37,24 @@ class Features(FeatureSelector):
     welch: bool = True
     sharpwave_analysis: bool = True
     fooof: bool = False
-    nolds: bool = True
-    coherence: bool = True
-    bursts: bool = False
-    linelength: bool = False
+    nolds: bool = False
+    coherence: bool = False
+    bursts: bool = True
+    linelength: bool = True
     mne_connectivity: bool = False
     bispectrum: bool = False
 
 
-class PostprocessingSettings(FeatureSelector):
+class PostprocessingSettings(BoolSelector):
     feature_normalization: bool = True
     project_cortex: bool = False
     project_subcortex: bool = False
 
 
 class NMSettings(NMBaseModel):
+    # Class variable to store instances
+    _instances: ClassVar[list["NMSettings"]] = []
+
     # General settings
     sampling_rate_features_hz: float = Field(default=10, gt=0)
     segment_length_features_ms: float = Field(default=1000, gt=0)
@@ -81,7 +85,7 @@ class NMSettings(NMBaseModel):
     project_subcortex_settings: ProjectionSettings = ProjectionSettings(max_dist_mm=5)
 
     # Feature settings
-    features: Features = Features()
+    features: FeatureSelection = FeatureSelection()
 
     fft_settings: OscillatorySettings = OscillatorySettings()
     welch_settings: OscillatorySettings = OscillatorySettings()
@@ -96,9 +100,31 @@ class NMSettings(NMBaseModel):
     nolds_features: NoldsSettings = NoldsSettings()
     bispectrum: BispectraSettings = BispectraSettings()
 
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+        for feat_name in user_features.keys():
+            setattr(self.features, feat_name, True)
+
+        NMSettings._add_instance(self)
+
+    @classmethod
+    def _add_instance(cls, instance: "NMSettings") -> None:
+        """Keep track of all instances created in class variable"""
+        cls._instances.append(instance)
+
+    @classmethod
+    def _add_feature(cls, feature: str) -> None:
+        for instance in cls._instances:
+            setattr(instance.features, feature, True)
+
+    @classmethod
+    def _remove_feature(cls, feature: str) -> None:
+        for instance in cls._instances:
+            delattr(instance.features, feature)
+
     @model_validator(mode="after")
     def validate_settings(self):
-
         if len(self.features.get_enabled()) == 0:
             raise ValueError("At least one feature must be selected.")
 
