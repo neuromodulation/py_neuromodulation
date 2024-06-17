@@ -78,6 +78,48 @@ def read_BIDS_data(
         coord_names,
     )
 
+def read_mne_data(
+    PATH_RUN: "_PathLike | BIDSPath",
+    line_noise: int = 50,
+):
+    """_summary_
+
+    Parameters
+    ----------
+    PATH_RUN : _PathLike | BIDSPath
+        Path to mne.io.read_raw supported types https://mne.tools/stable/generated/mne.io.read_raw.html
+    line_noise : int, optional
+        line noise, by default 50
+
+    Returns
+    -------
+    raw : mne.io.Raw
+    sfreq : float
+    ch_names : list[str]
+    ch_type : list[str]
+    bads : list[str]
+    """
+
+    from mne import io as mne_io
+
+    raw_arr = mne_io.read_raw(PATH_RUN)
+    sfreq = raw_arr.info["sfreq"]
+    ch_names = raw_arr.info["ch_names"]
+    ch_types = raw_arr.get_channel_types()
+    logger.info(
+        f"Channel data is read using mne.io.read_raw function. Channel types might not be correct"
+        f" and set to 'eeg' by default"
+    )
+    bads = raw_arr.info["bads"]
+
+    if raw_arr.info["line_freq"] is not None:
+        line_noise = int(raw_arr.info["line_freq"])
+    else:
+        logger.info(
+            f"Line noise is not available in the data, using value of {line_noise} Hz."
+        )
+    
+    return raw_arr.get_data(), sfreq, ch_names, ch_types, bads
 
 def get_coord_list(
     raw: "mne_io.BaseRaw",
