@@ -7,6 +7,7 @@ if TYPE_CHECKING:
 
 from py_neuromodulation.nm_types import ImportDetails, get_class, FeatureName
 
+
 @runtime_checkable
 class NMFeature(Protocol):
     def __init__(
@@ -30,8 +31,6 @@ class NMFeature(Protocol):
         """
         ...
 
-
-NMFeatureType = TypeVar("NMFeatureType", bound=NMFeature)
 
 FEATURE_DICT: dict[FeatureName | str, ImportDetails] = {
     "raw_hjorth": ImportDetails("nm_hjorth_raw", "Hjorth"),
@@ -74,7 +73,7 @@ class FeatureProcessors:
             _description_
         """
         from py_neuromodulation import user_features
-    
+
         # Accept 'str' for custom features
         self.features: dict[FeatureName | str, NMFeature] = {
             feature_name: get_class(FEATURE_DICT[feature_name])(
@@ -82,7 +81,7 @@ class FeatureProcessors:
             )
             for feature_name in settings.features.get_enabled()
         }
-        
+
         for feature_name, feature in user_features.items():
             self.features[feature_name] = feature(settings, ch_names, sfreq)
 
