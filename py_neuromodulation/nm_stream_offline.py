@@ -1,11 +1,15 @@
 """Module for offline data streams."""
 
+from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 from pathlib import Path
 from py_neuromodulation.nm_stream_abc import NMStream
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
+
+if TYPE_CHECKING:
+    from py_neuromodulation.nm_settings import NMSettings
 
 
 class _GenericStream(NMStream):
@@ -90,15 +94,15 @@ class _GenericStream(NMStream):
             ValueError: depending on the settings, parallel processing is not possible
         """
 
-        if "raw_normalization" in self.settings["preprocessing"]:
+        if "raw_normalization" in self.settings.preprocessing:
             raise ValueError(
                 "Parallel processing is not possible with raw_normalization normalization."
             )
-        if self.settings["postprocessing"]["feature_normalization"]:
+        if self.settings.postprocessing.feature_normalization:
             raise ValueError(
                 "Parallel processing is not possible with feature normalization."
             )
-        if self.settings["features"]["bursts"]:
+        if self.settings.features.bursts:
             raise ValueError(
                 "Parallel processing is not possible with burst estimation."
             )
@@ -157,7 +161,7 @@ class _GenericStream(NMStream):
 
         sample_add = self.sfreq / self.data_processor.sfreq_features
 
-        offset_time = self.settings["segment_length_features_ms"]
+        offset_time = self.settings.segment_length_features_ms
         # offset_start = np.ceil(offset_time / 1000 * self.sfreq).astype(int)
         offset_start = offset_time / 1000 * self.sfreq
 
@@ -273,7 +277,7 @@ class Stream(_GenericStream):
         sfreq: float,
         data: np.ndarray | pd.DataFrame | None = None,
         nm_channels: pd.DataFrame | _PathLike | None = None,
-        settings: dict | _PathLike | None = None,
+        settings: "NMSettings | _PathLike | None" = None,
         sampling_rate_features_hz: float | None = None,
         line_noise: float | None = 50,
         path_grids: _PathLike | None = None,

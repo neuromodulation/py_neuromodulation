@@ -8,11 +8,11 @@ def test_stream_init():
     """Test if stream initialization with passed data will setup nm_channels correctly"""
     np.random.seed(0)
     data = np.random.random((10, 1000))
-    sfreq = 500
+    sfreq = 1000
     stream = nm.Stream(sfreq=sfreq, data=data, sampling_rate_features_hz=11)
 
     assert stream.nm_channels.shape[0] == 10
-    assert stream.settings["sampling_rate_features_hz"] == 11
+    assert stream.settings.sampling_rate_features_hz == 11
 
 
 def test_stream_init_no_sfreq():

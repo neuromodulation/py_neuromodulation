@@ -19,23 +19,27 @@ def get_stream():
     )
     stream.nm_channels.loc[0, "target"] = 1
     stream.nm_channels.loc[0, "used"] = 0
-    stream.settings["postprocessing"]["feature_normalization"] = False
-    stream.settings["segment_length_features_ms"] = 5000
-    for feature in stream.settings["features"]:
-        stream.settings["features"][feature] = False
-    stream.settings["features"]["nolds"] = False
-    stream.settings["features"]["fooof"] = True
-    stream.settings["features"]["bursts"] = False
-    stream.settings["features"]["mne_connectivity"] = False
-    stream.settings["coherence"]["channels"] = [["ch1", "ch2"]]
+    
+    stream.settings.postprocessing.feature_normalization = False
+    stream.settings.segment_length_features_ms = 5000
+    
+    stream.settings.features.disable_all()
+    
+    stream.settings.features.nolds = False
+    stream.settings.features.fooof = True
+    stream.settings.features.bursts = False
+    stream.settings.features.mne_connectivity = False
+    
+    stream.settings.coherence.channels = [("ch1", "ch2")]
+    
     return stream
 
 
 def test_setting_exception(get_stream):
     stream = get_stream
-    stream.settings["features"]["burst"] = True
+    stream.settings.features.bursts = True
 
-    with pytest.raises(Exception) as e_info:
+    with pytest.raises(Exception):
         stream.run(parallel=True, n_jobs=-1)
 
 

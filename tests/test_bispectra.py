@@ -3,7 +3,7 @@ import numpy as np
 from py_neuromodulation import (
     nm_define_nmchannels,
     nm_IO,
-    nm_settings,
+    NMSettings,
     Stream,
 )
 
@@ -39,10 +39,10 @@ def test_bispectrum():
         target_keywords=("MOV_RIGHT_CLEAN",),
     )
 
-    settings = nm_settings.get_default_settings()
-    settings = nm_settings.reset_settings(settings)
+    settings = NMSettings.get_default()
+    settings.reset()
 
-    settings["features"]["bispectrum"] = True
+    settings.features.bispectrum = True
 
     stream = Stream(
         settings=settings,

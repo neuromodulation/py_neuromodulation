@@ -1,52 +1,33 @@
 """Module for real-time data normalization."""
 
-from enum import Enum
-
-from sklearn import preprocessing
 import numpy as np
+from typing import TYPE_CHECKING, Callable, Literal, get_args
 
+from py_neuromodulation.nm_types import NMBaseModel, Field, NormMethod
 from py_neuromodulation.nm_preprocessing import NMPreprocessor
 
+if TYPE_CHECKING:
+    from py_neuromodulation.nm_settings import NMSettings
 
-class NORM_METHODS(Enum):
-    MEAN = "mean"
-    MEDIAN = "median"
-    ZSCORE = "zscore"
-    ZSCORE_MEDIAN = "zscore-median"
-    QUANTILE = "quantile"
-    POWER = "power"
-    ROBUST = "robust"
-    MINMAX = "minmax"
+NormalizerType = Literal["raw", "feature"]
 
 
-def test_normalization_settings(
-    normalization_time_s: float, normalization_method: str, clip: bool
-):
-    assert isinstance(
-        normalization_time_s,
-        (float, int),
-    )
+class NormalizationSettings(NMBaseModel):
+    normalization_time_s: float = 30
+    normalization_method: NormMethod = "zscore"
+    clip: float = Field(default=3, ge=0)
 
-    assert isinstance(
-        normalization_method, str
-    ), "normalization method needs to be of type string"
-
-    assert normalization_method in [e.value for e in NORM_METHODS], (
-        f"select a valid normalization method, got {normalization_method}, "
-        f"valid options are {[e.value for e in NORM_METHODS]}"
-    )
-
-    assert isinstance(clip, (float, int, bool))
+    @staticmethod
+    def list_normalization_methods() -> list[NormMethod]:
+        return list(get_args(NormMethod))
 
 
-class RawNormalizer(NMPreprocessor):
+class Normalizer(NMPreprocessor):
     def __init__(
         self,
         sfreq: float,
-        sampling_rate_features_hz: float,
-        normalization_method: str = "zscore",
-        normalization_time_s: float = 30,
-        clip: float = 0,
+        settings: "NMSettings",
+        type: NormalizerType,
     ) -> None:
         """Normalize raw data.
 
@@ -62,97 +43,84 @@ class RawNormalizer(NMPreprocessor):
             value at which to clip after normalization
         """
 
-        test_normalization_settings(normalization_time_s, normalization_method, clip)
+        self.type = type
+        self.settings: NormalizationSettings
 
-        self.method = normalization_method
-        self.clip = clip
-        self.num_samples_normalize = int(normalization_time_s * sfreq)
-        self.add_samples = int(sfreq / sampling_rate_features_hz)
-        self.previous: np.ndarray = np.array([])  # Default empty array
+        match self.type:
+            case "raw":
+                self.settings = settings.raw_normalization_settings.validate()
+                self.add_samples = int(sfreq / settings.sampling_rate_features_hz)
+            case "feature":
+                self.settings = settings.feature_normalization_settings.validate()
+                self.add_samples = 0
+
+        # For type = "feature" sfreq = sampling_rate_features_hz
+        self.num_samples_normalize = int(self.settings.normalization_time_s * sfreq)
+
+        self.previous: np.ndarray = np.empty((0, 0))  # Default empty array
+
+        self.method = self.settings.normalization_method
+        self.using_sklearn = self.method in ["quantile", "power", "robust", "minmax"]
+
+        if self.using_sklearn:
+            import sklearn.preprocessing as skpp
+
+            NORM_METHODS_SKLEARN: dict[NormMethod, Callable] = {
+                "quantile": lambda: skpp.QuantileTransformer(n_quantiles=300),
+                "robust": skpp.RobustScaler,
+                "minmax": skpp.MinMaxScaler,
+                "power": skpp.PowerTransformer,
+            }
+
+            self.normalizer = norm_sklearn(NORM_METHODS_SKLEARN[self.method]())
+
+        else:
+            NORM_FUNCTIONS = {
+                "mean": norm_mean,
+                "median": norm_median,
+                "zscore": norm_zscore,
+                "zscore-median": norm_zscore_median,
+            }
+            self.normalizer = NORM_FUNCTIONS[self.method]
 
     def process(self, data: np.ndarray) -> np.ndarray:
-        data = data.T
+        # TODO: does feature normalization need to be transposed too?
+        if self.type == "raw":
+            data = data.T
+
         if self.previous.size == 0:  # Check if empty
             self.previous = data
-            return data.T
+            return data if self.type == "raw" else data.T
 
         self.previous = np.vstack((self.previous, data[-self.add_samples :]))
 
-        data, self.previous = _normalize_and_clip(
-            current=data,
-            previous=self.previous,
-            method=self.method,
-            clip=self.clip,
-            description="raw",
-        )
-        if self.previous.shape[0] >= self.num_samples_normalize:
-            self.previous = self.previous[1:]
+        data = self.normalizer(data, self.previous)
 
-        return data.T
-
-    def test_settings(self, normalization_time_s, normalization_method, clip):
-        test_normalization_settings(normalization_time_s, normalization_method, clip)
+        if self.settings.clip:
+            data = data.clip(min=-self.settings.clip, max=self.settings.clip)
 
 
-class FeatureNormalizer:
-    def __init__(
-        self,
-        sampling_rate_features_hz: float,
-        normalization_method: str = "zscore",
-        normalization_time_s: float = 30,
-        clip: float = 0,
-    ) -> None:
-        """Normalize raw data.
+        self.previous = self.previous[-self.num_samples_normalize + 1 :]
 
-        normalize_samples : int
-            number of past samples considered for normalization
-        sample_add : int
-            number of samples to add to previous
-        method : str | default is 'mean'
-            data is normalized via subtraction of the 'mean' or 'median' and
-            subsequent division by the 'mean' or 'median'. For z-scoring enter
-            'zscore'.
-        clip : float, optional
-            value at which to clip after normalization
-        """
-        self.test_settings(normalization_time_s, normalization_method, clip)
+        data = np.nan_to_num(data)
 
-        self.method = normalization_method
-        self.clip = clip
-        self.num_samples_normalize = int(
-            normalization_time_s * sampling_rate_features_hz
-        )
-        self.previous: np.ndarray = np.array([])
-
-    def process(self, data: np.ndarray) -> np.ndarray:
-        if self.previous.size == 0:
-            self.previous = data
-            return data
-
-        self.previous = np.vstack((self.previous, data))
-
-        data, self.previous = _normalize_and_clip(
-            current=data,
-            previous=self.previous,
-            method=self.method,
-            clip=self.clip,
-            description="feature",
-        )
-        if self.previous.shape[0] >= self.num_samples_normalize:
-            self.previous = self.previous[1:]
-
-        return data
-
-    def test_settings(self, normalization_time_s, normalization_method, clip):
-        test_normalization_settings(normalization_time_s, normalization_method, clip)
+        return data if self.type == "raw" else data.T
 
 
-"""
-Functions to check for NaN's before deciding which Numpy function to call
-"""
+class RawNormalizer(Normalizer):
+    def __init__(self, sfreq: float, settings: "NMSettings") -> None:
+        super().__init__(sfreq, settings, "raw")
 
 
-def nan_mean(data, axis):
+class FeatureNormalizer(Normalizer):
+    def __init__(self, settings: "NMSettings") -> None:
+        super().__init__(settings.sampling_rate_features_hz, settings, "feature")
+
+
+""" Functions to check for NaN's before deciding which Numpy function to call """
+
+
+def nan_mean(data: np.ndarray, axis: int) -> np.ndarray:
     return (
         np.nanmean(data, axis=axis)
         if np.any(np.isnan(sum(data)))
@@ -160,7 +128,7 @@ def nan_mean(data, axis):
     )
 
 
-def nan_std(data, axis):
+def nan_std(data: np.ndarray, axis: int) -> np.ndarray:
     return (
         np.nanstd(data, axis=axis)
         if np.any(np.isnan(sum(data)))
@@ -168,7 +136,7 @@ def nan_std(data, axis):
     )
 
 
-def nan_median(data, axis):
+def nan_median(data: np.ndarray, axis: int) -> np.ndarray:
     return (
         np.nanmedian(data, axis=axis)
         if np.any(np.isnan(sum(data)))
@@ -176,72 +144,43 @@ def nan_median(data, axis):
     )
 
 
-def _normalize_and_clip(
-    current: np.ndarray,
-    previous: np.ndarray,
-    method: str,
-    clip: float | bool,
-    description: str,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Normalize data."""
-    match method:
-        case NORM_METHODS.MEAN.value:
-            mean = nan_mean(previous, axis=0)
-            current = (current - mean) / mean
-        case NORM_METHODS.MEDIAN.value:
-            median = nan_median(previous, axis=0)
-            current = (current - median) / median
-        case NORM_METHODS.ZSCORE.value:
-            current = (current - nan_mean(previous, axis=0)) / nan_std(previous, axis=0)
-        case NORM_METHODS.ZSCORE_MEDIAN.value:
-            current = (current - nan_median(previous, axis=0)) / nan_std(
-                previous, axis=0
+def norm_mean(current, previous):
+    mean = nan_mean(previous, axis=0)
+    return (current - mean) / mean
+
+
+def norm_median(current, previous):
+    median = nan_median(previous, axis=0)
+    return (current - median) / median
+
+
+def norm_zscore(current, previous):
+    std = nan_std(previous, axis=0)
+    std[std == 0] = 1 # same behavior as sklearn
+    return (current - nan_mean(previous, axis=0)) / std
+
+
+def norm_zscore_median(current, previous):
+    std = nan_std(previous, axis=0)
+    std[std == 0] = 1 # same behavior as sklearn
+    return (current - nan_median(previous, axis=0)) / std
+
+
+def norm_sklearn(sknormalizer):
+    # For the following methods we check for the shape of current
+    # when current is a 1D array, then it is the post-processing normalization,
+    # and we need to expand, and remove the extra dimension afterwards
+    # When current is a 2D array, then it is pre-processing normalization, and
+    # there's no need for expanding.
+
+    def sk_normalizer(current, previous):
+        return (
+            sknormalizer.fit(np.nan_to_num(previous))
+            .transform(
+                # if post-processing: pad dimensions to 2
+                np.reshape(current, (2 - len(current.shape)) * (1,) + current.shape)
             )
-        # For the following methods we check for the shape of current
-        # when current is a 1D array, then it is the post-processing normalization,
-        # and we need to expand, and remove the extra dimension afterwards
-        # When current is a 2D array, then it is pre-processing normalization, and
-        # there's no need for expanding.
-        case (
-            NORM_METHODS.QUANTILE.value
-            | NORM_METHODS.ROBUST.value
-            | NORM_METHODS.MINMAX.value
-            | NORM_METHODS.POWER.value
-        ):
-            norm_methods = {
-                NORM_METHODS.QUANTILE.value: lambda: preprocessing.QuantileTransformer(
-                    n_quantiles=300
-                ),
-                NORM_METHODS.ROBUST.value: preprocessing.RobustScaler,
-                NORM_METHODS.MINMAX.value: preprocessing.MinMaxScaler,
-                NORM_METHODS.POWER.value: preprocessing.PowerTransformer,
-            }
+            .squeeze()  # if post-processing: remove extra dimension # type: ignore
+        )
 
-            current = (
-                norm_methods[method]()
-                .fit(np.nan_to_num(previous))
-                .transform(
-                    # if post-processing: pad dimensions to 2
-                    np.reshape(current, (2 - len(current.shape)) * (1,) + current.shape)
-                )
-                .squeeze()  # if post-processing: remove extra dimension
-            )
-
-        case _:
-            raise ValueError(
-                f"Only {[e.value for e in NORM_METHODS]} are supported as "
-                f"{description} normalization methods. Got {method}."
-            )
-
-    if clip:
-        current = _clip(data=current, clip=clip)
-    return current, previous
-
-
-def _clip(data: np.ndarray, clip: float) -> np.ndarray:
-    """Clip data."""
-    if not clip:
-        clip = 3.0  # default value
-    else:
-        clip = float(clip)
-    return np.nan_to_num(data).clip(min=-clip, max=clip)
+    return sk_normalizer

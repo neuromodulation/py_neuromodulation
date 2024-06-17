@@ -33,7 +33,7 @@ from py_neuromodulation import (
     nm_analysis,
     nm_plots,
     nm_IO,
-    nm_settings,
+    NMSettings,
     nm_define_nmchannels
 )
 
@@ -59,10 +59,9 @@ RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data
         PATH_RUN=PATH_RUN
 )
 
-settings = nm_settings.get_default_settings()
-settings = nm_settings.set_settings_fast_compute(settings)
+settings = NMSettings.get_fast_compute()
 
-settings["postprocessing"]["project_cortex"] = True
+settings.postprocessing.project_cortex = True
 
 nm_channels = nm_define_nmchannels.set_channels(
     ch_names=raw.ch_names,

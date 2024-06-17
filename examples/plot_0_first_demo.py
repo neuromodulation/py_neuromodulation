@@ -11,7 +11,7 @@ from matplotlib import pyplot as plt
 
 import py_neuromodulation as nm
 
-from py_neuromodulation import nm_analysis, nm_define_nmchannels, nm_plots, nm_settings
+from py_neuromodulation import nm_analysis, nm_define_nmchannels, nm_plots, NMSettings
 
 # %%
 # Data Simulation
@@ -107,8 +107,7 @@ nm_channels
 # -----------
 # Next, we will initialize the nm_settings dictionary and use the default settings, reset them, and enable a subset of features:
 
-settings = nm_settings.get_default_settings()
-settings = nm_settings.reset_settings(settings)
+settings = NMSettings.get_fast_compute()
 
 
 # %%
@@ -131,9 +130,10 @@ settings = nm_settings.reset_settings(settings)
 #
 # and use *z-score* postprocessing normalization.
 
-settings["features"]["fft"] = True
-settings["features"]["bursts"] = True
-settings["features"]["sharpwave_analysis"] = True
+settings.features.fooof = True
+settings.features.fft = True
+settings.features.bursts = True
+settings.features.sharpwave_analysis = True
 
 # %%
 # We are now ready to go to instantiate the *Stream* and call the *run* method for feature estimation:

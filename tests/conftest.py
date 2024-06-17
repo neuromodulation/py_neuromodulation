@@ -8,6 +8,7 @@ from py_neuromodulation import (
     nm_mnelsl_generator,
     nm_IO,
     nm_define_nmchannels,
+    NMSettings
 )
 
 @pytest.fixture
@@ -32,7 +33,7 @@ def setup_default_data():
     return raw, data, sfreq
 
 @pytest.fixture
-def setup_default_stream_fast_compute():
+def setup_default_stream_fast_compute() -> tuple[np.ndarray, nm_stream_offline.Stream]:
     """This test function sets a data batch and automatic initialized M1 dataframe
 
     Args:
@@ -72,11 +73,11 @@ def setup_default_stream_fast_compute():
         target_keywords=("MOV_RIGHT_CLEAN",),
     )
 
-    settings = nm_settings.get_default_settings()
-    settings = nm_settings.reset_settings(settings)
-    settings["fooof"]["aperiodic"]["exponent"] = True
-    settings["fooof"]["aperiodic"]["offset"] = True
-    settings["features"]["fooof"] = True
+    settings = NMSettings.get_default()
+    settings.reset()
+    settings.fooof.aperiodic.exponent = True
+    settings.fooof.aperiodic.offset = True
+    settings.features.fooof = True
 
     stream = nm_stream_offline.Stream(
         settings=settings,
@@ -154,8 +155,7 @@ def setup_databatch():
         coord_names,
     ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
 
-    settings = nm_settings.get_default_settings()
-    settings = nm_settings.set_settings_fast_compute(settings)
+    settings = NMSettings.get_fast_compute()
 
     generator = nm_generator.raw_data_generator(data, settings, int(np.floor(sfreq)))
     data_batch = next(generator, None)

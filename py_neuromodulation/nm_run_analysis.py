@@ -6,17 +6,17 @@ import pandas as pd
 
 from py_neuromodulation import nm_IO, logger
 from py_neuromodulation.nm_types import _PathLike
-from py_neuromodulation.nm_features import Features
+from py_neuromodulation.nm_features import FeatureProcessors
 from py_neuromodulation.nm_preprocessing import NMPreprocessors
-from py_neuromodulation.nm_normalization import FeatureNormalizer
 from py_neuromodulation.nm_projection import Projection
+from py_neuromodulation.nm_settings import NMSettings
 
 
 class DataProcessor:
     def __init__(
         self,
         sfreq: float,
-        settings: dict | _PathLike,
+        settings: "NMSettings | _PathLike",
         nm_channels: pd.DataFrame | _PathLike,
         coord_names: list | None = None,
         coord_list: list | None = None,
@@ -43,10 +43,10 @@ class DataProcessor:
         verbose : boolean
             if True, log signal processed and computation time
         """
-        self.settings = self._load_settings(settings)
+        self.settings = NMSettings.load(settings)
         self.nm_channels = self._load_nm_channels(nm_channels)
 
-        self.sfreq_features: float = self.settings["sampling_rate_features_hz"]
+        self.sfreq_features: float = self.settings.sampling_rate_features_hz
         self._sfreq_raw_orig: float = sfreq
         self.sfreq_raw: float = sfreq // 1
         self.line_noise: float | None = line_noise
@@ -64,14 +64,12 @@ class DataProcessor:
             line_noise=self.line_noise,
         )
 
-        if self.settings["postprocessing"]["feature_normalization"]:
-            settings_str = "feature_normalization_settings"
-            self.feature_normalizer = FeatureNormalizer(
-                sampling_rate_features_hz=self.sfreq_features,
-                **self.settings.get(settings_str, {}),
-            )
+        if self.settings.postprocessing.feature_normalization:
+            from py_neuromodulation.nm_normalization import FeatureNormalizer
 
-        self.features = Features(
+            self.feature_normalizer = FeatureNormalizer(self.settings)
+
+        self.features = FeatureProcessors(
             settings=self.settings,
             ch_names=self.ch_names_used,
             sfreq=self.sfreq_raw,
@@ -153,7 +151,7 @@ class DataProcessor:
 
     @staticmethod
     def _get_grids(
-        settings: dict,
+        settings: "NMSettings",
         path_grids: _PathLike | None,
     ) -> tuple[pd.DataFrame | None, pd.DataFrame | None]:
         """Read settings specified grids
@@ -169,25 +167,25 @@ class DataProcessor:
             grid_cortex, grid_subcortex,
             might be None if not specified in settings
         """
-        if settings["postprocessing"]["project_cortex"]:
+        if settings.postprocessing.project_cortex:
             grid_cortex = nm_IO.read_grid(path_grids, "cortex")
         else:
             grid_cortex = None
-        if settings["postprocessing"]["project_subcortex"]:
+        if settings.postprocessing.project_subcortex:
             grid_subcortex = nm_IO.read_grid(path_grids, "subcortex")
         else:
             grid_subcortex = None
         return grid_cortex, grid_subcortex
 
     def _get_projection(
-        self, settings: dict, nm_channels: pd.DataFrame
+        self, settings: "NMSettings", nm_channels: pd.DataFrame
     ) -> Projection | None:
         """Return projection of used coordinated and grids"""
 
         if not any(
             (
-                settings["postprocessing"]["project_cortex"],
-                settings["postprocessing"]["project_subcortex"],
+                settings.postprocessing.project_cortex,
+                settings.postprocessing.project_subcortex,
             )
         ):
             return None
@@ -211,19 +209,13 @@ class DataProcessor:
             return nm_IO.load_nm_channels(nm_channels)
         return nm_channels
 
-    @staticmethod
-    def _load_settings(settings: dict | _PathLike) -> dict:
-        if not isinstance(settings, dict):
-            return nm_IO.read_settings(str(settings))
-        return settings
-
     def _set_coords(
         self, coord_names: list[str] | None, coord_list: list | None
     ) -> dict:
         if not any(
             (
-                self.settings["postprocessing"]["project_cortex"],
-                self.settings["postprocessing"]["project_subcortex"],
+                self.settings.postprocessing.project_cortex,
+                self.settings.postprocessing.project_subcortex,
             )
         ):
             return {}
@@ -253,7 +245,7 @@ class DataProcessor:
             Features calculated from current data
         """
         start_time = time()
-            
+
         nan_channels = np.isnan(data).any(axis=1)
 
         data = np.nan_to_num(data)[self.feature_idx, :]
@@ -264,9 +256,9 @@ class DataProcessor:
         features_dict = self.features.estimate_features(data)
 
         # normalize features
-        if self.settings["postprocessing"]["feature_normalization"]:
+        if self.settings.postprocessing.feature_normalization:
             normed_features = self.feature_normalizer.process(
-                np.fromiter(features_dict.values(), dtype="float")
+                np.fromiter(features_dict.values(), dtype=np.float64)
             )
             features_dict = {
                 key: normed_features[idx]
@@ -310,10 +302,10 @@ class DataProcessor:
         }
         if self.projection:
             sidecar["coords"] = self.projection.coords
-            if self.settings["postprocessing"]["project_cortex"]:
+            if self.settings.postprocessing.project_cortex:
                 sidecar["grid_cortex"] = self.projection.grid_cortex
                 sidecar["proj_matrix_cortex"] = self.projection.proj_matrix_cortex
-            if self.settings["postprocessing"]["project_subcortex"]:
+            if self.settings.postprocessing.project_subcortex:
                 sidecar["grid_subcortex"] = self.projection.grid_subcortex
                 sidecar["proj_matrix_subcortex"] = self.projection.proj_matrix_subcortex
         if additional_args is not None:
@@ -322,7 +314,7 @@ class DataProcessor:
         nm_IO.save_sidecar(sidecar, out_path_root, folder_name)
 
     def save_settings(self, out_path_root: _PathLike, folder_name: str) -> None:
-        nm_IO.save_settings(self.settings, out_path_root, folder_name)
+        self.settings.save(out_path_root, folder_name)
 
     def save_nm_channels(self, out_path_root: _PathLike, folder_name: str) -> None:
         nm_IO.save_nm_channels(self.nm_channels, out_path_root, folder_name)

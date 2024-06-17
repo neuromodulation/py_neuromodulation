@@ -1,21 +1,20 @@
 import os
-import sys
 import platform
 from pathlib import PurePath
 from importlib.metadata import version
 from .nm_logger import NMLogger
-import matplotlib
 
-if sys.platform.startswith("linux"):
-    matplotlib.use("Agg")
-else:
-    matplotlib.use("qtagg")
+#####################################
+# Globals and environment variables #
+#####################################
 
 __version__ = version(__package__)  # get version from pyproject.toml
 
+# Check if the module is running headless (no display) for tests and doc builds
+PYNM_HEADLESS: bool = not os.environ.get("DISPLAY")
 PYNM_DIR = PurePath(__file__).parent  # Define constant for py_nm directory
 
-logger = NMLogger(__name__)  # logger initialization first to prevent circular import
+os.environ["MPLBACKEND"] = "agg" if PYNM_HEADLESS else "qtagg"  # Set matplotlib backend
 
 # Set  environment variable MNE_LSL_LIB (required to import Stream below)
 LSL_DICT = {
@@ -37,20 +36,39 @@ PLATFORM = platform.system().lower().strip()
 ARCH = platform.architecture()[0]
 match PLATFORM:
     case "windows":
-        KEY = PLATFORM + "_" +  ARCH
+        KEY = PLATFORM + "_" + ARCH
     case "darwin":
-        KEY = PLATFORM + "_" +  platform.processor()
+        KEY = PLATFORM + "_" + platform.processor()
     case "linux":
         DIST = platform.freedesktop_os_release()["VERSION_CODENAME"]
         KEY = PLATFORM + "_" + DIST + "_" + ARCH
         if KEY not in LSL_DICT:
             KEY = PLATFORM + "_" + ARCH
-    case _: 
+    case _:
         KEY = ""
-        
+
 if KEY in LSL_DICT:
     os.environ["MNE_LSL_LIB"] = str(PYNM_DIR / "liblsl" / LSL_DICT[KEY])
 
-# Bring Stream and DataProcessor classes to top namespace
-from .nm_stream_offline import Stream
-from .nm_run_analysis import DataProcessor
+
+# Create global dictionary to store user-defined features
+user_features = {}
+
+
+######################################
+# Logger initialization and settings #
+######################################
+
+logger = NMLogger(__name__)  # logger initialization first to prevent circular import
+
+####################################
+# API: Exposed classes and methods #
+####################################
+from .nm_stream_offline import Stream as Stream
+from .nm_run_analysis import DataProcessor as DataProcessor
+from .nm_settings import NMSettings as NMSettings
+from .nm_features import (
+    add_custom_feature as add_custom_feature,
+    remove_custom_feature as remove_custom_feature,
+    NMFeature as NMFeature,
+)

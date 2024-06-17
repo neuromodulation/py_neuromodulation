@@ -9,13 +9,14 @@ from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger, PYNM_DIR
 
 if TYPE_CHECKING:
+    from py_neuromodulation.nm_settings import NMSettings
     from mne_bids import BIDSPath
     from mne import io as mne_io
 
 
 def load_nm_channels(
     nm_channels: pd.DataFrame | _PathLike,
-) -> pd.DataFrame:
+) -> "pd.DataFrame":
     """Read nm_channels from path or specify via BIDS arguments.
     Nexessary parameters are then
     ch_names (list),
@@ -56,7 +57,7 @@ def read_BIDS_data(
     line_noise : int
     """
 
-    from mne_bids import read_raw_bids, get_bids_path_from_fname, BIDSPath
+    from mne_bids import read_raw_bids, get_bids_path_from_fname
 
     bids_path = get_bids_path_from_fname(PATH_RUN)
 
@@ -77,6 +78,48 @@ def read_BIDS_data(
         coord_names,
     )
 
+def read_mne_data(
+    PATH_RUN: "_PathLike | BIDSPath",
+    line_noise: int = 50,
+):
+    """_summary_
+
+    Parameters
+    ----------
+    PATH_RUN : _PathLike | BIDSPath
+        Path to mne.io.read_raw supported types https://mne.tools/stable/generated/mne.io.read_raw.html
+    line_noise : int, optional
+        line noise, by default 50
+
+    Returns
+    -------
+    raw : mne.io.Raw
+    sfreq : float
+    ch_names : list[str]
+    ch_type : list[str]
+    bads : list[str]
+    """
+
+    from mne import io as mne_io
+
+    raw_arr = mne_io.read_raw(PATH_RUN)
+    sfreq = raw_arr.info["sfreq"]
+    ch_names = raw_arr.info["ch_names"]
+    ch_types = raw_arr.get_channel_types()
+    logger.info(
+        f"Channel data is read using mne.io.read_raw function. Channel types might not be correct"
+        f" and set to 'eeg' by default"
+    )
+    bads = raw_arr.info["bads"]
+
+    if raw_arr.info["line_freq"] is not None:
+        line_noise = int(raw_arr.info["line_freq"])
+    else:
+        logger.info(
+            f"Line noise is not available in the data, using value of {line_noise} Hz."
+        )
+    
+    return raw_arr.get_data(), sfreq, ch_names, ch_types, bads
 
 def get_coord_list(
     raw: "mne_io.BaseRaw",
@@ -167,7 +210,7 @@ def save_features_and_settings(
     run_analysis,
     folder_name,
     out_path,
-    settings,
+    settings: 'NMSettings',
     nm_channels,
     coords,
     fs,
@@ -196,7 +239,7 @@ def save_features_and_settings(
 
     save_sidecar(dict_sidecar, out_path, folder_name)
     save_features(df_features, out_path, folder_name)
-    save_settings(settings, out_path, folder_name)
+    settings.save(out_path, folder_name)
     save_nm_channels(nm_channels, out_path, folder_name)
 
 
@@ -208,17 +251,8 @@ def write_csv(df, path_out):
     write an index column by default
     """
     from pyarrow import csv, Table
+
     csv.write_csv(Table.from_pandas(df), path_out)
-
-
-def save_settings(settings: dict, path_out: _PathLike, folder_name: str = "") -> None:
-    if folder_name:
-        path_out = PurePath(path_out, folder_name, folder_name + "_SETTINGS.json")
-
-    with open(path_out, "w") as f:
-        json.dump(settings, f, indent=4)
-    logger.info(f"settings.json saved to {path_out}")
-
 
 def save_nm_channels(
     nmchannels: pd.DataFrame,
@@ -283,11 +317,6 @@ def read_sidecar(PATH: _PathLike) -> dict:
         return json.load(f)
 
 
-def read_settings(PATH: _PathLike) -> dict:
-    with open(PATH if ".json" in str(PATH) else str(PATH) + "_SETTINGS.json") as f:
-        return json.load(f)
-
-
 def read_features(PATH: _PathLike) -> pd.DataFrame:
     return pd.read_csv(str(PATH) + "_FEATURES.csv", engine="pyarrow")
 
@@ -316,6 +345,7 @@ def loadmat(filename) -> dict:
     which are still mat-objects
     """
     from scipy.io import loadmat as sio_loadmat
+
     data = sio_loadmat(filename, struct_as_record=False, squeeze_me=True)
     return _check_keys(data)
 
@@ -363,6 +393,7 @@ def _todict(matobj) -> dict:
     A recursive function which constructs from matobjects nested dictionaries
     """
     from scipy.io.matlab import mat_struct
+
     dict = {}
     for strg in matobj._fieldnames:
         elem = matobj.__dict__[strg]

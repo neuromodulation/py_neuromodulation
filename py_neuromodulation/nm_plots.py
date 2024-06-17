@@ -179,7 +179,7 @@ def plot_bar_performance_per_channel(
 
 def plot_corr_matrix(
     feature: pd.DataFrame,
-    feature_file: str = "",
+    feature_file: _PathLike = "",
     ch_name: str = "",
     feature_names: list[str] = [],
     show_plot=True,

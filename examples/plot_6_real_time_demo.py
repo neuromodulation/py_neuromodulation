@@ -46,18 +46,17 @@ Real-time feature estimation
 
 # %%
 import py_neuromodulation as nm
-from py_neuromodulation import nm_settings
+from py_neuromodulation import NMSettings
 import numpy as np
 import timeit
 
 
 def get_fast_compute_settings():
-    settings = nm_settings.get_default_settings()
-    settings = nm_settings.reset_settings(settings)
-    settings = nm_settings.set_settings_fast_compute(settings)
-    settings["preprocessing"] = ["re_referencing", "notch_filter"]
-    settings["features"]["fft"] = True
-    settings["postprocessing"]["feature_normalization"] = True
+    settings = NMSettings.get_fast_compute()
+    
+    settings.preprocessing = ["re_referencing", "notch_filter"]
+    settings.features.fft = True
+    settings.postprocessing.feature_normalization = True
     return settings
 
 
@@ -80,7 +79,7 @@ print(
 print("Computation time for 6 ECoG channels: ")
 data = np.random.random([6, 1000])
 stream = nm.Stream(
-    sfreq=500,
+    sfreq=1000,
     data=data,
     sampling_rate_features_hz=10,
     verbose=False,
