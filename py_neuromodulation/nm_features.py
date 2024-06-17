@@ -151,6 +151,7 @@ def remove_custom_feature(feature_name: str):
         feature_name (str): Name of the feature to remove
     """
     from py_neuromodulation import user_features
+    from py_neuromodulation.nm_settings import NMSettings
 
     user_features.pop(feature_name)
     NMSettings._remove_feature(feature_name)
