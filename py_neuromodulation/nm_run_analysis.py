@@ -282,7 +282,7 @@ class DataProcessor:
                 features_dict[ch] = np.nan
 
         if self.verbose:
-            logger.info("Last batch took: %.2f seconds", time() - start_time)
+            logger.info("Last batch took: %.3f seconds to process", time() - start_time)
 
         return features_dict
 

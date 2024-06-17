@@ -166,6 +166,10 @@ class NMSettings(NMBaseModel):
         self.features.enable_all()
         return self
 
+    def disable_all_features(self):
+        self.features.disable_all()
+        return self
+
     @staticmethod
     def get_fast_compute() -> "NMSettings":
         return NMSettings.get_default().set_fast_compute()

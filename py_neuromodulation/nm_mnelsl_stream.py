@@ -68,6 +68,7 @@ class LSLStream:
         self.last_time = time.time()
         check_data = None
         data = None
+        stream_start_time = None
 
         while self.stream.connected:
             time_diff = time.time() - self.last_time  # in s
@@ -75,7 +76,8 @@ class LSLStream:
             if time_diff >= self.sampling_interval:
                 self.last_time = time.time()
 
-                logger.info(f"Pull data - current time: {self.last_time}")
+                logger.debug(f"Pull data - current time: {self.last_time}")
+                logger.debug(f"time since last data pull {time_diff} seconds")
 
                 if time_diff >= 2 * self.sampling_interval:
                     logger.warning(
@@ -86,6 +88,8 @@ class LSLStream:
                     check_data = data
 
                 data, timestamp = self.stream.get_data(winsize=self.winsize)
+                if stream_start_time is None:
+                    stream_start_time = timestamp[0]
 
                 for i in range(self._n_seconds_wait_before_disconnect):
                     if (
@@ -104,6 +108,8 @@ class LSLStream:
                             break
 
                 yield timestamp, data
+
+                logger.info(f"Stream time: {timestamp[-1] - stream_start_time}")
 
                 if not self.headless and not self.listener.running:
                     logger.info("Keyboard interrupt")

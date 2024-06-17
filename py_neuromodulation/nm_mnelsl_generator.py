@@ -65,7 +65,7 @@ class LSLOfflinePlayer:
             self._path_raw = Path.cwd() / "temp_raw.fif"
             raw.save(self._path_raw, overwrite=True)
 
-    def start_player(self, chunk_size: int = 1, n_repeat: int = 1):
+    def start_player(self, chunk_size: int = 10, n_repeat: int = 1):
         """Start MNE-LSL Player
 
         Parameters
