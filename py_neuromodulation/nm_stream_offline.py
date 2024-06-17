@@ -46,21 +46,6 @@ class _GenericStream(NMStream):
                 feature_series[target_name] = data[target_idx, -1]
         return feature_series
 
-    def _add_timestamp(self, feature_series: pd.Series, cnt_samples: int) -> pd.Series: # TODO Änderungen time -> Methode unnötig?
-        """Add time stamp in ms.
-
-        Due to normalization run_analysis needs to keep track of the counted
-        samples. These are accessed here for time conversion.
-        """
-        feature_series["time"] = cnt_samples * 1000 / self.sfreq
-
-
-
-        if self.verbose:
-            logger.info("%.2f seconds of data processed", feature_series["time"] / 1000)
-
-        return feature_series
-
     def _handle_data(self, data: np.ndarray | pd.DataFrame) -> np.ndarray:
         names_expected = self.nm_channels["name"].to_list()
 
@@ -86,37 +71,6 @@ class _GenericStream(NMStream):
             )
         return data.to_numpy().transpose()
 
-    def _check_settings_for_parallel(self):
-        """Check specified settings and raise error if parallel processing is not possible.
-
-        Raises:
-            ValueError: depending on the settings, parallel processing is not possible
-        """
-
-        if "raw_normalization" in self.settings["preprocessing"]:
-            raise ValueError(
-                "Parallel processing is not possible with raw_normalization normalization."
-            )
-        if self.settings["postprocessing"]["feature_normalization"]:
-            raise ValueError(
-                "Parallel processing is not possible with feature normalization."
-            )
-        if self.settings["features"]["bursts"]:
-            raise ValueError(
-                "Parallel processing is not possible with burst estimation."
-            )
-
-    def _process_batch(self, data_batch, cnt_samples):
-        # if isinstance(data_batch, tuple):
-        #     data_batch = np.array(data_batch[1])
-
-        feature_series = self.run_analysis.process(data_batch[1].astype(np.float64)) # TODO Take a look at this again
-        feature_series = self._add_timestamp(feature_series, cnt_samples)
-        feature_series = self._add_target(
-            feature_series=feature_series, data=data_batch[1] # TODO also here
-        )
-        return feature_series
-
     def _run(
         self,
         data: np.ndarray | pd.DataFrame | None = None,
@@ -125,8 +79,6 @@ class _GenericStream(NMStream):
         is_stream_lsl: bool = True,
         stream_lsl_name: str = None,
         plot_lsl: bool = False,
-        parallel: bool = False,
-        n_jobs: int = -2,
     ) -> pd.DataFrame:
 
         from py_neuromodulation.nm_generator import raw_data_generator
@@ -161,61 +113,39 @@ class _GenericStream(NMStream):
             
             generator = self.lsl_stream.get_next_batch()
 
-        sample_add = self.sfreq / self.run_analysis.sfreq_features
+        l_features: list[pd.Series] = []
+        last_time = None
 
-        offset_time = self.settings["segment_length_features_ms"]
-        # offset_start = np.ceil(offset_time / 1000 * self.sfreq).astype(int)
-        offset_start = offset_time / 1000 * self.sfreq
+        while True:
+            next_item = next(generator, None)
 
-        if parallel:
+            if next_item is not None:
+                time_, data_batch = next_item
+            else:
+                break
 
-            from joblib import Parallel, delayed
-            from itertools import count
-
-            # parallel processing can not be utilized if a LSL stream is used
-            if is_stream_lsl:
-                error_msg = (
-                    "Parallel processing is not possible with LSL stream."
-                )
-                logger.error(error_msg)
-                raise ValueError(error_msg)
-
-            l_features = Parallel(n_jobs=n_jobs, verbose=10)(
-                delayed(self._process_batch)(data_batch, cnt_samples)
-                for data_batch, cnt_samples in zip(
-                    generator, count(offset_start, sample_add)
-                )
+            if data_batch is None:
+                break
+            feature_series = self.run_analysis.process(
+                data_batch.astype(np.float64)
             )
 
-        else:
-            l_features: list[pd.Series] = []
-            last_time = None
-
-            while True:
-                next_item = next(generator, None)
-
-                if next_item is not None:
-                    time_, data_batch = next_item
-                else:
-                    break
-
-                if data_batch is None:
-                    break
-                feature_series = self.run_analysis.process(
-                    data_batch.astype(np.float64)
-                )
-
+            if is_stream_lsl:
                 feature_series["time"] = time_[-1]
                 if self.verbose:
                     if last_time is not None:
-                        logger.info("%.2f seconds of data processed", time_[-1] - last_time)
+                        logger.debug("%.3f seconds of new data processed", time_[-1] - last_time)
                     last_time = time_[-1]
+            else:
+                feature_series["time"] = np.ceil(time_[-1] * 1000 +1 ).astype(int)
+                logger.info("Time: %.2f", feature_series["time"]/1000)
+            
 
-                feature_series = self._add_target(
-                    feature_series=feature_series, data=data_batch
-                )
+            feature_series = self._add_target(
+                feature_series=feature_series, data=data_batch
+            )
 
-                l_features.append(feature_series)
+            l_features.append(feature_series)
 
         feature_df = pd.DataFrame(l_features)
 
@@ -355,8 +285,6 @@ class Stream(_GenericStream):
         data: np.ndarray | pd.DataFrame | None = None,
         out_path_root: _PathLike = Path.cwd(),
         folder_name: str = "sub",
-        parallel: bool = False,
-        n_jobs: int = -2,
         stream_lsl: bool = False,
         stream_lsl_name: str = None,
         plot_lsl: bool = False,
@@ -391,9 +319,6 @@ class Stream(_GenericStream):
         elif self.data is None and data is None and self.stream_lsl is False:
             raise ValueError("No data passed to run function.")
 
-        if parallel:
-            self._check_settings_for_parallel()
-
         out_path = Path(out_path_root, folder_name)
         out_path.mkdir(parents=True, exist_ok=True)
         logger.log_to_file(out_path)
@@ -402,8 +327,6 @@ class Stream(_GenericStream):
             data,
             out_path_root,
             folder_name,
-            parallel=parallel,
-            n_jobs=n_jobs,
             is_stream_lsl=stream_lsl,
             stream_lsl_name=stream_lsl_name,
             plot_lsl=plot_lsl,

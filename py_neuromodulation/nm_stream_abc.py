@@ -95,12 +95,6 @@ class NMStream(ABC):
             verbose=self.verbose,
         )
 
-    @abstractmethod
-    def _add_timestamp(self, feature_series: pd.Series, cnt_samples: int) -> pd.Series:
-        """Add to feature_series "time" keyword
-        For Bids specify with fs_features, for real time analysis with current time stamp
-        """
-
     @staticmethod
     def _get_sess_lat(coords: dict) -> bool:
         if len(coords["cortex_left"]["positions"]) == 0:

@@ -77,4 +77,4 @@ def test_float_fs():
         features["time"].iloc[1] - features["time"].iloc[0]
     ) == 1000 / sampling_rate_features_hz
 
-    assert features["time"].iloc[0] == settings["segment_length_features_ms"]
+    assert features["time"].iloc[0] - 1 == settings["segment_length_features_ms"]
