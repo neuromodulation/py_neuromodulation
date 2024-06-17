@@ -67,4 +67,8 @@ logger = NMLogger(__name__)  # logger initialization first to prevent circular i
 from .nm_stream_offline import Stream as Stream
 from .nm_run_analysis import DataProcessor as DataProcessor
 from .nm_settings import NMSettings as NMSettings
-from .nm_features import add_custom_feature as add_custom_feature, NMFeature as NMFeature
+from .nm_features import (
+    add_custom_feature as add_custom_feature,
+    remove_custom_feature as remove_custom_feature,
+    NMFeature as NMFeature,
+)

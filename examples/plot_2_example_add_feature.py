@@ -80,7 +80,8 @@ feature_df[columns]
 
 
 # %% 
-# The new feature is added to the settings object 
+# Remove feature so that it does not interfere with other examples
+nm.remove_custom_feature("channel_mean") 
 
 
 
