@@ -68,42 +68,37 @@ class FooofAnalyzer(NMFeature):
             and settings.fooof.freq_range_hz[1] < sfreq
         ), f"fooof frequency range needs to be below sfreq, got {settings.fooof.freq_range_hz}"
 
-        from fooof import FOOOF
-        self.fm = FOOOF(
-                    aperiodic_mode=self.ap_mode,
-                    peak_width_limits=tuple(self.settings.peak_width_limits),
-                    max_n_peaks=self.settings.max_n_peaks,
-                    min_peak_height=self.settings.min_peak_height,
-                    peak_threshold=self.settings.peak_threshold,
-                    verbose=False,
-                )
+        from specparam import SpectralGroupModel
+        from fooof import FOOOFGroup
 
-    def _get_spectrum(self, data: np.ndarray):
-        from scipy.fft import rfft
-
-        """return absolute value fft spectrum"""
-
-        data = data[-self.num_samples :]
-        Z = np.abs(rfft(data))
-
-        return Z
+        self.fm = FOOOFGroup(
+            aperiodic_mode=self.ap_mode,
+            peak_width_limits=tuple(self.settings.peak_width_limits),
+            max_n_peaks=self.settings.max_n_peaks,
+            min_peak_height=self.settings.min_peak_height,
+            peak_threshold=self.settings.peak_threshold,
+            verbose=False,
+        )
 
     def calc_feature(
         self,
         data: np.ndarray,
         features_compute: dict,
     ) -> dict:
+        from scipy.fft import rfft
+
+        spectra = np.abs(rfft(data[:, -self.num_samples :]))  # type: ignore
+
+        self.fm.fit(self.f_vec, spectra, self.settings.freq_range_hz)
+
+        if not self.fm.has_model or self.fm.null_inds_ is None:
+            raise RuntimeError("FOOOF failed to fit model to data.")
+
+        failed_fits: list[int] = self.fm.null_inds_
 
         for ch_idx, ch_name in enumerate(self.ch_names):
-            spectrum = self._get_spectrum(data[ch_idx, :])
-
-            try:
-                self.fm.fit(self.f_vec, spectrum, self.settings.freq_range_hz)
-            except Exception as e:
-                logger.critical(e, exc_info=True)
-                raise e
-
-            FIT_PASSED = self.fm.fooofed_spectrum_ is not None
+            FIT_PASSED = ch_idx not in failed_fits
+            exp = self.fm.get_params("aperiodic_params", "exponent")[ch_idx]
 
             for feat in self.settings.aperiodic.get_enabled():
                 f_name = f"{ch_name}_fooof_a_{self.feat_name_map[feat]}"
@@ -111,21 +106,18 @@ class FooofAnalyzer(NMFeature):
                 if not FIT_PASSED:
                     features_compute[f_name] = None
 
-                elif (
-                    feat == "knee"
-                    and self.fm.get_params("aperiodic_params", "exponent") == 0
-                ):
+                elif feat == "knee" and exp == 0:
                     features_compute[f_name] = None
 
                 else:
-                    params = self.fm.get_params("aperiodic_params", feat)
+                    params = self.fm.get_params("aperiodic_params", feat)[ch_idx]
                     if feat == "knee":
                         # If knee parameter is negative, set knee frequency to 0
                         if params < 0:
                             params = 0
                         else:
-                            params = params ** (1 / self.fm.get_params("aperiodic_params", "exponent"))
-                    
+                            params = params ** (1 / exp)
+
                     features_compute[f_name] = np.nan_to_num(params)
 
             peaks_dict: dict[str, np.ndarray | None] = {
