@@ -1,31 +1,19 @@
 import numpy as np
-from collections.abc import Iterable
+from collections.abc import Sequence
 
 from py_neuromodulation.nm_features import NMFeature
 
 
 class LineLength(NMFeature):
-    def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: float) -> None:
-        self.settings = settings
+    def __init__(self, settings: dict, ch_names: Sequence[str], sfreq: float) -> None:
         self.ch_names = ch_names
 
-    @staticmethod
-    def get_line_length(x: np.ndarray) -> np.floating:
-        return np.mean(np.abs(np.diff(x)) / (x.shape[0] - 1))
-
-    @staticmethod
-    def test_settings(
-        settings: dict,
-        ch_names: Iterable[str],
-        sfreq: float,
-    ):
-        # no settings to be checked
-        pass
-
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
+        line_length = np.mean(
+            np.abs(np.diff(data, axis=-1)) / (data.shape[1] - 1), axis=-1
+        )
+
         for ch_idx, ch_name in enumerate(self.ch_names):
-            features_compute["_".join([ch_name, "LineLength"])] = self.get_line_length(
-                data[ch_idx, :]
-            )
+            features_compute[f"{ch_name}_LineLength"] = line_length[ch_idx]
 
         return features_compute
