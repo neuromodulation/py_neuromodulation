@@ -68,7 +68,6 @@ class FooofAnalyzer(NMFeature):
             and settings.fooof.freq_range_hz[1] < sfreq
         ), f"fooof frequency range needs to be below sfreq, got {settings.fooof.freq_range_hz}"
 
-        from specparam import SpectralGroupModel
         from fooof import FOOOFGroup
 
         self.fm = FOOOFGroup(
