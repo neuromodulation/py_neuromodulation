@@ -38,8 +38,8 @@ dependencies = [
     "mne-connectivity",
     "mrmr_selection",
     "nolds",
-    "numpy >= 1.21.2",
-    "pandas >= 1.2.2",
+    "numpy>=2.0.0",
+    "pandas>=2.2.2",
     "scikit-image",
     "scikit-learn >= 0.24.2",
     "scikit-optimize",
@@ -54,24 +54,25 @@ dependencies = [
     "mne-lsl>=1.2.0",
     "pynput",
     "pyqt5",
+    "pydantic>=2.7.3",
 ]
 
 [project.optional-dependencies]
 test = ["pytest>=8.0.2", "pytest-xdist"]
 dev = ["ruff", "pytest>=8.0.2", "pytest-cov", "pytest-sugar", "notebook"]
 docs = [
-    "py-neuromodulation[dev]",
-#    "nbsphinx",
-    "sphinx",
-#    "pandoc",
-    "recommonmark",
-    "sphinx",
-    "numpydoc",
-    "sphinx-gallery",
-#    "nbsphinx_link",
-    "pydata-sphinx-theme",
-#    "pypandoc",
-    "sphinx_togglebutton",
+  "py-neuromodulation[dev]",
+  #    "nbsphinx",
+  "sphinx",
+  #    "pandoc",
+  "recommonmark",
+  "sphinx",
+  "numpydoc",
+  "sphinx-gallery",
+  #    "nbsphinx_link",
+  "pydata-sphinx-theme",
+  #    "pypandoc",
+  "sphinx_togglebutton",
 ]
 
 [tool.rye]
@@ -83,6 +84,10 @@ repository = "https://github.com/neuromodulation/py_neuromodulation"
 
 [tool.ruff]
 target-version = "py310"
+
+[tool.ruff.lint.per-file-ignores]
+# E402: module level import not at top of file, but we need to st PYNM_DIR and MNE_LSL_LIB first
+"__init__.py" = ["E402"]
 
 [tool.hatch.build.targets.sdist]
 exclude = ["/.github", "/docs"]

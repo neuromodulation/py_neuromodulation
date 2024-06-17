@@ -2,21 +2,12 @@ import numpy as np
 from collections.abc import Iterable
 
 from py_neuromodulation.nm_features import NMFeature
+from py_neuromodulation.nm_settings import NMSettings
 
 
 class Hjorth(NMFeature):
-    def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: float) -> None:
-        self.settings = settings
+    def __init__(self, settings: NMSettings, ch_names: Iterable[str], sfreq: float) -> None:
         self.ch_names = ch_names
-
-    @staticmethod
-    def test_settings(
-        settings: dict,
-        ch_names: Iterable[str],
-        sfreq: float,
-    ):
-        # no settings to test
-        pass
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         for ch_idx, ch_name in enumerate(self.ch_names):
@@ -49,12 +40,3 @@ class Raw(NMFeature):
             features_compute["_".join([ch_name, "raw"])] = data[ch_idx, -1]
 
         return features_compute
-
-    @staticmethod
-    def test_settings(
-        settings: dict,
-        ch_names: Iterable[str],
-        sfreq: float,
-    ):
-        # no settings to test
-        pass

@@ -3,6 +3,7 @@ from pathlib import PurePath
 import pickle
 import numpy as np
 import pandas as pd
+
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import r2_score
 from sklearn.model_selection import KFold
@@ -11,6 +12,9 @@ from scipy.stats import zscore as scipy_zscore
 
 from py_neuromodulation import nm_IO, nm_plots
 from py_neuromodulation.nm_decode import Decoder
+from py_neuromodulation.nm_types import _PathLike
+from py_neuromodulation.nm_settings import NMSettings
+
 
 target_filter_str = {
     "CLEAN",
@@ -22,9 +26,12 @@ target_filter_str = {
 features_reverse_order_plotting = {"stft", "fft", "bandpass"}
 
 
-class Feature_Reader:
+class FeatureReader:
     def __init__(
-        self, feature_dir: str, feature_file: str = "", binarize_label: bool = True
+        self,
+        feature_dir: _PathLike,
+        feature_file: _PathLike = "",
+        binarize_label: bool = True,
     ) -> None:
         """Feature_Reader enables analysis methods on top of NM_reader and NM_Decoder
 
@@ -38,18 +45,14 @@ class Feature_Reader:
             binarize label, by default True
 
         """
-        self.feature_dir: str = feature_dir
+        self.feature_dir = feature_dir
         self.feature_list: list[str] = nm_IO.get_run_list_indir(self.feature_dir)
-        self.feature_file: str
-        if not feature_file:
-            self.feature_file = self.feature_list[0]
-        else:
-            self.feature_file = feature_file
+        self.feature_file = feature_file if feature_file else self.feature_list[0]
 
         FILE_BASENAME = PurePath(self.feature_file).stem
         PATH_READ_FILE = str(PurePath(self.feature_dir, FILE_BASENAME, FILE_BASENAME))
 
-        self.settings = nm_IO.read_settings(PATH_READ_FILE)
+        self.settings = NMSettings.from_file(PATH_READ_FILE)
         self.sidecar = nm_IO.read_sidecar(PATH_READ_FILE)
         if self.sidecar["sess_right"] is None:
             if "coords" in self.sidecar:
@@ -101,10 +104,10 @@ class Feature_Reader:
         else:
             for target_ in target_clean:
                 # try to select contralateral label
-                if self.sidecar["sess_right"] is True and "LEFT" in target_:
+                if self.sidecar["sess_right"] and "LEFT" in target_:
                     target = target_
                     continue
-                elif self.sidecar["sess_right"] is False and "RIGHT" in target_:
+                elif not self.sidecar["sess_right"] and "RIGHT" in target_:
                     target = target_
                     continue
                 if target_ == target_clean[-1]:
@@ -113,7 +116,7 @@ class Feature_Reader:
 
     @staticmethod
     def read_target_ch(
-        feature_arr: pd.DataFrame,
+        feature_arr: "pd.DataFrame",
         label_name: str,
         binarize: bool = True,
         binarize_th: float = 0.3,
@@ -195,7 +198,7 @@ class Feature_Reader:
 
     def normalize_features(
         self,
-    ) -> pd.DataFrame:
+    ) -> "pd.DataFrame":
         """Normalize feature_arr feature columns
 
         Returns:
@@ -315,7 +318,7 @@ class Feature_Reader:
             data,
             self.label,
             epoch_len=epoch_len,
-            sfreq=self.settings["sampling_rate_features_hz"],
+            sfreq=self.settings.sampling_rate_features_hz,
             threshold=threshold,
         )
 
@@ -323,7 +326,7 @@ class Feature_Reader:
             X_epoch=X_epoch,
             y_epoch=y_epoch,
             epoch_len=epoch_len,
-            sfreq=self.settings["sampling_rate_features_hz"],
+            sfreq=self.settings.sampling_rate_features_hz,
             feature_names=list(filtered_df.columns),
             feature_str_add="_".join(list_feature_keywords)
             if list_feature_keywords is not None
@@ -430,7 +433,7 @@ class Feature_Reader:
             if "grid" not in ch and "combined" not in ch:
                 ecog_coords_strip.append(performance_sub[ch]["coord"])
                 ecog_strip_performance.append(performance_sub[ch]["performance_test"])
-            elif plt_grid is True and "gridcortex_" in ch:
+            elif plt_grid and "gridcortex_" in ch:
                 cortex_grid.append(performance_sub[ch]["coord"])
                 grid_performance.append(performance_sub[ch]["performance_test"])
 
@@ -960,7 +963,7 @@ class Feature_Reader:
                 ["project_cortex", "project_subcortex"],
                 ["gridcortex_", "gridsubcortex_"],
             ):
-                if not self.settings["postprocessing"][project_settings]:
+                if not self.settings.postprocessing[project_settings]:
                     continue
 
                 # the sidecar keys are grid_cortex and subcortex_grid
@@ -1000,7 +1003,7 @@ class Feature_Reader:
         return performance_dict
 
     @staticmethod
-    def get_dataframe_performances(p: dict) -> pd.DataFrame:
+    def get_dataframe_performances(p: dict) -> "pd.DataFrame":
         performances = []
         for sub in p.keys():
             for ch in p[sub].keys():
@@ -1017,6 +1020,5 @@ class Feature_Reader:
                 else:
                     dict_add["ch_type"] = "electrode ch"
                 performances.append(dict_add)
-        df = pd.DataFrame(performances)
 
-        return df
+        return pd.DataFrame(performances)

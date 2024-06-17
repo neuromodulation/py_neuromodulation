@@ -1,6 +1,6 @@
 """
 ===================
-Adding New Features 
+Adding New Features
 ===================
 
 """
@@ -26,9 +26,9 @@ stream = nm.Stream(
 
 
 class NewFeature(NMFeature):
-    def __init__(
-        self, settings: dict, ch_names: Iterable[str], sfreq: float
-    ) -> None:
+    settings: dict = {}
+    
+    def __init__(self, settings: nm.NMSettings, ch_names: Iterable[str], sfreq: float) -> None:
         self.s = settings
         self.ch_names = ch_names
 
@@ -38,16 +38,13 @@ class NewFeature(NMFeature):
 
         return features_compute
 
-    def test_settings():
-        pass
-
 
 newFeature = NewFeature(
     stream.settings, list(stream.nm_channels["name"]), stream.sfreq
 )
-stream.run_analysis.features.features.append(newFeature)
+stream.data_processor.features.features["new_feature_name"] = newFeature
 
-features = stream.run_analysis.process(data)
+features = stream.data_processor.process(data)
 feature_name = f"new_feature_{stream.nm_channels['name'][0]}"
 
 print(f"{feature_name}: {features[feature_name]}")
@@ -71,6 +68,6 @@ print(f"{feature_name}: {features[feature_name]}")
 #                FeatureClass = nm_new_feature.NewFeature
 #            ...
 #
-# The new feature class can then be used by setting the `settings["feature"]["new_feature"]` value in the
+# The new feature class can then be used by setting the `settings.feature["new_feature"]` value in the
 # settings to true.
 #

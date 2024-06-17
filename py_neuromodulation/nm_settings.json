@@ -6,13 +6,6 @@
         "notch_filter",
         "re_referencing"
     ],
-    "documentation_preprocessing_options": [
-        "raw_resampling",
-        "notch_filter",
-        "re_referencing",
-        "raw_normalization",
-        "preprocessing_filter"
-    ],
     "features": {
         "raw_hjorth": true,
         "return_raw": true,
@@ -46,27 +39,13 @@
             "frequency_low_hz": 100,
             "frequency_high_hz": 160
         },
-        "lowpass_filter_settings": {
-            "frequency_cutoff_hz": 200
-        },
-        "highpass_filter_settings": {
-            "frequency_cutoff_hz": 3
-        },
         "bandpass_filter_settings": {
             "frequency_low_hz": 3,
             "frequency_high_hz": 200
-        }
+        },
+        "lowpass_filter_cutoff_hz": 200,
+        "highpass_filter_cutoff_hz": 3
     },
-    "documentation_normalization_options": [
-        "mean",
-        "median",
-        "zscore",
-        "zscore-median",
-        "quantile",
-        "power",
-        "robust",
-        "minmax"
-    ],
     "raw_normalization_settings": {
         "normalization_time_s": 30,
         "normalization_method": "zscore",
@@ -203,14 +182,14 @@
             "slope_ratio": false
         },
         "filter_ranges_hz": [
-            [
-                5,
-                80
-            ],
-            [
-                5,
-                30
-            ]
+            {
+                "frequency_low_hz": 5,
+                "frequency_high_hz": 80
+            },
+            {
+                "frequency_low_hz": 5,
+                "frequency_high_hz": 30
+            }
         ],
         "detect_troughs": {
             "estimate": true,
@@ -226,13 +205,13 @@
             "mean": [
                 "interval"
             ],
-            "median": null,
+            "median": [],
             "max": [
                 "prominence",
                 "sharpness"
             ],
-            "min": null,
-            "var": null
+            "min": [],
+            "var": []
         },
         "apply_estimator_between_peaks_and_troughs": true
     },

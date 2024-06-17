@@ -1,11 +1,15 @@
 """Module for offline data streams."""
 
+from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 from pathlib import Path
 from py_neuromodulation.nm_stream_abc import NMStream
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
+
+if TYPE_CHECKING:
+    from py_neuromodulation.nm_settings import NMSettings
 
 
 class _GenericStream(NMStream):
@@ -17,7 +21,7 @@ class _GenericStream(NMStream):
     nm_stream_abc : nm_stream_abc.NMStream
     """
 
-    def _add_target(self, feature_series: pd.Series, data: np.ndarray) -> pd.Series:
+    def _add_target(self, feature_dict: dict, data: np.ndarray) -> None:
         """Add target channels to feature series.
 
         Parameters
@@ -43,8 +47,7 @@ class _GenericStream(NMStream):
                 self.target_idx_initialized = True
 
             for target_idx, target_name in zip(self.target_indexes, self.target_names):
-                feature_series[target_name] = data[target_idx, -1]
-        return feature_series
+                feature_dict[target_name] = data[target_idx, -1]
 
     def _handle_data(self, data: np.ndarray | pd.DataFrame) -> np.ndarray:
         names_expected = self.nm_channels["name"].to_list()
@@ -58,6 +61,7 @@ class _GenericStream(NMStream):
                     f' Length of nm_channels["name"]: {len(names_expected)}.'
                 )
             return data
+
         names_data = data.columns.to_list()
         if not (
             len(names_expected) == len(names_data)
@@ -80,7 +84,6 @@ class _GenericStream(NMStream):
         stream_lsl_name: str = None,
         plot_lsl: bool = False,
     ) -> pd.DataFrame:
-
         from py_neuromodulation.nm_generator import raw_data_generator
 
         if not is_stream_lsl:
@@ -110,10 +113,10 @@ class _GenericStream(NMStream):
                 )
                 logger.warning(error_msg)
                 self.sfreq = self.lsl_stream.stream.sinfo.sfreq
-            
+
             generator = self.lsl_stream.get_next_batch()
 
-        l_features: list[pd.Series] = []
+        l_features: list[dict] = []
         last_time = None
 
         while True:
@@ -126,27 +129,25 @@ class _GenericStream(NMStream):
 
             if data_batch is None:
                 break
-            feature_series = self.run_analysis.process(
+            feature_dict = self.data_processor.process(
                 data_batch.astype(np.float64)
             )
-
             if is_stream_lsl:
-                feature_series["time"] = time_[-1]
+                feature_dict["time"] = time_[-1]
                 if self.verbose:
                     if last_time is not None:
                         logger.debug("%.3f seconds of new data processed", time_[-1] - last_time)
                     last_time = time_[-1]
             else:
-                feature_series["time"] = np.ceil(time_[-1] * 1000 +1 ).astype(int)
-                logger.info("Time: %.2f", feature_series["time"]/1000)
+                feature_dict["time"] = np.ceil(time_[-1] * 1000 +1 ).astype(int)
+                logger.info("Time: %.2f", feature_dict["time"]/1000)
             
 
-            feature_series = self._add_target(
-                feature_series=feature_series, data=data_batch
-            )
+            self._add_target(feature_dict, data_batch)
 
-            l_features.append(feature_series)
+                l_features.append(feature_dict)
 
+                cnt_samples += sample_add
         feature_df = pd.DataFrame(l_features)
 
         self.save_after_stream(out_path_root, folder_name, feature_df)
@@ -218,7 +219,7 @@ class Stream(_GenericStream):
         sfreq: float,
         data: np.ndarray | pd.DataFrame | None = None,
         nm_channels: pd.DataFrame | _PathLike | None = None,
-        settings: dict | _PathLike | None = None,
+        settings: "NMSettings | _PathLike | None" = None,
         sampling_rate_features_hz: float | None = None,
         line_noise: float | None = 50,
         path_grids: _PathLike | None = None,

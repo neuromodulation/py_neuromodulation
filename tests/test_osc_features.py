@@ -1,57 +1,71 @@
-import numpy as np
+from pydantic import ValidationError
 import pytest
+import numpy as np
 
-from py_neuromodulation import nm_oscillatory, nm_settings
+from py_neuromodulation import nm_oscillatory, NMSettings, Stream
+from py_neuromodulation.nm_types import FeatureName
 
 
 def setup_osc_settings(
-    osc_feature_name: str,
+    osc_feature_name: FeatureName,
     osc_feature_setting: str,
     windowlength_ms: int,
     log_transform: bool,
 ):
-    settings = nm_settings.get_default_settings()
-    settings = nm_settings.reset_settings(settings)
-    settings[osc_feature_name] = True
-    settings[osc_feature_setting]["windowlength_ms"] = windowlength_ms
-    settings[osc_feature_setting]["log_transform"] = log_transform
+    settings = NMSettings.get_default().reset()
+
+    settings.features[osc_feature_name] = True
+    settings[osc_feature_setting].windowlength_ms = windowlength_ms
+    settings[osc_feature_setting].log_transform = log_transform
+
+    return settings
+
+
+def setup_bandpass_settings(log_transform: bool):
+    settings = NMSettings.get_default().reset()
+
+    settings.features.bandpass_filter = True
+    settings.bandpass_filter_settings.log_transform = log_transform
 
     return settings
 
 
 def test_fft_wrong_logtransform_param_init():
+    """Test that settings cannot be initialized with wrong log_transform parameter value"""
     ch_names = ["ch1", "ch2", "ch3", "ch4"]
     sfreq = 1000
+
+    with pytest.raises(ValidationError):
+        settings = setup_osc_settings(
+            osc_feature_name="fft",
+            osc_feature_setting="fft_settings",
+            windowlength_ms=1000,
+            log_transform="123",
+        )
+        settings.frequency_ranges_hz = {"theta": (4, 8), "beta": (10, 20)}
+        nm_oscillatory.FFT(settings, ch_names, sfreq)
+
+def test_fft_frequencyband_range_passing_nyquist_range():
+
+    ch_names = ["ch1", "ch2", "ch3", "ch4"]
+    sfreq = 1000
+    data = np.random.random([len(ch_names), sfreq])
 
     settings = setup_osc_settings(
         osc_feature_name="fft",
         osc_feature_setting="fft_settings",
         windowlength_ms=1000,
-        log_transform="123",
+        log_transform=False,
     )
-    settings["frequency_ranges_hz"] = {"theta": [4, 8], "beta": [10, 20]}
 
-    with pytest.raises(Exception) as e_info:
-        nm_oscillatory.FFT.test_settings(settings, ch_names, sfreq)
+    settings.frequency_ranges_hz = {"theta": [4, 8], "broadband": [10, 600]}
 
-
-def test_fft_wrong_frequencyband_range_init():
-    ch_names = ["ch1", "ch2", "ch3", "ch4"]
-    sfreq = 1000
-
-    settings = setup_osc_settings(
-        osc_feature_name="fft",
-        osc_feature_setting="fft_settings",
-        windowlength_ms=1000,
-        log_transform="123",
-    )
-    settings["frequency_ranges_hz"] = {"theta": [4, 8], "broadband": [10, 600]}
-
-    with pytest.raises(Exception):
-        nm_oscillatory.FFT.test_settings(settings, ch_names, sfreq)
+    with pytest.raises(AssertionError):
+        Stream(sfreq=sfreq, data=data, settings=settings)
 
 
 def test_fft_zero_data():
+    """ """
     ch_names = ["ch1", "ch2", "ch3", "ch4"]
     sfreq = 1000
 
@@ -61,9 +75,8 @@ def test_fft_zero_data():
         windowlength_ms=1000,
         log_transform=False,
     )
-    settings["frequency_ranges_hz"] = {"theta": [4, 8], "beta": [10, 20]}
+    settings.frequency_ranges_hz = {"theta": [4, 8], "beta": [10, 20]}
     fft_obj = nm_oscillatory.FFT(settings, ch_names, sfreq)
-    fft_obj.test_settings(settings, ch_names, sfreq)
 
     data = np.ones([len(ch_names), sfreq])
     features_out = fft_obj.calc_feature(data, {})
@@ -74,6 +87,7 @@ def test_fft_zero_data():
 
 
 def test_fft_random_data():
+    """Test that FFT feature extraction works with random numbers"""
     ch_names = ["ch1", "ch2", "ch3", "ch4"]
     sfreq = 1000
 
@@ -83,9 +97,8 @@ def test_fft_random_data():
         windowlength_ms=1000,
         log_transform=False,
     )
-    settings["frequency_ranges_hz"] = {"theta": [4, 8], "beta": [10, 20]}
+    settings.frequency_ranges_hz = {"theta": [4, 8], "beta": [10, 20]}
     fft_obj = nm_oscillatory.FFT(settings, ch_names, sfreq)
-    fft_obj.test_settings(settings, ch_names, sfreq)
 
     data = np.random.random([len(ch_names), sfreq])
     features_out = fft_obj.calc_feature(data, {})
@@ -107,14 +120,13 @@ def test_fft_beta_osc():
         log_transform=False,
     )
 
-    settings["frequency_ranges_hz"] = {
+    settings.frequency_ranges_hz = {
         "theta": [4, 8],
         "beta": [10, 28],
         "gamma": [50, 60],
     }
 
     fft_obj = nm_oscillatory.FFT(settings, ch_names, sfreq)
-    fft_obj.test_settings(settings, ch_names, sfreq)
 
     time_duration = 1
 
@@ -135,35 +147,36 @@ def test_fft_beta_osc():
 
 
 def test_stft_wrong_logtransform_param_init():
+    """ """
     ch_names = ["ch1", "ch2", "ch3", "ch4"]
     sfreq = 1000
 
-    settings = setup_osc_settings(
-        osc_feature_name="stft",
-        osc_feature_setting="stft_settings",
-        windowlength_ms=1000,
-        log_transform="123",
-    )
-    settings["frequency_ranges_hz"] = {"theta": [4, 8], "beta": [10, 20]}
-
-    with pytest.raises(Exception) as e_info:
-        nm_oscillatory.STFT.test_settings(settings, ch_names, sfreq)
+    with pytest.raises(ValidationError):
+        settings = setup_osc_settings(
+            osc_feature_name="stft",
+            osc_feature_setting="stft_settings",
+            windowlength_ms=1000,
+            log_transform="123",
+        )
+        nm_oscillatory.STFT(settings, ch_names, sfreq)
 
 
 def test_stft_wrong_frequencyband_range_init():
+    """ """
     ch_names = ["ch1", "ch2", "ch3", "ch4"]
     sfreq = 1000
-
+    data = np.random.random([len(ch_names), sfreq])
+    
     settings = setup_osc_settings(
         osc_feature_name="stft",
         osc_feature_setting="stft_settings",
         windowlength_ms=1000,
-        log_transform="123",
+        log_transform=False,
     )
-    settings["frequency_ranges_hz"] = {"theta": [4, 8], "broadband": [10, 600]}
+    settings.frequency_ranges_hz = {"theta": [4, 8], "broadband": [10, 600]}
 
-    with pytest.raises(Exception):
-        nm_oscillatory.STFT.test_settings(settings, ch_names, sfreq)
+    with pytest.raises(AssertionError):
+        Stream(settings = settings, data=data, sfreq = sfreq)
 
 
 def test_stft_beta_osc():
@@ -179,14 +192,13 @@ def test_stft_beta_osc():
         log_transform=True,
     )
 
-    settings["frequency_ranges_hz"] = {
+    settings.frequency_ranges_hz = {
         "theta": [4, 8],
         "beta": [10, 28],
         "gamma": [50, 60],
     }
 
     stft_obj = nm_oscillatory.STFT(settings, ch_names, sfreq)
-    stft_obj.test_settings(settings, ch_names, sfreq)
 
     time_duration = 1
 
@@ -219,14 +231,13 @@ def test_welch_beta_osc():
         log_transform=True,
     )
 
-    settings["frequency_ranges_hz"] = {
+    settings.frequency_ranges_hz = {
         "theta": [4, 8],
         "beta": [10, 28],
         "gamma": [50, 60],
     }
 
     stft_obj = nm_oscillatory.Welch(settings, ch_names, sfreq)
-    stft_obj.test_settings(settings, ch_names, sfreq)
 
     time_duration = 1
 
@@ -250,90 +261,78 @@ def test_bp_wrong_logtransform_param_init():
     ch_names = ["ch1", "ch2", "ch3", "ch4"]
     sfreq = 1000
 
-    settings = setup_osc_settings(
-        osc_feature_name="bandpass_filter",
-        osc_feature_setting="bandpass_filter_settings",
-        windowlength_ms=1000,
-        log_transform="123",
-    )
-    settings["frequency_ranges_hz"] = {"theta": [4, 8], "beta": [10, 20]}
+    settings = NMSettings.get_default().reset()
+    settings.features.bandpass_filter = True
+    settings.bandpass_filter_settings.log_transform = "123"
 
-    with pytest.raises(Exception) as e_info:
-        nm_oscillatory.BandPower.test_settings(settings, ch_names, sfreq)
+    settings.frequency_ranges_hz = {"theta": [4, 8], "beta": [10, 20]}
+
+    with pytest.raises(ValidationError):
+        nm_oscillatory.BandPower(settings, ch_names, sfreq)
 
 
 def test_bp_wrong_frequencyband_range_init():
     ch_names = ["ch1", "ch2", "ch3", "ch4"]
     sfreq = 1000
 
-    settings = setup_osc_settings(
-        osc_feature_name="bandpass_filter",
-        osc_feature_setting="bandpass_filter_settings",
-        windowlength_ms=1000,
-        log_transform="123",
-    )
-    settings["frequency_ranges_hz"] = {"theta": [4, 8], "broadband": [10, 600]}
+    settings = NMSettings.get_default().reset()
+    settings.features.bandpass_filter = True
+    settings.bandpass_filter_settings.log_transform = False
 
-    with pytest.raises(Exception):
-        nm_oscillatory.BandPower.test_settings(settings, ch_names, sfreq)
+    settings.frequency_ranges_hz = {"theta": [4, 8], "broadband": [10, 600]}
+
+    with pytest.raises(ValidationError):
+        nm_oscillatory.BandPower(settings, ch_names, sfreq)
 
 
 def test_bp_non_defined_fband():
     ch_names = ["ch1", "ch2", "ch3", "ch4"]
     sfreq = 1000
 
-    settings = setup_osc_settings(
-        osc_feature_name="bandpass_filter",
-        osc_feature_setting="bandpass_filter_settings",
-        windowlength_ms=1000,
-        log_transform=True,
-    )
+    settings = NMSettings.get_default().reset()
+    settings.features.bandpass_filter = True
+    settings.bandpass_filter_settings.log_transform = False
+    settings.frequency_ranges_hz = {"theta": [4, 8], "broadband": [10, 600]}
 
-    settings["frequency_ranges_hz"] = {"theta": [4, 8], "broadband": [10, 600]}
-    settings["bandpass_filter_settings"]["segment_lengths_ms"]["theta"] = 1000
-    settings["bandpass_filter_settings"]["segment_lengths_ms"]["beta"] = 300
+    settings.bandpass_filter_settings.segment_lengths_ms["theta"] = 1000
+    settings.bandpass_filter_settings.segment_lengths_ms["beta"] = 300
 
-    with pytest.raises(Exception):
-        nm_oscillatory.BandPower.test_settings(settings, ch_names, sfreq)
+    with pytest.raises(ValidationError):
+        nm_oscillatory.BandPower(settings, ch_names, sfreq)
 
 
 def test_bp_segment_length_fb_exceeds_segment_length_features():
     ch_names = ["ch1", "ch2", "ch3", "ch4"]
     sfreq = 1000
 
-    settings = setup_osc_settings(
-        osc_feature_name="bandpass_filter",
-        osc_feature_setting="bandpass_filter_settings",
-        windowlength_ms=1000,
-        log_transform=True,
-    )
+    settings = NMSettings.get_default().reset()
+    settings.features.bandpass_filter = True
+    settings.bandpass_filter_settings.log_transform = False
 
-    settings["segment_length_features_ms"] = 500
-    settings["frequency_ranges_hz"] = {"theta": [4, 8], "broadband": [10, 600]}
-    settings["bandpass_filter_settings"]["segment_lengths_ms"]["theta"] = 1000
-    settings["bandpass_filter_settings"]["segment_lengths_ms"]["beta"] = 300
+    settings.segment_length_features_ms = 500
+    settings.frequency_ranges_hz = {"theta": [4, 8], "broadband": [10, 600]}
+    settings.bandpass_filter_settings.segment_lengths_ms["theta"] = 1000
+    settings.bandpass_filter_settings.segment_lengths_ms["beta"] = 300
 
     with pytest.raises(Exception):
-        nm_oscillatory.BandPower.test_settings(settings, ch_names, sfreq)
+        nm_oscillatory.BandPower(settings, ch_names, sfreq)
 
 
 def test_bp_zero_data():
     ch_names = ["ch1", "ch2", "ch3", "ch4"]
     sfreq = 1000
 
-    settings = nm_settings.get_default_settings()
-    settings = nm_settings.reset_settings(settings)
-    settings["features"]["bandpass_filter"] = True
-    settings["bandpass_filter_settings"]["segment_lengths_ms"]["theta"] = 1000
-    settings["bandpass_filter_settings"]["segment_lengths_ms"]["beta"] = 300
+    settings = NMSettings.get_default().reset()
+    settings.features.bandpass_filter = True
+    settings.bandpass_filter_settings.segment_lengths_ms["theta"] = 1000
+    settings.bandpass_filter_settings.segment_lengths_ms["beta"] = 300
 
-    settings["bandpass_filter_settings"]["log_transform"] = False
-    settings["bandpass_filter_settings"]["kalman_filter"] = False
-    settings["bandpass_filter_settings"]["bandpower_features"]["activity"] = True
+    settings.bandpass_filter_settings.log_transform = False
+    settings.bandpass_filter_settings.kalman_filter = False
+    settings.bandpass_filter_settings.bandpower_features.activity = True
 
-    settings["frequency_ranges_hz"] = {"theta": [4, 8], "beta": [10, 20]}
+    settings.frequency_ranges_hz = {"theta": [4, 8], "beta": [10, 20]}
     stft_obj = nm_oscillatory.BandPower(settings, ch_names, sfreq)
-    stft_obj.test_settings(settings, ch_names, sfreq)
 
     data = np.zeros([len(ch_names), sfreq])
     features_out = stft_obj.calc_feature(data, {})
@@ -346,19 +345,18 @@ def test_bp_random_data():
     ch_names = ["ch1", "ch2", "ch3", "ch4"]
     sfreq = 1000
 
-    settings = nm_settings.get_default_settings()
-    settings = nm_settings.reset_settings(settings)
-    settings["frequency_ranges_hz"] = {"theta": [4, 8], "beta": [10, 30]}
-    settings["features"]["bandpass_filter"] = True
-    settings["bandpass_filter_settings"]["segment_lengths_ms"]["theta"] = 1000
-    settings["bandpass_filter_settings"]["segment_lengths_ms"]["beta"] = 300
+    settings = NMSettings.get_default().reset()
 
-    settings["bandpass_filter_settings"]["log_transform"] = False
-    settings["bandpass_filter_settings"]["kalman_filter"] = False
-    settings["bandpass_filter_settings"]["bandpower_features"]["activity"] = True
+    settings.frequency_ranges_hz = {"theta": [4, 8], "beta": [10, 30]}
+    settings.features.bandpass_filter = True
+    settings.bandpass_filter_settings.segment_lengths_ms["theta"] = 1000
+    settings.bandpass_filter_settings.segment_lengths_ms["beta"] = 300
+
+    settings.bandpass_filter_settings.log_transform = False
+    settings.bandpass_filter_settings.kalman_filter = False
+    settings.bandpass_filter_settings.bandpower_features.activity = True
 
     stft_obj = nm_oscillatory.BandPower(settings, ch_names, sfreq)
-    stft_obj.test_settings(settings, ch_names, sfreq)
 
     np.random.seed(0)
     data = np.random.random([len(ch_names), sfreq])
@@ -374,25 +372,25 @@ def test_bp_beta_osc():
     ]
     sfreq = 1000
 
-    settings = nm_settings.get_default_settings()
-    settings = nm_settings.reset_settings(settings)
-    settings["frequency_ranges_hz"] = {
+    settings = NMSettings.get_default().reset()
+
+    settings.frequency_ranges_hz = {
         "theta": [4, 8],
         "beta": [10, 30],
         "gamma": [50, 60],
     }
 
-    settings["features"]["bandpass_filter"] = True
-    settings["bandpass_filter_settings"]["segment_lengths_ms"]["theta"] = 1000
-    settings["bandpass_filter_settings"]["segment_lengths_ms"]["beta"] = 300
-    settings["bandpass_filter_settings"]["segment_lengths_ms"]["gamma"] = 100
+    settings.features.bandpass_filter = True
+    settings.bandpass_filter_settings.segment_lengths_ms["theta"] = 1000
+    settings.bandpass_filter_settings.segment_lengths_ms["beta"] = 300
+    settings.bandpass_filter_settings.segment_lengths_ms["gamma"] = 100
 
-    settings["bandpass_filter_settings"]["log_transform"] = False
-    settings["bandpass_filter_settings"]["kalman_filter"] = False
-    settings["bandpass_filter_settings"]["bandpower_features"]["activity"] = True
+    settings.bandpass_filter_settings.log_transform = False
+    settings.bandpass_filter_settings.kalman_filter = False
+    settings.bandpass_filter_settings.bandpower_features.activity = True
 
     bp_obj = nm_oscillatory.BandPower(settings, ch_names, sfreq)
-    bp_obj.test_settings(settings, ch_names, sfreq)
+    # bp_obj.test_settings(settings, ch_names, sfreq)
 
     time_duration = 1
 

@@ -1,17 +1,21 @@
 from collections.abc import Iterator
 import time
+from typing import TYPE_CHECKING
 import numpy as np
 from py_neuromodulation import logger
 from mne_lsl.lsl import resolve_streams
 import os
 
+if TYPE_CHECKING:
+    from py_neuromodulation import NMSettings
+    
 
 class LSLStream:
     """
     Class is used to create and connect to a LSL stream and pull data from it.
     """
 
-    def __init__(self, settings: dict, stream_name: str | None = None) -> None:
+    def __init__(self, settings: "NMSettings", stream_name: str | None = None) -> None:
         """
         Initialize the LSL stream.
 
@@ -28,7 +32,8 @@ class LSLStream:
             If no stream is running under the provided name or if there are multiple streams running under the same name.
         """
         from mne_lsl.stream import StreamLSL
-
+        self.stream: StreamLSL
+        
         self.settings = settings
         self._n_seconds_wait_before_disconnect = 3
         try:
@@ -40,11 +45,14 @@ class LSLStream:
             self.stream = StreamLSL(name=stream_name, bufsize=2).connect(timeout=2)
         except Exception as e:
             msg = f"Could not connect to stream: {e}. Either no stream is running under the name {stream_name} or there is several streams under this name."
-            logger.warning(msg)
+            logger.exception(msg)
             raise RuntimeError(msg)
 
-        self.winsize = settings["segment_length_features_ms"] / self.stream.sinfo.sfreq
-        self.sampling_interval = 1 / self.settings["sampling_rate_features_hz"]
+        if self.stream.sinfo is None:
+            raise RuntimeError("Stream info is None. Check if the stream is running.")
+        
+        self.winsize = settings.segment_length_features_ms / self.stream.sinfo.sfreq
+        self.sampling_interval = 1 / self.settings.sampling_rate_features_hz
 
         # If not running the generator when the escape key is pressed.
         self.headless: bool = not os.environ.get("DISPLAY")

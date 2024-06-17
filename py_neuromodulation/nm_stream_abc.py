@@ -7,7 +7,8 @@ import pickle
 import pandas as pd
 
 from py_neuromodulation.nm_run_analysis import DataProcessor
-from py_neuromodulation.nm_types import _PathLike
+from py_neuromodulation.nm_settings import NMSettings
+from py_neuromodulation.nm_types import _PathLike, FeatureName
 from py_neuromodulation import nm_IO, PYNM_DIR
 
 
@@ -16,7 +17,7 @@ class NMStream(ABC):
         self,
         sfreq: float,
         nm_channels: pd.DataFrame | _PathLike,
-        settings: dict | _PathLike | None = None,
+        settings: "NMSettings | _PathLike | None" = None,
         line_noise: float | None = 50,
         sampling_rate_features_hz: float | None = None,
         path_grids: _PathLike | None = None,
@@ -49,10 +50,36 @@ class NMStream(ABC):
         verbose : bool, optional
             print out stream computation time information, by default True
         """
-        self.settings = self._load_settings(settings)
+        self.settings: NMSettings = NMSettings.load(settings)
+
+        # If features that use frequency ranges are on, test them against nyquist frequency
+        use_freq_ranges: list[FeatureName] = [
+            "bandpass_filter",
+            "stft",
+            "fft",
+            "welch",
+            "bursts",
+            "coherence",
+            "nolds",
+            "bispectrum",
+        ]
+
+        need_nyquist_check = any(
+            (f in use_freq_ranges for f in self.settings.features.get_enabled())
+        )
+
+        if need_nyquist_check:
+            assert all(
+                fb.frequency_high_hz < sfreq / 2
+                for fb in self.settings.frequency_ranges_hz.values()
+            ), (
+                "If a feature that uses frequency ranges is selected, "
+                "the frequency band ranges need to be smaller than the nyquist frequency.\n"
+                f"Got sfreq = {sfreq} and fband ranges:\n {self.settings.frequency_ranges_hz}"
+            )
 
         if sampling_rate_features_hz is not None:
-            self.settings["sampling_rate_features_hz"] = sampling_rate_features_hz
+            self.settings.sampling_rate_features_hz = sampling_rate_features_hz
 
         self.nm_channels = self._load_nm_channels(nm_channels)
         if path_grids is None:
@@ -67,7 +94,7 @@ class NMStream(ABC):
         self.projection = None
         self.model = None
 
-        self.run_analysis = DataProcessor(
+        self.data_processor = DataProcessor(
             sfreq=self.sfreq,
             settings=self.settings,
             nm_channels=self.nm_channels,
@@ -84,7 +111,7 @@ class NMStream(ABC):
         This might be handy in case the nm_channels or nm_settings changed
         """
 
-        self.run_analysis = DataProcessor(
+        self.data_processor = DataProcessor(
             sfreq=self.sfreq,
             settings=self.settings,
             nm_channels=self.nm_channels,
@@ -118,15 +145,6 @@ class NMStream(ABC):
             )
 
         return nm_channels
-
-    @staticmethod
-    def _load_settings(settings: dict | _PathLike | None) -> dict:
-        if isinstance(settings, dict):
-            return settings
-        if settings is None:
-            from py_neuromodulation.nm_settings import get_default_settings
-            return get_default_settings()
-        return nm_IO.read_settings(str(settings))
 
     def load_model(self, model_name: _PathLike) -> None:
         """Load sklearn model, that utilizes predict"""
@@ -167,13 +185,13 @@ class NMStream(ABC):
         nm_IO.save_features(feature_arr, out_path_root, folder_name)
 
     def save_nm_channels(self, out_path_root: _PathLike, folder_name: str) -> None:
-        self.run_analysis.save_nm_channels(out_path_root, folder_name)
+        self.data_processor.save_nm_channels(out_path_root, folder_name)
 
     def save_settings(self, out_path_root: _PathLike, folder_name: str) -> None:
-        self.run_analysis.save_settings(out_path_root, folder_name)
+        self.data_processor.save_settings(out_path_root, folder_name)
 
     def save_sidecar(self, out_path_root: _PathLike, folder_name: str) -> None:
         """Save sidecar incduing fs, coords, sess_right to
         out_path_root and subfolder 'folder_name'"""
         additional_args = {"sess_right": self.sess_right}
-        self.run_analysis.save_sidecar(out_path_root, folder_name, additional_args)
+        self.data_processor.save_sidecar(out_path_root, folder_name, additional_args)
