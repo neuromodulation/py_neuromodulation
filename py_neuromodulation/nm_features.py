@@ -124,7 +124,7 @@ class FeatureProcessors:
         return self.features[fname]
 
 
-def AddCustomFeature(feature_name: str, new_feature: Type[NMFeature]):
+def add_custom_feature(feature_name: str, new_feature: Type[NMFeature]):
     """Add a custom feature to the dictionary of user-defined features.
         The feature will be automatically enabled in the settings,
         and computed when the Stream.run() method is called.
@@ -145,7 +145,7 @@ def AddCustomFeature(feature_name: str, new_feature: Type[NMFeature]):
     NMSettings._add_feature(feature_name)
 
 
-def RemoveCustomFeature(feature_name: str):
+def remove_custom_feature(feature_name: str):
     """Remove a custom feature from the dictionary of user-defined features.
 
     Args:

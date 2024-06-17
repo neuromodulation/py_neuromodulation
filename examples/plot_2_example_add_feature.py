@@ -51,7 +51,7 @@ class ChannelMean:
         return features_compute
 
 
-nm.AddCustomFeature("channel_mean", ChannelMean)
+nm.add_custom_feature("channel_mean", ChannelMean)
 
 # %%
 # Now we can instantiate settings and observe that the new feature has been added to the list of features
