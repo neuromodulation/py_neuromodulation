@@ -22,7 +22,7 @@ class NMStream(ABC):
         sampling_rate_features_hz: float | None = None,
         path_grids: _PathLike | None = None,
         coord_names: list | None = None,
-        stream_name: str | None = "example_stream",
+        stream_name: str | None = "example_stream",  # Timon: do we need those in the nmstream_abc?
         stream_lsl: bool = False,
         coord_list: list | None = None,
         verbose: bool = True,
@@ -35,8 +35,9 @@ class NMStream(ABC):
             sampling frequency of data in Hertz
         nm_channels : pd.DataFrame | _PathLike
             parametrization of channels (see nm_define_channels.py for initialization)
-        settings : dict | _PathLike | None, optional
-            features settings can be a dictionary or path to the nm_settings.json, by default the py_neuromodulation/nm_settings.json are read
+        settings : NMSettings | _PathLike | None, optional
+            Initialized nm_settings.NMSettings object, by default the py_neuromodulation/nm_settings.yaml are read
+            and passed into a settings object
         line_noise : float | None, optional
             line noise, by default 50
         sampling_rate_features_hz : float | None, optional
@@ -123,16 +124,6 @@ class NMStream(ABC):
         )
 
     @staticmethod
-    def _get_sess_lat(coords: dict) -> bool:
-        if len(coords["cortex_left"]["positions"]) == 0:
-            return True
-        if len(coords["cortex_right"]["positions"]) == 0:
-            return False
-        raise ValueError(
-            "Either cortex_left or cortex_right positions must be provided."
-        )
-
-    @staticmethod
     def _load_nm_channels(
         nm_channels: pd.DataFrame | _PathLike,
     ) -> pd.DataFrame:
@@ -145,11 +136,6 @@ class NMStream(ABC):
             )
 
         return nm_channels
-
-    def load_model(self, model_name: _PathLike) -> None:
-        """Load sklearn model, that utilizes predict"""
-        with open(model_name, "rb") as fid:
-            self.model = pickle.load(fid)
 
     def save_after_stream(
         self,

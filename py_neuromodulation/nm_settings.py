@@ -189,7 +189,8 @@ class NMSettings(NMBaseModel):
         Args:
             PATH (_PathLike): Path to settings file or to directory containing settings file,
                               or path to experiment including experiment prefix
-                              (e.g. /path/to/exp/exp_prefix[_SETTINGS.json])
+                              (e.g. /path/to/exp/exp_prefix[_SETTINGS.json]).
+                              Supported file types are .json and .yaml
 
         Raises:
             ValueError: when file format is not supported.
@@ -243,7 +244,7 @@ class NMSettings(NMBaseModel):
         return NormalizationSettings.list_normalization_methods()
 
     def save(
-        self, path_out: _PathLike, folder_name: str = "", format: str = "json"
+        self, path_out: _PathLike, folder_name: str = "", format: str = "yaml"
     ) -> None:
         path_out = PurePath(path_out)
         filename = f"SETTINGS.{format}"

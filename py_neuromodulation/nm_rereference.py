@@ -89,7 +89,7 @@ class ReReferencer(NMPreprocessor):
 
         Returns:
             reref_data (numpy ndarray):
-            shape(n_channels, n_samples) - rereferenced data
+                shape(n_channels, n_samples) - rereferenced data
         """
         if self.ref_matrix is not None:
             return self.ref_matrix @ data

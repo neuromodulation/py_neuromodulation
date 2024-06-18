@@ -20,7 +20,7 @@ features:
   mne_connectivity: false
   bispectrum: false
 
-frequency_ranges_hz:
+frequency_ranges_hz:  # frequency band ranges can be added, removed and altered
   theta:
     - 4
     - 8
@@ -43,7 +43,8 @@ frequency_ranges_hz:
     - 200
     - 400
 
-# Preproceessing settings
+# preprocessing options: raw_resampling, notch_filter, re_referencing, preprocessing_filter, raw_normalization
+# note: the list order specifies also the order of execution 
 preprocessing:
   - raw_resampling
   - notch_filter
@@ -54,7 +55,7 @@ raw_resampling_settings:
 
 raw_normalization_settings:
   normalization_time_s: 30
-  normalization_method: zscore
+  normalization_method: zscore  # supported methods: mean, median, zscore, zscore-median, quantile, power, robust, minmax
   clip: 3
 
 preprocessing_filter:
@@ -79,7 +80,7 @@ postprocessing:
 
 feature_normalization_settings:
   normalization_time_s: 30
-  normalization_method: zscore
+  normalization_method: zscore  # supported methods: mean, median, zscore, zscore-median, quantile, power, robust, minmax
   clip: 3
 
 project_cortex_settings:
@@ -199,7 +200,7 @@ sharpwave_analysis_settings:
   apply_estimator_between_peaks_and_troughs: true
 
 coherence:
-  channels:
+  channels:  # list of channel pairs
     - - STN_RIGHT_0
       - ECOG_RIGHT_0
   frequency_bands:

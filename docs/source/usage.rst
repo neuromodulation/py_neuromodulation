@@ -125,12 +125,12 @@ When setting up the :class:`~nm_stream_abc`, `nm_settings` and `nm_channels` can
 Setting definition
 ------------------
 
-The *nm_settings* allow for parametrization of all features. Default settings are passed from the `nm_settings.json` file:
+The *nm_settings* allow for parametrization of all features. Default settings are passed from the `nm_settings.yaml` file:
 
 .. toggle::
 
-    .. literalinclude:: ../../py_neuromodulation/nm_settings.json
-        :language: json
+    .. literalinclude:: ../../py_neuromodulation/nm_settings.yaml
+        :language: yaml
  
 
 Preprocessing

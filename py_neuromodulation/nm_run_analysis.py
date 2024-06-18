@@ -28,18 +28,16 @@ class DataProcessor:
 
         Parameters
         ----------
-        features : features.py object
-            Feature_df object (needs to be initialized beforehand)
-        settings : dict
-            dictionary of settings such as "seglengths" or "frequencyranges"
-        reference : reference.py object
-            Rereference object (needs to be initialized beforehand), by default None
-        projection : projection.py object
-            projection object (needs to be initialized beforehand), by default None
-        resample : resample.py object
-            Resample object (needs to be initialized beforehand), by default None
-        notch_filter : nm_filter.NotchFilter,
-            Notch Filter object, needs to be instantiated beforehand
+        settings : nm_settings.NMSettings object
+        nm_channels : pd.DataFrame | _PathLike
+            Initialized pd.DataFrame with channel specific information.
+            The path to a nm_channels.csv can be also passed.
+        coord_names : list | None
+            list of coordinate names
+        coord_list : list | None
+            list of list of 3D coordinates
+        path_grids : _PathLike | None
+            List to grid_cortex.tsv and grid_subcortex.tsv for grid point projection
         verbose : boolean
             if True, log signal processed and computation time
         """
@@ -158,8 +156,8 @@ class DataProcessor:
 
         Parameters
         ----------
-        settings : dict
-        path_grids : str
+        settings : nm_settings.NMSettings object
+        path_grids : _PathLike | str
 
         Returns
         -------

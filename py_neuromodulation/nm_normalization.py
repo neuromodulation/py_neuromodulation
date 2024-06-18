@@ -29,19 +29,6 @@ class Normalizer(NMPreprocessor):
         settings: "NMSettings",
         type: NormalizerType,
     ) -> None:
-        """Normalize raw data.
-
-        normalize_samples : int
-            number of past samples considered for normalization
-        sample_add : int
-            number of samples to add to previous
-        method : str | default is 'mean'
-            data is normalized via subtraction of the 'mean' or 'median' and
-            subsequent division by the 'mean' or 'median'. For z-scoring enter
-            'zscore'.
-        clip : float, optional
-            value at which to clip after normalization
-        """
 
         self.type = type
         self.settings: NormalizationSettings
