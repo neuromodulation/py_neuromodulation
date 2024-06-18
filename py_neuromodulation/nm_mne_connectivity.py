@@ -97,24 +97,20 @@ class MNEConnectivity(NMFeature):
 
         spec_out = self.estimate_connectivity(epochs)
 
-        if not self.fband_ranges:
+        if len(self.fband_ranges) == 0:
             for fband_name, fband_range in self.fbands.items():
                 self.fband_ranges.append(
                     np.where(
-                        np.logical_and(
-                            np.array(spec_out.freqs) > fband_range[0],
-                            np.array(spec_out.freqs) < fband_range[1],
-                        )
+                        (np.array(spec_out.freqs) > fband_range[0])
+                        & (np.array(spec_out.freqs) < fband_range[1])
                     )[0]
                 )
 
         dat_conn: np.ndarray = spec_out.get_data()
-
         for fband_idx, fband in enumerate(self.fbands):
-            conn_mean = np.mean(dat_conn, axis=0)
-            
+            fband_mean = np.mean(dat_conn[:, self.fband_ranges[fband_idx]], axis=1)
             for conn in np.arange(dat_conn.shape[0]):
                 key = "_".join(["ch1", self.method, str(conn), fband])
-                features_compute[key] =conn_mean[self.fband_ranges[fband_idx]]
+                features_compute[key] = fband_mean[conn]
 
         return features_compute
