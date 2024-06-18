@@ -64,7 +64,7 @@ logger = NMLogger(__name__)  # logger initialization first to prevent circular i
 ####################################
 # API: Exposed classes and methods #
 ####################################
-from .nm_stream_offline import Stream as Stream
+from .nm_stream import Stream as Stream
 from .nm_run_analysis import DataProcessor as DataProcessor
 from .nm_settings import NMSettings as NMSettings
 from .nm_features import (

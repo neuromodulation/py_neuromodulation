@@ -2,6 +2,24 @@
 # General settings
 sampling_rate_features_hz: 10
 segment_length_features_ms: 1000
+
+# Feature settings
+features:
+  raw_hjorth: true
+  return_raw: true
+  bandpass_filter: false
+  stft: false
+  fft: true
+  welch: true
+  sharpwave_analysis: true
+  fooof: false
+  bursts: true
+  linelength: true
+  coherence: false
+  nolds: false
+  mne_connectivity: false
+  bispectrum: false
+
 frequency_ranges_hz:
   theta:
     - 4
@@ -69,23 +87,6 @@ project_cortex_settings:
 
 project_subcortex_settings:
   max_dist_mm: 5
-
-# Feature settings
-features:
-  raw_hjorth: true
-  return_raw: true
-  bandpass_filter: false
-  stft: false
-  fft: true
-  welch: true
-  sharpwave_analysis: true
-  fooof: false
-  bursts: true
-  linelength: true
-  coherence: false
-  nolds: false
-  mne_connectivity: false
-  bispectrum: false
 
 fft_settings:
   windowlength_ms: 1000

@@ -16,7 +16,7 @@ from py_neuromodulation import (
     nm_IO,
     nm_define_nmchannels,
     nm_analysis,
-    nm_stream_offline,
+    nm_stream,
     NMSettings,
 )
 
@@ -86,7 +86,7 @@ settings.features.sharpwave_analysis = False
 settings.features.coherence = False
 
 # %%
-stream = nm_stream_offline.Stream(
+stream = nm_stream.Stream(
     sfreq=sfreq,
     nm_channels=nm_channels,
     settings=settings,

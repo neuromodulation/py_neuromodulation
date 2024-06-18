@@ -1,5 +1,5 @@
-nm_stream_offline.py
+nm_stream.py
 ====================
 
-.. automodule:: nm_stream_offline
+.. automodule:: nm_stream
       :members:

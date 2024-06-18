@@ -3,7 +3,7 @@ import numpy as np
 
 from py_neuromodulation import (
     nm_generator,
-    nm_stream_offline,
+    nm_stream,
     nm_settings,
     nm_mnelsl_generator,
     nm_IO,
@@ -33,7 +33,7 @@ def setup_default_data():
     return raw, data, sfreq
 
 @pytest.fixture
-def setup_default_stream_fast_compute() -> tuple[np.ndarray, nm_stream_offline.Stream]:
+def setup_default_stream_fast_compute() -> tuple[np.ndarray, nm_stream.Stream]:
     """This test function sets a data batch and automatic initialized M1 dataframe
 
     Args:
@@ -79,7 +79,7 @@ def setup_default_stream_fast_compute() -> tuple[np.ndarray, nm_stream_offline.S
     settings.fooof.aperiodic.offset = True
     settings.features.fooof = True
 
-    stream = nm_stream_offline.Stream(
+    stream = nm_stream.Stream(
         settings=settings,
         nm_channels=nm_channels,
         path_grids=None,
