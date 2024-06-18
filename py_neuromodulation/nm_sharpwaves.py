@@ -1,4 +1,3 @@
-import numpy as np
 from collections.abc import Sequence
 from collections import defaultdict
 from itertools import product
@@ -6,7 +5,12 @@ from itertools import product
 from py_neuromodulation.nm_types import NMBaseModel
 from pydantic import model_validator
 from typing import TYPE_CHECKING, Any, Callable
-from numpy._core._methods import _mean as np_mean
+
+import numpy as np
+if np.__version__ >= "2.0.0":
+    from numpy._core._methods import _mean as np_mean # type: ignore
+else:
+    from numpy.core._methods import _mean as np_mean
 
 from py_neuromodulation.nm_features import NMFeature
 from py_neuromodulation.nm_types import BoolSelector, FrequencyRange
