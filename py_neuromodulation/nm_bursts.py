@@ -1,5 +1,8 @@
 import numpy as np
-from numpy.lib._function_base_impl import _quantile as np_quantile  # type:ignore
+if np.__version__ >= "2.0.0":
+    from numpy.lib._function_base_impl import _quantile as np_quantile  # type:ignore
+else:
+    from numpy.lib.function_base import _quantile as np_quantile  # type:ignore
 from collections.abc import Sequence
 from itertools import product
 
