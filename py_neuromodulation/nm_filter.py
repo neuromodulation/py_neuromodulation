@@ -78,7 +78,13 @@ class MNEFilter:
                     # filter_length=filter_length,
                 )
             filter_bank.append(filt)
+            
+        self.num_filters = len(filter_bank)
         self.filter_bank = np.vstack(filter_bank)
+        
+        self.filters: np.ndarray
+        self.num_channels = -1
+        
 
     def filter_data(self, data: np.ndarray) -> np.ndarray:
         """Apply previously calculated (bandpass) filters to data.
@@ -96,6 +102,8 @@ class MNEFilter:
             Filtered data.
 
         """
+        from scipy.signal import fftconvolve
+
         if data.ndim > 2:
             raise ValueError(
                 f"Data must have one or two dimensions. Got:"
@@ -103,13 +111,14 @@ class MNEFilter:
             )
         if data.ndim == 1:
             data = np.expand_dims(data, axis=0)
-
-        filtered = np.array(
-            [
-                [np.convolve(filt, chan, mode="same") for filt in self.filter_bank]
-                for chan in data
-            ]
-        )
+            
+        if self.num_channels == -1:
+            self.num_channels = data.shape[0]
+            self.filters = np.tile(self.filter_bank[None, :, :], (self.num_channels, 1, 1)) 
+                   
+        data_tiled = np.tile(data[:, None, :], (1, self.num_filters, 1))
+        
+        filtered = fftconvolve(data_tiled, self.filters, axes=2, mode="same")
 
         # ensure here that the output dimension matches the input dimension
         if data.shape[1] != filtered.shape[-1]:
