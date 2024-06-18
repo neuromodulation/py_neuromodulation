@@ -1,9 +1,8 @@
 """
-Reference: Oh, S. H., Lee, Y. R., & Kim, H. N. (2014).
-            A novel EEG feature extraction method using Hjorth parameter.
-            International Journal of Electronics and Electrical Engineering, 2(2), 106-110.
-http://cspl.ee.pusan.ac.kr/sites/cspl/download/internation_c/ICAEE2014_02_OSH.pdf
-
+Reference:  B Hjorth
+            EEG analysis based on time domain properties
+            Electroencephalogr Clin Neurophysiol. 1970 Sep;29(3):306-10.
+            DOI: 10.1016/0013-4694(70)90143-4
 """
 
 import numpy as np
