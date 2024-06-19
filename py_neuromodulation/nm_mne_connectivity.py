@@ -7,8 +7,8 @@ from py_neuromodulation.nm_types import NMBaseModel
 
 if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
-    from mne.io import RawArray
     from mne import Epochs
+    from mne.io import RawArray
 
 
 class MNEConnectivitySettings(NMBaseModel):
@@ -23,6 +23,8 @@ class MNEConnectivity(NMFeature):
         ch_names: Iterable[str],
         sfreq: float,
     ) -> None:
+        from mne import create_info
+
         self.ch_names = ch_names
         self.settings = settings
         self.mode = settings.mne_connectivity.mode
@@ -32,11 +34,17 @@ class MNEConnectivity(NMFeature):
         self.fbands = settings.frequency_ranges_hz
         self.fband_ranges: list = []
 
+        self.raw_info = create_info(ch_names=self.ch_names, sfreq=self.sfreq)
+        self.raw_is_initialized = False
+        self.raw_array: "RawArray"
+        self.prev_batch_shape: tuple = (-1, -1)  # sentinel value
+        self.batch_shape_changed: bool = True
+
     def get_epoched_data(
         self, data: np.ndarray, time_samples_s: float, epoch_length: float = 1
     ) -> "Epochs":
         from mne.io import RawArray
-        from mne import create_info, make_fixed_length_events, Epochs
+        from mne import Epochs
 
         if epoch_length > time_samples_s:
             raise ValueError(
@@ -44,19 +52,32 @@ class MNEConnectivity(NMFeature):
                 f" are longer than the passed data array {np.round(time_samples_s, 2)}s"
             )
 
-        raw = RawArray(
-            data=data,
-            info=create_info(ch_names=self.ch_names, sfreq=self.sfreq),
-            verbose=False,
+        if not self.raw_is_initialized or self.batch_shape_changed:
+            self.raw_array = RawArray(
+                data=data,
+                info=self.raw_info,
+                copy=None,  # type: ignore
+                verbose=False,
+            )
+            self.raw_is_initialized = True
+        else:
+            self.raw_array._data = data
+
+        # events = make_fixed_length_events(raw, duration=epoch_length, overlap=0)
+        # Since we don't pass any other parameter than duration, the call to
+        # make_fixed_length_events is equivalent to this:
+        events = np.column_stack(
+            (
+                np.arange(0, data.shape[-1], self.sfreq * epoch_length),
+                [0, 0],
+                [1, 1],
+            )
         )
 
-        events = make_fixed_length_events(raw, duration=epoch_length, overlap=0)
-        event_id = {"rest": 1}
-
         epochs = Epochs(
-            raw,
+            self.raw_array,
             events=events,
-            event_id=event_id,
+            event_id={"rest": 1},
             tmin=0,
             tmax=epoch_length,
             baseline=None,
@@ -89,6 +110,8 @@ class MNEConnectivity(NMFeature):
         return spec_out
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
+        self.batch_shape_changed = data.shape != self.prev_batch_shape
+
         time_samples_s = data.shape[1] / self.sfreq
 
         epochs = self.get_epoched_data(data, time_samples_s=time_samples_s)
@@ -112,5 +135,7 @@ class MNEConnectivity(NMFeature):
             for conn in np.arange(dat_conn.shape[0]):
                 key = "_".join(["ch1", self.method, str(conn), fband])
                 features_compute[key] = fband_mean[conn]
+
+        self.prev_batch_shape = data.shape
 
         return features_compute
