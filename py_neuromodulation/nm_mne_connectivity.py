@@ -1,5 +1,6 @@
 from collections.abc import Iterable
 import numpy as np
+import pandas as pd
 from typing import TYPE_CHECKING
 
 from py_neuromodulation.nm_features import NMFeature
@@ -35,16 +36,18 @@ class MNEConnectivity(NMFeature):
         self.fband_ranges: list = []
 
         self.raw_info = create_info(ch_names=self.ch_names, sfreq=self.sfreq)
-        self.raw_is_initialized = False
-        self.raw_array: "RawArray"
-        self.prev_batch_shape: tuple = (-1, -1)  # sentinel value
-        self.batch_shape_changed: bool = True
 
-    def get_epoched_data(
-        self, data: np.ndarray, time_samples_s: float, epoch_length: float = 1
-    ) -> "Epochs":
+        self.raw_array: "RawArray"
+        self.events: np.ndarray
+        self.prev_batch_shape: tuple = (-1, -1)  # sentinel value
+
+    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         from mne.io import RawArray
         from mne import Epochs
+        from mne_connectivity import spectral_connectivity_epochs
+
+        time_samples_s = data.shape[1] / self.sfreq
+        epoch_length: float = 1  # TODO: Make this a parameter
 
         if epoch_length > time_samples_s:
             raise ValueError(
@@ -52,52 +55,59 @@ class MNEConnectivity(NMFeature):
                 f" are longer than the passed data array {np.round(time_samples_s, 2)}s"
             )
 
-        if not self.raw_is_initialized or self.batch_shape_changed:
+        if data.shape != self.prev_batch_shape:
             self.raw_array = RawArray(
                 data=data,
                 info=self.raw_info,
                 copy=None,  # type: ignore
                 verbose=False,
             )
-            self.raw_is_initialized = True
+
+            # self.events = make_fixed_length_events(
+            #     self.raw_array, duration=epoch_length, overlap=0
+            # )
+            # Equivalnet code for those parameters:
+            self.events = np.column_stack(
+                (
+                    np.arange(0, data.shape[-1], self.sfreq * epoch_length, dtype=int),
+                    np.array([0, 0], dtype=int),
+                    np.array([1, 1], dtype=int),
+                )
+            )
+
+            # there need to be minimum 2 of two epochs, otherwise mne_connectivity
+            # is not correctly initialized
+            if self.events.shape[0] < 2:
+                raise RuntimeError(
+                    f"A minimum of 2 epochs is required for mne_connectivity,"
+                    f" got only {self.events.shape[0]}. Increase settings['segment_length_features_ms']"
+                )
+
+            self.epochs = Epochs(
+                self.raw_array,
+                events=self.events,
+                event_id={"rest": 1},
+                tmin=0,
+                tmax=epoch_length,
+                baseline=None,
+                reject_by_annotation=True,
+                verbose=False,
+            )
+
+            self.epochs.metadata = pd.DataFrame(
+                index=np.arange(self.events.shape[0]), columns=["column1", "column2"]
+            )
+
         else:
-            self.raw_array._data = data
+            # self.raw_array._data = data
+            # As long as the initialization parameters, channels, sfreq and batch size are the same
+            # We can re-use the existing epochs object by updating the raw data
+            self.epochs._raw = self.raw_array
 
-        # events = make_fixed_length_events(raw, duration=epoch_length, overlap=0)
-        # Since we don't pass any other parameter than duration, the call to
-        # make_fixed_length_events is equivalent to this:
-        events = np.column_stack(
-            (
-                np.arange(0, data.shape[-1], self.sfreq * epoch_length),
-                [0, 0],
-                [1, 1],
-            )
-        )
-
-        epochs = Epochs(
-            self.raw_array,
-            events=events,
-            event_id={"rest": 1},
-            tmin=0,
-            tmax=epoch_length,
-            baseline=None,
-            reject_by_annotation=True,
-            verbose=False,
-        )
-        if epochs.events.shape[0] < 2:
-            raise Exception(
-                f"A minimum of 2 epochs is required for mne_connectivity,"
-                f" got only {epochs.events.shape[0]}. Increase settings['segment_length_features_ms']"
-            )
-        return epochs
-
-    def estimate_connectivity(self, epochs: "Epochs"):
         # n_jobs is here kept to 1, since setup of the multiprocessing Pool
         # takes longer than most batch computing sizes
-        from mne_connectivity import spectral_connectivity_epochs
-
         spec_out = spectral_connectivity_epochs(
-            data=epochs,
+            data=self.epochs,
             sfreq=self.sfreq,
             n_jobs=1,
             method=self.method,
@@ -107,18 +117,6 @@ class MNEConnectivity(NMFeature):
             block_size=1000,
             verbose=False,
         )
-        return spec_out
-
-    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
-        self.batch_shape_changed = data.shape != self.prev_batch_shape
-
-        time_samples_s = data.shape[1] / self.sfreq
-
-        epochs = self.get_epoched_data(data, time_samples_s=time_samples_s)
-        # there need to be minimum 2 of two epochs, otherwise mne_connectivity
-        # is not correctly initialized
-
-        spec_out = self.estimate_connectivity(epochs)
 
         if len(self.fband_ranges) == 0:
             for fband_name, fband_range in self.fbands.items():
