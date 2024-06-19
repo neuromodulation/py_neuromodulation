@@ -228,8 +228,13 @@ class NMSettings(NMBaseModel):
             case ".yaml":
                 import yaml
 
+                #with open(path) as f:
+                #    model_dict = yaml.safe_load(f)
+                
+                # Timon: this is potentially dangerous since python code is directly executed
                 with open(path) as f:
-                    model_dict = yaml.safe_load(f)
+                    model_dict = yaml.load(f, Loader=yaml.Loader)
+
             case _:
                 raise ValueError("File format not supported.")
 

@@ -37,10 +37,10 @@ The above example implicitly used the default settings and channels. However, we
 
 .. code-block:: python
 
-    from py_neuromodulation import nm_define_nmchannels, nm_settings
+    from py_neuromodulation import nm_define_nmchannels, NMSettings
 
     channels = nm_define_nmchannels.get_default_channels_from_data(data, car_rereferencing=True)
-    settings = nm_settings.get_default_settings()
+    settings = NMSettings.get_fast_compute()
 
 Channel parametrization
 -----------------------

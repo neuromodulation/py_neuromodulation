@@ -20,15 +20,7 @@ LARGE_NUM = 2**24
 
 
 def get_label_pos(burst_labels, valid_labels):
-    """_summary_
 
-    Args:
-        burst_labels (_type_): _description_
-        valid_labels (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
     max_label = np.max(burst_labels, axis=2).flatten()
     min_label = np.min(
         burst_labels, axis=2, initial=LARGE_NUM, where=burst_labels != 0
