@@ -9,6 +9,7 @@ from py_neuromodulation.nm_types import NMBaseModel
 if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
     from mne.io import RawArray
+    from mne import Epochs
 
 
 class MNEConnectivitySettings(NMBaseModel):
@@ -40,9 +41,8 @@ class MNEConnectivity(NMFeature):
 
         self.raw_info = create_info(ch_names=self.ch_names, sfreq=self.sfreq)
         self.raw_array: "RawArray"
-        self.events: np.ndarray
+        self.epochs: "Epochs"
         self.prev_batch_shape: tuple = (-1, -1)  # sentinel value
-        # self.prev_sfreq = self.sfreq
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         from mne.io import RawArray
@@ -61,7 +61,6 @@ class MNEConnectivity(NMFeature):
         # Only reinitialize the raw_array and epochs object if the data shape has changed
         # That could mean that the channels have been re-selected, or we're in the last batch
         # TODO: If sfreq or channels change, do we re-initialize the whole Stream object?
-        # if data.shape != self.prev_batch_shape or self.prev_sfreq != self.sfreq:
         if data.shape != self.prev_batch_shape:
             self.raw_array = RawArray(
                 data=data,
@@ -72,25 +71,28 @@ class MNEConnectivity(NMFeature):
 
             # self.events = make_fixed_length_events(self.raw_array, duration=epoch_length)
             # Equivalent code for those parameters:
-            self.events = np.column_stack(
+            event_times = np.arange(
+                0, data.shape[-1], self.sfreq * epoch_length, dtype=int
+            )
+            events = np.column_stack(
                 (
-                    np.arange(0, data.shape[-1], self.sfreq * epoch_length, dtype=int),
-                    np.array([0, 0], dtype=int),
-                    np.array([1, 1], dtype=int),
+                    event_times,
+                    np.zeros_like(event_times, dtype=int),
+                    np.ones_like(event_times, dtype=int),
                 )
             )
 
             # there need to be minimum 2 of two epochs, otherwise mne_connectivity
             # is not correctly initialized
-            if self.events.shape[0] < 2:
+            if events.shape[0] < 2:
                 raise RuntimeError(
                     f"A minimum of 2 epochs is required for mne_connectivity,"
-                    f" got only {self.events.shape[0]}. Increase settings['segment_length_features_ms']"
+                    f" got only {events.shape[0]}. Increase settings['segment_length_features_ms']"
                 )
 
             self.epochs = Epochs(
                 self.raw_array,
-                events=self.events,
+                events=events,
                 event_id={"rest": 1},
                 tmin=0,
                 tmax=epoch_length,
@@ -101,7 +103,7 @@ class MNEConnectivity(NMFeature):
 
             # Trick the function "spectral_connectivity_epochs" into not calling "add_annotations_to_metadata"
             # TODO: This is a hack, and maybe needs a fix in the mne_connectivity library
-            self.epochs._metadata = pd.DataFrame(index=np.arange(self.events.shape[0]))
+            self.epochs._metadata = pd.DataFrame(index=np.arange(events.shape[0]))
 
         else:
             # As long as the initialization parameters, channels, sfreq and batch size are the same
@@ -114,44 +116,33 @@ class MNEConnectivity(NMFeature):
         spec_out = spectral_connectivity_epochs(
             data=self.epochs,
             sfreq=self.sfreq,
-            n_jobs=1,
             method=self.method,
             mode=self.mode,
             indices=(np.array([0, 0, 1, 1]), np.array([2, 3, 2, 3])),
-            faverage=False,
-            block_size=1000,
             verbose=False,
         )
         dat_conn: np.ndarray = spec_out.get_data()
 
-        # Do this only for the first batch
+        # Get frequency band ranges only for the first batch, it's already the same
         if len(self.fband_ranges) == 0:
-            # Get frequency band ranges
-            for fband_name, fband_range in self.fbands.items():
+            for fband_range in self.fbands.values():
                 self.fband_ranges.append(
                     np.where(
                         (np.array(spec_out.freqs) > fband_range[0])
                         & (np.array(spec_out.freqs) < fband_range[1])
                     )[0]
                 )
-            # Get keys to order the results by channel first, then fband
-            for conn in np.arange(dat_conn.shape[0]):
-                for fband_idx, fband in enumerate(self.fbands):
-                    self.result_keys.append("_".join(["ch1", self.method, str(conn), fband]))
 
-        result_dict = {}
-        for fband_idx, fband in enumerate(self.fbands):
-            fband_mean = np.mean(dat_conn[:, self.fband_ranges[fband_idx]], axis=1)
-            for conn in np.arange(dat_conn.shape[0]):
-                key = "_".join(["ch1", self.method, str(conn), fband])
-                result_dict[key] = fband_mean[conn]
-
-        # Sort keys alphabetically to match the previous implementation
-        for k in self.result_keys:
-            features_compute[k] = result_dict[k]
+        # TODO: If I compute the mean for the entire fband, results are almost the same before
+        # normalization (0.9999999... vs 1.0), but some change wildly after normalization (-3 vs 0)
+        # Investigate why, is this a bug in normalization?
+        for conn in np.arange(dat_conn.shape[0]):
+            for fband_idx, fband in enumerate(self.fbands):
+                features_compute["_".join(["ch1", self.method, str(conn), fband])] = (
+                    np.mean(dat_conn[conn, self.fband_ranges[fband_idx]])
+                )
 
         # Store current experiment parameters to check if re-initialization is needed
         self.prev_batch_shape = data.shape
-        # self.prev_sfreq = self.sfreq
 
         return features_compute
