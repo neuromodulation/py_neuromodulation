@@ -126,16 +126,14 @@ class _GenericStream(NMStream):
         db_path = Path(out_path_root, folder_name, "stream.db")
         if os.path.exists(db_path):
             os.remove(db_path)
+        conn = sqlite3.connect(db_path, isolation_level=None)
+        cursor = conn.cursor()
 
         db_dir = Path(folder_name)
         if os.path.exists(db_dir):
             os.chmod(db_dir, 0o777)
         if os.path.exists(db_path):
             os.chmod(db_path, 0o777)
-
-
-        conn = sqlite3.connect(db_path, isolation_level=None)
-        cursor = conn.cursor()
 
         while True:
             next_item = next(generator, None)
