@@ -128,8 +128,10 @@ class _GenericStream(NMStream):
             os.remove(db_path)
 
         db_dir = Path(folder_name).resolve()
+        os.chmod(db_dir, 0o777)
         if not os.access(db_dir, os.W_OK):
             raise PermissionError(f"Directory {db_dir} is not writable")
+            os.chmod(db_dir, 0o777)
         
         conn = sqlite3.connect(db_path, isolation_level=None)
         cursor = conn.cursor()
