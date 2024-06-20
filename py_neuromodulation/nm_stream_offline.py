@@ -125,7 +125,7 @@ class _GenericStream(NMStream):
         buff_cnt: int = 0
         if os.path.exists("nm_database.db"):
             os.remove("nm_database.db")
-        conn = sqlite3.connect("nm_database.db", autocommit=False, isolation_level=None)
+        conn = sqlite3.connect("nm_database.db", isolation_level=None)
         cursor = conn.cursor()
 
         while True:
