@@ -123,9 +123,11 @@ class _GenericStream(NMStream):
         last_time = None
 
         buff_cnt: int = 0
-        if os.path.exists("nm_database.db"):
-            os.remove("nm_database.db")
-        conn = sqlite3.connect("nm_database.db", isolation_level=None)
+        db_path = Path(out_path_root, folder_name, "stream.db")
+        if os.path.exists(db_path):
+            os.remove(db_path)
+        
+        conn = sqlite3.connect(db_path, isolation_level=None)
         cursor = conn.cursor()
 
         while True:
@@ -142,10 +144,12 @@ class _GenericStream(NMStream):
                 data_batch.astype(np.float64)
             )
             if is_stream_lsl:
-                feature_dict["time"] = time_[-1] # TODO change this to a time that makes sense! -> Stream time as logged for lsl
                 if self.verbose:
                     if last_time is not None:
                         logger.debug("%.3f seconds of new data processed", time_[-1] - last_time)
+                        feature_dict["time"] = time_[-1] - last_time
+                    else:
+                        feature_dict["time"] = 0
                     last_time = time_[-1]
             else:
                 feature_dict["time"] = np.ceil(time_[-1] * 1000 +1 )
@@ -195,7 +199,6 @@ class _GenericStream(NMStream):
         # TODO change this to save only head afterwards (conrol)
         self.save_after_stream(out_path_root, folder_name, feature_df)
 
-        # TODO change to load df from database and return here
         return feature_df
 
     def plot_raw_signal(
