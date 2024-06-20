@@ -134,6 +134,8 @@ class _GenericStream(NMStream):
             os.chmod(db_dir, 0o777)
         if os.path.exists(db_path):
             os.chmod(db_path, 0o777)
+        if os.path.exists(Path(out_path_root, folder_name)):
+            os.chmod(Path(out_path_root, folder_name), 0o777)
 
         while True:
             next_item = next(generator, None)
