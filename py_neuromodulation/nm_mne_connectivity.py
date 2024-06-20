@@ -26,24 +26,23 @@ class MNEConnectivity(NMFeature):
         from mne import create_info
 
         self.settings = settings
-        
+
         self.ch_names = ch_names
         self.sfreq = sfreq
-        
+
         # Params used by spectral_connectivity_epochs
         self.mode = settings.mne_connectivity.mode
         self.method = settings.mne_connectivity.method
 
         self.fbands = settings.frequency_ranges_hz
         self.fband_ranges: list = []
+        self.result_keys = []
 
         self.raw_info = create_info(ch_names=self.ch_names, sfreq=self.sfreq)
-
         self.raw_array: "RawArray"
         self.events: np.ndarray
         self.prev_batch_shape: tuple = (-1, -1)  # sentinel value
-        self.prev_sfreq = self.sfreq
-        self.ch_names = ch_names
+        # self.prev_sfreq = self.sfreq
 
     def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
         from mne.io import RawArray
@@ -61,7 +60,9 @@ class MNEConnectivity(NMFeature):
 
         # Only reinitialize the raw_array and epochs object if the data shape has changed
         # That could mean that the channels have been re-selected, or we're in the last batch
-        if data.shape != self.prev_batch_shape or self.prev_sfreq != self.sfreq:
+        # TODO: If sfreq or channels change, do we re-initialize the whole Stream object?
+        # if data.shape != self.prev_batch_shape or self.prev_sfreq != self.sfreq:
+        if data.shape != self.prev_batch_shape:
             self.raw_array = RawArray(
                 data=data,
                 info=self.raw_info,
@@ -70,7 +71,7 @@ class MNEConnectivity(NMFeature):
             )
 
             # self.events = make_fixed_length_events(self.raw_array, duration=epoch_length)
-            # Equivalnet code for those parameters:
+            # Equivalent code for those parameters:
             self.events = np.column_stack(
                 (
                     np.arange(0, data.shape[-1], self.sfreq * epoch_length, dtype=int),
@@ -99,6 +100,7 @@ class MNEConnectivity(NMFeature):
             )
 
             # Trick the function "spectral_connectivity_epochs" into not calling "add_annotations_to_metadata"
+            # TODO: This is a hack, and maybe needs a fix in the mne_connectivity library
             self.epochs._metadata = pd.DataFrame(index=np.arange(self.events.shape[0]))
 
         else:
@@ -120,8 +122,11 @@ class MNEConnectivity(NMFeature):
             block_size=1000,
             verbose=False,
         )
+        dat_conn: np.ndarray = spec_out.get_data()
 
+        # Do this only for the first batch
         if len(self.fband_ranges) == 0:
+            # Get frequency band ranges
             for fband_name, fband_range in self.fbands.items():
                 self.fband_ranges.append(
                     np.where(
@@ -129,16 +134,24 @@ class MNEConnectivity(NMFeature):
                         & (np.array(spec_out.freqs) < fband_range[1])
                     )[0]
                 )
+            # Get keys to order the results by channel first, then fband
+            for conn in np.arange(dat_conn.shape[0]):
+                for fband_idx, fband in enumerate(self.fbands):
+                    self.result_keys.append("_".join(["ch1", self.method, str(conn), fband]))
 
-        dat_conn: np.ndarray = spec_out.get_data()
+        result_dict = {}
         for fband_idx, fband in enumerate(self.fbands):
             fband_mean = np.mean(dat_conn[:, self.fband_ranges[fband_idx]], axis=1)
             for conn in np.arange(dat_conn.shape[0]):
                 key = "_".join(["ch1", self.method, str(conn), fband])
-                features_compute[key] = fband_mean[conn]
+                result_dict[key] = fband_mean[conn]
+
+        # Sort keys alphabetically to match the previous implementation
+        for k in self.result_keys:
+            features_compute[k] = result_dict[k]
 
         # Store current experiment parameters to check if re-initialization is needed
         self.prev_batch_shape = data.shape
-        self.prev_sfreq = self.sfreq
+        # self.prev_sfreq = self.sfreq
 
         return features_compute
