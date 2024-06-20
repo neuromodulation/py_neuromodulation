@@ -126,6 +126,10 @@ class _GenericStream(NMStream):
         db_path = Path(out_path_root, folder_name, "stream.db")
         if os.path.exists(db_path):
             os.remove(db_path)
+
+        db_dir = Path(folder_name).resolve()
+        if not os.access(db_dir, os.W_OK):
+            raise PermissionError(f"Directory {db_dir} is not writable")
         
         conn = sqlite3.connect(db_path, isolation_level=None)
         cursor = conn.cursor()
@@ -153,7 +157,7 @@ class _GenericStream(NMStream):
                     last_time = time_[-1]
             else:
                 feature_dict["time"] = np.ceil(time_[-1] * 1000 +1 )
-                logger.info("Time: %.2f", feature_dict["time"]/1000 -1)
+                logger.info("Time: %.2f", feature_dict["time"]/1000)
             
 
             self._add_target(feature_dict, data_batch)
