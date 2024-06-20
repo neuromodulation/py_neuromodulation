@@ -131,10 +131,14 @@ class _GenericStream(NMStream):
         os.chmod(db_dir, 0o777)
         if not os.access(db_dir, os.W_OK):
             raise PermissionError(f"Directory {db_dir} is not writable")
-            os.chmod(db_dir, 0o777)
         
         conn = sqlite3.connect(db_path, isolation_level=None)
         cursor = conn.cursor()
+
+        if not os.access(db_path, os.W_OK):
+          os.chmod(db_path, 0o777)
+          raise PermissionError(f"Database file {db_path} is not writable")
+
 
         while True:
             next_item = next(generator, None)
