@@ -179,3 +179,14 @@ figures_ucsf/*
 catboost_info/*
 out_per
 .DS_Store
+
+# Temp dev files
+# Testing scripts
+/*.py 
+# Stream output
+/*.csv
+/*.db
+/*.sqlite
+# Profiler files
+/*.prof
+/profiling/*
