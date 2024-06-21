@@ -189,10 +189,15 @@ class NMCoherence(NMFeature):
         flat_channels = [
             ch for ch_pair in settings.coherence.channels for ch in ch_pair
         ]
-        assert all(ch_coh in ch_names for ch_coh in flat_channels), (
-            f"coherence selected channels don't match the ones in nm_channels. \n"
-            f"ch_names: {ch_names} \n settings.coherence.channels: {settings.coherence.channels}"
-        )
+        
+        valid_coh_channel = [any(ch.startswith(ch_coh) for ch in ch_names) for ch_coh in flat_channels]
+        for ch_idx, ch_coh in enumerate(flat_channels):
+            assert valid_coh_channel[ch_idx], (
+                "Coherence selected channels don't match the ones in nm_channels. \n"
+                f"Channel {ch_coh} not present in nm_channels\n"
+                f"  - settings.coherence.channels: {settings.coherence.channels}\n"
+                f"  - ch_names: {ch_names} \n"
+            )
 
         assert all(
             f_band_coh in settings.frequency_ranges_hz
