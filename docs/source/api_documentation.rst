@@ -8,7 +8,7 @@ Parametrization
    :maxdepth: 4
 
    nm_stream_abc
-   nm_stream_offline
+   nm_stream
    nm_settings
    nm_define_nmchannels
    nm_generator

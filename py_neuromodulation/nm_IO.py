@@ -18,13 +18,8 @@ def load_nm_channels(
     nm_channels: pd.DataFrame | _PathLike,
 ) -> "pd.DataFrame":
     """Read nm_channels from path or specify via BIDS arguments.
-    Nexessary parameters are then
-    ch_names (list),
-    ch_types (list),
-    bads (list)
-    used_types (list)
-    target_keywords (list)
-    reference Union[list, str]
+    Necessary parameters are then ch_names (list), ch_types (list), bads (list), used_types (list),
+    target_keywords (list) and reference Union[list, str].
     """
 
     if isinstance(nm_channels, pd.DataFrame):
@@ -47,14 +42,19 @@ def read_BIDS_data(
 
     Parameters
     ----------
-    PATH_RUN : string
+    PATH_RUN : path to bids run file
+        supported formats: https://bids-specification.readthedocs.io/en/v1.2.1/04-modality-specific-files/04-intracranial-electroencephalography.html#ieeg-recording-data
+    line_noise: int, optional
+        by default 50
 
     Returns
     -------
     raw_arr : mne.io.RawArray
     raw_arr_data : np.ndarray
-    fs : int
+    sfreq : float
     line_noise : int
+    coord_list : list | None
+    coord_names : list | None
     """
 
     from mne_bids import read_raw_bids, get_bids_path_from_fname
@@ -82,7 +82,7 @@ def read_mne_data(
     PATH_RUN: "_PathLike | BIDSPath",
     line_noise: int = 50,
 ):
-    """_summary_
+    """Read data in the mne.io.read_raw supported format. 
 
     Parameters
     ----------
@@ -107,8 +107,8 @@ def read_mne_data(
     ch_names = raw_arr.info["ch_names"]
     ch_types = raw_arr.get_channel_types()
     logger.info(
-        f"Channel data is read using mne.io.read_raw function. Channel types might not be correct"
-        f" and set to 'eeg' by default"
+        "Channel data is read using mne.io.read_raw function. Channel types might not be correct"
+        " and set to 'eeg' by default"
     )
     bads = raw_arr.info["bads"]
 
@@ -124,6 +124,16 @@ def read_mne_data(
 def get_coord_list(
     raw: "mne_io.BaseRaw",
 ) -> tuple[list, list] | tuple[None, None]:
+    """Return the coordinate list and names from mne RawArray
+
+    Parameters
+    ----------
+    raw : mne_io.BaseRaw
+
+    Returns
+    -------
+    coord_list[list, list] | coord_names[None, None]
+    """
     montage = raw.get_montage()
     if montage is not None:
         coord_list = np.array(
@@ -140,6 +150,20 @@ def get_coord_list(
 
 
 def read_grid(PATH_GRIDS: _PathLike | None, grid_str: str) -> pd.DataFrame:
+    """Read grid file from path or PYNM_DIR
+
+    Parameters
+    ----------
+    PATH_GRIDS : _PathLike | None
+        path to grid file, by default None
+    grid_str : str
+        grid name
+
+    Returns
+    -------
+    pd.DataFrame
+        pd.DataFrame including mni x,y,z coordinates for each grid point
+    """
     if PATH_GRIDS is None:
         grid = pd.read_csv(PYNM_DIR / ("grid_" + grid_str.lower() + ".tsv"), sep="\t")
     else:
@@ -203,45 +227,6 @@ def read_plot_modules(
         y_stn,
         z_stn,
     )
-
-
-def save_features_and_settings(
-    df_features,
-    run_analysis,
-    folder_name,
-    out_path,
-    settings: 'NMSettings',
-    nm_channels,
-    coords,
-    fs,
-    line_noise,
-) -> None:
-    """save settings.json, nm_channels.csv and features.csv
-
-    Parameters
-    ----------
-    df_ : pd.Dataframe
-        feature dataframe
-    run_analysis_ : run_analysis.py object
-        This includes all (optionally projected) run_analysis estimated data
-        inluding added the resampled labels in features_arr
-    folder_name : string
-        output path
-    settings_wrapper : settings.py object
-    """
-
-    # create out folder if doesn't exist
-    if not Path(out_path, folder_name).exists():
-        logger.info(f"Creating output folder: {folder_name}")
-        Path(out_path, folder_name).mkdir(parents=True)
-
-    dict_sidecar = {"fs": fs, "coords": coords, "line_noise": line_noise}
-
-    save_sidecar(dict_sidecar, out_path, folder_name)
-    save_features(df_features, out_path, folder_name)
-    settings.save(out_path, folder_name)
-    save_nm_channels(nm_channels, out_path, folder_name)
-
 
 def write_csv(df, path_out):
     """

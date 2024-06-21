@@ -37,10 +37,10 @@ The above example implicitly used the default settings and channels. However, we
 
 .. code-block:: python
 
-    from py_neuromodulation import nm_define_nmchannels, nm_settings
+    from py_neuromodulation import nm_define_nmchannels, NMSettings
 
     channels = nm_define_nmchannels.get_default_channels_from_data(data, car_rereferencing=True)
-    settings = nm_settings.get_default_settings()
+    settings = NMSettings.get_fast_compute()
 
 Channel parametrization
 -----------------------
@@ -125,12 +125,12 @@ When setting up the :class:`~nm_stream_abc`, `nm_settings` and `nm_channels` can
 Setting definition
 ------------------
 
-The *nm_settings* allow for parametrization of all features. Default settings are passed from the `nm_settings.json` file:
+The *nm_settings* allow for parametrization of all features. Default settings are passed from the `nm_settings.yaml` file:
 
 .. toggle::
 
-    .. literalinclude:: ../../py_neuromodulation/nm_settings.json
-        :language: json
+    .. literalinclude:: ../../py_neuromodulation/nm_settings.yaml
+        :language: yaml
  
 
 Preprocessing

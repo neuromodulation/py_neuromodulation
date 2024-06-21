@@ -94,9 +94,7 @@ settings.features.bursts = True
 settings.features.sharpwave_analysis = True
 settings.features.coherence = True
 
-settings.coherence.channels = [("LFP_RIGHT_0-LFP_RIGHT_2", "ECOG_RIGHT_0-avgref")] 
-# TONI: this example was failing because the rereferenced channel have different names than originals
-# We need to handle ch_names being changed after reref with settings.coherence.channels validation
+settings.coherence.channels = [("LFP_RIGHT_0", "ECOG_RIGHT_0")] 
 
 settings.coherence.frequency_bands = ["high beta", "low gamma"]
 settings.sharpwave_analysis_settings.estimator["mean"] = []

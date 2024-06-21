@@ -23,7 +23,6 @@ class NMFeature(Protocol):
         data : 'np.ndarray'
             (channels, time)
         features_compute : dict
-        ch_names : Iterable[str]
 
         Returns
         -------
@@ -60,17 +59,9 @@ class FeatureProcessors:
 
         Parameters
         ----------
-        s : dict
-            _description_
+        settings : nm_settings.NMSettings
         ch_names : list[str]
-            _description_
         sfreq : float
-            _description_
-
-        Raises
-        ------
-        ValueError
-            _description_
         """
         from py_neuromodulation import user_features
 

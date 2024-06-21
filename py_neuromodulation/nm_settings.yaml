@@ -1,42 +1,51 @@
 ---
-# General settings
+
+########################
+### General settings ###
+########################
 sampling_rate_features_hz: 10
 segment_length_features_ms: 1000
-frequency_ranges_hz:
-  theta:
-    - 4
-    - 8
-  alpha:
-    - 8
-    - 12
-  low beta:
-    - 13
-    - 20
-  high beta:
-    - 20
-    - 35
-  low gamma:
-    - 60
-    - 80
-  high gamma:
-    - 90
-    - 200
-  HFA:
-    - 200
-    - 400
 
-# Preproceessing settings
-preprocessing:
-  - raw_resampling
-  - notch_filter
-  - re_referencing
+frequency_ranges_hz: # frequency band ranges can be added, removed and altered
+  theta: [4, 8]
+  alpha: [8, 12]
+  low beta: [13, 20]
+  high beta: [20, 35]
+  low gamma: [60, 80]
+  high gamma: [90, 200]
+  HFA: [200, 400]
+
+
+# Enabled features
+features:
+  raw_hjorth: true
+  return_raw: true
+  bandpass_filter: false
+  stft: false
+  fft: true
+  welch: true
+  sharpwave_analysis: true
+  fooof: false
+  bursts: true
+  linelength: true
+  coherence: false
+  nolds: false
+  mne_connectivity: false
+  bispectrum: false
+
+##############################
+### Preprocessing settings ###
+##############################
+# preprocessing options: raw_resampling, notch_filter, re_referencing, preprocessing_filter, raw_normalization
+# note: the list order specifies also the order of execution
+preprocessing: [raw_resampling, notch_filter, re_referencing]
 
 raw_resampling_settings:
   resample_freq_hz: 1000
 
 raw_normalization_settings:
   normalization_time_s: 30
-  normalization_method: zscore
+  normalization_method: zscore # supported methods: mean, median, zscore, zscore-median, quantile, power, robust, minmax
   clip: 3
 
 preprocessing_filter:
@@ -53,7 +62,10 @@ preprocessing_filter:
   lowpass_filter_cutoff_hz: 200
   highpass_filter_cutoff_hz: 3
 
-# Postprocessing settings
+
+################################
+### Postprocessing settings ####
+################################
 postprocessing:
   feature_normalization: true
   project_cortex: false
@@ -61,7 +73,7 @@ postprocessing:
 
 feature_normalization_settings:
   normalization_time_s: 30
-  normalization_method: zscore
+  normalization_method: zscore # supported methods: mean, median, zscore, zscore-median, quantile, power, robust, minmax
   clip: 3
 
 project_cortex_settings:
@@ -70,22 +82,10 @@ project_cortex_settings:
 project_subcortex_settings:
   max_dist_mm: 5
 
-# Feature settings
-features:
-  raw_hjorth: true
-  return_raw: true
-  bandpass_filter: false
-  stft: false
-  fft: true
-  welch: true
-  sharpwave_analysis: true
-  fooof: false
-  bursts: true
-  linelength: true
-  coherence: false
-  nolds: false
-  mne_connectivity: false
-  bispectrum: false
+
+#################################
+### Feature specific settings ###
+#################################
 
 fft_settings:
   windowlength_ms: 1000
@@ -138,21 +138,12 @@ kalman_filter_settings:
   sigma_w: 0.7
   sigma_v: 1
   frequency_bands:
-    - theta
-    - alpha
-    - low beta
-    - high beta
-    - low gamma
-    - high gamma
-    - HFA
+    [theta, alpha, low beta, high beta, low gamma, high gamma, HFA]
 
 burst_settings:
   threshold: 75
   time_duration_s: 30
-  frequency_bands:
-    - low beta
-    - high beta
-    - low gamma
+  frequency_bands: [low beta, high beta, low gamma]
   burst_features:
     duration: true
     amplitude: true
@@ -187,22 +178,17 @@ sharpwave_analysis_settings:
     distance_troughs_ms: 5
     distance_peaks_ms: 10
   estimator:
-    mean:
-      - interval
+    mean: [interval]
     median: []
-    max:
-      - prominence
-      - sharpness
+    max: [prominence, sharpness]
     min: []
     var: []
   apply_estimator_between_peaks_and_troughs: true
 
 coherence:
-  channels:
-    - - STN_RIGHT_0
-      - ECOG_RIGHT_0
-  frequency_bands:
-    - high beta
+  channels: [] # List of channel pairs, empty by default. Each pair is a list of two channels.
+  # Example channels: [[STN_RIGHT_0, ECOG_RIGHT_0], [STN_RIGHT_1, ECOG_RIGHT_1]]
+  frequency_bands: [high beta]
   features:
     mean_fband: true
     max_fband: true
@@ -221,15 +207,11 @@ fooof:
     band_width: false
     height_over_ap: false
   windowlength_ms: 800
-  peak_width_limits:
-    - 0.5
-    - 12
+  peak_width_limits: [0.5, 12]
   max_n_peaks: 3
   min_peak_height: 0
   peak_threshold: 2
-  freq_range_hz:
-    - 2
-    - 40
+  freq_range_hz: [2, 40]
   knee: true
 
 nolds_features:
@@ -240,26 +222,17 @@ nolds_features:
   detrended_fluctutaion_analysis: false
   data:
     raw: true
-    frequency_bands:
-      - low beta
+    frequency_bands: [low beta]
 
 mne_connectiviy:
   method: plv
   mode: multitaper
 
 bispectrum:
-  f1s:
-    - 5
-    - 35
-  f2s:
-    - 5
-    - 35
+  f1s: [5, 35]
+  f2s: [5, 35]
   compute_features_for_whole_fband_range: true
-  frequency_bands:
-    - theta
-    - alpha
-    - low beta
-    - high beta
+  frequency_bands: [theta, alpha, low beta, high beta]
   components:
     absolute: true
     real: true

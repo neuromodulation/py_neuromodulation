@@ -13,7 +13,7 @@ class LSLOfflinePlayer:
         raw: mne.io.Raw | None = None,
         sfreq: int | float | None = None,
         data: np.ndarray | None = None,
-        ch_types: str | None = "dbs",
+        ch_type: str | None = "dbs",
     ) -> None:
         """Initialization of MNE-LSL offline player.
         Either a filename (PathLike) is provided,
@@ -22,16 +22,16 @@ class LSLOfflinePlayer:
 
         Parameters
         ----------
-        settings : dict
-            _description_
         stream_name : str, optional
-            _description_, by default "example_stream"
+            LSL stream name, by default "example_stream"
         f_name : str | None, optional
-            _description_, by default None
+            file name used for streaming, by default None
         sfreq : int | float | None, optional
-            _description_, by default None
+            sampling rate, by default None
         data : np.ndarray | None, optional
-            _description_, by default None
+            data used for streaming, by default None
+        ch_type: str | None, optional
+            channel type to select for streaming, by default "dbs"
 
         Raises
         ------
@@ -58,7 +58,7 @@ class LSLOfflinePlayer:
         elif got_sfreq_data:
             info = mne.create_info(
                 ch_names=[f"ch{i}" for i in range(data.shape[0])],
-                ch_types=[ch_types for _ in range(data.shape[0])],
+                ch_types=[ch_type for _ in range(data.shape[0])],
                 sfreq=sfreq,
             )
             raw = mne.io.RawArray(data, info)

@@ -53,7 +53,7 @@ def set_channels(
             'None' if no renaming should be performed. 'default' will infer
             channel renaming from re-referencing information. If a list is
             given, it should be in the same order as 'ch_names'.
-        ECOG_ONLY : boolean, default: False
+        ecog_only : boolean, default: False
             if True, set only 'ecog' channel type to used
         used_types : iterable of str | None, default : ("ecog", "dbs", "seeg")
             data channel types to be used. Set to `None` to use no channel

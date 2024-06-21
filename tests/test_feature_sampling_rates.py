@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from py_neuromodulation import NMSettings, nm_stream_offline, nm_define_nmchannels
+from py_neuromodulation import NMSettings, nm_stream, nm_define_nmchannels
 
 
 def get_example_settings(test_arr: np.ndarray) -> tuple[NMSettings, pd.DataFrame]:
@@ -20,7 +20,7 @@ def test_different_sampling_rate_100Hz():
     settings, nm_channels = get_example_settings(arr_test)
 
     settings.sampling_rate_features_hz = sampling_rate_features
-    stream = nm_stream_offline.Stream(
+    stream = nm_stream.Stream(
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )
 
@@ -40,7 +40,7 @@ def test_different_sampling_rate_10Hz():
     settings, nm_channels = get_example_settings(arr_test)
 
     settings.sampling_rate_features_hz = sampling_rate_features
-    stream = nm_stream_offline.Stream(
+    stream = nm_stream.Stream(
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )
 
@@ -58,7 +58,7 @@ def test_different_sampling_rate_1Hz():
     settings, nm_channels = get_example_settings(arr_test)
 
     settings.sampling_rate_features_hz = sampling_rate_features
-    stream = nm_stream_offline.Stream(
+    stream = nm_stream.Stream(
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )
 
@@ -76,7 +76,7 @@ def test_different_sampling_rate_0DOT1Hz():
     settings, nm_channels = get_example_settings(arr_test)
 
     settings.sampling_rate_features_hz = sampling_rate_features
-    stream = nm_stream_offline.Stream(
+    stream = nm_stream.Stream(
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )
 
@@ -96,7 +96,7 @@ def test_wrong_initalization_of_segment_length_features_ms_and_osc_window_length
     settings.fft_settings.windowlength_ms = 1000
 
     with pytest.raises(Exception):
-        stream = nm_stream_offline.Stream(
+        stream = nm_stream.Stream(
             sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
         )
 
@@ -110,7 +110,7 @@ def test_different_segment_lengths():
     settings.segment_length_features_ms = segment_length_features_ms
     settings.fft_settings.windowlength_ms = segment_length_features_ms
 
-    stream = nm_stream_offline.Stream(
+    stream = nm_stream.Stream(
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )
 
@@ -124,7 +124,7 @@ def test_different_segment_lengths():
     settings.segment_length_features_ms = segment_length_features_ms
     settings.fft_settings.windowlength_ms = segment_length_features_ms
 
-    stream = nm_stream_offline.Stream(
+    stream = nm_stream.Stream(
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )
 

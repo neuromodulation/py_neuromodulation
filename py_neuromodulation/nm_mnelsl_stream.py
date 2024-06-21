@@ -21,15 +21,15 @@ class LSLStream:
 
         Parameters:
         -----------
-        settings : dict
-            Settings dictionary
+        settings : nm_settings.NMSettings object
         stream_name : str, optional
             Name of the stream to connect to. If not provided, the first available stream is used.
 
         Raises:
         -------
         RuntimeError
-            If no stream is running under the provided name or if there are multiple streams running under the same name.
+            If no stream is running under the provided name or if there are multiple streams running
+            under the same name.
         """
         from mne_lsl.stream import StreamLSL
         self.stream: StreamLSL
