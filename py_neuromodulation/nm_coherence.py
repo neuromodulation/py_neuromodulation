@@ -1,11 +1,12 @@
 import numpy as np
 from collections.abc import Iterable
 
-from py_neuromodulation.nm_types import FrequencyRange, NMBaseModel, Field
-from typing import TYPE_CHECKING
+
+from typing import TYPE_CHECKING, Annotated
+from pydantic import Field
 
 from py_neuromodulation.nm_features import NMFeature
-from py_neuromodulation.nm_types import BoolSelector
+from py_neuromodulation.nm_types import BoolSelector, FrequencyRange, NMBaseModel
 from py_neuromodulation import logger
 
 if TYPE_CHECKING:
@@ -22,11 +23,12 @@ class CoherenceFeatures(BoolSelector):
     max_fband: bool = True
     max_allfbands: bool = True
 
+ListOfTwoStr = Annotated[list[str], Field(min_length=2, max_length=2)]
 
 class CoherenceSettings(NMBaseModel):
     features: CoherenceFeatures = CoherenceFeatures()
     method: CoherenceMethods = CoherenceMethods()
-    channels: list[tuple[str, str]] = [("STN_RIGHT_0", "ECOG_RIGHT_0")]
+    channels: list[ListOfTwoStr] = []
     frequency_bands: list[str] = Field(default=["high beta"], min_length=1)
 
 
