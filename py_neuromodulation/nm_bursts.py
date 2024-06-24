@@ -136,7 +136,7 @@ class Burst(NMFeature):
         self.label_structure_matrix = np.zeros((3, 3, 3))
         self.label_structure_matrix[1, 1, :] = 1
 
-    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray) -> dict:
         from scipy.signal import hilbert
         from scipy.ndimage import label, sum_labels as label_sum, mean as label_mean
 
@@ -246,40 +246,41 @@ class Burst(NMFeature):
             self.end_in_burst = bursts[:, :, -1]  # End in burst
 
         # Create dictionary of features which is the correct return format
+        feature_results = {}
         for (ch_i, ch), (fb_i, fb), feat in self.feature_combinations:
-            self.STORE_FEAT_DICT[feat](features_compute, ch_i, ch, fb_i, fb)
+            self.STORE_FEAT_DICT[feat](feature_results, ch_i, ch, fb_i, fb)
 
-        return features_compute
+        return feature_results
 
     def store_duration(
-        self, features_compute: dict, ch_i: int, ch: str, fb_i: int, fb: str
+        self, feature_results: dict, ch_i: int, ch: str, fb_i: int, fb: str
     ):
-        features_compute[f"{ch}_bursts_{fb}_duration_mean"] = self.burst_duration_mean[
+        feature_results[f"{ch}_bursts_{fb}_duration_mean"] = self.burst_duration_mean[
             ch_i, fb_i
         ]
 
-        features_compute[f"{ch}_bursts_{fb}_duration_max"] = self.burst_duration_max[
+        feature_results[f"{ch}_bursts_{fb}_duration_max"] = self.burst_duration_max[
             ch_i, fb_i
         ]
 
     def store_amplitude(
-        self, features_compute: dict, ch_i: int, ch: str, fb_i: int, fb: str
+        self, feature_results: dict, ch_i: int, ch: str, fb_i: int, fb: str
     ):
-        features_compute[f"{ch}_bursts_{fb}_amplitude_mean"] = (
+        feature_results[f"{ch}_bursts_{fb}_amplitude_mean"] = (
             self.burst_amplitude_mean[ch_i, fb_i]
         )
-        features_compute[f"{ch}_bursts_{fb}_amplitude_max"] = self.burst_amplitude_max[
+        feature_results[f"{ch}_bursts_{fb}_amplitude_max"] = self.burst_amplitude_max[
             ch_i, fb_i
         ]
 
     def store_burst_rate(
-        self, features_compute: dict, ch_i: int, ch: str, fb_i: int, fb: str
+        self, feature_results: dict, ch_i: int, ch: str, fb_i: int, fb: str
     ):
-        features_compute[f"{ch}_bursts_{fb}_burst_rate_per_s"] = self.burst_rate_per_s[
+        feature_results[f"{ch}_bursts_{fb}_burst_rate_per_s"] = self.burst_rate_per_s[
             ch_i, fb_i
         ]
 
     def store_in_burst(
-        self, features_compute: dict, ch_i: int, ch: str, fb_i: int, fb: str
+        self, feature_results: dict, ch_i: int, ch: str, fb_i: int, fb: str
     ):
-        features_compute[f"{ch}_bursts_{fb}_in_burst"] = self.end_in_burst[ch_i, fb_i]
+        feature_results[f"{ch}_bursts_{fb}_in_burst"] = self.end_in_burst[ch_i, fb_i]

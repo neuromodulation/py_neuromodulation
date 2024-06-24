@@ -44,7 +44,7 @@ class MNEConnectivity(NMFeature):
         self.epochs: "Epochs"
         self.prev_batch_shape: tuple = (-1, -1)  # sentinel value
 
-    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray) -> dict:
         from mne.io import RawArray
         from mne import Epochs
         from mne_connectivity import spectral_connectivity_epochs
@@ -136,13 +136,14 @@ class MNEConnectivity(NMFeature):
         # TODO: If I compute the mean for the entire fband, results are almost the same before
         # normalization (0.9999999... vs 1.0), but some change wildly after normalization (-3 vs 0)
         # Investigate why, is this a bug in normalization?
+        feature_results = {}
         for conn in np.arange(dat_conn.shape[0]):
             for fband_idx, fband in enumerate(self.fbands):
-                features_compute["_".join(["ch1", self.method, str(conn), fband])] = (
+                feature_results["_".join(["ch1", self.method, str(conn), fband])] = (
                     np.mean(dat_conn[conn, self.fband_ranges[fband_idx]])
                 )
 
         # Store current experiment parameters to check if re-initialization is needed
         self.prev_batch_shape = data.shape
 
-        return features_compute
+        return feature_results

@@ -7,8 +7,9 @@ from pydantic import model_validator
 from typing import TYPE_CHECKING, Any, Callable
 
 import numpy as np
+
 if np.__version__ >= "2.0.0":
-    from numpy._core._methods import _mean as np_mean # type: ignore
+    from numpy._core._methods import _mean as np_mean  # type: ignore
 else:
     from numpy.core._methods import _mean as np_mean
 
@@ -211,11 +212,7 @@ class SharpwaveAnalyzer(NMFeature):
 
         self.need_steepness = self.need_rise_steepness or self.need_decay_steepness
 
-    def calc_feature(
-        self,
-        data: np.ndarray,
-        features_compute: dict,
-    ) -> dict:
+    def calc_feature(self, data: np.ndarray) -> dict:
         """Given a new data batch, the peaks, troughs and sharpwave features
         are estimated. Importantly only new data is being analyzed here. In
         steps of 1/settings["sampling_rate_features] analyzed and returned.
@@ -224,11 +221,11 @@ class SharpwaveAnalyzer(NMFeature):
         Parameters
         ----------
         data (np.ndarray): 2d data array with shape [num_channels, samples]
-        features_compute (dict): Features.py estimated features
+        feature_results (dict): Features.py estimated features
 
         Returns
         -------
-        features_compute (dict): set features for Features.py object
+        feature_results (dict): set features for Features.py object
         """
         dict_ch_features: dict[str, dict[str, float]] = defaultdict(lambda: {})
 
@@ -240,6 +237,8 @@ class SharpwaveAnalyzer(NMFeature):
         self.filtered_data = (
             data  # TONI: Expose filtered data for example 3, need a better way
         )
+
+        feature_results = {}
 
         for (
             (ch_idx, ch_name),
@@ -277,19 +276,19 @@ class SharpwaveAnalyzer(NMFeature):
 
             # the key_name stays, since the estimator function stays between peaks and troughs
             for key_name, estimator in self.estimator_key_map.items():
-                features_compute[key_name] = estimator(
+                feature_results[key_name] = estimator(
                     [
                         list(dict_ch_features[key_name].values())[0],
                         list(dict_ch_features[key_name].values())[1],
                     ]
                 )
         else:
-            # otherwise, save all write all "flattened" key value pairs in features_compute
+            # otherwise, save all write all "flattened" key value pairs in feature_results
             for key, subdict in dict_ch_features.items():
                 for key_sub, value_sub in subdict.items():
-                    features_compute[key + "_analyze_" + key_sub] = value_sub
+                    feature_results[key + "_analyze_" + key_sub] = value_sub
 
-        return features_compute
+        return feature_results
 
     def analyze_waveform(self, data) -> dict:
         """Given the scipy.signal.find_peaks trough/peak distance
@@ -367,7 +366,7 @@ class SharpwaveAnalyzer(NMFeature):
             left_height = data[troughs_valid - int(5 * (1000 / self.sfreq))]
             right_height = data[troughs_valid + int(5 * (1000 / self.sfreq))]
             # results["sharpness"] = ((trough_height - left_height) + (trough_height - right_height)) / 2
-            results["sharpness"] = trough_height - 0.5 * (left_height + right_height) 
+            results["sharpness"] = trough_height - 0.5 * (left_height + right_height)
 
         if self.need_steepness:
             # steepness is calculated as the first derivative

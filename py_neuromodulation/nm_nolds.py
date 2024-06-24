@@ -1,3 +1,4 @@
+from pyexpat import features
 import numpy as np
 from collections.abc import Iterable
 
@@ -43,36 +44,33 @@ class Nolds(NMFeature):
                 fb in settings.frequency_ranges_hz
             ), f"{fb} selected in nolds_features, but not defined in s['frequency_ranges_hz']"
 
-    def calc_feature(
-        self,
-        data: np.ndarray,
-        features_compute: dict,
-    ) -> dict:
+    def calc_feature(self, data: np.ndarray) -> dict:
+        feature_results = {}
         data = np.nan_to_num(data)
         if self.settings.raw:
-            features_compute = self.calc_nolds(data, features_compute)
+            feature_results = self.calc_nolds(data, feature_results)
         if len(self.settings.frequency_bands) > 0:
             data_filt = self.bp_filter.bandpass_filter.filter_data(data)
 
             for f_band_idx, f_band in enumerate(self.settings.frequency_bands):
                 # filter data now for a specific fband and pass to calc_nolds
-                features_compute = self.calc_nolds(
-                    data_filt[:, f_band_idx, :], features_compute, f_band
+                feature_results = self.calc_nolds(
+                    data_filt[:, f_band_idx, :], feature_results, f_band
                 )  # ch, bands, samples
-        return features_compute
+        return feature_results
 
     def calc_nolds(
-        self, data: np.ndarray, features_compute: dict, data_str: str = "raw"
+        self, data: np.ndarray, feature_results: dict, data_str: str = "raw"
     ) -> dict:
         for ch_idx, ch_name in enumerate(self.ch_names):
             for f_name in self.settings.features.get_enabled():
-                features_compute[f"{ch_name}_nolds_{f_name}_{data_str}"] = (
+                feature_results[f"{ch_name}_nolds_{f_name}_{data_str}"] = (
                     self.calc_nolds_feature(f_name, data[ch_idx, :])
                     if data[ch_idx, :].sum()
                     else 0
                 )
 
-        return features_compute
+        return feature_results
 
     @staticmethod
     def calc_nolds_feature(f_name: str, dat: np.ndarray):

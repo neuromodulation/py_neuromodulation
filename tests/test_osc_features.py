@@ -79,7 +79,7 @@ def test_fft_zero_data():
     fft_obj = nm_oscillatory.FFT(settings, ch_names, sfreq)
 
     data = np.ones([len(ch_names), sfreq])
-    features_out = fft_obj.calc_feature(data, {})
+    features_out = fft_obj.calc_feature(data)
 
     for f in features_out.keys():
         if "psd_0" not in f:
@@ -101,7 +101,7 @@ def test_fft_random_data():
     fft_obj = nm_oscillatory.FFT(settings, ch_names, sfreq)
 
     data = np.random.random([len(ch_names), sfreq])
-    features_out = fft_obj.calc_feature(data, {})
+    features_out = fft_obj.calc_feature(data)
 
     for f in features_out.keys():
         assert features_out[f] != 0
@@ -138,7 +138,7 @@ def test_fft_beta_osc():
     np.random.seed(0)
     data = np.random.random([len(ch_names), sfreq]) + beta_wave
 
-    features_out = fft_obj.calc_feature(data, {})
+    features_out = fft_obj.calc_feature(data)
 
     assert (
         features_out["ch1_fft_beta_mean"] > features_out["ch1_fft_theta_mean"]
@@ -210,7 +210,7 @@ def test_stft_beta_osc():
     np.random.seed(0)
     data = np.random.random([len(ch_names), sfreq]) + beta_wave
 
-    features_out = stft_obj.calc_feature(data, {})
+    features_out = stft_obj.calc_feature(data)
 
     assert (
         features_out["ch1_stft_beta_mean"] > features_out["ch1_stft_theta_mean"]
@@ -249,7 +249,7 @@ def test_welch_beta_osc():
     np.random.seed(0)
     data = np.random.random([len(ch_names), sfreq]) + beta_wave
 
-    features_out = stft_obj.calc_feature(data, {})
+    features_out = stft_obj.calc_feature(data)
 
     assert (
         features_out["ch1_welch_beta_mean"] > features_out["ch1_welch_theta_mean"]
@@ -335,7 +335,7 @@ def test_bp_zero_data():
     stft_obj = nm_oscillatory.BandPower(settings, ch_names, sfreq)
 
     data = np.zeros([len(ch_names), sfreq])
-    features_out = stft_obj.calc_feature(data, {})
+    features_out = stft_obj.calc_feature(data)
 
     for f in features_out.keys():
         assert pytest.approx(0, 0.01) == features_out[f]
@@ -360,7 +360,7 @@ def test_bp_random_data():
 
     np.random.seed(0)
     data = np.random.random([len(ch_names), sfreq])
-    features_out = stft_obj.calc_feature(data, {})
+    features_out = stft_obj.calc_feature(data)
 
     for f in features_out.keys():
         assert pytest.approx(0, 0.01) != features_out[f]
@@ -402,7 +402,7 @@ def test_bp_beta_osc():
     np.random.seed(0)
     data = np.random.random([len(ch_names), sfreq]) + beta_wave
 
-    features_out = bp_obj.calc_feature(data, {})
+    features_out = bp_obj.calc_feature(data)
 
     assert (
         features_out["ch1_bandpass_activity_beta"]

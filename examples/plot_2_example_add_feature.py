@@ -37,18 +37,21 @@ class ChannelMean:
         
         self.feature_name = "channel_mean"
 
-    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray) -> dict:
+        # First, create an empty dictionary to store the calculated features
+        feature_results = {}
+
         # Here you can add any feature calculation code
         # This example simply calculates the mean signal for each channel
         ch_means = np.mean(data, axis=1)
 
-        # Store the calculated features in the features_compute dictionary
+        # Store the calculated features in the feature_results dictionary
         # Be careful to use a unique keyfor each channel and metric you compute
         for ch_idx, ch in enumerate(self.ch_names):
-            features_compute[f"{self.feature_name}_{ch}"] = ch_means[ch_idx]
+            feature_results[f"{self.feature_name}_{ch}"] = ch_means[ch_idx]
 
-        # Return the updated features_compute dictionary to the stream
-        return features_compute
+        # Return the updated feature_results dictionary to the stream
+        return feature_results
 
 
 nm.add_custom_feature("channel_mean", ChannelMean)

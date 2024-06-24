@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+from pyexpat import features
 import numpy as np
 
 from typing import TYPE_CHECKING
@@ -79,13 +80,9 @@ class FooofAnalyzer(NMFeature):
             verbose=False,
         )
 
-    def calc_feature(
-        self,
-        data: np.ndarray,
-        features_compute: dict,
-    ) -> dict:
+    def calc_feature(self, data: np.ndarray) -> dict:
         from scipy.fft import rfft
-
+        
         spectra = np.abs(rfft(data[:, -self.num_samples :]))  # type: ignore
 
         self.fm.fit(self.f_vec, spectra, self.settings.freq_range_hz)
@@ -94,7 +91,8 @@ class FooofAnalyzer(NMFeature):
             raise RuntimeError("FOOOF failed to fit model to data.")
 
         failed_fits: list[int] = self.fm.null_inds_
-
+        
+        feature_results = {}
         for ch_idx, ch_name in enumerate(self.ch_names):
             FIT_PASSED = ch_idx not in failed_fits
             exp = self.fm.get_params("aperiodic_params", "exponent")[ch_idx]
@@ -103,10 +101,10 @@ class FooofAnalyzer(NMFeature):
                 f_name = f"{ch_name}_fooof_a_{self.feat_name_map[feat]}"
 
                 if not FIT_PASSED:
-                    features_compute[f_name] = None
+                    feature_results[f_name] = None
 
                 elif feat == "knee" and exp == 0:
-                    features_compute[f_name] = None
+                    feature_results[f_name] = None
 
                 else:
                     params = self.fm.get_params("aperiodic_params", feat)[ch_idx]
@@ -117,7 +115,7 @@ class FooofAnalyzer(NMFeature):
                         else:
                             params = params ** (1 / exp)
 
-                    features_compute[f_name] = np.nan_to_num(params)
+                    feature_results[f_name] = np.nan_to_num(params)
 
             peaks_dict: dict[str, np.ndarray | None] = {
                 "bw": self.fm.get_params("peak_params", "BW") if FIT_PASSED else None,
@@ -134,10 +132,10 @@ class FooofAnalyzer(NMFeature):
                 for feat in self.settings.periodic.get_enabled():
                     f_name = f"{ch_name}_fooof_p_{peak_idx}_{self.feat_name_map[feat]}"
 
-                    features_compute[f_name] = (
+                    feature_results[f_name] = (
                         peaks_dict[self.feat_name_map[feat]][peak_idx]
                         if peak_idx < len(peaks_dict[self.feat_name_map[feat]])
                         else None
                     )
 
-        return features_compute
+        return feature_results
