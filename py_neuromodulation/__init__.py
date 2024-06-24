@@ -77,7 +77,8 @@ from .features.feature_processor import (
 from .utils import types as types
 from .utils import io as io
 
-from . import stream as stream
+from . import stream
+from . import features
 
 from .stream.settings import (
     get_default_settings as get_default_settings,

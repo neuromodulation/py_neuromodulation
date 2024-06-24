@@ -120,8 +120,8 @@ class NMBaseModel(BaseModel):
 
 
 class FrequencyRange(NMBaseModel):
-    frequency_low_hz: float = Field(default=0, gt=0)
-    frequency_high_hz: float = Field(default=0, gt=0)
+    frequency_low_hz: float = Field(gt=0)
+    frequency_high_hz: float = Field(gt=0)
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
