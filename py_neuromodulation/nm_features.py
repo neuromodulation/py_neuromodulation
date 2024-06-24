@@ -50,18 +50,17 @@ FEATURE_DICT: dict[FeatureName | str, ImportDetails] = {
 
 
 class FeatureProcessors:
-    """Class for calculating features.p"""
+    """Class for storing NMFeature objects and calculating features during processing"""
 
     def __init__(
         self, settings: "NMSettings", ch_names: list[str], sfreq: float
     ) -> None:
-        """_summary_
+        """Initialize FeatureProcessors object with settings, channel names and sampling frequency.
 
-        Parameters
-        ----------
-        settings : nm_settings.NMSettings
-        ch_names : list[str]
-        sfreq : float
+        Args:
+            settings (NMSettings): PyNM settings object
+            ch_names (list[str]): list of channel names
+            sfreq (float): sampling frequency in Hz
         """
         from py_neuromodulation import user_features
 
