@@ -7,6 +7,7 @@ from pathlib import Path
 import sqlite3
 import os
 from py_neuromodulation.nm_stream_abc import NMStream
+from py_neuromodulation.nm_database import NMDatabase
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
 import time
@@ -120,24 +121,10 @@ class _GenericStream(NMStream):
 
             generator = self.lsl_stream.get_next_batch()
 
-        l_features: list[dict] = []
         last_time = None
 
         buff_cnt: int = 0
-        db_time_idx = time.time() * 1000
-        db_path = Path(out_path_root, folder_name, f"stream{db_time_idx}.db")
-        if os.path.exists(db_path):
-            os.remove(db_path)
-        conn = sqlite3.connect(db_path, isolation_level=None)
-        cursor = conn.cursor()
-
-        db_dir = Path(folder_name)
-        if os.path.exists(db_dir):
-            os.chmod(db_dir, 0o777)
-        if os.path.exists(db_path):
-            os.chmod(db_path, 0o777)
-        if os.path.exists(Path(out_path_root, folder_name)):
-            os.chmod(Path(out_path_root, folder_name), 0o777)
+        db = NMDatabase(out_path_root, folder_name)
 
         while True:
             next_item = next(generator, None)
@@ -167,45 +154,18 @@ class _GenericStream(NMStream):
 
             self._add_target(feature_dict, data_batch)
             buff_cnt += 1
-            l_features.append(feature_dict)
 
-            def infer_type(value):
-                if isinstance(value, int) or isinstance(value, float):
-                    return "REAL"
-                elif isinstance(value, str):
-                    return "TEXT"
-                else:
-                    return "BLOB" 
-
-            def cast_values(feature_dict):      # TODO This type cast might be super inefficient but sqlite expects only consistent types
-                for key, value in feature_dict.items():
-                    if isinstance(value, (np.int64, int, float)):
-                        feature_dict[key] = float(value)  
-                return feature_dict
-
-            feature_dict = cast_values(feature_dict)
-
-            columns_schema = ", ".join([f'"{column}" {infer_type(value)}' for column, value in feature_dict.items()]) 
-            cursor.execute(f"CREATE TABLE IF NOT EXISTS stream_table ({columns_schema})")
-
-            columns = ", ".join([f'"{column}"' for column in feature_dict.keys()])
-            placeholders = ", ".join(["?" for _ in feature_dict])
-            insert_sql = f"INSERT INTO stream_table ({columns}) VALUES ({placeholders})"
-            values = tuple(feature_dict.values())
-            cursor.execute(insert_sql, values)
+            feature_dict = db.cast_values(feature_dict)
+            db.create_table(feature_dict)
+            db.insert_data(feature_dict)
 
             if buff_cnt >= 10:
-                conn.commit()
+                db.commit()
                 buff_cnt = 0
-                # l_features = []
 
-        feature_df = pd.read_sql_query("SELECT * FROM stream_table", conn)
-        # feature_df = pd.DataFrame(l_features)
+        feature_df = db.fetch_all()
+        db.close()
 
-        conn.close()
-
-
-        # TODO change this to save only head afterwards (conrol)
         self.save_after_stream(out_path_root, folder_name, feature_df)
 
         return feature_df
