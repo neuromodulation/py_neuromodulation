@@ -9,6 +9,7 @@ import os
 from py_neuromodulation.nm_stream_abc import NMStream
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
+import time
 
 if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
@@ -123,7 +124,8 @@ class _GenericStream(NMStream):
         last_time = None
 
         buff_cnt: int = 0
-        db_path = Path(out_path_root, folder_name, "stream.db")
+        db_time_idx = time.time() * 1000
+        db_path = Path(out_path_root, folder_name, f"stream{db_time_idx}.db")
         if os.path.exists(db_path):
             os.remove(db_path)
         conn = sqlite3.connect(db_path, isolation_level=None)
