@@ -310,7 +310,7 @@ stream = nm.Stream(
     verbose=True,
 )
 
-df_features = stream.run(data=data[:, :30000])
+df_features = stream.run(data=data[:, :30000], save_csv=True)
 
 # %%
 # We can then plot two exemplary features, prominence and interval, and see that the movement amplitude can be clustered with those two features alone:

@@ -11,7 +11,7 @@ class NMDatabase:
         self.folder_name = folder_name
         self.db_time_idx = int(time.time() * 1000)
         self.db_path = Path(out_path_root, folder_name, f"stream{self.db_time_idx}.db")
-        csv_path = Path(out_path_root, folder_name, f"stream{self.db_time_idx}.csv")
+        self.csv_path = Path(out_path_root, folder_name, f"stream.csv")
         
         if os.path.exists(self.db_path):
             os.remove(self.db_path)
@@ -69,9 +69,9 @@ class NMDatabase:
     def fetch_all(self):
         return pd.read_sql_query("SELECT * FROM stream_table", self.conn)
     
-    def save_as_csv(self, csv_path):
+    def save_as_csv(self):
         df = self.fetch_all()
-        df.to_csv(csv_path, index=False)
+        df.to_csv(self.csv_path, index=False)
 
     def close(self):
         self.conn.close()

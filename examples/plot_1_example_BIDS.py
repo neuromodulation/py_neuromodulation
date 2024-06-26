@@ -120,6 +120,7 @@ features = stream.run(
     data=data,
     out_path_root=PATH_OUT,
     folder_name=RUN_NAME,
+    save_csv = True,
 )
 
 # %%
