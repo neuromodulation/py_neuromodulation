@@ -1,8 +1,8 @@
 from typing import Protocol, Type, runtime_checkable, TYPE_CHECKING, TypeVar
 from collections.abc import Sequence
+import numpy as np
 
 if TYPE_CHECKING:
-    import numpy as np
     from nm_settings import NMSettings
 
 from py_neuromodulation.nm_types import ImportDetails, get_class, FeatureName
@@ -14,19 +14,19 @@ class NMFeature(Protocol):
         self, settings: "NMSettings", ch_names: Sequence[str], sfreq: int | float
     ) -> None: ...
 
-    def calc_feature(self, data: "np.ndarray", features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray) -> dict:
         """
-        Feature calculation method. Each method needs to loop through all channels
+            Feature calculation method. Each method needs to loop through all channels
 
         Parameters
-        ----------
-        data : 'np.ndarray'
-            (channels, time)
-        features_compute : dict
+            ----------
+            data : 'np.ndarray'
+                (channels, time)
+            feature_results : dict
 
-        Returns
-        -------
-        dict
+            Returns
+            -------
+            dict
         """
         ...
 
@@ -50,18 +50,17 @@ FEATURE_DICT: dict[FeatureName | str, ImportDetails] = {
 
 
 class FeatureProcessors:
-    """Class for calculating features.p"""
+    """Class for storing NMFeature objects and calculating features during processing"""
 
     def __init__(
         self, settings: "NMSettings", ch_names: list[str], sfreq: float
     ) -> None:
-        """_summary_
+        """Initialize FeatureProcessors object with settings, channel names and sampling frequency.
 
-        Parameters
-        ----------
-        settings : nm_settings.NMSettings
-        ch_names : list[str]
-        sfreq : float
+        Args:
+            settings (NMSettings): PyNM settings object
+            ch_names (list[str]): list of channel names
+            sfreq (float): sampling frequency in Hz
         """
         from py_neuromodulation import user_features
 
@@ -86,7 +85,7 @@ class FeatureProcessors:
         """
         self.features[feature_name] = feature  # type: ignore
 
-    def estimate_features(self, data: "np.ndarray") -> dict:
+    def estimate_features(self, data: np.ndarray) -> dict:
         """Calculate features, as defined in settings.json
         Features are based on bandpower, raw Hjorth parameters and sharp wave
         characteristics.
@@ -100,15 +99,12 @@ class FeatureProcessors:
         dat (dict): naming convention : channel_method_feature_(f_band)
         """
 
-        features_compute: dict = {}
+        feature_results: dict = {}
 
         for feature in self.features.values():
-            features_compute = feature.calc_feature(
-                data,
-                features_compute,
-            )
+            feature_results.update(feature.calc_feature(data))
 
-        return features_compute
+        return feature_results
 
     def get_feature(self, fname: FeatureName) -> NMFeature:
         return self.features[fname]

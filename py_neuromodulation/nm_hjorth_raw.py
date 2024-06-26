@@ -5,6 +5,7 @@ Reference:  B Hjorth
             DOI: 10.1016/0013-4694(70)90143-4
 """
 
+from pyexpat import features
 import numpy as np
 from collections.abc import Iterable
 
@@ -18,7 +19,7 @@ class Hjorth(NMFeature):
     ) -> None:
         self.ch_names = ch_names
 
-    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray) -> dict:
         var = np.var(data, axis=-1)
         deriv1 = np.diff(data, axis=-1)
         deriv2 = np.diff(deriv1, axis=-1)
@@ -30,24 +31,23 @@ class Hjorth(NMFeature):
         mobility = np.nan_to_num(np.sqrt(deriv1_var / var))
         complexity = np.nan_to_num(deriv1_mobility / mobility)
 
+        feature_results = {}
         for ch_idx, ch_name in enumerate(self.ch_names):
-            features_compute[f"{ch_name}_RawHjorth_Activity"] = activity[ch_idx]
-            features_compute[f"{ch_name}_RawHjorth_Mobility"] = mobility[ch_idx]
-            features_compute[f"{ch_name}_RawHjorth_Complexity"] = complexity[ch_idx]
+            feature_results[f"{ch_name}_RawHjorth_Activity"] = activity[ch_idx]
+            feature_results[f"{ch_name}_RawHjorth_Mobility"] = mobility[ch_idx]
+            feature_results[f"{ch_name}_RawHjorth_Complexity"] = complexity[ch_idx]
 
-        return features_compute
+        return feature_results
 
 
 class Raw(NMFeature):
     def __init__(self, settings: dict, ch_names: Iterable[str], sfreq: float) -> None:
         self.ch_names = ch_names
 
-    def calc_feature(
-        self,
-        data: np.ndarray,
-        features_compute: dict,
-    ) -> dict:
-        for ch_idx, ch_name in enumerate(self.ch_names):
-            features_compute["_".join([ch_name, "raw"])] = data[ch_idx, -1]
+    def calc_feature(self, data: np.ndarray) -> dict:
+        feature_results = {}
 
-        return features_compute
+        for ch_idx, ch_name in enumerate(self.ch_names):
+            feature_results["_".join([ch_name, "raw"])] = data[ch_idx, -1]
+
+        return feature_results

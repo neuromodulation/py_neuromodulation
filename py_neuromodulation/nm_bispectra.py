@@ -86,7 +86,7 @@ class Bispectra(NMFeature):
     
         # self.freqs: np.ndarray = np.array([]) # In case we pre-computed this
 
-    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray) -> dict:
         from pybispectra import compute_fft, WaveShape
 
         # PyBispectra's compute_fft uses PQDM to parallelize the calculation per channel
@@ -120,7 +120,8 @@ class Bispectra(NMFeature):
             f1s=tuple(self.settings.f1s),  # type: ignore
             f2s=tuple(self.settings.f2s),  # type: ignore
         )
-
+        
+        feature_results = {}
         for ch_idx, ch_name in enumerate(self.ch_names):
             
             bispectrum = waveshape._bicoherence[ch_idx]  # Same as waveshape.results._data, skips a copy
@@ -136,13 +137,13 @@ class Bispectra(NMFeature):
                     data_bs = spectrum_ch[range_, range_]
 
                     for bispectrum_feature in self.used_features:
-                        features_compute[
+                        feature_results[
                             f"{ch_name}_Bispectrum_{component}_{bispectrum_feature}_{fb}"
                         ] = FEATURE_DICT[bispectrum_feature](data_bs)
 
                         if self.settings.compute_features_for_whole_fband_range:
-                            features_compute[
+                            feature_results[
                                 f"{ch_name}_Bispectrum_{component}_{bispectrum_feature}_whole_fband_range"
                             ] = FEATURE_DICT[bispectrum_feature](spectrum_ch)
 
-        return features_compute
+        return feature_results

@@ -68,7 +68,7 @@ class CoherenceObject:
         self.coh_val = None
         self.icoh_val = None
 
-    def get_coh(self, features_compute, x, y):
+    def get_coh(self, feature_results, x, y):
         from scipy.signal import welch, csd
 
         self.f, self.Pxx = welch(x, self.sfreq, self.window, nperseg=128)
@@ -104,7 +104,7 @@ class CoherenceObject:
                             self.fband_names[idx],
                         ]
                     )
-                    features_compute[feature_name] = feature_calc
+                    feature_results[feature_name] = feature_calc
                 if self.features_coh.max_fband:
                     feature_calc = np.max(
                         coh_val[np.bitwise_and(self.f > fband[0], self.f < fband[1])]
@@ -119,7 +119,7 @@ class CoherenceObject:
                             self.fband_names[idx],
                         ]
                     )
-                    features_compute[feature_name] = feature_calc
+                    feature_results[feature_name] = feature_calc
             if self.features_coh.max_allfbands:
                 feature_calc = self.f[np.argmax(coh_val)]
                 feature_name = "_".join(
@@ -132,8 +132,8 @@ class CoherenceObject:
                         self.fband_names[idx],
                     ]
                 )
-                features_compute[feature_name] = feature_calc
-        return features_compute
+                feature_results[feature_name] = feature_calc
+        return feature_results
 
 
 class NMCoherence(NMFeature):
@@ -235,12 +235,14 @@ class NMCoherence(NMFeature):
                 "feature coherence enabled, but no coherence['method'] selected"
             )
 
-    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray) -> dict:
+        feature_results = {}
+
         for coh_obj in self.coherence_objects:
-            features_compute = coh_obj.get_coh(
-                features_compute,
+            feature_results = coh_obj.get_coh(
+                feature_results,
                 data[coh_obj.ch_1_idx, :],
                 data[coh_obj.ch_2_idx, :],
             )
 
-        return features_compute
+        return feature_results

@@ -16,7 +16,7 @@ class DataProcessor:
     def __init__(
         self,
         sfreq: float,
-        settings: "NMSettings | _PathLike",
+        settings: NMSettings | _PathLike,
         nm_channels: pd.DataFrame | _PathLike,
         coord_names: list | None = None,
         coord_list: list | None = None,
