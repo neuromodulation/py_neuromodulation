@@ -18,8 +18,9 @@ class NMDatabase:
 
         for file_path in glob.glob(pattern):
             if os.path.exists(file_path):
-                os.remove(file_path)
-            
+                if (self.db_time_idx/1000) - os.path.getctime(file_path) > 600:
+                    os.remove(file_path)
+
         self.conn = sqlite3.connect(self.db_path, isolation_level=None)
         self.cursor = self.conn.cursor()
 
