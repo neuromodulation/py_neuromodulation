@@ -7,30 +7,34 @@ import pandas as pd
 import glob
 
 class NMDatabase:
-    def __init__(self, out_path_root, folder_name):
+    """
+    Class to create a database and insert data into it.
+    Parameters
+    ----------
+    out_path_root : str
+        The root path to save the database.
+    folder_name : str
+        The folder name to save the database.
+    """
+    def __init__(self, out_path_root, folder_name, csv_path = None):
         self.out_path_root = out_path_root
         self.folder_name = folder_name
-        self.db_time_idx = int(time.time() * 1000)
+        self.db_time_idx = int(time.time())
         self.db_path = Path(out_path_root, folder_name, f"stream{self.db_time_idx}.db")
-        self.csv_path = Path(out_path_root, folder_name, f"stream.csv")
-        
+        if csv_path is None:
+            self.csv_path = Path(out_path_root, folder_name, f"stream.csv")
+        else:
+            self.csv_path = Path(csv_path)
+
         pattern = str(Path(out_path_root, folder_name, "stream*.db"))
 
         for file_path in glob.glob(pattern):
             if os.path.exists(file_path):
-                if (self.db_time_idx/1000) - os.path.getctime(file_path) > 600:
+                if (self.db_time_idx) - os.path.getctime(file_path) > 600:
                     os.remove(file_path)
 
         self.conn = sqlite3.connect(self.db_path, isolation_level=None)
         self.cursor = self.conn.cursor()
-
-        db_dir = Path(folder_name)
-        if os.path.exists(db_dir):
-            os.chmod(db_dir, 0o777)
-        if os.path.exists(self.db_path):
-            os.chmod(self.db_path, 0o777)
-        if os.path.exists(Path(out_path_root, folder_name)):
-            os.chmod(Path(out_path_root, folder_name), 0o777)
 
     def infer_type(self, value):
         """Infer the type of the value to create the table schema.
@@ -58,10 +62,24 @@ class NMDatabase:
         return feature_dict
 
     def create_table(self, feature_dict):
+        """
+        Create a table in the database.
+        Parameters
+        ----------
+        feature_dict : dict
+            The dictionary with the feature names and values.
+        """
         columns_schema = ", ".join([f'"{column}" {self.infer_type(value)}' for column, value in feature_dict.items()])
         self.cursor.execute(f"CREATE TABLE IF NOT EXISTS stream_table ({columns_schema})")
 
     def insert_data(self, feature_dict):
+        """
+        Insert data into the database.  
+        Parameters
+        ----------
+        feature_dict : dict
+            The dictionary with the feature names and values.
+        """
         columns = ", ".join([f'"{column}"' for column in feature_dict.keys()])
         placeholders = ", ".join(["?" for _ in feature_dict])
         insert_sql = f"INSERT INTO stream_table ({columns}) VALUES ({placeholders})"
@@ -72,6 +90,13 @@ class NMDatabase:
         self.conn.commit()
 
     def fetch_all(self):
+        """"
+        Fetch all the data from the database.
+        Returns
+        -------
+        pd.DataFrame
+            The data in a pandas DataFrame.
+        """
         return pd.read_sql_query("SELECT * FROM stream_table", self.conn)
     
     def save_as_csv(self):

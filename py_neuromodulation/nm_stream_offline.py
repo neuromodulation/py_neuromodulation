@@ -8,6 +8,7 @@ from py_neuromodulation.nm_stream_abc import NMStream
 from py_neuromodulation.nm_database import NMDatabase
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
+import time
 
 if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
@@ -123,6 +124,7 @@ class _GenericStream(NMStream):
 
         buff_cnt: int = 0
         db = NMDatabase(out_path_root, folder_name)
+        data_acquired = False
 
         while True:
             next_item = next(generator, None)
@@ -154,7 +156,9 @@ class _GenericStream(NMStream):
             buff_cnt += 1
 
             feature_dict = db.cast_values(feature_dict)
-            db.create_table(feature_dict)
+            if not data_acquired:
+                db.create_table(feature_dict)
+                data_acquired = True
             db.insert_data(feature_dict)
 
             if buff_cnt >= 10:
