@@ -4,6 +4,7 @@ import time
 from pathlib import Path
 import numpy as np
 import pandas as pd
+import glob
 
 class NMDatabase:
     def __init__(self, out_path_root, folder_name):
@@ -13,8 +14,11 @@ class NMDatabase:
         self.db_path = Path(out_path_root, folder_name, f"stream{self.db_time_idx}.db")
         self.csv_path = Path(out_path_root, folder_name, f"stream.csv")
         
-        if os.path.exists(self.db_path):
-            os.remove(self.db_path)
+        pattern = str(Path(out_path_root, folder_name, "stream*.db"))
+
+        for file_path in glob.glob(pattern):
+            if os.path.exists(file_path):
+                os.remove(file_path)
             
         self.conn = sqlite3.connect(self.db_path, isolation_level=None)
         self.cursor = self.conn.cursor()
