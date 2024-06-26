@@ -19,7 +19,7 @@ class NMDatabase:
     def __init__(self, out_path_root, folder_name, csv_path = None):
         self.out_path_root = out_path_root
         self.folder_name = folder_name
-        self.db_time_idx = int(time.time())
+        self.db_time_idx = int(time.time() * 1000)
         self.db_path = Path(out_path_root, folder_name, f"stream{self.db_time_idx}.db")
         if csv_path is None:
             self.csv_path = Path(out_path_root, folder_name, f"stream.csv")
@@ -30,7 +30,7 @@ class NMDatabase:
 
         for file_path in glob.glob(pattern):
             if os.path.exists(file_path):
-                if (self.db_time_idx) - os.path.getctime(file_path) > 600:
+                if (self.db_time_idx/1000) - os.path.getctime(file_path) > 600:
                     os.remove(file_path)
 
         self.conn = sqlite3.connect(self.db_path, isolation_level=None)
