@@ -30,7 +30,7 @@ def get_features(time_end_ms: int, segment_length_features_ms: int):
         settings=settings,
     )
 
-    features = stream.run(data)
+    features = stream.run(data, out_path_root="./test_data", folder_name="test_feature_sampling_rates")
     return features
 
 
