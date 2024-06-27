@@ -13,13 +13,14 @@ def raw_data_generator(
 ) -> Iterator[tuple[np.ndarray, np.ndarray]]:
     """
     This generator function mimics online data acquisition.
-    The data are iteratively sampled with sfreq_new.
+    The data are iteratively sampled with settings.sampling_rate_features_hz
+
     Arguments
     ---------
-        ieeg_raw (np array): shape (channels, time)
-        sfreq: int
-        sfreq_new: int
-        offset_time: float
+        data (np array): shape (channels, time)
+        settings (nm_settings.NMSettings): settings object
+        sfreq (float): sampling frequency of the data
+
     Returns
     -------
         np.array: 1D array of time stamps

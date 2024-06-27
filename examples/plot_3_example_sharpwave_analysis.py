@@ -8,7 +8,7 @@ Analyzing temporal features
 # Time series data can be characterized using oscillatory components, but assumptions of sinusoidality are for real data rarely fulfilled.
 # See *"Brain Oscillations and the Importance of Waveform Shape"* `Cole et al 2017 <https://doi.org/10.1016/j.tics.2016.12.008>`_ for a great motivation.
 # We implemented here temporal characteristics based on individual trough and peak relations,
-# based on the :meth:~`scipy.signal.find_peaks` method. The function parameter *distance* can be specified in the *nm_settings.json*.
+# based on the :meth:~`scipy.signal.find_peaks` method. The function parameter *distance* can be specified in the *nm_settings.yaml*.
 # Temporal features can be calculated twice for troughs and peaks. In the settings, this can be specified by setting *estimate* to true
 # in *detect_troughs* and/or *detect_peaks*. A statistical measure (e.g. mean, max, median, var) can be defined as a resulting feature from the peak and
 # trough estimates using the *apply_estimator_between_peaks_and_troughs* setting.

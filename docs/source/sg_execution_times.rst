@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**01:29.853** total execution time for 9 files **from all galleries**:
+**01:09.048** total execution time for 9 files **from all galleries**:
 
 .. container::
 
@@ -33,29 +33,29 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_auto_examples_plot_1_example_BIDS.py` (``..\..\examples\plot_1_example_BIDS.py``)
-     - 00:47.144
+     - 00:25.194
      - 0.0
    * - :ref:`sphx_glr_auto_examples_plot_7_lsl_example.py` (``..\..\examples\plot_7_lsl_example.py``)
-     - 00:25.282
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_plot_4_example_gridPointProjection.py` (``..\..\examples\plot_4_example_gridPointProjection.py``)
-     - 00:08.812
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_plot_3_example_sharpwave_analysis.py` (``..\..\examples\plot_3_example_sharpwave_analysis.py``)
-     - 00:07.947
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_plot_8_cebra_example.py` (``..\..\examples\plot_8_cebra_example.py``)
-     - 00:00.668
+     - 00:24.770
      - 0.0
    * - :ref:`sphx_glr_auto_examples_plot_0_first_demo.py` (``..\..\examples\plot_0_first_demo.py``)
-     - 00:00.000
+     - 00:12.259
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_plot_4_example_gridPointProjection.py` (``..\..\examples\plot_4_example_gridPointProjection.py``)
+     - 00:06.826
      - 0.0
    * - :ref:`sphx_glr_auto_examples_plot_2_example_add_feature.py` (``..\..\examples\plot_2_example_add_feature.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_plot_3_example_sharpwave_analysis.py` (``..\..\examples\plot_3_example_sharpwave_analysis.py``)
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_plot_5_example_rmap_computing.py` (``..\..\examples\plot_5_example_rmap_computing.py``)
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_plot_6_real_time_demo.py` (``..\..\examples\plot_6_real_time_demo.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_plot_8_cebra_example.py` (``..\..\examples\plot_8_cebra_example.py``)
      - 00:00.000
      - 0.0

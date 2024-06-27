@@ -1,11 +1,12 @@
 import numpy as np
 from collections.abc import Iterable
 
-from py_neuromodulation.nm_types import FrequencyRange, NMBaseModel, Field
-from typing import TYPE_CHECKING
+
+from typing import TYPE_CHECKING, Annotated
+from pydantic import Field
 
 from py_neuromodulation.nm_features import NMFeature
-from py_neuromodulation.nm_types import BoolSelector
+from py_neuromodulation.nm_types import BoolSelector, FrequencyRange, NMBaseModel
 from py_neuromodulation import logger
 
 if TYPE_CHECKING:
@@ -23,10 +24,13 @@ class CoherenceFeatures(BoolSelector):
     max_allfbands: bool = True
 
 
+ListOfTwoStr = Annotated[list[str], Field(min_length=2, max_length=2)]
+
+
 class CoherenceSettings(NMBaseModel):
     features: CoherenceFeatures = CoherenceFeatures()
     method: CoherenceMethods = CoherenceMethods()
-    channels: list[tuple[str, str]] = [("STN_RIGHT_0", "ECOG_RIGHT_0")]
+    channels: list[ListOfTwoStr] = []
     frequency_bands: list[str] = Field(default=["high beta"], min_length=1)
 
 
@@ -56,7 +60,7 @@ class CoherenceObject:
         self.coh = coh
         self.icoh = icoh
         self.features_coh = features_coh
-        
+
         self.Pxx = None
         self.Pyy = None
         self.Pxy = None
@@ -64,8 +68,8 @@ class CoherenceObject:
         self.coh_val = None
         self.icoh_val = None
 
-    def get_coh(self, features_compute, x, y):
-        from scipy.signal import welch, csd 
+    def get_coh(self, feature_results, x, y):
+        from scipy.signal import welch, csd
 
         self.f, self.Pxx = welch(x, self.sfreq, self.window, nperseg=128)
         self.Pyy = welch(y, self.sfreq, self.window, nperseg=128)[1]
@@ -100,7 +104,7 @@ class CoherenceObject:
                             self.fband_names[idx],
                         ]
                     )
-                    features_compute[feature_name] = feature_calc
+                    feature_results[feature_name] = feature_calc
                 if self.features_coh.max_fband:
                     feature_calc = np.max(
                         coh_val[np.bitwise_and(self.f > fband[0], self.f < fband[1])]
@@ -115,7 +119,7 @@ class CoherenceObject:
                             self.fband_names[idx],
                         ]
                     )
-                    features_compute[feature_name] = feature_calc
+                    feature_results[feature_name] = feature_calc
             if self.features_coh.max_allfbands:
                 feature_calc = self.f[np.argmax(coh_val)]
                 feature_name = "_".join(
@@ -128,8 +132,8 @@ class CoherenceObject:
                         self.fband_names[idx],
                     ]
                 )
-                features_compute[feature_name] = feature_calc
-        return features_compute
+                feature_results[feature_name] = feature_calc
+        return feature_results
 
 
 class NMCoherence(NMFeature):
@@ -143,7 +147,7 @@ class NMCoherence(NMFeature):
         self.coherence_objects: Iterable[CoherenceObject] = []
 
         self.test_settings(settings, ch_names, sfreq)
-        
+
         for idx_coh in range(len(self.settings.channels)):
             fband_names = self.settings.frequency_bands
             fband_specs = []
@@ -187,10 +191,25 @@ class NMCoherence(NMFeature):
         flat_channels = [
             ch for ch_pair in settings.coherence.channels for ch in ch_pair
         ]
-        assert all(ch_coh in ch_names for ch_coh in flat_channels), (
-            f"coherence selected channels don't match the ones in nm_channels. \n"
-            f"ch_names: {ch_names} \n settings.coherence.channels: {settings.coherence.channels}"
-        )
+
+        valid_coh_channel = [
+            sum(ch.startswith(ch_coh) for ch in ch_names) for ch_coh in flat_channels
+        ]
+        for ch_idx, ch_coh in enumerate(flat_channels):
+            if valid_coh_channel[ch_idx] == 0:
+                raise RuntimeError(
+                    f"Coherence selected channel {ch_coh} does not match any channel name: \n"
+                    f"  - settings.coherence.channels: {settings.coherence.channels}\n"
+                    f"  - ch_names: {ch_names} \n"
+                )
+            
+            if valid_coh_channel[ch_idx] > 1:
+                raise RuntimeError(
+                    f"Coherence selected channel {ch_coh} is ambigous and matches more than one channel name: \n"
+                    f"  - settings.coherence.channels: {settings.coherence.channels}\n"
+                    f"  - ch_names: {ch_names} \n"
+                )
+
 
         assert all(
             f_band_coh in settings.frequency_ranges_hz
@@ -216,12 +235,14 @@ class NMCoherence(NMFeature):
                 "feature coherence enabled, but no coherence['method'] selected"
             )
 
-    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray) -> dict:
+        feature_results = {}
+
         for coh_obj in self.coherence_objects:
-            features_compute = coh_obj.get_coh(
-                features_compute,
+            feature_results = coh_obj.get_coh(
+                feature_results,
                 data[coh_obj.ch_1_idx, :],
                 data[coh_obj.ch_2_idx, :],
             )
 
-        return features_compute
+        return feature_results

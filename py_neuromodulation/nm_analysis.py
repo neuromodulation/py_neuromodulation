@@ -156,9 +156,7 @@ class FeatureReader:
         Parameters
         ----------
         feature_columns : list
-            [description]
         ch_name : str, optional
-            [description], by default None
         list_feature_keywords : list[str], optional
             list of feature strings that need to be in the columns, by default None
 
@@ -278,27 +276,19 @@ class FeatureReader:
         Parameters
         ----------
         ch : str, optional
-            _description_, by default None
         list_feature_keywords : Optional[list[str]], optional
-            _description_, by default None
         features_to_plt : list, optional
-            _description_, by default None
         epoch_len : int, optional
-            _description_, by default 4
         threshold : float, optional
-            _description_, by default 0.1
         normalize_data : bool, optional
-            _description_, by default True
         show_plot : bool, optional
-            _description_, by default True
         title : str, optional
-            _description_, by default "Movement aligned features"
+            by default "Movement aligned features"
         ytick_labelsize : _type_, optional
-            _description_, by default None
         figsize_x : float, optional
-            _description_, by default 8
+            by default 8
         figsize_y : float, optional
-            _description_, by default 8
+            by default 8
         """
 
         # TODO: This does not work properly when we have bipolar rereferencing
@@ -362,23 +352,18 @@ class FeatureReader:
         Parameters
         ----------
         ch_used : str, optional
-            _description_, by default None
         time_limit_low_s : float, optional
-            _description_, by default None
         time_limit_high_s : float, optional
-            _description_, by default None
         normalize : bool, optional
-            _description_, by default True
         save : bool, optional
-            _description_, by default False
         title : str, optional
-            _description_, by default "all_feature_plt.pdf"
+            default "all_feature_plt.pdf"
         ytick_labelsize : int, optional
-            _description_, by default 10
+            by default 10
         clim_low : float, optional
-            _description_, by default None
+            by default None
         clim_high : float, optional
-            _description_, by default None
+            by default None
         """
 
         if ch_used is not None:
@@ -407,20 +392,6 @@ class FeatureReader:
 
     @staticmethod
     def get_performace_sub_strip(performance_sub: dict, plt_grid: bool = False):
-        """_summary_
-
-        Parameters
-        ----------
-        performance_sub : dict
-            _description_
-        plt_grid : bool, optional
-            _description_, by default False
-
-        Returns
-        -------
-        _type_
-            _description_
-        """
 
         ecog_strip_performance = []
         ecog_coords_strip = []
@@ -501,7 +472,7 @@ class FeatureReader:
         subject_name : string, optional
             used subject, by default None
         performance_dict : dict, optional
-            [description], by default None
+            by default None
         plt_grid : bool, optional
             True to plot grid performances, by default False
         feature_str_add : string, optional
@@ -675,7 +646,6 @@ class FeatureReader:
         Parameters
         ----------
         feature_file : string, optional
-            [description], by default None
         estimate_gridpoints : bool, optional
             run ML analysis for grid points, by default True
         estimate_channels : bool, optional

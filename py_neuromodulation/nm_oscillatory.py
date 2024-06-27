@@ -91,7 +91,8 @@ class FFT(OscillatoryFeature):
             (est, ESTIMATOR_DICT[est]) for est in self.settings.features.get_enabled()
         ]
 
-    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray) -> dict:
+
         data = data[:, self.window_samples :]
 
         from scipy.fft import rfft
@@ -101,6 +102,8 @@ class FFT(OscillatoryFeature):
         if self.settings.log_transform:
             Z = np.log10(Z)
 
+        feature_results = {}
+
         for f_band_name, idx_range in self.idx_range:
             # TODO Can we get rid of this for-loop? Hard to vectorize windows of different lengths...
             Z_band = Z[:, idx_range]  # Data for all channels
@@ -109,16 +112,16 @@ class FFT(OscillatoryFeature):
                 result = est_fun(Z_band, axis=1)
 
                 for ch_idx, ch_name in enumerate(self.ch_names):
-                    features_compute[
+                    feature_results[
                         f"{ch_name}_{self.osc_feature_name}_{f_band_name}_{est_name}"
                     ] = result[ch_idx]
 
         if self.settings.return_spectrum:
             combinations = product(enumerate(self.ch_names), enumerate(self.freqs))
             for (ch_idx, ch_name), (idx, f) in combinations:
-                features_compute[f"{ch_name}_fft_psd_{int(f)}"] = Z[ch_idx][idx]
+                feature_results[f"{ch_name}_fft_psd_{int(f)}"] = Z[ch_idx][idx]
 
-        return features_compute
+        return feature_results
 
 
 class Welch(OscillatoryFeature):
@@ -149,7 +152,7 @@ class Welch(OscillatoryFeature):
             (est, ESTIMATOR_DICT[est]) for est in self.settings.features.get_enabled()
         ]
 
-    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray) -> dict:
         from scipy.signal import welch
 
         _, Z = welch(
@@ -163,6 +166,8 @@ class Welch(OscillatoryFeature):
         if self.settings.log_transform:
             Z = np.log10(Z)
 
+        feature_results = {}
+
         for f_band_name, idx_range in self.idx_range:
             Z_band = Z[:, idx_range]
 
@@ -170,16 +175,16 @@ class Welch(OscillatoryFeature):
                 result = est_fun(Z_band, axis=1)
 
                 for ch_idx, ch_name in enumerate(self.ch_names):
-                    features_compute[
+                    feature_results[
                         f"{ch_name}_{self.osc_feature_name}_{f_band_name}_{est_name}"
                     ] = result[ch_idx]
 
         if self.settings.return_spectrum:
             combinations = product(enumerate(self.ch_names), enumerate(self.freqs))
             for (ch_idx, ch_name), (idx, f) in combinations:
-                features_compute[f"{ch_name}_welch_psd_{str(f)}"] = Z[ch_idx][idx]
+                feature_results[f"{ch_name}_welch_psd_{str(f)}"] = Z[ch_idx][idx]
 
-        return features_compute
+        return feature_results
 
 
 class STFT(OscillatoryFeature):
@@ -212,7 +217,8 @@ class STFT(OscillatoryFeature):
             (est, ESTIMATOR_DICT[est]) for est in self.settings.features.get_enabled()
         ]
 
-    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray) -> dict:
+
         from scipy.signal import stft
 
         _, _, Zxx = stft(
@@ -227,6 +233,8 @@ class STFT(OscillatoryFeature):
         if self.settings.log_transform:
             Z = np.log10(Z)
 
+        feature_results = {}
+
         for f_band_name, idx_range in self.idx_range:
             Z_band = Z[:, idx_range, :]
 
@@ -234,18 +242,18 @@ class STFT(OscillatoryFeature):
                 result = est_fun(Z_band, axis=(1, 2))
 
                 for ch_idx, ch_name in enumerate(self.ch_names):
-                    features_compute[
+                    feature_results[
                         f"{ch_name}_{self.osc_feature_name}_{f_band_name}_{est_name}"
                     ] = result[ch_idx]
 
         if self.settings.return_spectrum:
             combinations = product(enumerate(self.ch_names), enumerate(self.freqs))
             for (ch_idx, ch_name), (idx, f) in combinations:
-                features_compute[f"{ch_name}_stft_psd_{str(f)}"] = Z[ch_idx].mean(
+                feature_results[f"{ch_name}_stft_psd_{str(f)}"] = Z[ch_idx].mean(
                     axis=1
                 )[idx]
 
-        return features_compute
+        return feature_results
 
 
 class BandpowerFeatures(BoolSelector):
@@ -363,8 +371,11 @@ class BandPower(NMFeature):
             feature_calc = self.KF_dict[KF_name].x[0]
         return feature_calc
 
-    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray) -> dict:
+
         data = self.bandpass_filter.filter_data(data)
+
+        feature_results = {}
 
         for (
             ch_idx,
@@ -373,11 +384,11 @@ class BandPower(NMFeature):
             bp_feature,
             feature_name,
         ) in self.feature_params:
-            features_compute[feature_name] = self.calc_bp_feature(
+            feature_results[feature_name] = self.calc_bp_feature(
                 bp_feature, feature_name, data[ch_idx, f_band_idx, -seglen:]
             )
 
-        return features_compute
+        return feature_results
 
     def calc_bp_feature(self, bp_feature, feature_name, data):
         match bp_feature:

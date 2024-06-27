@@ -82,7 +82,7 @@ def test_prominence_features():
     data[2, 500] = 3
     data[3, 500] = 4
 
-    features = sw.calc_feature(data, {})
+    features = sw.calc_feature(data)
 
     assert (
         features["ch4_Sharpwave_Max_prominence_range_5_80"]
@@ -118,7 +118,7 @@ def test_interval_feature():
     for i in np.arange(0, 1000, 400):
         data[3, i] = 1
 
-    features = sw.calc_feature(data, {})
+    features = sw.calc_feature(data)
 
     print(features.keys())
     assert (

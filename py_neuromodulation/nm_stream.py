@@ -8,7 +8,6 @@ from py_neuromodulation.nm_stream_abc import NMStream
 from py_neuromodulation.nm_database import NMDatabase
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
-import time
 
 if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
@@ -28,14 +27,15 @@ class _GenericStream(NMStream):
 
         Parameters
         ----------
-        feature_series : pd.Series
+        feature_dict : dict
         data : np.ndarray
-            Raw data with shape (n_channels, n_samples). Channels not for feature computation are also included
+            Raw data with shape (n_channels, n_samples).
+            Channels not usd for feature computation are also included
 
         Returns
         -------
-        pd.Series
-            feature series with target channels added
+        dict
+            feature dict with target channels added
         """
 
         if self.nm_channels["target"].sum() > 0:
@@ -125,7 +125,6 @@ class _GenericStream(NMStream):
         buff_cnt: int = 0
         db = NMDatabase(out_path_root, folder_name)
         data_acquired = False
-
         while True:
             next_item = next(generator, None)
 
@@ -192,10 +191,16 @@ class _GenericStream(NMStream):
             sampling frequency [Hz]
         data : np.ndarray, optional
             data (n_channels, n_times), by default None
+        lowpass: float, optional
+            cutoff lowpass filter frequency
+        highpass: float, optional
+            cutoff highpass filter frequency
+        picks: list, optional
+            list of channels to plot
         plot_time : bool, optional
             mne.io.RawArray.plot(), by default True
         plot_psd : bool, optional
-            mne.io.RawArray.plot(), by default True
+            mne.io.RawArray.plot(), by default False
 
         Raises
         ------
@@ -257,8 +262,9 @@ class Stream(_GenericStream):
             data to be streamed with shape (n_channels, n_time), by default None
         nm_channels : pd.DataFrame | _PathLike
             parametrization of channels (see nm_define_channels.py for initialization)
-        settings : dict | _PathLike | None, optional
-            features settings can be a dictionary or path to the nm_settings.json, by default the py_neuromodulation/nm_settings.json are read
+        settings : NMSettings | _PathLike | None, optional
+            Initialized nm_settings.NMSettings object, by default the py_neuromodulation/nm_settings.yaml are read
+            and passed into a settings object
         line_noise : float | None, optional
             line noise, by default 50
         sampling_rate_features_hz : float | None, optional
@@ -322,6 +328,12 @@ class Stream(_GenericStream):
             If None, data is simply returned and not saved
         folder_name : str, optional
              folder output name, commonly subject or run name, by default "sub"
+        stream_lsl : bool, optional
+            stream data from LSL, by default False
+        stream_lsl_name : str, optional
+            stream name, by default None
+        plot_lsl : bool, optional
+            plot data with mne_lsl stream_viewer
 
         Returns
         -------

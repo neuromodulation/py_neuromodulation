@@ -68,7 +68,7 @@ settings = NMSettings.get_fast_compute()
 
 player = nm_mnelsl_generator.LSLOfflinePlayer(
     raw=raw, stream_name="example_stream"
-)  # TODO: add different keyword
+)
 
 player.start_player(chunk_size=30)
 # %%
@@ -77,7 +77,7 @@ player.start_player(chunk_size=30)
 #
 # Next let’s create a Stream analog to the First Demo’s example However as
 # we run the stream, we will set the *lsl-stream* value to True and pass
-# the stream name we earlier declared when initializing the player object
+# the stream name we earlier declared when initializing the player object.
 
 settings.features.welch = False
 settings.features.fft = True
@@ -117,7 +117,7 @@ plt.plot(features.time, features.MOV_RIGHT)
 # ----------------------------
 # We can now check the movement averaged features of an ECoG channel.
 # Note that the path was here adapted to be documentation build compliant.
-# %%
+
 
 feature_reader = nm_analysis.FeatureReader(feature_dir=PATH_OUT, feature_file=RUN_NAME)
 feature_reader.label_name = "MOV_RIGHT"
