@@ -3,7 +3,7 @@ import pandas as pd
 
 from py_neuromodulation import (
     NMSettings,
-    nm_stream_offline,
+    nm_stream,
     nm_define_nmchannels,
 )
 
@@ -30,7 +30,7 @@ def test_label_add_single_target():
 
     settings.sampling_rate_features_hz = sampling_rate_features
 
-    stream = nm_stream_offline.Stream(
+    stream = nm_stream.Stream(
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )
 
@@ -62,7 +62,7 @@ def test_label_add_multidimensional_target():
 
     settings.sampling_rate_features_hz = sampling_rate_features
 
-    stream = nm_stream_offline.Stream(
+    stream = nm_stream.Stream(
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )
 
@@ -87,7 +87,7 @@ def test_label_add_no_target():
 
     settings.sampling_rate_features_hz = sampling_rate_features
 
-    stream = nm_stream_offline.Stream(
+    stream = nm_stream.Stream(
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )
 
