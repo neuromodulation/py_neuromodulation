@@ -3,18 +3,25 @@ import sqlite3
 from pathlib import Path
 import numpy as np
 import pandas as pd
+from py_neuromodulation.nm_types import _PathLike
 
 class NMDatabase:
     """
     Class to create a database and insert data into it.
     Parameters
     ----------
-    out_path_root : str
+    out_path_root : _PathLike
         The root path to save the database.
     folder_name : str
         The folder name to save the database.
+    csv_path : str, optional   
+        The path to save the csv file. If not provided, it will be saved in the same folder as the database.
     """
-    def __init__(self, out_path_root, folder_name, csv_path = None):
+    def __init__(
+            self, 
+            out_path_root: _PathLike,
+            folder_name: str, 
+            csv_path: _PathLike | None = None):
         self.out_path_root = out_path_root
         self.folder_name = folder_name
         self.db_path = Path(out_path_root, folder_name, "stream.db") 
@@ -43,7 +50,7 @@ class NMDatabase:
         else:
             return "BLOB"
 
-    def cast_values(self, feature_dict):
+    def cast_values(self, feature_dict: dict):
         """Cast the int values of the dictionary to float.
         Parameters
         ----------
@@ -54,7 +61,7 @@ class NMDatabase:
                 feature_dict[key] = float(value)
         return feature_dict
 
-    def create_table(self, feature_dict):
+    def create_table(self, feature_dict: dict):
         """
         Create a table in the database.
         Parameters
@@ -65,7 +72,7 @@ class NMDatabase:
         columns_schema = ", ".join([f'"{column}" {self.infer_type(value)}' for column, value in feature_dict.items()])
         self.cursor.execute(f"CREATE TABLE IF NOT EXISTS stream_table ({columns_schema})")
 
-    def insert_data(self, feature_dict):
+    def insert_data(self, feature_dict: dict):
         """
         Insert data into the database.  
         Parameters

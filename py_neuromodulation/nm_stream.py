@@ -84,8 +84,9 @@ class _GenericStream(NMStream):
         folder_name: str = "sub",
         is_stream_lsl: bool = True,
         stream_lsl_name: str = None,
-        save_csv: bool = False,
         plot_lsl: bool = False,
+        save_csv: bool = False,
+        save_interval: int = 10,
     ) -> pd.DataFrame:
         # from py_neuromodulation.nm_database import NMDatabase
 
@@ -160,7 +161,7 @@ class _GenericStream(NMStream):
                 data_acquired = True
             db.insert_data(feature_dict)
 
-            if buff_cnt >= 10:
+            if buff_cnt >= save_interval:
                 db.commit()
                 buff_cnt = 0
 
@@ -316,6 +317,7 @@ class Stream(_GenericStream):
         stream_lsl_name: str = None,
         save_csv: bool = False,
         plot_lsl: bool = False,
+        save_interval: int = 10,
     ) -> pd.DataFrame:
         """Call run function for offline stream.
 
@@ -334,6 +336,10 @@ class Stream(_GenericStream):
             stream name, by default None
         plot_lsl : bool, optional
             plot data with mne_lsl stream_viewer
+        save_csv : bool, optional
+            save csv file, by default False
+        save_interval : int, optional
+            save interval in number of samples, by default 10
 
         Returns
         -------
