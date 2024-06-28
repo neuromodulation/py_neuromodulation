@@ -165,6 +165,7 @@ class _GenericStream(NMStream):
                 db.commit()
                 buff_cnt = 0
 
+        db.commit()
         feature_df = db.fetch_all()
 
 
@@ -317,7 +318,7 @@ class Stream(_GenericStream):
         stream_lsl_name: str = None,
         save_csv: bool = False,
         plot_lsl: bool = False,
-        save_interval: int = 10,
+        save_interval: float = 1.0,
     ) -> pd.DataFrame:
         """Call run function for offline stream.
 
@@ -371,4 +372,5 @@ class Stream(_GenericStream):
             stream_lsl_name=stream_lsl_name,
             save_csv = save_csv,
             plot_lsl = plot_lsl,
+            save_interval = save_interval,
         )
