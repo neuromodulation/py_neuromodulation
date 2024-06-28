@@ -12,7 +12,7 @@ def test_stream_with_none_data():
 
     stream = nm.Stream(fs, data)
 
-    features = stream.run(data)
+    features = stream.run(data, out_path_root="./test_data", folder_name="test_stream_with_none_data")
 
     # assert if all features if name ch0 are None
     assert len(

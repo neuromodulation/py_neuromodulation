@@ -142,6 +142,7 @@ class NMStream(ABC):
         out_path_root: _PathLike = "",
         folder_name: str = "sub",
         feature_arr: pd.DataFrame | None = None,
+        save_csv : bool = False,
     ) -> None:
         """Save features, settings, nm_channels and sidecar after run"""
 
@@ -154,6 +155,9 @@ class NMStream(ABC):
         self.PATH_OUT_folder_name = folder_name
 
         self.save_sidecar(out_path_root, folder_name)
+
+        if not save_csv:
+            feature_arr = feature_arr.head()
 
         if feature_arr is not None:
             self.save_features(out_path_root, folder_name, feature_arr)

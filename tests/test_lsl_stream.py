@@ -25,7 +25,7 @@ def test_offline_lsl(setup_default_stream_fast_compute, setup_lsl_player, setup_
 
     data, stream = setup_default_stream_fast_compute
 
-    features = stream.run(stream_lsl = True, plot_lsl= False, stream_lsl_name='offline_test')
+    features = stream.run(stream_lsl = True, plot_lsl= False, stream_lsl_name='offline_test', out_path_root="./test_data", folder_name="test_offline_lsl")
     # check sfreq
     assert raw.info['sfreq'] == stream.sfreq, "Expected same sampling frequency in the stream and input file"
     assert player.player.info['sfreq'] == stream.sfreq, "Expected same sampling frequency in the stream and player"

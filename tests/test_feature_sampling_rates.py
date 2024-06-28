@@ -24,7 +24,7 @@ def test_different_sampling_rate_100Hz():
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )
 
-    df = stream.run(arr_test)
+    df = stream.run(arr_test, out_path_root="./test_data", folder_name="test_different_sampling_rate_100Hz")
 
     # check the difference between time points
     #print(df["time"].iloc[:2])
@@ -44,7 +44,7 @@ def test_different_sampling_rate_10Hz():
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )
 
-    df = stream.run(arr_test)
+    df = stream.run(arr_test, out_path_root="./test_data", folder_name="test_different_sampling_rate_10Hz")
 
     # check the difference between time points
 
@@ -62,7 +62,7 @@ def test_different_sampling_rate_1Hz():
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )
 
-    df = stream.run(arr_test)
+    df = stream.run(arr_test, out_path_root="./test_data", folder_name="test_different_sampling_rate_1Hz")
 
     # check the difference between time points
 
@@ -80,7 +80,7 @@ def test_different_sampling_rate_0DOT1Hz():
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )
 
-    df = stream.run(arr_test)
+    df = stream.run(arr_test, out_path_root="./test_data", folder_name="test_different_sampling_rate_0DOT1Hz")
 
     # check the difference between time points
 
@@ -114,7 +114,7 @@ def test_different_segment_lengths():
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )
 
-    df_seglength_800 = stream.run(arr_test)
+    df_seglength_800 = stream.run(arr_test, out_path_root="./test_data", folder_name="test_different_segment_lengths_800")
 
     segment_length_features_ms = 1000
 
@@ -128,7 +128,7 @@ def test_different_segment_lengths():
         sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
     )
 
-    df_seglength_1000 = stream.run(arr_test)
+    df_seglength_1000 = stream.run(arr_test, out_path_root="./test_data", folder_name="test_different_segment_lengths_1000")
     # check the difference between time points
 
     print(df_seglength_1000.columns)

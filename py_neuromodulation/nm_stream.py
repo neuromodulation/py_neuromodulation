@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from py_neuromodulation.nm_stream_abc import NMStream
+from py_neuromodulation.nm_database import NMDatabase
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
 
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
 
 class _GenericStream(NMStream):
     """_GenericStream base class.
-    This class can be inherited for different types of offline streams
+    This class can be inhereted for different types of offline streams
 
     Parameters
     ----------
@@ -84,10 +85,13 @@ class _GenericStream(NMStream):
         is_stream_lsl: bool = True,
         stream_lsl_name: str = None,
         plot_lsl: bool = False,
+        save_csv: bool = False,
+        save_interval: int = 10,
     ) -> pd.DataFrame:
-        from py_neuromodulation.nm_generator import raw_data_generator
+        # from py_neuromodulation.nm_database import NMDatabase
 
         if not is_stream_lsl:
+            from py_neuromodulation.nm_generator import raw_data_generator
             generator = raw_data_generator(
                 data=data,
                 settings=self.settings,
@@ -117,9 +121,11 @@ class _GenericStream(NMStream):
 
             generator = self.lsl_stream.get_next_batch()
 
-        l_features: list[dict] = []
         last_time = None
 
+        buff_cnt: int = 0
+        db = NMDatabase(out_path_root, folder_name)
+        data_acquired = False
         while True:
             next_item = next(generator, None)
 
@@ -134,23 +140,38 @@ class _GenericStream(NMStream):
                 data_batch.astype(np.float64)
             )
             if is_stream_lsl:
-                feature_dict["time"] = time_[-1]
                 if self.verbose:
                     if last_time is not None:
                         logger.debug("%.3f seconds of new data processed", time_[-1] - last_time)
+                        feature_dict["time"] = time_[-1] - last_time
+                    else:
+                        feature_dict["time"] = 0
                     last_time = time_[-1]
             else:
-                feature_dict["time"] = np.ceil(time_[-1] * 1000 +1 ).astype(int)
+                feature_dict["time"] = np.ceil(time_[-1] * 1000 +1 )
                 logger.info("Time: %.2f", feature_dict["time"]/1000)
             
 
             self._add_target(feature_dict, data_batch)
+            buff_cnt += 1
 
-            l_features.append(feature_dict)
+            feature_dict = db.cast_values(feature_dict)
+            if not data_acquired:
+                db.create_table(feature_dict)
+                data_acquired = True
+            db.insert_data(feature_dict)
 
-        feature_df = pd.DataFrame(l_features)
+            if buff_cnt >= save_interval:
+                db.commit()
+                buff_cnt = 0
 
-        self.save_after_stream(out_path_root, folder_name, feature_df)
+        db.commit()
+        feature_df = db.fetch_all()
+
+
+        self.save_after_stream(out_path_root, folder_name, feature_df, save_csv=save_csv)
+
+        db.close()
 
         return feature_df
 
@@ -295,7 +316,9 @@ class Stream(_GenericStream):
         folder_name: str = "sub",
         stream_lsl: bool = False,
         stream_lsl_name: str = None,
+        save_csv: bool = False,
         plot_lsl: bool = False,
+        save_interval: float = 1.0,
     ) -> pd.DataFrame:
         """Call run function for offline stream.
 
@@ -314,6 +337,10 @@ class Stream(_GenericStream):
             stream name, by default None
         plot_lsl : bool, optional
             plot data with mne_lsl stream_viewer
+        save_csv : bool, optional
+            save csv file, by default False
+        save_interval : int, optional
+            save interval in number of samples, by default 10
 
         Returns
         -------
@@ -343,5 +370,7 @@ class Stream(_GenericStream):
             folder_name,
             is_stream_lsl=stream_lsl,
             stream_lsl_name=stream_lsl_name,
-            plot_lsl=plot_lsl,
+            save_csv = save_csv,
+            plot_lsl = plot_lsl,
+            save_interval = save_interval,
         )
