@@ -1,10 +1,11 @@
+import os
 import subprocess
 import threading
 from pathlib import Path
 from time import sleep
 
 def run_flask():
-    subprocess.run([".venv_windows/Scripts/python", "py_neuromodulation/gui/app.py"])
+    os.system("python py_neuromodulation/gui/app.py")
 
 def run_vite():
     subprocess.run(["bun", "run", "dev"], cwd="gui_dev")
