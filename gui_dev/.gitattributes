@@ -1,0 +1,3 @@
+*.lockb binary diff=lockb
+*.lockb diff=lockb
+*.lockb textconv=bun
