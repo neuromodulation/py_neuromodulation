@@ -4,6 +4,7 @@ import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import reactCompiler from "eslint-plugin-react-compiler";
+import babelParser from "@babel/eslint-parser";
 
 export default [
   { files: ["**/*.{js,mjs,cjs,jsx}"] },
@@ -19,13 +20,19 @@ export default [
       "react-compiler": reactCompiler,
     },
     languageOptions: {
+      ecmaVersion: "latest", // or a specific version like 2021
+      sourceType: "module",
+      parser: babelParser,
       parserOptions: {
+        requireConfigFile: false,
+        babelOptions: {
+          babelrc: false,
+          configFile: false,
+          presets: ["@babel/preset-env", "@babel/preset-react"],
+        },
         ecmaFeatures: {
           jsx: true,
         },
-      },
-      globals: {
-        ...globals.browser,
       },
     },
     rules: {

@@ -12,6 +12,7 @@ classifiers = [
   "Programming Language :: Python",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
+
 description = "Real-time analysis of intracranial neurophysiology recordings."
 keywords = [
   "real-time",
@@ -23,6 +24,7 @@ keywords = [
   "deep-brain-stimulation",
   "machine-learning",
 ]
+
 license = { file = "LICENSE" }
 maintainers = [{ name = "Timon Merk" }]
 readme = "README.rst"
@@ -59,6 +61,7 @@ dependencies = [
   "flask-socketio",
   "flask-cors",
   "pywebview",
+  "eventlet",
   "seaborn >= 0.11",
 ]
 
@@ -79,6 +82,10 @@ docs = [
 [project.urls]
 bugtracker = "https://github.com/neuromodulation/py_neuromodulation/issues"
 repository = "https://github.com/neuromodulation/py_neuromodulation"
+documentation = "https://neuromodulation.github.io/py_neuromodulation/"
+
+[tool.rye]
+dev-dependencies = ["py-neuromodulation[dev]"]
 
 [tool.ruff]
 target-version = "py311"

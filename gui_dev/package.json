@@ -1,8 +1,7 @@
 {
-  "name": "gui_dev",
-  "private": true,
-  "version": "0.0.0",
+  "license": "MIT",
   "type": "module",
+  "private": true,
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -10,32 +9,32 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@emotion/react": "^11.11.4",
-    "@emotion/styled": "^11.11.5",
-    "@fontsource/figtree": "^5.0.20",
-    "@mui/material": "^5.16.0",
-    "plotly.js": "^2.33.0",
-    "react": "^19.0.0-rc-fb9a90fa48-20240614",
-    "react-desktop": "^0.3.9",
-    "react-dom": "^19.0.0-rc-fb9a90fa48-20240614",
+    "@emotion/react": "^11.13.0",
+    "@emotion/styled": "^11.13.0",
+    "@mui/material": "^5.16.4",
+    "plotly.js-basic-dist-min": "^2.34.0",
+    "react": "next",
+    "react-dom": "next",
     "react-plotly.js": "^2.6.0",
-    "react-router-dom": "^6.24.1",
+    "react-router-dom": "^6.25.1",
     "socket.io-client": "^4.7.5",
-    "uplot": "^1.6.30"
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
-    "@eslint/compat": "^1.1.0",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
+    "@babel/core": "^7.24.9",
+    "@babel/eslint-parser": "^7.24.8",
+    "@babel/preset-env": "^7.24.8",
+    "@babel/preset-react": "^7.24.7",
+    "@eslint/compat": "^1.1.1",
     "@vitejs/plugin-react": "^4.3.1",
     "babel-plugin-react-compiler": "^0.0.0-experimental-696af53-20240625",
-    "eslint": "^9.6.0",
+    "eslint": "^9.7.0",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-react": "^7.34.3",
+    "eslint-plugin-react": "^7.35.0",
     "eslint-plugin-react-compiler": "^0.0.0-experimental-0998c1e-20240625",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.8",
-    "prettier": "^3.3.2",
-    "vite": "^5.3.3"
+    "prettier": "^3.3.3",
+    "vite": "^5.3.4"
   }
 }

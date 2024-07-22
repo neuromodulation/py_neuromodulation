@@ -1,39 +1,60 @@
-import { useState, useEffect } from "react";
-import SettingsUI from "./components/Settings";
-import "./App.css";
+import { useEffect } from "react";
+import { useSettingsStore, useSocketStore, useWebviewStore } from "@/stores";
+import {
+  Settings,
+  TitleBar,
+  Graph,
+  StatusBar,
+  Sidebar,
+  Drawer,
+} from "@/components";
+import styles from "./App.module.css";
 
 export default function App() {
-  const [nm_settings, setSettings] = useState(null);
+  // Get settings from backend on start-up
+  const fetchSettingsWithDelay = useSettingsStore(
+    (state) => state.fetchSettingsWithDelay
+  );
+  useEffect(() => {
+    fetchSettingsWithDelay();
+  }, [fetchSettingsWithDelay]);
+
+  // Connect to web-socket
+  const { connectSocket, disconnectSocket } = useSocketStore((state) => ({
+    connectSocket: state.connectSocket,
+    disconnectSocket: state.disconnectSocket,
+  }));
 
   useEffect(() => {
-    fetch("/api/settings")
-      .then(console.log("Fetching..."))
-      .then((response) => response.json())
-      .then((data) => setSettings(data));
-  }, []);
+    console.log("Connecting socket from App component...");
+    connectSocket();
+    return () => {
+      console.log("Disconnecting socket from App component...");
+      disconnectSocket();
+    };
+  }, [connectSocket, disconnectSocket]);
+
+  // Check PyWebView status
+  const checkWebviewReady = useWebviewStore((state) => state.checkWebviewReady);
 
   useEffect(() => {
-    if (nm_settings) {
-      fetch("/api/settings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(nm_settings),
-      })
-        .then((response) => response.json())
-        .then((data) => console.log("Settings updated:", data))
-        .catch((error) => console.error("Error updating settings:", error));
-    }
-  }, [nm_settings]);
-
-  const updateSettings = (newSettings) => {
-    setSettings(newSettings);
-  };
+    checkWebviewReady();
+  }, [checkWebviewReady]);
 
   return (
-    <>
-      <SettingsUI nm_settings={nm_settings} onSettingsChange={updateSettings} />
-    </>
+    <div className={styles.appContainer}>
+      <TitleBar />
+      <div className={styles.appContent}>
+        <Sidebar>
+          <Drawer name="settings">
+            <Settings />
+          </Drawer>
+        </Sidebar>
+        <div className={styles.appMainContent}>
+          <Graph />
+        </div>
+      </div>
+      <StatusBar />
+    </div>
   );
 }

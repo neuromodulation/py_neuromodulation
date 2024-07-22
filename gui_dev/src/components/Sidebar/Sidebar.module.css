@@ -1,0 +1,55 @@
+.sidebarContainer {
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+.sidebar {
+  background-color: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.drawerContainer {
+  position: relative;
+  width: 0;
+  transition: width 0.3s ease-out;
+  overflow: hidden;
+
+  &.open {
+    width: 300px;
+  }
+}
+
+.drawerToggle {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+
+  &.open {
+    background-color: #d0d0d0;
+  }
+}
+
+.drawerToggle:hover {
+  background-color: #e0e0e0;
+}
+
+.drawerWrapper {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  overflow: hidden;
+  transition: width 0.3s ease-out;
+  width: 0;
+}
+
+.drawerWrapper.open {
+  width: 300px;
+}
