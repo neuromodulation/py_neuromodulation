@@ -1,23 +1,11 @@
-:root {
-  --sidebar-color: #333; /* Dark background for the sidebar */
-  --toggle-color: #444; /* Slightly lighter color for toggle button */
-  --toggle-hover-color: #555; /* Even lighter on hover */
-  --drawer-color: #424242; /* Dark color for drawer */
-  --resize-handle-color: #616161; /* Handle color matching the dark theme */
-  --max-drawer-width: 600px;
-  --min-drawer-width: 200px;
-}
-
 .sidebarContainer {
   display: flex;
   height: 100%;
   overflow: hidden;
-  flex-shrink: 0;
-  flex-grow: 0;
 }
 
 .sidebar {
-  background-color: var(--sidebar-color);
+  background-color: #f0f0f0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -25,14 +13,13 @@
 }
 
 .drawerContainer {
-  display: flex;
+  position: relative;
+  width: 0;
+  transition: width 0.3s ease-out;
   overflow: hidden;
-  background-color: var(--drawer-color);
-  transition: width 0.15s ease-out;
-  max-width: var(--max-drawer-width);
 
-  &.resizing {
-    transition: none;
+  &.open {
+    width: 300px;
   }
 }
 
@@ -44,66 +31,25 @@
   cursor: pointer;
   font-size: 16px;
   transition: background-color 0.3s;
-  padding: 10px 5px;
-  color: #f4f4f4; /* Light text color */
 
   &.open {
-    background-color: var(--toggle-color);
-  }
-
-  &:hover {
-    background-color: var(--toggle-hover-color);
+    background-color: #d0d0d0;
   }
 }
 
-.toggleLabel {
-  text-transform: capitalize;
-  color: #f4f4f4; /* Ensure text is visible on dark background */
+.drawerToggle:hover {
+  background-color: #e0e0e0;
 }
 
-.drawer {
-  flex-shrink: 0;
-  flex-grow: 0;
-  display: flex;
-  flex-direction: column;
-  width: var(--max-drawer-width);
-  height: 100%;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5); /* Stronger shadow for dark theme */
-  overflow-y: auto;
-  padding: 20px;
-  color: #f4f4f4; /* Ensure text is visible on dark background */
-}
-
-.resizeHandle {
+.drawerWrapper {
   position: absolute;
   top: 0;
-  right: 0;
-  width: 5px;
   height: 100%;
-  cursor: ew-resize;
-  transition: width 0.15s ease-out;
+  overflow: hidden;
+  transition: width 0.3s ease-out;
+  width: 0;
+}
 
-  &::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 1px;
-    height: 100%;
-    background-color: var(--resize-handle-color);
-    transition: width 0.15s ease-out, background-color 0.15s ease-out;
-  }
-
-  &:hover::after {
-    width: 3px;
-  }
-
-  &.resizing {
-    width: 4px;
-
-    &::after {
-      width: 3px;
-      background-color: rgba(255, 255, 255, 0.712); /* Lighter during resizing */
-    }
-  }
+.drawerWrapper.open {
+  width: 300px;
 }
