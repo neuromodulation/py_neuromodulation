@@ -1,20 +1,33 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import { fileURLToPath } from "url";
 
-const ReactCompilerConfig = {};
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react({
       babel: {
-        plugins: [["babel-plugin-react-compiler", ReactCompilerConfig]],
+        plugins: [
+          [
+            "babel-plugin-react-compiler",
+            {
+              /* Compiler config here, for now empty */
+            },
+          ],
+        ],
       },
     }),
   ],
+  resolve: {
+    alias: { "@": path.resolve(__dirname, "./src") },
+  },
   build: {
-    outDir: path.resolve(__dirname, "../py_neuromodulation/app/frontend"),
+    sourcemap: true,
+    outDir: path.resolve(__dirname, "../py_neuromodulation/gui/frontend"),
     emptyOutDir: true,
   },
   server: {
