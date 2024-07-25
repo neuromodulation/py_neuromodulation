@@ -131,5 +131,5 @@ class PyNMApp:
             )
 
     def run_app(self):
-        # generator = RandomGenerator(self.socketio)
-        self.socketio.run(self.app, debug=True, port=50000)  # type: ignore
+        generator = RandomGenerator(self.socketio)
+        self.socketio.run(self.app, debug=True, port=5000)  # type: ignore
