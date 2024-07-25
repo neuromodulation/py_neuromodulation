@@ -1,6 +1,5 @@
-import logging
 from pathlib import Path
-import toml
+import tomllib
 from collections import defaultdict
 
 import pandas as pd
@@ -34,7 +33,7 @@ class PyNMApp:
         self.socketio = PyNMSocket(
             self.app,
             cors_allowed_origins="*",
-            async_mode="threading",
+            async_mode="eventlet",
         )
 
         # Catch-all endpoint that routes all requests to the frontend
@@ -101,7 +100,7 @@ class PyNMApp:
         def get_app_info():
             pyproject_path = Path(__file__).parent.parent / "pyproject.toml"
             with open(pyproject_path, "r") as f:
-                pyproject_data = toml.load(f)
+                pyproject_data = tomllib.load(f)
 
             project_info = defaultdict(lambda: "", pyproject_data.get("project", {}))
             urls = defaultdict(str, project_info.get("urls", {}))
@@ -132,9 +131,5 @@ class PyNMApp:
             )
 
     def run_app(self):
-        log = logging.getLogger("werkzeug")
-        log.setLevel(logging.ERROR)  # Disable dev server warning
-
         generator = RandomGenerator(self.socketio)
-
         self.socketio.run(self.app, debug=True, port=5000)  # type: ignore
