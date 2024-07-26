@@ -1,8 +1,8 @@
 import sqlite3
 from pathlib import Path
-import numpy as np
 import pandas as pd
 from py_neuromodulation.nm_types import _PathLike
+from datetime import datetime
 
 
 class NMDatabase:
@@ -17,7 +17,9 @@ class NMDatabase:
     """
 
     def __init__(self, out_dir: _PathLike, csv_path: _PathLike | None = None):
-        self.db_path = Path(out_dir, "stream.db")
+        self.db_path = Path(
+            out_dir, f"stream_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.db"
+        )
 
         self.table_name = "stream_table"  # change to param?
         self.table_created = False
@@ -96,7 +98,7 @@ class NMDatabase:
 
         insert_sql = f"INSERT INTO {self.table_name} ({self.columns}) VALUES ({self.placeholders})"
 
-        self.cursor.execute(insert_sql, feature_dict.values())
+        self.cursor.execute(insert_sql, tuple(feature_dict.values()))
 
     def commit(self):
         self.conn.commit()

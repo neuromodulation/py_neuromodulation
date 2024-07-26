@@ -171,16 +171,16 @@ class _GenericStream(NMStream):
             if self.batch_count % save_interval == 0:
                 db.commit()
 
-        # Save last batches and close the database connection
-        db.commit()
-        db.close()
+        db.commit()  # Save last batches
 
         # If save_csv is False, still save the first row to get the column names
         feature_df = db.fetch_all() if save_csv else db.head()
 
+        db.close()  # Close the database connection
+
         self.save_after_stream(out_dir, feature_df)
 
-        return feature_df  # Not sure if this makes sense anymore
+        return feature_df  # TONI: Not sure if this makes sense anymore
 
     def plot_raw_signal(
         self,
