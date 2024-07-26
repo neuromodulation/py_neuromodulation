@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from py_neuromodulation.nm_stream_abc import NMStream
-from py_neuromodulation.nm_database import NMDatabase
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
 
@@ -15,7 +14,7 @@ if TYPE_CHECKING:
 
 class _GenericStream(NMStream):
     """_GenericStream base class.
-    This class can be inhereted for different types of offline streams
+    This class can be inherited for different types of offline streams
 
     Parameters
     ----------
@@ -88,10 +87,19 @@ class _GenericStream(NMStream):
         save_csv: bool = False,
         save_interval: int = 10,
     ) -> pd.DataFrame:
-        # from py_neuromodulation.nm_database import NMDatabase
+        from py_neuromodulation.nm_database import NMDatabase
+
+        out_path_root = Path.cwd() if not out_path_root else Path(out_path_root)
+        out_dir = out_path_root / folder_name
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        db = NMDatabase(out_dir, folder_name)  # Create output database
+
+        self.batch_count: int = 0  # Keep track of the number of batches processed
 
         if not is_stream_lsl:
             from py_neuromodulation.nm_generator import raw_data_generator
+
             generator = raw_data_generator(
                 data=data,
                 settings=self.settings,
@@ -121,59 +129,58 @@ class _GenericStream(NMStream):
 
             generator = self.lsl_stream.get_next_batch()
 
-        last_time = None
+        prev_batch_end = 0
 
-        buff_cnt: int = 0
-        db = NMDatabase(out_path_root, folder_name)
-        data_acquired = False
         while True:
             next_item = next(generator, None)
 
             if next_item is not None:
-                time_, data_batch = next_item
+                timestamps, data_batch = next_item
             else:
                 break
 
             if data_batch is None:
                 break
-            feature_dict = self.data_processor.process(
-                data_batch.astype(np.float64)
+
+            feature_dict = self.data_processor.process(data_batch)
+
+            this_batch_end = timestamps[-1]
+            batch_length = this_batch_end - prev_batch_end
+            logger.debug(
+                f"{batch_length:.3f} seconds of new data processed",
             )
-            if is_stream_lsl:
-                if self.verbose:
-                    if last_time is not None:
-                        logger.debug("%.3f seconds of new data processed", time_[-1] - last_time)
-                        feature_dict["time"] = time_[-1] - last_time
-                    else:
-                        feature_dict["time"] = 0
-                    last_time = time_[-1]
-            else:
-                feature_dict["time"] = np.ceil(time_[-1] * 1000 +1 )
-                logger.info("Time: %.2f", feature_dict["time"]/1000)
-            
+
+            feature_dict["time"] = (
+                batch_length if is_stream_lsl else np.ceil(this_batch_end * 1000 + 1)
+            )
+
+            prev_batch_end = this_batch_end
+
+            if self.verbose:
+                logger.info("Time: %.2f", feature_dict["time"] / 1000)
 
             self._add_target(feature_dict, data_batch)
-            buff_cnt += 1
 
-            feature_dict = db.cast_values(feature_dict)
-            if not data_acquired:
-                db.create_table(feature_dict)
-                data_acquired = True
+            # We should ensure that feature output is float64 and remove this
+            for key, value in feature_dict.items():
+                feature_dict[key] = float(value)
+
             db.insert_data(feature_dict)
 
-            if buff_cnt >= save_interval:
+            self.batch_count += 1
+            if self.batch_count % save_interval == 0:
                 db.commit()
-                buff_cnt = 0
 
+        # Save last batches and close the database connection
         db.commit()
-        feature_df = db.fetch_all()
-
-
-        self.save_after_stream(out_path_root, folder_name, feature_df, save_csv=save_csv)
-
         db.close()
 
-        return feature_df
+        # If save_csv is False, still save the first row to get the column names
+        feature_df = db.fetch_all() if save_csv else db.head()
+
+        self.save_after_stream(out_dir, feature_df)
+
+        return feature_df  # Not sure if this makes sense anymore
 
     def plot_raw_signal(
         self,
@@ -370,7 +377,7 @@ class Stream(_GenericStream):
             folder_name,
             is_stream_lsl=stream_lsl,
             stream_lsl_name=stream_lsl_name,
-            save_csv = save_csv,
-            plot_lsl = plot_lsl,
-            save_interval = save_interval,
+            save_csv=save_csv,
+            plot_lsl=plot_lsl,
+            save_interval=save_interval,
         )

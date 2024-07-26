@@ -1,40 +1,48 @@
-import os
 import sqlite3
 from pathlib import Path
 import numpy as np
 import pandas as pd
 from py_neuromodulation.nm_types import _PathLike
 
+
 class NMDatabase:
     """
     Class to create a database and insert data into it.
     Parameters
     ----------
-    out_path_root : _PathLike
-        The root path to save the database.
-    folder_name : str
-        The folder name to save the database.
-    csv_path : str, optional   
+    out_dir : _PathLike
+        The directory to save the database.
+    csv_path : str, optional
         The path to save the csv file. If not provided, it will be saved in the same folder as the database.
     """
-    def __init__(
-            self, 
-            out_path_root: _PathLike,
-            folder_name: str, 
-            csv_path: _PathLike | None = None):
-        self.out_path_root = out_path_root
-        self.folder_name = folder_name
-        self.db_path = Path(out_path_root, folder_name, "stream.db") 
+
+    def __init__(self, out_dir: _PathLike, csv_path: _PathLike | None = None):
+        self.db_path = Path(out_dir, "stream.db")
+
+        self.table_name = "stream_table"  # change to param?
+        self.table_created = False
+
         if csv_path is None:
-            self.csv_path = Path(out_path_root, folder_name, f"stream.csv")
+            self.csv_path = Path(out_dir, "stream.csv")
         else:
             self.csv_path = Path(csv_path)
 
-        if os.path.exists(self.db_path):
-            os.remove(self.db_path)
+        if self.db_path.exists():
+            raise FileExistsError(f"Database file {self.db_path} already exists.")
 
-        self.conn = sqlite3.connect(self.db_path, isolation_level=None)
+        self.conn = sqlite3.connect(self.db_path)
         self.cursor = self.conn.cursor()
+
+        # Database config and optimization, prioritize data integrity
+        self.cursor.execute("PRAGMA journal_mode=WAL")  # Write-Ahead Logging mode
+        self.cursor.execute("PRAGMA synchronous=FULL")  # Sync on every commit
+        self.cursor.execute("PRAGMA temp_store=MEMORY")  # Store temp tables in memory
+        self.cursor.execute(
+            "PRAGMA wal_autocheckpoint = 1000"
+        )  # WAL checkpoint every 1000 pages (default, 4MB, might change)
+        self.cursor.execute(
+            f"PRAGMA mmap_size = {2 * 1024 * 1024 * 1024}"
+        )  # 2GB of memory mapped
 
     def infer_type(self, value):
         """Infer the type of the value to create the table schema.
@@ -42,24 +50,13 @@ class NMDatabase:
         ----------
         value : int, float, str
             The value to infer the type."""
-        
+
         if isinstance(value, (int, float)):
             return "REAL"
         elif isinstance(value, str):
             return "TEXT"
         else:
             return "BLOB"
-
-    def cast_values(self, feature_dict: dict):
-        """Cast the int values of the dictionary to float.
-        Parameters
-        ----------
-        feature_dict : dict
-            The dictionary to cast the values."""
-        for key, value in feature_dict.items():
-            if isinstance(value, (int, float, np.int64)):
-                feature_dict[key] = float(value)
-        return feature_dict
 
     def create_table(self, feature_dict: dict):
         """
@@ -69,39 +66,72 @@ class NMDatabase:
         feature_dict : dict
             The dictionary with the feature names and values.
         """
-        columns_schema = ", ".join([f'"{column}" {self.infer_type(value)}' for column, value in feature_dict.items()])
-        self.cursor.execute(f"CREATE TABLE IF NOT EXISTS stream_table ({columns_schema})")
+        columns_schema = ", ".join(
+            [
+                f'"{column}" {self.infer_type(value)}'
+                for column, value in feature_dict.items()
+            ]
+        )
+
+        self.cursor.execute(
+            f"CREATE TABLE IF NOT EXISTS {self.table_name} ({columns_schema})"
+        )
+
+        # Create column names and placeholders for insert statement
+        self.columns: str = ", ".join([f'"{column}"' for column in feature_dict.keys()])
+        self.placeholders = ", ".join(["?" for _ in feature_dict])
 
     def insert_data(self, feature_dict: dict):
         """
-        Insert data into the database.  
+        Insert data into the database.
         Parameters
         ----------
         feature_dict : dict
             The dictionary with the feature names and values.
         """
-        columns = ", ".join([f'"{column}"' for column in feature_dict.keys()])
-        placeholders = ", ".join(["?" for _ in feature_dict])
-        insert_sql = f"INSERT INTO stream_table ({columns}) VALUES ({placeholders})"
-        values = tuple(feature_dict.values())
-        self.cursor.execute(insert_sql, values)
+
+        if not self.table_created:
+            self.create_table(feature_dict)
+            self.table_created = True
+
+        insert_sql = f"INSERT INTO {self.table_name} ({self.columns}) VALUES ({self.placeholders})"
+
+        self.cursor.execute(insert_sql, feature_dict.values())
 
     def commit(self):
         self.conn.commit()
 
     def fetch_all(self):
-        """"
+        """ "
         Fetch all the data from the database.
         Returns
         -------
         pd.DataFrame
             The data in a pandas DataFrame.
         """
-        return pd.read_sql_query("SELECT * FROM stream_table", self.conn)
-    
+        return pd.read_sql_query(f"SELECT * FROM {self.table_name}", self.conn)
+
+    def head(self, n: int = 1):
+        """ "
+        Returns the first N rows of the database.
+        Parameters
+        ----------
+        n : int, optional
+            The number of rows to fetch, by default 1
+        -------
+        pd.DataFrame
+            The data in a pandas DataFrame.
+        """
+        return pd.read_sql_query(
+            f"SELECT * FROM {self.table_name} LIMIT{n}1", self.conn
+        )
+
     def save_as_csv(self):
         df = self.fetch_all()
         df.to_csv(self.csv_path, index=False)
 
     def close(self):
+        # Optimize before closing is recommended:
+        # https://www.sqlite.org/pragma.html#pragma_optimize
+        self.cursor.execute("PRAGMA optimize")
         self.conn.close()
