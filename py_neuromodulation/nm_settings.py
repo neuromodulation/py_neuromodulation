@@ -1,6 +1,6 @@
 """Module for handling settings."""
 
-from pathlib import PurePath, Path
+from pathlib import Path
 from typing import ClassVar
 from pydantic import Field, model_validator
 
@@ -233,9 +233,9 @@ class NMSettings(NMBaseModel):
             case ".yaml":
                 import yaml
 
-                #with open(path) as f:
+                # with open(path) as f:
                 #    model_dict = yaml.safe_load(f)
-                
+
                 # Timon: this is potentially dangerous since python code is directly executed
                 with open(path) as f:
                     model_dict = yaml.load(f, Loader=yaml.Loader)

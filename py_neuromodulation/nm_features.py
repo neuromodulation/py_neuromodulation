@@ -1,4 +1,4 @@
-from typing import Protocol, Type, runtime_checkable, TYPE_CHECKING, TypeVar
+from typing import Protocol, Type, runtime_checkable, TYPE_CHECKING
 from collections.abc import Sequence
 import numpy as np
 

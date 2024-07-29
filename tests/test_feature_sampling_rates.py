@@ -111,7 +111,7 @@ def test_wrong_initalization_of_segment_length_features_ms_and_osc_window_length
     settings.fft_settings.windowlength_ms = 1000
 
     with pytest.raises(Exception):
-        stream = nm_stream.Stream(
+        nm_stream.Stream(
             sfreq=1000, nm_channels=nm_channels, settings=settings, verbose=True
         )
 

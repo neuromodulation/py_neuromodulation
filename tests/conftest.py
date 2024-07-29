@@ -4,12 +4,12 @@ import numpy as np
 from py_neuromodulation import (
     nm_generator,
     nm_stream,
-    nm_settings,
     nm_mnelsl_generator,
     nm_IO,
     nm_define_nmchannels,
-    NMSettings
+    NMSettings,
 )
+
 
 @pytest.fixture
 def setup_default_data():
@@ -29,8 +29,9 @@ def setup_default_data():
         coord_list,
         coord_names,
     ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
-    
+
     return raw, data, sfreq
+
 
 @pytest.fixture
 def setup_default_stream_fast_compute() -> tuple[np.ndarray, nm_stream.Stream]:
@@ -95,11 +96,11 @@ def setup_default_stream_fast_compute() -> tuple[np.ndarray, nm_stream.Stream]:
 
 @pytest.fixture
 def setup_lsl_player(request):
-    """ This test function sets a data batch and automatic initialized dataframe 
-    
+    """This test function sets a data batch and automatic initialized dataframe
+
     Args:
         PATH_PYNEUROMODULATION (string): Path to py_neuromodulation repository
-        
+
     Returns:
         player (mne_lsl.player.PlayerLSL): LSL player object
     """
@@ -120,9 +121,9 @@ def setup_lsl_player(request):
         coord_list,
         coord_names,
     ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
-    player = nm_mnelsl_generator.LSLOfflinePlayer(raw = raw, stream_name=name)
+    player = nm_mnelsl_generator.LSLOfflinePlayer(raw=raw, stream_name=name)
     return player
-    
+
 
 @pytest.fixture
 def setup_databatch():

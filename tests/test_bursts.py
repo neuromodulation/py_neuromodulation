@@ -67,7 +67,7 @@ def test_bursting_duration():
     settings = NMSettings.get_default()
     settings.features.bursts = True
     settings.postprocessing.feature_normalization = False
-    TIME_DURATION = 10
+    # TIME_DURATION = 10 # TONI: Unused variable
     sfreq = 1000
     NUM_CH = 1
     time_points_beta = np.arange(0, 1, 1 / sfreq)
