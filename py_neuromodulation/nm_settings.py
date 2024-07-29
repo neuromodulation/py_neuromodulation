@@ -254,16 +254,11 @@ class NMSettings(NMBaseModel):
         return NormalizationSettings.list_normalization_methods()
 
     def save(
-        self, path_out: _PathLike, folder_name: str = "", format: str = "yaml"
+        self, out_dir: _PathLike = ".", prefix: str = "", format: str = "yaml"
     ) -> None:
-        path_out = PurePath(path_out)
-        filename = f"SETTINGS.{format}"
+        filename = f"{prefix}_SETTINGS.{format}" if prefix else f"SETTINGS.{format}"
 
-        if folder_name:
-            path_out = path_out / folder_name
-            filename = f"{folder_name}_{filename}"
-
-        path_out = path_out / filename
+        path_out = Path(out_dir) / filename
 
         with open(path_out, "w") as f:
             match format:
@@ -272,9 +267,9 @@ class NMSettings(NMBaseModel):
                 case "yaml":
                     import yaml
 
-                    yaml.dump(self.model_dump(), f, default_flow_style=False)
+                    yaml.dump(self.model_dump(), f, default_flow_style=None)
 
-        logger.info(f"Settings saved to {path_out}")
+        logger.info(f"Settings saved to {path_out.resolve()}")
 
 
 # For retrocompatibility with previous versions of PyNM

@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 from pathlib import Path
+from contextlib import suppress
+
 from py_neuromodulation.nm_stream_abc import NMStream
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger
@@ -86,14 +88,22 @@ class _GenericStream(NMStream):
         plot_lsl: bool = False,
         save_csv: bool = False,
         save_interval: int = 10,
+        return_df: bool = True,
     ) -> pd.DataFrame:
         from py_neuromodulation.nm_database import NMDatabase
 
         out_path_root = Path.cwd() if not out_path_root else Path(out_path_root)
+
+        self.PATH_OUT = out_path_root
+        self.PATH_OUT_folder_name = folder_name
+
         out_dir = out_path_root / folder_name
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        db = NMDatabase(out_dir, folder_name)  # Create output database
+        # TONI: Need better default experiment name
+        experiment_name = folder_name if folder_name else "sub"
+
+        db = NMDatabase(experiment_name, out_dir)  # Create output database
 
         self.batch_count: int = 0  # Keep track of the number of batches processed
 
@@ -161,9 +171,10 @@ class _GenericStream(NMStream):
 
             self._add_target(feature_dict, data_batch)
 
-            # We should ensure that feature output is float64 and remove this
-            for key, value in feature_dict.items():
-                feature_dict[key] = float(value)
+            # We should ensure that feature output is always either float64 or None and remove this
+            with suppress(TypeError):  # Need this because some features output None
+                for key, value in feature_dict.items():
+                    feature_dict[key] = np.float64(value)
 
             db.insert_data(feature_dict)
 
@@ -174,11 +185,15 @@ class _GenericStream(NMStream):
         db.commit()  # Save last batches
 
         # If save_csv is False, still save the first row to get the column names
-        feature_df = db.fetch_all() if save_csv else db.head()
+        feature_df: pd.DataFrame = (
+            db.fetch_all() if (save_csv or return_df) else db.head()
+        )
 
         db.close()  # Close the database connection
 
-        self.save_after_stream(out_dir, feature_df)
+        self.save_after_stream(
+            out_dir=out_dir, prefix=experiment_name, feature_arr=feature_df
+        )
 
         return feature_df  # TONI: Not sure if this makes sense anymore
 

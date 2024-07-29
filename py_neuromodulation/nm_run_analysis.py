@@ -287,6 +287,7 @@ class DataProcessor:
     def save_sidecar(
         self,
         out_dir: _PathLike,
+        prefix: str = "",
         additional_args: dict | None = None,
     ) -> None:
         """Save sidecar incuding fs, coords, sess_right to out_dir."""
@@ -307,17 +308,18 @@ class DataProcessor:
         if additional_args is not None:
             sidecar = sidecar | additional_args
 
-        nm_IO.save_sidecar(sidecar, out_dir)
+        nm_IO.save_sidecar(sidecar, out_dir, prefix)
 
-    def save_settings(self, out_dir: _PathLike) -> None:
-        self.settings.save(out_dir)
+    def save_settings(self, out_dir: _PathLike, prefix: str = "") -> None:
+        self.settings.save(out_dir, prefix)
 
-    def save_nm_channels(self, out_dir: _PathLike) -> None:
-        nm_IO.save_nm_channels(self.nm_channels, out_dir)
+    def save_nm_channels(self, out_dir: _PathLike, prefix: str = "") -> None:
+        nm_IO.save_nm_channels(self.nm_channels, out_dir, prefix)
 
     def save_features(
         self,
-        out_dir: _PathLike,
         feature_arr: pd.DataFrame,
+        out_dir: _PathLike = "",
+        prefix: str = "",
     ) -> None:
-        nm_IO.save_features(feature_arr, out_dir)
+        nm_IO.save_features(feature_arr, out_dir, prefix)

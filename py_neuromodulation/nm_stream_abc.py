@@ -1,8 +1,6 @@
 """Module that contains NMStream ABC."""
 
 from abc import ABC, abstractmethod
-from pathlib import Path
-import pickle
 
 import pandas as pd
 
@@ -141,27 +139,28 @@ class NMStream(ABC):
     def save_after_stream(
         self,
         out_dir: _PathLike = "",
+        prefix: str = "",
         feature_arr: pd.DataFrame | None = None,
     ) -> None:
         """Save features, settings, nm_channels and sidecar after run"""
 
-        self.save_sidecar(out_dir)
+        self.save_sidecar(out_dir, prefix)
 
         if feature_arr is not None:
-            nm_IO.save_features(feature_arr, out_dir)
+            nm_IO.save_features(feature_arr, out_dir, prefix)
 
-        self.save_settings(out_dir)
+        self.save_settings(out_dir, prefix)
 
-        self.save_nm_channels(out_dir)
+        self.save_nm_channels(out_dir, prefix)
 
-    def save_nm_channels(self, out_dir: _PathLike) -> None:
-        self.data_processor.save_nm_channels(out_dir)
+    def save_nm_channels(self, out_dir: _PathLike, prefix: str = "") -> None:
+        self.data_processor.save_nm_channels(out_dir, prefix)
 
-    def save_settings(self, out_dir: _PathLike) -> None:
-        self.data_processor.save_settings(out_dir)
+    def save_settings(self, out_dir: _PathLike, prefix: str = "") -> None:
+        self.data_processor.save_settings(out_dir, prefix)
 
-    def save_sidecar(self, out_dir: _PathLike) -> None:
+    def save_sidecar(self, out_dir: _PathLike, prefix: str = "") -> None:
         """Save sidecar incduing fs, coords, sess_right to
         out_path_root and subfolder 'folder_name'"""
         additional_args = {"sess_right": self.sess_right}
-        self.data_processor.save_sidecar(out_dir, additional_args)
+        self.data_processor.save_sidecar(out_dir, prefix, additional_args)

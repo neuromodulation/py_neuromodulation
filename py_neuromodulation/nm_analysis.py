@@ -392,7 +392,6 @@ class FeatureReader:
 
     @staticmethod
     def get_performace_sub_strip(performance_sub: dict, plt_grid: bool = False):
-
         ecog_strip_performance = []
         ecog_coords_strip = []
         cortex_grid = []
@@ -967,8 +966,8 @@ class FeatureReader:
             nm_IO.save_general_dict(
                 dict_=performance_dict,
                 path_out=PATH_OUT,
+                prefix=folder_name,
                 str_add=str_add,
-                folder_name=folder_name,
             )
         return performance_dict
 
