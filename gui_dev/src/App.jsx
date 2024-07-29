@@ -45,10 +45,11 @@ export default function App() {
   return (
     <div className={styles.appContainer}>
       <TitleBar />
+  
       <div className={styles.appContent}>
         <Sidebar>
           <Drawer name="settings">
-            <CollapsibleBox title = "Features"> 
+            <CollapsibleBox title = "Features" startOpen ={0}> 
               <Settings />
             </CollapsibleBox>
           </Drawer>
