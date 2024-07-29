@@ -1,40 +1,42 @@
-import React, { useRef, useState } from 'react';
-import { RiArrowDropDownLine } from "react-icons/ri";
+import React, { useEffect, useRef, useState } from 'react';
+
 import styles from "./CollapsibleBox.module.css";
 
 
 
-export const CollapsibleBox = ({ title, startOpen = False, children }) => {
-  const contentHeight = useRef();
+export const CollapsibleBox = ({ title, startOpen = false, children }) => {
+  const contentHeight = useRef(null);
   const [isOpen, setIsOpen] = useState(startOpen);
+
+  useEffect(() => {
+    if (contentHeight.current) {
+      contentHeight.current.style.height = isOpen
+          ? `${contentHeight.current.scrollHeight}px` 
+          : "0px";
+    }
+  }, [isOpen])
+
   const toggleState = () => setIsOpen(!isOpen);
-  
-  
+
   return(
     <div className = {styles.wrapper}>
-      <input
-      type = "checkbox"
-      checked = {startOpen}
-      className={styles.titleContainer}
-      >
-        <p className= {styles.titleContent}> {title}</p>
-        <RiArrowDropDownLine className={styles.arrow}/>
+      <div className={`${styles.titleContainer} ${isOpen ? styles.active : ''}`} onClick={toggleState}>
+        <p className={`${styles.titleContent} ${isOpen ? styles.active : ''}`}>{title}</p>
 
-      </input>
+      </div>
+
       <div 
         ref = {contentHeight}
         className={styles.contentContainer}
-        style = {
-          isOpen 
-            ? { height: contentHeight.current.scrollHeight }
-            : { height: "0px" }
-        }
+        style = {{ overflow: 'hidden', transition: 'height 0.3s ease' }}
         >
           {children}
         </div>
     </div>
   );
 };
+
+
 
 
 
