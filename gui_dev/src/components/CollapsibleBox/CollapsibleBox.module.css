@@ -18,7 +18,7 @@
     border-bottom: 1px solid black;
     overflow: hidden;
   }
-  .wrapper .question-container{
+  .wrapper .questionContainer{
     width: 100%;
     text-align: left;
     padding: 20px 10px;
@@ -46,12 +46,7 @@
     rotate: 180deg;
     color: #1db954;
   }
-  .wrapper .component-container{
+  .wrapper .contentContainer{
     padding: 0 1rem;
     transition: height .7s ease-in-out;
-  }
-  .wrapper .component-content{
-    padding: 1rem 0;
-    font-size: 20px;
-    font-style: italic;
   }
