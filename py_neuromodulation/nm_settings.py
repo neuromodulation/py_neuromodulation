@@ -61,10 +61,10 @@ class NMSettings(NMBaseModel):
     frequency_ranges_hz: dict[str, FrequencyRange] = {
         "theta": FrequencyRange(4, 8),
         "alpha": FrequencyRange(8, 12),
-        "low beta": FrequencyRange(13, 20),
-        "high beta": FrequencyRange(20, 35),
-        "low gamma": FrequencyRange(60, 80),
-        "high gamma": FrequencyRange(90, 200),
+        "low_beta": FrequencyRange(13, 20),
+        "high_beta": FrequencyRange(20, 35),
+        "low_gamma": FrequencyRange(60, 80),
+        "high_gamma": FrequencyRange(90, 200),
         "HFA": FrequencyRange(200, 400),
     }
 
@@ -127,6 +127,11 @@ class NMSettings(NMBaseModel):
     def validate_settings(self):
         if len(self.features.get_enabled()) == 0:
             raise ValueError("At least one feature must be selected.")
+
+        # Replace spaces with underscores in frequency band names
+        self.frequency_ranges_hz = {
+            k.replace(" ", "_"): v for k, v in self.frequency_ranges_hz.items()
+        }
 
         if self.features.bandpass_filter:
             # Check BandPass settings frequency bands

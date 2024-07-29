@@ -2,6 +2,8 @@ from numpy import array, cov
 from py_neuromodulation.nm_types import NMBaseModel
 from typing import TYPE_CHECKING
 
+from pydantic import field_validator
+
 if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
 
@@ -19,6 +21,10 @@ class KalmanSettings(NMBaseModel):
         "high_gamma",
         "HFA",
     ]
+
+    @field_validator("frequency_bands")
+    def fbands_spaces_to_underscores(cls, frequency_bands):
+        return [f.replace(" ", "_") for f in frequency_bands]
 
     def validate_fbands(self, settings: "NMSettings") -> None:
         assert all(

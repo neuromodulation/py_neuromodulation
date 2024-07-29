@@ -3,7 +3,7 @@ from collections.abc import Iterable
 
 
 from typing import TYPE_CHECKING, Annotated
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from py_neuromodulation.nm_features import NMFeature
 from py_neuromodulation.nm_types import BoolSelector, FrequencyRange, NMBaseModel
@@ -31,7 +31,11 @@ class CoherenceSettings(NMBaseModel):
     features: CoherenceFeatures = CoherenceFeatures()
     method: CoherenceMethods = CoherenceMethods()
     channels: list[ListOfTwoStr] = []
-    frequency_bands: list[str] = Field(default=["high beta"], min_length=1)
+    frequency_bands: list[str] = Field(default=["high_beta"], min_length=1)
+
+    @field_validator("frequency_bands")
+    def fbands_spaces_to_underscores(cls, frequency_bands):
+        return [f.replace(" ", "_") for f in frequency_bands]
 
 
 class CoherenceObject:
@@ -202,14 +206,13 @@ class NMCoherence(NMFeature):
                     f"  - settings.coherence.channels: {settings.coherence.channels}\n"
                     f"  - ch_names: {ch_names} \n"
                 )
-            
+
             if valid_coh_channel[ch_idx] > 1:
                 raise RuntimeError(
                     f"Coherence selected channel {ch_coh} is ambigous and matches more than one channel name: \n"
                     f"  - settings.coherence.channels: {settings.coherence.channels}\n"
                     f"  - ch_names: {ch_names} \n"
                 )
-
 
         assert all(
             f_band_coh in settings.frequency_ranges_hz

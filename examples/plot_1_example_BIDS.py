@@ -49,9 +49,7 @@ from py_neuromodulation import (
     line_noise,
     coord_list,
     coord_names,
-) = nm_IO.read_BIDS_data(
-    PATH_RUN=PATH_RUN
-)
+) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
 
 nm_channels = nm_define_nmchannels.set_channels(
     ch_names=raw.ch_names,
@@ -94,9 +92,9 @@ settings.features.bursts = True
 settings.features.sharpwave_analysis = True
 settings.features.coherence = True
 
-settings.coherence.channels = [("LFP_RIGHT_0", "ECOG_RIGHT_0")] 
+settings.coherence.channels = [("LFP_RIGHT_0", "ECOG_RIGHT_0")]
 
-settings.coherence.frequency_bands = ["high beta", "low gamma"]
+settings.coherence.frequency_bands = ["high_beta", "low_gamma"]
 settings.sharpwave_analysis_settings.estimator["mean"] = []
 settings.sharpwave_analysis_settings.sharpwave_features.enable_all()
 for sw_feature in settings.sharpwave_analysis_settings.sharpwave_features.list_all():
@@ -118,7 +116,7 @@ features = stream.run(
     data=data,
     out_path_root=PATH_OUT,
     folder_name=RUN_NAME,
-    save_csv = True,
+    save_csv=True,
 )
 
 # %%
@@ -169,9 +167,9 @@ feature_reader.plot_all_features(
 # %%
 nm_plots.plot_corr_matrix(
     feature=feature_reader.feature_arr.filter(regex="ECOG_RIGHT_0"),
-    ch_name="ECOG_RIGHT_0-avgref",
+    ch_name="ECOG_RIGHT_0_avgref",
     feature_names=list(
-        feature_reader.feature_arr.filter(regex="ECOG_RIGHT_0-avgref").columns
+        feature_reader.feature_arr.filter(regex="ECOG_RIGHT_0_avgref").columns
     ),
     feature_file=feature_reader.feature_file,
     show_plot=True,

@@ -91,11 +91,11 @@ def test_bursting_duration():
     f_burst = bursts.calc_feature(beta_wave + np.random.random([NUM_CH, 1 * sfreq]))
 
     assert (
-        f["ch0_bursts_low beta_amplitude_max"]
-        < f_burst["ch0_bursts_low beta_amplitude_max"]
+        f["ch0_bursts_low_beta_amplitude_max"]
+        < f_burst["ch0_bursts_low_beta_amplitude_max"]
     )
 
     assert (
-        f["ch0_bursts_low beta_duration_max"]
-        < f_burst["ch0_bursts_low beta_duration_max"]
+        f["ch0_bursts_low_beta_duration_max"]
+        < f_burst["ch0_bursts_low_beta_duration_max"]
     )

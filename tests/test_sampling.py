@@ -18,10 +18,10 @@ def get_features(time_end_ms: int, segment_length_features_ms: int):
 
     settings.frequency_ranges_hz = {
         # "high beta" : [20, 35],
-        "low gamma": [60, 80],
-        "high gamma": [90, 200],
+        "low_gamma": [60, 80],
+        "high_gamma": [90, 200],
     }
-        
+
     stream = nm.Stream(
         sfreq=1000,
         data=data,
@@ -30,7 +30,9 @@ def get_features(time_end_ms: int, segment_length_features_ms: int):
         settings=settings,
     )
 
-    features = stream.run(data, out_path_root="./test_data", folder_name="test_feature_sampling_rates")
+    features = stream.run(
+        data, out_path_root="./test_data", folder_name="test_feature_sampling_rates"
+    )
     return features
 
 

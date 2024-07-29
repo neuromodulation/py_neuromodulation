@@ -318,8 +318,8 @@ df_features = stream.run(data=data[:, :30000], save_csv=True)
 plt.figure(figsize=(5, 3), dpi=300)
 print(df_features.columns)
 plt.scatter(
-    df_features["ECOG_RIGHT_0-avgref_Sharpwave_Max_prominence_range_5_80"],
-    df_features["ECOG_RIGHT_5-avgref_Sharpwave_Mean_interval_range_5_80"],
+    df_features["ECOG_RIGHT_0_avgref_Sharpwave_Max_prominence_range_5_80"],
+    df_features["ECOG_RIGHT_5_avgref_Sharpwave_Mean_interval_range_5_80"],
     c=df_features.MOV_RIGHT,
     alpha=0.8,
     s=30,
