@@ -2,7 +2,7 @@ import sqlite3
 from pathlib import Path
 import pandas as pd
 from py_neuromodulation.nm_types import _PathLike
-from datetime import datetime
+from py_neuromodulation.nm_IO import generate_unique_filename
 
 
 class NMDatabase:
@@ -16,21 +16,26 @@ class NMDatabase:
         The path to save the csv file. If not provided, it will be saved in the same folder as the database.
     """
 
-    def __init__(self, out_dir: _PathLike, csv_path: _PathLike | None = None):
-        self.db_path = Path(
-            out_dir, f"stream_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.db"
-        )
+    def __init__(
+        self,
+        name: str,
+        out_dir: _PathLike,
+        csv_path: _PathLike | None = None,
+    ):
+        self.db_path = Path(out_dir, f"{name}.db")
 
-        self.table_name = "stream_table"  # change to param?
+        self.table_name = f"{name}_data"  # change to param?
         self.table_created = False
 
+        if self.db_path.exists():
+            self.db_path = generate_unique_filename(self.db_path)
+            name = self.db_path.stem
+            # raise FileExistsError(f"Database file {self.db_path} already exists.")
+
         if csv_path is None:
-            self.csv_path = Path(out_dir, "stream.csv")
+            self.csv_path = Path(out_dir, f"{name}.csv")
         else:
             self.csv_path = Path(csv_path)
-
-        if self.db_path.exists():
-            raise FileExistsError(f"Database file {self.db_path} already exists.")
 
         self.conn = sqlite3.connect(self.db_path)
         self.cursor = self.conn.cursor()
@@ -76,12 +81,13 @@ class NMDatabase:
         )
 
         self.cursor.execute(
-            f"CREATE TABLE IF NOT EXISTS {self.table_name} ({columns_schema})"
+            f'CREATE TABLE IF NOT EXISTS "{self.table_name}" ({columns_schema})'
         )
 
         # Create column names and placeholders for insert statement
         self.columns: str = ", ".join([f'"{column}"' for column in feature_dict.keys()])
-        self.placeholders = ", ".join(["?" for _ in feature_dict])
+        # Use named placeholders for more resiliency against unexpected change in column order
+        self.placeholders = ", ".join([f":{key}" for key in feature_dict.keys()])
 
     def insert_data(self, feature_dict: dict):
         """
@@ -96,9 +102,9 @@ class NMDatabase:
             self.create_table(feature_dict)
             self.table_created = True
 
-        insert_sql = f"INSERT INTO {self.table_name} ({self.columns}) VALUES ({self.placeholders})"
+        insert_sql = f'INSERT INTO "{self.table_name}" ({self.columns}) VALUES ({self.placeholders})'
 
-        self.cursor.execute(insert_sql, tuple(feature_dict.values()))
+        self.cursor.execute(insert_sql, feature_dict)
 
     def commit(self):
         self.conn.commit()
@@ -111,7 +117,7 @@ class NMDatabase:
         pd.DataFrame
             The data in a pandas DataFrame.
         """
-        return pd.read_sql_query(f"SELECT * FROM {self.table_name}", self.conn)
+        return pd.read_sql_query(f'SELECT * FROM "{self.table_name}"', self.conn)
 
     def head(self, n: int = 1):
         """ "
@@ -125,7 +131,7 @@ class NMDatabase:
             The data in a pandas DataFrame.
         """
         return pd.read_sql_query(
-            f"SELECT * FROM {self.table_name} LIMIT{n}1", self.conn
+            f'SELECT * FROM "{self.table_name}" LIMIT {n}', self.conn
         )
 
     def save_as_csv(self):
