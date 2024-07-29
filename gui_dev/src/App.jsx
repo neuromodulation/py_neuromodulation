@@ -7,8 +7,8 @@ import {
   StatusBar,
   Sidebar,
   Drawer,
+  CollapsibleBox,
 } from "@/components";
-import { Accordion } from "./components/Accordion";
 import styles from "./App.module.css";
 
 export default function App() {
@@ -48,7 +48,9 @@ export default function App() {
       <div className={styles.appContent}>
         <Sidebar>
           <Drawer name="settings">
-            <Settings />
+            <CollapsibleBox title = "Features"> 
+              <Settings />
+            </CollapsibleBox>
           </Drawer>
         </Sidebar>
         <div className={styles.appMainContent}>
