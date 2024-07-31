@@ -1,12 +1,18 @@
-import webview
 import threading
 import time
 import logging
-from utils import ANSI_COLORS
+from typing import TYPE_CHECKING
+
+from .app_utils import ansi_color, ansi_reset
+
+if TYPE_CHECKING:
+    import webview
 
 
 class WebViewWindow:
     def __init__(self) -> None:
+        import webview
+
         self.api = WebViewWindowApi()
 
         self.window = webview.create_window(
@@ -20,24 +26,26 @@ class WebViewWindow:
         )
 
         self.api.register_window(self.window)
-
         # Customize PyWebView logging format
+        color = ansi_color(color="CYAN", styles=["BOLD"])
         logger = logging.getLogger("pywebview")
         formatter = logging.Formatter(
-            f"{ANSI_COLORS.CYAN_BOLD_BRIGHT}[PyWebView %(levelname)s (%(asctime)s)]:{ANSI_COLORS.RESET} %(message)s",
+            f"{color}[PyWebView %(levelname)s (%(asctime)s)]:{ansi_reset} %(message)s",
             datefmt="%H:%M:%S",
         )
         logger.handlers[0].setFormatter(formatter)
 
-    def start(self):
-        webview.start(debug=True)
+    def start(self, debug: bool = False):
+        import webview
+
+        webview.start(debug=debug)
 
 
 # API class implementing all the methods available in the PyWebView Window object
 # API Reference: https://pywebview.flowrl.com/guide/api.html#webview-window
 class WebViewWindowApi:
     def __init__(self):
-        self._window: webview.Window
+        self._window: "webview.Window"
         self.is_resizing = False
         self.start_x = 0
         self.start_y = 0
@@ -45,7 +53,7 @@ class WebViewWindowApi:
         self.start_height = 0
 
     # Function to store the reference to the PyWevView window
-    def register_window(self, window: webview.Window):
+    def register_window(self, window: "webview.Window"):
         self._window = window
 
     # Functions to handle window resizing
@@ -113,7 +121,7 @@ class WebViewWindowApi:
 
     def create_file_dialog(
         self,
-        dialog_type=webview.OPEN_DIALOG,
+        dialog_type: int = 10,  # webview.OPEN_DIALOG,
         directory="",
         allow_multiple=False,
         save_filename="",

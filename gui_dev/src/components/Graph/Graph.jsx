@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
-import Plotly from "plotly.js-basic-dist-min";
 import { useSocketStore } from "@/stores";
+import Plotly from "plotly.js-basic-dist-min";
 import styles from "./Graph.module.css";
 
 // Plotly documentation: https://plotly.com/javascript/plotlyjs-function-reference/
@@ -12,7 +12,8 @@ export const Graph = ({
   lineColor = "blue",
   maxDataPoints = 1000,
 }) => {
-  const socket = useSocketStore((state) => state.socket);
+  const { graphData } = useSocketStore();
+
   const graphRef = useRef(null);
   const plotlyRef = useRef(null);
 
@@ -36,7 +37,11 @@ export const Graph = ({
   const updateGraph = (newData) => {
     if (!plotlyRef.current) return;
 
-    dataRef.current[0] = { ...dataRef.current[0], y: newData };
+    // TODO: show a dynamic window of the last maxDataPoints
+    // const updatedY = [...dataRef.current[0].y.slice(-maxDataPoints + 1), newData];
+    const updatedY = newData;
+
+    dataRef.current[0] = { ...dataRef.current[0], y: updatedY };
     Plotly.react(plotlyRef.current, dataRef.current, layoutRef.current);
 
     // Plotly.animate(
@@ -58,15 +63,15 @@ export const Graph = ({
     // );
   };
 
-  const handleNewBatch = (newData) => {
-    try {
-      console.log("Received new batch of data");
-      const processedData = Array.from(new Float64Array(newData));
-      updateGraph(processedData);
-    } catch (err) {
-      console.error("Error processing new data:", err);
-    }
-  };
+  // const handleNewBatch = (event) => {
+  //   try {
+  //     console.log("Received new batch of data");
+  //     const processedData = Array.from(new Float64Array(event.data));
+  //     updateGraph(processedData);
+  //   } catch (err) {
+  //     console.error("Error processing new data:", err);
+  //   }
+  // };
 
   useEffect(() => {
     // Initialize plot after component mount
@@ -77,23 +82,14 @@ export const Graph = ({
         }
       );
     }
+  });
 
-    //Add callback to update graph on new data
-    if (socket) {
-      socket.on("new_batch", handleNewBatch);
+  useEffect(() => {
+    if (plotlyRef.current && graphData.length > 0) {
+      dataRef.current[0] = { ...dataRef.current[0], y: graphData };
+      Plotly.react(plotlyRef.current, dataRef.current, layoutRef.current);
     }
-
-    // Clean up on unmount
-    return () => {
-      if (socket) {
-        socket.off("new_batch", handleNewBatch);
-      }
-      if (plotlyRef.current) {
-        Plotly.purge(plotlyRef.current);
-        plotlyRef.current = null;
-      }
-    };
-  }, [socket, handleNewBatch]);
+  }, [graphData]);
 
   useEffect(() => {
     if (!plotlyRef.current) return;

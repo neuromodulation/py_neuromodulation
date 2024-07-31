@@ -5,43 +5,38 @@ import signal
 import time
 
 import logging
-from utils import force_terminate_process, create_logger, ANSI_COLORS
 
-from app_backend import PyNMBackend
-from app_pynm import PyNMState
+from .app_utils import force_terminate_process, create_logger, ansi_color, ansi_reset
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from multiprocessing.synchronize import Event
-
-DEBUG = True
+    from .app_backend import PyNMBackend
 
 # Shared memory configuration
 ARRAY_SIZE = 1000  # Adjust based on your needs
 
 
-def run_vite(shutdown_event: "Event") -> None:
+def run_vite(shutdown_event: "Event", debug: bool = False) -> None:
     """Run Vite in a separate shell"""
     import subprocess
 
-    global DEBUG
     logger = create_logger(
         "Vite",
-        ANSI_COLORS.MAGENTA_BOLD_BRIGHT,
-        logging.DEBUG if DEBUG else logging.INFO,
+        "magenta",
+        logging.DEBUG if debug else logging.INFO,
     )
 
     def output_reader(shutdown_event: "Event", process: subprocess.Popen):
         logger.debug("Initialized output stream")
+        color = ansi_color(color="magenta", bright=True, styles=["BOLD"])
 
         def read_stream(stream, stream_name):
             for line in iter(stream.readline, ""):
                 if shutdown_event.is_set():
                     break
-                logger.info(
-                    f"{ANSI_COLORS.MAGENTA_BRIGHT}[{stream_name}]{ANSI_COLORS.RESET} {line.strip()}"
-                )
+                logger.info(f"{color}[{stream_name}]{ansi_reset} {line.strip()}")
 
         stdout_thread = threading.Thread(
             target=read_stream, args=(process.stdout, "stdout")
@@ -97,7 +92,10 @@ def run_vite(shutdown_event: "Event") -> None:
     logger.info("Development server stopped")
 
 
-def create_backend() -> PyNMBackend:
+def create_backend() -> "PyNMBackend":
+    from .app_pynm import PyNMState
+    from .app_backend import PyNMBackend
+
     return PyNMBackend(pynm_state=PyNMState())
 
 
@@ -108,22 +106,29 @@ def run_backend(
 ) -> None:
     import uvicorn
     from uvicorn.config import LOGGING_CONFIG
-    from ansi_colors import ANSI_COLORS
 
     # Configure logging
-    log_level = "%(levelname)s"
-    log_msg = "%(message)s"
-    log_time = "%(asctime)s"
-    log_info = f"{ANSI_COLORS.GREEN_BOLD_BRIGHT}[FastAPI {log_level} ({log_time})]:{ANSI_COLORS.RESET} {log_msg}"
-    log_access = f"{ANSI_COLORS.GREEN_BOLD_BRIGHT}[FastAPI access ({log_time})]:{ANSI_COLORS.RESET} {log_msg}"
+    color = ansi_color(color="green", bright=True, styles=["BOLD"])
+    log_level = "DEBUG" if debug else "INFO"
     log_config = LOGGING_CONFIG.copy()
-    log_config["formatters"]["default"]["fmt"] = log_info
+    log_config["loggers"]["uvicorn"]["level"] = log_level
+    log_config["loggers"]["uvicorn.error"]["level"] = log_level
+    log_config["loggers"]["uvicorn.access"]["level"] = log_level
+    log_config["formatters"]["default"]["fmt"] = (
+        f"{color}[FastAPI %(levelname)s (%(asctime)s)]:{ansi_reset} %(message)s"
+    )
     log_config["formatters"]["default"]["datefmt"] = "%H:%M:%S"
-    log_config["formatters"]["access"]["fmt"] = log_access
+    log_config["formatters"]["access"]["fmt"] = (
+        f"{color}[FastAPI access (%(asctime)s)]:{ansi_reset} %(message)s"
+    )
     log_config["formatters"]["access"]["datefmt"] = "%H:%M:%S"
 
     # Reload requires passing import string
-    app = "app_manager:create_backend" if reload else create_backend()
+    app = (
+        "py_neuromodulation.gui.backend.app_manager:create_backend"
+        if reload
+        else create_backend()
+    )
 
     server_config = uvicorn.Config(
         app,
@@ -140,15 +145,23 @@ def run_backend(
     server_thread.start()
 
     shutdown_event.wait()
+
     server.should_exit = True
 
     server_thread.join()
 
 
 class AppManager:
-    def __init__(self, debug: bool = False):
+    LAUNCH_FLAG = "PYNM_RUNNING"
+
+    def __init__(self, debug: bool = False) -> None:
         self.debug = debug
         self.shutdown_complete = False
+
+        # Prevent launching multiple instances of the app due to multiprocessing
+        # This allows the absence of a main guard in the main script
+        self.is_child_process = os.environ.get(self.LAUNCH_FLAG) == "TRUE"
+        os.environ[self.LAUNCH_FLAG] = "TRUE"
 
         # Background tasks
         self.tasks: dict[str, mp.Process] = {}
@@ -166,15 +179,15 @@ class AppManager:
         # Logging
         self.logger = create_logger(
             "PyNM",
-            ANSI_COLORS.YELLOW_BOLD_BRIGHT,
+            "yellow",
             logging.DEBUG if self.debug else logging.INFO,
         )
 
-    def run_app(self) -> None:
+    def _run_app(self) -> None:
         self.logger.info("Starting Vite server...")
         self.tasks["vite"] = mp.Process(
             target=run_vite,
-            kwargs={"shutdown_event": self.shutdown_event},
+            kwargs={"shutdown_event": self.shutdown_event, "debug": self.debug},
             name="Vite",
         )
 
@@ -192,7 +205,7 @@ class AppManager:
         for process in self.tasks.values():
             process.start()
 
-    def terminate_app(self) -> None:
+    def _terminate_app(self) -> None:
         timeout = 5
         deadline = time.time() + timeout
 
@@ -212,4 +225,24 @@ class AppManager:
             self.logger.info(f"Process {process.name} terminated.")
 
         self.shutdown_complete = True
+        self.shutdown_event.clear()
         self.logger.info("All background tasks succesfully terminated.")
+
+    def launch(self) -> None:
+        if self.is_child_process:
+            return
+
+        from .app_window import WebViewWindow
+
+        self._run_app()
+
+        self.logger.info("Starting PyWebView window...")
+        window = WebViewWindow()  # Only works from main thread
+        window.window.events.closed += self._terminate_app
+        window.start(debug=self.debug)
+
+        while not self.shutdown_complete:
+            time.sleep(0.1)
+
+        self.shutdown_complete = False
+        self.logger.info("All processes cleaned up. Exiting...")

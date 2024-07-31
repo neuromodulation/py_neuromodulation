@@ -64,11 +64,19 @@ logger = NMLogger(__name__)  # logger initialization first to prevent circular i
 ####################################
 # API: Exposed classes and methods #
 ####################################
-from .nm_stream import Stream as Stream
-from .nm_run_analysis import DataProcessor as DataProcessor
-from .nm_settings import NMSettings as NMSettings
-from .nm_features import (
-    add_custom_feature as add_custom_feature,
-    remove_custom_feature as remove_custom_feature,
-    NMFeature as NMFeature,
-)
+from .nm_stream import Stream
+from .nm_run_analysis import DataProcessor
+from .nm_settings import NMSettings
+from .nm_features import add_custom_feature, remove_custom_feature, NMFeature
+from .gui.backend.app_manager import AppManager as App
+
+
+__all__ = [
+    "Stream",
+    "DataProcessor",
+    "NMSettings",
+    "NMFeature",
+    "add_custom_feature",
+    "remove_custom_feature",
+    "App",
+]

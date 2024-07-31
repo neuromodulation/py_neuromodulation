@@ -11,7 +11,7 @@
   "dependencies": {
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
-    "@mui/material": "^5.16.4",
+    "@mui/material": "^5.16.6",
     "plotly.js-basic-dist-min": "^2.34.0",
     "react": "next",
     "react-dom": "next",
@@ -21,20 +21,20 @@
     "zustand": "^4.5.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.24.9",
-    "@babel/eslint-parser": "^7.24.8",
-    "@babel/preset-env": "^7.24.8",
+    "@babel/core": "^7.25.2",
+    "@babel/eslint-parser": "^7.25.1",
+    "@babel/preset-env": "^7.25.3",
     "@babel/preset-react": "^7.24.7",
     "@eslint/compat": "^1.1.1",
     "@vitejs/plugin-react": "^4.3.1",
-    "babel-plugin-react-compiler": "^0.0.0-experimental-696af53-20240625",
-    "eslint": "^9.7.0",
+    "babel-plugin-react-compiler": "latest",
+    "eslint": "^9.8.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-react": "^7.35.0",
-    "eslint-plugin-react-compiler": "^0.0.0-experimental-0998c1e-20240625",
+    "eslint-plugin-react-compiler": "^0.0.0",
     "eslint-plugin-react-hooks": "^4.6.2",
-    "eslint-plugin-react-refresh": "^0.4.8",
+    "eslint-plugin-react-refresh": "^0.4.9",
     "prettier": "^3.3.3",
-    "vite": "^5.3.4"
+    "vite": "^5.3.5"
   }
 }
