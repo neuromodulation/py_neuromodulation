@@ -1,5 +1,4 @@
 import py_neuromodulation as nm
-from py_neuromodulation import nm_mnelsl_stream, nm_define_nmchannels, nm_IO
 import logging
 import numpy as np
 import pandas as pd
@@ -23,7 +22,7 @@ class PyNMState:
         # TODO: we should add a way to pass the output path and the foldername
         if self.lsl_stream_name is not None:
             self.stream.run(
-                stream_lsl=True,
+                is_stream_lsl=True,
                 stream_lsl_name=self.lsl_stream_name,
             )
         else:
@@ -31,9 +30,9 @@ class PyNMState:
 
     def setup_lsl_stream(
         self,
-        lsl_stream_name: str = None,
-        line_noise: float = None,
-        sampling_rate_features: float = None,
+        lsl_stream_name: str | None = None,
+        line_noise: float | None = None,
+        sampling_rate_features: float | None = None,
     ):
         from mne_lsl.lsl import resolve_streams
 
@@ -60,7 +59,7 @@ class PyNMState:
                 info_ = stream.get_channel_info()
                 self.logger.info(f"channel info: {info_}")
 
-                channels = nm_define_nmchannels.set_channels(
+                channels = nm.utils.set_channels(
                     ch_names=ch_names,
                     ch_types=ch_types,
                     used_types=["eeg", "ecog", "dbs", "seeg"],
@@ -71,7 +70,7 @@ class PyNMState:
                 self.stream: nm.Stream = nm.Stream(
                     sfreq=sfreq,
                     line_noise=line_noise,
-                    nm_channels=channels,
+                    channels=channels,
                     sampling_rate_features_hz=sampling_rate_features,
                 )
                 self.logger.info("stream setup")
@@ -88,12 +87,12 @@ class PyNMState:
     def setup_offline_stream(
         self,
         file_path: str,
-        line_noise: float = None,
-        sampling_rate_features: float = None,
+        line_noise: float | None = None,
+        sampling_rate_features: float | None = None,
     ):
-        data, sfreq, ch_names, ch_types, bads = nm_IO.read_mne_data(file_path)
+        data, sfreq, ch_names, ch_types, bads = nm.io.read_mne_data(file_path)
 
-        channels = nm_define_nmchannels.set_channels(
+        channels = nm.utils.set_channels(
             ch_names=ch_names,
             ch_types=ch_types,
             bads=bads,
@@ -103,7 +102,7 @@ class PyNMState:
         self.stream: nm.Stream = nm.Stream(
             sfreq=sfreq,
             data=data,
-            nm_channels=channels,
+            channels=channels,
             line_noise=line_noise,
             sampling_rate_features_hz=sampling_rate_features,
         )
