@@ -40,7 +40,6 @@ class WebViewWindow:
         )
 
         self.api.register_window(self.window)
-
         # Customize PyWebView logging format
         color = ansi_color(color="CYAN", styles=["BOLD"])
         logger = logging.getLogger("pywebview")
