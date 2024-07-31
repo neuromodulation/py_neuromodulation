@@ -2,6 +2,8 @@ import { createStore } from "./createStore";
 
 const WEBSOCKET_URL = "ws";
 const RECONNECT_INTERVAL = 500; // ms
+const WEBSOCKET_URL = "ws://localhost:50001/ws";
+const MAGIC_BYTE = 98; // binary messages start with an ASCII `b`
 
 export const useSocketStore = createStore("socket", (set, get) => ({
   socket: null,

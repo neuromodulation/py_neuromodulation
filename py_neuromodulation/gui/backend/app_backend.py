@@ -13,7 +13,6 @@ from fastapi import (
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-import asyncio
 
 from . import app_pynm
 from .app_socket import WebSocketManager

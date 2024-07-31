@@ -13,7 +13,6 @@ console.error = (message, ...messageArgs) => {
 };
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  // TODO: fix websocket connection and re-enable strict mode
   <StrictMode>
     <App />
   </StrictMode>

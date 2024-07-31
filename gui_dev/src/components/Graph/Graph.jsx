@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useSocketStore } from "@/stores";
 import { newPlot, react } from "plotly.js-basic-dist-min";
 import styles from "./Graph.module.css";
@@ -10,7 +10,6 @@ export const Graph = ({
   lineColor = "#1a73e8",
   maxDataPoints = 1000,
 }) => {
-  console.log("Graph");
   const graphData = useSocketStore((state) => state.graphData);
   const graphRef = useRef(null);
   const plotlyRef = useRef(null);
