@@ -78,3 +78,5 @@ from . import stream
 from . import analysis
 
 from .stream.settings import get_default_settings, get_fast_compute, reset_settings
+
+from .gui.backend.app_manager import AppManager as App

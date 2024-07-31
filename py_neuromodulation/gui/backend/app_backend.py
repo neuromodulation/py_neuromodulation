@@ -1,13 +1,16 @@
 from pathlib import Path
 from collections import defaultdict
 import tomllib
+import numpy as np
 
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Request
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+import asyncio
 
-from app_pynm import PyNMState
+from .app_pynm import PyNMState
+from .app_socket import WebSocketManager
 
 import pandas as pd
 
@@ -35,6 +38,8 @@ class PyNMBackend(FastAPI):
         )
 
         self.pynm_state = pynm_state
+        self.websocket_manager = WebSocketManager()
+
         self.setup_routes()
 
     def setup_routes(self):
@@ -79,6 +84,7 @@ class PyNMBackend(FastAPI):
             return {"message": f"Stream action '{action}' executed"}
 
         @self.get("/api/app-info")
+        # TODO: fix this function
         async def get_app_info():
             pyproject_path = Path(__file__).parent.parent / "pyproject.toml"
             with open(pyproject_path, "rb") as f:
@@ -112,13 +118,65 @@ class PyNMBackend(FastAPI):
 
         @self.websocket("/ws")
         async def websocket_endpoint(websocket: WebSocket):
-            await websocket.accept()
+            if self.websocket_manager.is_connected:
+                await websocket.close(
+                    code=1008, reason="Another client is already connected"
+                )
+                return
+
+            await self.websocket_manager.connect(websocket)
+
+            periodic_task: asyncio.Task | None = None
             try:
+                # Start the periodic task
+                periodic_task = asyncio.create_task(self.send_periodic_data())
+
+                # Handle incoming messages
                 while True:
                     data = await websocket.receive_text()
-                    await websocket.send_text(f"Message text was: {data}")
+                    await self.websocket_manager.send_message(
+                        f"Message received: {data}"
+                    )
             except WebSocketDisconnect:
+                self.websocket_manager.disconnect()
                 print("Client disconnected")
+            finally:
+                # Ensure the periodic task is cancelled when the WebSocket disconnects
+                if periodic_task:
+                    periodic_task.cancel()
+                    try:
+                        await periodic_task
+                    except asyncio.CancelledError:
+                        pass
+
+    async def send_periodic_data(self):
+        while True:
+            try:
+                if self.websocket_manager.is_connected:
+                    # Send binary data
+                    data = np.random.random(1000).astype(np.float64)
+                    header = {
+                        "type": "new_batch",
+                        "data_type": "float64",
+                        "length": len(data),
+                        "payload": True,
+                    }
+                    await self.websocket_manager.send_bytes(header, data.tobytes())
+
+                    # Send JSON-only data
+                    header = {
+                        "type": "info",
+                        "message": "This is an info message",
+                        "payload": False,
+                    }
+                    await self.websocket_manager.send_bytes(header)
+
+                await asyncio.sleep(0.016)
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                print(f"Error in periodic task: {e}")
+                break
 
         @self.get("/{full_path:path}")
         async def serve_spa(request, full_path: str):
