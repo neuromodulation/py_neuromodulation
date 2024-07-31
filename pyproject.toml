@@ -57,29 +57,28 @@ dependencies = [
   "pynput",
   "pyqt5",
   "pydantic>=2.7.3",
-  "flask",
-  "flask-socketio",
-  "flask-cors",
   "pywebview",
-  "eventlet",
-  "cryptography>=43.0.0",
+  "fastapi",
 ]
 
 [project.optional-dependencies]
 test = ["pytest>=8.0.2", "pytest-xdist"]
-dev = ["ruff", "pytest>=8.0.2", "pytest-cov", "pytest-sugar", "notebook"]
+dev = [
+  "ruff",
+  "pytest>=8.0.2",
+  "pytest-cov",
+  "pytest-sugar",
+  "notebook",
+  "watchdog",
+]
 docs = [
   "py-neuromodulation[dev]",
-  #    "nbsphinx",
   "sphinx",
-  #    "pandoc",
   "recommonmark",
   "sphinx",
   "numpydoc",
   "sphinx-gallery",
-  #    "nbsphinx_link",
   "pydata-sphinx-theme",
-  #    "pypandoc",
   "sphinx_togglebutton",
 ]
 

@@ -1,35 +1,43 @@
 import webview
 import threading
 import time
+import logging
+from utils import ANSI_COLORS
 
 
-class AppWindow:
-    def create_window(self) -> None:
-        api = WindowAPI()
+class WebViewWindow:
+    def __init__(self) -> None:
+        self.api = WebViewWindowApi()
 
-        window = webview.create_window(
+        self.window = webview.create_window(
             title="PyNeuromodulation GUI",
-            url="http://localhost:5173",
+            url="http://localhost:54321",
             min_size=(1200, 800),
             frameless=True,
             resizable=True,
             easy_drag=False,
-            js_api=api,
+            js_api=self.api,
         )
 
-        api.register_window(window)
+        self.api.register_window(self.window)
 
-        webview.start(
-            debug=True,
-            ssl=True,
+        # Customize PyWebView logging format
+        logger = logging.getLogger("pywebview")
+        formatter = logging.Formatter(
+            f"{ANSI_COLORS.CYAN_BOLD_BRIGHT}[PyWebView %(levelname)s (%(asctime)s)]:{ANSI_COLORS.RESET} %(message)s",
+            datefmt="%H:%M:%S",
         )
+        logger.handlers[0].setFormatter(formatter)
+
+    def start(self):
+        webview.start(debug=True)
 
 
 # API class implementing all the methods available in the PyWebView Window object
 # API Reference: https://pywebview.flowrl.com/guide/api.html#webview-window
-class WindowAPI:
+class WebViewWindowApi:
     def __init__(self):
-        self.window = None
+        self._window: webview.Window
         self.is_resizing = False
         self.start_x = 0
         self.start_y = 0
