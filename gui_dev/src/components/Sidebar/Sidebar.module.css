@@ -1,11 +1,23 @@
+:root {
+  --sidebar-color: #f0f0f0;
+  --toggle-color: #d0d0d0;
+  --toggle-hover-color: #e0e0e0;
+  --drawer-color: #e0e0e0;
+  --resize-handle-color: #ccc;
+  --max-drawer-width: 600px;
+  --min-drawer-width: 200px;
+}
+
 .sidebarContainer {
   display: flex;
   height: 100%;
   overflow: hidden;
+  flex-shrink: 0;
+  flex-grow: 0;
 }
 
 .sidebar {
-  background-color: #f0f0f0;
+  background-color: var(--sidebar-color);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -13,16 +25,16 @@
 }
 
 .drawerContainer {
-  position: relative;
-  width: 0;
-  transition: width 0.3s ease-out;
+  display: flex;
   overflow: hidden;
+  background-color: var(--drawer-color);
+  transition: width 0.15s ease-out;
+  max-width: var(--max-drawer-width);
 
-  &.open {
-    width: 300px;
+  &.resizing {
+    transition: none;
   }
 }
-
 .drawerToggle {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
@@ -31,25 +43,65 @@
   cursor: pointer;
   font-size: 16px;
   transition: background-color 0.3s;
+  padding: 10px 5px;
 
   &.open {
-    background-color: #d0d0d0;
+    background-color: var(--toggle-color);
+  }
+
+  &:hover {
+    background-color: var(--toggle-hover-color);
   }
 }
 
-.drawerToggle:hover {
-  background-color: #e0e0e0;
+.toggleLabel {
+  text-transform: capitalize;
 }
 
-.drawerWrapper {
+.drawer {
+  flex-shrink: 0;
+  flex-grow: 0;
+  display: flex;
+  flex-direction: column;
+  width: var(--max-drawer-width);
+  height: 100%;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.resizeHandle {
   position: absolute;
   top: 0;
+  right: 0;
+  width: 5px;
   height: 100%;
-  overflow: hidden;
-  transition: width 0.3s ease-out;
-  width: 0;
-}
+  cursor: ew-resize;
+  transition: width 0.15s ease-out;
 
-.drawerWrapper.open {
-  width: 300px;
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1px; /* Start with 1px width */
+    height: 100%;
+    background-color: #ccc; /* Or any color you prefer for the non-resizing state */
+    transition:
+      width 0.15s ease-out,
+      background-color 0.15s ease-out;
+  }
+
+  &:hover::after {
+    width: 3px; /* Expand on hover */
+  }
+
+  &.resizing {
+    width: 4px;
+
+    &::after {
+      width: 3px;
+      background-color: rgba(109, 158, 231, 0.712);
+    }
+  }
 }

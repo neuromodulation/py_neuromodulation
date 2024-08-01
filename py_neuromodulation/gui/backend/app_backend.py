@@ -124,6 +124,9 @@ class PyNMBackend(FastAPI):
         @self.websocket("/ws")
         async def websocket_endpoint(websocket: WebSocket):
             if self.websocket_manager.is_connected:
+                self.logger.info(
+                    "WebSocket connection attempted while already connected"
+                )
                 await websocket.close(
                     code=1008, reason="Another client is already connected"
                 )

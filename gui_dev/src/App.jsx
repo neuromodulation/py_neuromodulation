@@ -1,14 +1,9 @@
 import { useEffect } from "react";
 import { useSettingsStore, useSocketStore, useWebviewStore } from "@/stores";
-import {
-  Settings,
-  TitleBar,
-  Graph,
-  StatusBar,
-  Sidebar,
-  Drawer,
-  CollapsibleBox,
-} from "@/components";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+
+import { TitleBar, StatusBar } from "@/components";
+import { Dashboard, Welcome } from "@/pages";
 import styles from "./App.module.css";
 
 export default function App() {
@@ -43,23 +38,17 @@ export default function App() {
   }, [checkWebviewReady]);
 
   return (
-    <div className={styles.appContainer}>
-      <TitleBar />
-
-
-      <div className={styles.appContent}>
-        <Sidebar>
-          <Drawer name="settings">
-            <CollapsibleBox title = "Features" startOpen ={0}> 
-                  <Settings />
-            </CollapsibleBox>
-          </Drawer>
-        </Sidebar>
-        <div className={styles.appMainContent}>
-          <Graph />
+    <Router>
+      <div className={styles.appContainer}>
+        <TitleBar />
+        <div className={styles.appContent}>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/welcome" element={<Welcome />} />
+          </Routes>
         </div>
+        <StatusBar />
       </div>
-      <StatusBar />
-    </div>
+    </Router>
   );
 }

@@ -1,0 +1,24 @@
+.welcomeContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-family: Arial, sansserif;
+  background-color: f0f0f0;
+}
+
+h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.loading {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+.info {
+  font-size: 0.9rem;
+  color: #666;
+}

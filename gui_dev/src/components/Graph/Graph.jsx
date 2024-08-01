@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useSocketStore } from "@/stores";
-import Plotly from "plotly.js-basic-dist-min";
+import { newPlot, react } from "plotly.js-dist-min";
 import styles from "./Graph.module.css";
 
 // Plotly documentation: https://plotly.com/javascript/plotlyjs-function-reference/
@@ -42,7 +42,7 @@ export const Graph = ({
     const updatedY = newData;
 
     dataRef.current[0] = { ...dataRef.current[0], y: updatedY };
-    Plotly.react(plotlyRef.current, dataRef.current, layoutRef.current);
+    react(plotlyRef.current, dataRef.current, layoutRef.current);
 
     // Plotly.animate(
     //   plotlyRef.current,
@@ -66,7 +66,7 @@ export const Graph = ({
   useEffect(() => {
     // Initialize plot after component mount
     if (graphRef.current && !plotlyRef.current) {
-      Plotly.newPlot(graphRef.current, dataRef.current, layoutRef.current).then(
+      newPlot(graphRef.current, dataRef.current, layoutRef.current).then(
         (gd) => {
           plotlyRef.current = gd;
         }
@@ -79,7 +79,7 @@ export const Graph = ({
     // Could also use plotly.extendTracess
     if (plotlyRef.current && graphData.length > 0) {
       dataRef.current[0] = { ...dataRef.current[0], y: graphData };
-      Plotly.react(plotlyRef.current, dataRef.current, layoutRef.current);
+      react(plotlyRef.current, dataRef.current, layoutRef.current);
     }
   }, [graphData]);
 
@@ -92,7 +92,7 @@ export const Graph = ({
       xaxis: { ...layoutRef.current.xaxis, title: xAxisTitle },
       yaxis: { ...layoutRef.current.yaxis, title: yAxisTitle },
     };
-    Plotly.react(plotlyRef.current, dataRef, layoutRef.current);
+    react(plotlyRef.current, dataRef, layoutRef.current);
   }, [title, xAxisTitle, yAxisTitle, lineColor]);
 
   return <div ref={graphRef} className={styles.graphContainer}></div>;

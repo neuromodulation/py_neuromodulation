@@ -14,10 +14,9 @@
     "@mui/material": "^5.16.6",
     "plotly.js-basic-dist-min": "^2.34.0",
     "react": "next",
+    "react-icons": "^5.2.1",
     "react-dom": "next",
-    "react-plotly.js": "^2.6.0",
-    "react-router-dom": "^6.25.1",
-    "socket.io-client": "^4.7.5",
+    "react-router-dom": "^6.26.0",
     "zustand": "^4.5.4"
   },
   "devDependencies": {
