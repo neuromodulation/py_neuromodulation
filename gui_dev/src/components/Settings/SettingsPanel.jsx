@@ -13,7 +13,6 @@ export const SettingsPanel = ({ settingsKey }) => {
     const flattenedSettings = flattenDictionary(settings);
     return Object.keys(flattenedSettings).reduce((acc, key) => {
       if (key.startsWith(`${settingsKey}.`)) {
-        // console.log(`Matched key: ${key}`); // Log matched keys
         acc[key.replace(`${settingsKey}.`, "")] = flattenedSettings[key];
       }
       return acc;
@@ -21,8 +20,6 @@ export const SettingsPanel = ({ settingsKey }) => {
   }, [settings, settingsKey]);
 
   const handleChange = (featureKey, isEnabled) => {
-    
-
     const updatedSettings = {
       ...settings,
       [settingsKey]: {
