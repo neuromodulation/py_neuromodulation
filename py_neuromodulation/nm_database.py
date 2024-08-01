@@ -1,5 +1,6 @@
 import sqlite3
 from pathlib import Path
+import os
 import pandas as pd
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation.nm_IO import generate_unique_filename
@@ -37,7 +38,13 @@ class NMDatabase:
         else:
             self.csv_path = Path(csv_path)
 
-        self.conn = sqlite3.connect(self.db_path)
+        try:
+            self.conn = sqlite3.connect(self.db_path)
+        except sqlite3.OperationalError as e:
+            os.makedirs(out_dir, exist_ok=True)
+        finally:
+            self.conn = sqlite3.connect(self.db_path)
+
         self.cursor = self.conn.cursor()
 
         # Database config and optimization, prioritize data integrity
