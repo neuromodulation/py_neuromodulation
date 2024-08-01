@@ -5,7 +5,7 @@ import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   // TODO: fix websocket connection and re-enable strict mode
-  // <React.StrictMode>
-  <App />
-  // </React.StrictMode>
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
 );

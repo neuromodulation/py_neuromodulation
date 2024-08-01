@@ -63,16 +63,6 @@ export const Graph = ({
     // );
   };
 
-  // const handleNewBatch = (event) => {
-  //   try {
-  //     console.log("Received new batch of data");
-  //     const processedData = Array.from(new Float64Array(event.data));
-  //     updateGraph(processedData);
-  //   } catch (err) {
-  //     console.error("Error processing new data:", err);
-  //   }
-  // };
-
   useEffect(() => {
     // Initialize plot after component mount
     if (graphRef.current && !plotlyRef.current) {
@@ -85,6 +75,8 @@ export const Graph = ({
   });
 
   useEffect(() => {
+    // Update the graph data when graphData from the socket store changes]
+    // Could also use plotly.extendTracess
     if (plotlyRef.current && graphData.length > 0) {
       dataRef.current[0] = { ...dataRef.current[0], y: graphData };
       Plotly.react(plotlyRef.current, dataRef.current, layoutRef.current);

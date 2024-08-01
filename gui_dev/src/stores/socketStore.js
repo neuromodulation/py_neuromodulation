@@ -2,19 +2,26 @@ import { create } from "zustand";
 
 const WEBSOCKET_URL = "ws://localhost:50000/ws";
 const MAGIC_BYTE = 98; // binary messages start with an ASCII `b`
+const RECONNECT_INTERVAL = 500; // ms
 
 export const useSocketStore = create((set, get) => ({
   socket: null,
   status: "disconnected", // 'disconnected', 'connecting', 'connected'
   error: null,
-  graphData: null,
+  graphData: [],
   infoMessages: [],
+  reconnectTimer: null,
 
   setSocket: (socket) => set({ socket }),
 
   connectSocket: () => {
     // Get current socket status and cancel if connecting or already connected
-    const { socket, status } = get();
+    const { socket, status, reconnectTimer } = get();
+
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+    }
+
     if (socket || status === "connecting" || status === "connected") return;
 
     // Set socket status to connecting
@@ -22,23 +29,28 @@ export const useSocketStore = create((set, get) => ({
 
     // Create new socket connection
     const newSocket = new WebSocket(WEBSOCKET_URL);
-    newSocket.binaryType = "arraybuffer";
+    newSocket.binaryType = "arraybuffer"; // Default is "blob"
 
     newSocket.onopen = () => {
       console.log("WebSocket connected");
       set({ socket: newSocket, status: "connected", error: null });
     };
 
-    newSocket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-      set({ status: "disconnected", error: error });
+    // Error event fires when the connection is closed due to error
+    newSocket.onerror = (event) => {
+      console.error("WebSocket error:", event);
+      set({ status: "disconnected", error: "Connection error", socket: null });
+
+      // Attempt to reconnect after a delay
+      get().setReconnectTimer(RECONNECT_INTERVAL);
     };
 
     newSocket.onclose = (event) => {
       console.log("WebSocket closed:", event.reason);
-      set({ status: "disconnected", error: null });
+      set({ status: "disconnected", error: null, socket: null });
+
       // Attempt to reconnect after a delay
-      setTimeout(() => get().connectSocket(), 500);
+      get().setReconnectTimer(RECONNECT_INTERVAL);
     };
 
     newSocket.onmessage = (event) => {
@@ -104,12 +116,24 @@ export const useSocketStore = create((set, get) => ({
   },
 
   disconnectSocket: () => {
-    const { socket } = get();
+    const { socket, reconnectTimer } = get();
     if (socket) {
-      console.log(socket);
       socket.close();
     }
-    set({ socket: null, status: "disconnected", error: null });
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+    }
+    set({
+      socket: null,
+      status: "disconnected",
+      error: null,
+      reconnectTimer: null,
+    });
+  },
+
+  setReconnectTimer: (delay) => {
+    const timer = setTimeout(() => get().connectSocket(), delay);
+    set({ reconnectTimer: timer });
   },
 
   // Method to send messages
