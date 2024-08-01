@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useWebviewStore } from "@/stores";
 import styles from "./ResizeHandle.module.css";
-import { debounce } from "lodash"; // You might need to install lodash
 
 const ResizeIcon = (props) => (
   <svg
@@ -28,13 +27,13 @@ export const ResizeHandle = () => {
   const [isResizing, setIsResizing] = useState(false);
   const [resizeStyle, setResizeStyle] = useState({});
 
-  const debouncedResize = useRef(
-    debounce((width, height) => {
-      if (isWebviewReady && window.pywebview && window.pywebview.api) {
-        window.pywebview.api.set_size(width, height);
-      }
-    }, 100)
-  ).current;
+  // const debouncedResize = useRef(
+  //   debounce((width, height) => {
+  //     if (isWebviewReady && window.pywebview && window.pywebview.api) {
+  //       window.pywebview.api.set_size(width, height);
+  //     }
+  //   }, 100)
+  // ).current;
 
   useEffect(() => {
     let startX, startY, startWidth, startHeight;
@@ -58,7 +57,7 @@ export const ResizeHandle = () => {
         height: `${newHeight}px`,
       });
 
-      debouncedResize(newWidth, newHeight);
+      // debouncedResize(newWidth, newHeight);
     };
 
     const handleMouseUp = () => {
@@ -81,7 +80,7 @@ export const ResizeHandle = () => {
         window.removeEventListener("mouseup", handleMouseUp);
       }
     };
-  }, [isWebviewReady, isResizing, debouncedResize]);
+  }, [isWebviewReady, isResizing]);
 
   useEffect(() => {
     if (isResizing) {

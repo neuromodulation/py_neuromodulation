@@ -1,6 +1,7 @@
 // Settings.jsx
 import { Switch } from "@/components";
 import { useSettingsStore } from "@/stores";
+import styles from "./Settings.module.css";
 
 export const SettingsPanel = () => {
   const { settings, updateSettings } = useSettingsStore((state) => ({
@@ -23,7 +24,7 @@ export const SettingsPanel = () => {
   };
 
   return (
-    <div className="settings-panel">
+    <div className={styles.settingsPanel}>
       <h2>Features</h2>
       <div className="feature-list">
         {Object.entries(settings.features).map(([key, value]) => (

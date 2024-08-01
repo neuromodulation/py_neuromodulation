@@ -23,15 +23,7 @@
 .appContent {
   display: flex;
   flex-direction: row;
+  justify-content: center;
   height: 100%;
-}
-
-.appMainContent {
-  display: flex;
-  flex-direction: column;
-
-  flex-grow: 1;
-  padding: 20px;
-  overflow-y: auto;
-  transition: margin-left 0.3s ease-out;
+  width: 100%;
 }
