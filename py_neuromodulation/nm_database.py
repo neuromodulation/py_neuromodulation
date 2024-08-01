@@ -119,7 +119,7 @@ class NMDatabase:
         """
         return pd.read_sql_query(f'SELECT * FROM "{self.table_name}"', self.conn)
 
-    def head(self, n: int = 1):
+    def head(self, n: int = 5):
         """ "
         Returns the first N rows of the database.
         Parameters

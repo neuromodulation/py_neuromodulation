@@ -340,7 +340,7 @@ class Stream(_GenericStream):
         stream_lsl_name: str = None,
         save_csv: bool = False,
         plot_lsl: bool = False,
-        save_interval: float = 1.0,
+        save_interval: float = 10,
     ) -> pd.DataFrame:
         """Call run function for offline stream.
 
