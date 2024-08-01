@@ -1,23 +1,35 @@
 import threading
 import time
 import logging
-from typing import TYPE_CHECKING
+import requests
+
+from py_neuromodulation import PYNM_DIR
 
 from .app_utils import ansi_color, ansi_reset
+
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import webview
 
+DEV = True
+
+VITE_URL = "http://localhost:54321"
+FRONTEND_PATH = PYNM_DIR / "gui" / "frontend"
+APP_URL = VITE_URL if DEV else str(FRONTEND_PATH / "index.html")
+WELCOME_URL = str(FRONTEND_PATH / "welcome")
+
 
 class WebViewWindow:
-    def __init__(self) -> None:
+    def __init__(self, debug: bool = False) -> None:
         import webview
 
+        self.debug = debug
         self.api = WebViewWindowApi()
 
         self.window = webview.create_window(
             title="PyNeuromodulation GUI",
-            url="http://localhost:54321",
+            url=VITE_URL,
             min_size=(1200, 800),
             frameless=True,
             resizable=True,
@@ -26,6 +38,7 @@ class WebViewWindow:
         )
 
         self.api.register_window(self.window)
+
         # Customize PyWebView logging format
         color = ansi_color(color="CYAN", styles=["BOLD"])
         logger = logging.getLogger("pywebview")
@@ -35,10 +48,48 @@ class WebViewWindow:
         )
         logger.handlers[0].setFormatter(formatter)
 
-    def start(self, debug: bool = False):
+    def start(self):
         import webview
 
-        webview.start(debug=debug)
+        # Set timer to load SPA after a delay
+        if DEV:
+            self.wait_for_vite_server()
+
+        webview.start(debug=self.debug)
+
+    def wait_for_vite_server(self):
+        while True:
+            if self.is_vite_server_running():
+                break
+            time.sleep(0.1)  # Wait for 1 second before checking again
+
+    def is_vite_server_running(self):
+        try:
+            response = requests.get(VITE_URL, timeout=1)
+            return response.status_code == 200
+        except requests.RequestException:
+            return False
+
+    # Register event handlers
+    def register_event_handler(self, event_type, handler):
+        # https://pywebview.flowrl.com/guide/api.html#window-events
+        match event_type:
+            case "closed":
+                self.window.events.closed += handler
+            case "closing":
+                self.window.events.closing += handler
+            case "loaded":
+                self.window.events.loaded += handler
+            case "minimized":
+                self.window.events.minimized += handler
+            case "maximized":
+                self.window.events.maximized += handler
+            case "resized":
+                self.window.events.resized += handler
+            case "restore":
+                self.window.events.restore += handler
+            case "shown":
+                self.window.events.shown += handler
 
 
 # API class implementing all the methods available in the PyWebView Window object

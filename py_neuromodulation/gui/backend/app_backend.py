@@ -2,6 +2,7 @@ from pathlib import Path
 from collections import defaultdict
 import tomllib
 import numpy as np
+import logging
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
@@ -21,6 +22,9 @@ class PyNMBackend(FastAPI):
     def __init__(self, pynm_state: PyNMState, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        # Use the FastAPI logger for the backend
+        self.logger = logging.getLogger("uvicorn.error")
+
         # Configure CORS
         self.add_middleware(
             CORSMiddleware,
@@ -30,17 +34,18 @@ class PyNMBackend(FastAPI):
             allow_headers=["*"],
         )
 
+        # Has to be before mounting static files
+        self.setup_routes()
+
         # Serve static files
         self.mount(
-            "/static",
-            StaticFiles(directory="py_neuromodulation/gui/frontend/"),
+            "",
+            StaticFiles(directory="py_neuromodulation/gui/frontend/", html=True),
             name="static",
         )
 
         self.pynm_state = pynm_state
         self.websocket_manager = WebSocketManager()
-
-        self.setup_routes()
 
     def setup_routes(self):
         @self.get("/api/health")
@@ -55,7 +60,7 @@ class PyNMBackend(FastAPI):
         async def update_settings(data: dict):
             try:
                 self.pynm_state.settings = nm.NMSettings.model_validate(data)
-                print(self.pynm_state.settings.features)
+                self.logger.info(self.pynm_state.settings.features)
                 return self.pynm_state.settings.model_dump()
             except ValueError as e:
                 raise HTTPException(
@@ -139,7 +144,7 @@ class PyNMBackend(FastAPI):
                     )
             except WebSocketDisconnect:
                 self.websocket_manager.disconnect()
-                print("Client disconnected")
+                self.logger.info("Client disconnected")
             finally:
                 # Ensure the periodic task is cancelled when the WebSocket disconnects
                 if periodic_task:
@@ -175,7 +180,7 @@ class PyNMBackend(FastAPI):
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                print(f"Error in periodic task: {e}")
+                self.logger.error(f"Error in periodic task: {e}")
                 break
 
         @self.get("/{full_path:path}")

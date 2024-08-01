@@ -56,7 +56,7 @@ def run_vite(shutdown_event: "Event", debug: bool = False) -> None:
         logger.debug("Output stream closed")
 
     # Handle different operating systems
-    shutdown_signals = {"nt": signal.CTRL_BREAK_EVENT, "posix": signal.SIGINT}
+    shutdown_signal = signal.CTRL_BREAK_EVENT if os.name == "nt" else signal.SIGINT
     subprocess_flags = subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0
 
     process = subprocess.Popen(
@@ -77,7 +77,7 @@ def run_vite(shutdown_event: "Event", debug: bool = False) -> None:
     shutdown_event.wait()  # Wait for shutdown
 
     logger.debug("Terminating Vite server...")
-    process.send_signal(shutdown_signals[os.name])
+    process.send_signal(shutdown_signal)
 
     try:
         process.wait(timeout=3)
@@ -237,9 +237,10 @@ class AppManager:
         self._run_app()
 
         self.logger.info("Starting PyWebView window...")
-        window = WebViewWindow()  # Only works from main thread
-        window.window.events.closed += self._terminate_app
-        window.start(debug=self.debug)
+        # PyWebView window only works from main thread
+        window = WebViewWindow(debug=True)
+        window.register_event_handler("closed", self._terminate_app)
+        window.start()
 
         while not self.shutdown_complete:
             time.sleep(0.1)
