@@ -66,6 +66,7 @@ def run_vite(shutdown_event: "Event", debug: bool = False) -> None:
         stderr=subprocess.PIPE,
         text=True,
         creationflags=subprocess_flags,
+        shell=True,
     )
 
     logging_thread = threading.Thread(
