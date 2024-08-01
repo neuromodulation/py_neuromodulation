@@ -1,6 +1,5 @@
 import sqlite3
 from pathlib import Path
-import os
 import pandas as pd
 from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation.nm_IO import generate_unique_filename
@@ -23,6 +22,9 @@ class NMDatabase:
         out_dir: _PathLike,
         csv_path: _PathLike | None = None,
     ):
+        # Make sure out_dir exists
+        Path(out_dir).mkdir(parents=True, exist_ok=True)
+
         self.db_path = Path(out_dir, f"{name}.db")
 
         self.table_name = f"{name}_data"  # change to param?
@@ -31,20 +33,15 @@ class NMDatabase:
         if self.db_path.exists():
             self.db_path = generate_unique_filename(self.db_path)
             name = self.db_path.stem
-            # raise FileExistsError(f"Database file {self.db_path} already exists.")
 
         if csv_path is None:
             self.csv_path = Path(out_dir, f"{name}.csv")
         else:
             self.csv_path = Path(csv_path)
 
-        try:
-            self.conn = sqlite3.connect(self.db_path)
-        except sqlite3.OperationalError as e:
-            os.makedirs(out_dir, exist_ok=True)
-        finally:
-            self.conn = sqlite3.connect(self.db_path)
+        self.csv_path.parent.mkdir(parents=True, exist_ok=True)
 
+        self.conn = sqlite3.connect(self.db_path)
         self.cursor = self.conn.cursor()
 
         # Database config and optimization, prioritize data integrity
