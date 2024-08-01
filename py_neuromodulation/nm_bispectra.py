@@ -41,6 +41,10 @@ class BispectraSettings(NMBaseModel):
         ), f"second frequency range value needs to be higher than first one, got {filter_range}"
         return filter_range
 
+    @field_validator("frequency_bands")
+    def fbands_spaces_to_underscores(cls, frequency_bands):
+        return [f.replace(" ", "_") for f in frequency_bands]
+
 
 FEATURE_DICT: dict[str, Callable] = {
     "mean": np.nanmean,
@@ -83,7 +87,7 @@ class Bispectra(NMFeature):
         self.max_freq = max(
             self.settings.f1s.frequency_high_hz, self.settings.f2s.frequency_high_hz
         )
-    
+
         # self.freqs: np.ndarray = np.array([]) # In case we pre-computed this
 
     def calc_feature(self, data: np.ndarray) -> dict:
@@ -115,16 +119,17 @@ class Bispectra(NMFeature):
             sampling_freq=self.sfreq,
             verbose=False,
         )
-        
+
         waveshape.compute(
             f1s=tuple(self.settings.f1s),  # type: ignore
             f2s=tuple(self.settings.f2s),  # type: ignore
         )
-        
+
         feature_results = {}
         for ch_idx, ch_name in enumerate(self.ch_names):
-            
-            bispectrum = waveshape._bicoherence[ch_idx]  # Same as waveshape.results._data, skips a copy
+            bispectrum = waveshape._bicoherence[
+                ch_idx
+            ]  # Same as waveshape.results._data, skips a copy
 
             for component in self.settings.components.get_enabled():
                 spectrum_ch = COMPONENT_DICT[component](bispectrum)

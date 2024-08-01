@@ -1,5 +1,4 @@
 from collections.abc import Iterable
-from pyexpat import features
 import numpy as np
 
 from typing import TYPE_CHECKING
@@ -7,7 +6,6 @@ from py_neuromodulation.nm_types import NMBaseModel
 
 from py_neuromodulation.nm_features import NMFeature
 from py_neuromodulation.nm_types import BoolSelector, FrequencyRange
-from py_neuromodulation import logger
 
 if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
@@ -82,7 +80,7 @@ class FooofAnalyzer(NMFeature):
 
     def calc_feature(self, data: np.ndarray) -> dict:
         from scipy.fft import rfft
-        
+
         spectra = np.abs(rfft(data[:, -self.num_samples :]))  # type: ignore
 
         self.fm.fit(self.f_vec, spectra, self.settings.freq_range_hz)
@@ -91,7 +89,7 @@ class FooofAnalyzer(NMFeature):
             raise RuntimeError("FOOOF failed to fit model to data.")
 
         failed_fits: list[int] = self.fm.null_inds_
-        
+
         feature_results = {}
         for ch_idx, ch_name in enumerate(self.ch_names):
             FIT_PASSED = ch_idx not in failed_fits

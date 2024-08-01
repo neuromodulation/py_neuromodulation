@@ -1,6 +1,5 @@
 import numpy as np
 from numpy.testing import assert_allclose
-import pandas as pd
 import pytest
 
 from py_neuromodulation.nm_rereference import ReReferencer
@@ -115,8 +114,8 @@ def test_rereference_wrong_rererference_column_name(setup_databatch):
     )
 
     nm_channels.loc[0, "rereference"] = "hallo"
-    with pytest.raises(Exception) as e_info:
-        re_referencer = ReReferencer(1, nm_channels)
+    with pytest.raises(Exception):
+        ReReferencer(1, nm_channels)
 
 
 def test_rereference_muliple_channels(setup_databatch):
@@ -162,4 +161,4 @@ def test_rereference_same_channel(setup_databatch):
     nm_channels.loc[0, "rereference"] = nm_channels.loc[0, "name"]
 
     with pytest.raises(Exception):
-        re_referencer = ReReferencer(1, nm_channels)
+        ReReferencer(1, nm_channels)

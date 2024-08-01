@@ -1,4 +1,5 @@
 import numpy as np
+
 if np.__version__ >= "2.0.0":
     from numpy.lib._function_base_impl import _quantile as np_quantile  # type:ignore
 else:
@@ -6,7 +7,7 @@ else:
 from collections.abc import Sequence
 from itertools import product
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from py_neuromodulation.nm_types import BoolSelector, NMBaseModel
 from py_neuromodulation.nm_features import NMFeature
 
@@ -20,7 +21,6 @@ LARGE_NUM = 2**24
 
 
 def get_label_pos(burst_labels, valid_labels):
-
     max_label = np.max(burst_labels, axis=2).flatten()
     min_label = np.min(
         burst_labels, axis=2, initial=LARGE_NUM, where=burst_labels != 0
@@ -48,8 +48,12 @@ class BurstFeatures(BoolSelector):
 class BurstSettings(NMBaseModel):
     threshold: float = Field(default=75, ge=0, le=100)
     time_duration_s: float = Field(default=30, ge=0)
-    frequency_bands: list[str] = ["low beta", "high beta", "low gamma"]
+    frequency_bands: list[str] = ["low_beta", "high_beta", "low_gamma"]
     burst_features: BurstFeatures = BurstFeatures()
+
+    @field_validator("frequency_bands")
+    def fbands_spaces_to_underscores(cls, frequency_bands):
+        return [f.replace(" ", "_") for f in frequency_bands]
 
 
 class Burst(NMFeature):
@@ -182,11 +186,10 @@ class Burst(NMFeature):
         ]
 
         # Find (channel, band) coordinates for each valid label and get an array that maps each valid label to its channel/band
-        # Channel band coordinate is flattened to a 1D array of length (n_channels x n_fbands) 
+        # Channel band coordinate is flattened to a 1D array of length (n_channels x n_fbands)
         label_positions = get_label_pos(burst_labels, valid_labels)
 
         # Now we're ready to calculate features
-
 
         if "duration" in self.used_features or "burst_rate_per_s" in self.used_features:
             # Handle division by zero using np.divide. Where num_bursts is 0, the result is 0
@@ -202,7 +205,9 @@ class Burst(NMFeature):
 
         if "duration" in self.used_features:
             # First get burst length for each valid burst
-            burst_lengths = label_sum(bursts, burst_labels, index=valid_labels) / self.sfreq
+            burst_lengths = (
+                label_sum(bursts, burst_labels, index=valid_labels) / self.sfreq
+            )
 
             # Now the max needs to be calculated per channel/band
             # For that, loop over channels/bands, get the corresponding burst lengths, and get the max
@@ -221,7 +226,7 @@ class Burst(NMFeature):
         if "amplitude" in self.used_features:
             # Max amplitude is just the max of the filtered data where there is a burst
             self.burst_amplitude_max = (filtered_data * bursts).max(axis=2)
-            
+
             # The mean is actually a mean of means, so we need the mean for each individual burst
             label_means = label_mean(filtered_data, burst_labels, index=valid_labels)
             # Now, loop over channels/bands, get the corresponding burst means, and calculate the mean of means
@@ -266,9 +271,9 @@ class Burst(NMFeature):
     def store_amplitude(
         self, feature_results: dict, ch_i: int, ch: str, fb_i: int, fb: str
     ):
-        feature_results[f"{ch}_bursts_{fb}_amplitude_mean"] = (
-            self.burst_amplitude_mean[ch_i, fb_i]
-        )
+        feature_results[f"{ch}_bursts_{fb}_amplitude_mean"] = self.burst_amplitude_mean[
+            ch_i, fb_i
+        ]
         feature_results[f"{ch}_bursts_{fb}_amplitude_max"] = self.burst_amplitude_max[
             ch_i, fb_i
         ]

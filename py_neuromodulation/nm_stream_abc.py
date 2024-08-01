@@ -1,8 +1,6 @@
 """Module that contains NMStream ABC."""
 
 from abc import ABC, abstractmethod
-from pathlib import Path
-import pickle
 
 import pandas as pd
 
@@ -22,7 +20,8 @@ class NMStream(ABC):
         sampling_rate_features_hz: float | None = None,
         path_grids: _PathLike | None = None,
         coord_names: list | None = None,
-        stream_name: str | None = "example_stream",  # Timon: do we need those in the nmstream_abc?
+        stream_name: str
+        | None = "example_stream",  # Timon: do we need those in the nmstream_abc?
         stream_lsl: bool = False,
         coord_list: list | None = None,
         verbose: bool = True,
@@ -139,45 +138,29 @@ class NMStream(ABC):
 
     def save_after_stream(
         self,
-        out_path_root: _PathLike = "",
-        folder_name: str = "sub",
+        out_dir: _PathLike = "",
+        prefix: str = "",
         feature_arr: pd.DataFrame | None = None,
     ) -> None:
         """Save features, settings, nm_channels and sidecar after run"""
 
-        out_path_root = Path.cwd() if not out_path_root else Path(out_path_root)
-
-        # create derivate folder_name output folder if doesn't exist
-        (out_path_root / folder_name).mkdir(parents=True, exist_ok=True)
-
-        self.PATH_OUT = out_path_root
-        self.PATH_OUT_folder_name = folder_name
-
-        self.save_sidecar(out_path_root, folder_name)
+        self.save_sidecar(out_dir, prefix)
 
         if feature_arr is not None:
-            self.save_features(out_path_root, folder_name, feature_arr)
+            nm_IO.save_features(feature_arr, out_dir, prefix)
 
-        self.save_settings(out_path_root, folder_name)
+        self.save_settings(out_dir, prefix)
 
-        self.save_nm_channels(out_path_root, folder_name)
+        self.save_nm_channels(out_dir, prefix)
 
-    def save_features(
-        self,
-        out_path_root: _PathLike,
-        folder_name: str,
-        feature_arr: pd.DataFrame,
-    ) -> None:
-        nm_IO.save_features(feature_arr, out_path_root, folder_name)
+    def save_nm_channels(self, out_dir: _PathLike, prefix: str = "") -> None:
+        self.data_processor.save_nm_channels(out_dir, prefix)
 
-    def save_nm_channels(self, out_path_root: _PathLike, folder_name: str) -> None:
-        self.data_processor.save_nm_channels(out_path_root, folder_name)
+    def save_settings(self, out_dir: _PathLike, prefix: str = "") -> None:
+        self.data_processor.save_settings(out_dir, prefix)
 
-    def save_settings(self, out_path_root: _PathLike, folder_name: str) -> None:
-        self.data_processor.save_settings(out_path_root, folder_name)
-
-    def save_sidecar(self, out_path_root: _PathLike, folder_name: str) -> None:
+    def save_sidecar(self, out_dir: _PathLike, prefix: str = "") -> None:
         """Save sidecar incduing fs, coords, sess_right to
         out_path_root and subfolder 'folder_name'"""
         additional_args = {"sess_right": self.sess_right}
-        self.data_processor.save_sidecar(out_path_root, folder_name, additional_args)
+        self.data_processor.save_sidecar(out_dir, prefix, additional_args)

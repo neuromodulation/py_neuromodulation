@@ -67,7 +67,7 @@ def test_bursting_duration():
     settings = NMSettings.get_default()
     settings.features.bursts = True
     settings.postprocessing.feature_normalization = False
-    TIME_DURATION = 10
+    # TIME_DURATION = 10 # TONI: Unused variable
     sfreq = 1000
     NUM_CH = 1
     time_points_beta = np.arange(0, 1, 1 / sfreq)
@@ -91,11 +91,11 @@ def test_bursting_duration():
     f_burst = bursts.calc_feature(beta_wave + np.random.random([NUM_CH, 1 * sfreq]))
 
     assert (
-        f["ch0_bursts_low beta_amplitude_max"]
-        < f_burst["ch0_bursts_low beta_amplitude_max"]
+        f["ch0_bursts_low_beta_amplitude_max"]
+        < f_burst["ch0_bursts_low_beta_amplitude_max"]
     )
 
     assert (
-        f["ch0_bursts_low beta_duration_max"]
-        < f_burst["ch0_bursts_low beta_duration_max"]
+        f["ch0_bursts_low_beta_duration_max"]
+        < f_burst["ch0_bursts_low_beta_duration_max"]
     )

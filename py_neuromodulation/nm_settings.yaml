@@ -9,10 +9,10 @@ segment_length_features_ms: 1000
 frequency_ranges_hz: # frequency band ranges can be added, removed and altered
   theta: [4, 8]
   alpha: [8, 12]
-  low beta: [13, 20]
-  high beta: [20, 35]
-  low gamma: [60, 80]
-  high gamma: [90, 200]
+  low_beta: [13, 20]
+  high_beta: [20, 35]
+  low_gamma: [60, 80]
+  high_gamma: [90, 200]
   HFA: [200, 400]
 
 
@@ -121,10 +121,10 @@ bandpass_filter_settings:
   segment_lengths_ms:
     theta: 1000
     alpha: 500
-    low beta: 333
-    high beta: 333
-    low gamma: 100
-    high gamma: 100
+    low_beta: 333
+    high_beta: 333
+    low_gamma: 100
+    high_gamma: 100
     HFA: 100
   bandpower_features:
     activity: true
@@ -138,12 +138,12 @@ kalman_filter_settings:
   sigma_w: 0.7
   sigma_v: 1
   frequency_bands:
-    [theta, alpha, low beta, high beta, low gamma, high gamma, HFA]
+    [theta, alpha, low_beta, high_beta, low_gamma, high_gamma, HFA]
 
 burst_settings:
   threshold: 75
   time_duration_s: 30
-  frequency_bands: [low beta, high beta, low gamma]
+  frequency_bands: [low_beta, high_beta, low_gamma]
   burst_features:
     duration: true
     amplitude: true
@@ -188,7 +188,7 @@ sharpwave_analysis_settings:
 coherence:
   channels: [] # List of channel pairs, empty by default. Each pair is a list of two channels.
   # Example channels: [[STN_RIGHT_0, ECOG_RIGHT_0], [STN_RIGHT_1, ECOG_RIGHT_1]]
-  frequency_bands: [high beta]
+  frequency_bands: [high_beta]
   features:
     mean_fband: true
     max_fband: true
@@ -222,7 +222,7 @@ nolds_features:
   detrended_fluctutaion_analysis: false
   data:
     raw: true
-    frequency_bands: [low beta]
+    frequency_bands: [low_beta]
 
 mne_connectiviy:
   method: plv
@@ -232,7 +232,7 @@ bispectrum:
   f1s: [5, 35]
   f2s: [5, 35]
   compute_features_for_whole_fband_range: true
-  frequency_bands: [theta, alpha, low beta, high beta]
+  frequency_bands: [theta, alpha, low_beta, high_beta]
   components:
     absolute: true
     real: true

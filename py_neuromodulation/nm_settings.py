@@ -1,6 +1,6 @@
 """Module for handling settings."""
 
-from pathlib import PurePath, Path
+from pathlib import Path
 from typing import ClassVar
 from pydantic import Field, model_validator
 
@@ -61,10 +61,10 @@ class NMSettings(NMBaseModel):
     frequency_ranges_hz: dict[str, FrequencyRange] = {
         "theta": FrequencyRange(4, 8),
         "alpha": FrequencyRange(8, 12),
-        "low beta": FrequencyRange(13, 20),
-        "high beta": FrequencyRange(20, 35),
-        "low gamma": FrequencyRange(60, 80),
-        "high gamma": FrequencyRange(90, 200),
+        "low_beta": FrequencyRange(13, 20),
+        "high_beta": FrequencyRange(20, 35),
+        "low_gamma": FrequencyRange(60, 80),
+        "high_gamma": FrequencyRange(90, 200),
         "HFA": FrequencyRange(200, 400),
     }
 
@@ -127,6 +127,11 @@ class NMSettings(NMBaseModel):
     def validate_settings(self):
         if len(self.features.get_enabled()) == 0:
             raise ValueError("At least one feature must be selected.")
+
+        # Replace spaces with underscores in frequency band names
+        self.frequency_ranges_hz = {
+            k.replace(" ", "_"): v for k, v in self.frequency_ranges_hz.items()
+        }
 
         if self.features.bandpass_filter:
             # Check BandPass settings frequency bands
@@ -228,9 +233,9 @@ class NMSettings(NMBaseModel):
             case ".yaml":
                 import yaml
 
-                #with open(path) as f:
+                # with open(path) as f:
                 #    model_dict = yaml.safe_load(f)
-                
+
                 # Timon: this is potentially dangerous since python code is directly executed
                 with open(path) as f:
                     model_dict = yaml.load(f, Loader=yaml.Loader)
@@ -249,16 +254,11 @@ class NMSettings(NMBaseModel):
         return NormalizationSettings.list_normalization_methods()
 
     def save(
-        self, path_out: _PathLike, folder_name: str = "", format: str = "yaml"
+        self, out_dir: _PathLike = ".", prefix: str = "", format: str = "yaml"
     ) -> None:
-        path_out = PurePath(path_out)
-        filename = f"SETTINGS.{format}"
+        filename = f"{prefix}_SETTINGS.{format}" if prefix else f"SETTINGS.{format}"
 
-        if folder_name:
-            path_out = path_out / folder_name
-            filename = f"{folder_name}_{filename}"
-
-        path_out = path_out / filename
+        path_out = Path(out_dir) / filename
 
         with open(path_out, "w") as f:
             match format:
@@ -267,9 +267,9 @@ class NMSettings(NMBaseModel):
                 case "yaml":
                     import yaml
 
-                    yaml.dump(self.model_dump(), f, default_flow_style=False)
+                    yaml.dump(self.model_dump(), f, default_flow_style=None)
 
-        logger.info(f"Settings saved to {path_out}")
+        logger.info(f"Settings saved to {path_out.resolve()}")
 
 
 # For retrocompatibility with previous versions of PyNM

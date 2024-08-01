@@ -27,7 +27,7 @@ def test_all_features_random_array():
     arr = np.random.random([2, 2000])
     stream = get_example_stream(arr)
     
-    df = stream.run(arr)
+    df = stream.run(arr, out_path_root="./test_data", folder_name="test_all_features_random_array")
 
     assert df.shape[0] != 0  # terrible test
 
@@ -38,7 +38,7 @@ def test_all_features_zero_array():
     stream = get_example_stream(arr)
     stream.settings.features.fooof = False # Can't use fooof with zero values (log(0) undefined)
     
-    df = stream.run(arr)
+    df = stream.run(arr, out_path_root="./test_data", folder_name="test_all_features_zero_array")
 
     assert df.shape[0] != 0  # terrible test
 
@@ -50,6 +50,6 @@ def test_all_features_NaN_array():
     stream = get_example_stream(arr)
     stream.settings.features.fooof = False # Can't use fooof nan values
 
-    df = stream.run(arr)
+    df = stream.run(arr, out_path_root="./test_data", folder_name="test_all_features_NaN_array")
 
     assert df.shape[0] != 0  # terrible test
