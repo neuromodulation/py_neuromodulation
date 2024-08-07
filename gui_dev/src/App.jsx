@@ -3,7 +3,7 @@ import { useSettingsStore, useSocketStore, useWebviewStore } from "@/stores";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 import { TitleBar, StatusBar } from "@/components";
-import { Dashboard, Welcome } from "@/pages";
+import { Dashboard, SourceSelection, Decoding, Channels, Settings } from "@/pages";
 import styles from "./App.module.css";
 
 export default function App() {
@@ -43,8 +43,11 @@ export default function App() {
         <TitleBar />
         <div className={styles.appContent}>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/welcome" element={<Welcome />} />
+            <Route exact path="/" element={<SourceSelection />} />
+            <Route exact path="/channels" element={<Channels />} />
+            <Route exact path="/dashboard" element={<Dashboard />} />
+            <Route exact path="/decoding" element={<Dashboard />} />
+            <Route exact path="/settings" element={<Settings />} />
           </Routes>
         </div>
         <StatusBar />
