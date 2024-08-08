@@ -7,7 +7,8 @@ import {
   StatusBar,
   Sidebar,
   Drawer,
-  CollapsibleBox,
+  CollapsibleBoxContainer,
+  DragAndDropList, 
 } from "@/components";
 import styles from "./App.module.css";
 
@@ -50,9 +51,8 @@ export default function App() {
       <div className={styles.appContent}>
         <Sidebar>
           <Drawer name="settings">
-            <CollapsibleBox title = "Features" startOpen ={0}> 
-                  <Settings />
-            </CollapsibleBox>
+            <CollapsibleBoxContainer > 
+            </CollapsibleBoxContainer>
           </Drawer>
         </Sidebar>
         <div className={styles.appMainContent}>
