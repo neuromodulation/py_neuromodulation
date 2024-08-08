@@ -1,18 +1,17 @@
-import { useRef, useState } from 'react'
-import styles from './DragAndDropList.module.css'
-import { useOptionsStore } from '@/stores'
-
+import { useRef, useState } from "react";
+import styles from "./DragAndDropList.module.css";
+import { useOptionsStore } from "@/stores";
 
 export const DragAndDropList = () => {
   const { options, setOptions, addOption, removeOption } = useOptionsStore();
 
   const predefinedOptions = [
-      { id: 1, name: 'raw_resampling' },
-      { id: 2, name: 'notch_filter' },
-      { id: 3, name: 're_referencing' },
-      { id: 4, name: 'preprocessing_filter' },
-      { id: 5, name: 'raw_normalization' },
-    ]
+    { id: 1, name: "raw_resampling" },
+    { id: 2, name: "notch_filter" },
+    { id: 3, name: "re_referencing" },
+    { id: 4, name: "preprocessing_filter" },
+    { id: 5, name: "raw_normalization" },
+  ];
 
   const dragOption = useRef(0);
   const draggedOverOption = useRef(0);
@@ -38,8 +37,15 @@ export const DragAndDropList = () => {
           onDragEnd={handleSort}
           onDragOver={(e) => e.preventDefault()}
         >
-          <p className={styles.itemText}>{[option.id, '. ' , option.name.replace("_", " ")]}</p>
-          <button className={styles.removeButton} onClick={() => removeOption(option.id)}>Remove</button>
+          <p className={styles.itemText}>
+            {[option.id, ". ", option.name.replace("_", " ")]}
+          </p>
+          <button
+            className={styles.removeButton}
+            onClick={() => removeOption(option.id)}
+          >
+            Remove
+          </button>
         </div>
       ))}
       <div className={styles.addSection}>
@@ -50,7 +56,7 @@ export const DragAndDropList = () => {
             className={styles.addButton}
             onClick={() => addOption(option)}
           >
-            {[option.id, '. ' , option.name.replace("_", " ")]}
+            {[option.id, ". ", option.name.replace("_", " ")]}
           </button>
         ))}
       </div>
