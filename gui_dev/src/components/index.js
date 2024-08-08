@@ -6,4 +6,4 @@ export { StatusBar } from "./StatusBar";
 export { Switch } from "./Switch";
 export { Sidebar } from "./Sidebar";
 export { Drawer } from "./Drawer";
-export { CollapsibleBox } from './CollapsibleBox';
+export { CollapsibleBox } from "./CollapsibleBox";

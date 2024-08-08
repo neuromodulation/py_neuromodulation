@@ -7,69 +7,48 @@ import {
 } from "@mui/material";
 import { useSettingsStore } from "@/stores";
 
-const filterByKeys = (dict, keys) => {
-  const filteredDict = {};
-  keys.forEach((key) => {
-    if (typeof key === "string") {
-      // Top-level key
-      if (Object.prototype.hasOwnProperty.call(dict, key)) {
-        filteredDict[key] = dict[key];
-      }
-    } else if (typeof key === "object") {
-      // Nested key
-      const topLevelKey = Object.keys(key)[0];
-      const nestedKeys = key[topLevelKey];
-      if (
-        Object.prototype.hasOwnProperty.call(dict, topLevelKey) &&
-        typeof dict[topLevelKey] === "object"
-      ) {
-        filteredDict[topLevelKey] = filterByKeys(dict[topLevelKey], nestedKeys);
+
+
+
+  
+  const flattenDictionary = (dict, parentKey = '', result = {}) => {
+    for (let key in dict) {
+      const newKey = parentKey ? `${parentKey}.${key}` : key;
+      if (typeof dict[key] === 'object' && dict[key] !== null) {
+        flattenDictionary(dict[key], newKey, result);
+      } else {
+        result[newKey] = dict[key];
       }
     }
-  });
-  return filteredDict;
-};
+    return result;
+  };
 
-export const TextField = ({ n, m }) => {
+  const filterByKeys = (flatDict, keys) => {
+    const filteredDict = {};
+    keys.forEach((key) => {
+      if (flatDict.hasOwnProperty(key)) {
+        filteredDict[key] = flatDict[key];
+      }
+    });
+    return filteredDict;
+  };
+
+export const TextField = ({ keysToInclude }) => {
   const settings = useSettingsStore((state) => state.settings);
-  const keysToInclude = [
-    "raw_normalization_settings",
-    ["preprocessing_filter", "bandstop_filter_settings"],
-  ];
-  const filteredSettings = filterByKeys(settings, keysToInclude);
+  const flatSettings = flattenDictionary(settings);
+  const filteredSettings = filterByKeys(flatSettings, keysToInclude);
   const [textLabels, setTextLabels] = useState({});
 
+
   useEffect(() => {
-    const labels = extractTextLabels(settings);
-    setTextLabels(labels);
+    setTextLabels(filteredSettings);
   }, [settings]);
 
-  const extractTextLabels = (obj) => {
-    const textLabels = {};
-
-    const recursiveExtract = (currentObj) => {
-      for (const [key, value] of Object.entries(currentObj)) {
-        if (typeof value === "number") {
-          textLabels[key] = value;
-        } else if (typeof value === "object" && value !== null) {
-          recursiveExtract(value);
-        }
-      }
-    };
-    recursiveExtract(obj);
-    console.log(textLabels);
-
-    return textLabels;
-  };
   const handleTextFieldChange = (label, value) => {
-    setSettings((prevSettings) => {
-      const updatedSettings = {
-        ...prevSettings,
-        [label]: value,
-      };
-      console.log(settings.frequency_high_hz);
-      return updatedSettings;
-    });
+    setTextLabels((prevLabels) => ({
+      ...prevLabels,
+      [label]: value,
+    }));
   };
 
   return (
@@ -85,7 +64,6 @@ export const TextField = ({ n, m }) => {
       }}
     >
       {Object.keys(textLabels)
-        .slice(n, m)
         .map((label, index) => (
           <Grid
             container
