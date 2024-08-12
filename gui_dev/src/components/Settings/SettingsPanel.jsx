@@ -3,19 +3,22 @@ import { Switch } from "@/components";
 import { useSettingsStore } from "@/stores";
 import styles from "./Settings.module.css";
 
-export const SettingsPanel = () => {
+export const SettingsPanel = ({ settingsKey }) => {
   const { settings, updateSettings } = useSettingsStore((state) => ({
     settings: state.settings,
     updateSettings: state.updateSettings,
   }));
 
+  // Ensure the settingsKey exists in the settings object
+  const currentSettings = settings[settingsKey] || {};
+
   const handleChange = (featureKey, isEnabled) => {
-    console.log(settings.features);
+    console.log(currentSettings);
 
     const updatedSettings = {
       ...settings,
-      features: {
-        ...settings.features,
+      [settingsKey]: {
+        ...currentSettings,
         [featureKey]: isEnabled,
       },
     };
@@ -27,7 +30,7 @@ export const SettingsPanel = () => {
     <div className={styles.settingsPanel}>
       <h2>Features</h2>
       <div className="feature-list">
-        {Object.entries(settings.features).map(([key, value]) => (
+        {Object.entries(currentSettings).map(([key, value]) => (
           <Switch
             key={key}
             label={key}

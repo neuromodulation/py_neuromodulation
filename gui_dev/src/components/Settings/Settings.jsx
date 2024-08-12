@@ -2,7 +2,7 @@ import { SettingsPanel } from "./SettingsPanel";
 import { useSettingsStore } from "@/stores";
 import styles from "./Settings.module.css";
 
-export const Settings = () => {
+export const Settings = ({ settingsKey }) => {
   const { settings } = useSettingsStore((state) => ({
     settings: state.settings,
   }));
@@ -14,7 +14,7 @@ export const Settings = () => {
   return (
     <div className={styles.settingsContainer}>
       <h2>Settings</h2>
-      <SettingsPanel />
+      <SettingsPanel settingsKey={settingsKey}/>
     </div>
   );
 };
