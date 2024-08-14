@@ -92,7 +92,6 @@ class FFT(OscillatoryFeature):
         ]
 
     def calc_feature(self, data: np.ndarray) -> dict:
-
         data = data[:, self.window_samples :]
 
         from scipy.fft import rfft
@@ -218,7 +217,6 @@ class STFT(OscillatoryFeature):
         ]
 
     def calc_feature(self, data: np.ndarray) -> dict:
-
         from scipy.signal import stft
 
         _, _, Zxx = stft(
@@ -271,15 +269,21 @@ class BandpassSettings(NMBaseModel):
     segment_lengths_ms: dict[str, int] = {
         "theta": 1000,
         "alpha": 500,
-        "low beta": 333,
-        "high beta": 333,
-        "low gamma": 100,
-        "high gamma": 100,
+        "low_beta": 333,
+        "high_beta": 333,
+        "low_gamma": 100,
+        "high_gamma": 100,
         "HFA": 100,
     }
     bandpower_features: BandpowerFeatures = BandpowerFeatures()
     log_transform: bool = True
     kalman_filter: bool = False
+
+    @field_validator("segment_lengths_ms")
+    @classmethod
+    # Replace spaces with underscores in frequency band names
+    def fbands_spaces_to_underscores(cls, segment_lengths_ms: dict[str, int]):
+        return {k.replace(" ", "_"): v for k, v in segment_lengths_ms.items()}
 
     @field_validator("bandpower_features")
     @classmethod
@@ -291,16 +295,18 @@ class BandpassSettings(NMBaseModel):
         return bandpower_features
 
     def validate_fbands(self, settings: "NMSettings") -> None:
-        for fband_name, seg_length_fband in self.segment_lengths_ms.items():
-            assert seg_length_fband <= settings.segment_length_features_ms, (
-                f"segment length {seg_length_fband} needs to be smaller than "
-                f" settings['segment_length_features_ms'] = {settings.segment_length_features_ms}"
-            )
-
+        # Ensure that each freq-band is defined in the global settings
         for fband_name in settings.frequency_ranges_hz.keys():
             assert fband_name in self.segment_lengths_ms, (
                 f"frequency range {fband_name} "
                 "needs to be defined in settings.bandpass_filter_settings.segment_lengths_ms]"
+            )
+
+        # Ensure that segment length for each freq-band is smaller than the feature segment length setting
+        for fband_name, seg_length_fband in self.segment_lengths_ms.items():
+            assert seg_length_fband <= settings.segment_length_features_ms, (
+                f"segment length {seg_length_fband} needs to be smaller than "
+                f" settings['segment_length_features_ms'] = {settings.segment_length_features_ms}"
             )
 
 
@@ -372,7 +378,6 @@ class BandPower(NMFeature):
         return feature_calc
 
     def calc_feature(self, data: np.ndarray) -> dict:
-
         data = self.bandpass_filter.filter_data(data)
 
         feature_results = {}

@@ -55,6 +55,6 @@ def test_bispectrum():
         coord_names=coord_names,
     )
 
-    features = stream.run(np.expand_dims(data[3, :], axis=0))
+    features = stream.run(np.expand_dims(data[3, :], axis=0), out_path_root="./test_data", folder_name="test_bispectrum")
 
     assert features["ECOG_RIGHT_1_Bispectrum_phase_mean_whole_fband_range"].sum() != 0

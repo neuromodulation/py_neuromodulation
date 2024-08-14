@@ -9,7 +9,6 @@ from py_neuromodulation.nm_types import _PathLike
 from py_neuromodulation import logger, PYNM_DIR
 
 if TYPE_CHECKING:
-    from py_neuromodulation.nm_settings import NMSettings
     from mne_bids import BIDSPath
     from mne import io as mne_io
 
@@ -78,11 +77,12 @@ def read_BIDS_data(
         coord_names,
     )
 
+
 def read_mne_data(
     PATH_RUN: "_PathLike | BIDSPath",
     line_noise: int = 50,
 ):
-    """Read data in the mne.io.read_raw supported format. 
+    """Read data in the mne.io.read_raw supported format.
 
     Parameters
     ----------
@@ -118,8 +118,9 @@ def read_mne_data(
         logger.info(
             f"Line noise is not available in the data, using value of {line_noise} Hz."
         )
-    
+
     return raw_arr.get_data(), sfreq, ch_names, ch_types, bads
+
 
 def get_coord_list(
     raw: "mne_io.BaseRaw",
@@ -228,6 +229,7 @@ def read_plot_modules(
         z_stn,
     )
 
+
 def write_csv(df, path_out):
     """
     Function to save Pandas dataframes to disk as CSV using
@@ -239,40 +241,46 @@ def write_csv(df, path_out):
 
     csv.write_csv(Table.from_pandas(df), path_out)
 
+
 def save_nm_channels(
     nmchannels: pd.DataFrame,
-    path_out: _PathLike,
-    folder_name: str = "",
+    out_dir: _PathLike,
+    prefix: str = "",
 ) -> None:
-    if folder_name:
-        path_out = PurePath(path_out, folder_name, folder_name + "_nm_channels.csv")
+    filename = f"{prefix}_nm_channels.csv" if prefix else "nm_channels.csv"
+    path_out = PurePath(out_dir, filename)
     write_csv(nmchannels, path_out)
     logger.info(f"nm_channels.csv saved to {path_out}")
 
 
 def save_features(
     df_features: pd.DataFrame,
-    path_out: _PathLike,
-    folder_name: str = "",
+    out_dir: _PathLike,
+    prefix: str = "",
 ) -> None:
-    if folder_name:
-        path_out = PurePath(path_out, folder_name, folder_name + "_FEATURES.csv")
-    write_csv(df_features, path_out)
-    logger.info(f"FEATURES.csv saved to {str(path_out)}")
+    filename = f"{prefix}_FEATURES.csv" if prefix else "_FEATURES.csv"
+    out_dir = PurePath(out_dir, filename)
+    write_csv(df_features, out_dir)
+    logger.info(f"FEATURES.csv saved to {str(out_dir)}")
 
 
-def save_sidecar(sidecar: dict, path_out: _PathLike, folder_name: str = "") -> None:
-    save_general_dict(sidecar, path_out, "_SIDECAR.json", folder_name)
+def save_sidecar(
+    sidecar: dict,
+    out_dir: _PathLike,
+    prefix: str = "",
+) -> None:
+    save_general_dict(sidecar, out_dir, prefix, "_SIDECAR.json")
 
 
 def save_general_dict(
     dict_: dict,
-    path_out: _PathLike,
+    out_dir: _PathLike,
+    prefix: str = "",
     str_add: str = "",
-    folder_name: str = "",
 ) -> None:
-    if folder_name:
-        path_out = PurePath(path_out, folder_name, folder_name + str_add)
+    # We should change this to a proper experiment name
+
+    path_out = PurePath(out_dir, f"{prefix}{str_add}")
 
     with open(path_out, "w") as f:
         json.dump(
@@ -387,3 +395,19 @@ def _todict(matobj) -> dict:
         else:
             dict[strg] = elem
     return dict
+
+
+def generate_unique_filename(path: _PathLike):
+    path = Path(path)
+
+    dir = path.parent
+    filename = path.stem
+    extension = path.suffix
+
+    counter = 1
+    while True:
+        new_filename = f"{filename}_{counter}{extension}"
+        new_file_path = dir / new_filename
+        if not new_file_path.exists():
+            return Path(new_file_path)
+        counter += 1

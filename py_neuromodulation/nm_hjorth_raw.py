@@ -5,7 +5,6 @@ Reference:  B Hjorth
             DOI: 10.1016/0013-4694(70)90143-4
 """
 
-from pyexpat import features
 import numpy as np
 from collections.abc import Iterable
 

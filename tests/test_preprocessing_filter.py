@@ -17,7 +17,7 @@ def test_preprocessing_within_pipeline(setup_default_stream_fast_compute: tuple[
 
 
     try:
-        _ = stream.run(data[:, : int(stream.sfreq * 2)])
+        _ = stream.run(data[:, : int(stream.sfreq * 2)], out_path_root="./test_data", folder_name="test_preprocessing_within_pipeline")
     except Exception as e:
         assert False, f"Error in pipeline including preprocess filtering : {e}"
 

@@ -146,7 +146,7 @@ stream = nm.Stream(
     line_noise=50,
 )
 
-features = stream.run(data)
+features = stream.run(data, save_csv=True)
 
 # %%
 # Feature Analysis

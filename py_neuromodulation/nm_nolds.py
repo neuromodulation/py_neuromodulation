@@ -1,4 +1,3 @@
-from pyexpat import features
 import numpy as np
 from collections.abc import Iterable
 
@@ -7,6 +6,8 @@ from typing import TYPE_CHECKING
 
 from py_neuromodulation.nm_features import NMFeature
 from py_neuromodulation.nm_types import BoolSelector
+
+from pydantic import field_validator
 
 if TYPE_CHECKING:
     from py_neuromodulation.nm_settings import NMSettings
@@ -22,8 +23,12 @@ class NoldsFeatures(BoolSelector):
 
 class NoldsSettings(NMBaseModel):
     raw: bool = True
-    frequency_bands: list[str] = ["low beta"]
+    frequency_bands: list[str] = ["low_beta"]
     features: NoldsFeatures = NoldsFeatures()
+
+    @field_validator("frequency_bands")
+    def fbands_spaces_to_underscores(cls, frequency_bands):
+        return [f.replace(" ", "_") for f in frequency_bands]
 
 
 class Nolds(NMFeature):

@@ -275,7 +275,7 @@ class DataProcessor:
                 for key in features_dict.keys():
                     if ch in key:
                         new_nan_channels.append(key)
-                
+
             for ch in new_nan_channels:
                 features_dict[ch] = np.nan
 
@@ -286,13 +286,12 @@ class DataProcessor:
 
     def save_sidecar(
         self,
-        out_path_root: _PathLike,
-        folder_name: str,
+        out_dir: _PathLike,
+        prefix: str = "",
         additional_args: dict | None = None,
     ) -> None:
-        """Save sidecar incuding fs, coords, sess_right to
-        out_path_root and subfolder 'folder_name'.
-        """
+        """Save sidecar incuding fs, coords, sess_right to out_dir."""
+
         sidecar: dict = {
             "original_fs": self._sfreq_raw_orig,
             "final_fs": self.sfreq_raw,
@@ -309,18 +308,18 @@ class DataProcessor:
         if additional_args is not None:
             sidecar = sidecar | additional_args
 
-        nm_IO.save_sidecar(sidecar, out_path_root, folder_name)
+        nm_IO.save_sidecar(sidecar, out_dir, prefix)
 
-    def save_settings(self, out_path_root: _PathLike, folder_name: str) -> None:
-        self.settings.save(out_path_root, folder_name)
+    def save_settings(self, out_dir: _PathLike, prefix: str = "") -> None:
+        self.settings.save(out_dir, prefix)
 
-    def save_nm_channels(self, out_path_root: _PathLike, folder_name: str) -> None:
-        nm_IO.save_nm_channels(self.nm_channels, out_path_root, folder_name)
+    def save_nm_channels(self, out_dir: _PathLike, prefix: str = "") -> None:
+        nm_IO.save_nm_channels(self.nm_channels, out_dir, prefix)
 
     def save_features(
         self,
-        out_path_root: _PathLike,
-        folder_name: str,
         feature_arr: pd.DataFrame,
+        out_dir: _PathLike = "",
+        prefix: str = "",
     ) -> None:
-        nm_IO.save_features(feature_arr, out_path_root, folder_name)
+        nm_IO.save_features(feature_arr, out_dir, prefix)

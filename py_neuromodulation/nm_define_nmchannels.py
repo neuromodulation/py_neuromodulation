@@ -174,9 +174,9 @@ def set_channels(
                 if np.isnan(ref):
                     new_names.append(name)
             elif ref == "average":
-                new_names.append(name + "-avgref")
+                new_names.append(name + "_avgref")
             else:
-                new_names.append(name + "-" + ref)
+                new_names.append(name + "_" + ref)
         df["new_name"] = new_names
     elif hasattr(new_names, "__iter__"):
         if len(new_names) != len(ch_names):
@@ -279,12 +279,12 @@ def get_default_channels_from_data(
 
     if car_rereferencing:
         rereference = ["average" for _ in range(data.shape[0])]
-        new_name = [f"{ch}-avgref" for ch in ch_name]
+        new_name = [f"{ch}_avgref" for ch in ch_name]
     else:
         rereference = ["None" for _ in range(data.shape[0])]
         new_name = ch_name
 
-    new_name = [f"{ch}-avgref" for ch in ch_name]
+    new_name = [f"{ch}_avgref" for ch in ch_name]
     target = np.array([0 for _ in range(data.shape[0])])
     used = np.array([1 for _ in range(data.shape[0])])
 
