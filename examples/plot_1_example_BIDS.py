@@ -184,7 +184,7 @@ nm_plots.plot_corr_matrix(
 # Nevertheless, the user can also use the pipeline for machine learning decoding.
 # It can be used for regression and classification problems and also dimensionality reduction such as PCA and CCA.
 #
-# Here, we show an example using the XGBOOST classifier. The used labels came from a continuous grip force movement target, named "MOV_RIGHT".
+# Here, we show an example using a sklearn linear regression model. The used labels came from a continuous grip force movement target, named "MOV_RIGHT".
 #
 # First we initialize the :class:`~nm_decode.Decoder` class, which the specified *validation method*, here being a simple 3-fold cross validation,
 # the evaluation metric, used machine learning model, and the channels we want to evaluate performances for.

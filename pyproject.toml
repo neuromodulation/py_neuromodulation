@@ -55,6 +55,8 @@ dependencies = [
     "pynput",
     "pyqt5",
     "pydantic>=2.7.3",
+    "pip>=24.2",
+    "nibabel>=5.2.1",
 ]
 
 [project.optional-dependencies]
@@ -75,8 +77,8 @@ docs = [
   "sphinx_togglebutton",
 ]
 
-[tool.rye]
-dev-dependencies = ["py-neuromodulation[dev]"]
+#[tool.rye]
+#dev-dependencies = ["py-neuromodulation[dev]"]
 
 [project.urls]
 bugtracker = "https://github.com/neuromodulation/py_neuromodulation/issues"
