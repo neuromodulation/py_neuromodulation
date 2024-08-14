@@ -14,6 +14,7 @@ The *py_neuromodulation* toolbox allows for real time capable feature estimation
    usage
    auto_examples/index
    api_documentation
+   contributing
 
 Why py_neuromodulation?
 -----------------------

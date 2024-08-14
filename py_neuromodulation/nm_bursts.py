@@ -150,6 +150,7 @@ class Burst(NMFeature):
         batch_size = (
             filtered_data.shape[-1] if self.batch == 0 else self.samples_overlap
         )
+
         self.batch += 1
         self.data_buffer = np.concatenate(
             (
