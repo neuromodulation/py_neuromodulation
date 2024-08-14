@@ -26,10 +26,18 @@ export const CollapsibleBoxContainer = () => {
                     )}
             <h3>Preprocessing Filter</h3>
             <Settings settingsKey={'preprocessing_filter'} />
+            <h4>Bandstop Filter</h4>
             <TextField keysToInclude = {["preprocessing_filter.bandstop_filter_settings.frequency_low_hz", "preprocessing_filter.bandstop_filter_settings.frequency_high_hz"]} />
+            <h4>Bandpass Filter</h4>
+            <TextField keysToInclude = {["preprocessing_filter.bandpass_filter_settings.frequency_low_hz", "preprocessing_filter.bandpass_filter_settings.frequency_high_hz"]} />
+            <TextField keysToInclude = {["preprocessing_filter.lowpass_filter_cutoff_hz", "preprocessing_filter.highpass_filter_cutoff_hz"]} />
+
         </CollapsibleBox>
 
+       <CollapsibleBox title = "Postprocessing Settings" startOpen = {0}>
+            <Settings settingsKey={'fft_settings'} />
        
+       </CollapsibleBox>
 
 
 
