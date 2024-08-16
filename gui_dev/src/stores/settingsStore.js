@@ -70,6 +70,7 @@ export const useSettingsStore = createStore("settings", (set, get) => ({
     const currentSettings = get().settings;
 
     set({ settings: newSettings });
+    
 
     const result = await uploadSettingsToServer(newSettings);
 

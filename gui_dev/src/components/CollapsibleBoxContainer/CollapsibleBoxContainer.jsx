@@ -3,11 +3,14 @@ import { CollapsibleBox } from '../CollapsibleBox/CollapsibleBox';
 import { Settings } from '../Settings/Settings.jsx'
 import { TextField } from '../TextField/TextField.jsx';
 import { DragAndDropList } from '../DragAndDropList/DragAndDropList';
-import { useOptionsStore } from "@/stores";
-
+import { useOptionsStore,  useSettingsStore } from "@/stores";
 
 export const CollapsibleBoxContainer = () => { 
     const options = useOptionsStore(state => state.options); 
+    const { settings } = useSettingsStore((state) => ({
+        settings: state.settings,
+      }));
+    // const currentSettings = settings ? settings[settingsKey] : null;
 
     return ( 
         <div> 
@@ -24,21 +27,45 @@ export const CollapsibleBoxContainer = () => {
                 {options.map(option => (
                     <div key={option.id}>{option.name === 'raw_normalization' && <TextField keysToInclude={["raw_normalization_settings.normalization_time_s", "raw_normalization_settings.clip"]}/>}</div>)
                     )}
-            <h3>Preprocessing Filter</h3>
-            <Settings settingsKey={'preprocessing_filter'} />
-            <h4>Bandstop Filter</h4>
-            <TextField keysToInclude = {["preprocessing_filter.bandstop_filter_settings.frequency_low_hz", "preprocessing_filter.bandstop_filter_settings.frequency_high_hz"]} />
-            <h4>Bandpass Filter</h4>
-            <TextField keysToInclude = {["preprocessing_filter.bandpass_filter_settings.frequency_low_hz", "preprocessing_filter.bandpass_filter_settings.frequency_high_hz"]} />
-            <TextField keysToInclude = {["preprocessing_filter.lowpass_filter_cutoff_hz", "preprocessing_filter.highpass_filter_cutoff_hz"]} />
+                {options.map(option => ( 
+                    <div>
+                        
+                        {option.name === 'preprocessing_filter' && (
+                            <div>
+                                {/* Preprocessing filter */}
+                                <h3>Preprocessing Filter</h3>
+                                <Settings settingsKey={'preprocessing_filter'} />
+                                    <div>
+                                        { settings['preprocessing_filter']['bandstop_filter'] && (
+                                            <div> 
+                                                <h4>Bandstop Filter</h4>
+                                                <TextField keysToInclude = {["preprocessing_filter.bandstop_filter_settings.frequency_low_hz", "preprocessing_filter.bandstop_filter_settings.frequency_high_hz"]} />
+                                            </div>
+                                        )}
 
+                                        { settings['preprocessing_filter']['bandpass_filter'] && (
+                                            <div> 
+                                                <h4>Bandpass Filter</h4>
+                                                <TextField keysToInclude = {["preprocessing_filter.bandpass_filter_settings.frequency_low_hz", "preprocessing_filter.bandpass_filter_settings.frequency_high_hz"]} />
+                                            </div>
+                                        )}
+
+                                    </div>
+                            </div> 
+
+                        )}
+                                
+                    </div>       
+
+                    ))}
+
+            <h3>Filter Cutoff</h3>
+            <TextField keysToInclude = {["preprocessing_filter.lowpass_filter_cutoff_hz", "preprocessing_filter.highpass_filter_cutoff_hz"]} />
         </CollapsibleBox>
 
        <CollapsibleBox title = "Postprocessing Settings" startOpen = {0}>
             <Settings settingsKey={'fft_settings'} />
-       
        </CollapsibleBox>
-
 
 
     </div>
