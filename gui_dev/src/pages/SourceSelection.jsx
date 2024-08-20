@@ -21,7 +21,7 @@ export const SourceSelection = () => {
           <Typography variant="h6" gutterBottom>
             Select a File
           </Typography>
-          <Box sx={{ border: '1px solid #ccc', padding: 2, borderRadius: 5, backgroundColor: '#f0f0f0' }}>
+          <Box sx={{ border: '1px solid #555', padding: 2, borderRadius: 5, backgroundColor: '#424242' }}>
             <Button variant="contained" component="label">
               Upload File
               <input type="file" hidden />
@@ -32,21 +32,27 @@ export const SourceSelection = () => {
                 variant="outlined"
                 size="small"
                 fullWidth
-                sx={{ marginBottom: 2, backgroundColor: '#dbdbdb' }}
+                sx={{ marginBottom: 2, backgroundColor: '#616161', color: '#f4f4f4' }}
+                InputLabelProps={{ style: { color: '#cccccc' } }}
+                InputProps={{ style: { color: '#f4f4f4' } }}
               />
               <MUITextField
                 label="line noise"
                 variant="outlined"
                 size="small"
                 fullWidth
-                sx={{ marginBottom: 2, backgroundColor: '#dbdbdb' }}
+                sx={{ marginBottom: 2, backgroundColor: '#616161', color: '#f4f4f4' }}
+                InputLabelProps={{ style: { color: '#cccccc' } }}
+                InputProps={{ style: { color: '#f4f4f4' } }}
               />
               <MUITextField
                 label="sfreq features"
                 variant="outlined"
                 size="small"
                 fullWidth
-                sx={{ marginBottom: 2, backgroundColor: '#dbdbdb' }}
+                sx={{ marginBottom: 2, backgroundColor: '#616161', color: '#f4f4f4' }}
+                InputLabelProps={{ style: { color: '#cccccc' } }}
+                InputProps={{ style: { color: '#f4f4f4' } }}
               />
             </Box>
           </Box>
@@ -55,13 +61,15 @@ export const SourceSelection = () => {
           <Typography variant="h6" gutterBottom>
             LSL-Stream
           </Typography>
-          <Box sx={{ border: '1px solid #ccc', padding: 2, borderRadius: 5, backgroundColor: '#f0f0f0' }}>
+          <Box sx={{ border: '1px solid #555', padding: 2, borderRadius: 5, backgroundColor: '#424242' }}>
             <MUITextField
               label="Stream-name"
               variant="outlined"
               size="small"
               fullWidth
-              sx={{ marginBottom: 2, backgroundColor: '#dbdbdb' }}
+              sx={{ marginBottom: 2, backgroundColor: '#616161', color: '#f4f4f4' }}
+              InputLabelProps={{ style: { color: '#cccccc' } }}
+              InputProps={{ style: { color: '#f4f4f4' } }}
             />
             <Button variant="contained" sx={{ marginTop: 2 }}>
               Find LSL-Streams

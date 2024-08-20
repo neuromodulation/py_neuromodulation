@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { TitleBar, StatusBar } from "@/components";
 import { Dashboard, SourceSelection, Decoding, Channels, Settings } from "@/pages";
 import styles from "./App.module.css";
+import AppToolbar from "./components/Toolbar/Toolbar";
 
 export default function App() {
   // Get settings from backend on start-up
@@ -40,14 +41,14 @@ export default function App() {
   return (
     <Router>
       <div className={styles.appContainer}>
-        <TitleBar />
+        <AppToolbar />
         <div className={styles.appContent}>
           <Routes>
             <Route exact path="/" element={<SourceSelection />} />
             <Route exact path="/channels" element={<Channels />} />
+            <Route exact path="/settings" element={<Settings />} />
             <Route exact path="/dashboard" element={<Dashboard />} />
             <Route exact path="/decoding" element={<Dashboard />} />
-            <Route exact path="/settings" element={<Settings />} />
           </Routes>
         </div>
         <StatusBar />

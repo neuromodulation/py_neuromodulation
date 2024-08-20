@@ -1,0 +1,3 @@
+"name","rereference","used","target","type","status","new_name"
+"ch0","average",1,0,"ecog","good","ch0-avgref"
+"target_ch","average",0,1,"ecog","good","ch1-avgref"
