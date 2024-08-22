@@ -2,6 +2,7 @@ from os import PathLike
 from math import isnan
 from typing import Any, Literal, Protocol, TYPE_CHECKING, runtime_checkable
 from pydantic import ConfigDict, Field, model_validator, BaseModel
+from pydantic_core import ValidationError, InitErrorDetails
 from pprint import pformat
 from collections.abc import Sequence
 
@@ -212,3 +213,40 @@ class BoolSelector(NMBaseModel):
     @classmethod
     def get_fields(cls):
         return cls.model_fields
+
+
+def create_validation_error(
+    error_message: str,
+    loc: list[str | int] = None,
+    title: str = "Validation Error",
+    input_type: Literal["python", "json"] = "python",
+    hide_input: bool = False,
+) -> ValidationError:
+    """
+    Factory function to create a Pydantic v2 ValidationError instance from a single error message.
+
+    Args:
+    error_message (str): The error message for the ValidationError.
+    loc (List[str | int], optional): The location of the error. Defaults to None.
+    title (str, optional): The title of the error. Defaults to "Validation Error".
+    input_type (Literal["python", "json"], optional): Whether the error is for a Python object or JSON. Defaults to "python".
+    hide_input (bool, optional): Whether to hide the input value in the error message. Defaults to False.
+
+    Returns:
+    ValidationError: A Pydantic ValidationError instance.
+    """
+    if loc is None:
+        loc = []
+
+    line_errors = [
+        InitErrorDetails(
+            type="value_error", loc=tuple(loc), input=None, ctx={"error": error_message}
+        )
+    ]
+
+    return ValidationError.from_exception_data(
+        title=title,
+        line_errors=line_errors,
+        input_type=input_type,
+        hide_input=hide_input,
+    )
