@@ -9,11 +9,6 @@ import pandas as pd
 import scipy.stats as stats
 
 
-def fitlm(x, y):
-    import statsmodels.api as sm
-    return sm.OLS(y, sm.add_constant(x)).fit()
-
-
 def fitlm_kfold(x, y, kfold_splits=5):
     from sklearn.linear_model import LinearRegression
     from sklearn.model_selection import KFold
@@ -28,7 +23,6 @@ def fitlm_kfold(x, y, kfold_splits=5):
     for i, (train, test) in enumerate(kfold.split(x, y)):
         model.fit(x.iloc[train, :], y.iloc[train, :])
         score = model.score(x.iloc[test, :], y.iloc[test, :])
-        # mdl = fitlm(np.squeeze(y.iloc[test,:].transpose()), np.squeeze(model.predict(x.iloc[test, :])))
         scores.append(score)
         coeffs = np.vstack((coeffs, model.coef_))
     coeffs = list(np.delete(coeffs, 0))
