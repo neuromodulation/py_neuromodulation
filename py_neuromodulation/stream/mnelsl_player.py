@@ -2,8 +2,9 @@ import numpy as np
 import mne
 from pathlib import Path
 
-from py_neuromodulation import logger, io
 from py_neuromodulation.utils.types import _PathLike
+from py_neuromodulation.utils import io
+from py_neuromodulation import logger
 
 
 class LSLOfflinePlayer:
