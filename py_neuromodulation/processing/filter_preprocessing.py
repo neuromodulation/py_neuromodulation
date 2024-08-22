@@ -49,7 +49,7 @@ class FilterSettings(BoolSelector):
 
 class PreprocessingFilter(NMPreprocessor):
     def __init__(self, settings: "NMSettings", sfreq: float) -> None:
-        from py_neuromodulation.utils.filter import MNEFilter
+        from py_neuromodulation.filter import MNEFilter
 
         self.filters: list[MNEFilter] = [
             MNEFilter(

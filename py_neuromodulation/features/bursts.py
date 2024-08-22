@@ -65,7 +65,7 @@ class Bursts(NMFeature):
                 fband_burst in list(settings.frequency_ranges_hz.keys())
             ), f"bursting {fband_burst} needs to be defined in settings['frequency_ranges_hz']"
 
-        from py_neuromodulation.utils.filter import MNEFilter
+        from py_neuromodulation.filter import MNEFilter
 
         self.settings = settings.burst_settings
         self.sfreq = sfreq

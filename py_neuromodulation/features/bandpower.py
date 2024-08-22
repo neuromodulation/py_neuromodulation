@@ -7,7 +7,7 @@ from py_neuromodulation.utils.types import NMBaseModel, BoolSelector, NMFeature
 
 if TYPE_CHECKING:
     from py_neuromodulation.stream.settings import NMSettings
-    from py_neuromodulation.utils.filter import KalmanSettings
+    from py_neuromodulation.filter import KalmanSettings
 
 
 class BandpowerFeatures(BoolSelector):
@@ -69,7 +69,7 @@ class BandPower(NMFeature):
         self.ch_names = ch_names
         self.KF_dict: dict = {}
 
-        from py_neuromodulation.utils.filter import MNEFilter
+        from py_neuromodulation.filter import MNEFilter
 
         self.bandpass_filter = MNEFilter(
             f_ranges=[
@@ -103,7 +103,7 @@ class BandPower(NMFeature):
                     )
 
     def init_KF(self, feature: str) -> None:
-        from py_neuromodulation.utils.filter import define_KF
+        from py_neuromodulation.filter import define_KF
 
         for f_band in self.kalman_filter_settings.frequency_bands:
             for channel in self.ch_names:

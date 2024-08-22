@@ -20,7 +20,7 @@ from py_neuromodulation.processing.normalization import NormalizationSettings
 from py_neuromodulation.processing.resample import ResamplerSettings
 from py_neuromodulation.processing.projection import ProjectionSettings
 
-from py_neuromodulation.utils.filter import KalmanSettings
+from py_neuromodulation.filter import KalmanSettings
 from py_neuromodulation.features import BispectraSettings
 from py_neuromodulation.features import NoldsSettings
 from py_neuromodulation.features import MNEConnectivitySettings
