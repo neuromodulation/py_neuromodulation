@@ -30,7 +30,6 @@ requires-python = ">=3.10"
 
 dependencies = [
     "mne",
-    "filterpy >= 1.4.5",
     "fooof",
     "imbalanced-learn",
     "matplotlib>=3.9.0",
