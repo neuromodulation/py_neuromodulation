@@ -1,5 +1,4 @@
 ---
-
 ########################
 ### General settings ###
 ########################
@@ -14,7 +13,6 @@ frequency_ranges_hz: # frequency band ranges can be added, removed and altered
   low_gamma: [60, 80]
   high_gamma: [90, 200]
   HFA: [200, 400]
-
 
 # Enabled features
 features:
@@ -62,7 +60,6 @@ preprocessing_filter:
   lowpass_filter_cutoff_hz: 200
   highpass_filter_cutoff_hz: 3
 
-
 ################################
 ### Postprocessing settings ####
 ################################
@@ -81,7 +78,6 @@ project_cortex_settings:
 
 project_subcortex_settings:
   max_dist_mm: 5
-
 
 #################################
 ### Feature specific settings ###
@@ -185,7 +181,7 @@ sharpwave_analysis_settings:
     var: []
   apply_estimator_between_peaks_and_troughs: true
 
-coherence:
+coherence_settings:
   channels: [] # List of channel pairs, empty by default. Each pair is a list of two channels.
   # Example channels: [[STN_RIGHT_0, ECOG_RIGHT_0], [STN_RIGHT_1, ECOG_RIGHT_1]]
   frequency_bands: [high_beta]
@@ -197,7 +193,7 @@ coherence:
     coh: true
     icoh: true
 
-fooof:
+fooof_settings:
   aperiodic:
     exponent: true
     offset: true
@@ -214,7 +210,7 @@ fooof:
   freq_range_hz: [2, 40]
   knee: true
 
-nolds_features:
+nolds_settings:
   sample_entropy: false
   correlation_dimension: false
   lyapunov_exponent: true
@@ -224,11 +220,11 @@ nolds_features:
     raw: true
     frequency_bands: [low_beta]
 
-mne_connectiviy:
+mne_connectiviy_settings:
   method: plv
   mode: multitaper
 
-bispectrum:
+bispectrum_settings:
   f1s: [5, 35]
   f2s: [5, 35]
   compute_features_for_whole_fband_range: true

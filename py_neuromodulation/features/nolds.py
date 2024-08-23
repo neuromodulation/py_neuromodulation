@@ -33,16 +33,16 @@ class Nolds(NMFeature):
     def __init__(
         self, settings: "NMSettings", ch_names: Iterable[str], sfreq: float
     ) -> None:
-        self.settings = settings.nolds_features
+        self.settings = settings.nolds_settings
         self.ch_names = ch_names
 
         if len(self.settings.frequency_bands) > 0:
-            from py_neuromodulation.oscillatory import BandPower
+            from py_neuromodulation.features.bandpower import BandPower
 
             self.bp_filter = BandPower(settings, ch_names, sfreq, use_kf=False)
 
         # Check if the selected frequency bands are defined in the global settings
-        for fb in settings.nolds_features.frequency_bands:
+        for fb in settings.nolds_settings.frequency_bands:
             assert (
                 fb in settings.frequency_ranges_hz
             ), f"{fb} selected in nolds_features, but not defined in s['frequency_ranges_hz']"

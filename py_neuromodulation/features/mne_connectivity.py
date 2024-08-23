@@ -30,8 +30,8 @@ class MNEConnectivity(NMFeature):
         self.sfreq = sfreq
 
         # Params used by spectral_connectivity_epochs
-        self.mode = settings.mne_connectivity.mode
-        self.method = settings.mne_connectivity.method
+        self.mode = settings.mne_connectivity_settings.mode
+        self.method = settings.mne_connectivity_settings.method
 
         self.fbands = settings.frequency_ranges_hz
         self.fband_ranges: list = []

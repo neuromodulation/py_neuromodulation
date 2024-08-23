@@ -70,7 +70,7 @@ class Bispectra(NMFeature):
         self.sfreq = sfreq
         self.ch_names = ch_names
         self.frequency_ranges_hz = settings.frequency_ranges_hz
-        self.settings: BispectraSettings = settings.bispectrum
+        self.settings: BispectraSettings = settings.bispectrum_settings
 
         assert all(
             f_band_bispectrum in settings.frequency_ranges_hz

@@ -5,7 +5,12 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING, Annotated
 from pydantic import Field, field_validator
 
-from py_neuromodulation.utils.types import NMFeature, BoolSelector, FrequencyRange, NMBaseModel
+from py_neuromodulation.utils.types import (
+    NMFeature,
+    BoolSelector,
+    FrequencyRange,
+    NMBaseModel,
+)
 from py_neuromodulation import logger
 
 if TYPE_CHECKING:
@@ -37,7 +42,7 @@ class CoherenceSettings(NMBaseModel):
         return [f.replace(" ", "_") for f in frequency_bands]
 
 
-class Coherence:
+class CoherenceObject:
     def __init__(
         self,
         sfreq: float,
@@ -139,15 +144,15 @@ class Coherence:
         return feature_results
 
 
-class NMCoherence(NMFeature):
+class Coherence(NMFeature):
     def __init__(
         self, settings: "NMSettings", ch_names: list[str], sfreq: float
     ) -> None:
-        self.settings = settings.coherence
+        self.settings = settings.coherence_settings
         self.frequency_ranges_hz = settings.frequency_ranges_hz
         self.sfreq = sfreq
         self.ch_names = ch_names
-        self.coherence_objects: Iterable[Coherence] = []
+        self.coherence_objects: Iterable[CoherenceObject] = []
 
         self.test_settings(settings, ch_names, sfreq)
 
@@ -170,7 +175,7 @@ class NMCoherence(NMFeature):
             ch_2_idx = self.ch_names.index(ch_2_name_reref)
 
             self.coherence_objects.append(
-                Coherence(
+                CoherenceObject(
                     sfreq,
                     "hann",
                     fband_specs,
@@ -192,7 +197,7 @@ class NMCoherence(NMFeature):
         sfreq: float,
     ):
         flat_channels = [
-            ch for ch_pair in settings.coherence.channels for ch in ch_pair
+            ch for ch_pair in settings.coherence_settings.channels for ch in ch_pair
         ]
 
         valid_coh_channel = [
@@ -202,37 +207,37 @@ class NMCoherence(NMFeature):
             if valid_coh_channel[ch_idx] == 0:
                 raise RuntimeError(
                     f"Coherence selected channel {ch_coh} does not match any channel name: \n"
-                    f"  - settings.coherence.channels: {settings.coherence.channels}\n"
+                    f"  - settings.coherence_settings.channels: {settings.coherence_settings.channels}\n"
                     f"  - ch_names: {ch_names} \n"
                 )
 
             if valid_coh_channel[ch_idx] > 1:
                 raise RuntimeError(
                     f"Coherence selected channel {ch_coh} is ambigous and matches more than one channel name: \n"
-                    f"  - settings.coherence.channels: {settings.coherence.channels}\n"
+                    f"  - settings.coherence_settings.channels: {settings.coherence_settings.channels}\n"
                     f"  - ch_names: {ch_names} \n"
                 )
 
         assert all(
             f_band_coh in settings.frequency_ranges_hz
-            for f_band_coh in settings.coherence.frequency_bands
+            for f_band_coh in settings.coherence_settings.frequency_bands
         ), (
             "coherence selected frequency bands don't match the ones"
             "specified in s['frequency_ranges_hz']"
-            f"coherence frequency bands: {settings.coherence.frequency_bands}"
+            f"coherence frequency bands: {settings.coherence_settings.frequency_bands}"
             f"specified frequency_ranges_hz: {settings.frequency_ranges_hz}"
         )
 
         assert all(
             settings.frequency_ranges_hz[fb][0] < sfreq / 2
             and settings.frequency_ranges_hz[fb][1] < sfreq / 2
-            for fb in settings.coherence.frequency_bands
+            for fb in settings.coherence_settings.frequency_bands
         ), (
             "the coherence frequency band ranges need to be smaller than the Nyquist frequency"
-            f"got sfreq = {sfreq} and fband ranges {settings.coherence.frequency_bands}"
+            f"got sfreq = {sfreq} and fband ranges {settings.coherence_settings.frequency_bands}"
         )
 
-        if not settings.coherence.method.get_enabled():
+        if not settings.coherence_settings.method.get_enabled():
             logger.warn(
                 "feature coherence enabled, but no coherence['method'] selected"
             )

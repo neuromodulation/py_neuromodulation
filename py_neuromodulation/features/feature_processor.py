@@ -17,7 +17,7 @@ FEATURE_DICT: dict[FeatureName | str, str] = {
     "sharpwave_analysis": "SharpwaveAnalyzer",
     "fooof": "FooofAnalyzer",
     "nolds": "Nolds",
-    "coherence": "NMCoherence",
+    "coherence": "Coherence",
     "bursts": "Bursts",
     "linelength": "LineLength",
     "mne_connectivity": "MNEConnectivity",

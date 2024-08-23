@@ -69,8 +69,8 @@ def setup_default_stream_fast_compute() -> tuple[np.ndarray, nm.Stream]:
 
     settings = nm.NMSettings.get_default()
     settings.reset()
-    settings.fooof.aperiodic.exponent = True
-    settings.fooof.aperiodic.offset = True
+    settings.fooof_settings.aperiodic.exponent = True
+    settings.fooof_settings.aperiodic.offset = True
     settings.features.fooof = True
 
     stream = nm.Stream(

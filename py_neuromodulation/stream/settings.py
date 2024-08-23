@@ -97,11 +97,11 @@ class NMSettings(NMBaseModel):
     kalman_filter_settings: KalmanSettings = KalmanSettings()
     burst_settings: BurstsSettings = BurstsSettings()
     sharpwave_analysis_settings: SharpwaveSettings = SharpwaveSettings()
-    mne_connectivity: MNEConnectivitySettings = MNEConnectivitySettings()
-    coherence: CoherenceSettings = CoherenceSettings()
-    fooof: FooofSettings = FooofSettings()
-    nolds_features: NoldsSettings = NoldsSettings()
-    bispectrum: BispectraSettings = BispectraSettings()
+    mne_connectivity_settings: MNEConnectivitySettings = MNEConnectivitySettings()
+    coherence_settings: CoherenceSettings = CoherenceSettings()
+    fooof_settings: FooofSettings = FooofSettings()
+    nolds_settings: NoldsSettings = NoldsSettings()
+    bispectrum_settings: BispectraSettings = BispectraSettings()
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

@@ -51,7 +51,7 @@ class FooofAnalyzer(NMFeature):
     def __init__(
         self, settings: "NMSettings", ch_names: Iterable[str], sfreq: float
     ) -> None:
-        self.settings = settings.fooof
+        self.settings = settings.fooof_settings
         self.sfreq = sfreq
         self.ch_names = ch_names
 
@@ -62,12 +62,12 @@ class FooofAnalyzer(NMFeature):
         self.f_vec = np.arange(0, int(self.num_samples / 2) + 1, 1)
 
         assert (
-            settings.fooof.windowlength_ms <= settings.segment_length_features_ms
+            self.settings.windowlength_ms <= settings.segment_length_features_ms
         ), f"fooof windowlength_ms ({settings.fooof.windowlength_ms}) needs to be smaller equal than segment_length_features_ms ({settings.segment_length_features_ms})."
 
         assert (
-            settings.fooof.freq_range_hz[0] < sfreq
-            and settings.fooof.freq_range_hz[1] < sfreq
+            self.settings.freq_range_hz[0] < sfreq
+            and self.settings.freq_range_hz[1] < sfreq
         ), f"fooof frequency range needs to be below sfreq, got {settings.fooof.freq_range_hz}"
 
         from fooof import FOOOFGroup
