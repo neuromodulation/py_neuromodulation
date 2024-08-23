@@ -297,9 +297,9 @@ def cluster_wise_p_val_correction(p_arr, p_sig=0.05, num_permutations=10000):
     p (float) : significance level of highest cluster
     p_min_index : indices of significant samples
     """
-    from skimage.measure import label as measure_label
+    from scipy.ndimage import label as measure_label
 
-    labels, num_clusters = measure_label(p_arr <= p_sig, return_num=True)
+    labels, num_clusters = measure_label(p_arr <= p_sig)
 
     # loop through clusters of p_val series or image
     index_cluster = {}

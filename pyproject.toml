@@ -38,7 +38,6 @@ dependencies = [
   "nolds",
   "numpy >= 1.21.2",
   "pandas >= 2.0.0",
-  "scikit-image",
   "scikit-learn >= 0.24.2",
   "scikit-optimize",
   "scipy >= 1.7.1",
