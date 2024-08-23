@@ -75,4 +75,4 @@ target-version = "py310"
 
 [tool.ruff.lint.per-file-ignores]
 # E402: module level import not at top of file, but we need to st PYNM_DIR and MNE_LSL_LIB first
-"__init__.py" = ["E402"]
+"**/__init__.py" = ["E402", "F401", "F403"]

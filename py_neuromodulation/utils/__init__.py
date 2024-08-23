@@ -1,6 +1,2 @@
-from .channels import *  # noqa
+from .channels import *
 from . import types
-
-__all__ = [
-    "types",
-]

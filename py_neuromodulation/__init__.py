@@ -68,28 +68,13 @@ from .stream.stream import Stream
 from .stream.data_processor import DataProcessor
 from .stream.settings import NMSettings
 
-# from .analysis.feature_reader import FeatureReader as FeatureReader
+from .analysis.feature_reader import FeatureReader
 from .features.feature_processor import add_custom_feature, remove_custom_feature
 
 from .utils import types
 from .utils import io
 
 from . import stream
+from . import analysis
 
 from .stream.settings import get_default_settings, get_fast_compute, reset_settings
-
-__all__ = [
-    "Stream",
-    "DataProcessor",
-    "NMSettings",
-    "add_custom_feature",
-    "remove_custom_feature",
-    "get_default_settings",
-    "get_fast_compute",
-    "reset_settings",
-    "stream",
-    "types",
-    "io",
-    "features",
-    "filter",
-]
