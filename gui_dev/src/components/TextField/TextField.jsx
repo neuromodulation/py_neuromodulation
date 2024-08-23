@@ -6,39 +6,35 @@ import {
   Typography,
 } from "@mui/material";
 import { useSettingsStore } from "@/stores";
+import styles from "./TextField.module.css"; // Import the CSS module
 
-
-
-
-  
-  const flattenDictionary = (dict, parentKey = '', result = {}) => {
-    for (let key in dict) {
-      const newKey = parentKey ? `${parentKey}.${key}` : key;
-      if (typeof dict[key] === 'object' && dict[key] !== null) {
-        flattenDictionary(dict[key], newKey, result);
-      } else {
-        result[newKey] = dict[key];
-      }
+const flattenDictionary = (dict, parentKey = "", result = {}) => {
+  for (let key in dict) {
+    const newKey = parentKey ? `${parentKey}.${key}` : key;
+    if (typeof dict[key] === "object" && dict[key] !== null) {
+      flattenDictionary(dict[key], newKey, result);
+    } else {
+      result[newKey] = dict[key];
     }
-    return result;
-  };
+  }
+  return result;
+};
 
-  const filterByKeys = (flatDict, keys) => {
-    const filteredDict = {};
-    keys.forEach((key) => {
-      if (flatDict.hasOwnProperty(key)) {
-        filteredDict[key] = flatDict[key];
-      }
-    });
-    return filteredDict;
-  };
+const filterByKeys = (flatDict, keys) => {
+  const filteredDict = {};
+  keys.forEach((key) => {
+    if (flatDict.hasOwnProperty(key)) {
+      filteredDict[key] = flatDict[key];
+    }
+  });
+  return filteredDict;
+};
 
 export const TextField = ({ keysToInclude }) => {
   const settings = useSettingsStore((state) => state.settings);
   const flatSettings = flattenDictionary(settings);
   const filteredSettings = filterByKeys(flatSettings, keysToInclude);
   const [textLabels, setTextLabels] = useState({});
-
 
   useEffect(() => {
     setTextLabels(filteredSettings);
@@ -51,48 +47,31 @@ export const TextField = ({ keysToInclude }) => {
     }));
   };
 
+  // Function to format the label
+  const formatLabel = (label) => {
+    const labelAfterDot = label.split(".").pop(); // Get everything after the last dot
+    return labelAfterDot.replace(/_/g, " "); // Replace underscores with spaces
+  };
+
   return (
-    <Box
-      sx={{
-        border: "1px solid #ccc",
-        padding: 2,
-        borderRadius: 5,
-        backgroundColor: "#b0aeae",
-        display: "inline-flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
-      {Object.keys(textLabels)
-        .map((label, index) => (
-          <Grid
-            container
-            alignItems="center"
-            spacing={2}
-            key={index}
-            sx={{ marginBottom: 2 }}
-            justifyContent="space-between"
+    <div className={styles.textFieldContainer}>
+      {Object.keys(textLabels).map((label, index) => (
+        <div className={styles.textFieldRow} key={index}>
+          <label
+            htmlFor={`textfield-${index}`}
+            className={styles.textFieldLabel}
           >
-            <Grid item>
-              <Typography
-                variant="body1"
-                sx={{ fontWeight: "bold", textAlign: "right" }}
-                color="black"
-              >
-                {label}:
-              </Typography>
-            </Grid>
-            <Grid item>
-              <MUITextField
-                variant="outlined"
-                size="small"
-                sx={{ width: 200, backgroundColor: "#dbdbdb" }}
-                defaultValue={textLabels[label]}
-                onChange={(e) => handleTextFieldChange(label, e.target.value)}
-              />
-            </Grid>
-          </Grid>
-        ))}
-    </Box>
+            {formatLabel(label)}:
+          </label>
+          <input
+            type="number" // or type="text" if using the text method
+            id={`textfield-${index}`}
+            value={textLabels[label]}
+            onChange={(e) => handleTextFieldChange(label, e.target.value)}
+            className={styles.textFieldInput}
+          />
+        </div>
+      ))}
+    </div>
   );
 };

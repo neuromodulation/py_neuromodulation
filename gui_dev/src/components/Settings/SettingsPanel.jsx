@@ -21,7 +21,7 @@ export const SettingsPanel = ({ settingsKey }) => {
   }, [settings, settingsKey]);
 
   const handleChange = (featureKey, isEnabled) => {
-    console.log(currentSettings);
+    
 
     const updatedSettings = {
       ...settings,

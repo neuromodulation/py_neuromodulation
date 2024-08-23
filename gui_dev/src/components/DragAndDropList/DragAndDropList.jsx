@@ -38,7 +38,7 @@ export const DragAndDropList = () => {
           onDragEnd={handleSort}
           onDragOver={(e) => e.preventDefault()}
         >
-          <p className={styles.itemText}>{option.name.replace("_", " ")}</p>
+          <p className={styles.itemText}>{[option.id, '. ' , option.name.replace("_", " ")]}</p>
           <button className={styles.removeButton} onClick={() => removeOption(option.id)}>Remove</button>
         </div>
       ))}
@@ -50,7 +50,7 @@ export const DragAndDropList = () => {
             className={styles.addButton}
             onClick={() => addOption(option)}
           >
-            {option.name.replace("_", " ")}
+            {[option.id, '. ' , option.name.replace("_", " ")]}
           </button>
         ))}
       </div>

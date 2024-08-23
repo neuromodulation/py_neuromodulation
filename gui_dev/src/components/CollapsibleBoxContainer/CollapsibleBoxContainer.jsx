@@ -1,16 +1,18 @@
 
 import { CollapsibleBox } from '../CollapsibleBox/CollapsibleBox';
 import { Settings } from '../Settings/Settings.jsx'
+import { SettingsPanel } from '../Settings/SettingsPanel'
 import { TextField } from '../TextField/TextField.jsx';
+import { FrequencySettings } from '../TextField/FrequencySettings';
 import { DragAndDropList } from '../DragAndDropList/DragAndDropList';
 import { useOptionsStore,  useSettingsStore } from "@/stores";
 
 export const CollapsibleBoxContainer = () => { 
     const options = useOptionsStore(state => state.options); 
-    const { settings } = useSettingsStore((state) => ({
+    const { settings, setSettings } = useSettingsStore((state) => ({
         settings: state.settings,
-      }));
-    // const currentSettings = settings ? settings[settingsKey] : null;
+        setSettings: state.setSettings,
+    }));
 
     return ( 
         <div> 
@@ -63,14 +65,71 @@ export const CollapsibleBoxContainer = () => {
             <TextField keysToInclude = {["preprocessing_filter.lowpass_filter_cutoff_hz", "preprocessing_filter.highpass_filter_cutoff_hz"]} />
         </CollapsibleBox>
 
-       <CollapsibleBox title = "Postprocessing Settings" startOpen = {0}>
-            <Settings settingsKey={'fft_settings'} />
+       <CollapsibleBox title = "TEST" startOpen = {0}>
+            {/* <div>
+                {Object.keys(settings?.frequency_ranges_hz).map((label) => (
+                <div key={label}>
+                    <div>{label}:</div>
+                    <div>
+                        {Object.entries(settings.frequency_ranges_hz[label]).map(([key, value]) => (
+                        <div key={key}>
+                            {key}: {settings.frequency_ranges_hz[label][key]}
+                        </div>
+                        ))}
+                    </div>
+                </div>
+            ))}
+            </div> */}
+
+            <FrequencySettings settings ={settings} />
+
        </CollapsibleBox>
 
+
+        <div> 
+        {settings?.features?.fft && ( 
+                <CollapsibleBox title='FFT '>
+                    <Settings settingsKey={'fft_settings'} />
+                    <TextField keysToInclude={["fft_settings.windowlength_ms"]} />
+                    
+                </CollapsibleBox>
+            )}
+        </div>
+
+        <div>
+        {settings?.features?.welch && ( 
+                <CollapsibleBox title=' Welch '>
+                    <SettingsPanel settingsKey={'welch_settings'} />
+                    <TextField keysToInclude={["welch_settings.windowlength_ms"]} />
+                </CollapsibleBox>
+            )}
+        </div>
+
+        <div>
+        {settings?.features?.welch && ( 
+                <CollapsibleBox title=' Welch '>
+                    <SettingsPanel settingsKey={'welch_settings'} />
+                    <TextField keysToInclude={["welch_settings.windowlength_ms"]} />
+                </CollapsibleBox>
+            )}
+        </div>
+        <div>
+        {settings?.features?.welch && ( 
+                <CollapsibleBox title=' STFT '>
+                    <SettingsPanel settingsKey={'stft_settings'} />
+                    <TextField keysToInclude={["stft_settings.windowlength_ms"]} />
+
+                </CollapsibleBox>
+            )}
+        </div>
+    
+       
 
     </div>
 
     )
     
 }
+
+
 
