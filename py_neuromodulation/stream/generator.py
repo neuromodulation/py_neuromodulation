@@ -1,5 +1,4 @@
 import numpy as np
-from py_neuromodulation.stream.settings import NMSettings
 
 
 class RawDataGenerator:
@@ -11,8 +10,9 @@ class RawDataGenerator:
     def __init__(
         self,
         data: np.ndarray,
-        settings: NMSettings,
         sfreq: float,
+        sampling_rate_features_hz: float,
+        segment_length_features_ms: float,
     ) -> None:
         """
         Arguments
@@ -26,35 +26,27 @@ class RawDataGenerator:
             np.array: 1D array of time stamps
             np.array: new batch for run function of full segment length shape
         """
-        self._idx = None
+        self._idx: int = 0  # keep track of the current index in the input data
+        self.batch_counter: int = 0  # counter for the batches
 
-        self.sfreq = sfreq
         self.data = data
-
-        sfreq_new = settings.sampling_rate_features_hz
-        offset_time = settings.segment_length_features_ms
-        self.offset_start = offset_time / 1000 * sfreq
-
-        self.ratio_samples_features = sfreq / sfreq_new
-
-        self.ratio_counter = 0
-
-        self.n_samples = range(
-            data.shape[1] + 1
-        )  # shape + 1 guarantees that the last sample is also included
+        self.sfreq = sfreq
+        # Width, in data points, of the moving window used to calculate features
+        self.segment_length = segment_length_features_ms / 1000 * sfreq
+        # Ratio of the sampling frequency of the input data to the sampling frequency
+        self.stride = sfreq / sampling_rate_features_hz
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        if self._idx is None:
-            self._idx = 0
+        start = np.floor(self._idx).astype(int)
+        end = np.floor(self._idx + self.segment_length).astype(int)
 
-        try:
-            return (
-                np.arange(cnt - self.offset_start, cnt) / self.sfreq,
-                self.data[:, np.floor(cnt - self.offset_start).astype(int) : cnt],
-            )
+        self._idx += self.stride
+        self.batch_counter += 1
 
-        except IndexError:
+        if end > self.data.shape[1]:
             raise StopIteration
+
+        return np.arange(start, end) / self.sfreq, self.data[:, start:end]

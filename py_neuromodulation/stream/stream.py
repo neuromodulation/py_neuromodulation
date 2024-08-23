@@ -1,6 +1,7 @@
 """Module for generic and offline data streams."""
 
 from typing import TYPE_CHECKING
+from collections.abc import Iterator
 import numpy as np
 from pathlib import Path
 
@@ -251,12 +252,31 @@ class Stream:
             verbose=self.verbose,
         )
 
-        nm.logger.log_to_file(out_dir)
+        self.is_stream_lsl = is_stream_lsl
+        self.stream_lsl_name = stream_lsl_name
 
+        if data is not None:
+            data = self._handle_data(data)
+        elif self.data is not None:
+            data = self._handle_data(self.data)
+        elif self.data is None and data is None and self.is_stream_lsl is False:
+            raise ValueError("No data passed to run function.")
+
+        out_path = Path(out_path_root, folder_name)
+        out_path.mkdir(parents=True, exist_ok=True)
+        nm.logger.log_to_file(out_path)
+
+        # Initialize generator
+        self.generator: Iterator
         if not is_stream_lsl:
             from py_neuromodulation.stream.generator import RawDataGenerator
 
-            generator = RawDataGenerator(data, self.settings, self.sfreq)
+            self.generator = RawDataGenerator(
+                data,
+                self.sfreq,
+                self.settings.sampling_rate_features_hz,
+                self.settings.segment_length_features_ms,
+            )
         else:
             from py_neuromodulation.stream.mnelsl_stream import LSLStream
 
@@ -279,11 +299,10 @@ class Stream:
                 nm.logger.warning(error_msg)
                 self.sfreq = self.lsl_stream.stream.sinfo.sfreq
 
-            generator = self.lsl_stream.get_next_batch()
+            self.generator = self.lsl_stream.get_next_batch()
 
         prev_batch_end = 0
-
-        for timestamps, data_batch in generator:
+        for timestamps, data_batch in self.generator:
             if data_batch is None:
                 break
 
