@@ -7,3 +7,4 @@ export { Sidebar, SidebarDrawer } from "./Sidebar/Sidebar";
 export { CollapsibleBox } from "./CollapsibleBox/CollapsibleBox";
 export { ChannelsTable } from "./ChannelsTable/ChannelsTable";
 export { AppBar } from "./AppBar/AppBar";
+export { AppInfoModal } from "./AppInfoModal/AppInfoModal";

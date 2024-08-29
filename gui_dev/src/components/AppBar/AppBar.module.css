@@ -1,3 +1,7 @@
+:root {
+  --accent-color: #1a73e8;
+}
+
 .appBar {
   display: flex;
   flex-direction: row;
@@ -19,6 +23,15 @@
   }
 }
 
+.appTitle {
+  cursor: pointer;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: var(--accent-color);
+  }
+}
+
 /* TOOLBAR */
 .toolbar {
   display: flex;
@@ -33,10 +46,14 @@
   text-transform: none;
   color: inherit;
   margin-left: 40px !important; /* Further increased space between buttons */
-}
 
-.toolbarButton.active {
-  color: #1a73e8; /* Accent color for active state */
+  &.active {
+    color: var(--accent-color);
+  }
+
+  :first-child {
+    min-width: 50px;
+  }
 }
 
 /* WINDOW BUTTONS FOR PYWEBVIEW */

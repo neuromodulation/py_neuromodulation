@@ -1,5 +1,10 @@
 import { useEffect } from "react";
-import { useSettingsStore, useSocketStore, useWebviewStore } from "@/stores";
+import {
+  useSettingsStore,
+  useSocketStore,
+  useWebviewStore,
+  useAppInfoStore,
+} from "@/stores";
 import {
   BrowserRouter as Router,
   Route,
@@ -20,10 +25,12 @@ export function App() {
   const fetchSettingsWithDelay = useSettingsStore(
     (state) => state.fetchSettingsWithDelay
   );
+  const fetchAppInfo = useAppInfoStore((state) => state.fetchAppInfo);
   useEffect(() => {
     fetchSettingsWithDelay();
     initializePyWebView();
-  }, [fetchSettingsWithDelay, initializePyWebView]);
+    fetchAppInfo();
+  }, [fetchSettingsWithDelay, initializePyWebView, fetchAppInfo]);
 
   // Connect to web-socket
   const { connectSocket, disconnectSocket } = useSocketStore((state) => ({
