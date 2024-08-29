@@ -177,11 +177,9 @@ class PyNMBackend(FastAPI):
                     await self.websocket_manager.send_bytes(header)
 
                 await asyncio.sleep(0.016)
-            except asyncio.CancelledError:
-                break
             except Exception as e:
                 self.logger.error(f"Error in periodic task: {e}")
-                break
+                await asyncio.sleep(0.5)
 
         @self.get("/{full_path:path}")
         async def serve_spa(request, full_path: str):
