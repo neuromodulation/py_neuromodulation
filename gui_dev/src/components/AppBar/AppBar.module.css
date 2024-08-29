@@ -1,10 +1,14 @@
-.titleBar {
+.appBar {
   display: flex;
   flex-direction: row;
-  width: 100vw;
+  justify-content: space-between;
+  align-items: center;
 
+  width: 100vw;
   background-color: #333;
   color: white;
+
+  border-bottom: 1px solid #555;
 
   h1 {
     margin: 5px 10px;
@@ -15,17 +19,35 @@
   }
 }
 
-.homeButton {
-  svg {
-    width: 100%;
-    height: 100%;
-  }
+/* TOOLBAR */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0.5rem;
+
+  flex-grow: 1;
 }
+
+.toolbarButton {
+  text-transform: none;
+  color: inherit;
+  margin-left: 40px !important; /* Further increased space between buttons */
+}
+
+.toolbarButton.active {
+  color: #1a73e8; /* Accent color for active state */
+}
+
+/* WINDOW BUTTONS FOR PYWEBVIEW */
 
 .windowButtons {
   display: flex;
   flex-direction: row;
   justify-content: center;
+
+  height: 100%;
+
   button {
     display: flex;
     justify-content: center;
@@ -49,9 +71,4 @@
   .buttonMinimize:hover {
     background-color: grey;
   }
-}
-
-.dragArea {
-  flex-grow: 1;
-  cursor: move;
 }

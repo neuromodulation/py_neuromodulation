@@ -1,40 +1,42 @@
 import { create } from "zustand";
 
-export const useWebviewStore = create((set, get) => ({
+const PYWEBVIEW_CHECK_INTERVAL = 100; // ms
+const PYWEBVIEW_TIMEOUT = 15000; // ms, increased to 15 seconds
+
+export const useWebviewStore = create((set) => ({
   isWebviewReady: false,
   isWebView: false,
-  statusMessage: "Waiting for PyWebView...",
+  statusMessage: "Checking for PyWebview...",
   isMaximized: false,
   setIsWebviewReady: (isReady) => set({ isWebviewReady: isReady }),
   setStatusMessage: (message) => set({ statusMessage: message }),
   setIsMaximized: (maximized) => set({ isMaximized: maximized }),
 
   initializePyWebView: () => {
-    set({ statusMessage: "Checking for PyWebview..." });
-
-    if (window.pywebview) {
+    if (navigator.userAgent.includes("PyNmWebView")) {
       set({
         isWebView: true,
         statusMessage: "Detected PyWebView, waiting for API...",
       });
 
       const startTime = Date.now();
-      while (!window.pywebview.api) {
-        if (Date.now() - startTime > PYWEBVIEW_TIMEOUT) {
+      const checkPywebview = () => {
+        if (window.pywebview?.api) {
+          set({
+            isWebviewReady: true,
+            statusMessage: "Found PyWebView API",
+          });
+        } else if (Date.now() - startTime > PYWEBVIEW_TIMEOUT) {
           set({
             statusMessage: "PyWebView initialization timed out",
             isWebviewReady: false,
           });
-          return;
+        } else {
+          setTimeout(checkPywebview, PYWEBVIEW_CHECK_INTERVAL);
         }
+      };
 
-        setTimeout(resolve, PYWEBVIEW_CHECK_INTERVAL);
-      }
-
-      set({
-        isWebviewReady: true,
-        statusMessage: "PyWebView is ready",
-      });
+      checkPywebview();
     } else {
       set({
         isWebView: false,
