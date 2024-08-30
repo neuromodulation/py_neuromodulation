@@ -41,6 +41,7 @@ class PeakDetectionSettings(NMBaseModel):
 class SharpwaveFeatures(BoolSelector):
     peak_left: bool = False
     peak_right: bool = False
+    num_peaks: bool = False
     trough: bool = False
     width: bool = False
     prominence: bool = True
@@ -370,6 +371,11 @@ class SharpwaveAnalyzer(NMFeature):
             right_height = data[troughs_valid + int(5 * (1000 / self.sfreq))]
             # results["sharpness"] = ((trough_height - left_height) + (trough_height - right_height)) / 2
             results["sharpness"] = trough_height - 0.5 * (left_height + right_height)
+
+        if self.sw_settings.sharpwave_features.num_peaks:
+            results["num_peaks"] = [
+                trough_idx.shape[0]
+            ]  # keep list to the estimator can be applied
 
         if self.need_steepness:
             # steepness is calculated as the first derivative

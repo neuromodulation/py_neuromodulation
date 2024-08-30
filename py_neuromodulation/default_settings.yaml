@@ -150,6 +150,7 @@ sharpwave_analysis_settings:
   sharpwave_features:
     peak_left: false
     peak_right: false
+    num_peaks: false
     trough: false
     width: false
     prominence: true
