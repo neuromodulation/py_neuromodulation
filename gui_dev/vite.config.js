@@ -20,7 +20,7 @@ const react_config = {
 };
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command, mode }) => {
+export default defineConfig(() => {
   return {
     plugins: [react(react_config)],
     resolve: {
@@ -31,10 +31,6 @@ export default defineConfig(({ command, mode }) => {
       outDir: path.resolve(__dirname, "../py_neuromodulation/gui/frontend"),
       emptyOutDir: true,
       rollupOptions: {
-        // input: {
-        //   main: path.resolve(__dirname, "index.html"),
-        //   welcome: path.resolve(__dirname, "welcome.html"),
-        // },
         output: {
           manualChunks: {
             plotly: ["plotly.js-basic-dist-min"],

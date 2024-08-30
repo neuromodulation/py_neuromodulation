@@ -13,24 +13,30 @@ class WebSocketManager:
     """
 
     def __init__(self):
-        # self.active_connections: List[WebSocket] = []
-        self.connection: WebSocket | None = None
+        self.active_connections: list[WebSocket] = []
         self.logger = logging.getLogger("PyNM")
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
-        # self.active_connections.append(websocket)
-        self.connection = websocket
-        self.logger.info(f"Client connected with client ID: {websocket.client}")
+        self.active_connections.append(websocket)
+        client_address = websocket.client
+        if client_address:
+            self.logger.info(
+                f"Client connected with client ID: {client_address.port}:{client_address.port}"
+            )
 
-    def disconnect(self):
-        # self.active_connections.remove(websocket)
-        self.connection = None
-        self.logger.info("Client disconnected.")
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+        client_address = websocket.client
+        if client_address:
+            self.logger.info(
+                f"Client {client_address.port}:{client_address.port} disconnected."
+            )
 
+    # Combine IP and port to create a unique client ID
     async def send_bytes(self, header: dict, payload: bytes | None = None):
-        if not self.connection:
-            self.logger.warning("No active connection to send message.")
+        if not self.active_connections:
+            self.logger.warning("No active connectios to send message.")
             return
 
         if payload:
@@ -48,15 +54,17 @@ class WebSocketManager:
         if payload:
             message.extend(payload)
 
-        await self.connection.send_bytes(message)
+        for connection in self.active_connections:
+            await connection.send_bytes(message)
 
     async def send_message(self, message: str):
-        if self.connection:
-            await self.connection.send_text(message)
+        if self.active_connections:
+            for connection in self.active_connections:
+                await connection.send_text(message)
             self.logger.info(f"Message sent: {message}")
         else:
             self.logger.warning("No active connection to send message.")
 
     @property
     def is_connected(self):
-        return self.connection is not None
+        return self.active_connections is not None
