@@ -195,3 +195,5 @@ test_data/
 # Ignore npm lock files
 package-lock.json
 package-lock.json.bak
+# Ignore uv lock file
+uv.lock
