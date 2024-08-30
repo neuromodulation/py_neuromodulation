@@ -14,9 +14,6 @@ export const Dashboard = () => (
       <SidebarDrawer name="settings">
         <Settings />
       </SidebarDrawer>
-      <SidebarDrawer name="another">
-        <div>Test</div>
-      </SidebarDrawer>
     </Sidebar>
     <div className={styles.dashboard}>
       <Graph />
