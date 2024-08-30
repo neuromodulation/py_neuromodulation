@@ -39,3 +39,8 @@
 .modalContent button {
   margin-top: 20px;
 }
+
+.infoLabel {
+  color: #1a73e8; /* Blue accent color */
+  font-weight: bold;
+}
