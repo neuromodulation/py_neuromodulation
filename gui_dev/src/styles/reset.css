@@ -14,17 +14,9 @@
 }
 
 body {
-  background-color: #333;
-  color: #f4f4f4;
-  font-family: 'Figtree', sans-serif;
   line-height: 1.5; /* accessible line-height */
   -webkit-font-smoothing: antialiased; /* disable sub-pixel antialiasing in MacOS */
   min-height: 100dvh;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
 }
 
 /* Set shorter line heights on headings and interactive elements */
@@ -44,8 +36,6 @@ button,
 textarea,
 select {
   font: inherit;
-  color: #f4f4f4;
-  background-color: #333;
 }
 
 /* Prevent font size inflation */
@@ -92,5 +82,5 @@ textarea:not([rows]) {
 
 /* Anything that has been anchored to should have extra scroll margin */
 /* :target {
-  scroll-margin-block: 5ex;
-} */
+   scroll-margin-block: 5ex;
+ } */
