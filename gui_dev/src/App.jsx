@@ -39,9 +39,6 @@ export const App = () => {
   const disconnectSocket = useSocketStore((state) => state.disconnectSocket);
 
   useEffect(() => {
-    console.log(window?.pywebview);
-    console.log(window.pywebview?.api);
-
     console.log("Connecting socket from App component...");
     connectSocket();
     return () => {
@@ -50,29 +47,12 @@ export const App = () => {
     };
   }, [connectSocket, disconnectSocket]);
 
-  // const theme = createTheme({
-  //   colorSchemes: { light: true, dark: true },
-  //   palette: {
-  //     mode: "dark", // This sets the overall theme to dark mode
-  //     primary: {
-  //       main: "#1a73e8", // Change this to your preferred primary color
-  //     },
-  //     secondary: {
-  //       main: "#f4f4f4", // Light color for secondary elements
-  //     },
-  //     background: {
-  //       default: "#333", // Background color
-  //       paper: "#424242", // Background color for Paper components
-  //     },
-  //     text: {
-  //       primary: "#f4f4f4", // Text color
-  //       secondary: "#cccccc", // Slightly lighter text color
-  //     },
-  //   },
-  //   typography: {
-  //     fontFamily: '"Figtree", sans-serif', // Use the Figtree font globally
-  //   },
-  // });
+  // Check PyWebView status
+  const checkWebviewReady = useWebviewStore((state) => state.checkWebviewReady);
+
+  useEffect(() => {
+    checkWebviewReady();
+  }, [checkWebviewReady]);
 
   return (
     <ThemeProvider theme={theme}>
