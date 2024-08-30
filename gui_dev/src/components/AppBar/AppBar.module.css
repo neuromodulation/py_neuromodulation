@@ -13,17 +13,17 @@
   color: white;
 
   border-bottom: 1px solid #555;
-
-  h1 {
-    margin: 5px 10px;
-    font-size: 20pt;
-    display: "inline";
-    color: white;
-    user-select: none;
-  }
 }
 
 .appTitle {
+  margin: 5px 10px;
+  font-size: 20pt;
+  display: "inline";
+  color: white;
+  user-select: none;
+
+  white-space: nowrap;
+
   cursor: pointer;
   transition: color 0.3s ease;
 
