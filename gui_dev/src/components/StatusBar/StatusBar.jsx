@@ -1,9 +1,16 @@
 import { ResizeHandle } from "./ResizeHandle";
 import { SocketStatus } from "./SocketStatus";
 import { WebviewStatus } from "./WebviewStatus";
+
+import { useWebviewStore } from "@/stores";
+
 import styles from "./StatusBar.module.css";
 
 export const StatusBar = () => {
+  const { isWebView } = useWebviewStore((state) => ({
+    isWebView: state.isWebView,
+  }));
+
   return (
     <div className={styles.statusBar}>
       <div className={styles.spacerLeft}></div>
@@ -19,7 +26,7 @@ export const StatusBar = () => {
         <SocketStatus />
       </div>
       <div className={styles.spacerRight}></div>
-      <ResizeHandle />
+      {isWebView && <ResizeHandle />}
     </div>
   );
 };

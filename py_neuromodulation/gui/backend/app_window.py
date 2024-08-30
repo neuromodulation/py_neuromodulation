@@ -19,6 +19,8 @@ FRONTEND_PATH = PYNM_DIR / "gui" / "frontend"
 APP_URL = VITE_URL if DEV else str(FRONTEND_PATH / "index.html")
 WELCOME_URL = str(FRONTEND_PATH / "welcome")
 
+USER_AGENT = "PyNmWebView"
+
 
 class WebViewWindow:
     def __init__(self, debug: bool = False) -> None:
@@ -55,7 +57,7 @@ class WebViewWindow:
         if DEV:
             self.wait_for_vite_server()
 
-        webview.start(debug=self.debug)
+        webview.start(debug=self.debug, user_agent=USER_AGENT)
 
     def wait_for_vite_server(self):
         while True:

@@ -3,13 +3,11 @@ import { useSocketStore } from "@/stores";
 import { newPlot, react } from "plotly.js-dist-min";
 import styles from "./Graph.module.css";
 
-// Plotly documentation: https://plotly.com/javascript/plotlyjs-function-reference/
-
 export const Graph = ({
   title = "EEG Data",
   xAxisTitle = "Sample",
   yAxisTitle = "Value",
-  lineColor = "blue",
+  lineColor = "#1a73e8",
   maxDataPoints = 1000,
 }) => {
   const { graphData } = useSocketStore();
@@ -27,44 +25,49 @@ export const Graph = ({
   ]);
 
   const layoutRef = useRef({
-    title: title,
+    title: {
+      text: title,
+      font: { color: "#f4f4f4" },
+    },
     autosize: true,
     height: 400,
-    xaxis: { title: xAxisTitle },
-    yaxis: { title: yAxisTitle },
+    paper_bgcolor: "#333",
+    plot_bgcolor: "#333",
+    xaxis: {
+      title: {
+        text: xAxisTitle,
+        font: { color: "#f4f4f4" },
+      },
+      color: "#cccccc",
+    },
+    yaxis: {
+      title: {
+        text: yAxisTitle,
+        font: { color: "#f4f4f4" },
+      },
+      color: "#cccccc",
+    },
+    margin: {
+      l: 50,
+      r: 50,
+      b: 50,
+      t: 50,
+    },
+    font: {
+      color: "#f4f4f4",
+    },
   });
 
   const updateGraph = (newData) => {
     if (!plotlyRef.current) return;
 
-    // TODO: show a dynamic window of the last maxDataPoints
-    // const updatedY = [...dataRef.current[0].y.slice(-maxDataPoints + 1), newData];
     const updatedY = newData;
 
     dataRef.current[0] = { ...dataRef.current[0], y: updatedY };
     react(plotlyRef.current, dataRef.current, layoutRef.current);
-
-    // Plotly.animate(
-    //   plotlyRef.current,
-    //   {
-    //     data: [{ y: newData }],
-    //     traces: [0],
-    //     layout: {},
-    //   },
-    //   {
-    //     transition: {
-    //       duration: 32,
-    //       easing: "cubic-in-out",
-    //     },
-    //     frame: {
-    //       duration: 32,
-    //     },
-    //   }
-    // );
   };
 
   useEffect(() => {
-    // Initialize plot after component mount
     if (graphRef.current && !plotlyRef.current) {
       newPlot(graphRef.current, dataRef.current, layoutRef.current).then(
         (gd) => {
@@ -75,8 +78,6 @@ export const Graph = ({
   });
 
   useEffect(() => {
-    // Update the graph data when graphData from the socket store changes]
-    // Could also use plotly.extendTracess
     if (plotlyRef.current && graphData.length > 0) {
       dataRef.current[0] = { ...dataRef.current[0], y: graphData };
       react(plotlyRef.current, dataRef.current, layoutRef.current);
@@ -88,9 +89,9 @@ export const Graph = ({
 
     layoutRef.current = {
       ...layoutRef.current,
-      title: title,
-      xaxis: { ...layoutRef.current.xaxis, title: xAxisTitle },
-      yaxis: { ...layoutRef.current.yaxis, title: yAxisTitle },
+      title: { text: title },
+      xaxis: { ...layoutRef.current.xaxis, title: { text: xAxisTitle } },
+      yaxis: { ...layoutRef.current.yaxis, title: { text: yAxisTitle } },
     };
     react(plotlyRef.current, dataRef, layoutRef.current);
   }, [title, xAxisTitle, yAxisTitle, lineColor]);

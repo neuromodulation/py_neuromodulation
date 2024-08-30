@@ -59,6 +59,8 @@ dependencies = [
   "pydantic>=2.7.3",
   "pywebview",
   "fastapi",
+  "uvicorn>=0.30.6",
+  "websockets>=13.0",
   "toml>=0.10.2",
   "seaborn >= 0.11",
 ]

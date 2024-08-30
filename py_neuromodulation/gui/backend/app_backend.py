@@ -70,9 +70,7 @@ class PyNMBackend(FastAPI):
 
         @self.get("/api/channels")
         async def get_channels():
-            channels_html = self.pynm_state.stream.nm_channels.to_html(
-                index=False, classes="table table-bordered"
-            )
+            channels_html = self.pynm_state.stream.nm_channels.to_json(index=False)
             return {"html": channels_html}
 
         @self.post("/api/channels")
@@ -123,14 +121,14 @@ class PyNMBackend(FastAPI):
 
         @self.websocket("/ws")
         async def websocket_endpoint(websocket: WebSocket):
-            if self.websocket_manager.is_connected:
-                self.logger.info(
-                    "WebSocket connection attempted while already connected"
-                )
-                await websocket.close(
-                    code=1008, reason="Another client is already connected"
-                )
-                return
+            # if self.websocket_manager.is_connected:
+            #     self.logger.info(
+            #         "WebSocket connection attempted while already connected"
+            #     )
+            #     await websocket.close(
+            #         code=1008, reason="Another client is already connected"
+            #     )
+            #     return
 
             await self.websocket_manager.connect(websocket)
 
@@ -146,8 +144,7 @@ class PyNMBackend(FastAPI):
                         f"Message received: {data}"
                     )
             except WebSocketDisconnect:
-                self.websocket_manager.disconnect()
-                self.logger.info("Client disconnected")
+                self.websocket_manager.disconnect(websocket)
             finally:
                 # Ensure the periodic task is cancelled when the WebSocket disconnects
                 if periodic_task:
@@ -180,11 +177,9 @@ class PyNMBackend(FastAPI):
                     await self.websocket_manager.send_bytes(header)
 
                 await asyncio.sleep(0.016)
-            except asyncio.CancelledError:
-                break
             except Exception as e:
                 self.logger.error(f"Error in periodic task: {e}")
-                break
+                await asyncio.sleep(0.5)
 
         @self.get("/{full_path:path}")
         async def serve_spa(request, full_path: str):

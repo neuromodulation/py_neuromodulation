@@ -11,6 +11,7 @@ export const useSocketStore = create((set, get) => ({
   graphData: [],
   infoMessages: [],
   reconnectTimer: null,
+  intentionalDisconnect: false,
 
   setSocket: (socket) => set({ socket }),
 
@@ -25,7 +26,7 @@ export const useSocketStore = create((set, get) => ({
     if (socket || status === "connecting" || status === "connected") return;
 
     // Set socket status to connecting
-    set({ status: "connecting", error: null });
+    set({ status: "connecting", error: null, intentionalDisconnect: false });
 
     // Create new socket connection
     const newSocket = new WebSocket(WEBSOCKET_URL);
@@ -38,19 +39,27 @@ export const useSocketStore = create((set, get) => ({
 
     // Error event fires when the connection is closed due to error
     newSocket.onerror = (event) => {
-      console.error("WebSocket error:", event);
-      set({ status: "disconnected", error: "Connection error", socket: null });
+      if (!get().intentionalDisconnect) {
+        console.error("WebSocket error:", event);
+        set({
+          status: "disconnected",
+          error: "Connection error",
+          socket: null,
+        });
 
-      // Attempt to reconnect after a delay
-      get().setReconnectTimer(RECONNECT_INTERVAL);
+        // Attempt to reconnect after a delay
+        get().setReconnectTimer(RECONNECT_INTERVAL);
+      }
     };
 
     newSocket.onclose = (event) => {
-      console.log("WebSocket closed:", event.reason);
-      set({ status: "disconnected", error: null, socket: null });
-
-      // Attempt to reconnect after a delay
-      get().setReconnectTimer(RECONNECT_INTERVAL);
+      if (!get().intentionalDisconnect) {
+        console.log("WebSocket closed unexpectedly:", event.reason);
+        set({ status: "disconnected", error: null, socket: null });
+        get().setReconnectTimer(RECONNECT_INTERVAL);
+      } else {
+        console.log("WebSocket closed intentionally");
+      }
     };
 
     newSocket.onmessage = (event) => {
@@ -117,22 +126,35 @@ export const useSocketStore = create((set, get) => ({
 
   disconnectSocket: () => {
     const { socket, reconnectTimer } = get();
+
+    set({ intentionalDisconnect: true });
+
     if (socket) {
-      socket.close();
+      try {
+        socket.close();
+      } catch (error) {
+        console.warning("Error closing socket:", error);
+      }
     }
+
     if (reconnectTimer) {
       clearTimeout(reconnectTimer);
     }
+
     set({
       socket: null,
       status: "disconnected",
       error: null,
       reconnectTimer: null,
+      intentionalDisconnect: false,
     });
   },
 
   setReconnectTimer: (delay) => {
-    const timer = setTimeout(() => get().connectSocket(), delay);
+    const timer = setTimeout(() => {
+      set({ intentionalDisconnect: false });
+      get().connectSocket();
+    }, delay);
     set({ reconnectTimer: timer });
   },
 

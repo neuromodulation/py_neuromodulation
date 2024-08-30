@@ -22,6 +22,8 @@ def run_vite(shutdown_event: "Event", debug: bool = False) -> None:
     """Run Vite in a separate shell"""
     import subprocess
 
+    signal.signal(signal.SIGINT, signal.SIG_IGN)  # Don't propagate SIGINT to subprocess
+
     logger = create_logger(
         "Vite",
         "magenta",
@@ -108,6 +110,8 @@ def run_backend(
     import uvicorn
     from uvicorn.config import LOGGING_CONFIG
 
+    signal.signal(signal.SIGINT, signal.SIG_IGN)  # Don't propagate SIGINT to subprocess
+
     # Configure logging
     color = ansi_color(color="green", bright=True, styles=["BOLD"])
     log_level = "DEBUG" if debug else "INFO"
@@ -155,22 +159,15 @@ def run_backend(
 class AppManager:
     LAUNCH_FLAG = "PYNM_RUNNING"
 
-    def __init__(self, debug: bool = False) -> None:
+    def __init__(self, debug: bool = False, run_in_webview=True) -> None:
         self.debug = debug
-        self.shutdown_complete = False
+        self.run_in_webview = run_in_webview
+        self._reset()
 
         # Prevent launching multiple instances of the app due to multiprocessing
         # This allows the absence of a main guard in the main script
         self.is_child_process = os.environ.get(self.LAUNCH_FLAG) == "TRUE"
         os.environ[self.LAUNCH_FLAG] = "TRUE"
-
-        # Background tasks
-        self.tasks: dict[str, mp.Process] = {}
-
-        # Events for multiprocessing synchronization
-        self.ready_event = mp.Event()
-        self.restart_event = mp.Event()
-        self.shutdown_event = mp.Event()
 
         # PyNM state
         # TODO: need to find a way to pass the state to the backend
@@ -183,6 +180,20 @@ class AppManager:
             "yellow",
             logging.DEBUG if self.debug else logging.INFO,
         )
+
+    def _reset(self) -> None:
+        """Reset the AppManager to its initial state."""
+        # Flags to track the state of the application
+        self.shutdown_complete = False
+        self.shutdown_started = False
+
+        # Store background tasks
+        self.tasks: dict[str, mp.Process] = {}
+
+        # Events for multiprocessing synchronization
+        self.ready_event = mp.Event()
+        self.restart_event = mp.Event()
+        self.shutdown_event = mp.Event()
 
     def _run_app(self) -> None:
         self.logger.info("Starting Vite server...")
@@ -207,6 +218,12 @@ class AppManager:
             process.start()
 
     def _terminate_app(self) -> None:
+        if self.shutdown_started:
+            self.logger.info("Termination already in progress. Skipping.")
+            return
+
+        self.shutdown_started = True
+
         timeout = 5
         deadline = time.time() + timeout
 
@@ -229,22 +246,37 @@ class AppManager:
         self.shutdown_event.clear()
         self.logger.info("All background tasks succesfully terminated.")
 
+    def _sigint_handler(self, signum, frame):
+        if not self.shutdown_started:
+            self.logger.info("Received SIGINT. Initiating graceful shutdown...")
+            self._terminate_app()
+        else:
+            self.logger.info("SIGINT received again. Ignoring...")
+
     def launch(self) -> None:
         if self.is_child_process:
             return
 
-        from .app_window import WebViewWindow
+        # Handle keyboard interrupt signals
+        signal.signal(signal.SIGINT, self._sigint_handler)
 
         self._run_app()
 
-        self.logger.info("Starting PyWebView window...")
-        # PyWebView window only works from main thread
-        window = WebViewWindow(debug=True)
-        window.register_event_handler("closed", self._terminate_app)
-        window.start()
+        if self.run_in_webview:
+            from .app_window import WebViewWindow
 
-        while not self.shutdown_complete:
-            time.sleep(0.1)
+            self.logger.info("Starting PyWebView window...")
+            window = WebViewWindow(debug=self.debug)  # Must be called from main thread
+            window.register_event_handler("closed", self._terminate_app)
+            window.start()  # Start the window, this will block until the window is closed
+        else:
+            try:
+                while not self.shutdown_complete:
+                    time.sleep(0.1)
+            except KeyboardInterrupt:
+                pass  # The SIGINT handler will take care of termination
 
-        self.shutdown_complete = False
+        if not self.shutdown_complete:
+            self._terminate_app()
+
         self.logger.info("All processes cleaned up. Exiting...")

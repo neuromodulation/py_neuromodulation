@@ -1,5 +1,5 @@
 import { useWebviewStore } from "@/stores";
-import styles from "./TitleBar.module.css";
+import styles from "./AppBar.module.css";
 
 export const WindowButtons = () => {
   const { isWebviewReady, isMaximized, setIsMaximized } = useWebviewStore(
