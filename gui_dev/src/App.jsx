@@ -38,6 +38,9 @@ export const App = () => {
   const disconnectSocket = useSocketStore((state) => state.disconnectSocket);
 
   useEffect(() => {
+    console.log(window?.pywebview);
+    console.log(window.pywebview?.api);
+
     console.log("Connecting socket from App component...");
     connectSocket();
     return () => {

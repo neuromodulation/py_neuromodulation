@@ -1,9 +1,9 @@
 :root {
-  --sidebar-color: #f0f0f0;
-  --toggle-color: #d0d0d0;
-  --toggle-hover-color: #e0e0e0;
-  --drawer-color: #e0e0e0;
-  --resize-handle-color: #ccc;
+  --sidebar-color: #333; /* Dark background for the sidebar */
+  --toggle-color: #444; /* Slightly lighter color for toggle button */
+  --toggle-hover-color: #555; /* Even lighter on hover */
+  --drawer-color: #424242; /* Dark color for drawer */
+  --resize-handle-color: #616161; /* Handle color matching the dark theme */
   --max-drawer-width: 600px;
   --min-drawer-width: 200px;
 }
@@ -35,6 +35,7 @@
     transition: none;
   }
 }
+
 .drawerToggle {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
@@ -44,6 +45,7 @@
   font-size: 16px;
   transition: background-color 0.3s;
   padding: 10px 5px;
+  color: #f4f4f4; /* Light text color */
 
   &.open {
     background-color: var(--toggle-color);
@@ -56,6 +58,7 @@
 
 .toggleLabel {
   text-transform: capitalize;
+  color: #f4f4f4; /* Ensure text is visible on dark background */
 }
 
 .drawer {
@@ -65,9 +68,10 @@
   flex-direction: column;
   width: var(--max-drawer-width);
   height: 100%;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5); /* Stronger shadow for dark theme */
   overflow-y: auto;
   padding: 20px;
+  color: #f4f4f4; /* Ensure text is visible on dark background */
 }
 
 .resizeHandle {
@@ -84,16 +88,14 @@
     position: absolute;
     top: 0;
     right: 0;
-    width: 1px; /* Start with 1px width */
+    width: 1px;
     height: 100%;
-    background-color: #ccc; /* Or any color you prefer for the non-resizing state */
-    transition:
-      width 0.15s ease-out,
-      background-color 0.15s ease-out;
+    background-color: var(--resize-handle-color);
+    transition: width 0.15s ease-out, background-color 0.15s ease-out;
   }
 
   &:hover::after {
-    width: 3px; /* Expand on hover */
+    width: 3px;
   }
 
   &.resizing {
@@ -101,7 +103,7 @@
 
     &::after {
       width: 3px;
-      background-color: rgba(109, 158, 231, 0.712);
+      background-color: rgba(255, 255, 255, 0.712); /* Lighter during resizing */
     }
   }
 }
