@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Select, MenuItem, Checkbox } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Select, MenuItem, Switch } from '@mui/material';
 
 const channelTypes = [
   'eeg', 'meg (mag)', 'meg (grad)', 'ecg', 'seeg', 'dbs', 
@@ -18,7 +18,7 @@ export const ChannelsTable = ({ channels, setChannels }) => {
 
   const handleToggleChange = (index, field) => {
     const updatedChannels = channels.map((channel, i) => 
-      i === index ? { ...channel, [field]: !channel[field] } : channel
+      i === index ? { ...channel, [field]: channel[field] === 1 ? 0 : 1 } : channel
     );
     setChannels(updatedChannels);
   };
@@ -34,6 +34,7 @@ export const ChannelsTable = ({ channels, setChannels }) => {
             <TableCell>Status</TableCell>
             <TableCell>Used</TableCell>
             <TableCell>Target</TableCell>
+            <TableCell>New Name</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -45,10 +46,11 @@ export const ChannelsTable = ({ channels, setChannels }) => {
                   onChange={(e) => handleInputChange(index, 'name', e.target.value)}
                 />
               </TableCell>
+              {/* Corrected Reref Column to match API data */}
               <TableCell>
                 <TextField 
-                  value={channel.reref}
-                  onChange={(e) => handleInputChange(index, 'reref', e.target.value)}
+                  value={channel.rereference}  // Use 'rereference' to match API data
+                  onChange={(e) => handleInputChange(index, 'rereference', e.target.value)}
                 />
               </TableCell>
               <TableCell>
@@ -56,29 +58,33 @@ export const ChannelsTable = ({ channels, setChannels }) => {
                   value={channel.type}
                   onChange={(e) => handleInputChange(index, 'type', e.target.value)}
                 >
-                  {channelTypes.map((type) => (
-                    <MenuItem key={type} value={type}>
-                      {type}
-                    </MenuItem>
+                  {channelTypes.map((type, idx) => (
+                    <MenuItem key={idx} value={type}>{type}</MenuItem>
                   ))}
                 </Select>
               </TableCell>
               <TableCell>
-                <Checkbox
-                  checked={channel.status === 'active'}
-                  onChange={() => handleToggleChange(index, 'status')}
+                <TextField 
+                  value={channel.status}
+                  onChange={(e) => handleInputChange(index, 'status', e.target.value)}
                 />
               </TableCell>
               <TableCell>
-                <Checkbox
-                  checked={channel.used === 'yes'}
+                <Switch
+                  checked={channel.used === 1}
                   onChange={() => handleToggleChange(index, 'used')}
                 />
               </TableCell>
               <TableCell>
-                <Checkbox
-                  checked={channel.target === 'C3'}
+                <Switch
+                  checked={channel.target === 1}
                   onChange={() => handleToggleChange(index, 'target')}
+                />
+              </TableCell>
+              <TableCell>
+                <TextField 
+                  value={channel.new_name}
+                  onChange={(e) => handleInputChange(index, 'new_name', e.target.value)}
                 />
               </TableCell>
             </TableRow>
