@@ -1,5 +1,0 @@
-"name","rereference","used","target","type","status","new_name"
-"target_ch_0","average",0,1,"ecog","good","ch0-avgref"
-"ch1","average",1,0,"ecog","good","ch1-avgref"
-"target_ch_1","average",0,1,"ecog","good","ch2-avgref"
-"ch3","average",1,0,"ecog","good","ch3-avgref"

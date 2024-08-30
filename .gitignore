@@ -190,3 +190,5 @@ out_per
 # Profiler files
 /*.prof
 /profiling/*
+# Test output
+test_data/
