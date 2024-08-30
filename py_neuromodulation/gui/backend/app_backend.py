@@ -75,6 +75,7 @@ class PyNMBackend(FastAPI):
         @self.post("/api/channels")
         async def update_channels(data: dict):
             try:
+                print("Received data:", data)
                 self.logger.info(self.pynm_state.settings.features)
                 self.pynm_state.stream.nm_channels = pd.DataFrame(data)
                 return {"message": "Channels updated successfully"}

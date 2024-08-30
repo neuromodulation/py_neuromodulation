@@ -1,4 +1,3 @@
-import React from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TextField, Select, MenuItem, Switch } from '@mui/material';
 
 const channelTypes = [
@@ -11,16 +10,16 @@ export const ChannelsTable = ({ channels, setChannels }) => {
   
   const handleInputChange = (index, field, value) => {
     const updatedChannels = channels.map((channel, i) => 
-      i === index ? { ...channel, [field]: value } : channel
+      i === index ? { ...channel, [field]: value || "" } : channel 
     );
-    setChannels(updatedChannels);
+    setChannels(index, updatedChannels[index]); 
   };
 
   const handleToggleChange = (index, field) => {
     const updatedChannels = channels.map((channel, i) => 
       i === index ? { ...channel, [field]: channel[field] === 1 ? 0 : 1 } : channel
     );
-    setChannels(updatedChannels);
+    setChannels(index, updatedChannels[index]); 
   };
 
   return (
@@ -46,10 +45,9 @@ export const ChannelsTable = ({ channels, setChannels }) => {
                   onChange={(e) => handleInputChange(index, 'name', e.target.value)}
                 />
               </TableCell>
-              {/* Corrected Reref Column to match API data */}
               <TableCell>
                 <TextField 
-                  value={channel.rereference}  // Use 'rereference' to match API data
+                  value={channel.rereference}
                   onChange={(e) => handleInputChange(index, 'rereference', e.target.value)}
                 />
               </TableCell>
