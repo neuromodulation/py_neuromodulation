@@ -192,3 +192,6 @@ out_per
 /profiling/*
 # Test output
 test_data/
+# Ignore npm lock files
+package-lock.json
+package-lock.json.bak
