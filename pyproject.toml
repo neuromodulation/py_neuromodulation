@@ -85,9 +85,10 @@ docs = [
 ]
 
 [project.urls]
-bugtracker = "https://github.com/neuromodulation/py_neuromodulation/issues"
-repository = "https://github.com/neuromodulation/py_neuromodulation"
-documentation = "https://neuromodulation.github.io/py_neuromodulation/"
+Homepage = "https://neuromodulation.github.io/py_neuromodulation/"
+Documentation = "https://neuromodulation.github.io/py_neuromodulation/"
+Repository = "https://github.com/neuromodulation/py_neuromodulation"
+Issues = "https://github.com/neuromodulation/py_neuromodulation/issues"
 
 [tool.rye]
 dev-dependencies = ["py-neuromodulation[dev]"]

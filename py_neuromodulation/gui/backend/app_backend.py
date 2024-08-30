@@ -1,8 +1,7 @@
-from pathlib import Path
-from collections import defaultdict
 import tomllib
 import numpy as np
 import logging
+import importlib.metadata
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
@@ -15,7 +14,7 @@ from .app_socket import WebSocketManager
 
 import pandas as pd
 
-import py_neuromodulation as nm
+from py_neuromodulation import PYNM_DIR, NMSettings
 
 
 class PyNMBackend(FastAPI):
@@ -59,7 +58,7 @@ class PyNMBackend(FastAPI):
         @self.post("/api/settings")
         async def update_settings(data: dict):
             try:
-                self.pynm_state.settings = nm.NMSettings.model_validate(data)
+                self.pynm_state.settings = NMSettings.model_validate(data)
                 self.logger.info(self.pynm_state.settings.features)
                 return self.pynm_state.settings.model_dump()
             except ValueError as e:
@@ -87,36 +86,49 @@ class PyNMBackend(FastAPI):
             return {"message": f"Stream action '{action}' executed"}
 
         @self.get("/api/app-info")
-        # TODO: fix this function
         async def get_app_info():
-            pyproject_path = Path(__file__).parent.parent / "pyproject.toml"
-            with open(pyproject_path, "rb") as f:
-                pyproject_data = tomllib.load(f)
+            # TODO: make this function not depend on pyproject.toml, since it's not shipped
+            pyproject_path = PYNM_DIR.parent / "pyproject.toml"
 
-            project_info = defaultdict(lambda: "", pyproject_data.get("project", {}))
-            urls = defaultdict(str, project_info.get("urls", {}))
+            try:
+                with open(pyproject_path, "rb") as f:
+                    pyproject_data = tomllib.load(f)
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail="pyproject.toml not found")
+            except tomllib.TOMLDecodeError:
+                raise HTTPException(
+                    status_code=500, detail="Error parsing pyproject.toml"
+                )
+
+            metadata = importlib.metadata.metadata("py_neuromodulation")
+            url_list = metadata.get_all("Project-URL")
+            urls = (
+                {url.split(",")[0]: url.split(",")[1] for url in url_list}
+                if url_list
+                else {}
+            )
+
+            classifier_list = metadata.get_all("Classifier")
+            classifiers = (
+                {
+                    item[: item.find("::") - 1]: item[item.find("::") + 3 :]
+                    for item in classifier_list
+                }
+                if classifier_list
+                else {}
+            )
+            if "License" in classifiers:
+                classifiers["License"] = classifiers["License"].split("::")[1]
 
             return {
-                "version": project_info["version"],
-                "website": urls["documentation"],
-                "authors": [
-                    author.get("name", "") for author in project_info["authors"]
-                ],
-                "maintainers": [
-                    maintainer.get("name", "")
-                    for maintainer in project_info["maintainers"]
-                ],
-                "repository": urls["repository"],
-                "documentation": urls["documentation"],
-                "license": next(
-                    (
-                        classifier.split(" :: ")[-1]
-                        for classifier in project_info["classifiers"]
-                        if classifier.startswith("License")
-                    ),
-                    "",
-                ),
-                "launchMode": "debug" if self.debug else "release",
+                "version": metadata.get("Version", ""),
+                "website": urls["Homepage"],
+                "authors": [metadata.get("Author-email", "")],
+                "maintainers": [metadata.get("Maintainer", "")],
+                "repository": urls.get("Repository", ""),
+                "documentation": urls.get("Documentation", ""),
+                "license": classifiers["License"],
+                # "launchMode": "debug" if app.debug else "release",
             }
 
         @self.websocket("/ws")
