@@ -1,5 +1,6 @@
 import styles from "./SourceSelection.module.css";
 import { useAppInfoStore } from "@/stores";
+import { useState } from "react";
 
 import { Box, Grid, Typography, Button, TextField as MUITextField } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -7,8 +8,30 @@ import { useNavigate } from 'react-router-dom';
 export const SourceSelection = () => {
   const navigate = useNavigate();
 
+  const [lslTextField, setlslTextField] = useState([]);
+  const [lslSearchButtonClicked, setSearchButtonClicked] = useState(false);
+  const [lslStreamNameSelected, setStreamNameSelected] = useState('');
+
   const handleSelectChannels = () => {
     navigate('/channels');
+  };
+
+  async function handleLSLStreamSearch() {
+    //console.log('Find LSL-Streams');
+    const response = await fetch("http://localhost:50001/api/LSL-streams");  // TODO: Change to correct port
+    const data = await response.json();
+    //console.log(data.message);
+
+    setSearchButtonClicked(true);
+
+    if (data.message === 'No LSL streams found') {
+      setlslTextField([]);
+      setStreamNameSelected('');
+    } else {
+      setlslTextField(Object.entries(data.message));
+      setStreamNameSelected(Object.entries(data.message)[0][0]);
+    }
+
   };
 
   return (
@@ -70,8 +93,22 @@ export const SourceSelection = () => {
               sx={{ marginBottom: 2, backgroundColor: '#616161', color: '#f4f4f4' }}
               InputLabelProps={{ style: { color: '#cccccc' } }}
               InputProps={{ style: { color: '#f4f4f4' } }}
+              value={lslStreamNameSelected}
+              onChange={(e) => setStreamNameSelected(e.target.value)} // Update the state on change
             />
-            <Button variant="contained" sx={{ marginTop: 2 }}>
+            {lslSearchButtonClicked && lslTextField.length === 0 && (
+              <p>No LSL streams found</p>
+            )}
+            {lslTextField.length > 0 && (
+              <ul>
+                {lslTextField.map(([key, value]) => (
+                  <li key={key}>
+                    {key}: {JSON.stringify(value)}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Button variant="contained" sx={{ marginTop: 2 }} onClick={handleLSLStreamSearch}>
               Find LSL-Streams
             </Button>
           </Box>
