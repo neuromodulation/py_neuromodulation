@@ -140,7 +140,7 @@ def run_backend(
         host="localhost",
         reload=reload,
         factory=True,
-        port=50000,
+        port=50001,
         log_level="debug" if debug else "info",
         log_config=log_config,
     )

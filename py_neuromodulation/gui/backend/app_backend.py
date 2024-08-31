@@ -106,6 +106,20 @@ class PyNMBackend(FastAPI):
 
             return {"message": stream_vals}
 
+        @self.post("/api/setup-LSL-stream")
+        async def setup_lsl_stream(data: dict):
+            self.logger.info(data)
+            stream_name = data["stream_name"]
+            try:
+                self.pynm_state = PyNMState(
+                    lsl_stream_name=stream_name,
+                    sampling_rate_features=data["sampling_rate_features"],
+                    line_noise=data["line_noise"],
+                )
+            except ValueError as e:
+                return {"message": f"LSL stream '{stream_name}' could not be setup"}
+            return {"message": f"LSL stream '{stream_name}' setup successfully"}
+
         @self.get("/api/app-info")
         async def get_app_info():
             # TODO: make this function not depend on pyproject.toml, since it's not shipped

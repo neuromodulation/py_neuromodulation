@@ -11,10 +11,45 @@ export const SourceSelection = () => {
   const [lslTextField, setlslTextField] = useState([]);
   const [lslSearchButtonClicked, setSearchButtonClicked] = useState(false);
   const [lslStreamNameSelected, setStreamNameSelected] = useState('');
+  const [streamSetupCorrect, setstreamSetupCorrect] = useState('Stream not setup');
+  const [streamSetupColor, setstreamSetupColor] = useState("white");
+
+  const [linenoiseValue, setLineNoiseValue] = useState(50);
+  const [samplingRateValue, setSamplingRateValue] = useState('');
+  const [samplingRateFeatures, setSamplingRateFeatures] = useState(10);
+
+  var first_lsl_stream;
 
   const handleSelectChannels = () => {
     navigate('/channels');
   };
+
+  async function handleConnectLSLStream() {
+    if (lslStreamNameSelected === '') {
+      alert('Please enter a LSL Stream name');
+      return;
+    }
+
+    const rawResponse = await fetch("http://localhost:50001/api/setup-LSL-stream", {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        stream_name: lslStreamNameSelected,
+        sampling_rate_features: samplingRateFeatures,
+        line_noise: linenoiseValue
+      })
+    });
+      const content = await rawResponse.json();
+    
+      console.log(content);
+      //alert(content.message);
+
+    setstreamSetupCorrect("Stream setup correct");
+    setstreamSetupColor("lightgreen");
+    };
 
   async function handleLSLStreamSearch() {
     //console.log('Find LSL-Streams');
@@ -29,7 +64,9 @@ export const SourceSelection = () => {
       setStreamNameSelected('');
     } else {
       setlslTextField(Object.entries(data.message));
-      setStreamNameSelected(Object.entries(data.message)[0][0]);
+      first_lsl_stream = Object.entries(data.message)[0][0];
+      setSamplingRateValue(data.message[first_lsl_stream].sfreq)
+      setStreamNameSelected(first_lsl_stream);
     }
 
   };
@@ -44,11 +81,14 @@ export const SourceSelection = () => {
           <Typography variant="h6" gutterBottom>
             Select a File
           </Typography>
-          <Box sx={{ border: '1px solid #555', padding: 2, borderRadius: 5, backgroundColor: '#424242' }}>
-            <Button variant="contained" component="label">
+          <Button variant="contained" component="label">
               Upload File
               <input type="file" hidden />
-            </Button>
+          </Button>
+
+          <Box sx={{ marginTop: 3 }}></Box>
+          <Box sx={{ border: '1px solid #555', padding: 2, borderRadius: 5, backgroundColor: '#424242' }}>
+
             <Box sx={{ marginTop: 2 }}>
               <MUITextField
                 label="sfreq"
@@ -58,6 +98,8 @@ export const SourceSelection = () => {
                 sx={{ marginBottom: 2, backgroundColor: '#616161', color: '#f4f4f4' }}
                 InputLabelProps={{ style: { color: '#cccccc' } }}
                 InputProps={{ style: { color: '#f4f4f4' } }}
+                value={samplingRateValue}
+                onChange={(e) => setSamplingRateValue(e.target.value)}
               />
               <MUITextField
                 label="line noise"
@@ -67,6 +109,8 @@ export const SourceSelection = () => {
                 sx={{ marginBottom: 2, backgroundColor: '#616161', color: '#f4f4f4' }}
                 InputLabelProps={{ style: { color: '#cccccc' } }}
                 InputProps={{ style: { color: '#f4f4f4' } }}
+                value={linenoiseValue}
+                onChange={(e) => setLineNoiseValue(e.target.value)}
               />
               <MUITextField
                 label="sfreq features"
@@ -76,6 +120,8 @@ export const SourceSelection = () => {
                 sx={{ marginBottom: 2, backgroundColor: '#616161', color: '#f4f4f4' }}
                 InputLabelProps={{ style: { color: '#cccccc' } }}
                 InputProps={{ style: { color: '#f4f4f4' } }}
+                value={samplingRateFeatures}
+                onChange={(e) => setSamplingRateFeatures(e.target.value)}
               />
             </Box>
           </Box>
@@ -84,6 +130,11 @@ export const SourceSelection = () => {
           <Typography variant="h6" gutterBottom>
             LSL-Stream
           </Typography>
+          <Button variant="contained" sx={{ marginRight: 2}} onClick={handleLSLStreamSearch}>
+              Find LSL-Streams
+          </Button>
+          <Box sx={{ marginTop: 3 }}></Box>
+
           <Box sx={{ border: '1px solid #555', padding: 2, borderRadius: 5, backgroundColor: '#424242' }}>
             <MUITextField
               label="Stream-name"
@@ -94,7 +145,7 @@ export const SourceSelection = () => {
               InputLabelProps={{ style: { color: '#cccccc' } }}
               InputProps={{ style: { color: '#f4f4f4' } }}
               value={lslStreamNameSelected}
-              onChange={(e) => setStreamNameSelected(e.target.value)} // Update the state on change
+              onChange={(e) => setStreamNameSelected(e.target.value)}
             />
             {lslSearchButtonClicked && lslTextField.length === 0 && (
               <p>No LSL streams found</p>
@@ -108,13 +159,14 @@ export const SourceSelection = () => {
                 ))}
               </ul>
             )}
-            <Button variant="contained" sx={{ marginTop: 2 }} onClick={handleLSLStreamSearch}>
-              Find LSL-Streams
+            <Button variant="contained" sx={{ marginTop: 2 }} onClick={handleConnectLSLStream}>
+              Connect LSL-Stream
             </Button>
           </Box>
         </Grid>
       </Grid>
-      <Box sx={{ marginTop: 3, textAlign: 'center' }}>
+      <Typography sx={{ marginTop: 2, textAlign: 'center', color: streamSetupColor }}>{streamSetupCorrect}</Typography>
+      <Box sx={{ marginTop: 2, textAlign: 'center' }}>
         <Button variant="contained" color="primary" onClick={handleSelectChannels}>
           Select Channels
         </Button>
