@@ -85,7 +85,7 @@ export function App() {
           <div className={styles.appContent}>
             <Routes>
               <Route path="/" element={<Navigate to="/source" replace />} />
-              <Route exact path="/source" element={<SourceSelection />} />
+              <Route exact path="/source/*" element={<SourceSelection />} />
               <Route exact path="/channels" element={<Channels />} />
               <Route exact path="/settings" element={<Settings />} />
               <Route exact path="/dashboard" element={<Dashboard />} />

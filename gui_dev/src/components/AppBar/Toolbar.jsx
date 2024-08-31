@@ -28,7 +28,7 @@ const Button = ({ to, icon, label }) => {
 
 export const Toolbar = () => (
   <div className={styles.toolbar}>
-    <Button to="/source" icon={<Dataset />} label="Source" />
+    <Button to="/source" icon={<Dataset />} label="Source Selection" />
     <Button to="/channels" icon={<Dvr />} label="Channels" />
     <Button to="/settings" icon={<Settings />} label="Settings" />
     <Button to="/dashboard" icon={<Dashboard />} label="Dashboard" />
