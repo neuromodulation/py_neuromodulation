@@ -85,6 +85,27 @@ class PyNMBackend(FastAPI):
             # Add other actions as needed
             return {"message": f"Stream action '{action}' executed"}
 
+        @self.get("/api/LSL-streams")
+        async def get_lsl_streams():
+            from py_neuromodulation import nm_mnelsl_stream
+
+            streams = nm_mnelsl_stream.resolve_streams()
+            if len(streams) == 0:
+                return {"message": "No LSL streams found"}
+
+            # return json file parsed from mnelsl xml streams
+            stream_vals = {}
+
+            for stream in streams:
+                lsl_source = {}
+                lsl_source["name"] = stream.name
+                lsl_source["sfreq"] = stream.sfreq
+                lsl_source["n_channels"] = stream.n_channels
+                lsl_source["hostname"] = stream.hostname
+                stream_vals[stream.name] = lsl_source
+
+            return {"message": stream_vals}
+
         @self.get("/api/app-info")
         async def get_app_info():
             # TODO: make this function not depend on pyproject.toml, since it's not shipped
