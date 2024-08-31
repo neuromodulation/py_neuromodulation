@@ -5,21 +5,8 @@ import {
   TextField,
   Switch,
 } from "@/components";
-
-import styles from "./Settings.module.css";
 import { useOptionsStore, useSettingsStore, useSettings } from "@/stores";
-
-const flattenDictionary = (dict, parentKey = "", result = {}) => {
-  for (let key in dict) {
-    const newKey = parentKey ? `${parentKey}.${key}` : key;
-    if (typeof dict[key] === "object" && dict[key] !== null) {
-      flattenDictionary(dict[key], newKey, result);
-    } else {
-      result[newKey] = dict[key];
-    }
-  }
-  return result;
-};
+import styles from "./Settings.module.css";
 
 const SettingsSection = ({ settingsKey }) => {
   const { settings, updateSettings } = useSettingsStore((state) => ({
@@ -28,7 +15,7 @@ const SettingsSection = ({ settingsKey }) => {
   }));
 
   const currentSettings = () => {
-    const flattenedSettings = flattenDictionary(settings);
+    console.log(flattenedSettings);
     return Object.keys(flattenedSettings).reduce((acc, key) => {
       if (key.startsWith(`${settingsKey}.`)) {
         acc[key.replace(`${settingsKey}.`, "")] = flattenedSettings[key];
@@ -40,15 +27,9 @@ const SettingsSection = ({ settingsKey }) => {
   const handleChange = (featureKey, isEnabled) => {
     console.log(settings.features);
 
-    const updatedSettings = {
-      ...settings,
-      features: {
-        ...settings.features,
-        [featureKey]: isEnabled,
-      },
-    };
-
-    updateSettings(updatedSettings);
+    updateSettings((settings) => {
+      settings.features[featureKey] = isEnabled;
+    });
   };
 
   return (
@@ -83,7 +64,10 @@ export const Settings = () => {
 
   return (
     <div className={styles.settingsPanel}>
-      <CollapsibleBoxContainer>
+      <CollapsibleBoxContainer
+        onlyOneOpenDrawer
+        className={styles.settingsContainer}
+      >
         <CollapsibleBox
           className={styles.settingsSection}
           title="General Settings"

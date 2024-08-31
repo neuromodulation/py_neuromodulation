@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useSocketStore } from "@/stores";
 import { newPlot, react } from "plotly.js-basic-dist-min";
 import styles from "./Graph.module.css";
@@ -10,19 +10,11 @@ export const Graph = ({
   lineColor = "#1a73e8",
   maxDataPoints = 1000,
 }) => {
-  const { graphData } = useSocketStore();
-
+  console.log("Graph");
+  const graphData = useSocketStore((state) => state.graphData);
   const graphRef = useRef(null);
   const plotlyRef = useRef(null);
-
-  const dataRef = useRef([
-    {
-      y: Array(maxDataPoints).fill(0),
-      type: "scatter",
-      mode: "lines",
-      line: { simplify: false, color: lineColor },
-    },
-  ]);
+  const frameIdRef = useRef(null);
 
   const layoutRef = useRef({
     title: {
@@ -70,32 +62,42 @@ export const Graph = ({
 
   useEffect(() => {
     if (graphRef.current && !plotlyRef.current) {
-      newPlot(graphRef.current, dataRef.current, layoutRef.current).then(
-        (gd) => {
-          plotlyRef.current = gd;
+      newPlot(
+        graphRef.current,
+        [
+          {
+            y: Array(maxDataPoints).fill(0),
+            type: "scatter",
+            mode: "lines",
+            line: { simplify: false, color: lineColor },
+          },
+        ],
+        layoutRef.current,
+        {
+          responsive: true,
+          displayModeBar: false,
+          // staticPlot: true,
         }
-      );
+      ).then((gd) => {
+        plotlyRef.current = gd;
+      });
     }
-  });
 
-  useEffect(() => {
-    if (plotlyRef.current && graphData.length > 0) {
-      dataRef.current[0] = { ...dataRef.current[0], y: graphData };
-      react(plotlyRef.current, dataRef.current, layoutRef.current);
-    }
-  }, [graphData]);
-
-  useEffect(() => {
-    if (!plotlyRef.current) return;
-
-    layoutRef.current = {
-      ...layoutRef.current,
-      title: { text: title },
-      xaxis: { ...layoutRef.current.xaxis, title: { text: xAxisTitle } },
-      yaxis: { ...layoutRef.current.yaxis, title: { text: yAxisTitle } },
+    return () => {
+      if (frameIdRef.current) {
+        cancelAnimationFrame(frameIdRef.current);
+      }
     };
-    react(plotlyRef.current, dataRef, layoutRef.current);
-  }, [title, xAxisTitle, yAxisTitle, lineColor]);
+  }, []);
+
+  useEffect(() => {
+    console.log("useEffect anim frame");
+    if (graphData.length > 0) {
+      if (!frameIdRef.current) {
+        frameIdRef.current = requestAnimationFrame(updateGraph);
+      }
+    }
+  }, [graphData, maxDataPoints, updateGraph]);
 
   return <div ref={graphRef} className={styles.graphContainer}></div>;
 };

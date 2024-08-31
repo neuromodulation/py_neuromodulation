@@ -17,6 +17,7 @@
   border-radius: 5px;
   width: fit-content;
 
+  border: 2px solid white;
   display: flex;
   flex-direction: column;
   align-items: center;

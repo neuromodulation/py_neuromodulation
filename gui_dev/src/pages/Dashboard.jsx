@@ -1,12 +1,6 @@
 import styles from "./Dashboard.module.css";
 
-import {
-  Settings,
-  Graph,
-  Sidebar,
-  SidebarDrawer,
-  CollapsibleBox,
-} from "@/components";
+import { Settings, Graph, Sidebar, SidebarDrawer } from "@/components";
 
 export const Dashboard = () => (
   <div className={styles.dashboardContainer}>
@@ -16,7 +10,9 @@ export const Dashboard = () => (
       </SidebarDrawer>
     </Sidebar>
     <div className={styles.dashboard}>
-      <Graph />
+      <div className={styles.graphContainer}>
+        <Graph />
+      </div>
     </div>
   </div>
 );

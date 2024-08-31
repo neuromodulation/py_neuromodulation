@@ -329,6 +329,7 @@ class PyNMBackend(FastAPI):
             try:
                 # Start the periodic task
                 periodic_task = asyncio.create_task(self.send_periodic_data())
+                # periodic_task = None
 
                 # Handle incoming messages
                 while True:
