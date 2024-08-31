@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-const WEBSOCKET_URL = "ws://localhost:50000/ws";
+const WEBSOCKET_URL = "ws";
 const MAGIC_BYTE = 98; // binary messages start with an ASCII `b`
 const RECONNECT_INTERVAL = 500; // ms
 
