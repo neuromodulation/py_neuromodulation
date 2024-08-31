@@ -40,6 +40,7 @@ body {
     transparent
   );
 }
+
 .wrapper .title-container:hover {
   background-image: linear-gradient(
     90deg,
@@ -47,6 +48,57 @@ body {
     rgba(0, 0, 0, 0.04),
     transparent
   );
+}
+.wrapper .arrow {
+  font-size: 2rem;
+  transition: 0.5s ease-in-out;
+}
+.arrow.active {
+  rotate: 180deg;
+  color: #1db954;
+}
+.wrapper .contentContainer {
+  padding: 0 1rem;
+  transition: height 0.7s ease-in-out;
+}
+
+.collapsibleBoxContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.arrow {
+  height: 50%;
+  transition: rotate 0.3s ease;
+  fill: blue;
+}
+
+.arrow * {
+  fill: inherit;
+}
+
+.header:has(.checkbox:checked) .arrow {
+  rotate: 90deg;
+}
+
+.checkbox {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.contentWrapper {
+  overflow: hidden;
+  transition: height 0.3s ease;
+  transition: max-height 0.3s ease;
+  height: fit-content;
+  max-height: 0px;
+  transition: max-height 0.3s ease;
 }
 .wrapper .arrow {
   font-size: 2rem;

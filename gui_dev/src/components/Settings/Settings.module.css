@@ -2,6 +2,9 @@
   width: 100%;
 }
 
-.settingsPanel {
+.settingsSection {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }

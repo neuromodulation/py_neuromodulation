@@ -11,7 +11,12 @@ const ArrowIcon = (props) => (
   </svg>
 );
 
-export const CollapsibleBox = ({ title, startOpen = false, children }) => {
+export const CollapsibleBox = ({
+  title,
+  startOpen = false,
+  className,
+  children,
+}) => {
   const collapsingContentRef = useRef(null);
   const [contentHeight, setContentHeight] = useState(0);
 
@@ -35,7 +40,7 @@ export const CollapsibleBox = ({ title, startOpen = false, children }) => {
   }, []); // Empty dependency array means this effect runs once on mount
 
   return (
-    <div className={styles.wrapper}>
+    <div className={`${styles.wrapper} ${className || ""}`}>
       <div className={styles.header}>
         <div className={styles.arrowContainer}>
           <ArrowIcon className={styles.arrow} />
@@ -45,9 +50,8 @@ export const CollapsibleBox = ({ title, startOpen = false, children }) => {
           type="checkbox"
           className={styles.checkbox}
           defaultChecked={startOpen}
-        ></input>
+        />
       </div>
-
       <div
         className={styles.contentWrapper}
         style={{ "--content-height": `${contentHeight}px` }}

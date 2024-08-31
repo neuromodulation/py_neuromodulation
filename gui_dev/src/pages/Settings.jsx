@@ -1,12 +1,13 @@
-import React from 'react';
-import { Box, Typography, Button } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { Box, Typography, Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { Settings as SettingsComponent } from "@/components";
 
 export const Settings = () => {
   const navigate = useNavigate();
 
   const handleDecoding = () => {
-    navigate('/decoding');
+    navigate("/decoding");
   };
 
   return (
@@ -14,7 +15,8 @@ export const Settings = () => {
       <Typography variant="h4" gutterBottom>
         Settings
       </Typography>
-      <Box sx={{ marginTop: 3, textAlign: 'center' }}>
+      <Box sx={{ marginTop: 3, textAlign: "center" }}>
+        <SettingsComponent />
         <Button variant="contained" color="primary" onClick={handleDecoding}>
           Run Stream
         </Button>
