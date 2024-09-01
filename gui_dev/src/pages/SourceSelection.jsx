@@ -13,10 +13,10 @@ export const SourceSelection = () => {
         </Typography>
 
         <div className={styles.sourceTypeButtonContainer}>
-          <Button variant="contained" component={RouterLink} to="/source/file">
+          <Button variant="contained" component={RouterLink} to="file">
             From File
           </Button>
-          <Button variant="contained" component={RouterLink} to="/source/lsl">
+          <Button variant="contained" component={RouterLink} to="lsl">
             From LSL-Stream
           </Button>
         </div>
