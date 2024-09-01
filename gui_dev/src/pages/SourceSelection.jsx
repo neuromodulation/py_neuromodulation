@@ -2,16 +2,9 @@ import styles from "./SourceSelection.module.css";
 import { Route, Routes, Link as RouterLink } from "react-router-dom";
 
 import { Box, Typography, Button } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 import { StreamSelector, FileSelector } from "@/components";
 
 export const SourceSelection = () => {
-  const navigate = useNavigate();
-
-  const handleSelectChannels = () => {
-    navigate("/channels");
-  };
-
   return (
     <div className={styles.sourceSelectionContainer}>
       <div className={styles.sourceSelectionHeader}>
@@ -40,7 +33,8 @@ export const SourceSelection = () => {
           <Button
             variant="contained"
             color="primary"
-            onClick={handleSelectChannels}
+            component={RouterLink}
+            to="/channels"
           >
             Select Channels
           </Button>
