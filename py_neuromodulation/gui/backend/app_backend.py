@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 
-from .app_pynm import PyNMState
+from . import app_pynm
 from .app_socket import WebSocketManager
 
 import pandas as pd
@@ -18,7 +18,7 @@ from py_neuromodulation import PYNM_DIR, NMSettings
 
 
 class PyNMBackend(FastAPI):
-    def __init__(self, pynm_state: PyNMState, *args, **kwargs):
+    def __init__(self, pynm_state: app_pynm.PyNMState, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         # Use the FastAPI logger for the backend
@@ -111,7 +111,7 @@ class PyNMBackend(FastAPI):
             self.logger.info(data)
             stream_name = data["stream_name"]
             try:
-                self.pynm_state = PyNMState(
+                self.pynm_state.setup_lsl_stream(
                     lsl_stream_name=stream_name,
                     sampling_rate_features=data["sampling_rate_features"],
                     line_noise=data["line_noise"],
@@ -119,6 +119,20 @@ class PyNMBackend(FastAPI):
             except ValueError as e:
                 return {"message": f"LSL stream '{stream_name}' could not be setup"}
             return {"message": f"LSL stream '{stream_name}' setup successfully"}
+
+        @self.post("/api/setup-Offline-stream")
+        async def setup_offline_stream(data: dict):
+            self.logger.info("Reached the backend to setup")
+            self.logger.info(data)
+            try:
+                self.pynm_state.setup_offline_stream(
+                    file_path=data["file_path"],
+                    line_noise=data["line_noise"],
+                    sampling_rate_features=data["sampling_rate_features"],
+                )
+            except ValueError as e:
+                return {"message": f"Offline stream could not be setup"}
+            return {"message": f"Offline stream setup successfully"}
 
         @self.get("/api/app-info")
         async def get_app_info():

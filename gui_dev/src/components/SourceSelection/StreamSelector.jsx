@@ -1,4 +1,6 @@
 import styles from "./StreamSelector.module.css";
+import { SourceSelectionSettings } from "@/components/SourceSelection/SourceSelectionSettings";
+
 import { useState } from "react";
 
 import {
@@ -15,10 +17,23 @@ export const StreamSelector = () => {
   const [lslStreamNameSelected, setStreamNameSelected] = useState("");
   const [streamSetupCorrect, setstreamSetupCorrect] =
     useState("Stream not setup");
+
+  
   const [streamSetupColor, setstreamSetupColor] = useState("white");
-  const [samplingRateFeatures, setSamplingRateFeatures] = useState(10);
-  const [linenoiseValue, setLineNoiseValue] = useState(50);
-  const [samplingRateValue, setSamplingRateValue] = useState("");
+
+  const [sourceSelectionSettingValues, setSourceSelectionSettingValues] = useState({
+    linenoiseValue: 50,
+    samplingRateValue: "",
+    samplingRateFeaturesValue: 10
+  });
+
+  const handleSourceSelectionSettingsValuesChange = (e) => {
+    const { name, value } = e.target;
+    setSourceSelectionSettingValues({
+      ...sourceSelectionSettingValues,
+      [name]: value
+    });
+  };
 
   const handleConnectLSLStream = async () => {
     if (lslStreamNameSelected === "") {
@@ -36,8 +51,8 @@ export const StreamSelector = () => {
         },
         body: JSON.stringify({
           stream_name: lslStreamNameSelected,
-          sampling_rate_features: samplingRateFeatures,
-          line_noise: linenoiseValue,
+          sampling_rate_features: sourceSelectionSettingValues.samplingRateFeaturesValue,
+          line_noise: sourceSelectionSettingValues.linenoiseValue,
         }),
       }
     );
@@ -64,7 +79,12 @@ export const StreamSelector = () => {
     } else {
       setlslTextField(Object.entries(data.message));
       const first_lsl_stream = Object.entries(data.message)[0][0];
-      setSamplingRateValue(data.message[first_lsl_stream].sfreq);
+
+      setSourceSelectionSettingValues(prevValues => ({
+        ...prevValues,
+        samplingRateValue: data.message[first_lsl_stream].sfreq
+      }));
+
       setStreamNameSelected(first_lsl_stream);
     }
   };
@@ -105,6 +125,7 @@ export const StreamSelector = () => {
         {lslSearchButtonClicked && lslTextField.length === 0 && (
           <p>No LSL streams found</p>
         )}
+        <Box sx={{ maxHeight: 200, overflowY: 'auto',}}>
         {lslTextField.length > 0 && (
           <ul>
             {lslTextField.map(([key, value]) => (
@@ -113,7 +134,8 @@ export const StreamSelector = () => {
               </li>
             ))}
           </ul>
-        )}
+          )}
+          </Box>
         <Button
           variant="contained"
           sx={{ marginTop: 2 }}
@@ -125,6 +147,8 @@ export const StreamSelector = () => {
       <Typography
         sx={{ marginTop: 2, textAlign: "center", color: streamSetupColor }}
       >
+        <SourceSelectionSettings sourceSelectionSettingValues={sourceSelectionSettingValues}
+          onSourceSelectionSettingValuesChange={handleSourceSelectionSettingsValuesChange} />
         {streamSetupCorrect}
       </Typography>
     </Grid>
