@@ -6,6 +6,29 @@ import pandas as pd
 
 
 class PyNMState:
+    def __init__(
+        self,
+        default_init: bool = True,
+    ) -> None:
+        self.logger = logging.getLogger("uvicorn.error")
+
+        if default_init:
+            self.stream: nm.Stream = nm.Stream(
+                sfreq=1500, data=np.random.random([1, 1])
+            )
+            # TODO: we currently can pass the sampling_rate_features to both the stream and the settings?
+            self.settings: nm.NMSettings = nm.NMSettings(sampling_rate_features=17)
+
+    def start_run_function(self) -> None:
+        # TODO: we should add a way to pass the output path and the foldername
+        if self.lsl_stream_name is not None:
+            self.stream.run(
+                stream_lsl=True,
+                stream_lsl_name=self.lsl_stream_name,
+            )
+        else:
+            self.stream.run()
+
     def setup_lsl_stream(
         self,
         lsl_stream_name: str = None,
@@ -87,26 +110,3 @@ class PyNMState:
         self.settings: nm.NMSettings = nm.NMSettings(
             sampling_rate_features=sampling_rate_features
         )
-
-    def __init__(
-        self,
-        default_init: bool = True,
-    ) -> None:
-        self.logger = logging.getLogger("uvicorn.error")
-
-        if default_init:
-            self.stream: nm.Stream = nm.Stream(
-                sfreq=1500, data=np.random.random([1, 1])
-            )
-            # TODO: we currently can pass the sampling_rate_features to both the stream and the settings?
-            self.settings: nm.NMSettings = nm.NMSettings(sampling_rate_features=17)
-
-    def start_run_function(self) -> None:
-        # TODO: we should add a way to pass the output path and the foldername
-        if self.lsl_stream_name is not None:
-            self.stream.run(
-                stream_lsl=True,
-                stream_lsl_name=self.lsl_stream_name,
-            )
-        else:
-            self.stream.run()

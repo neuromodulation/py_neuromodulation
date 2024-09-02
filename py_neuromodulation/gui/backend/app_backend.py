@@ -2,8 +2,11 @@ import tomllib
 import numpy as np
 import logging
 import importlib.metadata
+from datetime import datetime
+from pathlib import Path
+import os
 
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,10 +14,14 @@ import asyncio
 
 from . import app_pynm
 from .app_socket import WebSocketManager
-
+from .app_utils import is_hidden, get_quick_access
 import pandas as pd
 
 from py_neuromodulation import PYNM_DIR, NMSettings
+from py_neuromodulation.nm_types import FileInfo
+
+# TODO: maybe pull this list from the MNE package?
+ALLOWED_EXTENSIONS = [".npy", ".vhdr", ".fif", ".edf", ".bdf"]
 
 
 class PyNMBackend(FastAPI):
@@ -180,6 +187,93 @@ class PyNMBackend(FastAPI):
                 # "launchMode": "debug" if app.debug else "release",
             }
 
+        ##############################
+        ### FILE BROWSER ENDPOINTS ###
+        ##############################
+        # Get home directory for the current user
+        @self.get("/api/home_directory")
+        async def home_directory():
+            try:
+                home_dir = str(Path.home())
+                return {"home_directory": home_dir}
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+
+        # Get list of available drives in Windows systems
+        @self.get("/api/drives")
+        async def list_drives():
+            if os.name == "nt":
+                import string
+
+                drives = []
+                for letter in string.ascii_uppercase:
+                    if Path(f"{letter}:").exists():
+                        drives.append(f"{letter}:")
+
+                return {"drives": drives}
+            else:
+                return {"drives": ["/"]}  # Unix-like systems have a single root
+
+        # Get list of files and directories in a directory
+        @self.get("/api/files", response_model=list[FileInfo])
+        async def list_files(
+            path: str = Query(default="", description="Directory path to list"),
+            allowed_extensions: str = Query(
+                default=",".join(ALLOWED_EXTENSIONS),
+                description="Comma-separated list of allowed file extensions",
+            ),
+            show_hidden: bool = Query(
+                default=False,
+                description="Whether to show hidden files and directories",
+            ),
+        ):
+            try:
+                if not path:
+                    path = str(Path.home())
+
+                if not Path(path).is_dir():
+                    raise FileNotFoundError("The specified path is not a directory")
+
+                allowed_ext = allowed_extensions.split(",")
+
+                files = []
+                for entry in Path(path).iterdir():
+                    # Skip hidden files/directories if show_hidden is False
+                    if not show_hidden and is_hidden(entry):
+                        continue
+
+                    if entry.is_file() and not any(
+                        entry.name.lower().endswith(ext.lower()) for ext in allowed_ext
+                    ):
+                        continue
+
+                    stats = entry.stat()
+                    files.append(
+                        FileInfo(
+                            name=entry.name,
+                            path=str(entry),
+                            dir=str(entry.parent),
+                            is_directory=entry.is_dir(),
+                            size=stats.st_size if not entry.is_dir() else 0,
+                            created_at=datetime.fromtimestamp(stats.st_birthtime),
+                            modified_at=datetime.fromtimestamp(stats.st_mtime),
+                        )
+                    )
+                return files
+            except FileNotFoundError:
+                raise HTTPException(status_code=404, detail="Directory not found")
+            except PermissionError:
+                raise HTTPException(status_code=403, detail="Permission denied")
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+
+        @self.get("/api/quick-access")
+        def quick_access():
+            return get_quick_access()
+
+        ###########################
+        ### WEBSOCKET ENDPOINTS ###
+        ###########################
         @self.websocket("/ws")
         async def websocket_endpoint(websocket: WebSocket):
             # if self.websocket_manager.is_connected:

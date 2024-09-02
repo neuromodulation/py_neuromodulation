@@ -1,39 +1,15 @@
-import styles from "./StreamSelector.module.css";
-import { SourceSelectionSettings } from "@/components/SourceSelection/SourceSelectionSettings";
-
 import { useState } from "react";
 
-import {
-  Box,
-  Grid,
-  Typography,
-  Button,
-  TextField as MUITextField,
-} from "@mui/material";
+import { Box, Grid, Typography, Button, TextField } from "@mui/material";
 
-export const StreamSelector = () => {
+import styles from "./SourceSelection.module.css";
+
+export const StreamSelector = ({ onStreamSetupCorrect }) => {
   const [lslTextField, setlslTextField] = useState([]);
   const [lslSearchButtonClicked, setSearchButtonClicked] = useState(false);
   const [lslStreamNameSelected, setStreamNameSelected] = useState("");
-  const [streamSetupCorrect, setstreamSetupCorrect] =
-    useState("Stream not setup");
 
-  
   const [streamSetupColor, setstreamSetupColor] = useState("white");
-
-  const [sourceSelectionSettingValues, setSourceSelectionSettingValues] = useState({
-    linenoiseValue: 50,
-    samplingRateValue: "",
-    samplingRateFeaturesValue: 10
-  });
-
-  const handleSourceSelectionSettingsValuesChange = (e) => {
-    const { name, value } = e.target;
-    setSourceSelectionSettingValues({
-      ...sourceSelectionSettingValues,
-      [name]: value
-    });
-  };
 
   const handleConnectLSLStream = async () => {
     if (lslStreamNameSelected === "") {
@@ -51,7 +27,8 @@ export const StreamSelector = () => {
         },
         body: JSON.stringify({
           stream_name: lslStreamNameSelected,
-          sampling_rate_features: sourceSelectionSettingValues.samplingRateFeaturesValue,
+          sampling_rate_features:
+            sourceSelectionSettingValues.samplingRateFeaturesValue,
           line_noise: sourceSelectionSettingValues.linenoiseValue,
         }),
       }
@@ -61,7 +38,7 @@ export const StreamSelector = () => {
     console.log(content);
     //alert(content.message);
 
-    setstreamSetupCorrect("Stream setup correct");
+    onStreamSetupCorrect("Stream setup correct");
     setstreamSetupColor("lightgreen");
   };
 
@@ -80,9 +57,9 @@ export const StreamSelector = () => {
       setlslTextField(Object.entries(data.message));
       const first_lsl_stream = Object.entries(data.message)[0][0];
 
-      setSourceSelectionSettingValues(prevValues => ({
+      setSourceSelectionSettingValues((prevValues) => ({
         ...prevValues,
-        samplingRateValue: data.message[first_lsl_stream].sfreq
+        samplingRateValue: data.message[first_lsl_stream].sfreq,
       }));
 
       setStreamNameSelected(first_lsl_stream);
@@ -111,7 +88,7 @@ export const StreamSelector = () => {
           backgroundColor: "#424242",
         }}
       >
-        <MUITextField
+        <TextField
           label="Stream-name"
           variant="outlined"
           size="small"
@@ -125,17 +102,17 @@ export const StreamSelector = () => {
         {lslSearchButtonClicked && lslTextField.length === 0 && (
           <p>No LSL streams found</p>
         )}
-        <Box sx={{ maxHeight: 200, overflowY: 'auto',}}>
-        {lslTextField.length > 0 && (
-          <ul>
-            {lslTextField.map(([key, value]) => (
-              <li key={key}>
-                {key}: {JSON.stringify(value)}
-              </li>
-            ))}
-          </ul>
+        <Box sx={{ maxHeight: 200, overflowY: "auto" }}>
+          {lslTextField.length > 0 && (
+            <ul>
+              {lslTextField.map(([key, value]) => (
+                <li key={key}>
+                  {key}: {JSON.stringify(value)}
+                </li>
+              ))}
+            </ul>
           )}
-          </Box>
+        </Box>
         <Button
           variant="contained"
           sx={{ marginTop: 2 }}
@@ -146,11 +123,7 @@ export const StreamSelector = () => {
       </Box>
       <Typography
         sx={{ marginTop: 2, textAlign: "center", color: streamSetupColor }}
-      >
-        <SourceSelectionSettings sourceSelectionSettingValues={sourceSelectionSettingValues}
-          onSourceSelectionSettingValuesChange={handleSourceSelectionSettingsValuesChange} />
-        {streamSetupCorrect}
-      </Typography>
+      ></Typography>
     </Grid>
   );
 };

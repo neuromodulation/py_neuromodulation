@@ -8,5 +8,4 @@ export { CollapsibleBox } from "./CollapsibleBox/CollapsibleBox";
 export { ChannelsTable } from "./ChannelsTable/ChannelsTable";
 export { AppBar } from "./AppBar/AppBar";
 export { AppInfoModal } from "./AppInfoModal/AppInfoModal";
-export { StreamSelector } from "./SourceSelection/StreamSelector";
-export { FileSelector } from "./SourceSelection/FileSelector";
+export { FileBrowser } from "./FileBrowser/FileBrowser";

@@ -2,6 +2,10 @@ import multiprocessing as mp
 import logging
 from typing import Sequence
 import sys
+from pathlib import Path
+from py_neuromodulation.nm_types import _PathLike
+from functools import lru_cache
+import platform
 
 
 def force_terminate_process(
@@ -97,3 +101,207 @@ def ansi_color(
 
 
 ansi_reset = ansi_color(styles=["RESET"])
+
+
+def is_hidden(filepath: _PathLike) -> bool:
+    """Check if a file or directory is hidden.
+
+    Args:
+        filepath (str): Path to the file or directory.
+
+    Returns:
+        bool: True if the file or directory is hidden, False otherwise.
+    """
+    from pathlib import Path
+
+    filepath = Path(filepath)
+
+    if sys.platform.startswith("win"):
+        import ctypes
+
+        try:
+            attrs = ctypes.windll.kernel32.GetFileAttributesW(str(filepath))
+            assert attrs != -1
+            result = bool(attrs & 2) or filepath.name.startswith(".")
+        except (AttributeError, AssertionError):
+            result = filepath.name.startswith(".")
+    else:
+        result = filepath.name.startswith(".")
+
+    return result
+
+
+@lru_cache(maxsize=1)
+def get_quick_access():
+    system = platform.system()
+    if system == "Windows":
+        return get_windows_quick_access()
+    elif system == "Darwin":  # macOS
+        return get_macos_quick_access()
+    else:  # Linux, Unix, etc.
+        return {"items": []}
+
+
+def get_windows_quick_access():
+    quick_access_items = []
+
+    # Add available drives
+    available_drives = [
+        f"{d}:\\" for d in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" if Path(f"{d}:").exists()
+    ]
+    for drive in available_drives:
+        quick_access_items.append(
+            {"name": f"Drive ({drive})", "type": "drive", "path": drive}
+        )
+
+    # Get user's pinned folders
+    pinned_folders = get_pinned_folders_windows()
+    for folder in pinned_folders:
+        path = Path(folder["Path"])
+        if path.exists():
+            quick_access_items.append(
+                {"name": folder["Name"], "type": "folder", "path": str(path)}
+            )
+
+    # Get user's home directory
+    home_path = Path.home()
+
+    # Add common folders if they're not already in pinned folders
+    common_folders = [
+        ("Desktop", "Desktop"),
+        ("Documents", "Documents"),
+        ("Downloads", "Downloads"),
+        ("Pictures", "Pictures"),
+        ("Music", "Music"),
+        ("Videos", "Videos"),
+    ]
+
+    for folder_name, folder_path in common_folders:
+        full_path = home_path / folder_path
+        if full_path.exists() and str(full_path) not in [
+            item["path"] for item in quick_access_items
+        ]:
+            quick_access_items.append(
+                {"name": folder_name, "type": "folder", "path": str(full_path)}
+            )
+
+    # Add user's home directory if not already included
+    if str(home_path) not in [item["path"] for item in quick_access_items]:
+        quick_access_items.append(
+            {"name": "Home", "type": "folder", "path": str(home_path)}
+        )
+
+    return {"items": quick_access_items}
+
+
+def get_pinned_folders_windows():
+    import subprocess
+    import json
+
+    powershell_command = """
+    $shell = New-Object -ComObject Shell.Application
+    $quickaccess = $shell.Namespace("shell:::{679f85cb-0220-4080-b29b-5540cc05aab6}").Items()
+    $pinned = $quickaccess | Where-Object { $_.IsFolder } | ForEach-Object {
+        [PSCustomObject]@{
+            Name = $_.Name
+            Path = $_.Path
+        }
+    }
+    $pinned | ConvertTo-Json
+    """
+
+    try:
+        print(powershell_command)
+        result = subprocess.run(
+            ["powershell", "-Command", powershell_command],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        print(result.stdout)
+        return json.loads(result.stdout)
+    except subprocess.CalledProcessError as e:
+        print(f"Error running PowerShell command: {e}")
+        return []
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON: {e}")
+        return []
+
+
+def get_macos_quick_access():
+    quick_access_folders = get_macos_favorites()
+    quick_access_items = []
+
+    quick_access_items.append({"name": "Computer", "type": "drive", "path": "/"})
+
+    # Add Volumes for macOS
+    volumes_path = Path("/Volumes")
+    if volumes_path.exists():
+        for volume in volumes_path.iterdir():
+            if volume.is_mount():
+                quick_access_items.append(
+                    {"name": volume.name, "type": "drive", "path": str(volume)}
+                )
+
+    # Add quick access folders
+    for folder in quick_access_folders:
+        path = Path(folder["Path"])
+        if path.exists():
+            quick_access_items.append(
+                {"name": folder["Name"], "type": "folder", "path": str(path)}
+            )
+
+    # Add user's home directory if not already included
+    home_path = str(Path.home())
+    if home_path not in [item["path"] for item in quick_access_items]:
+        quick_access_items.append({"name": "Home", "type": "folder", "path": home_path})
+
+    return {"items": quick_access_items}
+
+
+def get_macos_favorites():
+    import subprocess
+    import json
+
+    favorites = []
+
+    try:
+        # Common locations in macOS
+        common_locations = [
+            ("Desktop", Path.home() / "Desktop"),
+            ("Documents", Path.home() / "Documents"),
+            ("Downloads", Path.home() / "Downloads"),
+            ("Pictures", Path.home() / "Pictures"),
+            ("Music", Path.home() / "Music"),
+            ("Movies", Path.home() / "Movies"),
+        ]
+
+        for name, path in common_locations:
+            if path.exists():
+                favorites.append({"Name": name, "Path": str(path)})
+
+        # Get user-defined favorites from sidebar plist
+        plist_path = (
+            Path.home()
+            / "Library/Application Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.FavoriteItems.sfl2"
+        )
+        if plist_path.exists():
+            try:
+                result = subprocess.run(
+                    ["plutil", "-convert", "json", "-o", "-", str(plist_path)],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
+                plist_data = json.loads(result.stdout)
+                for item in plist_data.get("Bookmark", []):
+                    if "Name" in item and "URL" in item:
+                        path = item["URL"].replace("file://", "")
+                        favorites.append({"Name": item["Name"], "Path": path})
+            except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
+                print(f"Error processing macOS favorites: {e}")
+
+    except Exception as e:
+        print(f"Error getting macOS favorites: {e}")
+
+    return favorites

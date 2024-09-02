@@ -5,12 +5,14 @@ from importlib import import_module
 from pydantic import ConfigDict, Field, model_validator, BaseModel
 from pprint import pformat
 from collections.abc import Sequence
+from datetime import datetime
 
 ###################################
 ########## TYPE ALIASES  ##########
 ###################################
 
 _PathLike = str | PathLike
+
 
 FeatureName = Literal[
     "raw_hjorth",
@@ -191,3 +193,18 @@ class BoolSelector(NMBaseModel):
     @classmethod
     def get_fields(cls):
         return cls.model_fields
+
+
+#################
+### GUI TYPES ###
+#################
+
+
+class FileInfo(BaseModel):
+    name: str
+    path: str
+    dir: str
+    is_directory: bool
+    size: int
+    created_at: datetime
+    modified_at: datetime
