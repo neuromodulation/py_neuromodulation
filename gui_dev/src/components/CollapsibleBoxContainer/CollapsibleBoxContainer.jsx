@@ -19,6 +19,9 @@ export const CollapsibleBoxContainer = () => {
         <CollapsibleBox title = "General Settings" startOpen ={0}> 
              <Settings settingsKey={'features'} />
              <TextField keysToInclude = {["sampling_rate_features_hz","segment_length_features_ms"]} />
+             <div>
+                {settings && ( <FrequencySettings settings ={settings.frequency_ranges_hz } />)}
+            </div>
         </CollapsibleBox>
         <CollapsibleBox title = "Preprocessing Settings" startOpen ={0}> 
             <DragAndDropList />
@@ -66,22 +69,11 @@ export const CollapsibleBoxContainer = () => {
         </CollapsibleBox>
 
        <CollapsibleBox title = "TEST" startOpen = {0}>
-            {/* <div>
-                {Object.keys(settings?.frequency_ranges_hz).map((label) => (
-                <div key={label}>
-                    <div>{label}:</div>
-                    <div>
-                        {Object.entries(settings.frequency_ranges_hz[label]).map(([key, value]) => (
-                        <div key={key}>
-                            {key}: {settings.frequency_ranges_hz[label][key]}
-                        </div>
-                        ))}
-                    </div>
-                </div>
-            ))}
-            </div> */}
-
-            <FrequencySettings settings ={settings} />
+        <div>
+        {settings && ( 
+                <FrequencySettings settings ={settings} />
+            )}
+        </div>
 
        </CollapsibleBox>
 
