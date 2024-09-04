@@ -69,7 +69,7 @@ class PyNMBackend(FastAPI):
 
         @self.get("/api/settings")
         async def get_settings():
-            return self.pynm_state.settings.model_dump()
+            return self.pynm_state.settings.process_for_frontend()
 
         @self.post("/api/settings")
         async def update_settings(data: dict):

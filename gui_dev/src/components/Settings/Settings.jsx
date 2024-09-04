@@ -1,146 +1,143 @@
-import {
-  CollapsibleBox,
-  CollapsibleBoxContainer,
-  DragAndDropList,
-  TextField,
-  Switch,
-} from "@/components";
-import { useOptionsStore, useSettingsStore, useSettings } from "@/stores";
+import { CollapsibleBox, Switch, FrequencyRange } from "@/components";
+
+import { TextField } from "@mui/material";
+import { useSettingsStore } from "@/stores";
+import { filterObjectByKeys } from "@/utils/functions";
 import styles from "./Settings.module.css";
 
-const SettingsSection = ({ settingsKey }) => {
-  const { settings, updateSettings } = useSettingsStore((state) => ({
-    settings: state.settings,
-    updateSettings: state.updateSettings,
-  }));
+const formatKey = (key) => {
+  return key
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
 
-  const currentSettings = () => {
-    console.log(flattenedSettings);
-    return Object.keys(flattenedSettings).reduce((acc, key) => {
-      if (key.startsWith(`${settingsKey}.`)) {
-        acc[key.replace(`${settingsKey}.`, "")] = flattenedSettings[key];
-      }
-      return acc;
-    }, {});
-  };
+// Wrapper components for each type
+const BooleanField = ({ value, onChange, label }) => (
+  <Switch isEnabled={value} onChange={onChange} label={label} />
+);
 
-  const handleChange = (featureKey, isEnabled) => {
-    console.log(settings.features);
+const StringField = ({ value, onChange, label }) => (
+  <TextField value={value} onChange={onChange} label={label} />
+);
 
-    updateSettings((settings) => {
-      settings.features[featureKey] = isEnabled;
-    });
-  };
+const NumberField = ({ value }) => <span>{value}</span>;
+
+const FrequencyRangeField = ({ value, onChange, label }) => (
+  <FrequencyRange value={value} onChange={onChange} label={label} />
+);
+
+// Map component types to their respective wrappers
+const getComponent = (type) => {
+  switch (type) {
+    case "boolean":
+      return BooleanField;
+    case "string":
+      return StringField;
+    case "number":
+      return NumberField;
+    case "FrequencyRange":
+      return FrequencyRangeField;
+    default:
+      return null;
+  }
+};
+
+const SettingsSection = ({ settings, title = null, path = [], onChange }) => {
+  console.log("Rendering settings section: ", path);
+
+  if (Object.keys(settings).length === 0) {
+    return null;
+  }
 
   return (
     <div className={styles.settingsSection}>
-      <h2>{settingsKey.charAt(0).toUpperCase() + settingsKey.slice(1)}</h2>
-      <div className={styles.featureList}>
-        {Object.entries(currentSettings)
-          .filter(([, value]) => typeof value === "boolean")
-          .map(([key, value]) => (
-            <Switch
-              key={key}
-              label={key}
-              isEnabled={value}
-              onChange={(isEnabled) => handleChange(key, isEnabled)}
-            />
-          ))}
-      </div>
+      <CollapsibleBox title={title ? title : formatKey(path[path.length - 1])}>
+        {Object.entries(settings).map(([key, value]) => {
+          // Loop over the object entries and render the corresponding fields
+
+          // Skip __field_type__ entries
+          if (key === "__field_type__") return null;
+
+          const newPath = [...path, key];
+          const label = formatKey(key);
+
+          // If the value is a Pydantic model, get the model type
+          const fieldType =
+            typeof value === "object" && "__field_type__" in value
+              ? value.__field_type__
+              : typeof value;
+
+          const Component = getComponent(fieldType);
+
+          if (Component) {
+            // If a component is assigned to this type, render it
+            return (
+              <div className={styles.settingFieldContainer}>
+                <label className={styles.settingLabel}>{label}</label>
+                <Component
+                  value={value}
+                  onChange={(newValue) => onChange(newPath, newValue)}
+                  label={label}
+                />
+              </div>
+            );
+          } else {
+            // If not assigned component, treat it as a nested object
+            return (
+              <SettingsSection
+                settings={value}
+                path={newPath}
+                onChange={onChange}
+              />
+            );
+          }
+        })}
+      </CollapsibleBox>
     </div>
   );
 };
 
 export const Settings = () => {
-  const settings = useSettings();
-
-  const options = useOptionsStore((state) => state.options);
+  const { settings, updateSettings } = useSettingsStore((state) => ({
+    settings: state.settings,
+    updateSettings: state.updateSettings,
+  }));
 
   if (!settings) {
     return <div>Loading settings...</div>;
   }
 
-  console.log(settings);
+  const handleChange = (path, value) => {
+    updateSettings((settings) => {
+      let current = settings;
+      console.log(current);
+      for (let i = 0; i < path.length - 1; i++) {
+        current = current[path[i]];
+      }
+      current[path[path.length - 1]] = value;
+    });
+  };
+
+  const featureSettingsKeys = Object.keys(settings.features).map(
+    (feature) => `${feature}_settings`
+  );
+  const enabledFeatures = filterObjectByKeys(settings, featureSettingsKeys);
 
   return (
-    <div className={styles.settingsPanel}>
-      <CollapsibleBoxContainer
-        onlyOneOpenDrawer
-        className={styles.settingsContainer}
-      >
-        <CollapsibleBox
-          className={styles.settingsSection}
-          title="General Settings"
-          startOpen={0}
-        >
-          <SettingsSection settingsKey={"features"} />
-          <TextField
-            keysToInclude={[
-              "sampling_rate_features_hz",
-              "segment_length_features_ms",
-            ]}
-          />
-        </CollapsibleBox>
-        <CollapsibleBox
-          className={styles.settingsSection}
-          title="Preprocessing Settings"
-          startOpen={0}
-        >
-          <DragAndDropList />
-          {options.map((option) => (
-            <div key={option.id}>
-              {option.name === "raw_resampling" && (
-                <TextField
-                  keysToInclude={["raw_resampling_settings.resample_freq_hz"]}
-                />
-              )}
-            </div>
-          ))}
+    <div className={styles.settingsContainer}>
+      <SettingsSection
+        settings={settings.features}
+        titl
+        path={["features"]}
+        onChange={handleChange}
+      />
 
-          {options.map((option) => (
-            <div key={option.id}>
-              {option.name === "raw_normalization" && (
-                <TextField
-                  keysToInclude={[
-                    "raw_normalization_settings.normalization_time_s",
-                    "raw_normalization_settings.clip",
-                  ]}
-                />
-              )}
-            </div>
-          ))}
-          <h3>Preprocessing Filter</h3>
-          <SettingsSection settingsKey={"preprocessing_filter"} />
-          <h4>Bandstop Filter</h4>
-          <TextField
-            keysToInclude={[
-              "preprocessing_filter.bandstop_filter_settings.frequency_low_hz",
-              "preprocessing_filter.bandstop_filter_settings.frequency_high_hz",
-            ]}
-          />
-          <h4>Bandpass Filter</h4>
-          <TextField
-            keysToInclude={[
-              "preprocessing_filter.bandpass_filter_settings.frequency_low_hz",
-              "preprocessing_filter.bandpass_filter_settings.frequency_high_hz",
-            ]}
-          />
-          <TextField
-            keysToInclude={[
-              "preprocessing_filter.lowpass_filter_cutoff_hz",
-              "preprocessing_filter.highpass_filter_cutoff_hz",
-            ]}
-          />
-        </CollapsibleBox>
-
-        <CollapsibleBox
-          className={styles.settingsSection}
-          title="Postprocessing Settings"
-          startOpen={0}
-        >
-          <SettingsSection settingsKey={"fft_settings"} />
-        </CollapsibleBox>
-      </CollapsibleBoxContainer>
+      <SettingsSection
+        title="Feature Settings"
+        settings={enabledFeatures}
+        onChange={handleChange}
+      />
     </div>
   );
 };

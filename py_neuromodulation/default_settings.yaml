@@ -136,7 +136,7 @@ kalman_filter_settings:
   frequency_bands:
     [theta, alpha, low_beta, high_beta, low_gamma, high_gamma, HFA]
 
-burst_settings:
+bursts_settings:
   threshold: 75
   time_duration_s: 30
   frequency_bands: [low_beta, high_beta, low_gamma]

@@ -17,3 +17,34 @@ export function debounce(func, wait) {
     timeout = setTimeout(later, wait);
   };
 }
+export const flattenDictionary = (dict, parentKey = "", result = {}) => {
+  for (let key in dict) {
+    const newKey = parentKey ? `${parentKey}.${key}` : key;
+    if (typeof dict[key] === "object" && dict[key] !== null) {
+      flattenDictionary(dict[key], newKey, result);
+    } else {
+      result[newKey] = dict[key];
+    }
+  }
+  return result;
+};
+
+export const filterObjectByKeys = (flatDict, keys) => {
+  const filteredDict = {};
+  keys.forEach((key) => {
+    if (flatDict.hasOwnProperty(key)) {
+      filteredDict[key] = flatDict[key];
+    }
+  });
+  return filteredDict;
+};
+
+export const filterObjectByKeyPrefix = (obj, prefix = "") => {
+  const result = {};
+  for (const key in obj) {
+    if (key.startsWith(prefix)) {
+      result[key] = obj[key];
+    }
+  }
+  return result;
+};

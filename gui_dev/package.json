@@ -11,8 +11,8 @@
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
-    "@mui/icons-material": "^5.16.7",
-    "@mui/material": "^5.16.7",
+    "@mui/icons-material": "latest",
+    "@mui/material": "latest",
     "immer": "^10.1.1",
     "plotly.js-basic-dist-min": "^2.35.2",
     "react": "next",

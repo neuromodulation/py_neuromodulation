@@ -6,7 +6,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useSettingsStore } from "@/stores";
-import styles from "./TextField.module.css"; // Import the CSS module
+import styles from "./TextField.module.css";
 
 const flattenDictionary = (dict, parentKey = "", result = {}) => {
   for (let key in dict) {

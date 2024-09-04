@@ -1,6 +1,6 @@
 import { createPersistStore } from "./createStore";
 
-export const useUiStore = createPersistStore("ui", (set, get) => ({
+export const useUiStore = createPersistStore((set, get) => ({
   activeDrawer: null,
   toggleDrawer: (drawerName) =>
     set((state) => {
@@ -15,4 +15,17 @@ export const useUiStore = createPersistStore("ui", (set, get) => ({
   closeAllDrawers: () => {
     set({ activeDrawer: null });
   },
+
+  // Keep track of which accordions are open throughout the app
+  accordionStates: {},
+  toggleAccordionState: (id) =>
+    set((state) => {
+      state.accordionStates[id] = !state.accordionStates[id];
+    }),
+  initAccordionState: (id, defaultState) =>
+    set((state) => {
+      if (state.accordionStates[id] === undefined) {
+        state.accordionStates[id] = defaultState;
+      }
+    }),
 }));

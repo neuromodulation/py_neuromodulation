@@ -11,11 +11,12 @@ import {
   Routes,
   Navigate,
 } from "react-router-dom";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { AppBar, StatusBar } from "@/components";
 import { Dashboard, SourceSelection, Channels, Settings } from "@/pages";
 import styles from "./App.module.css";
+import theme from "./theme";
 
 /**
  *
@@ -49,28 +50,29 @@ export const App = () => {
     };
   }, [connectSocket, disconnectSocket]);
 
-  const theme = createTheme({
-    palette: {
-      mode: "dark", // This sets the overall theme to dark mode
-      primary: {
-        main: "#1a73e8", // Change this to your preferred primary color
-      },
-      secondary: {
-        main: "#f4f4f4", // Light color for secondary elements
-      },
-      background: {
-        default: "#333", // Background color
-        paper: "#424242", // Background color for Paper components
-      },
-      text: {
-        primary: "#f4f4f4", // Text color
-        secondary: "#cccccc", // Slightly lighter text color
-      },
-    },
-    typography: {
-      fontFamily: '"Figtree", sans-serif', // Use the Figtree font globally
-    },
-  });
+  // const theme = createTheme({
+  //   colorSchemes: { light: true, dark: true },
+  //   palette: {
+  //     mode: "dark", // This sets the overall theme to dark mode
+  //     primary: {
+  //       main: "#1a73e8", // Change this to your preferred primary color
+  //     },
+  //     secondary: {
+  //       main: "#f4f4f4", // Light color for secondary elements
+  //     },
+  //     background: {
+  //       default: "#333", // Background color
+  //       paper: "#424242", // Background color for Paper components
+  //     },
+  //     text: {
+  //       primary: "#f4f4f4", // Text color
+  //       secondary: "#cccccc", // Slightly lighter text color
+  //     },
+  //   },
+  //   typography: {
+  //     fontFamily: '"Figtree", sans-serif', // Use the Figtree font globally
+  //   },
+  // });
 
   return (
     <ThemeProvider theme={theme}>

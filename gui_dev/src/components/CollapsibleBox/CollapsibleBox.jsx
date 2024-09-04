@@ -1,65 +1,67 @@
-import { useRef, useState, useEffect } from "react";
+import { useEffect } from "react";
+import {
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Box,
+  Typography,
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { useUiStore } from "@/stores/uiStore";
 import styles from "./CollapsibleBox.module.css";
 
-const ArrowIcon = (props) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="-4.5 0 20 20" {...props}>
-    <title>{"arrow_right [#336]"}</title>
-    <path
-      fillRule="evenodd"
-      d="M.366 19.708c.405.39 1.06.39 1.464 0l8.563-8.264a1.95 1.95 0 0 0 0-2.827L1.768.292A1.063 1.063 0 0 0 .314.282a.976.976 0 0 0-.011 1.425l7.894 7.617a.975.975 0 0 1 0 1.414L.366 18.295a.974.974 0 0 0 0 1.413"
-    />
-  </svg>
-);
+const generateIdFromTitle = (title) => {
+  return title.toLowerCase().replace(/\s+/g, "-");
+};
 
 export const CollapsibleBox = ({
-  title,
-  startOpen = false,
+  id,
+  title = "Collapsible Box",
+  defaultExpanded = true,
   className,
   children,
+  sx,
+  headerProps,
+  contentProps,
 }) => {
-  const collapsingContentRef = useRef(null);
-  const [contentHeight, setContentHeight] = useState(0);
+  const boxId = id || generateIdFromTitle(title);
+
+  const { toggleAccordionState, initAccordionState } = useUiStore((state) => ({
+    toggleAccordionState: state.toggleAccordionState,
+    initAccordionState: state.initAccordionState,
+  }));
+  const isExpanded = useUiStore((state) => state.accordionStates[boxId]);
 
   useEffect(() => {
-    const updateHeight = () =>
-      setContentHeight(collapsingContentRef.current?.scrollHeight ?? 0);
+    initAccordionState(boxId, defaultExpanded);
+  }, [boxId, defaultExpanded, initAccordionState]);
 
-    // Set up ResizeObserver
-    const resizeObserver = new ResizeObserver(updateHeight);
+  const handleChange = () => {
+    toggleAccordionState(boxId);
+  };
 
-    if (collapsingContentRef.current) {
-      resizeObserver.observe(collapsingContentRef.current);
-    }
-
-    // Clean up
-    return () => {
-      if (collapsingContentRef.current) {
-        resizeObserver.unobserve(collapsingContentRef.current);
-      }
-    };
-  }, []); // Empty dependency array means this effect runs once on mount
+  // Ensure expanded prop is always boolean (can't never be undefined or MUI will complain)
+  const expandedState = isExpanded === undefined ? defaultExpanded : isExpanded;
 
   return (
-    <div className={`${styles.wrapper} ${className || ""}`}>
-      <div className={styles.header}>
-        <div className={styles.arrowContainer}>
-          <ArrowIcon className={styles.arrow} />
-        </div>
-        <h3 className={styles.title}>{title}</h3>
-        <input
-          type="checkbox"
-          className={styles.checkbox}
-          defaultChecked={startOpen}
-        />
-      </div>
-      <div
-        className={styles.contentWrapper}
-        style={{ "--content-height": `${contentHeight}px` }}
+    <Box className={className}>
+      <Accordion
+        expanded={expandedState}
+        onChange={handleChange}
+        disableGutters
+        square={false}
+        sx={sx}
       >
-        <div className={styles.collapsingContentBox} ref={collapsingContentRef}>
-          {children}
-        </div>
-      </div>
-    </div>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls={`${boxId}-content`}
+          id={`${boxId}-header`}
+          {...headerProps}
+        >
+          <Typography variant="h6">{title}</Typography>
+        </AccordionSummary>
+        <AccordionDetails {...contentProps}>{children}</AccordionDetails>
+      </Accordion>
+    </Box>
   );
 };

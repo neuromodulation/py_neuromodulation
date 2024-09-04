@@ -1,6 +1,6 @@
 import styles from "./Switch.module.css";
 
-export const Switch = ({ isEnabled, onChange, label }) => {
+export const Switch = ({ label = "", isEnabled, onChange }) => {
   return (
     <label className={styles.label}>
       <span className={styles.switch}>
