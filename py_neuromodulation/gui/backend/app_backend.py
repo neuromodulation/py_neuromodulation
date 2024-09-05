@@ -69,7 +69,10 @@ class PyNMBackend(FastAPI):
 
         @self.get("/api/channels")
         async def get_channels():
-            channels = self.pynm_state.stream.nm_channels.to_dict(orient='records')
+            if isinstance(self.pynm_state.stream.nm_channels, pd.Series):
+                channels = self.pynm_state.stream.nm_channels.to_frame().to_dict(orient='records')
+            else:
+                channels = self.pynm_state.stream.nm_channels.to_dict(orient='records')
             return channels
 
         @self.post("/api/channels")
@@ -77,7 +80,7 @@ class PyNMBackend(FastAPI):
             try:
                 print("Received data:", data)
                 self.logger.info(self.pynm_state.settings.features)
-                self.pynm_state.stream.nm_channels = pd.DataFrame(data)
+                self.pynm_state.stream.nm_channels = pd.DataFrame(data).channels
                 return {"message": "Channels updated successfully"}
             except ValueError as e:
                 raise HTTPException(
@@ -130,7 +133,7 @@ class PyNMBackend(FastAPI):
 
             return {
                 "version": metadata.get("Version", ""),
-                "website": urls["Homepage"],
+                "website": urls.get("Homepage", ""),
                 "authors": [metadata.get("Author-email", "")],
                 "maintainers": [metadata.get("Maintainer", "")],
                 "repository": urls.get("Repository", ""),

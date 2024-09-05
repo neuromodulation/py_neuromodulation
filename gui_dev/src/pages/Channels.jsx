@@ -16,7 +16,6 @@ export const Channels = () => {
         }
         const data = await response.json();
 
-        // TODO check if all cases are still necessary and check with multiple channels init (consistency of format)
         if (Array.isArray(data) && data.length > 0 && data[0].channels) {
           const extractedChannels = data.map(item => item.channels);
           setChannels(extractedChannels);

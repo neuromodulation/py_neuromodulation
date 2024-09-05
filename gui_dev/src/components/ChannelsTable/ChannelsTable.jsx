@@ -6,6 +6,8 @@ const channelTypes = [
   'stim', 'resp', 'chpi', 'exci', 'ias', 'syst'
 ];
 
+const statusOptions = ['good', 'bad'];
+
 export const ChannelsTable = ({ channels, setChannels }) => {
   
   const handleInputChange = (index, field, value) => {
@@ -62,10 +64,14 @@ export const ChannelsTable = ({ channels, setChannels }) => {
                 </Select>
               </TableCell>
               <TableCell>
-                <TextField 
+                <Select
                   value={channel.status}
                   onChange={(e) => handleInputChange(index, 'status', e.target.value)}
-                />
+                >
+                  {statusOptions.map((status, idx) => (
+                    <MenuItem key={idx} value={status}>{status}</MenuItem>
+                  ))}
+                </Select>
               </TableCell>
               <TableCell>
                 <Switch
