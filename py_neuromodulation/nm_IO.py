@@ -78,11 +78,12 @@ def read_BIDS_data(
         coord_names,
     )
 
+
 def read_mne_data(
     PATH_RUN: "_PathLike | BIDSPath",
     line_noise: int = 50,
 ):
-    """Read data in the mne.io.read_raw supported format. 
+    """Read data in the mne.io.read_raw supported format.
 
     Parameters
     ----------
@@ -118,8 +119,9 @@ def read_mne_data(
         logger.info(
             f"Line noise is not available in the data, using value of {line_noise} Hz."
         )
-    
+
     return raw_arr.get_data(), sfreq, ch_names, ch_types, bads
+
 
 def get_coord_list(
     raw: "mne_io.BaseRaw",
@@ -228,6 +230,7 @@ def read_plot_modules(
         z_stn,
     )
 
+
 def write_csv(df, path_out):
     """
     Function to save Pandas dataframes to disk as CSV using
@@ -238,6 +241,7 @@ def write_csv(df, path_out):
     from pyarrow import csv, Table
 
     csv.write_csv(Table.from_pandas(df), path_out)
+
 
 def save_nm_channels(
     nmchannels: pd.DataFrame,

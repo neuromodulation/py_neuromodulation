@@ -197,3 +197,6 @@ package-lock.json
 package-lock.json.bak
 # Ignore uv lock file
 uv.lock
+
+# LSL log file
+lsllog.txt
