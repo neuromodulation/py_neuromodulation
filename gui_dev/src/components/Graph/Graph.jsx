@@ -58,6 +58,7 @@ export const Graph = ({
     },
   });
 
+    // dead code?
   const updateGraph = (newData) => {
     if (!plotlyRef.current) return;
 

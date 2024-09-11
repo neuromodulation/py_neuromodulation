@@ -76,13 +76,24 @@ class PyNMBackend(FastAPI):
 
         @self.get("/api/channels")
         async def get_channels():
-            channels_html = self.pynm_state.stream.nm_channels.to_json(index=False)
-            return {"html": channels_html}
+            if isinstance(self.pynm_state.stream.nm_channels, pd.Series):
+                channels = self.pynm_state.stream.nm_channels.to_frame().to_dict(orient='records')
+            else:
+                channels = self.pynm_state.stream.nm_channels.to_dict(orient='records')
+            return channels
 
         @self.post("/api/channels")
         async def update_channels(data: dict):
-            self.pynm_state.stream.nm_channels = pd.DataFrame(data)
-            return {"message": "Channels updated successfully"}
+            try:
+                print("Received data:", data)
+                self.logger.info(self.pynm_state.settings.features)
+                self.pynm_state.stream.nm_channels = pd.DataFrame(data).channels
+                return {"message": "Channels updated successfully"}
+            except ValueError as e:
+                raise HTTPException(
+                    status_code=422,
+                    detail={"error": "Validation failed", "details": str(e)},
+                )
 
         @self.post("/api/stream-control")
         async def handle_stream_control(data: dict):
@@ -178,7 +189,7 @@ class PyNMBackend(FastAPI):
 
             return {
                 "version": metadata.get("Version", ""),
-                "website": urls["Homepage"],
+                "website": urls.get("Homepage", ""),
                 "authors": [metadata.get("Author-email", "")],
                 "maintainers": [metadata.get("Maintainer", "")],
                 "repository": urls.get("Repository", ""),
