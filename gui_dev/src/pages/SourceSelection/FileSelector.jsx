@@ -1,4 +1,4 @@
-import { Typography, Button } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 
 import { useState, useRef } from "react";
 import { useSessionStore } from "@/stores";
@@ -55,9 +55,9 @@ export const FileSelector = () => {
   };
 
   return (
-    <div className={styles.fileSelectorContainer}>
+    <Box>
       <Typography variant="h6" gutterBottom>
-        Select a File
+        Read data from file
       </Typography>
       <Button
         variant="contained"
@@ -98,6 +98,6 @@ export const FileSelector = () => {
           onFileSelect={handleFileSelect}
         />
       )}
-    </div>
+    </Box>
   );
 };

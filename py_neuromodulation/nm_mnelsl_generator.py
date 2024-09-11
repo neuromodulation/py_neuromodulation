@@ -5,7 +5,6 @@ import multiprocessing as mp
 import atexit
 import time
 import signal
-from contextlib import contextmanager
 
 from py_neuromodulation import logger, nm_types, nm_IO
 

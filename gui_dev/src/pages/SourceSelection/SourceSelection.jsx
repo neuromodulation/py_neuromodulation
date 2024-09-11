@@ -1,13 +1,11 @@
 import { Route, Routes, Link as RouterLink } from "react-router-dom";
 import { useEffect } from "react";
 
-import { Typography, Button, TextField, Box } from "@mui/material";
+import { Box, Button, Typography, TextField } from "@mui/material";
 
 import { StreamSelector } from "./StreamSelector";
 import { FileSelector } from "./FileSelector";
 import { useSessionStore, WorkflowStage } from "@/stores";
-
-import styles from "./SourceSelection.module.css";
 
 const MyTextField = ({ label, value, onChange }) => (
   <TextField
@@ -52,7 +50,16 @@ export const SourceSelection = () => {
     };
 
     return (
-      <Box sx={{ marginTop: 2 }}>
+      <Box
+        component="fieldset"
+        p={2}
+        borderRadius={5}
+        border="1px solid #555"
+        backgroundColor="#424242"
+        width="100%"
+      >
+        <legend>Stream parameters</legend>
+
         <MyTextField
           label="sfreq"
           value={samplingRateValue}
@@ -83,42 +90,51 @@ export const SourceSelection = () => {
   };
 
   return (
-    <div className={styles.sourceSelectionContainer}>
-      <div className={styles.sourceSelectionHeader}>
-        <Typography variant="h6" gutterBottom>
+    <Box
+      overflow="auto"
+      width="100%"
+      px={6}
+      pt={2}
+      pb={10}
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      gap={2}
+    >
+      <Box display="flex" gap={2}>
+        <Typography variant="h6">
           Where do you want to load data from?
         </Typography>
 
-        <div className={styles.sourceTypeButtonContainer}>
-          <Button
-            variant="contained"
-            component={RouterLink}
-            to="file"
-            onClick={() => handleSourceTypeChange("file")}
-          >
-            From File
-          </Button>
-          <Button
-            variant="contained"
-            component={RouterLink}
-            to="lsl"
-            onClick={() => handleSourceTypeChange("lsl")}
-          >
-            From LSL-Stream
-          </Button>
-        </div>
-      </div>
+        <Button
+          variant="contained"
+          component={RouterLink}
+          to="file"
+          onClick={() => handleSourceTypeChange("file")}
+          sx={{ width: 150 }}
+        >
+          File
+        </Button>
+        <Button
+          variant="contained"
+          component={RouterLink}
+          to="lsl"
+          onClick={() => handleSourceTypeChange("lsl")}
+          sx={{ width: 150 }}
+        >
+          LSL Stream
+        </Button>
+      </Box>
 
-      <div className={styles.sourceSelectionBody}>
+      <Box width="100%">
         <Routes>
           <Route path="file" element={<FileSelector />} />
           <Route path="lsl" element={<StreamSelector />} />
         </Routes>
-      </div>
-
+      </Box>
       <SourceSelectionSettings />
 
-      <div className={styles.sourceSelectionFooter}>
+      <Box p={3} height="100%">
         <Button
           variant="contained"
           color="primary"
@@ -128,7 +144,7 @@ export const SourceSelection = () => {
         >
           Select Channels
         </Button>
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };

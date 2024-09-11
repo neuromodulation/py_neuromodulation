@@ -6,7 +6,14 @@ from datetime import datetime
 from pathlib import Path
 import os
 
-from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import (
+    FastAPI,
+    HTTPException,
+    Query,
+    WebSocket,
+    WebSocketDisconnect,
+    Response,
+)
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -103,26 +110,33 @@ class PyNMBackend(FastAPI):
             # Add other actions as needed
             return {"message": f"Stream action '{action}' executed"}
 
+        ###################
+        ### LSL STREAMS ###
+        ###################
+
         @self.get("/api/LSL-streams")
         async def get_lsl_streams():
             from py_neuromodulation import nm_mnelsl_stream
 
-            streams = nm_mnelsl_stream.resolve_streams()
-            if len(streams) == 0:
-                return {"message": "No LSL streams found"}
-
-            # return json file parsed from mnelsl xml streams
-            stream_vals = {}
-
-            for stream in streams:
-                lsl_source = {}
-                lsl_source["name"] = stream.name
-                lsl_source["sfreq"] = stream.sfreq
-                lsl_source["n_channels"] = stream.n_channels
-                lsl_source["hostname"] = stream.hostname
-                stream_vals[stream.name] = lsl_source
-
-            return {"message": stream_vals}
+            return {
+                "message": [
+                    {
+                        "dtype":  # MNE-LSL might return a class, so we get the name
+                        getattr(stream.dtype, "__name__", str(stream.dtype)),
+                        "name": stream.name,
+                        "n_channels": stream.n_channels,
+                        "sfreq": stream.sfreq,
+                        "source_id": stream.source_id,
+                        "stype": stream.stype,  # Stream type (e.g. EEG)
+                        "created_at": stream.created_at,
+                        "hostname": stream.hostname,
+                        "session_id": stream.session_id,
+                        "uid": stream.uid,
+                        "protocol_version": stream.protocol_version,
+                    }
+                    for stream in nm_mnelsl_stream.resolve_streams()
+                ]
+            }
 
         @self.post("/api/setup-LSL-stream")
         async def setup_lsl_stream(data: dict):
@@ -151,6 +165,10 @@ class PyNMBackend(FastAPI):
             except ValueError as e:
                 return {"message": f"Offline stream could not be setup"}
             return {"message": f"Offline stream setup successfully"}
+
+        #######################
+        ### PYNM ABOUT INFO ###
+        #######################
 
         @self.get("/api/app-info")
         async def get_app_info():
@@ -320,6 +338,14 @@ class PyNMBackend(FastAPI):
                     except asyncio.CancelledError:
                         pass
 
+        # #######################
+        # ### SPA ENTRY POINT ###
+        # #######################
+        # @self.get("/{full_path:path}")
+        # async def serve_spa(request, full_path: str):
+        #     # Serve the index.html for any path that doesn't match an API route
+        #     return FileResponse("frontend/index.html")
+
     async def send_periodic_data(self):
         while True:
             try:
@@ -346,8 +372,3 @@ class PyNMBackend(FastAPI):
             except Exception as e:
                 self.logger.error(f"Error in periodic task: {e}")
                 await asyncio.sleep(0.5)
-
-        @self.get("/{full_path:path}")
-        async def serve_spa(request, full_path: str):
-            # Serve the index.html for any path that doesn't match an API route
-            return FileResponse("frontend/index.html")
