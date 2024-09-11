@@ -20,12 +20,19 @@ export const StreamSelector = () => {
   const [searchingStreams, setSearchingStreams] = useState(false);
   const [selectedStreamName, setSelectedStreamName] = useState("");
   const [isStreamNameValid, setIsStreamNameValid] = useState(false);
-  const { lslSource, selectLSLStream, fetchLSLStreams, connectToLSLStream } =
+  const { lslSource, selectLSLStream, fetchLSLStreams, initializeLSLStream,
+    streamParameters, setLineNoiseValue, setSamplingRateFeaturesValue,
+    setSamplingRateValue, setStreamParametersAllValid} =
     useSessionStore((state) => ({
       lslSource: state.lslSource,
       selectLSLStream: state.selectLSLStream,
       fetchLSLStreams: state.fetchLSLStreams,
-      connectToLSLStream: state.connectToLSLStream,
+      initializeLSLStream: state.initializeLSLStream,
+      streamParameters: state.streamParameters,
+      setLineNoiseValue: state.setLineNoiseValue,
+      setSamplingRateFeaturesValue: state.setSamplingRateFeaturesValue,
+      setSamplingRateValue: state.setSamplingRateValue,
+      setStreamParametersAllValid: state.setStreamParametersAllValid,
     }));
 
   const validateStreamName = (name) => {
@@ -40,8 +47,18 @@ export const StreamSelector = () => {
     return () => clearTimeout(timer);
   }, [selectedStreamName, validateStreamName]);
 
-  const handleSelectStream = (streamName) => {
+  const handleSelectStream = (streamName, sfreq) => {
     setSelectedStreamName(streamName);
+    // set the samplingRateValue of the streamParameters
+    //streamParameters.samplingRateValue = sfreq;
+    // streamParameters.samplingRateFeaturesValue = 10;
+    // streamParameters.lineNoiseValue = 50;
+    // streamParameters.allValid = true;
+    setLineNoiseValue(50);
+    setSamplingRateFeaturesValue(10);
+    setSamplingRateValue(sfreq);
+    setStreamParametersAllValid(true);
+    
     setIsStreamNameValid(true);
   };
 
@@ -69,7 +86,10 @@ export const StreamSelector = () => {
           {lslSource.availableStreams.map((stream, index) => (
             <TableRow
               key={index}
-              onClick={() => handleSelectStream(stream.name)}
+              onClick={() => handleSelectStream(
+                stream.name,
+                stream.sfreq
+              )}
               sx={{
                 cursor: "pointer",
                 "&:hover": { backgroundColor: "#505050" },
@@ -101,7 +121,7 @@ export const StreamSelector = () => {
 
   const handleConnectStream = async () => {
     if (isStreamNameValid) {
-      await connectToLSLStream(selectedStreamName);
+      await initializeLSLStream();  // selectedStreamName
     }
   };
 

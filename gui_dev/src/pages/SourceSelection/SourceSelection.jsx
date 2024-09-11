@@ -34,9 +34,10 @@ export const SourceSelection = () => {
     syncError,
     setWorkflowStage,
     isStageActive,
-    samplingRateValue,
-    lineNoiseValue,
-    samplingRateFeaturesValue,
+    //samplingRateValue,
+    //lineNoiseValue,
+    //samplingRateFeaturesValue,
+    streamParameters,
     setSamplingRateValue,
     setLineNoiseValue,
     setSamplingRateFeaturesValue,
@@ -62,17 +63,17 @@ export const SourceSelection = () => {
 
         <MyTextField
           label="sfreq"
-          value={samplingRateValue}
+          value={streamParameters.samplingRateValue}
           onChange={(event) => handleOnChange(event, setSamplingRateValue)}
         />
         <MyTextField
           label="line noise"
-          value={lineNoiseValue}
+          value={streamParameters.lineNoiseValue}
           onChange={(event) => handleOnChange(event, setLineNoiseValue)}
         />
         <MyTextField
           label="sfreq features"
-          value={samplingRateFeaturesValue}
+          value={streamParameters.samplingRateFeaturesValue}
           onChange={(event) =>
             handleOnChange(event, setSamplingRateFeaturesValue)
           }
@@ -140,7 +141,8 @@ export const SourceSelection = () => {
           color="primary"
           component={RouterLink}
           to="/channels"
-          disabled={canProceedToChannelSelection}
+          //disabled={canProceedToChannelSelection}  // TODO: This doesn't work with the current setup, no idea why... the state values are set correctly
+          // load here the channels and display them from the stream
         >
           Select Channels
         </Button>

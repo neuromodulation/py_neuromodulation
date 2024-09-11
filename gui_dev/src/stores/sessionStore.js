@@ -62,6 +62,28 @@ export const useSessionStore = create(
       allValid: false,
     },
 
+    // write function to set streamParameters
+    setSamplingRateValue: (value) => {
+      set((state) => {
+        state.streamParameters.samplingRateValue = value;
+      });
+    },
+    setLineNoiseValue: (value) => {
+      set((state) => {
+        state.streamParameters.lineNoiseValue = value;
+      });
+    },
+    setSamplingRateFeaturesValue: (value) => {
+      set((state) => {
+        state.streamParameters.samplingRateFeaturesValue = value;
+      });
+    },
+    setStreamParametersAllValid: (value) => {
+      set((state) => {
+        state.streamParameters.allValid = value;
+      });
+    },
+
     // Channel selection
     channels: null,
     selectedChannels: [],
@@ -217,15 +239,23 @@ export const useSessionStore = create(
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          stream_name: lslSource.selectedStream.name,
+          stream_name: lslSource.availableStreams[0].name,
           sampling_rate_features: streamParameters.samplingRateValue,
-          line_noise: streamParameters.linenoiseValue,
+          line_noise: streamParameters.lineNoiseValue,
         }),
       });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      // enable the next button
+      set({
+        sourceType: "lsl",
+        isSourceValid: true,
+      })
+
+      // make a alert that says that the stream is initialized in js
     },
 
     // Computed properties
