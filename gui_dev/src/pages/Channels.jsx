@@ -10,7 +10,7 @@ export const Channels = () => {
   useEffect(() => {
     const fetchChannels = async () => {
       try {
-        const response = await fetch('http://localhost:50000/api/channels');
+        const response = await fetch('http://localhost:50001/api/channels');
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
@@ -47,7 +47,7 @@ export const Channels = () => {
 
       console.log('Data being sent to the backend:', JSON.stringify({ channels: formattedChannels }));
 
-      const response = await fetch('http://localhost:50000/api/channels', {
+      const response = await fetch('http://localhost:50001/api/channels', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
