@@ -9,7 +9,7 @@ import babelParser from "@babel/eslint-parser";
 
 export default [
   js.configs.recommended,
-  jsdoc.configs["flat/stylistic-typescript-flavor"],
+  jsdoc.configs["flat/recommended-typescript-flavor"],
   { files: ["**/*.{js,mjs,cjs,jsx}"] },
   { languageOptions: { parserOptions: { ecmaFeatures: { jsx: true } } } },
   { languageOptions: { globals: globals.browser } },
