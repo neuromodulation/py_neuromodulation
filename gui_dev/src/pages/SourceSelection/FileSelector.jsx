@@ -1,18 +1,16 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Paper, Button, Typography } from "@mui/material";
 
 import { useState, useRef } from "react";
 import { useSessionStore } from "@/stores";
 
-import { FileBrowser } from "@/components";
-
-import styles from "./SourceSelection.module.css";
+import { FileBrowser, TitledBox } from "@/components";
 
 export const FileSelector = () => {
   const {
     fileSource,
     setFileSource,
     setIsSourceValid,
-    initializeStream,
+    initializeOfflineStream,
     streamSetupMessage,
     isStreamSetupCorrect,
   } = useSessionStore();
@@ -33,17 +31,7 @@ export const FileSelector = () => {
     fileBrowserDirRef.current = file.dir;
 
     try {
-      const fileId =
-        Date.now().toString(36) + Math.random().toString(36).substr(2);
-
-      setFileSource({
-        fileId,
-        fileName: file.name,
-        fileSize: file.size,
-        fileFormat: file.name.split(".").pop(),
-        filePath: file.path,
-      });
-      setIsSourceValid(true);
+      setFileSource(file);
 
       // Close the FileBrowser modal
       setShowFileBrowser(false);
@@ -55,32 +43,44 @@ export const FileSelector = () => {
   };
 
   return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
-        Read data from file
-      </Typography>
+    <TitledBox
+      title="Read data from file"
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 2,
+      }}
+    >
       <Button
         variant="contained"
         onClick={handleSelectFile}
         disabled={isSelecting}
+        sx={{ width: "100%" }}
       >
         {isSelecting ? "Selecting..." : "Select File"}
       </Button>
-      {fileSource.fileName && (
-        <Typography variant="body2" mt={2}>
-          Selected File: <i>{fileSource.fileName}</i>
-        </Typography>
-      )}
-      {fileSource.fileFormat && (
-        <Typography variant="body2" mt={1}>
-          File Format: {fileSource.fileFormat}
-        </Typography>
-      )}
-      {fileSource.filePath && (
-        <Typography variant="body2" mt={1}>
-          File Path: {fileSource.filePath}
-        </Typography>
-      )}
+      <Paper sx={{ p: 2, display: "flex", flexDirection: "column", gap: 1 }}>
+        {fileSource.name && (
+          <Typography variant="body2">
+            Selected File: <i>{fileSource.name}</i>
+          </Typography>
+        )}
+        {fileSource.size && (
+          <Typography variant="body2">File Size: {fileSource.size}</Typography>
+        )}
+        {fileSource.path && (
+          <Typography variant="body2">File Path: {fileSource.path}</Typography>
+        )}
+      </Paper>
+      <Button
+        variant="contained"
+        onClick={initializeOfflineStream}
+        sx={{ width: "fit-content" }}
+      >
+        Open File
+      </Button>
       {streamSetupMessage && (
         <Typography
           variant="body2"
@@ -98,6 +98,6 @@ export const FileSelector = () => {
           onFileSelect={handleFileSelect}
         />
       )}
-    </Box>
+    </TitledBox>
   );
 };

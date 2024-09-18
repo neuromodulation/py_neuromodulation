@@ -1,94 +1,224 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { ChannelsTable } from "@/components";
+import { useSessionStore } from "@/stores";
 
-export const Channels = () => {
-  const navigate = useNavigate();
-  const [channels, setChannels] = useState([]);
+import {
+  Box,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TextField,
+  Select,
+  MenuItem,
+  Switch,
+  Tooltip,
+} from "@mui/material";
 
-  useEffect(() => {
-    const fetchChannels = async () => {
-      try {
-        const response = await fetch('http://localhost:50001/api/channels');
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
+import { LinkButton } from "@/components/utils";
 
-        if (Array.isArray(data) && data.length > 0 && data[0].channels) {
-          const extractedChannels = data.map(item => item.channels);
-          setChannels(extractedChannels);
-        } else if (data.channels) {
-          setChannels(data.channels);
-        } else {
-          setChannels(data); 
-        }
-      } catch (error) {
-        console.error('Error fetching channels:', error);
-      }
-    };
+/**
+ * Possible channel types for LSL streams
+ */
+const channelTypes = Object.freeze([
+  "eeg",
+  "meg (mag)",
+  "meg (grad)",
+  "ecg",
+  "seeg",
+  "dbs",
+  "ecog",
+  "fnirs (hbo)",
+  "fnirs (hbr)",
+  "emg",
+  "bio",
+  "stim",
+  "resp",
+  "chpi",
+  "exci",
+  "ias",
+  "syst",
+]);
 
-    fetchChannels();
-  }, []);
+/**
+ * Possible status options for channels
+ */
+const statusOptions = Object.freeze(["good", "bad"]);
 
-  const handleUpdateChannels = async () => {
-    try {
-      const formattedChannels = channels.map(channel => ({
-        ...channel,
-        used: channel.used ? 1 : 0,
-        target: channel.target ? 1 : 0,
-        name: channel.name || "",
-        rereference: channel.rereference || "",
-        type: channel.type || "",
-        status: channel.status || "",
-        new_name: channel.new_name || "",
-      }));
+/**
+ * Wrapper for the TextField component
+ * @param {object} props - Props for the inner TextField component
+ * @returns {JSX.Element} - The TextField component
+ */
+const TableTextField = (props) => <TextField variant="standard" {...props} />;
 
-      console.log('Data being sent to the backend:', JSON.stringify({ channels: formattedChannels }));
+/**
+ * Wrapper for the Select component
+ * @param {object} props - Props for the inner Select component
+ * @param {Array} props.options - Array of options for the Select component
+ * @returns {JSX.Element} - The Select component
+ */
+const TableSelect = ({ options, ...props }) => (
+  <Select variant="standard" {...props}>
+    {options.map((opt, idx) => (
+      <MenuItem key={idx} value={opt}>
+        {opt}
+      </MenuItem>
+    ))}
+  </Select>
+);
 
-      const response = await fetch('http://localhost:50001/api/channels', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ channels: formattedChannels }),
-      });
+/**
+ * Array mapping column names to their corresponding components and props
+ */
+const columns = [
+  {
+    id: "name",
+    label: "Name",
+    component: TableTextField,
+    description: "Channel name",
+  },
+  {
+    id: "rereference",
+    label: "Rereference",
+    component: TableTextField,
+    description: "Channel to re-reference against",
+  },
+  {
+    id: "type",
+    label: "Type",
+    component: TableSelect,
+    props: { options: channelTypes },
+    description: "Channel type",
+  },
+  {
+    id: "status",
+    label: "Status",
+    component: TableSelect,
+    props: { options: statusOptions },
+  },
+  {
+    id: "used",
+    label: "Used",
+    component: Switch,
+  },
+  {
+    id: "target",
+    label: "Target",
+    component: Switch,
+  },
+  {
+    id: "new_name",
+    label: "New Name",
+    component: TableTextField,
+  },
+];
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to update channels: ${errorText}`);
-      }
+/**
+ *
+ * @returns {JSX.Element} - The ChannelsTable component
+ */
+const ChannelsTable = () => {
+  const channels = useSessionStore((state) => state.channels);
+  const updateChannel = useSessionStore((state) => state.updateChannel);
 
-      const result = await response.json();
-      console.log('Update successful:', result);
-    } catch (error) {
-      console.error('Error updating channels:', error);
-    }
-  };
-
-  const handleSettings = () => {
-    handleUpdateChannels();
-    navigate('/settings');
-  };
-
-  const handleReplaceChannel = (index, newChannel) => {
-    const updatedChannels = channels.map((channel, i) =>
-      i === index ? newChannel : channel
+  const handleChange = (event, index, field) => {
+    updateChannel(
+      index,
+      field,
+      event.target.type === "checkbox"
+        ? event.target.checked
+        : event.target.value
     );
-    setChannels(updatedChannels);
   };
 
   return (
+    <TableContainer
+      component={Paper}
+      sx={{ maxHeight: "500px", overflowY: "auto" }}
+    >
+      <Table stickyHeader>
+        <TableHead>
+          <TableRow>
+            {columns.map((column) => (
+              <Tooltip
+                key={column.id}
+                title={column.description}
+                placement="top"
+              >
+                <TableCell
+                  key={column.id}
+                  align="center"
+                  sx={{ p: 1, backgroundColor: "primary.main" }}
+                >
+                  {column.label}
+                </TableCell>
+              </Tooltip>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {channels &&
+            channels.length > 0 &&
+            channels.map((channel, index) => (
+              <TableRow
+                key={index}
+                sx={{
+                  backgroundColor: index % 2 ? "background.main" : "#666666",
+                }}
+              >
+                {columns.map((column) => (
+                  <TableCell
+                    key={column.id}
+                    sx={{
+                      py: 1,
+                    }}
+                  >
+                    <column.component
+                      value={channel[column.id]}
+                      onChange={(e) => handleChange(e, index, column.id)}
+                      {...column.props}
+                    />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+};
+
+/**
+ * Channels page component
+ * @returns {JSX.Element} - The Channels component
+ */
+export const Channels = () => {
+  const uploadChannels = useSessionStore((state) => state.uploadChannels);
+
+  return (
     <Box sx={{ padding: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Channels
-      </Typography>
-      <ChannelsTable channels={channels} setChannels={handleReplaceChannel} />
-      <Box sx={{ marginTop: 3, textAlign: 'center' }}>
-        <Button variant="contained" color="primary" onClick={handleSettings} sx={{ marginLeft: 2 }}>
-          Settings
+      <ChannelsTable />
+      <Box
+        sx={{
+          marginTop: 3,
+          display: "flex",
+          gap: 2,
+          justifyContent: "center",
+        }}
+      >
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => uploadChannels()}
+        >
+          Save Channels
         </Button>
+        <LinkButton to="/settings" variant="contained" color="primary">
+          Settings
+        </LinkButton>
       </Box>
     </Box>
   );

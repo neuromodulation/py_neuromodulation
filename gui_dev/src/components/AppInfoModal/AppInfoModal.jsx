@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import { useAppInfo } from "@/stores/appInfoStore";
+import { useAppInfoStore } from "@/stores/appInfoStore";
 import { SafeExternalLink as ExtLink } from "@/components/utils";
 import styles from "./AppInfoModal.module.css";
 
@@ -27,7 +27,7 @@ const InfoItem = ({ label, value, isLink = false }) => {
 };
 
 export const AppInfoModal = ({ onClose }) => {
-  const appInfo = useAppInfo();
+  const appInfo = useAppInfoStore();
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>

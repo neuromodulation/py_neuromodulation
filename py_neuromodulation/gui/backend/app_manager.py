@@ -14,15 +14,23 @@ if TYPE_CHECKING:
     from multiprocessing.synchronize import Event
     from .app_backend import PyNMBackend
 
+
 # Shared memory configuration
 ARRAY_SIZE = 1000  # Adjust based on your needs
+
+
+def create_backend() -> "PyNMBackend":
+    from .app_pynm import PyNMState
+    from .app_backend import PyNMBackend
+
+    return PyNMBackend(pynm_state=PyNMState())
 
 
 def run_vite(shutdown_event: "Event", debug: bool = False) -> None:
     """Run Vite in a separate shell"""
     import subprocess
 
-    signal.signal(signal.SIGINT, signal.SIG_IGN)  # Don't propagate SIGINT to subprocess
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
 
     logger = create_logger(
         "Vite",
@@ -95,22 +103,9 @@ def run_vite(shutdown_event: "Event", debug: bool = False) -> None:
     logger.info("Development server stopped")
 
 
-def create_backend() -> "PyNMBackend":
-    from .app_pynm import PyNMState
-    from .app_backend import PyNMBackend
-
-    return PyNMBackend(pynm_state=PyNMState())
-
-
-def run_backend(
-    shutdown_event: "Event",
-    debug: bool = False,
-    reload: bool = True,
-) -> None:
-    import uvicorn
-    from uvicorn.config import LOGGING_CONFIG
-
-    signal.signal(signal.SIGINT, signal.SIG_IGN)  # Don't propagate SIGINT to subprocess
+def run_uvicorn(debug: bool = False, reload=False) -> None:
+    from uvicorn.server import Server
+    from uvicorn.config import LOGGING_CONFIG, Config
 
     # Configure logging
     color = ansi_color(color="green", bright=True, styles=["BOLD"])
@@ -128,15 +123,8 @@ def run_backend(
     )
     log_config["formatters"]["access"]["datefmt"] = "%H:%M:%S"
 
-    # Reload requires passing import string
-    app = (
-        "py_neuromodulation.gui.backend.app_manager:create_backend"
-        if reload
-        else create_backend()
-    )
-
-    server_config = uvicorn.Config(
-        app,
+    config = Config(
+        app="py_neuromodulation.gui.backend.app_manager:create_backend",
         host="localhost",
         reload=reload,
         factory=True,
@@ -144,26 +132,65 @@ def run_backend(
         log_level="debug" if debug else "info",
         log_config=log_config,
     )
-    server = uvicorn.Server(server_config)
 
-    server_thread = threading.Thread(target=server.run, name="Server")
-    server_thread.start()
+    server = Server(config=config)
 
+    if reload:
+        from uvicorn.supervisors import ChangeReload
+        from uvicorn._subprocess import get_subprocess
+
+        # Overload the restart method of uvicorn so that is does not kill all of our processes
+        # IMPORTANT: This is a hack and prevents shutdown events from triggering when the reloader is used
+        class CustomReloader(ChangeReload):
+            def restart(self) -> None:
+                self.process.terminate()  # Use terminate instead of os.kill
+                self.process.join()
+                self.process = get_subprocess(
+                    config=self.config, target=self.target, sockets=self.sockets
+                )
+                self.process.start()
+
+        sock = config.bind_socket()
+        server = CustomReloader(config, target=server.run, sockets=[sock])
+
+    server.run()
+
+
+def run_backend(
+    shutdown_event: "Event", debug: bool = False, reload: bool = True
+) -> None:
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+
+    server_process = mp.Process(
+        target=run_uvicorn,
+        kwargs={"debug": debug, "reload": reload},
+        name="Server",
+    )
+    server_process.start()
     shutdown_event.wait()
-
-    server.should_exit = True
-
-    server_thread.join()
+    server_process.join()
 
 
 class AppManager:
     LAUNCH_FLAG = "PYNM_RUNNING"
 
-    def __init__(self, debug: bool = False, run_in_webview=True) -> None:
+    def __init__(
+        self, debug: bool = False, dev: bool = True, run_in_webview=False
+    ) -> None:
+        """_summary_
+
+        Args:
+            debug (bool, optional): If True, run the app in debug mode, which sets logging level to debug,
+                and starts uvicorn, FastAPI, and Vite in debug mode. Defaults to False.
+            dev (bool, optional): If True, run the app in development mode, which enables hot
+                reloading and runs the frontend in Vite server. If False, run the app in production mode,
+                which runs the frontend from the static files in the `frontend` directory. Defaults to True.
+            run_in_webview (bool, optional): If True, open a PyWebView window to display the app. Defaults to False.
+        """
         self.debug = debug
+        self.dev = dev
         self.run_in_webview = run_in_webview
         self._reset()
-
         # Prevent launching multiple instances of the app due to multiprocessing
         # This allows the absence of a main guard in the main script
         self.is_child_process = os.environ.get(self.LAUNCH_FLAG) == "TRUE"
@@ -191,31 +218,7 @@ class AppManager:
         self.tasks: dict[str, mp.Process] = {}
 
         # Events for multiprocessing synchronization
-        self.ready_event = mp.Event()
-        self.restart_event = mp.Event()
-        self.shutdown_event = mp.Event()
-
-    def _run_app(self) -> None:
-        self.logger.info("Starting Vite server...")
-        self.tasks["vite"] = mp.Process(
-            target=run_vite,
-            kwargs={"shutdown_event": self.shutdown_event, "debug": self.debug},
-            name="Vite",
-        )
-
-        self.logger.info("Starting backend server...")
-        self.tasks["backend"] = mp.Process(
-            target=run_backend,
-            kwargs={
-                "debug": self.debug,
-                "shutdown_event": self.shutdown_event,
-                "reload": True,
-            },
-            name="Backend",
-        )
-
-        for process in self.tasks.values():
-            process.start()
+        self.shutdown_event: Event = mp.Event()
 
     def _terminate_app(self) -> None:
         if self.shutdown_started:
@@ -224,7 +227,7 @@ class AppManager:
 
         self.shutdown_started = True
 
-        timeout = 5
+        timeout = 10
         deadline = time.time() + timeout
 
         self.logger.info("App closed, cleaning up background tasks...")
@@ -259,8 +262,29 @@ class AppManager:
 
         # Handle keyboard interrupt signals
         signal.signal(signal.SIGINT, self._sigint_handler)
+        # signal.signal(signal.SIGINT, signal.SIG_IGN)
 
-        self._run_app()
+        # Create and start the subprocesses
+        self.logger.info("Starting Vite server...")
+        self.tasks["vite"] = mp.Process(
+            target=run_vite,
+            kwargs={"shutdown_event": self.shutdown_event, "debug": self.debug},
+            name="Vite",
+        )
+
+        self.logger.info("Starting backend server...")
+        self.tasks["backend"] = mp.Process(
+            target=run_backend,
+            kwargs={
+                "shutdown_event": self.shutdown_event,
+                "debug": self.debug,
+                "reload": self.dev,
+            },
+            name="Backend",
+        )
+
+        for process in self.tasks.values():
+            process.start()
 
         if self.run_in_webview:
             from .app_window import WebViewWindow

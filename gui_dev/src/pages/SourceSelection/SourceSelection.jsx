@@ -1,11 +1,13 @@
-import { Route, Routes, Link as RouterLink } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { useEffect } from "react";
 
-import { Box, Button, Typography, TextField } from "@mui/material";
+import { Box, Typography, TextField } from "@mui/material";
 
 import { StreamSelector } from "./StreamSelector";
 import { FileSelector } from "./FileSelector";
+import { TitledBox } from "@/components";
 import { useSessionStore, WorkflowStage } from "@/stores";
+import { LinkButton } from "@/components/utils";
 
 const MyTextField = ({ label, value, onChange }) => (
   <TextField
@@ -27,58 +29,39 @@ const MyTextField = ({ label, value, onChange }) => (
 
 export const SourceSelection = () => {
   const {
-    sourceType,
     setSourceType,
-    canProceedToChannelSelection,
-    syncStatus,
-    syncError,
     setWorkflowStage,
-    isStageActive,
-    //samplingRateValue,
-    //lineNoiseValue,
-    //samplingRateFeaturesValue,
+    isSourceValid,
     streamParameters,
-    setSamplingRateValue,
-    setLineNoiseValue,
-    setSamplingRateFeaturesValue,
+    updateStreamParameter,
     checkStreamParameters,
   } = useSessionStore();
 
+  console.log(streamParameters);
   const SourceSelectionSettings = () => {
-    const handleOnChange = (event, setter) => {
-      setter(event.target.value);
+    const handleOnChange = (event, field) => {
+      updateStreamParameter(field, event.target.value);
       checkStreamParameters();
     };
 
     return (
-      <Box
-        component="fieldset"
-        p={2}
-        borderRadius={5}
-        border="1px solid #555"
-        backgroundColor="#424242"
-        width="100%"
-      >
-        <legend>Stream parameters</legend>
-
+      <TitledBox title="Stream parameters" width="100%">
         <MyTextField
           label="sfreq"
-          value={streamParameters.samplingRateValue}
-          onChange={(event) => handleOnChange(event, setSamplingRateValue)}
+          value={streamParameters.samplingRate}
+          onChange={(event) => handleOnChange(event, "samplingRate")}
         />
         <MyTextField
           label="line noise"
-          value={streamParameters.lineNoiseValue}
-          onChange={(event) => handleOnChange(event, setLineNoiseValue)}
+          value={streamParameters.lineNoise}
+          onChange={(event) => handleOnChange(event, "lineNoise")}
         />
         <MyTextField
           label="sfreq features"
-          value={streamParameters.samplingRateFeaturesValue}
-          onChange={(event) =>
-            handleOnChange(event, setSamplingRateFeaturesValue)
-          }
+          value={streamParameters.samplingRateFeatures}
+          onChange={(event) => handleOnChange(event, "samplingRateFeatures")}
         />
-      </Box>
+      </TitledBox>
     );
   };
 
@@ -107,24 +90,22 @@ export const SourceSelection = () => {
           Where do you want to load data from?
         </Typography>
 
-        <Button
+        <LinkButton
           variant="contained"
-          component={RouterLink}
           to="file"
           onClick={() => handleSourceTypeChange("file")}
           sx={{ width: 150 }}
         >
           File
-        </Button>
-        <Button
+        </LinkButton>
+        <LinkButton
           variant="contained"
-          component={RouterLink}
           to="lsl"
           onClick={() => handleSourceTypeChange("lsl")}
           sx={{ width: 150 }}
         >
           LSL Stream
-        </Button>
+        </LinkButton>
       </Box>
 
       <Box width="100%">
@@ -136,16 +117,14 @@ export const SourceSelection = () => {
       <SourceSelectionSettings />
 
       <Box p={3} height="100%">
-        <Button
+        <LinkButton
           variant="contained"
           color="primary"
-          component={RouterLink}
           to="/channels"
-          //disabled={canProceedToChannelSelection}  // TODO: This doesn't work with the current setup, no idea why... the state values are set correctly
-          // load here the channels and display them from the stream
+          disabled={!isSourceValid}
         >
           Select Channels
-        </Button>
+        </LinkButton>
       </Box>
     </Box>
   );

@@ -1,10 +1,9 @@
-import { create } from "zustand";
+import { createStore } from "./createStore";
 
 const WEBSOCKET_URL = "ws";
-const MAGIC_BYTE = 98; // binary messages start with an ASCII `b`
 const RECONNECT_INTERVAL = 500; // ms
 
-export const useSocketStore = create((set, get) => ({
+export const useSocketStore = createStore("socket", (set, get) => ({
   socket: null,
   status: "disconnected", // 'disconnected', 'connecting', 'connected'
   error: null,
@@ -63,62 +62,7 @@ export const useSocketStore = create((set, get) => ({
     };
 
     newSocket.onmessage = (event) => {
-      // console.log("Received message from server:", event.data);
-      if (event.data instanceof ArrayBuffer) {
-        const view = new DataView(event.data);
-
-        const firstByte = view.getUint8(0);
-
-        switch (firstByte) {
-          case MAGIC_BYTE:
-            // Get header length
-            const headerLength = view.getUint32(1);
-            // Parse JSON header
-            const headerJson = new TextDecoder().decode(
-              event.data.slice(5, 5 + headerLength)
-            );
-            const header = JSON.parse(headerJson);
-            // console.log(header);
-
-            if (header.payload) {
-              // Extract payload
-              const payload = event.data.slice(5 + headerLength);
-
-              if (header.type === "new_batch") {
-                console.log("Received new batch of data:");
-                if (header.data_type === "float64") {
-                  const data = new Float64Array(payload);
-                  // console.log("Received new batch of data:", Array.from(data));
-                  set({ graphData: Array.from(data) });
-                }
-                // Handle other data types as needed
-              }
-              // Handle other payload types as needed
-            } else {
-              // Handle non-payload messages
-              if (header.type === "info") {
-                set((state) => ({
-                  infoMessages: [...state.infoMessages, header.message],
-                }));
-              }
-              // Handle other message types as needed
-            }
-            break;
-
-          // Handle JSON messages
-          case "{":
-            const message = JSON.parse(event.data);
-            console.log("Received JSON message:", message);
-            break;
-
-          // Handle other message types
-          default:
-            console.error("Unrecognized message format:", event.data);
-            break;
-        }
-      } else {
-        console.error("Unexpected non-binary message:", event.data);
-      }
+      console.log("Received message from server:", event.data);
     };
 
     set({ socket: newSocket });
@@ -169,5 +113,5 @@ export const useSocketStore = create((set, get) => ({
   },
 
   // Clear messages
-  clearMessages: () => set({ messages: [] }),
+  clearMessages: set({ messages: [] }),
 }));

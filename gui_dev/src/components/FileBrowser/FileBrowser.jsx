@@ -31,6 +31,9 @@ import {
 } from "@mui/icons-material";
 
 import { QuickAccessSidebar } from "./QuickAccess";
+import { FileManager } from "@/utils/FileManager";
+
+const fileManager = new FileManager("");
 
 const ALLOWED_EXTENSIONS = [".npy", ".vhdr", ".fif", ".edf", ".bdf"];
 
@@ -138,20 +141,14 @@ export const FileBrowser = ({
 
   const fetchFiles = async (path) => {
     try {
-      const response = await fetch(
-        `/api/files?path=${encodeURIComponent(path)}&allowed_extensions=${ALLOWED_EXTENSIONS.join(",")}&show_hidden=${state.showHiddenFiles}`
-      );
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error("Directory not found");
-        } else {
-          throw new Error("Failed to fetch files");
-        }
-      }
-      const data = await response.json();
+      const files = await fileManager.getFiles({
+        path,
+        allowedExtensions: ALLOWED_EXTENSIONS.join(","),
+        showHidden: state.showHiddenFiles,
+      });
       dispatch({
         type: "SET_FILES",
-        payload: data.map((file) => ({
+        payload: files.map((file) => ({
           ...file,
           type: file.is_directory
             ? "Directory"
@@ -209,16 +206,20 @@ export const FileBrowser = ({
   };
 
   const handleSort = (key) => {
+    const direction =
+      state.sortConfig.key === key && state.sortConfig.direction === "asc"
+        ? "desc"
+        : "asc";
     dispatch({
       type: "SET_SORT_CONFIG",
-      payload: {
-        key,
-        direction:
-          state.sortConfig.key === key && state.sortConfig.direction === "asc"
-            ? "desc"
-            : "asc",
-      },
+      payload: { key, direction },
     });
+    const sortedFiles = fileManager.sortFiles(
+      [state.files],
+      key,
+      direction === "asc"
+    );
+    dispatch({ type: "SET_FILES", payload: sortedFiles });
   };
 
   const handleMenuOpen = (event) => {
@@ -233,14 +234,6 @@ export const FileBrowser = ({
     console.log("Toggle hidden files");
     dispatch({ type: "TOGGLE_HIDDEN_FILES" });
   };
-
-  const sortedFiles = [...state.files].sort((a, b) => {
-    if (a[state.sortConfig.key] < b[state.sortConfig.key])
-      return state.sortConfig.direction === "asc" ? -1 : 1;
-    if (a[state.sortConfig.key] > b[state.sortConfig.key])
-      return state.sortConfig.direction === "asc" ? 1 : -1;
-    return 0;
-  });
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString();
@@ -386,7 +379,7 @@ export const FileBrowser = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {sortedFiles.map((file) => (
+              {state.files.map((file) => (
                 <TableRow
                   key={file.path}
                   hover

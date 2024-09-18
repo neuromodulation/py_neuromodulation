@@ -1,6 +1,6 @@
-import { create } from "zustand";
+import { createStore } from "./createStore";
 
-export const useAppInfoStore = create((set) => ({
+export const useAppInfoStore = createStore("appInfo", (set) => ({
   version: "",
   website: "",
   authors: [],
@@ -20,14 +20,5 @@ export const useAppInfoStore = create((set) => ({
   },
 }));
 
-export const useAppInfo = () =>
-  useAppInfoStore((state) => ({
-    version: state.version,
-    website: state.website,
-    authors: state.authors,
-    maintainers: state.maintainers,
-    repository: state.repository,
-    documentation: state.documentation,
-    license: state.license,
-    launchMode: state.launchMode,
-  }));
+export const useFetchAppInfo = () =>
+  useAppInfoStore((state) => state.fetchAppInfo);

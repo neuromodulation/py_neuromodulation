@@ -15,25 +15,23 @@ import {
   Paper,
 } from "@mui/material";
 import { useSessionStore } from "@/stores";
+import { TitledBox } from "@/components";
 
 export const StreamSelector = () => {
   const [searchingStreams, setSearchingStreams] = useState(false);
   const [selectedStreamName, setSelectedStreamName] = useState("");
   const [isStreamNameValid, setIsStreamNameValid] = useState(false);
-  const { lslSource, selectLSLStream, fetchLSLStreams, initializeLSLStream,
-    streamParameters, setLineNoiseValue, setSamplingRateFeaturesValue,
-    setSamplingRateValue, setStreamParametersAllValid} =
-    useSessionStore((state) => ({
-      lslSource: state.lslSource,
-      selectLSLStream: state.selectLSLStream,
-      fetchLSLStreams: state.fetchLSLStreams,
-      initializeLSLStream: state.initializeLSLStream,
-      streamParameters: state.streamParameters,
-      setLineNoiseValue: state.setLineNoiseValue,
-      setSamplingRateFeaturesValue: state.setSamplingRateFeaturesValue,
-      setSamplingRateValue: state.setSamplingRateValue,
-      setStreamParametersAllValid: state.setStreamParametersAllValid,
-    }));
+  const {
+    lslSource,
+    selectLSLStream,
+    fetchLSLStreams,
+    initializeLSLStream,
+    streamParameters,
+    setLineNoiseValue,
+    setSamplingRateFeaturesValue,
+    setSamplingRateValue,
+    setStreamParametersAllValid,
+  } = useSessionStore();
 
   const validateStreamName = (name) => {
     return lslSource.availableStreams.some((stream) => stream.name === name);
@@ -58,7 +56,7 @@ export const StreamSelector = () => {
     setSamplingRateFeaturesValue(10);
     setSamplingRateValue(sfreq);
     setStreamParametersAllValid(true);
-    
+
     setIsStreamNameValid(true);
   };
 
@@ -86,10 +84,7 @@ export const StreamSelector = () => {
           {lslSource.availableStreams.map((stream, index) => (
             <TableRow
               key={index}
-              onClick={() => handleSelectStream(
-                stream.name,
-                stream.sfreq
-              )}
+              onClick={() => handleSelectStream(stream.name, stream.sfreq)}
               sx={{
                 cursor: "pointer",
                 "&:hover": { backgroundColor: "#505050" },
@@ -121,7 +116,7 @@ export const StreamSelector = () => {
 
   const handleConnectStream = async () => {
     if (isStreamNameValid) {
-      await initializeLSLStream();  // selectedStreamName
+      await initializeLSLStream(); // selectedStreamName
     }
   };
 
@@ -133,20 +128,13 @@ export const StreamSelector = () => {
 
   return (
     <Grid item xs={6}>
-      <Typography variant="h6" gutterBottom>
-        Read data from LSL stream
-      </Typography>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          gap: 2,
-          border: "1px solid #555",
-          padding: 2,
-          borderRadius: 5,
-          backgroundColor: "#424242",
-        }}
+      <TitledBox
+        title="Read data from LSL stream"
+        width="100%"
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        gap={2}
       >
         <Button
           variant="contained"
@@ -201,7 +189,7 @@ export const StreamSelector = () => {
             Connect to stream
           </Button>
         </Box>
-      </Box>
+      </TitledBox>
     </Grid>
   );
 };

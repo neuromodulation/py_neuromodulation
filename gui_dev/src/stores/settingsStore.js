@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { createStore } from "./createStore";
 
 const INITIAL_DELAY = 3000; // wait for Flask
 const RETRY_DELAY = 1000; // ms
@@ -23,7 +23,7 @@ const uploadSettingsToServer = async (settings) => {
   }
 };
 
-export const useSettingsStore = create((set, get) => ({
+export const useSettingsStore = createStore("settings", (set, get) => ({
   settings: null,
   isLoading: false,
   error: null,
@@ -83,3 +83,6 @@ export const useSettingsStore = create((set, get) => ({
     return result;
   },
 }));
+
+export const useFetchSettings = () =>
+  useSettingsStore((state) => state.fetchSettingsWithDelay);
