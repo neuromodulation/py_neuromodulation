@@ -93,3 +93,5 @@ export const useSettingsStore = createStore("settings", (set, get) => ({
 }));
 
 export const useSettings = () => useSettingsStore((state) => state.settings);
+export const useFetchSettings = () =>
+  useSettingsStore((state) => state.fetchSettingsWithDelay);

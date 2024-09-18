@@ -1,3 +1,4 @@
+import numpy as np
 import logging
 import importlib.metadata
 from datetime import datetime
@@ -324,56 +325,9 @@ class PyNMBackend(FastAPI):
 
             await self.websocket_manager.connect(websocket)
 
-            periodic_task: asyncio.Task | None = None
-            try:
-                # Start the periodic task
-                periodic_task = asyncio.create_task(self.send_periodic_data())
-                # periodic_task = None
-
-                # Handle incoming messages
-                while True:
-                    data = await websocket.receive_text()
-                    await self.websocket_manager.send_message(
-                        f"Message received: {data}"
-                    )
-            except WebSocketDisconnect:
-                self.websocket_manager.disconnect(websocket)
-            finally:
-                # Ensure the periodic task is cancelled when the WebSocket disconnects
-                if periodic_task:
-                    periodic_task.cancel()
-                    try:
-                        await periodic_task
-                    except asyncio.CancelledError:
-                        pass
-
-    async def send_periodic_data(self):
-        while True:
-            try:
-                if self.websocket_manager.is_connected:
-                    # Send binary data
-                    data = np.random.random(1000).astype(np.float64)
-                    header = {
-                        "type": "new_batch",
-                        "data_type": "float64",
-                        "length": len(data),
-                        "payload": True,
-                    }
-                    await self.websocket_manager.send_bytes(header, data.tobytes())
-
-                    # Send JSON-only data
-                    header = {
-                        "type": "info",
-                        "message": "This is an info message",
-                        "payload": False,
-                    }
-                    await self.websocket_manager.send_bytes(header)
-
-                await asyncio.sleep(0.016)
-            except Exception as e:
-                self.logger.error(f"Error in periodic task: {e}")
-                await asyncio.sleep(0.5)
-
+        # #######################
+        # ### SPA ENTRY POINT ###
+        # #######################
         @self.get("/{full_path:path}")
         async def serve_spa(request, full_path: str):
             # Serve the index.html for any path that doesn't match an API route

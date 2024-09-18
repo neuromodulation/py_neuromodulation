@@ -1,13 +1,7 @@
 export { AppBar } from "./AppBar/AppBar";
 export { AppInfoModal } from "./AppInfoModal/AppInfoModal";
-export { ChannelsTable } from "./ChannelsTable/ChannelsTable";
 export { CollapsibleBox } from "./CollapsibleBox/CollapsibleBox";
-export { CollapsibleBoxContainer } from "./CollapsibleBox/CollapsibleBoxContainer";
-export { DragAndDropList } from "./DragAndDropList/DragAndDropList";
-export { FrequencyRange } from "./TextField/FrequencySettings";
 export { Graph } from "./Graph/Graph";
-export { Settings } from "./Settings/Settings";
 export { Sidebar, SidebarDrawer } from "./Sidebar/Sidebar";
 export { StatusBar } from "./StatusBar/StatusBar";
-export { Switch } from "./Switch/Switch";
-export { TextField } from "./TextField/TextField";
+export { TitledBox } from "./TitledBox";
