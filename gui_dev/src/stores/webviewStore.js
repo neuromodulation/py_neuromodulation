@@ -1,9 +1,9 @@
-import { create } from "zustand";
+import { createStore } from "./createStore";
 
 const PYWEBVIEW_CHECK_INTERVAL = 100; // ms
 const PYWEBVIEW_TIMEOUT = 15000; // ms, increased to 15 seconds
 
-export const useWebviewStore = create((set) => ({
+export const useWebviewStore = createStore("webview", (set) => ({
   isWebviewReady: false,
   isWebView: false,
   statusMessage: "Checking for PyWebview...",
@@ -12,7 +12,7 @@ export const useWebviewStore = create((set) => ({
   setStatusMessage: (message) => set({ statusMessage: message }),
   setIsMaximized: (maximized) => set({ isMaximized: maximized }),
 
-  initializePyWebView: () => {
+  initPyWebView: () => {
     if (navigator.userAgent.includes("PyNmWebView")) {
       set({
         isWebView: true,
@@ -46,3 +46,6 @@ export const useWebviewStore = create((set) => ({
     }
   },
 }));
+
+export const useInitPyWebView = () =>
+  useWebviewStore((state) => state.initPyWebView);

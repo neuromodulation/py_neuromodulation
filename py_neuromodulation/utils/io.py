@@ -190,6 +190,46 @@ def get_annotations(PATH_ANNOTATIONS: str, PATH_RUN: str, raw_arr: "mne_io.RawAr
     return annot, annot_data, raw_arr
 
 
+def read_plot_modules(
+    PATH_PLOT: _PathLike = PYNM_DIR / "plots",
+):
+    """Read required .mat files for plotting
+
+    Parameters
+    ----------
+    PATH_PLOT : regexp, optional
+        path to plotting files, by default
+    """
+
+    faces = loadmat(PurePath(PATH_PLOT, "faces.mat"))
+    vertices = loadmat(PurePath(PATH_PLOT, "Vertices.mat"))
+    grid = loadmat(PurePath(PATH_PLOT, "grid.mat"))["grid"]
+    stn_surf = loadmat(PurePath(PATH_PLOT, "STN_surf.mat"))
+    x_ver = stn_surf["vertices"][::2, 0]
+    y_ver = stn_surf["vertices"][::2, 1]
+    x_ecog = vertices["Vertices"][::1, 0]
+    y_ecog = vertices["Vertices"][::1, 1]
+    z_ecog = vertices["Vertices"][::1, 2]
+    x_stn = stn_surf["vertices"][::1, 0]
+    y_stn = stn_surf["vertices"][::1, 1]
+    z_stn = stn_surf["vertices"][::1, 2]
+
+    return (
+        faces,
+        vertices,
+        grid,
+        stn_surf,
+        x_ver,
+        y_ver,
+        x_ecog,
+        y_ecog,
+        z_ecog,
+        x_stn,
+        y_stn,
+        z_stn,
+    )
+
+
 def write_csv(df, path_out):
     """
     Function to save Pandas dataframes to disk as CSV using

@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useSocketStore } from "@/stores";
-import { newPlot, react } from "plotly.js-dist-min";
+import { newPlot, react } from "plotly.js-basic-dist-min";
 import styles from "./Graph.module.css";
 
 export const Graph = ({
@@ -58,6 +58,7 @@ export const Graph = ({
     },
   });
 
+  // dead code?
   const updateGraph = (newData) => {
     if (!plotlyRef.current) return;
 

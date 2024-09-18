@@ -5,6 +5,7 @@ from pydantic import ConfigDict, Field, model_validator, BaseModel
 from pydantic_core import ValidationError, InitErrorDetails
 from pprint import pformat
 from collections.abc import Sequence
+from datetime import datetime
 
 if TYPE_CHECKING:
     import numpy as np
@@ -15,6 +16,7 @@ if TYPE_CHECKING:
 ###################################
 
 _PathLike = str | PathLike
+
 
 FeatureName = Literal[
     "raw_hjorth",
@@ -249,3 +251,18 @@ def create_validation_error(
         input_type=input_type,
         hide_input=hide_input,
     )
+
+
+#################
+### GUI TYPES ###
+#################
+
+
+class FileInfo(BaseModel):
+    name: str
+    path: str
+    dir: str
+    is_directory: bool
+    size: int
+    created_at: datetime
+    modified_at: datetime

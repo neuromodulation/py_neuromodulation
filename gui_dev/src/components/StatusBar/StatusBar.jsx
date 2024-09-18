@@ -7,9 +7,7 @@ import { useWebviewStore } from "@/stores";
 import styles from "./StatusBar.module.css";
 
 export const StatusBar = () => {
-  const { isWebView } = useWebviewStore((state) => ({
-    isWebView: state.isWebView,
-  }));
+  const { isWebView } = useWebviewStore((state) => state.isWebView);
 
   return (
     <div className={styles.statusBar}>

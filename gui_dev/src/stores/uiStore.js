@@ -1,6 +1,6 @@
-import { create } from "zustand";
+import { createPersistStore } from "./createStore";
 
-export const useUiStore = create((set, get) => ({
+export const useUiStore = createPersistStore("ui", (set, get) => ({
   activeDrawer: null,
   toggleDrawer: (drawerName) =>
     set((state) => {

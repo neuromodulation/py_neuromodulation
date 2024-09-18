@@ -6,6 +6,8 @@ import path from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const BACKEND_PORT = 50001;
+
 const react_config = {
   babel: {
     plugins: [
@@ -51,9 +53,13 @@ export default defineConfig(() => {
       port: 54321,
       proxy: {
         "/api": {
-          target: "http://localhost:50000/api/",
+          target: `http://localhost:${BACKEND_PORT}`,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, ""),
+        },
+        "/ws": {
+          target: `ws://localhost:${BACKEND_PORT}`,
+          ws: true,
+          changeOrigin: true,
         },
       },
     },

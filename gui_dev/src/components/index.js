@@ -5,6 +5,7 @@ export { StatusBar } from "./StatusBar/StatusBar";
 export { Switch } from "./Switch/Switch";
 export { Sidebar, SidebarDrawer } from "./Sidebar/Sidebar";
 export { CollapsibleBox } from "./CollapsibleBox/CollapsibleBox";
-export { ChannelsTable } from "./ChannelsTable/ChannelsTable";
 export { AppBar } from "./AppBar/AppBar";
 export { AppInfoModal } from "./AppInfoModal/AppInfoModal";
+export { FileBrowser } from "./FileBrowser/FileBrowser";
+export { TitledBox } from "./TitledBox";

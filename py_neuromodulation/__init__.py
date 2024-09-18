@@ -16,6 +16,8 @@ PYNM_DIR = PurePath(__file__).parent  # Define constant for py_nm directory
 
 os.environ["MPLBACKEND"] = "agg" if PYNM_HEADLESS else "qtagg"  # Set matplotlib backend
 
+os.environ["LSLAPICFG"] = str(PYNM_DIR / "lsl_api.cfg")  # LSL config file
+
 # Set  environment variable MNE_LSL_LIB (required to import Stream below)
 LSL_DICT = {
     "windows_32bit": "windows/x86/liblsl.1.16.2.dll",

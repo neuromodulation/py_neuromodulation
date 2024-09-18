@@ -6,10 +6,7 @@ import { AppInfoModal } from "@/components";
 import styles from "./AppBar.module.css";
 
 export const AppBar = () => {
-  const { isWebView } = useWebviewStore((state) => ({
-    isWebView: state.isWebView,
-  }));
-
+  const { isWebView } = useWebviewStore((state) => state.isWebView);
   const [showModal, setShowModal] = useState(false);
 
   const handleTitleClick = () => {

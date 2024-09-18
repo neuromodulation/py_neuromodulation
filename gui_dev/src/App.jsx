@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import {
-  useSettingsStore,
   useSocketStore,
-  useWebviewStore,
-  useAppInfoStore,
+  useFetchSettings,
+  useInitPyWebView,
+  useFetchAppInfo,
 } from "@/stores";
 import {
   BrowserRouter as Router,
@@ -17,31 +17,27 @@ import { AppBar, StatusBar } from "@/components";
 import { Dashboard, SourceSelection, Channels, Settings } from "@/pages";
 import styles from "./App.module.css";
 
-export function App() {
+/**
+ *
+ * @returns {JSX.Element} The rendered App component
+ */
+export const App = () => {
   // Get settings from backend on start-up and check for PyWebView
-  const initializePyWebView = useWebviewStore(
-    (state) => state.initializePyWebView
-  );
-  const fetchSettingsWithDelay = useSettingsStore(
-    (state) => state.fetchSettingsWithDelay
-  );
-  const fetchAppInfo = useAppInfoStore((state) => state.fetchAppInfo);
+  const initPyWebView = useInitPyWebView();
+  const fetchSettingsWithDelay = useFetchSettings();
+  const fetchAppInfo = useFetchAppInfo();
+
   useEffect(() => {
     fetchSettingsWithDelay();
-    initializePyWebView();
+    initPyWebView();
     fetchAppInfo();
-  }, [fetchSettingsWithDelay, initializePyWebView, fetchAppInfo]);
+  }, [fetchSettingsWithDelay, initPyWebView, fetchAppInfo]);
 
   // Connect to web-socket
-  const { connectSocket, disconnectSocket } = useSocketStore((state) => ({
-    connectSocket: state.connectSocket,
-    disconnectSocket: state.disconnectSocket,
-  }));
+  const connectSocket = useSocketStore((state) => state.connectSocket);
+  const disconnectSocket = useSocketStore((state) => state.disconnectSocket);
 
   useEffect(() => {
-    console.log(window?.pywebview);
-    console.log(window.pywebview?.api);
-
     console.log("Connecting socket from App component...");
     connectSocket();
     return () => {
@@ -49,8 +45,6 @@ export function App() {
       disconnectSocket();
     };
   }, [connectSocket, disconnectSocket]);
-
-  // Check PyWebView status
 
   const theme = createTheme({
     palette: {
@@ -85,7 +79,11 @@ export function App() {
           <div className={styles.appContent}>
             <Routes>
               <Route path="/" element={<Navigate to="/source" replace />} />
-              <Route exact path="/source" element={<SourceSelection />} />
+              <Route
+                path="/source/"
+                element={<Navigate to="/source/file" replace />}
+              />
+              <Route exact path="/source/*" element={<SourceSelection />} />
               <Route exact path="/channels" element={<Channels />} />
               <Route exact path="/settings" element={<Settings />} />
               <Route exact path="/dashboard" element={<Dashboard />} />
@@ -97,4 +95,4 @@ export function App() {
       </Router>
     </ThemeProvider>
   );
-}
+};

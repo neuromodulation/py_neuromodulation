@@ -10,7 +10,7 @@ import {
 
 import styles from "./AppBar.module.css";
 
-const Button = ({ to, icon, label }) => {
+const ToolbarButton = ({ to, label, icon }) => {
   const location = useLocation();
   return (
     <MUIButton
@@ -28,10 +28,10 @@ const Button = ({ to, icon, label }) => {
 
 export const Toolbar = () => (
   <div className={styles.toolbar}>
-    <Button to="/source" icon={<Dataset />} label="Source" />
-    <Button to="/channels" icon={<Dvr />} label="Channels" />
-    <Button to="/settings" icon={<Settings />} label="Settings" />
-    <Button to="/dashboard" icon={<Dashboard />} label="Dashboard" />
-    <Button to="/decoding" icon={<BarChart />} label="Decoding" />
+    <ToolbarButton to="/source" icon={<Dataset />} label="Source Selection" />
+    <ToolbarButton to="/channels" icon={<Dvr />} label="Channels" />
+    <ToolbarButton to="/settings" icon={<Settings />} label="Settings" />
+    <ToolbarButton to="/dashboard" icon={<Dashboard />} label="Dashboard" />
+    <ToolbarButton to="/decoding" icon={<BarChart />} label="Decoding" />
   </div>
 );
