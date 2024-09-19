@@ -11,6 +11,7 @@ from pydantic import Field
 from py_neuromodulation.utils.types import BoolSelector, NMBaseModel, NMFeature
 
 from typing import TYPE_CHECKING, Callable
+from py_neuromodulation.utils.types import create_validation_error
 
 if TYPE_CHECKING:
     from py_neuromodulation import NMSettings
@@ -60,10 +61,15 @@ class Bursts(NMFeature):
         self, settings: "NMSettings", ch_names: Sequence[str], sfreq: float
     ) -> None:
         # Test settings
+        settings.validate()
+
+        # Validate that all frequency bands are defined in the settings
         for fband_burst in settings.burst_settings.frequency_bands:
-            assert (
-                fband_burst in list(settings.frequency_ranges_hz.keys())
-            ), f"bursting {fband_burst} needs to be defined in settings['frequency_ranges_hz']"
+            if fband_burst not in list(settings.frequency_ranges_hz.keys()):
+                raise create_validation_error(
+                    f"bursting {fband_burst} needs to be defined in settings['frequency_ranges_hz']",
+                    loc=["burst_settings", "frequency_bands"],
+                )
 
         from py_neuromodulation.filter import MNEFilter
 

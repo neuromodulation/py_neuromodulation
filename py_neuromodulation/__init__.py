@@ -90,4 +90,6 @@ __all__ = [
     "stream",
     "types",
     "io",
+    "features",
+    "filter",
 ]

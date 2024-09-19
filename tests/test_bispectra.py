@@ -1,11 +1,6 @@
 import numpy as np
 
-from py_neuromodulation import (
-    nm_define_nmchannels,
-    nm_IO,
-    NMSettings,
-    Stream,
-)
+import py_neuromodulation as nm
 
 
 def test_bispectrum():
@@ -15,7 +10,7 @@ def test_bispectrum():
         PATH_BIDS,
         PATH_OUT,
         datatype,
-    ) = nm_IO.get_paths_example_data()
+    ) = nm.io.get_paths_example_data()
 
     (
         raw,
@@ -24,12 +19,12 @@ def test_bispectrum():
         line_noise,
         coord_list,
         coord_names,
-    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
+    ) = nm.io.read_BIDS_data(PATH_RUN=PATH_RUN)
 
     ch_names = raw.ch_names[4]
     ch_types = raw.get_channel_types()[4]
 
-    nm_channels = nm_define_nmchannels.set_channels(
+    channels = nm.utils.set_channels(
         ch_names=[ch_names],
         ch_types=[ch_types],
         reference="default",
@@ -39,14 +34,14 @@ def test_bispectrum():
         target_keywords=("MOV_RIGHT_CLEAN",),
     )
 
-    settings = NMSettings.get_default()
+    settings = nm.NMSettings.get_default()
     settings.reset()
 
     settings.features.bispectrum = True
 
-    stream = Stream(
+    stream = nm.Stream(
         settings=settings,
-        nm_channels=nm_channels,
+        channels=channels,
         path_grids=None,
         verbose=True,
         sfreq=sfreq,

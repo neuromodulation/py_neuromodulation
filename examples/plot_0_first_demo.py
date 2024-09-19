@@ -140,7 +140,7 @@ settings.features.sharpwave_analysis = True
 
 stream = nm.Stream(
     settings=settings,
-    nm_channels=nm_channels,
+    channels=nm_channels,
     verbose=True,
     sfreq=sfreq,
     line_noise=50,

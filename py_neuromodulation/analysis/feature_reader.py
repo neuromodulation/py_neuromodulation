@@ -62,7 +62,7 @@ class FeatureReader:
                 if len(self.sidecar["coords"]["cortex_right"]["ch_names"]) > 0:
                     self.sidecar["sess_right"] = True
         self.sfreq = self.sidecar["sfreq"]
-        self.channels = io.read_nm_channels(PATH_READ_FILE)
+        self.channels = io.read_channels(PATH_READ_FILE)
         self.feature_arr = io.read_features(PATH_READ_FILE)
 
         self.ch_names = self.channels.new_name

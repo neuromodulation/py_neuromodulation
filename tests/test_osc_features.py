@@ -2,8 +2,8 @@ from pydantic import ValidationError
 import pytest
 import numpy as np
 
-from py_neuromodulation import nm_oscillatory, NMSettings, Stream
-from py_neuromodulation.nm_types import FeatureName
+from py_neuromodulation import NMSettings, Stream, features
+from py_neuromodulation.utils.types import FeatureName
 
 
 def setup_osc_settings(
@@ -43,10 +43,10 @@ def test_fft_wrong_logtransform_param_init():
             log_transform="123",
         )
         settings.frequency_ranges_hz = {"theta": (4, 8), "beta": (10, 20)}
-        nm_oscillatory.FFT(settings, ch_names, sfreq)
+        features.FFT(settings, ch_names, sfreq)
+
 
 def test_fft_frequencyband_range_passing_nyquist_range():
-
     ch_names = ["ch1", "ch2", "ch3", "ch4"]
     sfreq = 1000
     data = np.random.random([len(ch_names), sfreq])
@@ -76,7 +76,7 @@ def test_fft_zero_data():
         log_transform=False,
     )
     settings.frequency_ranges_hz = {"theta": [4, 8], "beta": [10, 20]}
-    fft_obj = nm_oscillatory.FFT(settings, ch_names, sfreq)
+    fft_obj = features.FFT(settings, ch_names, sfreq)
 
     data = np.ones([len(ch_names), sfreq])
     features_out = fft_obj.calc_feature(data)
@@ -98,7 +98,7 @@ def test_fft_random_data():
         log_transform=False,
     )
     settings.frequency_ranges_hz = {"theta": [4, 8], "beta": [10, 20]}
-    fft_obj = nm_oscillatory.FFT(settings, ch_names, sfreq)
+    fft_obj = features.FFT(settings, ch_names, sfreq)
 
     data = np.random.random([len(ch_names), sfreq])
     features_out = fft_obj.calc_feature(data)
@@ -126,7 +126,7 @@ def test_fft_beta_osc():
         "gamma": [50, 60],
     }
 
-    fft_obj = nm_oscillatory.FFT(settings, ch_names, sfreq)
+    fft_obj = features.FFT(settings, ch_names, sfreq)
 
     time_duration = 1
 
@@ -158,7 +158,7 @@ def test_stft_wrong_logtransform_param_init():
             windowlength_ms=1000,
             log_transform="123",
         )
-        nm_oscillatory.STFT(settings, ch_names, sfreq)
+        features.STFT(settings, ch_names, sfreq)
 
 
 def test_stft_wrong_frequencyband_range_init():
@@ -166,7 +166,7 @@ def test_stft_wrong_frequencyband_range_init():
     ch_names = ["ch1", "ch2", "ch3", "ch4"]
     sfreq = 1000
     data = np.random.random([len(ch_names), sfreq])
-    
+
     settings = setup_osc_settings(
         osc_feature_name="stft",
         osc_feature_setting="stft_settings",
@@ -176,7 +176,7 @@ def test_stft_wrong_frequencyband_range_init():
     settings.frequency_ranges_hz = {"theta": [4, 8], "broadband": [10, 600]}
 
     with pytest.raises(AssertionError):
-        Stream(settings = settings, data=data, sfreq = sfreq)
+        Stream(settings=settings, data=data, sfreq=sfreq)
 
 
 def test_stft_beta_osc():
@@ -198,7 +198,7 @@ def test_stft_beta_osc():
         "gamma": [50, 60],
     }
 
-    stft_obj = nm_oscillatory.STFT(settings, ch_names, sfreq)
+    stft_obj = features.STFT(settings, ch_names, sfreq)
 
     time_duration = 1
 
@@ -237,7 +237,7 @@ def test_welch_beta_osc():
         "gamma": [50, 60],
     }
 
-    stft_obj = nm_oscillatory.Welch(settings, ch_names, sfreq)
+    stft_obj = features.Welch(settings, ch_names, sfreq)
 
     time_duration = 1
 
@@ -268,7 +268,7 @@ def test_bp_wrong_logtransform_param_init():
     settings.frequency_ranges_hz = {"theta": [4, 8], "beta": [10, 20]}
 
     with pytest.raises(ValidationError):
-        nm_oscillatory.BandPower(settings, ch_names, sfreq)
+        features.BandPower(settings, ch_names, sfreq)
 
 
 def test_bp_wrong_frequencyband_range_init():
@@ -282,7 +282,7 @@ def test_bp_wrong_frequencyband_range_init():
     settings.frequency_ranges_hz = {"theta": [4, 8], "broadband": [10, 600]}
 
     with pytest.raises(ValidationError):
-        nm_oscillatory.BandPower(settings, ch_names, sfreq)
+        features.BandPower(settings, ch_names, sfreq)
 
 
 def test_bp_non_defined_fband():
@@ -298,7 +298,7 @@ def test_bp_non_defined_fband():
     settings.bandpass_filter_settings.segment_lengths_ms["beta"] = 300
 
     with pytest.raises(ValidationError):
-        nm_oscillatory.BandPower(settings, ch_names, sfreq)
+        features.BandPower(settings, ch_names, sfreq)
 
 
 def test_bp_segment_length_fb_exceeds_segment_length_features():
@@ -315,7 +315,7 @@ def test_bp_segment_length_fb_exceeds_segment_length_features():
     settings.bandpass_filter_settings.segment_lengths_ms["beta"] = 300
 
     with pytest.raises(Exception):
-        nm_oscillatory.BandPower(settings, ch_names, sfreq)
+        features.BandPower(settings, ch_names, sfreq)
 
 
 def test_bp_zero_data():
@@ -332,7 +332,7 @@ def test_bp_zero_data():
     settings.bandpass_filter_settings.bandpower_features.activity = True
 
     settings.frequency_ranges_hz = {"theta": [4, 8], "beta": [10, 20]}
-    stft_obj = nm_oscillatory.BandPower(settings, ch_names, sfreq)
+    stft_obj = features.BandPower(settings, ch_names, sfreq)
 
     data = np.zeros([len(ch_names), sfreq])
     features_out = stft_obj.calc_feature(data)
@@ -356,7 +356,7 @@ def test_bp_random_data():
     settings.bandpass_filter_settings.kalman_filter = False
     settings.bandpass_filter_settings.bandpower_features.activity = True
 
-    stft_obj = nm_oscillatory.BandPower(settings, ch_names, sfreq)
+    stft_obj = features.BandPower(settings, ch_names, sfreq)
 
     np.random.seed(0)
     data = np.random.random([len(ch_names), sfreq])
@@ -389,8 +389,7 @@ def test_bp_beta_osc():
     settings.bandpass_filter_settings.kalman_filter = False
     settings.bandpass_filter_settings.bandpower_features.activity = True
 
-    bp_obj = nm_oscillatory.BandPower(settings, ch_names, sfreq)
-    # bp_obj.test_settings(settings, ch_names, sfreq)
+    bp_obj = features.BandPower(settings, ch_names, sfreq)
 
     time_duration = 1
 

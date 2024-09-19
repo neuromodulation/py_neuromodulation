@@ -10,7 +10,7 @@ def test_stream_with_none_data():
     data = np.random.random([2, 2000])
     data[0, :] = None
 
-    stream = nm.Stream(fs, data)
+    stream = nm.Stream(sfreq=fs, data=data)
 
     features = stream.run(data, out_path_root="./test_data", folder_name="test_stream_with_none_data")
 

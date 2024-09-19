@@ -21,18 +21,17 @@ class DataPreprocessor:
     def __init__(
         self,
         settings: "NMSettings",
-        nm_channels: "pd.DataFrame",
+        channels: "pd.DataFrame",
         sfreq: float,
         line_noise: float | None = None,
     ) -> None:
-        
         from importlib import import_module
         from inspect import getfullargspec
 
         possible_arguments = {
             "sfreq": sfreq,
             "settings": settings,
-            "nm_channels": nm_channels,
+            "channels": channels,
             "line_noise": line_noise,
         }
 

@@ -28,7 +28,7 @@ class Stream:
     def __init__(
         self,
         sfreq: float,
-        nm_channels: "pd.DataFrame | _PathLike | None" = None,
+        channels: "pd.DataFrame | _PathLike | None" = None,
         data: "np.ndarray | pd.DataFrame | None" = None,
         settings: NMSettings | _PathLike | None = None,
         line_noise: float | None = 50,
@@ -47,7 +47,7 @@ class Stream:
         ----------
         sfreq : float
             sampling frequency of data in Hertz
-        nm_channels : pd.DataFrame | _PathLike
+        channels : pd.DataFrame | _PathLike
             parametrization of channels (see define_channels.py for initialization)
         data : np.ndarray | pd.DataFrame | None, optional
             data to be streamed with shape (n_channels, n_time), by default None
@@ -69,21 +69,19 @@ class Stream:
         """
         self.settings: NMSettings = NMSettings.load(settings)
 
-        if nm_channels is None and data is not None:
-            nm_channels = nm.utils.channels.get_default_channels_from_data(data)
+        if channels is None and data is not None:
+            channels = nm.utils.channels.get_default_channels_from_data(data)
 
-        if nm_channels is not None:
-            self.channels = nm.io.load_nm_channels(nm_channels)
+        if channels is not None:
+            self.channels = nm.io.load_channels(channels)
 
         if self.channels.query("used == 1 and target == 0").shape[0] == 0:
             raise ValueError(
-                "No channels selected for analysis that have column 'used' = 1 and 'target' = 0. Please check your nm_channels"
+                "No channels selected for analysis that have column 'used' = 1 and 'target' = 0. Please check your channels"
             )
 
-        if nm_channels is None and data is None:
-            raise ValueError(
-                "Either `nm_channels` or `data` must be passed to `Stream`."
-            )
+        if channels is None and data is None:
+            raise ValueError("Either `channels` or `data` must be passed to `Stream`.")
 
         # If features that use frequency ranges are on, test them against nyquist frequency
         use_freq_ranges: list[FeatureName] = [
@@ -131,7 +129,7 @@ class Stream:
         self.data_processor = DataProcessor(
             sfreq=self.sfreq,
             settings=self.settings,
-            nm_channels=self.channels,
+            channels=self.channels,
             path_grids=self.path_grids,
             coord_names=coord_names,
             coord_list=coord_list,
@@ -179,7 +177,7 @@ class Stream:
                     "If data is passed as an array, the first dimension must"
                     " match the number of channel names in `channels`.\n"
                     f" Number of data channels (data.shape[0]): {data.shape[0]}\n"
-                    f' Length of nm_channels["name"]: {len(names_expected)}.'
+                    f' Length of channels["name"]: {len(names_expected)}.'
                 )
             return data
 
@@ -192,7 +190,7 @@ class Stream:
                 "If data is passed as a DataFrame, the"
                 "column names must match the channel names in `channels`.\n"
                 f"Input dataframe column names: {names_data}\n"
-                f'Expected (from nm_channels["name"]): : {names_expected}.'
+                f'Expected (from channels["name"]): : {names_expected}.'
             )
         return data.to_numpy().transpose()
 
@@ -244,7 +242,7 @@ class Stream:
         self.data_processor = DataProcessor(
             sfreq=self.sfreq,
             settings=self.settings,
-            nm_channels=self.channels,
+            channels=self.channels,
             path_grids=self.path_grids,
             coord_names=self.coord_names,
             coord_list=self.coord_list,
@@ -252,19 +250,7 @@ class Stream:
             verbose=self.verbose,
         )
 
-        self.is_stream_lsl = is_stream_lsl
-        self.stream_lsl_name = stream_lsl_name
-
-        if data is not None:
-            data = self._handle_data(data)
-        elif self.data is not None:
-            data = self._handle_data(self.data)
-        elif self.data is None and data is None and self.is_stream_lsl is False:
-            raise ValueError("No data passed to run function.")
-
-        out_path = Path(out_path_root, folder_name)
-        out_path.mkdir(parents=True, exist_ok=True)
-        nm.logger.log_to_file(out_path)
+        nm.logger.log_to_file(out_dir)
 
         # Initialize generator
         self.generator: Iterator
@@ -429,7 +415,7 @@ class Stream:
 
         self._save_settings(self.PATH_OUT, self.PATH_OUT_folder_name)
 
-        self._save_nm_channels(self.PATH_OUT, self.PATH_OUT_folder_name)
+        self._save_channels(self.PATH_OUT, self.PATH_OUT_folder_name)
 
     def _save_features(
         self,
@@ -439,8 +425,8 @@ class Stream:
     ) -> None:
         nm.io.save_features(feature_arr, out_path_root, folder_name)
 
-    def _save_nm_channels(self, out_path_root: _PathLike, folder_name: str) -> None:
-        self.data_processor.save_nm_channels(out_path_root, folder_name)
+    def _save_channels(self, out_path_root: _PathLike, folder_name: str) -> None:
+        self.data_processor.save_channels(out_path_root, folder_name)
 
     def _save_settings(self, out_path_root: _PathLike, folder_name: str) -> None:
         self.data_processor.save_settings(out_path_root, folder_name)

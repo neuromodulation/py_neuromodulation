@@ -3,6 +3,7 @@
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
 import numpy as np
+
 if TYPE_CHECKING:
     import pandas as pd
 
@@ -19,9 +20,9 @@ def set_channels(
     used_types: Iterable[str] | None = ("ecog", "dbs", "seeg"),
     target_keywords: Iterable[str] | None = ("mov", "squared", "label"),
 ) -> "pd.DataFrame":
-    """Return dataframe with channel-specific settings in nm_channels format.
+    """Return dataframe with channel-specific settings in channels format.
 
-    Return an nm_channels dataframe with the columns: "name", "rereference",
+    Return an channels dataframe with the columns: "name", "rereference",
     "used", "target", "type", "status", "new_name"]. "name" is set to ch_names,
     "rereference" can be specified individually. "used" is set to 1 for all
     channel types specified in `used_types`, else to 0. "target" is set to 1
@@ -64,10 +65,10 @@ def set_channels(
 
     Returns
     -------
-        df: DataFrame in nm_channels format
+        df: DataFrame in channels format
     """
     import pandas as pd
-    
+
     if not (len(ch_names) == len(ch_types)):
         raise ValueError(
             "Number of `ch_names` and `ch_types` must match."
@@ -253,7 +254,7 @@ def get_default_channels_from_data(
     data: np.ndarray,
     car_rereferencing: bool = True,
 ):
-    """Return default nm_channels dataframe with
+    """Return default channels dataframe with
     ecog datatype, no bad channels, no targets, common average rereferencing
 
     Parameters

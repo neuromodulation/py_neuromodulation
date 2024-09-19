@@ -13,25 +13,22 @@ if TYPE_CHECKING:
     import pandas as pd
 
 
-def load_nm_channels(
-    nm_channels: "pd.DataFrame | _PathLike",
+def load_channels(
+    channels: "pd.DataFrame | _PathLike",
 ) -> "pd.DataFrame":
-    """Read nm_channels from path or specify via BIDS arguments.
+    """Read channels from path or specify via BIDS arguments.
     Necessary parameters are then ch_names (list), ch_types (list), bads (list), used_types (list),
     target_keywords (list) and reference Union[list, str].
     """
     import pandas as pd
 
-    if isinstance(nm_channels, pd.DataFrame):
-        nm_ch_return = nm_channels
-    elif nm_channels:
-        if not Path(nm_channels).is_file():
-            raise ValueError(
-                "PATH_NM_CHANNELS is not a valid file. Got: " f"{nm_channels}"
-            )
-        nm_ch_return = pd.read_csv(nm_channels)
+    if isinstance(channels, pd.DataFrame):
+        return channels
 
-    return nm_ch_return
+    if not Path(channels).is_file():
+        raise ValueError("PATH_CHANNELS is not a valid file. Got: " f"{channels}")
+
+    return pd.read_csv(channels)
 
 
 def read_BIDS_data(
@@ -205,7 +202,7 @@ def write_csv(df, path_out):
     csv.write_csv(Table.from_pandas(df), path_out)
 
 
-def save_nm_channels(
+def save_channels(
     nmchannels: "pd.DataFrame",
     path_out: _PathLike,
     folder_name: str = "",
@@ -281,7 +278,7 @@ def read_features(PATH: _PathLike) -> "pd.DataFrame":
     return pd.read_csv(str(PATH) + "_FEATURES.csv", engine="pyarrow")
 
 
-def read_nm_channels(PATH: _PathLike) -> "pd.DataFrame":
+def read_channels(PATH: _PathLike) -> "pd.DataFrame":
     import pandas as pd
 
     return pd.read_csv(str(PATH) + "_channels.csv")

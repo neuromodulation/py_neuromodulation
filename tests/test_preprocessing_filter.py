@@ -2,10 +2,12 @@ import numpy as np
 from scipy import signal
 
 from py_neuromodulation import NMSettings, Stream
-from py_neuromodulation.nm_filter_preprocessing import PreprocessingFilter
+from py_neuromodulation.processing import PreprocessingFilter
 
 
-def test_preprocessing_within_pipeline(setup_default_stream_fast_compute: tuple[np.ndarray, Stream]):
+def test_preprocessing_within_pipeline(
+    setup_default_stream_fast_compute: tuple[np.ndarray, Stream],
+):
     data, stream = setup_default_stream_fast_compute
 
     stream.settings.preprocessing.append("preprocessing_filter")
@@ -14,7 +16,6 @@ def test_preprocessing_within_pipeline(setup_default_stream_fast_compute: tuple[
     stream.settings.preprocessing_filter.bandpass_filter = True
     stream.settings.preprocessing_filter.lowpass_filter = True
     stream.settings.preprocessing_filter.highpass_filter = True
-
 
     try:
         _ = stream.run(data[:, : int(stream.sfreq * 2)], out_path_root="./test_data", folder_name="test_preprocessing_within_pipeline")

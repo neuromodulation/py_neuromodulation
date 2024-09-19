@@ -10,7 +10,7 @@ class ReReferencer(NMPreprocessor):
     def __init__(
         self,
         sfreq: float,
-        nm_channels: pd.DataFrame,
+        channels: pd.DataFrame,
     ) -> None:
         """Initialize real-time rereference information.
 
@@ -18,7 +18,7 @@ class ReReferencer(NMPreprocessor):
         ----------
         sfreq : float
             Sampling frequency. Is not used, only kept for compatibility.
-        nm_channels : Pandas DataFrame
+        channels : Pandas DataFrame
             Dataframe containing information about rereferencing, as
             specified in channels.csv.
 
@@ -30,27 +30,27 @@ class ReReferencer(NMPreprocessor):
 
         self.ref_matrix: np.ndarray | None
 
-        nm_channels = nm_channels[nm_channels["used"] == 1].reset_index(drop=True)
+        channels = channels[channels["used"] == 1].reset_index(drop=True)
         # (channels_used,) = np.where((channels.used == 1))
 
-        ch_names = nm_channels["name"].tolist()
+        ch_names = channels["name"].tolist()
 
         # no re-referencing is being performed when there is a single channel present only
-        if nm_channels.shape[0] in (0, 1):
+        if channels.shape[0] in (0, 1):
             self.ref_matrix = None
             return
 
-        ch_types = nm_channels["type"]
-        refs = nm_channels["rereference"]
+        ch_types = channels["type"]
+        refs = channels["rereference"]
 
         type_map = {}
         for ch_type in ch_types.unique():
             type_map[ch_type] = np.where(
-                (ch_types == ch_type) & (nm_channels["status"] == "good")
+                (ch_types == ch_type) & (channels["status"] == "good")
             )[0]
 
-        ref_matrix = np.zeros((len(nm_channels), len(nm_channels)))
-        for ind in range(len(nm_channels)):
+        ref_matrix = np.zeros((len(channels), len(channels)))
+        for ind in range(len(channels)):
             ref_matrix[ind, ind] = 1
             # if ind not in channels_used:
             #    continue

@@ -105,7 +105,7 @@ for sw_feature in settings.sharpwave_analysis_settings.sharpwave_features.list_a
 # %%
 stream = nm.Stream(
     sfreq=sfreq,
-    nm_channels=nm_channels,
+    channels=nm_channels,
     settings=settings,
     line_noise=line_noise,
     coord_list=coord_list,

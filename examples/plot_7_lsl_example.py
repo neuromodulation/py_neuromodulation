@@ -13,7 +13,7 @@ from matplotlib import pyplot as plt
 
 from py_neuromodulation import (
     nm_mnelsl_generator,
-    nm_io,
+    io,
     nm_define_nmchannels,
     nm_analysis,
     nm_stream,
@@ -21,7 +21,7 @@ from py_neuromodulation import (
 )
 
 # %%
-# Let’s get the example data from the provided BIDS dataset and create the nm_channels DataFrame.
+# Let’s get the example data from the provided BIDS dataset and create the channels DataFrame.
 
 (
     RUN_NAME,
@@ -40,7 +40,7 @@ from py_neuromodulation import (
     coord_names,
 ) = io.read_BIDS_data(PATH_RUN=PATH_RUN)
 
-nm_channels = define_nmchannels.set_channels(
+channels = define_nmchannels.set_channels(
     ch_names=raw.ch_names,
     ch_types=raw.get_channel_types(),
     reference="default",
@@ -88,7 +88,7 @@ settings.features.coherence = False
 # %%
 stream = stream.Stream(
     sfreq=sfreq,
-    nm_channels=nm_channels,
+    channels=channels,
     settings=settings,
     coord_list=coord_list,
     verbose=True,
@@ -98,7 +98,7 @@ stream = stream.Stream(
 # We then simply have to set the `stream_lsl` parameter to be `True` and specify the `stream_lsl_name`.
 
 features = stream.run(
-    stream_lsl=True,
+    is_stream_lsl=True,
     plot_lsl=False,
     stream_lsl_name="example_stream",
     out_path_root=PATH_OUT,

@@ -1432,7 +1432,7 @@ def update(x, P, z, R, H=None, return_all=False):
     # map system uncertainty into kalman gain
     try:
         K = np.dot(np.dot(P, H.T), np.linalg.inv(S))
-    except:
+    except Exception:
         # can't invert a 1D array, annoyingly
         K = np.dot(np.dot(P, H.T), 1.0 / S)
 
@@ -1444,7 +1444,7 @@ def update(x, P, z, R, H=None, return_all=False):
 
     try:
         I_KH = np.eye(KH.shape[0]) - KH
-    except:
+    except Exception:
         I_KH = np.array([1 - KH])
     P = np.dot(np.dot(I_KH, P), I_KH.T) + np.dot(np.dot(K, R), K.T)
 

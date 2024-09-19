@@ -1,7 +1,4 @@
 import py_neuromodulation as nm
-from py_neuromodulation import (
-    NMSettings,
-)
 
 import numpy as np
 
@@ -16,7 +13,7 @@ def test_setting_computation_time():
     fs = 1000
     data = np.random.random((1, int(data_duration_s * fs)))
 
-    settings = NMSettings.get_fast_compute()
+    settings = nm.NMSettings.get_fast_compute()
     settings.segment_length_features_ms = 1000  # start afte 1 second
     settings.features.fft = False
     settings.features.raw_hjorth = True
@@ -52,7 +49,7 @@ def test_float_fs():
     fs = 1111.111
     data = np.random.random((1, int(data_duration_s * fs)))
 
-    settings = NMSettings.get_fast_compute()
+    settings = nm.NMSettings.get_fast_compute()
     settings.segment_length_features_ms = 333  # start afte 1 second
 
     settings.features.fft = False
@@ -75,4 +72,6 @@ def test_float_fs():
         features.time.iloc[1] - features.time.iloc[0]
     ) == 1000 / sampling_rate_features_hz
 
-    assert features["time"].iloc[0] - 1 == settings["segment_length_features_ms"]  # remove 1 due to python counting
+    assert (
+        features["time"].iloc[0] - 1 == settings["segment_length_features_ms"]
+    )  # remove 1 due to python counting

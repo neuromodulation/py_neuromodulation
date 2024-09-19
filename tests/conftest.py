@@ -57,7 +57,7 @@ def setup_default_stream_fast_compute() -> tuple[np.ndarray, nm.Stream]:
         coord_names,
     ) = nm.io.read_BIDS_data(PATH_RUN=PATH_RUN)
 
-    nm_channels = nm.utils.set_channels(
+    channels = nm.utils.set_channels(
         ch_names=raw.ch_names,
         ch_types=raw.get_channel_types(),
         reference="default",
@@ -75,7 +75,7 @@ def setup_default_stream_fast_compute() -> tuple[np.ndarray, nm.Stream]:
 
     stream = nm.Stream(
         settings=settings,
-        nm_channels=nm_channels,
+        channels=channels,
         path_grids=None,
         verbose=True,
         sfreq=sfreq,
@@ -151,7 +151,12 @@ def setup_databatch():
 
     settings = nm.NMSettings.get_fast_compute()
 
-    generator = nm.stream.RawDataGenerator(data, settings, int(np.floor(sfreq)))
+    generator = nm.stream.RawDataGenerator(
+        data,
+        int(np.floor(sfreq)),
+        settings.sampling_rate_features_hz,
+        settings.segment_length_features_ms,
+    )
     data_batch = next(generator, None)
 
     return [raw.ch_names, raw.get_channel_types(), raw.info["bads"], data_batch[1]]

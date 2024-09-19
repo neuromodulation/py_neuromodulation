@@ -19,13 +19,13 @@ class Projection:
         grid_cortex: "pd.DataFrame",
         grid_subcortex: "pd.DataFrame",
         coords: dict,
-        nm_channels: "pd.DataFrame",
+        channels: "pd.DataFrame",
         plot_projection: bool = False,
     ) -> None:
         self.grid_cortex = grid_cortex
         self.grid_subcortex = grid_subcortex
         self.coords = coords
-        self.channels = nm_channels
+        self.channels = channels
         self.project_cortex = settings.postprocessing.project_cortex
         self.project_subcortex = settings.postprocessing.project_subcortex
         self.max_dist_cortex = settings.project_cortex_settings.max_dist_mm

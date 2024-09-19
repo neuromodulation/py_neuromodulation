@@ -1,10 +1,10 @@
 import pytest
 import numpy as np
 
-from py_neuromodulation import nm_normalization
-from py_neuromodulation.nm_settings import NMSettings
+from py_neuromodulation import processing, NMSettings
 
-NORM_METHODS = nm_normalization.NormalizationSettings.list_normalization_methods()
+
+NORM_METHODS = processing.NormalizationSettings.list_normalization_methods()
 
 
 def test_raw_normalization_init():
@@ -14,7 +14,7 @@ def test_raw_normalization_init():
     settings.raw_normalization_settings.normalization_method = "meann"  # type: ignore
 
     with pytest.raises(Exception):
-        nm_normalization.RawNormalizer(sfreq=1000, settings=settings)
+        processing.RawNormalizer(sfreq=1000, settings=settings)
 
 
 def test_feature_normalization_init():
@@ -24,7 +24,7 @@ def test_feature_normalization_init():
     settings.feature_normalization_settings.normalization_method = "meann"  # type: ignore
 
     with pytest.raises(Exception):
-        nm_normalization.FeatureNormalizer(settings=settings)
+        processing.FeatureNormalizer(settings=settings)
 
 
 def test_process_norm_features():
@@ -34,7 +34,7 @@ def test_process_norm_features():
     settings = NMSettings.get_default()
     settings.feature_normalization_settings.normalization_method = "mean"
 
-    norm = nm_normalization.FeatureNormalizer(settings=settings)
+    norm = processing.FeatureNormalizer(settings=settings)
 
     data = np.ones([1, 5])
     data_normed = norm.process(data)
@@ -45,7 +45,7 @@ def test_process_norm_features():
 
 def test_previous_size_FeatureNorm():
     """Test that previous batch data is clipped correctly when clip is enabled (default clip = 3)"""
-    norm = nm_normalization.FeatureNormalizer(settings=NMSettings())
+    norm = processing.FeatureNormalizer(settings=NMSettings())
 
     num_features = 5
 
@@ -62,7 +62,7 @@ def test_zscore_feature_analysis():
     settings = NMSettings.get_default()
     settings.feature_normalization_settings.clip = False
 
-    norm = nm_normalization.FeatureNormalizer(settings=settings)
+    norm = processing.FeatureNormalizer(settings=settings)
 
     num_features = 5
 
@@ -87,7 +87,7 @@ def test_zscore_raw_analysis():
     settings = NMSettings.get_default()
     settings.raw_normalization_settings.clip = False
 
-    norm = nm_normalization.RawNormalizer(sfreq=10, settings=settings)
+    norm = processing.RawNormalizer(sfreq=10, settings=settings)
 
     num_samples = 100
     data_to_norm = np.zeros([1, num_samples])
@@ -106,14 +106,14 @@ def test_zscore_raw_analysis():
 
 def test_all_norm_methods_raw():
     """Test that all raw normalization methods return correct values (not nan or infinite)"""
-    
+
     settings = NMSettings.get_default()
     settings.raw_normalization_settings.clip = False
 
     for norm_method in NMSettings.list_normalization_methods():
         settings.raw_normalization_settings.normalization_method = norm_method
 
-        norm = nm_normalization.RawNormalizer(sfreq=10, settings=settings)
+        norm = processing.RawNormalizer(sfreq=10, settings=settings)
 
         num_samples = 10
 
@@ -130,14 +130,14 @@ def test_all_norm_methods_raw():
 
 def test_all_norm_methods_feature():
     """Test that all feature normalization methods return correct values (not nan or infinite)"""
-    
+
     settings = NMSettings.get_default()
     settings.feature_normalization_settings.clip = False
 
     for norm_method in NMSettings.list_normalization_methods():
         settings.feature_normalization_settings.normalization_method = norm_method
 
-        norm = nm_normalization.FeatureNormalizer(settings=settings)
+        norm = processing.FeatureNormalizer(settings=settings)
 
         num_samples = 10
 

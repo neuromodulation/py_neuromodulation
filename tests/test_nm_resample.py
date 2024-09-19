@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from py_neuromodulation import nm_resample
+from py_neuromodulation.processing import Resampler
 
 
 def test_upsample():
@@ -14,7 +14,7 @@ def test_upsample():
     data = np.sin(2 * np.pi * times * oscill_freqs)
 
     sfreq_new = 1000.0
-    resample = nm_resample.Resampler(
+    resample = Resampler(
         resample_freq_hz=sfreq_new,
         sfreq=sfreq_old,
     )
@@ -39,7 +39,7 @@ def test_downsample():
     data = np.sin(2 * np.pi * times * oscill_freqs)
 
     sfreq_new = 4000.0
-    resample = nm_resample.Resampler(
+    resample = Resampler(
         resample_freq_hz=sfreq_new,
         sfreq=sfreq_old,
     )
@@ -56,7 +56,7 @@ def test_no_resample():
     data = np.sin(2 * np.pi * times * oscill_freqs)
 
     sfreq_new = 1000.0
-    resample = nm_resample.Resampler(
+    resample = Resampler(
         resample_freq_hz=sfreq_new,
         sfreq=sfreq_old,
     )

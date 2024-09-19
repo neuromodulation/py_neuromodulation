@@ -103,14 +103,14 @@ The following possible parametrization option are available:
      - no rereferencing being used for the particular channel
      - *none*
 
-The **nm_channels** can either be created as a *.tsv* file, or as a pandas DataFrame.
-There are some helper functions that let you create the nm_channels without much effort:
+The **channels** can either be created as a *.tsv* file, or as a pandas DataFrame.
+There are some helper functions that let you create the channels without much effort:
 
 .. code-block:: python
 
-    nm_channels = nm_define_nmchannels.get_default_channels_from_data(data, car_rereferencing=True)
+    channels = nm_define_nmchannels.get_default_channels_from_data(data, car_rereferencing=True)
 
-When setting up the :class:`~nm_stream_abc`, `nm_settings` and `nm_channels` can also be defined and passed to the init function:
+When setting up the :class:`~nm_stream_abc`, `nm_settings` and `channels` can also be defined and passed to the init function:
 
 .. code-block:: python
 
@@ -118,7 +118,7 @@ When setting up the :class:`~nm_stream_abc`, `nm_settings` and `nm_channels` can
     
     stream = nm.Stream(
         sfreq=sfreq,
-        nm_channels=nm_channels,
+        channels=channels,
         settings=settings,
     )
 
@@ -465,7 +465,7 @@ Coherence
 ~~~~~~~~~
 
 **coherence** can be calculated for channel pairs that are passed as a list of lists.
-Each list contains the channels specified in *nm_channels*.
+Each list contains the channels specified in *channels*.
 The mean and/or maximum in a specific frequency band can be calculated.
 The maximum for all frequency bands can also be estimated.
 

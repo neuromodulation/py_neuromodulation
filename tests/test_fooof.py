@@ -1,10 +1,18 @@
-from py_neuromodulation import nm_generator
+import py_neuromodulation as nm
+import numpy as np
 
 
 def test_fooof_features(setup_default_stream_fast_compute):
-    data, stream = setup_default_stream_fast_compute
+    default_stream: tuple[np.ndarray, nm.Stream] = setup_default_stream_fast_compute
+    data, stream = default_stream
 
-    generator = nm_generator.raw_data_generator(data, stream.settings, stream.sfreq)
+    generator = nm.stream.RawDataGenerator(
+        data,
+        stream.sfreq,
+        stream.settings.sampling_rate_features_hz,
+        stream.settings.segment_length_features_ms,
+    )
+
     _, data_batch = next(generator, None)
     feature_series = stream.data_processor.process(data_batch)
     # since the settings can define searching for "max_n_peaks" peaks

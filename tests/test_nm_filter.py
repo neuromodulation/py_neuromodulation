@@ -1,8 +1,8 @@
 """Test the nm_filter module."""
 
 import numpy as np
-from py_neuromodulation import nm_filter
 import pytest
+from py_neuromodulation.filter import MNEFilter
 
 
 class TestMNEFilterData:
@@ -20,7 +20,7 @@ class TestMNEFilterData:
         sfreq = 4000
         duration = 10
         times = np.linspace(0, duration, int(duration * sfreq))
-        bandpass_filter = nm_filter.MNEFilter(
+        bandpass_filter = MNEFilter(
             f_ranges=f_ranges,
             sfreq=sfreq,
             filter_length=filter_length,

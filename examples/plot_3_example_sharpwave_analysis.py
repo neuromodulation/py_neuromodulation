@@ -69,7 +69,7 @@ settings.sharpwave_analysis_settings.sharpwave_features.enable_all()
 for sw_feature in settings.sharpwave_analysis_settings.sharpwave_features.list_all():
     settings.sharpwave_analysis_settings.estimator["mean"].append(sw_feature)
 
-nm_channels = nm.utils.set_channels(
+channels = nm.utils.set_channels(
     ch_names=raw.ch_names,
     ch_types=raw.get_channel_types(),
     reference="default",
@@ -81,7 +81,7 @@ nm_channels = nm.utils.set_channels(
 
 stream = nm.Stream(
     sfreq=sfreq,
-    nm_channels=nm_channels,
+    channels=channels,
     settings=settings,
     line_noise=line_noise,
     coord_list=coord_list,
@@ -293,12 +293,12 @@ settings = NMSettings.get_default().reset()
 settings.features.sharpwave_analysis = True
 settings.sharpwave_analysis_settings.filter_ranges_hz = [[5, 80]]
 
-nm_channels["used"] = 0  # set only two ECoG channels for faster computation to true
+channels["used"] = 0  # set only two ECoG channels for faster computation to true
 channels.loc[[3, 8], "used"] = 1
 
 stream = nm.Stream(
     sfreq=sfreq,
-    nm_channels=nm_channels,
+    channels=channels,
     settings=settings,
     line_noise=line_noise,
     coord_list=coord_list,

@@ -20,7 +20,7 @@ class DataProcessor:
         self,
         sfreq: float,
         settings: NMSettings | _PathLike,
-        nm_channels: "pd.DataFrame | _PathLike",
+        channels: "pd.DataFrame | _PathLike",
         coord_names: list | None = None,
         coord_list: list | None = None,
         line_noise: float | None = None,
@@ -34,7 +34,7 @@ class DataProcessor:
         Parameters
         ----------
         settings : settings.NMSettings object
-        nm_channels : pd.DataFrame | _PathLike
+        channels : pd.DataFrame | _PathLike
             Initialized pd.DataFrame with channel specific information.
             The path to a channels.csv can be also passed.
         coord_names : list | None
@@ -48,7 +48,7 @@ class DataProcessor:
         """
 
         self.settings = NMSettings.load(settings)
-        self.channels = self._load_nm_channels(nm_channels)
+        self.channels = self._load_channels(channels)
 
         self.sfreq_features: float = self.settings.sampling_rate_features_hz
         self._sfreq_raw_orig: float = sfreq
@@ -63,7 +63,7 @@ class DataProcessor:
 
         self.preprocessors = DataPreprocessor(
             settings=self.settings,
-            nm_channels=self.channels,
+            channels=self.channels,
             sfreq=self.sfreq_raw,
             line_noise=self.line_noise,
         )
@@ -140,16 +140,16 @@ class DataProcessor:
     def _get_ch_info(
         self,
     ) -> tuple[list[str], list[str], list[int], np.ndarray]:
-        """Get used feature and label info from nm_channels"""
-        nm_channels = self.channels
-        ch_names_used = nm_channels[nm_channels["used"] == 1]["new_name"].tolist()
-        ch_types_used = nm_channels[nm_channels["used"] == 1]["type"].tolist()
+        """Get used feature and label info from channels"""
+        channels = self.channels
+        ch_names_used = channels[channels["used"] == 1]["new_name"].tolist()
+        ch_types_used = channels[channels["used"] == 1]["type"].tolist()
 
         # used channels for feature estimation
-        feature_idx = np.where(nm_channels["used"] & ~nm_channels["target"])[0].tolist()
+        feature_idx = np.where(channels["used"] & ~channels["target"])[0].tolist()
 
         # If multiple targets exist, select only the first
-        label_idx = np.where(nm_channels["target"] == 1)[0]
+        label_idx = np.where(channels["target"] == 1)[0]
 
         return ch_names_used, ch_types_used, feature_idx, label_idx
 
@@ -182,7 +182,7 @@ class DataProcessor:
         return grid_cortex, grid_subcortex
 
     def _get_projection(
-        self, settings: "NMSettings", nm_channels: "pd.DataFrame"
+        self, settings: "NMSettings", channels: "pd.DataFrame"
     ) -> "Projection | None":
         from py_neuromodulation.processing.projection import Projection
 
@@ -202,20 +202,20 @@ class DataProcessor:
             grid_cortex=grid_cortex,
             grid_subcortex=grid_subcortex,
             coords=self.coords,
-            nm_channels=nm_channels,
+            channels=channels,
             plot_projection=False,
         )
         return projection
 
     @staticmethod
-    def _load_nm_channels(
-        nm_channels: "pd.DataFrame | _PathLike",
+    def _load_channels(
+        channels: "pd.DataFrame | _PathLike",
     ) -> "pd.DataFrame":
         import pandas as pd
 
-        if not isinstance(nm_channels, pd.DataFrame):
-            return io.load_nm_channels(nm_channels)
-        return nm_channels
+        if not isinstance(channels, pd.DataFrame):
+            return io.load_channels(channels)
+        return channels
 
     def _set_coords(
         self, coord_names: list[str] | None, coord_list: list | None
@@ -323,8 +323,8 @@ class DataProcessor:
     def save_settings(self, out_dir: _PathLike, prefix: str = "") -> None:
         self.settings.save(out_dir, prefix)
 
-    def save_nm_channels(self, out_dir: _PathLike, prefix: str = "") -> None:
-        io.save_nm_channels(self.channels, out_dir, prefix)
+    def save_channels(self, out_path_root: _PathLike, folder_name: str) -> None:
+        io.save_channels(self.channels, out_path_root, folder_name)
 
     def save_features(
         self,
