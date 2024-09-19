@@ -30,11 +30,8 @@ import matplotlib.pyplot as plt
 
 import py_neuromodulation as nm
 from py_neuromodulation import (
-    nm_analysis,
     nm_plots,
-    nm_IO,
     NMSettings,
-    nm_define_nmchannels
 )
 
 
@@ -46,7 +43,7 @@ from py_neuromodulation import (
 
 
 # %%
-RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data()
+RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = io.get_paths_example_data()
 
 (
     raw,
@@ -55,7 +52,7 @@ RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data
     line_noise,
     coord_list,
     coord_names,
-) = nm_IO.read_BIDS_data(
+) = io.read_BIDS_data(
         PATH_RUN=PATH_RUN
 )
 
@@ -63,7 +60,7 @@ settings = NMSettings.get_fast_compute()
 
 settings.postprocessing.project_cortex = True
 
-nm_channels = nm_define_nmchannels.set_channels(
+nm_channels = nm.utils.set_channels(
     ch_names=raw.ch_names,
     ch_types=raw.get_channel_types(),
     reference="default",
@@ -91,10 +88,10 @@ features = stream.run(
 )
 
 # %%
-# From nm_analysis.py, we use the :class:~`nm_analysis.FeatureReader` class to load the data.
+# From analysis.py, we use the :class:~`analysis.FeatureReader` class to load the data.
 
 # init analyzer
-feature_reader = nm_analysis.FeatureReader(
+feature_reader = nm.FeatureReader(
     feature_dir=PATH_OUT, feature_file=RUN_NAME
 )
 
@@ -116,9 +113,9 @@ feature_reader = nm_analysis.FeatureReader(
 feature_reader.plot_cort_projection()
 
 # %%
-# We can also plot only the ECoG electrodes or the grid points, with the help of the data saved in feature_reader.sidecar. BIDS sidecar files are json files where you store additional information, here it is used to save the ECoG strip positions and the grid coordinates, which are not part of the settings and nm_channels.csv. We can check what is stored in the file and then use the nmplotter.plot_cortex function:
+# We can also plot only the ECoG electrodes or the grid points, with the help of the data saved in feature_reader.sidecar. BIDS sidecar files are json files where you store additional information, here it is used to save the ECoG strip positions and the grid coordinates, which are not part of the settings and channels.csv. We can check what is stored in the file and then use the nmplotter.plot_cortex function:
 
-grid_plotter = nm_plots.NM_Plot(
+grid_plotter = plots.NM_Plot(
     ecog_strip=np.array(feature_reader.sidecar["coords"]["cortex_right"]["positions"]),
     grid_cortex=np.array(feature_reader.sidecar["grid_cortex"]),
     # grid_subcortex=np.array(feature_reader.sidecar["grid_subcortex"]),

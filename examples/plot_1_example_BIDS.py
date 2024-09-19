@@ -9,7 +9,7 @@ ECoG Movement decoding example
 # *Electrocorticography is superior to subthalamic local field potentials
 # for movement decoding in Parkinson’s disease*
 # (`Merk et al. 2022 <https://elifesciences.org/articles/75126>_`).
-# The dataset is available `here <https://doi.org/10.7910/DVN/IO2FLM>`_.
+# The dataset is available `here <https://doi.org/10.7910/DVN/io.FLM>`_.
 #
 # For simplicity one example subject is automatically shipped within
 # this repo at the *py_neuromodulation/data* folder, stored in
@@ -24,7 +24,7 @@ from py_neuromodulation import (
     nm_analysis,
     nm_decode,
     nm_define_nmchannels,
-    nm_IO,
+    nm_io.
     nm_plots,
     NMSettings,
 )
@@ -40,7 +40,7 @@ from py_neuromodulation import (
     PATH_BIDS,
     PATH_OUT,
     datatype,
-) = nm_IO.get_paths_example_data()
+) = io.get_paths_example_data()
 
 (
     raw,
@@ -49,9 +49,11 @@ from py_neuromodulation import (
     line_noise,
     coord_list,
     coord_names,
-) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
+) = io.read_BIDS_data(
+    PATH_RUN=PATH_RUN
+)
 
-nm_channels = nm_define_nmchannels.set_channels(
+nm_channels = define_nmchannels.set_channels(
     ch_names=raw.ch_names,
     ch_types=raw.get_channel_types(),
     reference="default",
@@ -75,7 +77,7 @@ plt.title("Movement label")
 plt.xlim(0, 20)
 
 plt.subplot(122)
-for idx, ch_name in enumerate(nm_channels.query("used == 1").name):
+for idx, ch_name in enumerate(channels.query("used == 1").name):
     plt.plot(raw.times, data[idx, :] + idx * 300, label=ch_name)
 plt.legend(bbox_to_anchor=(1, 0.5), loc="center left")
 plt.title("ECoG + STN-LFP time series")
@@ -122,10 +124,10 @@ features = stream.run(
 # %%
 # Feature Analysis Movement
 # -------------------------
-# The obtained performances can now be read and visualized using the :class:`nm_analysis.Feature_Reader`.
+# The obtained performances can now be read and visualized using the :class:`analysis.Feature_Reader`.
 
 # initialize analyzer
-feature_reader = nm_analysis.FeatureReader(
+feature_reader = analysis.FeatureReader(
     feature_dir=PATH_OUT,
     feature_file=RUN_NAME,
 )
@@ -165,7 +167,7 @@ feature_reader.plot_all_features(
 )
 
 # %%
-nm_plots.plot_corr_matrix(
+plots.plot_corr_matrix(
     feature=feature_reader.feature_arr.filter(regex="ECOG_RIGHT_0"),
     ch_name="ECOG_RIGHT_0_avgref",
     feature_names=list(
@@ -186,14 +188,14 @@ nm_plots.plot_corr_matrix(
 #
 # Here, we show an example using a sklearn linear regression model. The used labels came from a continuous grip force movement target, named "MOV_RIGHT".
 #
-# First we initialize the :class:`~nm_decode.Decoder` class, which the specified *validation method*, here being a simple 3-fold cross validation,
+# First we initialize the :class:`~decode.Decoder` class, which the specified *validation method*, here being a simple 3-fold cross validation,
 # the evaluation metric, used machine learning model, and the channels we want to evaluate performances for.
 #
 # There are many more implemented methods, but we will here limit it to the ones presented.
 
 model = linear_model.LinearRegression()
 
-feature_reader.decoder = nm_decode.Decoder(
+feature_reader.decoder = decode.Decoder(
     features=feature_reader.feature_arr,
     label=feature_reader.label,
     label_name=feature_reader.label_name,
@@ -219,7 +221,7 @@ df_per = feature_reader.get_dataframe_performances(performances)
 df_per
 
 # %%
-ax = nm_plots.plot_df_subjects(
+ax = plots.plot_df_subjects(
     df_per,
     x_col="sub",
     y_col="performance_test",

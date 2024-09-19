@@ -13,7 +13,7 @@ from matplotlib import pyplot as plt
 
 from py_neuromodulation import (
     nm_mnelsl_generator,
-    nm_IO,
+    nm_io,
     nm_define_nmchannels,
     nm_analysis,
     nm_stream,
@@ -29,7 +29,7 @@ from py_neuromodulation import (
     PATH_BIDS,
     PATH_OUT,
     datatype,
-) = nm_IO.get_paths_example_data()
+) = io.get_paths_example_data()
 
 (
     raw,
@@ -38,9 +38,9 @@ from py_neuromodulation import (
     line_noise,
     coord_list,
     coord_names,
-) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
+) = io.read_BIDS_data(PATH_RUN=PATH_RUN)
 
-nm_channels = nm_define_nmchannels.set_channels(
+nm_channels = define_nmchannels.set_channels(
     ch_names=raw.ch_names,
     ch_types=raw.get_channel_types(),
     reference="default",
@@ -66,7 +66,7 @@ nm_channels = nm_define_nmchannels.set_channels(
 
 settings = NMSettings.get_fast_compute()
 
-player = nm_mnelsl_generator.LSLOfflinePlayer(
+player = mnelsl_generator.LSLOfflinePlayer(
     raw=raw, stream_name="example_stream"
 )
 
@@ -86,7 +86,7 @@ settings.features.sharpwave_analysis = False
 settings.features.coherence = False
 
 # %%
-stream = nm_stream.Stream(
+stream = stream.Stream(
     sfreq=sfreq,
     nm_channels=nm_channels,
     settings=settings,
@@ -119,7 +119,7 @@ plt.plot(features.time, features.MOV_RIGHT)
 # Note that the path was here adapted to be documentation build compliant.
 
 
-feature_reader = nm_analysis.FeatureReader(feature_dir=PATH_OUT, feature_file=RUN_NAME)
+feature_reader = analysis.FeatureReader(feature_dir=PATH_OUT, feature_file=RUN_NAME)
 feature_reader.label_name = "MOV_RIGHT"
 feature_reader.label = feature_reader.feature_arr["MOV_RIGHT"]
 

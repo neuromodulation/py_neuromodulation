@@ -2,13 +2,13 @@ import os
 import platform
 from pathlib import PurePath
 from importlib.metadata import version
-from .nm_logger import NMLogger
+from py_neuromodulation.utils.logging import NMLogger
 
 #####################################
 # Globals and environment variables #
 #####################################
 
-__version__ = version(__package__)  # get version from pyproject.toml
+__version__ = version("py_neuromodulation")  # get version from pyproject.toml
 
 # Check if the module is running headless (no display) for tests and doc builds
 PYNM_HEADLESS: bool = not os.environ.get("DISPLAY")
@@ -64,11 +64,23 @@ logger = NMLogger(__name__)  # logger initialization first to prevent circular i
 ####################################
 # API: Exposed classes and methods #
 ####################################
-from .nm_stream import Stream as Stream
-from .nm_run_analysis import DataProcessor as DataProcessor
-from .nm_settings import NMSettings as NMSettings
-from .nm_features import (
+from .stream.stream import Stream as Stream
+from .stream.data_processor import DataProcessor as DataProcessor
+from .stream.settings import NMSettings as NMSettings
+
+# from .analysis.feature_reader import FeatureReader as FeatureReader
+from .features.feature_processor import (
     add_custom_feature as add_custom_feature,
     remove_custom_feature as remove_custom_feature,
-    NMFeature as NMFeature,
+)
+
+from .utils import types as types
+from .utils import io as io
+
+from . import stream as stream
+
+from .stream.settings import (
+    get_default_settings as get_default_settings,
+    get_fast_compute as get_fast_compute,
+    reset_settings as reset_settings,
 )

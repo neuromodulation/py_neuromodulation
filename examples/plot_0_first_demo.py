@@ -47,7 +47,7 @@ plt.title("Example random walk data")
 # %%
 # Now let’s define the necessary setup files we will be using for data
 # preprocessing and feature estimation. Py_neuromodualtion is based on two
-# parametrization files: the *nm_channels.tsv* and the *nm_setting.json*.
+# parametrization files: the *channels.tsv* and the *default_settings.json*.
 #
 # nm_channels
 # ~~~~~~~~~~~
@@ -93,7 +93,7 @@ plt.title("Example random walk data")
 # DataFrame. There are some helper functions that let you create the
 # nm_channels without much effort:
 
-nm_channels = nm_define_nmchannels.get_default_channels_from_data(
+nm_channels = define_nmchannels.get_default_channels_from_data(
     data, car_rereferencing=True
 )
 
@@ -101,7 +101,7 @@ nm_channels
 
 # %%
 # Using this function default channel names and a common average re-referencing scheme is specified.
-# Alternatively the *nm_define_nmchannels.set_channels* function can be used to pass each column values.
+# Alternatively the *define_nmchannels.set_channels* function can be used to pass each column values.
 #
 # nm_settings
 # -----------
@@ -155,7 +155,7 @@ features = stream.run(data, save_csv=True)
 # There is a lot of output, which we could omit by verbose being False, but let's have a look what was being computed.
 # We will therefore use the :class:`~nm_analysis` class to showcase some functions. For multi-run -or subject analysis we will pass here the feature_file "sub" as default directory:
 
-analyzer = nm_analysis.FeatureReader(
+analyzer = analysis.FeatureReader(
     feature_dir=stream.PATH_OUT, feature_file=stream.PATH_OUT_folder_name
 )
 
@@ -178,7 +178,7 @@ analyzer.feature_arr.iloc[:10, :7]
 analyzer.plot_all_features(ch_used="ch1")
 
 # %%
-nm_plots.plot_corr_matrix(
+plots.plot_corr_matrix(
     figsize=(25, 25),
     show_plot=True,
     feature=analyzer.feature_arr,

@@ -18,8 +18,8 @@ Real-time feature estimation
 # For online as well as as offline analysis, the :class:`~nm_stream_abc` class needs to be instantiated.
 # Here the `nm_settings` and `nm_channels` are required to be defined.
 # Previously for the offline analysis, an offline :class:`~nm_generator` object was defined that periodically yielded data.
-# For online data, the :meth:`~nm_stream_abc.run` function therefore needs to be overwritten, which first acquires data and then calls
-# the :meth:`~nm_run_analysis.process` function.
+# For online data, the :meth:`~stream_abc.run` function therefore needs to be overwritten, which first acquires data and then calls
+# the :meth:`~run_analysis.process` function.
 #
 # The following illustrates in pseudo-code how such a stream could be initialized:
 #
