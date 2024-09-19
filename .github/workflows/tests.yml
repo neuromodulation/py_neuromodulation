@@ -3,21 +3,21 @@ on:
   push:
     branches:
       - main
-      - '**'
+      - "**"
     paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '*.rst'
-      - '*.txt'
+      - "docs/**"
+      - "*.md"
+      - "*.rst"
+      - "*.txt"
   pull_request:
     branches:
       - main
-      - '*.x'
+      - "*.x"
     paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '*.rst'
-      - '*.txt'
+      - "docs/**"
+      - "*.md"
+      - "*.rst"
+      - "*.txt"
 jobs:
   tests:
     name: ${{ matrix.platform.name }} Python ${{ matrix.python }}
@@ -33,21 +33,27 @@ jobs:
           - os: windows-latest
             name: Windows
         python:
-          - '3.10'
+          - "3.11"
+          - "3.12"
     steps:
       - uses: actions/checkout@v4
       - name: Install and cache Linux packages
         if: ${{ runner.os == 'Linux' }}
-        uses: tecolicom/actions-use-apt-tools@v1
+        uses: awalsh128/cache-apt-pkgs-action@latest
         with:
-          tools: binutils qtbase5-dev qt5-qmake libpugixml1v5
-      - name: Set up Python with uv
-        uses: drivendataorg/setup-python-uv-action@v1
+          packages: binutils qtbase5-dev qt5-qmake libpugixml1v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
         with:
-          python-version: ${{ matrix.python }}
-          cache: packages
-          cache-dependency-path: pyproject.toml
-      - name: Install test dependencies
-        run: uv pip install .[test]
+          version: "0.4.12"
+          enable-cache: true
+          cache-dependency-glob: "**/pyproject.toml"
+      - name: Install Python and dependencies
+        run: |
+          uv python install ${{ matrix.python }}
+          uv venv
+          uv pip install .[test]
       - name: Run tests
-        run: pytest -n auto tests/
+        run: |
+          ${{ (runner.os == 'Windows' && 'echo "Activating environment" && .venv\Scripts\activate') || 'echo "Activating environment" &&source .venv/bin/activate' }}
+          pytest -n auto tests/
