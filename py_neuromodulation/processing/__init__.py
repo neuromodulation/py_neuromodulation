@@ -1,12 +1,20 @@
-from .artifacts import PARRMArtifactRejection as PARRMArtifactRejection
-from .data_preprocessor import DataPreprocessor as DataPreprocessor
-from .projection import Projection as Projection
-from .normalization import (
-    FeatureNormalizer as FeatureNormalizer,
-    RawNormalizer as RawNormalizer,
-)
-from .resample import Resampler as Resampler
-from .rereference import ReReferencer as ReReferencer
+from .artifacts import PARRMArtifactRejection
+from .data_preprocessor import DataPreprocessor
+from .projection import Projection
+from .normalization import FeatureNormalizer, RawNormalizer
+from .resample import Resampler
+from .rereference import ReReferencer
 
 # Expose Notch filter also in the processing module, as it is used as a data preprocessing step
-from py_neuromodulation.utils.filter import NotchFilter as NotchFilter
+from py_neuromodulation.filter import NotchFilter
+
+__all__ = [
+    "PARRMArtifactRejection",
+    "DataPreprocessor",
+    "Projection",
+    "FeatureNormalizer",
+    "RawNormalizer",
+    "Resampler",
+    "ReReferencer",
+    "NotchFilter",
+]
