@@ -55,5 +55,5 @@ jobs:
           uv pip install .[test]
       - name: Run tests
         run: |
-          ${{ (runner.os == 'Windows' && 'echo "Activating environment" && .venv\Scripts\activate') || 'echo "Activating environment" &&source .venv/bin/activate' }}
+          ${{ (runner.os == 'Windows' && '.venv\Scripts\activate') || 'source .venv/bin/activate' }}
           pytest -n auto tests/
