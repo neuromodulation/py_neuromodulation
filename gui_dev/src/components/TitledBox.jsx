@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Container } from "@mui/material";
 
 /**
  * Component that uses the Box component to render an HTML fieldset element
@@ -13,15 +13,23 @@ export const TitledBox = ({
   children,
   ...props
 }) => (
-  <Box
+  <Container
     component="fieldset"
-    p={2}
-    borderRadius={5}
-    border="1px solid #555"
-    backgroundColor="#424242"
     {...props}
+    sx={{
+      borderRadius: 5,
+      border: "1px solid #555",
+      backgroundColor: "#424242",
+      padding: 2,
+      width: "100%",
+      gap: 2,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      ...(props?.sx || {}),
+    }}
   >
     <legend>{title}</legend>
     {children}
-  </Box>
+  </Container>
 );

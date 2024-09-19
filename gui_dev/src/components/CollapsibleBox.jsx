@@ -8,7 +8,6 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useUiStore } from "@/stores/uiStore";
-import styles from "./CollapsibleBox.module.css";
 
 const generateIdFromTitle = (title) => {
   return title.toLowerCase().replace(/\s+/g, "-");
@@ -18,18 +17,19 @@ export const CollapsibleBox = ({
   id,
   title = "Collapsible Box",
   defaultExpanded = true,
-  className,
   children,
-  sx,
   headerProps,
   contentProps,
+  isolated = false,
+  ...props
 }) => {
   const boxId = id || generateIdFromTitle(title);
 
-  const { toggleAccordionState, initAccordionState } = useUiStore((state) => ({
-    toggleAccordionState: state.toggleAccordionState,
-    initAccordionState: state.initAccordionState,
-  }));
+  const toggleAccordionState = useUiStore(
+    (state) => state.toggleAccordionState
+  );
+  const initAccordionState = useUiStore((state) => state.initAccordionState);
+
   const isExpanded = useUiStore((state) => state.accordionStates[boxId]);
 
   useEffect(() => {
@@ -43,25 +43,38 @@ export const CollapsibleBox = ({
   // Ensure expanded prop is always boolean (can't never be undefined or MUI will complain)
   const expandedState = isExpanded === undefined ? defaultExpanded : isExpanded;
 
-  return (
-    <Box className={className}>
-      <Accordion
-        expanded={expandedState}
-        onChange={handleChange}
-        disableGutters
-        square={false}
-        sx={sx}
+  const result = (
+    <Accordion
+      expanded={expandedState}
+      onChange={handleChange}
+      disableGutters
+      {...props}
+      sx={{
+        overflow: "hidden",
+        ...(props?.sx || {}),
+      }}
+    >
+      <AccordionSummary
+        expandIcon={<ExpandMoreIcon />}
+        id={`${boxId}-header`}
+        {...headerProps}
+        sx={{
+          ...(headerProps?.sx || {}),
+        }}
       >
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls={`${boxId}-content`}
-          id={`${boxId}-header`}
-          {...headerProps}
-        >
-          <Typography variant="h6">{title}</Typography>
-        </AccordionSummary>
-        <AccordionDetails {...contentProps}>{children}</AccordionDetails>
-      </Accordion>
-    </Box>
+        <Typography variant="h6">{title}</Typography>
+      </AccordionSummary>
+      <AccordionDetails
+        {...contentProps}
+        sx={{
+          bgcolor: "background.level2",
+          ...(contentProps?.sx || {}),
+        }}
+      >
+        {children}
+      </AccordionDetails>
+    </Accordion>
   );
+
+  return isolated ? <Box>{result}</Box> : result;
 };

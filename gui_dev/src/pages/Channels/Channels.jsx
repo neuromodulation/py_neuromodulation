@@ -3,6 +3,8 @@ import { useSessionStore } from "@/stores";
 import {
   Box,
   Button,
+  Container,
+  MenuItem,
   Table,
   TableBody,
   TableCell,
@@ -12,7 +14,7 @@ import {
   Paper,
   TextField,
   Select,
-  MenuItem,
+  Stack,
   Switch,
   Tooltip,
 } from "@mui/material";
@@ -199,27 +201,29 @@ export const Channels = () => {
   const uploadChannels = useSessionStore((state) => state.uploadChannels);
 
   return (
-    <Box sx={{ padding: 3 }}>
-      <ChannelsTable />
-      <Box
-        sx={{
-          marginTop: 3,
-          display: "flex",
-          gap: 2,
-          justifyContent: "center",
-        }}
-      >
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => uploadChannels()}
+    <Container>
+      <Stack sx={{ pt: 2 }}>
+        <ChannelsTable />
+        <Box
+          sx={{
+            marginTop: 3,
+            display: "flex",
+            gap: 2,
+            justifyContent: "center",
+          }}
         >
-          Save Channels
-        </Button>
-        <LinkButton to="/settings" variant="contained" color="primary">
-          Settings
-        </LinkButton>
-      </Box>
-    </Box>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => uploadChannels()}
+          >
+            Save Channels
+          </Button>
+          <LinkButton to="/settings" variant="contained" color="primary">
+            Settings
+          </LinkButton>
+        </Box>
+      </Stack>
+    </Container>
   );
 };

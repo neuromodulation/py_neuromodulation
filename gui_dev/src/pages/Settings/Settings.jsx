@@ -1,17 +1,16 @@
 import {
-  Box,
   Button,
   InputAdornment,
-  Paper,
+  Stack,
   Switch,
   TextField,
   Typography,
 } from "@mui/material";
 import { Link } from "react-router-dom";
-import { CollapsibleBox, FrequencyRange } from "@/components";
+import { CollapsibleBox, TitledBox } from "@/components";
+import { FrequencyRange } from "./FrequencyRange";
 import { useSettingsStore } from "@/stores";
 import { filterObjectByKeys } from "@/utils/functions";
-import styles from "./Settings.module.css";
 
 const formatKey = (key) => {
   // console.log(key);
@@ -71,58 +70,22 @@ const componentRegistry = {
   FrequencyRange: FrequencyRangeField,
 };
 
-const TitledBox = ({ title, children, depth }) => {
-  const typography = {
-    0: "h5",
-    1: "h6",
-    2: "subtitle1",
-    3: "subtitle2",
-  }[Math.min(depth, 3)]; // Cap depth
-
-  return (
-    <Paper
-      sx={{
-        py: 1,
-        pr: 0.5,
-        m: 1,
-        bgcolor: `var(--mui-palette-background-level${depth + 1})`,
-        borderRadius: "var(--mui-shape-borderRadius)",
-      }}
-    >
-      {depth > 0 && (
-        <Typography
-          variant={typography}
-          gutterBottom
-          color={depth % 2 === 0 ? "text.primary" : "text.secondary"}
-          sx={{ pl: 2, pt: 0.5 }}
-        >
-          {title}
-        </Typography>
-      )}
-      <Box>{children}</Box>
-    </Paper>
-  );
-};
-
 const SettingsField = ({ path, Component, label, value, onChange, depth }) => {
   return (
-    <Box
-      className={styles.settingFieldContainer}
+    <Stack
+      direction="row"
+      justifyContent="space-between"
       sx={{
         pl: depth * 2,
-        pr: 1,
-        mb: 1,
       }}
     >
-      <Typography variant="body2" className={styles.settingLabel}>
-        {label}
-      </Typography>
+      <Typography variant="body2">{label}</Typography>
       <Component
         value={value}
         onChange={(newValue) => onChange(path, newValue)}
         label={label}
       />
-    </Box>
+    </Stack>
   );
 };
 
@@ -139,7 +102,7 @@ const SettingsSection = ({
   const boxTitle = title ? title : formatKey(path[path.length - 1]);
 
   return (
-    <TitledBox title={boxTitle} depth={depth}>
+    <TitledBox title={boxTitle} depth={depth} sx={{ borderRadius: 3 }}>
       {Object.entries(settings).map(([key, value]) => {
         if (key === "__field_type__") return null;
 
@@ -181,10 +144,8 @@ const SettingsSection = ({
 };
 
 const SettingsContent = () => {
-  const { settings, updateSettings } = useSettingsStore((state) => ({
-    settings: state.settings,
-    updateSettings: state.updateSettings,
-  }));
+  const settings = useSettingsStore((state) => state.settings);
+  const updateSettings = useSettingsStore((state) => state.updateSettings);
 
   if (!settings) {
     return <div>Loading settings...</div>;
@@ -206,57 +167,93 @@ const SettingsContent = () => {
 
   const enabledFeatures = filterObjectByKeys(settings, featureSettingsKeys);
 
+  const preprocessingSettingsKeys = [
+    "preprocessing",
+    "raw_resampling_settings",
+    "raw_normalization_settings",
+    "preprocessing_filter",
+  ];
+
+  const postprocessingSettingsKeys = [
+    "postprocessing",
+    "feature_normalization_settings",
+    "project_cortex_settings",
+    "project_subcortex_settings",
+  ];
+
   return (
-    <Box className={styles.settingsContainer}>
+    <Stack
+      direction="row"
+      alignItems="flex-start"
+      justifyContent="center"
+      width="fit-content"
+      gap={2}
+      p={2}
+    >
       <CollapsibleBox
         title="Features"
         defaultExpanded={true}
-        className={styles.featureSelection}
-        sx={{ bgcolor: "background.level1" }}
+        isolated
+        sx={{ flex: 1 }}
       >
         <SettingsSection
           settings={settings.features}
           path={["features"]}
-          startOpen={true}
           onChange={handleChange}
           depth={0}
         />
       </CollapsibleBox>
 
-      <CollapsibleBox
-        title="Feature settings"
-        defaultExpanded={true}
-        className={styles.featureSettings}
-        contentProps={{ sx: { pl: 1 } }}
-        sx={{ bgcolor: "background.level1" }}
-      >
+      <Stack sx={{ flex: 1 }}>
+        <CollapsibleBox title="Preprocessing" defaultExpanded={true}>
+          {preprocessingSettingsKeys.map((key) => (
+            <SettingsSection
+              key={`${key}_settingsSection`}
+              settings={settings[key]}
+              path={[key]}
+              onChange={handleChange}
+              depth={0}
+            />
+          ))}
+        </CollapsibleBox>
+
+        <CollapsibleBox title="Postprocessing" defaultExpanded={true}>
+          {postprocessingSettingsKeys.map((key) => (
+            <SettingsSection
+              key={`${key}_settingsSection`}
+              settings={settings[key]}
+              path={[key]}
+              onChange={handleChange}
+              depth={0}
+            />
+          ))}
+        </CollapsibleBox>
+      </Stack>
+
+      <CollapsibleBox title="Feature settings" defaultExpanded={true} isolated>
         {Object.entries(enabledFeatures).map(([feature, featureSettings]) => (
           <CollapsibleBox
             key={`${feature}_collapsibleBox`}
             title={formatKey(feature)}
-            defaultExpanded={false}
-            className={styles.featureSelection}
-            contentProps={{ sx: { pl: 0 } }}
-            sx={{ my: 2, bgcolor: "background.level2" }}
+            defaultExpanded={true}
           >
             <SettingsSection
               key={`${feature}_settingsSection`}
               settings={featureSettings}
               path={[feature]}
               onChange={handleChange}
-              startOpen={true}
               depth={0}
             />
           </CollapsibleBox>
         ))}
       </CollapsibleBox>
-    </Box>
+    </Stack>
   );
 };
 
 export const Settings = () => {
   return (
-    <Box className={styles.settingsPageContainer}>
+    <Stack justifyContent="center" pb={2}>
       <SettingsContent />
       <Button
         variant="contained"
@@ -267,6 +264,6 @@ export const Settings = () => {
       >
         Run Stream
       </Button>
-    </Box>
+    </Stack>
   );
 };

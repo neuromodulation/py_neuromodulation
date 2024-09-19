@@ -51,6 +51,7 @@ export const useSessionStore = createPersistStore("session", (set, get) => ({
     allValid: false,
   },
 
+  setSourceType: (type) => set({ sourceType: type }),
   updateStreamParameter: (field, value) =>
     set((state) => {
       state.streamParameters[field] = value;

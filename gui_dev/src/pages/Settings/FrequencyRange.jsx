@@ -1,5 +1,4 @@
 import { useState } from "react";
-import styles from "./FrequencySettings.module.css";
 
 // const onChange = (key, newValue) => {
 //   settings.frequencyRanges[key] = newValue;

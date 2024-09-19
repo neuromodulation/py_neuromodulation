@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useSocketStore } from "@/stores";
 import { newPlot, react } from "plotly.js-basic-dist-min";
-import styles from "./Graph.module.css";
 
 export const Graph = ({
   title = "EEG Data",
@@ -98,5 +97,5 @@ export const Graph = ({
     }
   }, [graphData, maxDataPoints, updateGraph]);
 
-  return <div ref={graphRef} className={styles.graphContainer}></div>;
+  return <div ref={graphRef}></div>;
 };

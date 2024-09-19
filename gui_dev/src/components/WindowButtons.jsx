@@ -1,5 +1,5 @@
 import { useWebviewStore } from "@/stores";
-import styles from "./AppBar.module.css";
+import { Box, Button } from "@mui/material";
 
 export const WindowButtons = () => {
   const { isWebviewReady, isMaximized, setIsMaximized } = useWebviewStore(
@@ -37,16 +37,10 @@ export const WindowButtons = () => {
   };
 
   return (
-    <div className={styles.windowButtons}>
-      <button className={styles.buttonMinimize} onClick={handleMinimizeWindow}>
-        -
-      </button>
-      <button className={styles.buttonMaximize} onClick={handleMaximizeWindow}>
-        &#x25A1;
-      </button>
-      <button className={styles.buttonClose} onClick={handleCloseWindow}>
-        x
-      </button>
-    </div>
+    <Box sx={{ display: "flex", gap: 1 }}>
+      <Button onClick={handleMinimizeWindow}>-</Button>
+      <Button onClick={handleMaximizeWindow}>&#x25A1;</Button>
+      <Button onClick={handleCloseWindow}>x</Button>
+    </Box>
   );
 };

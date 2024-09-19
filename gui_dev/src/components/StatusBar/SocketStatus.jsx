@@ -1,5 +1,4 @@
 import { useSocketStore } from "@/stores";
-import styles from "./StatusBar.module.css";
 
 const DisconnectedIcon = (props) => (
   // Source: https://www.svgrepo.com/svg/384385/delete-remove-uncheck
@@ -52,12 +51,12 @@ export const SocketStatus = () => {
   const socketError = useSocketStore((state) => state.error);
 
   return (
-    <span className={styles.socketStatus}>
+    <span>
       SocketIO: {StatusIcons[socketStatus]()}
       {socketError && (
         <>
           {" - "}
-          <span className={styles.socketError}> Error: {socketError}</span>
+          <span> Error: {socketError}</span>
         </>
       )}
     </span>

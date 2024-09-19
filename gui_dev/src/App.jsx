@@ -11,12 +11,19 @@ import {
   Routes,
   Navigate,
 } from "react-router-dom";
-import { ThemeProvider } from "@mui/material/styles";
+import { Box, Stack, ThemeProvider } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import { AppBar, StatusBar } from "@/components";
-import { Dashboard, SourceSelection, Channels, Settings } from "@/pages";
-import styles from "./App.module.css";
-import theme from "./theme";
+import {
+  Dashboard,
+  SourceSelection,
+  Channels,
+  Settings,
+  Decoding,
+} from "@/pages";
+import { theme } from "./theme";
+import { StreamSelector } from "@/pages/SourceSelection/StreamSelector";
+import { FileSelector } from "@/pages/SourceSelection/FileSelector";
 
 /**
  *
@@ -47,36 +54,36 @@ export const App = () => {
     };
   }, [connectSocket, disconnectSocket]);
 
-  // Check PyWebView status
-  const checkWebviewReady = useWebviewStore((state) => state.checkWebviewReady);
-
-  useEffect(() => {
-    checkWebviewReady();
-  }, [checkWebviewReady]);
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-
       <Router>
-        <div className={styles.appContainer}>
+        <Stack height="100vh" width="100vw" overflow="hidden">
           <AppBar />
-          <div className={styles.appContent}>
+          <Box
+            sx={{
+              height: "100%",
+              overflow: "auto",
+              width: "100%",
+              p: 0,
+              m: 0,
+            }}
+          >
             <Routes>
-              <Route path="/" element={<Navigate to="/source" replace />} />
-              <Route
-                path="/source/"
-                element={<Navigate to="/source/file" replace />}
-              />
-              <Route exact path="/source/*" element={<SourceSelection />} />
-              <Route exact path="/channels" element={<Channels />} />
-              <Route exact path="/settings" element={<Settings />} />
-              <Route exact path="/dashboard" element={<Dashboard />} />
-              <Route exact path="/decoding" element={<Dashboard />} />
+              <Route index element={<Navigate to="/source" replace />} />
+              <Route path="source" element={<SourceSelection />}>
+                <Route index element={<Navigate to="/source/file" replace />} />
+                <Route path="file" element={<FileSelector />} />
+                <Route path="lsl" element={<StreamSelector />} />
+              </Route>
+              <Route path="channels" element={<Channels />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="decoding" element={<Decoding />} />
             </Routes>
-          </div>
+          </Box>
           <StatusBar />
-        </div>
+        </Stack>
       </Router>
     </ThemeProvider>
   );

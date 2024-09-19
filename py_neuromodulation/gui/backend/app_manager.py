@@ -265,12 +265,13 @@ class AppManager:
         # signal.signal(signal.SIGINT, signal.SIG_IGN)
 
         # Create and start the subprocesses
-        self.logger.info("Starting Vite server...")
-        self.tasks["vite"] = mp.Process(
-            target=run_vite,
-            kwargs={"shutdown_event": self.shutdown_event, "debug": self.debug},
-            name="Vite",
-        )
+        if self.dev:
+            self.logger.info("Starting Vite server...")
+            self.tasks["vite"] = mp.Process(
+                target=run_vite,
+                kwargs={"shutdown_event": self.shutdown_event, "debug": self.debug},
+                name="Vite",
+            )
 
         self.logger.info("Starting backend server...")
         self.tasks["backend"] = mp.Process(

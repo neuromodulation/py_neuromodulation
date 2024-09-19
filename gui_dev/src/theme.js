@@ -1,7 +1,34 @@
-import { createTheme } from "@mui/material/styles";
+import { createTheme } from "@mui/material";
+import Figtree from "@/assets/fonts/figtree/Figtree-VariableFont_wght.ttf";
 
 export const theme = createTheme({
   cssVariables: true,
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: `
+        @font-face {
+          font-family: 'Figtree';
+          font-style: normal;
+          font-display: swap;
+          font-weight: 400;
+          src: local('Figtree'),
+               url(${Figtree}) format('truetype-variations');
+          unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF;
+        }
+      `,
+    },
+    MuiButtonBase: {
+      defaultProps: {
+        disableRipple: true,
+      },
+    },
+    MuiStack: {
+      defaultProps: {
+        alignItems: "center",
+        width: "100%",
+      },
+    },
+  },
   palette: {
     mode: "dark",
     primary: {
@@ -28,7 +55,13 @@ export const theme = createTheme({
     divider: "rgba(255, 255, 255, 0.12)",
   },
   typography: {
-    fontFamily: '"Figtree", sans-serif',
+    fontFamily: [
+      "Figtree",
+      "system-ui",
+      "Helvetica",
+      "Arial",
+      "sans-serif",
+    ].join(","),
     h4: {
       fontSize: "1.75rem",
       fontWeight: 600,
@@ -54,5 +87,3 @@ export const theme = createTheme({
     borderRadius: 5,
   },
 });
-
-export default theme;

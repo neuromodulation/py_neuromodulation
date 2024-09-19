@@ -1,7 +1,6 @@
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { App } from "./App.jsx";
-import "./index.css";
 
 // Ignore React 19 warning about accessing element.ref
 const originalConsoleError = console.error;

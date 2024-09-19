@@ -29,12 +29,20 @@ ALLOWED_EXTENSIONS = [".npy", ".vhdr", ".fif", ".edf", ".bdf"]
 
 class PyNMBackend(FastAPI):
     def __init__(
-        self, pynm_state: app_pynm.PyNMState, debug=False, fastapi_kwargs: dict = {}
+        self,
+        pynm_state: app_pynm.PyNMState,
+        debug=False,
+        dev=True,
+        fastapi_kwargs: dict = {},
     ) -> None:
         super().__init__(debug=debug, **fastapi_kwargs)
 
+        self.debug = debug
+        self.dev = dev
+
         # Use the FastAPI logger for the backend
         self.logger = logging.getLogger("uvicorn.error")
+        self.logger.warning(PYNM_DIR)
 
         # Configure CORS
         self.add_middleware(
@@ -50,8 +58,8 @@ class PyNMBackend(FastAPI):
 
         # Serve static files
         self.mount(
-            "",
-            StaticFiles(directory="py_neuromodulation/gui/frontend/", html=True),
+            "/",
+            StaticFiles(directory=PYNM_DIR / "gui" / "frontend", html=True),
             name="static",
         )
 
@@ -325,10 +333,13 @@ class PyNMBackend(FastAPI):
 
             await self.websocket_manager.connect(websocket)
 
-        # #######################
-        # ### SPA ENTRY POINT ###
-        # #######################
-        @self.get("/{full_path:path}")
-        async def serve_spa(request, full_path: str):
-            # Serve the index.html for any path that doesn't match an API route
-            return FileResponse("frontend/index.html")
+        # # #######################
+        # # ### SPA ENTRY POINT ###
+        # # #######################
+        # if not self.dev:
+
+        #     @self.get("/app/{full_path:path}")
+        #     async def serve_spa(request, full_path: str):
+        #         # Serve the index.html for any path that doesn't match an API route
+        #         print(Path.cwd())
+        #         return FileResponse("frontend/index.html")

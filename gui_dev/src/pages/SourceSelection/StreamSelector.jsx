@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
 import {
-  Box,
-  Grid,
-  Typography,
   Button,
   TextField,
   CircularProgress,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -21,21 +19,30 @@ export const StreamSelector = () => {
   const [searchingStreams, setSearchingStreams] = useState(false);
   const [selectedStreamName, setSelectedStreamName] = useState("");
   const [isStreamNameValid, setIsStreamNameValid] = useState(false);
-  const {
-    lslSource,
-    selectLSLStream,
-    fetchLSLStreams,
-    initializeLSLStream,
-    streamParameters,
-    setLineNoiseValue,
-    setSamplingRateFeaturesValue,
-    setSamplingRateValue,
-    setStreamParametersAllValid,
-  } = useSessionStore();
+  const lslSource = useSessionStore((state) => state.lslSource);
+  const fetchLSLStreams = useSessionStore((state) => state.fetchLSLStreams);
+  const initializeLSLStream = useSessionStore(
+    (state) => state.initializeLSLStream
+  );
+  const setLineNoiseValue = useSessionStore((state) => state.setLineNoiseValue);
+  const setSamplingRateFeaturesValue = useSessionStore(
+    (state) => state.setSamplingRateFeaturesValue
+  );
+  const setSamplingRateValue = useSessionStore(
+    (state) => state.setSamplingRateValue
+  );
+  const setStreamParametersAllValid = useSessionStore(
+    (state) => state.setStreamParametersAllValid
+  );
+  const setSourceType = useSessionStore((state) => state.setSourceType);
 
   const validateStreamName = (name) => {
     return lslSource.availableStreams.some((stream) => stream.name === name);
   };
+
+  useEffect(() => {
+    setSourceType("lsl");
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -127,69 +134,54 @@ export const StreamSelector = () => {
   };
 
   return (
-    <Grid item xs={6}>
-      <TitledBox
-        title="Read data from LSL stream"
-        width="100%"
-        display="flex"
-        flexDirection="column"
-        justifyContent="center"
-        gap={2}
+    <TitledBox title="Read data from LSL stream">
+      <Button
+        variant="contained"
+        onClick={handleSearchStream}
+        disabled={searchingStreams}
       >
+        {searchingStreams ? (
+          <>
+            Searching for streams
+            <CircularProgress size={20} sx={{ mx: 1 }} color="secondary" />
+          </>
+        ) : (
+          "Search for LSL Streams"
+        )}
+      </Button>
+      {lslSource.availableStreams.length > 0
+        ? formatStreams()
+        : "No LSL streams found"}
+
+      <Stack direction="row" width="100%" gap={2}>
+        <TextField
+          label="Selected LSL stream"
+          fullWidth
+          size="small"
+          sx={{ color: "#f4f4f4", flexGrow: 1 }}
+          InputLabelProps={{ sx: { color: "#cccccc" } }}
+          InputProps={{
+            sx: { backgroundColor: "#616161", color: "#f4f4f4" },
+          }}
+          value={selectedStreamName}
+          onChange={handleStreamNameChange}
+          onKeyDown={handleEnterStreamName}
+          error={!isStreamNameValid && selectedStreamName !== ""}
+          helperText={
+            !isStreamNameValid && selectedStreamName !== ""
+              ? "Invalid stream name"
+              : " "
+          }
+        />
         <Button
           variant="contained"
-          onClick={handleSearchStream}
-          disabled={searchingStreams}
+          onClick={handleConnectStream}
+          sx={{ width: "fit-content" }}
+          disabled={!isStreamNameValid}
         >
-          {searchingStreams ? (
-            <>
-              Searching for streams
-              <CircularProgress size={20} sx={{ mx: 1 }} color="secondary" />
-            </>
-          ) : (
-            "Search for LSL Streams"
-          )}
+          Connect to stream
         </Button>
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
-          {lslSource.availableStreams.length > 0
-            ? formatStreams()
-            : "No LSL streams found"}
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            gap: 2,
-            alignItems: "start",
-          }}
-        >
-          <TextField
-            label="Selected LSL stream"
-            size="small"
-            sx={{ color: "#f4f4f4", flexGrow: 1 }}
-            InputLabelProps={{ sx: { color: "#cccccc" } }}
-            InputProps={{
-              sx: { backgroundColor: "#616161", color: "#f4f4f4" },
-            }}
-            value={selectedStreamName}
-            onChange={handleStreamNameChange}
-            onKeyDown={handleEnterStreamName}
-            error={!isStreamNameValid && selectedStreamName !== ""}
-            helperText={
-              !isStreamNameValid && selectedStreamName !== ""
-                ? "Invalid stream name"
-                : " "
-            }
-          />
-          <Button
-            variant="contained"
-            onClick={handleConnectStream}
-            sx={{ width: "fit-content" }}
-            disabled={!isStreamNameValid}
-          >
-            Connect to stream
-          </Button>
-        </Box>
-      </TitledBox>
-    </Grid>
+      </Stack>
+    </TitledBox>
   );
 };
