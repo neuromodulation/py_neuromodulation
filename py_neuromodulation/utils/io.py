@@ -204,29 +204,29 @@ def write_csv(df, path_out):
 
 def save_channels(
     nmchannels: "pd.DataFrame",
-    path_out: _PathLike,
-    folder_name: str = "",
+    out_dir: _PathLike = "",
+    prefix: str = "",
 ) -> None:
-    if folder_name:
-        path_out = PurePath(path_out, folder_name, folder_name + "_channels.csv")
-    write_csv(nmchannels, path_out)
-    logger.info(f"channels.csv saved to {path_out}")
+    out_dir = Path.cwd() if not out_dir else Path(out_dir)
+    filename = "channels.csv" if not prefix else prefix + "_channels.csv"
+    write_csv(nmchannels, out_dir / filename)
+    logger.info(f"{filename} saved to {out_dir}")
 
 
 def save_features(
     df_features: "pd.DataFrame",
-    path_out: _PathLike,
-    folder_name: str = "",
+    out_dir: _PathLike = "",
+    prefix: str = "",
 ) -> None:
+    out_dir = Path.cwd() if not out_dir else Path(out_dir)
     filename = f"{prefix}_FEATURES.csv" if prefix else "_FEATURES.csv"
-    out_dir = PurePath(out_dir, filename)
-    write_csv(df_features, out_dir)
-    logger.info(f"FEATURES.csv saved to {str(out_dir)}")
+    write_csv(df_features, out_dir / filename)
+    logger.info(f"{filename} saved to {str(out_dir)}")
 
 
 def save_sidecar(
     sidecar: dict,
-    out_dir: _PathLike,
+    out_dir: _PathLike = "",
     prefix: str = "",
 ) -> None:
     save_general_dict(sidecar, out_dir, prefix, "_SIDECAR.json")
@@ -234,15 +234,14 @@ def save_sidecar(
 
 def save_general_dict(
     dict_: dict,
-    out_dir: _PathLike,
+    out_dir: _PathLike = "",
     prefix: str = "",
     str_add: str = "",
 ) -> None:
-    # We should change this to a proper experiment name
+    out_dir = Path.cwd() if not out_dir else Path(out_dir)
+    filename = f"{prefix}{str_add}"
 
-    path_out = PurePath(out_dir, f"{prefix}{str_add}")
-
-    with open(path_out, "w") as f:
+    with open(out_dir / filename, "w") as f:
         json.dump(
             dict_,
             f,
@@ -250,7 +249,7 @@ def save_general_dict(
             indent=4,
             separators=(",", ": "),
         )
-    logger.info(f"{str_add} saved to {path_out}")
+    logger.info(f"{filename} saved to {out_dir}")
 
 
 def default_json_convert(obj) -> list | float:

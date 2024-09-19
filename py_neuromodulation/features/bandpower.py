@@ -120,9 +120,10 @@ class BandPower(NMFeature):
             feature_calc = self.KF_dict[KF_name].x[0]
         return feature_calc
 
-    def calc_feature(self, data: np.ndarray, features_compute: dict) -> dict:
+    def calc_feature(self, data: np.ndarray) -> dict:
         data = self.bandpass_filter.filter_data(data)
 
+        feature_results = {}
         for (
             ch_idx,
             f_band_idx,
@@ -130,11 +131,11 @@ class BandPower(NMFeature):
             bp_feature,
             feature_name,
         ) in self.feature_params:
-            features_compute[feature_name] = self.calc_bp_feature(
+            feature_results[feature_name] = self.calc_bp_feature(
                 bp_feature, feature_name, data[ch_idx, f_band_idx, -seglen:]
             )
 
-        return features_compute
+        return feature_results
 
     def calc_bp_feature(self, bp_feature, feature_name, data):
         match bp_feature:

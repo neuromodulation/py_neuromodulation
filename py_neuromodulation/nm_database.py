@@ -1,8 +1,8 @@
 import sqlite3
 from pathlib import Path
 import pandas as pd
-from py_neuromodulation.nm_types import _PathLike
-from py_neuromodulation.nm_IO import generate_unique_filename
+from py_neuromodulation.utils.types import _PathLike
+from py_neuromodulation.utils.io import generate_unique_filename
 
 
 class NMDatabase:

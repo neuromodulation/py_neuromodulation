@@ -152,7 +152,7 @@ features = stream.run(data, save_csv=True)
 # We will therefore use the :class:`~nm_analysis` class to showcase some functions. For multi-run -or subject analysis we will pass here the feature_file "sub" as default directory:
 
 analyzer = nm.FeatureReader(
-    feature_dir=stream.PATH_OUT, feature_file=stream.PATH_OUT_folder_name
+    feature_dir=stream.out_dir_root, feature_file=stream.experiment_name
 )
 
 # %%

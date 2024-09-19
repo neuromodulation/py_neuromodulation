@@ -7,7 +7,7 @@ else:
 from collections.abc import Sequence
 from itertools import product
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from py_neuromodulation.utils.types import BoolSelector, NMBaseModel, NMFeature
 
 from typing import TYPE_CHECKING, Callable

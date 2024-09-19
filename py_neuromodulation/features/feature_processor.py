@@ -62,7 +62,7 @@ class FeatureProcessors:
         """
         self.features[feature_name] = feature  # type: ignore
 
-    def estimate_features(self, data: np.ndarray) -> dict:
+    def estimate_features(self, data: "np.ndarray") -> dict:
         """Calculate features, as defined in settings.json
         Features are based on bandpower, raw Hjorth parameters and sharp wave
         characteristics.

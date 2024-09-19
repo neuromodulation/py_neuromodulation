@@ -197,15 +197,15 @@ class Stream:
     def run(
         self,
         data: "np.ndarray | pd.DataFrame | None" = None,
-        out_path_root: _PathLike = "",
-        folder_name: str = "sub",
+        out_dir: _PathLike = "",
+        experiment_name: str = "sub",
         is_stream_lsl: bool = False,
         stream_lsl_name: str | None = None,
         plot_lsl: bool = False,
         save_csv: bool = False,
         save_interval: int = 10,
         return_df: bool = True,
-    ) -> pd.DataFrame:
+    ) -> "pd.DataFrame":
         self.is_stream_lsl = is_stream_lsl
         self.stream_lsl_name = stream_lsl_name
 
@@ -218,16 +218,12 @@ class Stream:
             raise ValueError("No data passed to run function.")
 
         # Generate output dirs
-        out_path_root = Path.cwd() if not out_path_root else Path(out_path_root)
-
-        self.PATH_OUT = out_path_root
-        self.PATH_OUT_folder_name = folder_name
-
-        out_dir = out_path_root / folder_name
-        out_dir.mkdir(parents=True, exist_ok=True)
-
+        self.out_dir_root = Path.cwd() if not out_dir else Path(out_dir)
+        self.out_dir = self.out_dir_root / experiment_name
         # TONI: Need better default experiment name
-        experiment_name = folder_name if folder_name else "sub"
+        self.experiment_name = experiment_name if experiment_name else "sub"
+
+        self.out_dir.mkdir(parents=True, exist_ok=True)
 
         # Open database connection
         # TONI: we should give the user control over the save format
@@ -325,7 +321,7 @@ class Stream:
         db.commit()  # Save last batches
 
         # If save_csv is False, still save the first row to get the column names
-        feature_df: pd.DataFrame = (
+        feature_df: "pd.DataFrame" = (
             db.fetch_all() if (save_csv or return_df) else db.head()
         )
 
@@ -404,35 +400,28 @@ class Stream:
         feature_arr: "pd.DataFrame | None" = None,
     ) -> None:
         """Save features, settings, nm_channels and sidecar after run"""
-
-        # create derivate folder_name output folder if doesn't exist
-        (self.PATH_OUT / self.PATH_OUT_folder_name).mkdir(parents=True, exist_ok=True)
-
-        self._save_sidecar(self.PATH_OUT, self.PATH_OUT_folder_name)
-
+        self._save_sidecar()
         if feature_arr is not None:
-            self._save_features(self.PATH_OUT, self.PATH_OUT_folder_name, feature_arr)
-
-        self._save_settings(self.PATH_OUT, self.PATH_OUT_folder_name)
-
-        self._save_channels(self.PATH_OUT, self.PATH_OUT_folder_name)
+            self._save_features(feature_arr)
+        self._save_settings()
+        self._save_channels()
 
     def _save_features(
         self,
-        out_path_root: _PathLike,
-        folder_name: str,
         feature_arr: "pd.DataFrame",
     ) -> None:
-        nm.io.save_features(feature_arr, out_path_root, folder_name)
+        nm.io.save_features(feature_arr, self.out_dir, self.experiment_name)
 
-    def _save_channels(self, out_path_root: _PathLike, folder_name: str) -> None:
-        self.data_processor.save_channels(out_path_root, folder_name)
+    def _save_channels(self) -> None:
+        self.data_processor.save_channels(self.out_dir, self.experiment_name)
 
-    def _save_settings(self, out_path_root: _PathLike, folder_name: str) -> None:
-        self.data_processor.save_settings(out_path_root, folder_name)
+    def _save_settings(self) -> None:
+        self.data_processor.save_settings(self.out_dir, self.experiment_name)
 
-    def _save_sidecar(self, out_path_root: _PathLike, folder_name: str) -> None:
+    def _save_sidecar(self) -> None:
         """Save sidecar incduing fs, coords, sess_right to
         out_path_root and subfolder 'folder_name'"""
         additional_args = {"sess_right": self.sess_right}
-        self.data_processor.save_sidecar(out_path_root, folder_name, additional_args)
+        self.data_processor.save_sidecar(
+            self.out_dir, self.experiment_name, additional_args
+        )

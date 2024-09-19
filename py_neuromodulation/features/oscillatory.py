@@ -246,4 +246,4 @@ class STFT(OscillatoryFeature):
                     axis=1
                 )[idx]
 
-        return features_compute
+        return feature_results

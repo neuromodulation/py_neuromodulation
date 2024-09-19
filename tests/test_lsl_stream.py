@@ -31,8 +31,8 @@ def test_offline_lsl(
         is_stream_lsl=True,
         plot_lsl=False,
         stream_lsl_name="offline_test",
-        out_path_root="./test_data",
-        folder_name="test_offline_lsl",
+        out_dir="./test_data",
+        experiment_name="test_offline_lsl",
     )
     # check sfreq
     if not raw.info["sfreq"] == stream.sfreq:

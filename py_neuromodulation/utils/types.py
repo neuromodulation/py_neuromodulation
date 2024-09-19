@@ -63,7 +63,7 @@ class NMFeature(Protocol):
         self, settings: "NMSettings", ch_names: Sequence[str], sfreq: int | float
     ) -> None: ...
 
-    def calc_feature(self, data: "np.ndarray", features_compute: dict) -> dict:
+    def calc_feature(self, data: "np.ndarray") -> dict:
         """
         Feature calculation method. Each method needs to loop through all channels
 
@@ -71,7 +71,6 @@ class NMFeature(Protocol):
         ----------
         data : 'np.ndarray'
             (channels, time)
-        features_compute : dict
 
         Returns
         -------

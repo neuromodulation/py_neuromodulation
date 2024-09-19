@@ -28,7 +28,9 @@ def test_label_add_single_target():
 
     stream = nm.Stream(sfreq=1000, channels=channels, settings=settings, verbose=True)
 
-    df = stream.run(arr_test, out_path_root="./test_data", folder_name="test_label_add_single_target")
+    df = stream.run(
+        arr_test, out_dir="./test_data", experiment_name="test_label_add_single_target"
+    )
 
     assert df[
         "target_ch"
@@ -58,7 +60,11 @@ def test_label_add_multidimensional_target():
 
     stream = nm.Stream(sfreq=1000, channels=channels, settings=settings, verbose=True)
 
-    df = stream.run(arr_test, out_path_root="./test_data", folder_name="test_label_add_multidimensional_target")
+    df = stream.run(
+        arr_test,
+        out_dir="./test_data",
+        experiment_name="test_label_add_multidimensional_target",
+    )
 
     for target_ch in ["target_ch_0", "target_ch_1"]:
         assert df[
@@ -81,6 +87,8 @@ def test_label_add_no_target():
 
     stream = nm.Stream(sfreq=1000, channels=channels, settings=settings, verbose=True)
 
-    df = stream.run(arr_test, out_path_root="./test_data", folder_name="test_label_add_no_target")
+    df = stream.run(
+        arr_test, out_dir="./test_data", experiment_name="test_label_add_no_target"
+    )
 
     assert all([col.startswith("ch") or col.startswith("time") for col in df.columns])

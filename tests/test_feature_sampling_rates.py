@@ -24,8 +24,8 @@ def test_different_sampling_rate_100Hz():
 
     df = stream.run(
         arr_test,
-        out_path_root="./test_data",
-        folder_name="test_different_sampling_rate_100Hz",
+        out_dir="./test_data",
+        experiment_name="test_different_sampling_rate_100Hz",
     )
 
     # check the difference between time points
@@ -43,8 +43,8 @@ def test_different_sampling_rate_10Hz():
 
     df = stream.run(
         arr_test,
-        out_path_root="./test_data",
-        folder_name="test_different_sampling_rate_10Hz",
+        out_dir="./test_data",
+        experiment_name="test_different_sampling_rate_10Hz",
     )
 
     # check the difference between time points
@@ -63,8 +63,8 @@ def test_different_sampling_rate_1Hz():
 
     df = stream.run(
         arr_test,
-        out_path_root="./test_data",
-        folder_name="test_different_sampling_rate_1Hz",
+        out_dir="./test_data",
+        experiment_name="test_different_sampling_rate_1Hz",
     )
 
     # check the difference between time points
@@ -83,8 +83,8 @@ def test_different_sampling_rate_0DOT1Hz():
 
     df = stream.run(
         arr_test,
-        out_path_root="./test_data",
-        folder_name="test_different_sampling_rate_0DOT1Hz",
+        out_dir="./test_data",
+        experiment_name="test_different_sampling_rate_0DOT1Hz",
     )
 
     # check the difference between time points
@@ -116,8 +116,8 @@ def test_different_segment_lengths():
 
     df_seglength_800 = stream.run(
         arr_test,
-        out_path_root="./test_data",
-        folder_name="test_different_segment_lengths_800",
+        out_dir="./test_data",
+        experiment_name="test_different_segment_lengths_800",
     )
 
     segment_length_features_ms = 1000
@@ -132,8 +132,8 @@ def test_different_segment_lengths():
 
     df_seglength_1000 = stream.run(
         arr_test,
-        out_path_root="./test_data",
-        folder_name="test_different_segment_lengths_1000",
+        out_dir="./test_data",
+        experiment_name="test_different_segment_lengths_1000",
     )
     # check the difference between time points
 

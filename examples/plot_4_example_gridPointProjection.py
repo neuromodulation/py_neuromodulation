@@ -76,9 +76,9 @@ stream = nm.Stream(
 
 features = stream.run(
     data=data[:, : int(sfreq * 5)],
-    out_path_root=PATH_OUT,
-    folder_name=RUN_NAME,
-    save_csv=True, 
+    out_dir=PATH_OUT,
+    experiment_name=RUN_NAME,
+    save_csv=True,
 )
 
 # %%

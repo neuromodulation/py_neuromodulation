@@ -58,9 +58,7 @@ channels = nm.utils.set_channels(
 
 settings = nm.NMSettings.get_fast_compute()
 
-player = nm.stream.LSLOfflinePlayer(
-    raw=raw, stream_name="example_stream"
-)
+player = nm.stream.LSLOfflinePlayer(raw=raw, stream_name="example_stream")
 
 player.start_player(chunk_size=30)
 # %%
@@ -93,8 +91,8 @@ features = stream.run(
     is_stream_lsl=True,
     plot_lsl=False,
     stream_lsl_name="example_stream",
-    out_path_root=PATH_OUT,
-    folder_name=RUN_NAME,
+    out_dir=PATH_OUT,
+    experiment_name=RUN_NAME,
 )
 
 # %%

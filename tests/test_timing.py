@@ -24,7 +24,9 @@ def test_setting_computation_time():
         settings=settings,
     )
 
-    features = stream.run(out_path_root="./test_data", folder_name="test_setting_computation_time")
+    features = stream.run(
+        out_dir="./test_data", experiment_name="test_setting_computation_time"
+    )
 
     # test if features up till the last sample was computed
     assert (
@@ -61,7 +63,7 @@ def test_float_fs():
         settings=settings,
     )
 
-    features = stream.run(out_path_root="./test_data", folder_name="test_float_fs")
+    features = stream.run(out_dir="./test_data", experiment_name="test_float_fs")
 
     # test if features up till the last sample was computed
     assert (

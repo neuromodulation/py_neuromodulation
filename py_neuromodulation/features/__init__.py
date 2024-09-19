@@ -25,7 +25,7 @@ from py_neuromodulation.features.bandpower import BandPower
 
 # Expose feature processor and custom feature functions
 from py_neuromodulation.features.feature_processor import (
-    FeatureProcessor,
+    FeatureProcessors,
     add_custom_feature,
     remove_custom_feature,
 )

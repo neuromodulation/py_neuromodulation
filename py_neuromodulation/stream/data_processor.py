@@ -6,7 +6,7 @@ import numpy as np
 
 from py_neuromodulation import logger
 from py_neuromodulation.utils.types import _PathLike
-from py_neuromodulation.features import FeatureProcessor
+from py_neuromodulation.features import FeatureProcessors
 from py_neuromodulation.utils import io
 from py_neuromodulation.stream.settings import NMSettings
 
@@ -73,7 +73,7 @@ class DataProcessor:
 
             self.feature_normalizer = FeatureNormalizer(self.settings)
 
-        self.features = FeatureProcessor(
+        self.features = FeatureProcessors(
             settings=self.settings,
             ch_names=self.ch_names_used,
             sfreq=self.sfreq_raw,
@@ -313,8 +313,8 @@ class DataProcessor:
     def save_settings(self, out_dir: _PathLike, prefix: str = "") -> None:
         self.settings.save(out_dir, prefix)
 
-    def save_channels(self, out_path_root: _PathLike, folder_name: str) -> None:
-        io.save_channels(self.channels, out_path_root, folder_name)
+    def save_channels(self, out_dir: _PathLike, prefix: str) -> None:
+        io.save_channels(self.channels, out_dir, prefix)
 
     def save_features(
         self,
