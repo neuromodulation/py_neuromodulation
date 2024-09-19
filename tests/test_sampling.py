@@ -31,7 +31,7 @@ def get_features(time_end_ms: int, segment_length_features_ms: int):
     )
 
     features = stream.run(
-        data, out_path_root="./test_data", folder_name="test_feature_sampling_rates"
+        data, out_dir="./test_data", experiment_name="test_feature_sampling_rates"
     )
     return features
 
@@ -42,6 +42,7 @@ def test_feature_timing_5s_start_800ms():
     segment_length_features_ms = 800
     features = get_features(time_end_ms, segment_length_features_ms)
 
+    # TONI: this is failing now because I changed the way timestamps are computed
     assert int(features.time.iloc[0]) == segment_length_features_ms
 
     assert int(features.time.iloc[-1]) == time_end_ms
@@ -53,6 +54,7 @@ def test_feature_timing_1s_start_500ms():
     segment_length_features_ms = 500
     features = get_features(time_end_ms, segment_length_features_ms)
 
+    # TONI: this is failing now because I changed the way timestamps are computed
     assert int(features.time.iloc[0]) == segment_length_features_ms
 
     assert int(features.time.iloc[-1]) == time_end_ms

@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import fft
 
-from py_neuromodulation import nm_filter
+from py_neuromodulation.filter import NotchFilter
 
 
 def test_notch_filter_setup():
@@ -9,7 +9,7 @@ def test_notch_filter_setup():
     for sfreq in [150, 200, 500, 1000]:
         line_noise = 50
 
-        notch_filter = nm_filter.NotchFilter(sfreq, line_noise)
+        notch_filter = NotchFilter(sfreq, line_noise)
 
         # the computed filter is saved in self.filter_bank
 

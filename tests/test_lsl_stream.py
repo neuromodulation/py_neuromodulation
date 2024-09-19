@@ -6,12 +6,12 @@ import time
 
 @pytest.mark.parametrize("setup_lsl_player", ["search"], indirect=True)
 def test_lsl_stream_search(setup_lsl_player):
-    from py_neuromodulation import nm_mnelsl_stream
+    from py_neuromodulation.stream import mnelsl_stream
 
     """ Test if the lsl stream search can find any streams after starting a player."""
     player = setup_lsl_player
     player.start_player()
-    streams = nm_mnelsl_stream.resolve_streams()
+    streams = mnelsl_stream.resolve_streams()
     assert len(streams) != 0, "No streams found in search"
 
 
@@ -28,37 +28,36 @@ def test_offline_lsl(
     data, stream = setup_default_stream_fast_compute
 
     features = stream.run(
-        stream_lsl=True,
+        is_stream_lsl=True,
         plot_lsl=False,
         stream_lsl_name="offline_test",
-        out_path_root="./test_data",
-        folder_name="test_offline_lsl",
+        out_dir="./test_data",
+        experiment_name="test_offline_lsl",
     )
     # check sfreq
-    assert (
-        raw.info["sfreq"] == stream.sfreq
-    ), "Expected same sampling frequency in the stream and input file"
-    assert (
-        player.player.info["sfreq"] == stream.sfreq
-    ), "Expected same sampling frequency in the stream and player"
+    if not raw.info["sfreq"] == stream.sfreq:
+        raise ValueError(
+            "Expected same sampling frequency in the stream and input file"
+        )
+    if not player.player.info["sfreq"] == stream.sfreq:
+        raise ValueError("Expected same sampling frequency in the stream and player")
 
     # check types
-    assert all(
-        raw.get_channel_types() == stream.nm_channels["type"]
-    ), "Channel types in data file are not matching the stream"
-    assert all(
-        player.player.get_channel_types() == stream.nm_channels["type"]
-    ), "Channel types in stream are not matching the player"
+    if not all(raw.get_channel_types() == stream.channels["type"]):
+        raise ValueError("Channel types in data file are not matching the stream")
+    if not all(player.player.get_channel_types() == stream.channels["type"]):
+        raise ValueError("Channel types in stream are not matching the player")
 
     # check names
-    assert all(
-        raw.ch_names == stream.nm_channels["name"]
-    ), "Expected same channel names in the stream and input file"
-    assert all(
-        player.player.info["ch_names"] == stream.nm_channels["name"]
-    ), "Expected same channel names in the stream and player"
+    if not all(raw.ch_names == stream.channels["name"]):
+        raise ValueError("Expected same channel names in the stream and input file")
+    if not all(player.player.info["ch_names"] == stream.channels["name"]):
+        raise ValueError("Expected same channel names in the stream and player")
 
-    assert features is not None
+    if not features is not None:
+        raise ValueError(
+            "Expected features dataframe as stream.run() output but got None"
+        )
 
 
 @pytest.mark.parametrize("setup_lsl_player", ["data_test"], indirect=True)

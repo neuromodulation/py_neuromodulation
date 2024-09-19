@@ -8,7 +8,7 @@ Analyzing temporal features
 # Time series data can be characterized using oscillatory components, but assumptions of sinusoidality are for real data rarely fulfilled.
 # See *"Brain Oscillations and the Importance of Waveform Shape"* `Cole et al 2017 <https://doi.org/10.1016/j.tics.2016.12.008>`_ for a great motivation.
 # We implemented here temporal characteristics based on individual trough and peak relations,
-# based on the :meth:~`scipy.signal.find_peaks` method. The function parameter *distance* can be specified in the *nm_settings.yaml*.
+# based on the :meth:~`scipy.signal.find_peaks` method. The function parameter *distance* can be specified in the *settings.yaml*.
 # Temporal features can be calculated twice for troughs and peaks. In the settings, this can be specified by setting *estimate* to true
 # in *detect_troughs* and/or *detect_peaks*. A statistical measure (e.g. mean, max, median, var) can be defined as a resulting feature from the peak and
 # trough estimates using the *apply_estimator_between_peaks_and_troughs* setting.
@@ -38,18 +38,14 @@ from scipy.signal import fftconvolve
 import numpy as np
 
 import py_neuromodulation as nm
-from py_neuromodulation import (
-    nm_define_nmchannels,
-    nm_IO,
-    NMSettings,
-)
-from py_neuromodulation.nm_sharpwaves import SharpwaveAnalyzer
+from py_neuromodulation import NMSettings
+from py_neuromodulation.features import SharpwaveAnalyzer
 
 
 # %%
 # We will first read the example ECoG data and plot the identified features on the filtered time series.
 
-RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data()
+RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm.io.get_paths_example_data()
 
 (
     raw,
@@ -58,7 +54,7 @@ RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm_IO.get_paths_example_data
     line_noise,
     coord_list,
     coord_names,
-) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
+) = nm.io.read_BIDS_data(PATH_RUN=PATH_RUN)
 
 # %%
 settings = NMSettings.get_fast_compute()
@@ -73,7 +69,7 @@ settings.sharpwave_analysis_settings.sharpwave_features.enable_all()
 for sw_feature in settings.sharpwave_analysis_settings.sharpwave_features.list_all():
     settings.sharpwave_analysis_settings.estimator["mean"].append(sw_feature)
 
-nm_channels = nm_define_nmchannels.set_channels(
+channels = nm.utils.set_channels(
     ch_names=raw.ch_names,
     ch_types=raw.get_channel_types(),
     reference="default",
@@ -85,7 +81,7 @@ nm_channels = nm_define_nmchannels.set_channels(
 
 stream = nm.Stream(
     sfreq=sfreq,
-    nm_channels=nm_channels,
+    channels=channels,
     settings=settings,
     line_noise=line_noise,
     coord_list=coord_list,
@@ -297,12 +293,12 @@ settings = NMSettings.get_default().reset()
 settings.features.sharpwave_analysis = True
 settings.sharpwave_analysis_settings.filter_ranges_hz = [[5, 80]]
 
-nm_channels["used"] = 0  # set only two ECoG channels for faster computation to true
-nm_channels.loc[[3, 8], "used"] = 1
+channels["used"] = 0  # set only two ECoG channels for faster computation to true
+channels.loc[[3, 8], "used"] = 1
 
 stream = nm.Stream(
     sfreq=sfreq,
-    nm_channels=nm_channels,
+    channels=channels,
     settings=settings,
     line_noise=line_noise,
     coord_list=coord_list,

@@ -1,14 +1,7 @@
 import pytest
 import numpy as np
 
-from py_neuromodulation import (
-    nm_generator,
-    nm_stream,
-    nm_mnelsl_generator,
-    nm_IO,
-    nm_define_nmchannels,
-    NMSettings,
-)
+import py_neuromodulation as nm
 
 
 @pytest.fixture
@@ -19,7 +12,7 @@ def setup_default_data():
         PATH_BIDS,
         PATH_OUT,
         datatype,
-    ) = nm_IO.get_paths_example_data()
+    ) = nm.io.get_paths_example_data()
 
     (
         raw,
@@ -28,13 +21,13 @@ def setup_default_data():
         line_noise,
         coord_list,
         coord_names,
-    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
+    ) = nm.io.read_BIDS_data(PATH_RUN=PATH_RUN)
 
     return raw, data, sfreq
 
 
 @pytest.fixture
-def setup_default_stream_fast_compute() -> tuple[np.ndarray, nm_stream.Stream]:
+def setup_default_stream_fast_compute() -> tuple[np.ndarray, nm.Stream]:
     """This test function sets a data batch and automatic initialized M1 dataframe
 
     Args:
@@ -53,7 +46,7 @@ def setup_default_stream_fast_compute() -> tuple[np.ndarray, nm_stream.Stream]:
         PATH_BIDS,
         PATH_OUT,
         datatype,
-    ) = nm_IO.get_paths_example_data()
+    ) = nm.io.get_paths_example_data()
 
     (
         raw,
@@ -62,9 +55,9 @@ def setup_default_stream_fast_compute() -> tuple[np.ndarray, nm_stream.Stream]:
         line_noise,
         coord_list,
         coord_names,
-    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
+    ) = nm.io.read_BIDS_data(PATH_RUN=PATH_RUN)
 
-    nm_channels = nm_define_nmchannels.set_channels(
+    channels = nm.utils.set_channels(
         ch_names=raw.ch_names,
         ch_types=raw.get_channel_types(),
         reference="default",
@@ -74,15 +67,15 @@ def setup_default_stream_fast_compute() -> tuple[np.ndarray, nm_stream.Stream]:
         target_keywords=("MOV_RIGHT_CLEAN",),
     )
 
-    settings = NMSettings.get_default()
+    settings = nm.NMSettings.get_default()
     settings.reset()
-    settings.fooof.aperiodic.exponent = True
-    settings.fooof.aperiodic.offset = True
+    settings.fooof_settings.aperiodic.exponent = True
+    settings.fooof_settings.aperiodic.offset = True
     settings.features.fooof = True
 
-    stream = nm_stream.Stream(
+    stream = nm.Stream(
         settings=settings,
-        nm_channels=nm_channels,
+        channels=channels,
         path_grids=None,
         verbose=True,
         sfreq=sfreq,
@@ -112,7 +105,7 @@ def setup_lsl_player(request):
         PATH_BIDS,
         PATH_OUT,
         datatype,
-    ) = nm_IO.get_paths_example_data()
+    ) = nm.io.get_paths_example_data()
     (
         raw,
         data,
@@ -120,8 +113,8 @@ def setup_lsl_player(request):
         line_noise,
         coord_list,
         coord_names,
-    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
-    player = nm_mnelsl_generator.LSLOfflinePlayer(raw=raw, stream_name=name)
+    ) = nm.io.read_BIDS_data(PATH_RUN=PATH_RUN)
+    player = nm.stream.LSLOfflinePlayer(raw=raw, stream_name=name)
     return player
 
 
@@ -145,7 +138,7 @@ def setup_databatch():
         PATH_BIDS,
         PATH_OUT,
         datatype,
-    ) = nm_IO.get_paths_example_data()
+    ) = nm.io.get_paths_example_data()
 
     (
         raw,
@@ -154,11 +147,16 @@ def setup_databatch():
         line_noise,
         coord_list,
         coord_names,
-    ) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
+    ) = nm.io.read_BIDS_data(PATH_RUN=PATH_RUN)
 
-    settings = NMSettings.get_fast_compute()
+    settings = nm.NMSettings.get_fast_compute()
 
-    generator = nm_generator.raw_data_generator(data, settings, int(np.floor(sfreq)))
+    generator = nm.stream.RawDataGenerator(
+        data,
+        int(np.floor(sfreq)),
+        settings.sampling_rate_features_hz,
+        settings.segment_length_features_ms,
+    )
     data_batch = next(generator, None)
 
     return [raw.ch_names, raw.get_channel_types(), raw.info["bads"], data_batch[1]]

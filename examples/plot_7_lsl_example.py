@@ -10,18 +10,10 @@ in a similar manner, This time however integrating an lsl stream.
 
 # %%
 from matplotlib import pyplot as plt
-
-from py_neuromodulation import (
-    nm_mnelsl_generator,
-    nm_IO,
-    nm_define_nmchannels,
-    nm_analysis,
-    nm_stream,
-    NMSettings,
-)
+import py_neuromodulation as nm
 
 # %%
-# Let’s get the example data from the provided BIDS dataset and create the nm_channels DataFrame.
+# Let’s get the example data from the provided BIDS dataset and create the channels DataFrame.
 
 (
     RUN_NAME,
@@ -29,7 +21,7 @@ from py_neuromodulation import (
     PATH_BIDS,
     PATH_OUT,
     datatype,
-) = nm_IO.get_paths_example_data()
+) = nm.io.get_paths_example_data()
 
 (
     raw,
@@ -38,9 +30,9 @@ from py_neuromodulation import (
     line_noise,
     coord_list,
     coord_names,
-) = nm_IO.read_BIDS_data(PATH_RUN=PATH_RUN)
+) = nm.io.read_BIDS_data(PATH_RUN=PATH_RUN)
 
-nm_channels = nm_define_nmchannels.set_channels(
+channels = nm.utils.set_channels(
     ch_names=raw.ch_names,
     ch_types=raw.get_channel_types(),
     reference="default",
@@ -64,11 +56,9 @@ nm_channels = nm_define_nmchannels.set_channels(
 # always search for available lsl streams.
 #
 
-settings = NMSettings.get_fast_compute()
+settings = nm.NMSettings.get_fast_compute()
 
-player = nm_mnelsl_generator.LSLOfflinePlayer(
-    raw=raw, stream_name="example_stream"
-)
+player = nm.stream.LSLOfflinePlayer(raw=raw, stream_name="example_stream")
 
 player.start_player(chunk_size=30)
 # %%
@@ -86,9 +76,9 @@ settings.features.sharpwave_analysis = False
 settings.features.coherence = False
 
 # %%
-stream = nm_stream.Stream(
+stream = nm.Stream(
     sfreq=sfreq,
-    nm_channels=nm_channels,
+    channels=channels,
     settings=settings,
     coord_list=coord_list,
     verbose=True,
@@ -98,11 +88,11 @@ stream = nm_stream.Stream(
 # We then simply have to set the `stream_lsl` parameter to be `True` and specify the `stream_lsl_name`.
 
 features = stream.run(
-    stream_lsl=True,
+    is_stream_lsl=True,
     plot_lsl=False,
     stream_lsl_name="example_stream",
-    out_path_root=PATH_OUT,
-    folder_name=RUN_NAME,
+    out_dir=PATH_OUT,
+    experiment_name=RUN_NAME,
 )
 
 # %%
@@ -119,7 +109,7 @@ plt.plot(features.time, features.MOV_RIGHT)
 # Note that the path was here adapted to be documentation build compliant.
 
 
-feature_reader = nm_analysis.FeatureReader(feature_dir=PATH_OUT, feature_file=RUN_NAME)
+feature_reader = nm.analysis.FeatureReader(feature_dir=PATH_OUT, feature_file=RUN_NAME)
 feature_reader.label_name = "MOV_RIGHT"
 feature_reader.label = feature_reader.feature_arr["MOV_RIGHT"]
 

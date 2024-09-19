@@ -1,65 +1,37 @@
 import pytest
 import numpy as np
-from py_neuromodulation import (
-    nm_bursts,
-    NMSettings,
-)
+from pydantic import ValidationError
+
+from py_neuromodulation.features import Bursts
+from py_neuromodulation import NMSettings
 
 
 def test_init_wrong_fband():
     settings = NMSettings.get_default()
     settings.burst_settings.frequency_bands = ["wrong_band"]
-    with pytest.raises(Exception):
-        nm_bursts.Burst.test_settings(
-            settings,
-            [
-                "ch1",
-                "ch2",
-            ],
-            1000,
-        )
+    with pytest.raises(ValidationError):
+        Bursts(settings, ["ch1", "ch2"], 1000)
 
 
 def test_init_wrong_treshold():
     settings = NMSettings.get_default()
     settings.burst_settings.threshold = -1
-    with pytest.raises(Exception):
-        nm_bursts.Burst.test_settings(
-            settings,
-            [
-                "ch1",
-                "ch2",
-            ],
-            1000,
-        )
+    with pytest.raises(ValidationError):
+        Bursts(settings, ["ch1", "ch2"], 1000)
 
 
 def test_init_wrong_timeduration():
     settings = NMSettings.get_default()
     settings.burst_settings.time_duration_s = -1
-    with pytest.raises(Exception):
-        nm_bursts.Burst.test_settings(
-            settings,
-            [
-                "ch1",
-                "ch2",
-            ],
-            1000,
-        )
+    with pytest.raises(ValidationError):
+        Bursts(settings, ["ch1", "ch2"], 1000)
 
 
 def test_init_wrong_burst_feature_init():
     settings = NMSettings.get_default()
     settings.burst_settings.burst_features.duration = -1
-    with pytest.raises(Exception):
-        nm_bursts.Burst.test_settings(
-            settings,
-            [
-                "ch1",
-                "ch2",
-            ],
-            1000,
-        )
+    with pytest.raises(ValidationError):
+        Bursts(settings, ["ch1", "ch2"], 1000)
 
 
 def test_bursting_duration():
@@ -67,7 +39,7 @@ def test_bursting_duration():
     settings = NMSettings.get_default()
     settings.features.bursts = True
     settings.postprocessing.feature_normalization = False
-    # TIME_DURATION = 10 # TONI: Unused variable
+
     sfreq = 1000
     NUM_CH = 1
     time_points_beta = np.arange(0, 1, 1 / sfreq)
@@ -77,7 +49,7 @@ def test_bursting_duration():
 
     ch_names = ["ch0"]
 
-    bursts = nm_bursts.Burst(settings, ch_names, sfreq)
+    bursts = Bursts(settings, ch_names, sfreq)
 
     for _ in range(10):
         np.random.seed(0)
@@ -87,7 +59,7 @@ def test_bursting_duration():
     np.random.seed(0)
     # the percentile of the hilbert transform of a continuous oscillation will be high
     # select better max amplitude
-    bursts = nm_bursts.Burst(settings, ch_names, sfreq)
+    bursts = Bursts(settings, ch_names, sfreq)
     f_burst = bursts.calc_feature(beta_wave + np.random.random([NUM_CH, 1 * sfreq]))
 
     assert (

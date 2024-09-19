@@ -11,13 +11,13 @@ from typing import Iterable
 
 # %%
 # In this example we will demonstrate how a new feature can be added to the existing feature pipeline.
-# This can be done by creating a new feature class that implements the protocol class :class:`~nm_features.NMFeature`
-# and registering it with the :func:`~nm_features.AddCustomFeature` function.
+# This can be done by creating a new feature class that implements the protocol class :class:`~features.NMFeature`
+# and registering it with the :func:`~features.AddCustomFeature` function.
 
 
 # %%
 # Let's create a new feature class called `ChannelMean` that calculates the mean signal for each channel.
-# We can optinally make it inherit from :class:`~nm_features.NMFeature` but as long as it has an adequate constructor
+# We can optinally make it inherit from :class:`~features.NMFeature` but as long as it has an adequate constructor
 # and a `calc_feature` method with the appropriate signatures it will work.
 # The :func:`__init__` method should take the settings, channel names and sampling frequency as arguments.
 # The `calc_feature` method should take the data and a dictionary of features as arguments and return the updated dictionary.

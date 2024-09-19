@@ -16,10 +16,10 @@ Real-time feature estimation
 # feature computation and decoding can be performed then in real-time.
 #
 # For online as well as as offline analysis, the :class:`~nm_stream_abc` class needs to be instantiated.
-# Here the `nm_settings` and `nm_channels` are required to be defined.
+# Here the `nm_settings` and `channels` are required to be defined.
 # Previously for the offline analysis, an offline :class:`~nm_generator` object was defined that periodically yielded data.
-# For online data, the :meth:`~nm_stream_abc.run` function therefore needs to be overwritten, which first acquires data and then calls
-# the :meth:`~nm_run_analysis.process` function.
+# For online data, the :meth:`~stream_abc.run` function therefore needs to be overwritten, which first acquires data and then calls
+# the :meth:`~run_analysis.process` function.
 #
 # The following illustrates in pseudo-code how such a stream could be initialized:
 #
@@ -53,7 +53,7 @@ import timeit
 
 def get_fast_compute_settings():
     settings = NMSettings.get_fast_compute()
-    
+
     settings.preprocessing = ["re_referencing", "notch_filter"]
     settings.features.fft = True
     settings.postprocessing.feature_normalization = True
@@ -94,9 +94,7 @@ print(
 )
 print("Computation time for single ECoG channel: ")
 data = np.random.random([1, 1000])
-stream = nm.Stream(
-    sfreq=1000, data=data, sampling_rate_features_hz=10, verbose=False
-)
+stream = nm.Stream(sfreq=1000, data=data, sampling_rate_features_hz=10, verbose=False)
 print(
     f"{np.round(timeit.timeit(lambda: stream.data_processor.process(data), number=10)/10, 3)} s"
 )
