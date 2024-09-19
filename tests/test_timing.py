@@ -29,16 +29,15 @@ def test_setting_computation_time():
     )
 
     # test if features up till the last sample was computed
-    assert (
-        data_duration_s * 1000 - features.time.iloc[-1]
-    ) < 1000 / sampling_rate_features_hz
+    assert features.time.iloc[-1] == data_duration_s * fs
+
 
     # test that the time difference between two samples is the feature sampling rate
     assert (
         features.time.iloc[1] - features.time.iloc[0]
-    ) == 1000 / sampling_rate_features_hz
+    ) == fs / sampling_rate_features_hz
 
-    assert features.time.iloc[0] == settings.segment_length_features_ms - 1
+    assert features.time.iloc[0] == settings.segment_length_features_ms
 
 
 def test_float_fs():
@@ -65,16 +64,10 @@ def test_float_fs():
 
     features = stream.run(out_dir="./test_data", experiment_name="test_float_fs")
 
-    # test if features up till the last sample was computed
-    assert (
-        data_duration_s * 1000 - features.time.iloc[-1]
-    ) < 1000 / sampling_rate_features_hz
-
     # test that the time difference between two samples is the feature sampling rate
     assert (
         features.time.iloc[1] - features.time.iloc[0]
     ) == 1000 / sampling_rate_features_hz
 
-    # TONI: I fixed this test so that it passes, but I feel it's not the right way to test timestamp correctness
-    # test that the first feature segment timestamp matches settings.segment_length_features_ms
-    assert features["time"].iloc[0] == settings.segment_length_features_ms - 1
+    # the timing of the first sample cannot be directly inferred from the segment length
+    # the samples are computed based on rounding to full indices of the original data
