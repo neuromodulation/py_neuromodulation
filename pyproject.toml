@@ -47,7 +47,6 @@ dependencies = [
   "pyarrow>=14.0.2",
   "joblib>=1.3.2",
   "mne-lsl>=1.2.0",
-  "pynput",
   "pyqt5",
   "pydantic>=2.7.3",
 ]
