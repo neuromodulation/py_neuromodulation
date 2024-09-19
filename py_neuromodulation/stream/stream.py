@@ -227,7 +227,7 @@ class Stream:
 
         # Open database connection
         # TONI: we should give the user control over the save format
-        from py_neuromodulation.nm_database import NMDatabase
+        from py_neuromodulation.utils.database import NMDatabase
 
         db = NMDatabase(experiment_name, out_dir)  # Create output database
 

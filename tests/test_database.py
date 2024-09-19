@@ -1,9 +1,9 @@
-from py_neuromodulation import nm_database
+from py_neuromodulation.utils import database
 import pandas as pd
 
 
 def test_db_setup():
-    nm_db = nm_database.NMDatabase(
+    nm_db = database.NMDatabase(
         name="test_db",
         out_dir="test_data",
     )
