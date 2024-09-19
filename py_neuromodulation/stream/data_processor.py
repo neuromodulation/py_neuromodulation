@@ -48,7 +48,7 @@ class DataProcessor:
         """
 
         self.settings = NMSettings.load(settings)
-        self.channels = self._load_channels(channels)
+        self.channels = io.load_channels(channels)
 
         self.sfreq_features: float = self.settings.sampling_rate_features_hz
         self._sfreq_raw_orig: float = sfreq
@@ -206,16 +206,6 @@ class DataProcessor:
             plot_projection=False,
         )
         return projection
-
-    @staticmethod
-    def _load_channels(
-        channels: "pd.DataFrame | _PathLike",
-    ) -> "pd.DataFrame":
-        import pandas as pd
-
-        if not isinstance(channels, pd.DataFrame):
-            return io.load_channels(channels)
-        return channels
 
     def _set_coords(
         self, coord_names: list[str] | None, coord_list: list | None

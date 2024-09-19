@@ -26,7 +26,6 @@ class RawDataGenerator:
             np.array: 1D array of time stamps
             np.array: new batch for run function of full segment length shape
         """
-        self._idx: int = 0  # keep track of the current index in the input data
         self.batch_counter: int = 0  # counter for the batches
 
         self.data = data
@@ -40,13 +39,15 @@ class RawDataGenerator:
         return self
 
     def __next__(self):
-        start = np.floor(self._idx).astype(int)
-        end = np.floor(self._idx + self.segment_length).astype(int)
+        start = self.stride * self.batch_counter
+        end = start + self.segment_length
 
-        self._idx += self.stride
         self.batch_counter += 1
 
-        if end > self.data.shape[1]:
+        start_idx = int(start)
+        end_idx = int(end)
+
+        if end_idx > self.data.shape[1]:
             raise StopIteration
 
-        return np.arange(start, end) / self.sfreq, self.data[:, start:end]
+        return np.arange(start, end) / self.sfreq, self.data[:, start_idx:end_idx]

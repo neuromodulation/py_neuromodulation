@@ -10,15 +10,7 @@ in a similar manner, This time however integrating an lsl stream.
 
 # %%
 from matplotlib import pyplot as plt
-
-from py_neuromodulation import (
-    nm_mnelsl_generator,
-    io,
-    nm_define_nmchannels,
-    nm_analysis,
-    nm_stream,
-    NMSettings,
-)
+import py_neuromodulation as nm
 
 # %%
 # Let’s get the example data from the provided BIDS dataset and create the channels DataFrame.
@@ -29,7 +21,7 @@ from py_neuromodulation import (
     PATH_BIDS,
     PATH_OUT,
     datatype,
-) = io.get_paths_example_data()
+) = nm.io.get_paths_example_data()
 
 (
     raw,
@@ -38,9 +30,9 @@ from py_neuromodulation import (
     line_noise,
     coord_list,
     coord_names,
-) = io.read_BIDS_data(PATH_RUN=PATH_RUN)
+) = nm.io.read_BIDS_data(PATH_RUN=PATH_RUN)
 
-channels = define_nmchannels.set_channels(
+channels = nm.utils.set_channels(
     ch_names=raw.ch_names,
     ch_types=raw.get_channel_types(),
     reference="default",
@@ -64,9 +56,9 @@ channels = define_nmchannels.set_channels(
 # always search for available lsl streams.
 #
 
-settings = NMSettings.get_fast_compute()
+settings = nm.NMSettings.get_fast_compute()
 
-player = mnelsl_generator.LSLOfflinePlayer(
+player = nm.stream.LSLOfflinePlayer(
     raw=raw, stream_name="example_stream"
 )
 
@@ -86,7 +78,7 @@ settings.features.sharpwave_analysis = False
 settings.features.coherence = False
 
 # %%
-stream = stream.Stream(
+stream = nm.Stream(
     sfreq=sfreq,
     channels=channels,
     settings=settings,
@@ -119,7 +111,7 @@ plt.plot(features.time, features.MOV_RIGHT)
 # Note that the path was here adapted to be documentation build compliant.
 
 
-feature_reader = analysis.FeatureReader(feature_dir=PATH_OUT, feature_file=RUN_NAME)
+feature_reader = nm.analysis.FeatureReader(feature_dir=PATH_OUT, feature_file=RUN_NAME)
 feature_reader.label_name = "MOV_RIGHT"
 feature_reader.label = feature_reader.feature_arr["MOV_RIGHT"]
 

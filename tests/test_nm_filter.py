@@ -49,7 +49,7 @@ class TestMNEFilterData:
         sfreq = 4000
         duration = 10
         times = np.linspace(0, duration, int(duration * sfreq))
-        bandpass_filter = nm_filter.MNEFilter(
+        bandpass_filter = MNEFilter(
             f_ranges=f_ranges,
             sfreq=sfreq,
             filter_length="999ms",
@@ -78,7 +78,7 @@ class TestMNEFilterData:
         sfreq = 4000
         duration = 10
         times = np.linspace(0, duration, int(duration * sfreq))
-        bandpass_filter = nm_filter.MNEFilter(
+        bandpass_filter = MNEFilter(
             f_ranges=f_ranges,
             sfreq=sfreq,
             filter_length="999ms",

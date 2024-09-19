@@ -20,14 +20,6 @@ from sklearn import metrics, model_selection, linear_model
 import matplotlib.pyplot as plt
 
 import py_neuromodulation as nm
-from py_neuromodulation import (
-    nm_analysis,
-    nm_decode,
-    nm_define_nmchannels,
-    nm_io.
-    nm_plots,
-    NMSettings,
-)
 
 # %%
 # Let's read the example using `mne_bids <https://mne.tools/mne-bids/stable/index.html>`_.
@@ -40,7 +32,7 @@ from py_neuromodulation import (
     PATH_BIDS,
     PATH_OUT,
     datatype,
-) = io.get_paths_example_data()
+) = nm.io.get_paths_example_data()
 
 (
     raw,
@@ -49,11 +41,9 @@ from py_neuromodulation import (
     line_noise,
     coord_list,
     coord_names,
-) = io.read_BIDS_data(
-    PATH_RUN=PATH_RUN
-)
+) = nm.io.read_BIDS_data(PATH_RUN=PATH_RUN)
 
-nm_channels = define_nmchannels.set_channels(
+channels = nm.utils.set_channels(
     ch_names=raw.ch_names,
     ch_types=raw.get_channel_types(),
     reference="default",
@@ -86,7 +76,7 @@ plt.ylabel("Voltage a.u.")
 plt.xlim(0, 20)
 
 # %%
-settings = NMSettings.get_fast_compute()
+settings = nm.NMSettings.get_fast_compute()
 
 settings.features.welch = True
 settings.features.fft = True
@@ -94,9 +84,9 @@ settings.features.bursts = True
 settings.features.sharpwave_analysis = True
 settings.features.coherence = True
 
-settings.coherence.channels = [("LFP_RIGHT_0", "ECOG_RIGHT_0")]
+settings.coherence_settings.channels = [("LFP_RIGHT_0", "ECOG_RIGHT_0")]
 
-settings.coherence.frequency_bands = ["high_beta", "low_gamma"]
+settings.coherence_settings.frequency_bands = ["high beta", "low gamma"]
 settings.sharpwave_analysis_settings.estimator["mean"] = []
 settings.sharpwave_analysis_settings.sharpwave_features.enable_all()
 for sw_feature in settings.sharpwave_analysis_settings.sharpwave_features.list_all():
@@ -105,7 +95,7 @@ for sw_feature in settings.sharpwave_analysis_settings.sharpwave_features.list_a
 # %%
 stream = nm.Stream(
     sfreq=sfreq,
-    channels=nm_channels,
+    channels=channels,
     settings=settings,
     line_noise=line_noise,
     coord_list=coord_list,
@@ -127,7 +117,7 @@ features = stream.run(
 # The obtained performances can now be read and visualized using the :class:`analysis.Feature_Reader`.
 
 # initialize analyzer
-feature_reader = analysis.FeatureReader(
+feature_reader = nm.analysis.FeatureReader(
     feature_dir=PATH_OUT,
     feature_file=RUN_NAME,
 )
@@ -167,7 +157,7 @@ feature_reader.plot_all_features(
 )
 
 # %%
-plots.plot_corr_matrix(
+nm.analysis.plot_corr_matrix(
     feature=feature_reader.feature_arr.filter(regex="ECOG_RIGHT_0"),
     ch_name="ECOG_RIGHT_0_avgref",
     feature_names=list(
@@ -195,7 +185,7 @@ plots.plot_corr_matrix(
 
 model = linear_model.LinearRegression()
 
-feature_reader.decoder = decode.Decoder(
+feature_reader.decoder = nm.analysis.Decoder(
     features=feature_reader.feature_arr,
     label=feature_reader.label,
     label_name=feature_reader.label_name,
@@ -221,7 +211,7 @@ df_per = feature_reader.get_dataframe_performances(performances)
 df_per
 
 # %%
-ax = plots.plot_df_subjects(
+ax = nm.analysis.plot_df_subjects(
     df_per,
     x_col="sub",
     y_col="performance_test",

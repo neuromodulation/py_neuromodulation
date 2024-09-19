@@ -29,10 +29,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import py_neuromodulation as nm
-from py_neuromodulation import (
-    nm_plots,
-    NMSettings,
-)
 
 
 # %%
@@ -43,7 +39,7 @@ from py_neuromodulation import (
 
 
 # %%
-RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = io.get_paths_example_data()
+RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm.io.get_paths_example_data()
 
 (
     raw,
@@ -52,9 +48,9 @@ RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = io.get_paths_example_data()
     line_noise,
     coord_list,
     coord_names,
-) = io.read_BIDS_data(PATH_RUN=PATH_RUN)
+) = nm.io.read_BIDS_data(PATH_RUN=PATH_RUN)
 
-settings = NMSettings.get_fast_compute()
+settings = nm.NMSettings.get_fast_compute()
 
 settings.postprocessing.project_cortex = True
 
@@ -111,7 +107,7 @@ feature_reader.plot_cort_projection()
 # %%
 # We can also plot only the ECoG electrodes or the grid points, with the help of the data saved in feature_reader.sidecar. BIDS sidecar files are json files where you store additional information, here it is used to save the ECoG strip positions and the grid coordinates, which are not part of the settings and channels.csv. We can check what is stored in the file and then use the nmplotter.plot_cortex function:
 
-grid_plotter = plots.NM_Plot(
+grid_plotter = nm.analysis.NM_Plot(
     ecog_strip=np.array(feature_reader.sidecar["coords"]["cortex_right"]["positions"]),
     grid_cortex=np.array(feature_reader.sidecar["grid_cortex"]),
     # grid_subcortex=np.array(feature_reader.sidecar["grid_subcortex"]),

@@ -128,9 +128,8 @@ def plot_epoch(
 def reg_plot(
     x_col: str, y_col: str, data: pd.DataFrame, out_path_save: str | None = None
 ):
-    
-    from py_neuromodulation.stats import permutationTestSpearmansRho
-    
+    from py_neuromodulation.analysis.stats import permutationTestSpearmansRho
+
     plt.figure(figsize=(4, 4), dpi=300)
     rho, p = permutationTestSpearmansRho(
         data[x_col],
@@ -464,7 +463,6 @@ def plot_all_features(
         plt.savefig(plt_path, bbox_inches="tight")
 
 
-
 def read_plot_modules(
     PATH_PLOT: _PathLike = PYNM_DIR / "plots",
 ):
@@ -476,7 +474,7 @@ def read_plot_modules(
         path to plotting files, by default
     """
     from py_neuromodulation.utils.io import loadmat
-    
+
     faces = loadmat(PurePath(PATH_PLOT, "faces.mat"))
     vertices = loadmat(PurePath(PATH_PLOT, "Vertices.mat"))
     grid = loadmat(PurePath(PATH_PLOT, "grid.mat"))["grid"]
@@ -520,8 +518,6 @@ class NM_Plot:
         self.ecog_strip = ecog_strip
         self.sess_right = sess_right
         self.proj_matrix_cortex = proj_matrix_cortex
-
-        from py_neuromodulation.IO import read_plot_modules
 
         (
             self.faces,

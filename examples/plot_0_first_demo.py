@@ -11,8 +11,6 @@ from matplotlib import pyplot as plt
 
 import py_neuromodulation as nm
 
-from py_neuromodulation import nm_analysis, nm_define_nmchannels, nm_plots, NMSettings
-
 # %%
 # Data Simulation
 # ---------------
@@ -93,9 +91,7 @@ plt.title("Example random walk data")
 # DataFrame. There are some helper functions that let you create the
 # nm_channels without much effort:
 
-nm_channels = define_nmchannels.get_default_channels_from_data(
-    data, car_rereferencing=True
-)
+nm_channels = nm.utils.get_default_channels_from_data(data, car_rereferencing=True)
 
 nm_channels
 
@@ -107,7 +103,7 @@ nm_channels
 # -----------
 # Next, we will initialize the nm_settings dictionary and use the default settings, reset them, and enable a subset of features:
 
-settings = NMSettings.get_fast_compute()
+settings = nm.NMSettings.get_fast_compute()
 
 
 # %%
@@ -155,7 +151,7 @@ features = stream.run(data, save_csv=True)
 # There is a lot of output, which we could omit by verbose being False, but let's have a look what was being computed.
 # We will therefore use the :class:`~nm_analysis` class to showcase some functions. For multi-run -or subject analysis we will pass here the feature_file "sub" as default directory:
 
-analyzer = analysis.FeatureReader(
+analyzer = nm.FeatureReader(
     feature_dir=stream.PATH_OUT, feature_file=stream.PATH_OUT_folder_name
 )
 
@@ -178,7 +174,7 @@ analyzer.feature_arr.iloc[:10, :7]
 analyzer.plot_all_features(ch_used="ch1")
 
 # %%
-plots.plot_corr_matrix(
+nm.analysis.plot_corr_matrix(
     figsize=(25, 25),
     show_plot=True,
     feature=analyzer.feature_arr,

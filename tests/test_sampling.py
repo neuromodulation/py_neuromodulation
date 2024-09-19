@@ -42,6 +42,7 @@ def test_feature_timing_5s_start_800ms():
     segment_length_features_ms = 800
     features = get_features(time_end_ms, segment_length_features_ms)
 
+    # TONI: this is failing now because I changed the way timestamps are computed
     assert int(features.time.iloc[0]) == segment_length_features_ms
 
     assert int(features.time.iloc[-1]) == time_end_ms
@@ -53,6 +54,7 @@ def test_feature_timing_1s_start_500ms():
     segment_length_features_ms = 500
     features = get_features(time_end_ms, segment_length_features_ms)
 
+    # TONI: this is failing now because I changed the way timestamps are computed
     assert int(features.time.iloc[0]) == segment_length_features_ms
 
     assert int(features.time.iloc[-1]) == time_end_ms
