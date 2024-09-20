@@ -57,10 +57,13 @@ class WebSocketManager:
         for connection in self.active_connections:
             await connection.send_bytes(message)
 
-    async def send_message(self, message: str):
+    async def send_message(self, message: str | dict):
         if self.active_connections:
             for connection in self.active_connections:
-                await connection.send_text(message)
+                if type(message) is dict:
+                    await connection.send_json(json.dump(message))
+                elif type(message) is str:
+                    await connection.send_text(message)
             self.logger.info(f"Message sent: {message}")
         else:
             self.logger.warning("No active connection to send message.")
