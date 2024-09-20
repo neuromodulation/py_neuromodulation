@@ -206,8 +206,8 @@ class Stream:
         save_csv: bool = False,
         save_interval: int = 10,
         return_df: bool = True,
-        feature_queue: "multiprocessing.Queue" | None = None,
-        stream_handling_queue : "multiprocessing.Queue" | None = None,
+        feature_queue: "multiprocessing.Queue | None"  = None,
+        stream_handling_queue : "multiprocessing.Queue | None" =  None,
     ):
         self.is_stream_lsl = is_stream_lsl
         self.stream_lsl_name = stream_lsl_name

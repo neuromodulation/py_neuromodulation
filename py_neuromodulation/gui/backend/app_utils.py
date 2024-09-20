@@ -3,7 +3,7 @@ import logging
 from typing import Sequence
 import sys
 from pathlib import Path
-from py_neuromodulation.nm_types import _PathLike
+from py_neuromodulation.utils.types import _PathLike
 from functools import lru_cache
 import platform
 
