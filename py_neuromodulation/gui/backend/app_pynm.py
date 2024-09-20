@@ -1,9 +1,11 @@
-import py_neuromodulation as nm
-from py_neuromodulation import nm_mnelsl_stream, nm_define_nmchannels, nm_IO
 import logging
 import numpy as np
-import pandas as pd
 from multiprocessing import Process, Queue
+
+from py_neuromodulation.stream import Stream, NMSettings
+from py_neuromodulation.utils import set_channels
+from py_neuromodulation.utils.io import read_mne_data
+
 
 class PyNMState:
     def __init__(
@@ -13,13 +15,13 @@ class PyNMState:
         self.logger = logging.getLogger("uvicorn.error")
 
         if default_init:
-            self.stream: nm.Stream = nm.Stream(
-                sfreq=1500, data=np.random.random([1, 1])
-            )
+            self.stream: Stream = Stream(sfreq=1500, data=np.random.random([1, 1]))
             # TODO: we currently can pass the sampling_rate_features to both the stream and the settings?
-            self.settings: nm.NMSettings = nm.NMSettings(sampling_rate_features=17)
+            self.settings: NMSettings = NMSettings(sampling_rate_features=17)
 
-    def start_run_function(self, out_dir: str="", experiment_name: str="sub") -> None:
+    def start_run_function(
+        self, out_dir: str = "", experiment_name: str = "sub"
+    ) -> None:
         # TODO: we should add a way to pass the output path and the foldername
         # Initialize the stream with as process with a queue that is passed to the stream
         # The stream will then put the results in the queue
@@ -31,12 +33,14 @@ class PyNMState:
         self.run_process = Process(
             target=self.stream.run,
             kwargs={
-                "out_dir" : out_dir,
-                "experiment_name" : experiment_name,
-                "feature_queue" : feature_queue,
-                "stream_handling_queue" : stream_handling_queue,
-                "stream_lsl" : self.lsl_stream_name is not None,
-                "stream_lsl_name" : self.lsl_stream_name if self.lsl_stream_name is not None else "",
+                "out_dir": out_dir,
+                "experiment_name": experiment_name,
+                "feature_queue": feature_queue,
+                "stream_handling_queue": stream_handling_queue,
+                "is_stream_lsl": self.lsl_stream_name is not None,
+                "stream_lsl_name": self.lsl_stream_name
+                if self.lsl_stream_name is not None
+                else "",
             },
         )
 
@@ -73,7 +77,7 @@ class PyNMState:
                 info_ = stream.get_channel_info()
                 self.logger.info(f"channel info: {info_}")
 
-                channels = nm_define_nmchannels.set_channels(
+                channels = set_channels(
                     ch_names=ch_names,
                     ch_types=ch_types,
                     used_types=["eeg", "ecog", "dbs", "seeg"],
@@ -81,16 +85,14 @@ class PyNMState:
                 self.logger.info(channels)
                 sfreq = stream.sfreq
 
-                self.stream: nm.Stream = nm.Stream(
+                self.stream: Stream = Stream(
                     sfreq=sfreq,
                     line_noise=line_noise,
-                    nm_channels=channels,
+                    channels=channels,
                     sampling_rate_features_hz=sampling_rate_features,
                 )
                 self.logger.info("stream setup")
-                self.settings: nm.NMSettings = nm.NMSettings(
-                    sampling_rate_features=sfreq
-                )
+                self.settings: NMSettings = NMSettings(sampling_rate_features=sfreq)
                 self.logger.info("settings setup")
                 break
 
@@ -104,22 +106,22 @@ class PyNMState:
         line_noise: float = None,
         sampling_rate_features: float = None,
     ):
-        data, sfreq, ch_names, ch_types, bads = nm_IO.read_mne_data(file_path)
+        data, sfreq, ch_names, ch_types, bads = read_mne_data(file_path)
 
-        channels = nm_define_nmchannels.set_channels(
+        channels = set_channels(
             ch_names=ch_names,
             ch_types=ch_types,
             bads=bads,
             used_types=["eeg", "ecog", "dbs", "seeg"],
         )
 
-        self.stream: nm.Stream = nm.Stream(
+        self.stream: Stream = Stream(
             sfreq=sfreq,
             data=data,
-            nm_channels=channels,
+            channels=channels,
             line_noise=line_noise,
             sampling_rate_features_hz=sampling_rate_features,
         )
-        self.settings: nm.NMSettings = nm.NMSettings(
+        self.settings: NMSettings = NMSettings(
             sampling_rate_features=sampling_rate_features
         )

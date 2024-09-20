@@ -6,7 +6,9 @@ import atexit
 import time
 import signal
 
-from py_neuromodulation import logger, nm_types, nm_IO
+from py_neuromodulation.utils.types import _PathLike
+from py_neuromodulation.utils.io import read_BIDS_data
+from py_neuromodulation import logger
 
 
 class LSLOfflinePlayer:
@@ -54,7 +56,7 @@ class LSLOfflinePlayer:
 
         if f_name:
             (self._path_raw, data, sfreq, line_noise, coord_list, coord_names) = (
-                nm_IO.read_BIDS_data(f_name)
+                read_BIDS_data(f_name)
             )
         elif raw:
             self._path_raw = raw
