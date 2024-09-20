@@ -2,6 +2,7 @@ import py_neuromodulation as nm
 import logging
 import numpy as np
 import pandas as pd
+from multiprocessing import Process, Queue
 
 
 class PyNMState:
@@ -18,15 +19,32 @@ class PyNMState:
             # TODO: we currently can pass the sampling_rate_features to both the stream and the settings?
             self.settings: nm.NMSettings = nm.NMSettings(sampling_rate_features=17)
 
-    def start_run_function(self) -> None:
+    def start_run_function(
+        self, out_dir: str = "", experiment_name: str = "sub"
+    ) -> None:
         # TODO: we should add a way to pass the output path and the foldername
-        if self.lsl_stream_name is not None:
-            self.stream.run(
-                is_stream_lsl=True,
-                stream_lsl_name=self.lsl_stream_name,
-            )
-        else:
-            self.stream.run()
+        # Initialize the stream with as process with a queue that is passed to the stream
+        # The stream will then put the results in the queue
+        # there should be another websocket in which the results are sent to the frontend
+
+        feature_queue = Queue()
+        stream_handling_queue = Queue()
+
+        self.run_process = Process(
+            target=self.stream.run,
+            kwargs={
+                "out_dir": out_dir,
+                "experiment_name": experiment_name,
+                "feature_queue": feature_queue,
+                "stream_handling_queue": stream_handling_queue,
+                "stream_lsl": self.lsl_stream_name is not None,
+                "stream_lsl_name": self.lsl_stream_name
+                if self.lsl_stream_name is not None
+                else "",
+            },
+        )
+
+        self.run_process.start()
 
     def setup_lsl_stream(
         self,

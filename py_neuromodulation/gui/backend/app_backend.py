@@ -4,6 +4,7 @@ import importlib.metadata
 from datetime import datetime
 from pathlib import Path
 import os
+import time
 
 from fastapi import (
     FastAPI,
@@ -22,6 +23,8 @@ import pandas as pd
 
 from py_neuromodulation import PYNM_DIR, NMSettings
 from py_neuromodulation.nm_types import FileInfo
+
+from multiprocessing import Process, Queue
 
 # TODO: maybe pull this list from the MNE package?
 ALLOWED_EXTENSIONS = [".npy", ".vhdr", ".fif", ".edf", ".bdf"]
@@ -66,6 +69,15 @@ class PyNMBackend(FastAPI):
         self.pynm_state = pynm_state
         self.websocket_manager = WebSocketManager()
 
+    def push_features_to_frontend(self, feature_queue: Queue) -> None:
+        while True:
+            time.sleep(0.002)
+            features = feature_queue.get()
+            self.websocket_manager.send_message(features)
+
+            if self.pynm_state.stream.is_running is False:
+                break
+
     def setup_routes(self):
         @self.get("/api/health")
         async def healthcheck():
@@ -99,8 +111,30 @@ class PyNMBackend(FastAPI):
         async def handle_stream_control(data: dict):
             action = data["action"]
             if action == "start":
-                self.pynm_state.stream.run()
-            # Add other actions as needed
+                # TODO: create out_dir and experiment_name text filds in frontend
+                self.pynm_state.stream.start_run_function(
+                    out_dir=data["out_dir"], experiment_name=data["experiment_name"]
+                )
+
+                self.push_features_process = Process(
+                    target=self.push_features_to_frontend,
+                    args=(self.pynm_state.stream.feature_queue,),
+                )
+                self.push_features_process.start()
+
+            if action == "stop":
+                if self.pynm_state.stream.is_running is False:
+                    # TODO: if the message starts with ERROR we could show the message in a popup
+                    return {"message": "ERROR: Stream is not running"}
+
+                # initiate stream stop and feature save
+                self.pynm_state.stream.stream_handling_queue.put("stop")
+                self.push_features_process.join(timeout=1)
+                self.pynm_state.run_process.join(timeout=1)
+
+                self.push_features_process.terminate()
+                self.pynm_state.run_process.terminate()
+
             return {"message": f"Stream action '{action}' executed"}
 
         ####################
