@@ -22,7 +22,7 @@ from .app_utils import is_hidden, get_quick_access
 import pandas as pd
 
 from py_neuromodulation import PYNM_DIR, NMSettings
-from py_neuromodulation.nm_types import FileInfo
+from py_neuromodulation.utils.types import FileInfo
 
 from multiprocessing import Process, Queue
 
