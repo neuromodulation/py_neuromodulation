@@ -2,10 +2,7 @@ from fastapi import WebSocket
 import logging
 import struct
 import json
-
-MAGIC_BYTE = b"b"  # Magic byte to identify non-textmessages
-
-
+import cbor2
 class WebSocketManager:
     """
     Manages WebSocket connections and messages.
@@ -34,28 +31,10 @@ class WebSocketManager:
             )
 
     # Combine IP and port to create a unique client ID
-    async def send_bytes(self, header: dict, payload: bytes | None = None):
-        if not self.active_connections:
-            self.logger.warning("No active connectios to send message.")
-            return
-
-        if payload:
-            header["payload_length"] = len(payload)
-            header["payload"] = True
-
-        # Convert the header to JSON and encode it as UTF-8
-        header_bytes = json.dumps(header).encode("utf-8")
-        header_length = len(header_bytes)
-
-        # Construct the message
-        message = bytearray(MAGIC_BYTE)  # start with magic byte
-        message.extend(struct.pack(">I", header_length))  # add header length
-        message.extend(header_bytes)  # add header string in JSON format
-        if payload:
-            message.extend(payload)
-
+    async def send_cbor(self, object: dict):
         for connection in self.active_connections:
-            await connection.send_bytes(message)
+            await connection.send_bytes(cbor2.dumps(object))
+        
 
     async def send_message(self, message: str | dict):
         self.logger.info(f"Sending message within app_socket: {message.keys()}")

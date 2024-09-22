@@ -67,8 +67,7 @@ class PyNMBackend(FastAPI):
         )
 
         self.pynm_state = pynm_state
-        self.websocket_manager_rawdata = WebSocketManager()
-        self.websocket_manager_features = WebSocketManager()
+        self.websocket_manager = WebSocketManager()
 
     def push_features_to_frontend(self, feature_queue: Queue) -> None:
         while True:
@@ -78,7 +77,7 @@ class PyNMBackend(FastAPI):
                 features = feature_queue.get()
 
                 self.logger.info(f"Sending features: {features}")
-                self.websocket_manager_features.send_message(features)
+                self.websocket_manager.send_message(features)
 
                 if self.pynm_state.stream.is_running is False:
                     break
@@ -118,19 +117,12 @@ class PyNMBackend(FastAPI):
             if action == "start":
                 # TODO: create out_dir and experiment_name text filds in frontend
                 self.logger.info("websocket:")
-                self.logger.info(self.websocket_manager_features)
+                self.logger.info(self.websocket_manager)
                 await self.pynm_state.start_run_function(
                     out_dir=data["out_dir"],
                     experiment_name=data["experiment_name"],
-                    websocket_manager_features=self.websocket_manager_features,
+                    websocket_manager=self.websocket_manager,
                 )
-                
-                # this also fails due to pickling error
-                # self.push_features_process = Process(
-                #     target=self.push_features_to_frontend,
-                #     args=(self.pynm_state.stream.feature_queue,),
-                # )
-                # self.push_features_process.start()
 
             if action == "stop":
                 if self.pynm_state.stream.is_running is False:
@@ -139,11 +131,6 @@ class PyNMBackend(FastAPI):
 
                 # initiate stream stop and feature save
                 self.pynm_state.stream.stream_handling_queue.put("stop")
-                self.push_features_process.join(timeout=1)
-                self.pynm_state.run_process.join(timeout=1)
-
-                self.push_features_process.terminate()
-                self.pynm_state.run_process.terminate()
 
             return {"message": f"Stream action '{action}' executed"}
 
@@ -375,11 +362,7 @@ class PyNMBackend(FastAPI):
             #     )
             #     return
 
-            await self.websocket_manager_rawdata.connect(
-                websocket
-            )  # NOTE: This needs to be done for features and raw data?
-            await self.websocket_manager_features.connect(websocket)
-
+            await self.websocket_manager.connect(websocket)  
         # # #######################
         # # ### SPA ENTRY POINT ###
         # # #######################

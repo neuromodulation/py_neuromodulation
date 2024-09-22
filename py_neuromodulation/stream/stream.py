@@ -257,6 +257,13 @@ class Stream:
 
         nm.logger.log_to_file(out_dir)
 
+        # Initialize mp.Pool for multiprocessing
+        self.pool = mp.Pool(processes=self.settings.n_jobs)
+        # Set up shared memory for multiprocessing
+        self.shared_memory = mp.Array(ctypes.c_double, self.settings.n_jobs * self.settings.n_jobs)
+        # Set up multiprocessing semaphores
+        self.semaphore = mp.Semaphore(self.settings.n_jobs)
+        
         # Initialize generator
         self.generator: Iterator
         if not is_stream_lsl:
