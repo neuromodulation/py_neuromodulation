@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING, cast
 import numpy as np
 
 from py_neuromodulation.utils.types import _PathLike
-from py_neuromodulation import logger, PYNM_DIR
+from py_neuromodulation.utils.logging import logger
+from py_neuromodulation import PYNM_DIR
 
 if TYPE_CHECKING:
     from mne_bids import BIDSPath

@@ -8,7 +8,7 @@ import signal
 
 from py_neuromodulation.utils.types import _PathLike
 from py_neuromodulation.utils.io import read_BIDS_data
-from py_neuromodulation import logger
+from py_neuromodulation.utils import logger
 
 
 class LSLOfflinePlayer:

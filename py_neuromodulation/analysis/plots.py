@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from matplotlib import gridspec
 import seaborn as sb
 from pathlib import PurePath
-from py_neuromodulation import logger, PYNM_DIR
+from py_neuromodulation.utils import logger, PYNM_DIR
 from py_neuromodulation.utils.types import _PathLike
 
 

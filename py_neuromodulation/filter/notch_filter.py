@@ -2,7 +2,7 @@ import numpy as np
 from typing import cast
 
 from py_neuromodulation.utils.types import NMPreprocessor
-from py_neuromodulation import logger
+from py_neuromodulation.utils import logger
 
 
 class NotchFilter(NMPreprocessor):

@@ -2,7 +2,7 @@ from collections.abc import Iterator
 import time
 from typing import TYPE_CHECKING
 import numpy as np
-from py_neuromodulation import logger
+from py_neuromodulation.utils import logger
 from mne_lsl.lsl import resolve_streams
 import os
 

@@ -4,7 +4,7 @@ from time import time
 from typing import TYPE_CHECKING
 import numpy as np
 
-from py_neuromodulation import logger
+from py_neuromodulation.utils import logger
 from py_neuromodulation.utils.types import _PathLike
 from py_neuromodulation.features import FeatureProcessors
 from py_neuromodulation.utils import io

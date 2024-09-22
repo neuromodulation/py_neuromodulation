@@ -4,7 +4,8 @@ from pathlib import Path
 from typing import ClassVar
 from pydantic import Field, model_validator
 
-from py_neuromodulation import PYNM_DIR, logger, user_features
+from py_neuromodulation import PYNM_DIR, user_features
+from py_neuromodulation.utils.logging import logger
 
 from py_neuromodulation.utils.types import (
     BoolSelector,
