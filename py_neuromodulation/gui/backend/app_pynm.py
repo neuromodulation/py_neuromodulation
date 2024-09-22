@@ -14,37 +14,56 @@ class PyNMState:
     ) -> None:
         self.logger = logging.getLogger("uvicorn.error")
 
+        self.lsl_stream_name = None
+
         if default_init:
             self.stream: Stream = Stream(sfreq=1500, data=np.random.random([1, 1]))
             # TODO: we currently can pass the sampling_rate_features to both the stream and the settings?
             self.settings: NMSettings = NMSettings(sampling_rate_features=17)
-
-    def start_run_function(
-        self, out_dir: str = "", experiment_name: str = "sub"
+            
+    async def start_run_function(
+        self, out_dir: str = "", experiment_name: str = "sub", websocket_manager_features=None
     ) -> None:
         # TODO: we should add a way to pass the output path and the foldername
         # Initialize the stream with as process with a queue that is passed to the stream
         # The stream will then put the results in the queue
         # there should be another websocket in which the results are sent to the frontend
 
-        feature_queue = Queue()
         stream_handling_queue = Queue()
 
-        self.run_process = Process(
-            target=self.stream.run,
-            kwargs={
-                "out_dir": out_dir,
-                "experiment_name": experiment_name,
-                "feature_queue": feature_queue,
-                "stream_handling_queue": stream_handling_queue,
-                "is_stream_lsl": self.lsl_stream_name is not None,
-                "stream_lsl_name": self.lsl_stream_name
-                if self.lsl_stream_name is not None
-                else "",
-            },
-        )
+        self.logger.info("setup stream Process")
 
-        self.run_process.start()
+        # self.run_process = Process(
+        #     target=self.stream.run,
+        #     kwargs={
+        #         "out_dir": out_dir,
+        #         "experiment_name": experiment_name,
+        #         "feature_queue": feature_queue,
+        #         "stream_handling_queue": stream_handling_queue,
+        #         "is_stream_lsl": self.lsl_stream_name is not None,
+        #         "stream_lsl_name": self.lsl_stream_name
+        #         if self.lsl_stream_name is not None
+        #         else "",
+        #     },
+        # )
+
+        await self.stream.run(
+            out_dir=out_dir,
+            experiment_name=experiment_name,
+            stream_handling_queue=stream_handling_queue,
+            is_stream_lsl=self.lsl_stream_name is not None,
+            stream_lsl_name=self.lsl_stream_name
+            if self.lsl_stream_name is not None
+            else "",
+            websocket_featues=websocket_manager_features,
+        )
+        #self.logger.info("initialized run process")
+
+        # self.run_process.start()
+
+        #import time
+        #time.sleep(2)
+        #self.logger.info(f"Stream running: {self.stream.is_running}")
 
     def setup_lsl_stream(
         self,
@@ -112,16 +131,21 @@ class PyNMState:
             ch_names=ch_names,
             ch_types=ch_types,
             bads=bads,
+            reference=None,
             used_types=["eeg", "ecog", "dbs", "seeg"],
         )
 
+        self.settings: NMSettings = NMSettings(
+            sampling_rate_features=sampling_rate_features
+        )
+
+        self.settings.preprocessing = []
+
         self.stream: Stream = Stream(
+            settings=self.settings,
             sfreq=sfreq,
             data=data,
             channels=channels,
             line_noise=line_noise,
             sampling_rate_features_hz=sampling_rate_features,
-        )
-        self.settings: NMSettings = NMSettings(
-            sampling_rate_features=sampling_rate_features
         )

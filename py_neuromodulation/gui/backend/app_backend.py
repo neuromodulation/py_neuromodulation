@@ -67,16 +67,24 @@ class PyNMBackend(FastAPI):
         )
 
         self.pynm_state = pynm_state
-        self.websocket_manager = WebSocketManager()
+        self.websocket_manager_rawdata = WebSocketManager()
+        self.websocket_manager_features = WebSocketManager()
 
     def push_features_to_frontend(self, feature_queue: Queue) -> None:
         while True:
-            time.sleep(0.002)
-            features = feature_queue.get()
-            self.websocket_manager.send_message(features)
+            time.sleep(
+                0.002
+            )  # NOTE: This should be adapted depending on the feature sampling rate
+            if feature_queue.empty() is False:
+                self.logger.info("data in feature queue")
 
-            if self.pynm_state.stream.is_running is False:
-                break
+                features = feature_queue.get()
+
+                self.logger.info(f"Sending features: {features}")
+                self.websocket_manager_features.send_message(features)
+
+                if self.pynm_state.stream.is_running is False:
+                    break
 
     def setup_routes(self):
         @self.get("/api/health")
@@ -112,15 +120,18 @@ class PyNMBackend(FastAPI):
             action = data["action"]
             if action == "start":
                 # TODO: create out_dir and experiment_name text filds in frontend
-                self.pynm_state.stream.start_run_function(
-                    out_dir=data["out_dir"], experiment_name=data["experiment_name"]
+                await self.pynm_state.start_run_function(
+                    out_dir=data["out_dir"],
+                    experiment_name=data["experiment_name"],
+                    websocket_manager_features=self.websocket_manager_features,
                 )
 
-                self.push_features_process = Process(
-                    target=self.push_features_to_frontend,
-                    args=(self.pynm_state.stream.feature_queue,),
-                )
-                self.push_features_process.start()
+                # this also fails due to pickling error
+                # self.push_features_process = Process(
+                #     target=self.push_features_to_frontend,
+                #     args=(self.pynm_state.stream.feature_queue,),
+                # )
+                # self.push_features_process.start()
 
             if action == "stop":
                 if self.pynm_state.stream.is_running is False:
@@ -143,7 +154,7 @@ class PyNMBackend(FastAPI):
 
         @self.get("/api/channels")
         async def get_channels():
-            channels = self.pynm_state.stream.nm_channels
+            channels = self.pynm_state.stream.channels
             self.logger.info(f"Sending channels: {channels}")
             if isinstance(channels, pd.DataFrame):
                 return {"channels": channels.to_dict(orient="records")}
@@ -158,9 +169,9 @@ class PyNMBackend(FastAPI):
             try:
                 new_channels = pd.DataFrame(data["channels"])
                 self.logger.info(f"Received channels:\n {new_channels}")
-                self.pynm_state.stream.nm_channels = new_channels
+                self.pynm_state.stream.channels = new_channels
                 return {
-                    "channels": self.pynm_state.stream.nm_channels.to_dict(
+                    "channels": self.pynm_state.stream.channels.to_dict(
                         orient="records"
                     )
                 }
@@ -222,8 +233,8 @@ class PyNMBackend(FastAPI):
             try:
                 self.pynm_state.setup_offline_stream(
                     file_path=data["file_path"],
-                    line_noise=data["line_noise"],
-                    sampling_rate_features=data["sampling_rate_features"],
+                    line_noise=float(data["line_noise"]),
+                    sampling_rate_features=float(data["sampling_rate_features"]),
                 )
                 return {"message": f"Offline stream setup successfully"}
             except ValueError as e:
@@ -365,7 +376,10 @@ class PyNMBackend(FastAPI):
             #     )
             #     return
 
-            await self.websocket_manager.connect(websocket)
+            await self.websocket_manager_rawdata.connect(
+                websocket
+            )  # NOTE: This needs to be done for features and raw data?
+            await self.websocket_manager_features.connect(websocket)
 
         # # #######################
         # # ### SPA ENTRY POINT ###
