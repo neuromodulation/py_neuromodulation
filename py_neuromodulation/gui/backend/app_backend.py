@@ -72,12 +72,9 @@ class PyNMBackend(FastAPI):
 
     def push_features_to_frontend(self, feature_queue: Queue) -> None:
         while True:
-            time.sleep(
-                0.002
-            )  # NOTE: This should be adapted depending on the feature sampling rate
+            time.sleep(0.002) # NOTE: should be adapted depending on feature sampling rate
             if feature_queue.empty() is False:
                 self.logger.info("data in feature queue")
-
                 features = feature_queue.get()
 
                 self.logger.info(f"Sending features: {features}")
@@ -125,7 +122,7 @@ class PyNMBackend(FastAPI):
                     experiment_name=data["experiment_name"],
                     websocket_manager_features=self.websocket_manager_features,
                 )
-
+                
                 # this also fails due to pickling error
                 # self.push_features_process = Process(
                 #     target=self.push_features_to_frontend,
@@ -391,3 +388,5 @@ class PyNMBackend(FastAPI):
         #         # Serve the index.html for any path that doesn't match an API route
         #         print(Path.cwd())
         #         return FileResponse("frontend/index.html")
+
+

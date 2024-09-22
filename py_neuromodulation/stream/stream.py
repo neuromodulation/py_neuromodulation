@@ -328,6 +328,7 @@ class Stream:
 
             # if self.feature_queue is not None:
             #    self.feature_queue.put(feature_dict)
+            
             if websocket_featues is not None:
                 await websocket_featues.send_message(feature_dict)
             self.batch_count += 1

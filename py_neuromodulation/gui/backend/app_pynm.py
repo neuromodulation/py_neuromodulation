@@ -60,6 +60,7 @@ class PyNMState:
             else "",
             websocket_featues=websocket_manager_features,
         )
+
         # self.logger.info("initialized run process")
 
         # self.run_process.start()
@@ -67,6 +68,7 @@ class PyNMState:
         # import time
         # time.sleep(2)
         # self.logger.info(f"Stream running: {self.stream.is_running}")
+
 
     def setup_lsl_stream(
         self,
@@ -152,3 +154,4 @@ class PyNMState:
             line_noise=line_noise,
             sampling_rate_features_hz=sampling_rate_features,
         )
+
