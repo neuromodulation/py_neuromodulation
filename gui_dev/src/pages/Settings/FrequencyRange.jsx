@@ -47,10 +47,10 @@ export const FrequencyRange = ({ settings }) => {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>Frequency Bands</div>
+    <div>
+      <div>Frequency Bands</div>
       {Object.keys(frequencyRanges).map((label) => (
-        <div key={label} className={styles.bandContainer}>
+        <div key={label}>
           <input
             type="text"
             value={label}
@@ -61,7 +61,6 @@ export const FrequencyRange = ({ settings }) => {
               delete updatedRanges[label];
               setFrequencyRanges(updatedRanges);
             }}
-            className={styles.bandNameInput}
             placeholder="Band Name"
           />
           <input
@@ -70,7 +69,6 @@ export const FrequencyRange = ({ settings }) => {
             onChange={(e) =>
               handleInputChange(label, "frequency_high_hz", e.target.value)
             }
-            className={styles.frequencyInput}
             placeholder="High Hz"
           />
           <input
@@ -79,20 +77,12 @@ export const FrequencyRange = ({ settings }) => {
             onChange={(e) =>
               handleInputChange(label, "frequency_low_hz", e.target.value)
             }
-            className={styles.frequencyInput}
             placeholder="Low Hz"
           />
-          <button
-            onClick={() => removeBand(label)}
-            className={styles.removeButton}
-          >
-            –
-          </button>
+          <button onClick={() => removeBand(label)}>–</button>
         </div>
       ))}
-      <button onClick={addBand} className={styles.addButton}>
-        + Add Band
-      </button>
+      <button onClick={addBand}>+ Add Band</button>
     </div>
   );
 };

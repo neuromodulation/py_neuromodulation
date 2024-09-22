@@ -95,7 +95,7 @@ class NMSettings(NMBaseModel):
     stft_settings: OscillatorySettings = OscillatorySettings()
     bandpass_filter_settings: BandPowerSettings = BandPowerSettings()
     kalman_filter_settings: KalmanSettings = KalmanSettings()
-    bursts_settings: BurstSettings = BurstSettings()
+    bursts_settings: BurstsSettings = BurstsSettings()
     sharpwave_analysis_settings: SharpwaveSettings = SharpwaveSettings()
     mne_connectivity_settings: MNEConnectivitySettings = MNEConnectivitySettings()
     coherence_settings: CoherenceSettings = CoherenceSettings()
