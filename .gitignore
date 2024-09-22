@@ -193,14 +193,15 @@ out_per
 /profiling/*
 # Test output
 test_data/
-# Ignore npm lock files
+# various lock files
 package-lock.json
 package-lock.json.bak
-# Ignore uv lock file
 uv.lock
+# temporarily ignore the frontend build
+/gui_dev/dist
+/gui/frontend
+# Node modules
+gui_dev/node_modules/*
 
 # LSL log file
 lsllog.txt
-
-# Node modules
-gui_dev/node_modules/*

@@ -1,6 +1,6 @@
 import json
 from pathlib import PurePath, Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
 
@@ -79,7 +79,7 @@ def read_BIDS_data(
 def read_mne_data(
     PATH_RUN: "_PathLike | BIDSPath",
     line_noise: int = 50,
-):
+) -> tuple[np.ndarray, float, list[str], list[str], list[str]]:
     """Read data in the mne.io.read_raw supported format.
 
     Parameters
@@ -117,7 +117,8 @@ def read_mne_data(
             f"Line noise is not available in the data, using value of {line_noise} Hz."
         )
 
-    return raw_arr.get_data(), sfreq, ch_names, ch_types, bads
+    data = cast(np.ndarray, raw_arr.get_data())
+    return data, sfreq, ch_names, ch_types, bads
 
 
 def get_coord_list(

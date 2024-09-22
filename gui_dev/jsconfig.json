@@ -3,10 +3,11 @@
     "baseUrl": "./",
     "target": "ES6",
     "checkJs": true,
+    "module": "ES6",
     "moduleResolution": "node",
     "paths": {
       "@/*": ["./src/*"]
     },
-    "jsx": "react-jsx",
+    "jsx": "react-jsx"
   }
 }

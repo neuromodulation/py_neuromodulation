@@ -65,24 +65,33 @@ export const useSettingsStore = createStore("settings", (set, get) => ({
 
   resetRetryCount: () => set({ retryCount: 0 }),
 
-  updateSettings: async (newSettings) => {
-    //Update settings optimistically
+  updateSettings: async (updater) => {
     const currentSettings = get().settings;
 
-    set({ settings: newSettings });
+    // Apply the update optimistically
+    set((state) => {
+      updater(state.settings);
+    });
 
-    const result = await uploadSettingsToServer(newSettings);
+    const newSettings = get().settings;
 
-    await get().uploadSettings;
+    try {
+      const result = await uploadSettingsToServer(newSettings);
 
-    if (!result.success) {
-      // Revert the local state if the server update failed
+      if (!result.success) {
+        // Revert the local state if the server update failed
+        set({ settings: currentSettings });
+      }
+
+      return result;
+    } catch (error) {
+      // Revert the local state if there was an error
       set({ settings: currentSettings });
+      throw error;
     }
-
-    return result;
   },
 }));
 
+export const useSettings = () => useSettingsStore((state) => state.settings);
 export const useFetchSettings = () =>
   useSettingsStore((state) => state.fetchSettingsWithDelay);

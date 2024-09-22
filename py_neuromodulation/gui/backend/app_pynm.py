@@ -20,9 +20,12 @@ class PyNMState:
             self.stream: Stream = Stream(sfreq=1500, data=np.random.random([1, 1]))
             # TODO: we currently can pass the sampling_rate_features to both the stream and the settings?
             self.settings: NMSettings = NMSettings(sampling_rate_features=17)
-            
+
     async def start_run_function(
-        self, out_dir: str = "", experiment_name: str = "sub", websocket_manager_features=None
+        self,
+        out_dir: str = "",
+        experiment_name: str = "sub",
+        websocket_manager_features=None,
     ) -> None:
         # TODO: we should add a way to pass the output path and the foldername
         # Initialize the stream with as process with a queue that is passed to the stream
@@ -57,19 +60,21 @@ class PyNMState:
             else "",
             websocket_featues=websocket_manager_features,
         )
-        #self.logger.info("initialized run process")
+
+        # self.logger.info("initialized run process")
 
         # self.run_process.start()
 
-        #import time
-        #time.sleep(2)
-        #self.logger.info(f"Stream running: {self.stream.is_running}")
+        # import time
+        # time.sleep(2)
+        # self.logger.info(f"Stream running: {self.stream.is_running}")
+
 
     def setup_lsl_stream(
         self,
-        lsl_stream_name: str = None,
-        line_noise: float = None,
-        sampling_rate_features: float = None,
+        lsl_stream_name: str | None = None,
+        line_noise: float | None = None,
+        sampling_rate_features: float | None = None,
     ):
         from mne_lsl.lsl import resolve_streams
 
@@ -122,8 +127,8 @@ class PyNMState:
     def setup_offline_stream(
         self,
         file_path: str,
-        line_noise: float = None,
-        sampling_rate_features: float = None,
+        line_noise: float | None = None,
+        sampling_rate_features: float | None = None,
     ):
         data, sfreq, ch_names, ch_types, bads = read_mne_data(file_path)
 
@@ -149,3 +154,4 @@ class PyNMState:
             line_noise=line_noise,
             sampling_rate_features_hz=sampling_rate_features,
         )
+

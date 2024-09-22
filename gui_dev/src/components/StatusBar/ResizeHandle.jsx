@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useWebviewStore } from "@/stores";
-import styles from "./ResizeHandle.module.css";
 
 const ResizeIcon = (props) => (
   <svg
@@ -93,8 +92,8 @@ export const ResizeHandle = () => {
   }, [isResizing]);
 
   return (
-    <div ref={resizeHandleRef} className={styles.resizeHandle}>
-      <ResizeIcon className={styles.resizeIcon} />
+    <div ref={resizeHandleRef}>
+      <ResizeIcon />
     </div>
   );
 };

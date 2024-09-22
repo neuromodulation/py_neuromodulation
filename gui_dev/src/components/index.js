@@ -1,11 +1,8 @@
-export { Settings } from "./Settings/Settings";
-export { TextField } from "./TextField/TextField";
-export { Graph } from "./Graph/Graph";
-export { StatusBar } from "./StatusBar/StatusBar";
-export { Switch } from "./Switch/Switch";
-export { Sidebar, SidebarDrawer } from "./Sidebar/Sidebar";
-export { CollapsibleBox } from "./CollapsibleBox/CollapsibleBox";
-export { AppBar } from "./AppBar/AppBar";
-export { AppInfoModal } from "./AppInfoModal/AppInfoModal";
+export { AppBar } from "./AppBar";
+export { AppInfoModal } from "./AppInfoModal";
+export { CollapsibleBox } from "./CollapsibleBox";
 export { FileBrowser } from "./FileBrowser/FileBrowser";
+export { Graph } from "./Graph";
+export { Sidebar, SidebarDrawer } from "./Sidebar/Sidebar";
+export { StatusBar } from "./StatusBar/StatusBar";
 export { TitledBox } from "./TitledBox";

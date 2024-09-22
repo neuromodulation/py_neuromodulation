@@ -11,11 +11,19 @@ import {
   Routes,
   Navigate,
 } from "react-router-dom";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { Box, Stack, ThemeProvider } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import { AppBar, StatusBar } from "@/components";
-import { Dashboard, SourceSelection, Channels, Settings } from "@/pages";
-import styles from "./App.module.css";
+import {
+  Dashboard,
+  SourceSelection,
+  Channels,
+  Settings,
+  Decoding,
+} from "@/pages";
+import { theme } from "./theme";
+import { StreamSelector } from "@/pages/SourceSelection/StreamSelector";
+import { FileSelector } from "@/pages/SourceSelection/FileSelector";
 
 /**
  *
@@ -46,52 +54,36 @@ export const App = () => {
     };
   }, [connectSocket, disconnectSocket]);
 
-  const theme = createTheme({
-    palette: {
-      mode: "dark", // This sets the overall theme to dark mode
-      primary: {
-        main: "#1a73e8", // Change this to your preferred primary color
-      },
-      secondary: {
-        main: "#f4f4f4", // Light color for secondary elements
-      },
-      background: {
-        default: "#333", // Background color
-        paper: "#424242", // Background color for Paper components
-      },
-      text: {
-        primary: "#f4f4f4", // Text color
-        secondary: "#cccccc", // Slightly lighter text color
-      },
-    },
-    typography: {
-      fontFamily: '"Figtree", sans-serif', // Use the Figtree font globally
-    },
-  });
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-
       <Router>
-        <div className={styles.appContainer}>
+        <Stack height="100vh" width="100vw" overflow="hidden">
           <AppBar />
-          <div className={styles.appContent}>
+          <Box
+            sx={{
+              height: "100%",
+              overflow: "auto",
+              width: "100%",
+              p: 0,
+              m: 0,
+            }}
+          >
             <Routes>
-              <Route path="/" element={<Navigate to="/source" replace />} />
-              <Route
-                path="/source/"
-                element={<Navigate to="/source/file" replace />}
-              />
-              <Route exact path="/source/*" element={<SourceSelection />} />
-              <Route exact path="/channels" element={<Channels />} />
-              <Route exact path="/settings" element={<Settings />} />
-              <Route exact path="/dashboard" element={<Dashboard />} />
-              <Route exact path="/decoding" element={<Dashboard />} />
+              <Route index element={<Navigate to="/source" replace />} />
+              <Route path="source" element={<SourceSelection />}>
+                <Route index element={<Navigate to="/source/file" replace />} />
+                <Route path="file" element={<FileSelector />} />
+                <Route path="lsl" element={<StreamSelector />} />
+              </Route>
+              <Route path="channels" element={<Channels />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="decoding" element={<Decoding />} />
             </Routes>
-          </div>
+          </Box>
           <StatusBar />
-        </div>
+        </Stack>
       </Router>
     </ThemeProvider>
   );

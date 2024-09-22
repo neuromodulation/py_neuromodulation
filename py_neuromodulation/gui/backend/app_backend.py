@@ -1,12 +1,10 @@
-from email.policy import HTTP
-import tomllib
+import numpy as np
 import logging
 import importlib.metadata
 from datetime import datetime
 from pathlib import Path
 import os
 import time
-from contextlib import asynccontextmanager
 
 from fastapi import (
     FastAPI,
@@ -34,12 +32,20 @@ ALLOWED_EXTENSIONS = [".npy", ".vhdr", ".fif", ".edf", ".bdf"]
 
 class PyNMBackend(FastAPI):
     def __init__(
-        self, pynm_state: app_pynm.PyNMState, debug=False, fastapi_kwargs: dict = {}
+        self,
+        pynm_state: app_pynm.PyNMState,
+        debug=False,
+        dev=True,
+        fastapi_kwargs: dict = {},
     ) -> None:
         super().__init__(debug=debug, **fastapi_kwargs)
 
+        self.debug = debug
+        self.dev = dev
+
         # Use the FastAPI logger for the backend
         self.logger = logging.getLogger("uvicorn.error")
+        self.logger.warning(PYNM_DIR)
 
         # Configure CORS
         self.add_middleware(
@@ -55,21 +61,20 @@ class PyNMBackend(FastAPI):
 
         # Serve static files
         self.mount(
-            "",
-            StaticFiles(directory="py_neuromodulation/gui/frontend/", html=True),
+            "/",
+            StaticFiles(directory=PYNM_DIR / "gui" / "frontend", html=True),
             name="static",
         )
 
         self.pynm_state = pynm_state
         self.websocket_manager_rawdata = WebSocketManager()
         self.websocket_manager_features = WebSocketManager()
-    
+
     def push_features_to_frontend(self, feature_queue: Queue) -> None:
         while True:
-            time.sleep(0.002)  # NOTE: This should be adapted depending on the feature sampling rate
+            time.sleep(0.002) # NOTE: should be adapted depending on feature sampling rate
             if feature_queue.empty() is False:
                 self.logger.info("data in feature queue")
-                
                 features = feature_queue.get()
 
                 self.logger.info(f"Sending features: {features}")
@@ -89,7 +94,7 @@ class PyNMBackend(FastAPI):
 
         @self.get("/api/settings")
         async def get_settings():
-            return self.pynm_state.settings.model_dump()
+            return self.pynm_state.settings.process_for_frontend()
 
         @self.post("/api/settings")
         async def update_settings(data: dict):
@@ -113,17 +118,17 @@ class PyNMBackend(FastAPI):
             if action == "start":
                 # TODO: create out_dir and experiment_name text filds in frontend
                 await self.pynm_state.start_run_function(
-                    out_dir=data["out_dir"], experiment_name=data["experiment_name"], websocket_manager_features=self.websocket_manager_features
+                    out_dir=data["out_dir"],
+                    experiment_name=data["experiment_name"],
+                    websocket_manager_features=self.websocket_manager_features,
                 )
-
-
+                
                 # this also fails due to pickling error
                 # self.push_features_process = Process(
                 #     target=self.push_features_to_frontend,
                 #     args=(self.pynm_state.stream.feature_queue,),
                 # )
                 # self.push_features_process.start()
-                
 
             if action == "stop":
                 if self.pynm_state.stream.is_running is False:
@@ -237,6 +242,7 @@ class PyNMBackend(FastAPI):
         #######################
 
         @self.get("/api/app-info")
+        # TODO: fix this function
         async def get_app_info():
             metadata = importlib.metadata.metadata("py_neuromodulation")
             url_list = metadata.get_all("Project-URL")
@@ -367,13 +373,20 @@ class PyNMBackend(FastAPI):
             #     )
             #     return
 
-            await self.websocket_manager_rawdata.connect(websocket)  # NOTE: This needs to be done for features and raw data?
+            await self.websocket_manager_rawdata.connect(
+                websocket
+            )  # NOTE: This needs to be done for features and raw data?
             await self.websocket_manager_features.connect(websocket)
 
-        # #######################
-        # ### SPA ENTRY POINT ###
-        # #######################
-        @self.get("/{full_path:path}")
-        async def serve_spa(request, full_path: str):
-            # Serve the index.html for any path that doesn't match an API route
-            return FileResponse("frontend/index.html")
+        # # #######################
+        # # ### SPA ENTRY POINT ###
+        # # #######################
+        # if not self.dev:
+
+        #     @self.get("/app/{full_path:path}")
+        #     async def serve_spa(request, full_path: str):
+        #         # Serve the index.html for any path that doesn't match an API route
+        #         print(Path.cwd())
+        #         return FileResponse("frontend/index.html")
+
+

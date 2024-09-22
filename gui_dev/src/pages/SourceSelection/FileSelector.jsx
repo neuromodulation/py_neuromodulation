@@ -1,24 +1,32 @@
-import { Box, Paper, Button, Typography } from "@mui/material";
+import { Paper, Button, Typography } from "@mui/material";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useSessionStore } from "@/stores";
 
 import { FileBrowser, TitledBox } from "@/components";
 
 export const FileSelector = () => {
-  const {
-    fileSource,
-    setFileSource,
-    setIsSourceValid,
-    initializeOfflineStream,
-    streamSetupMessage,
-    isStreamSetupCorrect,
-  } = useSessionStore();
+  const fileSource = useSessionStore((state) => state.fileSource);
+  const setFileSource = useSessionStore((state) => state.setFileSource);
+  const initializeOfflineStream = useSessionStore(
+    (state) => state.initializeOfflineStream
+  );
+  const streamSetupMessage = useSessionStore(
+    (state) => state.streamSetupMessage
+  );
+  const isStreamSetupCorrect = useSessionStore(
+    (state) => state.isStreamSetupCorrect
+  );
+  const setSourceType = useSessionStore((state) => state.setSourceType);
 
   const fileBrowserDirRef = useRef("C:/dev/");
 
   const [isSelecting, setIsSelecting] = useState(false);
   const [showFileBrowser, setShowFileBrowser] = useState(false);
+
+  useEffect(() => {
+    setSourceType("lsl");
+  }, []);
 
   const handleSelectFile = () => {
     setShowFileBrowser(true);
@@ -43,16 +51,7 @@ export const FileSelector = () => {
   };
 
   return (
-    <TitledBox
-      title="Read data from file"
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 2,
-      }}
-    >
+    <TitledBox title="Read data from file">
       <Button
         variant="contained"
         onClick={handleSelectFile}

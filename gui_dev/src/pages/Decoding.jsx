@@ -1,17 +1,14 @@
-import styles from "./Decoding.module.css";
+import { Box } from "@mui/material";
 
 export const Decoding = () => (
-    <div className={styles.dashboardContainer}>
-      <Sidebar>
-        <SidebarDrawer name="settings">
-          <Settings />
-        </SidebarDrawer>
-        <SidebarDrawer name="another">
-          <div>Test</div>
-        </SidebarDrawer>
-      </Sidebar>
-      <div className={styles.dashboard}>
-        <Graph />
-      </div>
-    </div>
-  );
+  <Box
+    display="flex"
+    width="100%"
+    height="100%"
+    flexDirection="column"
+    alignItems="center"
+    justifyContent="center"
+  >
+    Not implemented
+  </Box>
+);

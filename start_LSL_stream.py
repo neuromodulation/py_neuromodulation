@@ -32,10 +32,10 @@ import multiprocessing as mp
 ) = io.read_BIDS_data(PATH_RUN=PATH_RUN)
 
 if __name__ == "__main__":
-
     PATH_VHDR = "/Users/Timon/Documents/py-neurmodulation_merge/py_neuromodulation/py_neuromodulation/data/sub-testsub/ses-EphysMedOff/ieeg/sub-testsub_ses-EphysMedOff_task-gripforce_run-0_ieeg.vhdr"
-#    data, sfreq, ch_names, ch_types, bads = io.read_mne_data(PATH_VHDR)
-    (raw_arr,
+    #    data, sfreq, ch_names, ch_types, bads = io.read_mne_data(PATH_VHDR)
+    (
+        raw_arr,
         data,
         sfreq,
         line_noise,
@@ -52,7 +52,6 @@ if __name__ == "__main__":
     )
 
     settings = nm.NMSettings.get_fast_compute()
-    
 
     stream = nm.Stream(
         settings=settings,
@@ -62,9 +61,7 @@ if __name__ == "__main__":
         line_noise=50,
     )
 
-
     features = asyncio.run(stream.run(data, save_csv=True))
-
 
     player = LSLOfflinePlayer(raw=raw, stream_name="example_stream")
 
@@ -75,5 +72,3 @@ if __name__ == "__main__":
     # check functionality of stream: do features end up in the queue?
 
     # are queue values put through websocket
-    
-    

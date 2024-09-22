@@ -206,14 +206,14 @@ class Stream:
         save_csv: bool = False,
         save_interval: int = 10,
         return_df: bool = True,
-        #feature_queue: "multiprocessing.Queue | None"  = None,
-        stream_handling_queue : "multiprocessing.Queue | None" =  None,
+        # feature_queue: "multiprocessing.Queue | None"  = None,
+        stream_handling_queue: "multiprocessing.Queue | None" = None,
         websocket_featues: "WebSocketManager | None" = None,
     ):
         self.is_stream_lsl = is_stream_lsl
         self.stream_lsl_name = stream_lsl_name
         self.stream_handling_queue = stream_handling_queue
-        #self.feature_queue = feature_queue
+        # self.feature_queue = feature_queue
         self.save_csv = save_csv
         self.save_interval = save_interval
         self.return_df = return_df
@@ -307,7 +307,9 @@ class Stream:
             )
 
             feature_dict["time"] = (
-                batch_length if self.is_stream_lsl else np.ceil(this_batch_end * 1000 + 1)
+                batch_length
+                if self.is_stream_lsl
+                else np.ceil(this_batch_end * 1000 + 1)
             )
 
             prev_batch_end = this_batch_end
@@ -324,8 +326,9 @@ class Stream:
 
             self.db.insert_data(feature_dict)
 
-            #if self.feature_queue is not None:
+            # if self.feature_queue is not None:
             #    self.feature_queue.put(feature_dict)
+            
             if websocket_featues is not None:
                 await websocket_featues.send_message(feature_dict)
             self.batch_count += 1

@@ -3,8 +3,6 @@ import time
 import logging
 import requests
 
-from py_neuromodulation import PYNM_DIR
-
 from .app_utils import ansi_color, ansi_reset
 
 from typing import TYPE_CHECKING
@@ -15,9 +13,8 @@ if TYPE_CHECKING:
 DEV = True
 
 VITE_URL = "http://localhost:54321"
-FRONTEND_PATH = PYNM_DIR / "gui" / "frontend"
-APP_URL = VITE_URL if DEV else str(FRONTEND_PATH / "index.html")
-WELCOME_URL = str(FRONTEND_PATH / "welcome")
+FASTAPI_URL = "http://localhost:50001"
+APP_URL = VITE_URL if DEV else FASTAPI_URL
 
 USER_AGENT = "PyNmWebView"
 
@@ -31,7 +28,7 @@ class WebViewWindow:
 
         self.window = webview.create_window(
             title="PyNeuromodulation GUI",
-            url=VITE_URL,
+            url=APP_URL,
             min_size=(1200, 800),
             frameless=True,
             resizable=True,
@@ -40,7 +37,6 @@ class WebViewWindow:
         )
 
         self.api.register_window(self.window)
-
         # Customize PyWebView logging format
         color = ansi_color(color="CYAN", styles=["BOLD"])
         logger = logging.getLogger("pywebview")

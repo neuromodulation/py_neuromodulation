@@ -61,7 +61,6 @@ dependencies = [
   "fastapi",
   "uvicorn>=0.30.6",
   "websockets>=13.0",
-  "toml>=0.10.2",
   "seaborn >= 0.11",
 ]
 
