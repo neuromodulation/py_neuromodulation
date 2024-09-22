@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import numpy as np
 from multiprocessing import Process, Queue
@@ -49,7 +50,7 @@ class PyNMState:
         #         else "",
         #     },
         # )
-
+        #asyncio.run(
         await self.stream.run(
             out_dir=out_dir,
             experiment_name=experiment_name,
@@ -138,6 +139,7 @@ class PyNMState:
             bads=bads,
             reference=None,
             used_types=["eeg", "ecog", "dbs", "seeg"],
+            target_keywords=None,
         )
 
         self.settings: NMSettings = NMSettings(

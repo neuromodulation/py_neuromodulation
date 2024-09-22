@@ -32,36 +32,47 @@ import multiprocessing as mp
 ) = io.read_BIDS_data(PATH_RUN=PATH_RUN)
 
 if __name__ == "__main__":
-    PATH_VHDR = "/Users/Timon/Documents/py-neurmodulation_merge/py_neuromodulation/py_neuromodulation/data/sub-testsub/ses-EphysMedOff/ieeg/sub-testsub_ses-EphysMedOff_task-gripforce_run-0_ieeg.vhdr"
-    #    data, sfreq, ch_names, ch_types, bads = io.read_mne_data(PATH_VHDR)
-    (
-        raw_arr,
-        data,
-        sfreq,
-        line_noise,
-        coord_list,
-        coord_names,
-    ) = io.read_BIDS_data(PATH_RUN=PATH_RUN)
+    # PATH_VHDR = "/Users/Timon/Documents/py-neurmodulation_merge/py_neuromodulation/py_neuromodulation/data/sub-testsub/ses-EphysMedOff/ieeg/sub-testsub_ses-EphysMedOff_task-gripforce_run-0_ieeg.vhdr"
+    
+    # data, sfreq, ch_names, ch_types, bads = io.read_mne_data(PATH_VHDR)
 
-    channels = set_channels(
-        ch_names=raw_arr.ch_names,
-        ch_types=raw_arr.get_channel_types(),
-        bads=None,
-        reference=None,
-        used_types=["eeg", "ecog", "dbs", "seeg"],
-    )
+    # channels = set_channels(
+    #     ch_names=ch_names,
+    #     ch_types=ch_types,
+    #     bads=bads,
+    #     reference=None,
+    #     used_types=["eeg", "ecog", "dbs", "seeg"],
+    #     target_keywords=None,
+    # )
+    
+    # (
+    #     raw_arr,
+    #     data,
+    #     sfreq,
+    #     line_noise,
+    #     coord_list,
+    #     coord_names,
+    # ) = io.read_BIDS_data(PATH_RUN=PATH_RUN)
 
-    settings = nm.NMSettings.get_fast_compute()
+    # channels = set_channels(
+    #     ch_names=raw_arr.ch_names,
+    #     ch_types=raw_arr.get_channel_types(),
+    #     bads=None,
+    #     reference=None,
+    #     used_types=["eeg", "ecog", "dbs", "seeg"],
+    # )
 
-    stream = nm.Stream(
-        settings=settings,
-        channels=channels,
-        verbose=True,
-        sfreq=sfreq,
-        line_noise=50,
-    )
+    # settings = nm.NMSettings.get_fast_compute()
 
-    features = asyncio.run(stream.run(data, save_csv=True))
+    # stream = nm.Stream(
+    #     settings=settings,
+    #     channels=channels,
+    #     verbose=True,
+    #     sfreq=sfreq,
+    #     line_noise=50,
+    # )
+
+    # features = asyncio.run(stream.run(data, save_csv=True))
 
     player = LSLOfflinePlayer(raw=raw, stream_name="example_stream")
 

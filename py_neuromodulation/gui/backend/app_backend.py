@@ -117,6 +117,8 @@ class PyNMBackend(FastAPI):
             action = data["action"]
             if action == "start":
                 # TODO: create out_dir and experiment_name text filds in frontend
+                self.logger.info("websocket:")
+                self.logger.info(self.websocket_manager_features)
                 await self.pynm_state.start_run_function(
                     out_dir=data["out_dir"],
                     experiment_name=data["experiment_name"],
