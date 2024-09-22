@@ -196,7 +196,7 @@ class Stream:
             )
         return data.to_numpy().transpose()
 
-    def run(
+    async def run(
         self,
         data: "np.ndarray | pd.DataFrame | None" = None,
         out_dir: _PathLike = "",
@@ -206,13 +206,14 @@ class Stream:
         save_csv: bool = False,
         save_interval: int = 10,
         return_df: bool = True,
-        feature_queue: "multiprocessing.Queue | None"  = None,
+        #feature_queue: "multiprocessing.Queue | None"  = None,
         stream_handling_queue : "multiprocessing.Queue | None" =  None,
+        websocket_featues: "WebSocketManager | None" = None,
     ):
         self.is_stream_lsl = is_stream_lsl
         self.stream_lsl_name = stream_lsl_name
         self.stream_handling_queue = stream_handling_queue
-        self.feature_queue = feature_queue
+        #self.feature_queue = feature_queue
         self.save_csv = save_csv
         self.save_interval = save_interval
         self.return_df = return_df
@@ -267,6 +268,7 @@ class Stream:
                 self.settings.sampling_rate_features_hz,
                 self.settings.segment_length_features_ms,
             )
+            nm.logger.info("Initializing RawDataGenerator")
         else:
             from py_neuromodulation.stream.mnelsl_stream import LSLStream
 
@@ -322,9 +324,10 @@ class Stream:
 
             self.db.insert_data(feature_dict)
 
-            if self.feature_queue is not None:
-                self.feature_queue.put(feature_dict)
-
+            #if self.feature_queue is not None:
+            #    self.feature_queue.put(feature_dict)
+            if websocket_featues is not None:
+                await websocket_featues.send_message(feature_dict)
             self.batch_count += 1
             if self.batch_count % self.save_interval == 0:
                 self.db.commit()
