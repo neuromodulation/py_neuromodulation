@@ -258,11 +258,11 @@ class Stream:
         nm.logger.log_to_file(out_dir)
 
         # Initialize mp.Pool for multiprocessing
-        self.pool = mp.Pool(processes=self.settings.n_jobs)
+        #self.pool = mp.Pool(processes=self.settings.n_jobs)
         # Set up shared memory for multiprocessing
-        self.shared_memory = mp.Array(ctypes.c_double, self.settings.n_jobs * self.settings.n_jobs)
+        #self.shared_memory = mp.Array(ctypes.c_double, self.settings.n_jobs * self.settings.n_jobs)
         # Set up multiprocessing semaphores
-        self.semaphore = mp.Semaphore(self.settings.n_jobs)
+        #self.semaphore = mp.Semaphore(self.settings.n_jobs)
         
         # Initialize generator
         self.generator: Iterator
@@ -339,7 +339,8 @@ class Stream:
             if websocket_featues is not None:
                 nm.logger.info("Sending message to Websocket")
                 #nm.logger.info(feature_dict)
-                await websocket_featues.send_message(feature_dict)
+                #await websocket_featues.send_cbor(feature_dict)
+                #await websocket_featues.send_message(feature_dict)
             self.batch_count += 1
             if self.batch_count % self.save_interval == 0:
                 self.db.commit()

@@ -33,7 +33,7 @@ class PyNMState:
         # The stream will then put the results in the queue
         # there should be another websocket in which the results are sent to the frontend
 
-        stream_handling_queue = Queue()
+        self.stream_handling_queue = Queue()
 
         self.logger.info("setup stream Process")
 
@@ -54,7 +54,7 @@ class PyNMState:
         await self.stream.run(
             out_dir=out_dir,
             experiment_name=experiment_name,
-            stream_handling_queue=stream_handling_queue,
+            stream_handling_queue=self.stream_handling_queue,
             is_stream_lsl=self.lsl_stream_name is not None,
             stream_lsl_name=self.lsl_stream_name
             if self.lsl_stream_name is not None

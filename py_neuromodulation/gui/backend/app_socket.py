@@ -41,7 +41,7 @@ class WebSocketManager:
         if self.active_connections:
             for connection in self.active_connections:
                 if type(message) is dict:
-                    await connection.send_json(json.dump(message))
+                    await connection.send_json(message)
                 elif type(message) is str:
                     await connection.send_text(message)
             self.logger.info(f"Message sent")

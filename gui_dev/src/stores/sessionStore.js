@@ -247,6 +247,54 @@ export const useSessionStore = createPersistStore("session", (set, get) => ({
     );
   },
 
+  startStream: async () => {
+    try {
+      console.log("Start Stream");
+
+      const response = await fetch("/api/stream-control", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // This needs to be adapted depending on the backend changes
+        body: JSON.stringify({ "action" : "start"}),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed start stream: ${await response.text()}`);
+      }
+
+      const result = await response.json();
+      console.log("Stream started:", result);
+    } catch (error) {
+      console.error("Failed to start stream:", error);
+    }
+  },
+
+  stopStream: async () => {
+    try {
+      console.log("Stop Stream");
+
+      const response = await fetch("/api/stream-control-stop", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // This needs to be adapted depending on the backend changes
+        body: JSON.stringify({ "action" : "stop"}),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed stopping stream: ${await response.text()}`);
+      }
+
+      const result = await response.json();
+      console.log("Stream Stopping:", result);
+    } catch (error) {
+      console.error("Failed to stop stream:", error);
+    }
+  },
+
   resetSession: () =>
     get().setStateAndSync({
       sourceType: null,
