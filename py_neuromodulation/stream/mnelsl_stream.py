@@ -34,7 +34,7 @@ class LSLStream:
         from mne_lsl.stream import StreamLSL
 
         self.stream: StreamLSL
-        #self.keyboard_interrupt = False
+        # self.keyboard_interrupt = False
 
         self.settings = settings
         self._n_seconds_wait_before_disconnect = 3
@@ -52,17 +52,19 @@ class LSLStream:
 
         if self.stream.sinfo is None:
             raise RuntimeError("Stream info is None. Check if the stream is running.")
+        else:
+            self.sinfo = self.stream.sinfo
 
         self.winsize = settings.segment_length_features_ms / self.stream.sinfo.sfreq
         self.sampling_interval = 1 / self.settings.sampling_rate_features_hz
 
         # If not running the generator when the escape key is pressed.
         self.headless: bool = not os.environ.get("DISPLAY")
-        #if not self.headless:
-            #from py_neuromodulation.utils.keyboard import KeyboardListener
+        # if not self.headless:
+        # from py_neuromodulation.utils.keyboard import KeyboardListener
 
-            #self.listener = KeyboardListener(("esc", self.set_keyboard_interrupt))
-            #self.listener.start()
+        # self.listener = KeyboardListener(("esc", self.set_keyboard_interrupt))
+        # self.listener.start()
 
     def get_next_batch(self) -> Iterator[tuple[np.ndarray, np.ndarray]]:
         self.last_time = time.time()
@@ -111,10 +113,10 @@ class LSLStream:
 
                 logger.info(f"Stream time: {timestamp[-1] - stream_start_time}")
 
-                #if not self.headless and self.keyboard_interrupt:
+                # if not self.headless and self.keyboard_interrupt:
                 #    logger.info("Keyboard interrupt")
                 #    self.listener.stop()
                 #    self.stream.disconnect()
 
-    #def set_keyboard_interrupt(self):
+    # def set_keyboard_interrupt(self):
     #    self.keyboard_interrupt = True

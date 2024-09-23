@@ -5,7 +5,7 @@ from py_neuromodulation.stream import (
 import os
 import asyncio
 
-from py_neuromodulation.utils import set_channels
+from py_neuromodulation.utils import create_channels
 
 from py_neuromodulation import io
 
@@ -33,7 +33,7 @@ import multiprocessing as mp
 
 if __name__ == "__main__":
     # PATH_VHDR = "/Users/Timon/Documents/py-neurmodulation_merge/py_neuromodulation/py_neuromodulation/data/sub-testsub/ses-EphysMedOff/ieeg/sub-testsub_ses-EphysMedOff_task-gripforce_run-0_ieeg.vhdr"
-    
+
     # data, sfreq, ch_names, ch_types, bads = io.read_mne_data(PATH_VHDR)
 
     # channels = set_channels(
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     #     used_types=["eeg", "ecog", "dbs", "seeg"],
     #     target_keywords=None,
     # )
-    
+
     # (
     #     raw_arr,
     #     data,

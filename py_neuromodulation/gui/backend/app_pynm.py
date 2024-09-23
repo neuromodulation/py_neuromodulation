@@ -1,10 +1,9 @@
-import asyncio
 import logging
 import numpy as np
-from multiprocessing import Process, Queue
+from multiprocessing import Queue
 
 from py_neuromodulation.stream import Stream, NMSettings
-from py_neuromodulation.utils import set_channels
+from py_neuromodulation.utils import create_channels
 from py_neuromodulation.utils.io import read_mne_data
 
 
@@ -26,9 +25,8 @@ class PyNMState:
         self,
         out_dir: str = "",
         experiment_name: str = "sub",
-        websocket_manager_features=None,
+        websocket_manager=None,
     ) -> None:
-        # TODO: we should add a way to pass the output path and the foldername
         # Initialize the stream with as process with a queue that is passed to the stream
         # The stream will then put the results in the queue
         # there should be another websocket in which the results are sent to the frontend
@@ -37,20 +35,6 @@ class PyNMState:
 
         self.logger.info("setup stream Process")
 
-        # self.run_process = Process(
-        #     target=self.stream.run,
-        #     kwargs={
-        #         "out_dir": out_dir,
-        #         "experiment_name": experiment_name,
-        #         "feature_queue": feature_queue,
-        #         "stream_handling_queue": stream_handling_queue,
-        #         "is_stream_lsl": self.lsl_stream_name is not None,
-        #         "stream_lsl_name": self.lsl_stream_name
-        #         if self.lsl_stream_name is not None
-        #         else "",
-        #     },
-        # )
-        #asyncio.run(
         await self.stream.run(
             out_dir=out_dir,
             experiment_name=experiment_name,
@@ -59,17 +43,8 @@ class PyNMState:
             stream_lsl_name=self.lsl_stream_name
             if self.lsl_stream_name is not None
             else "",
-            websocket_featues=websocket_manager_features,
+            websocket_featues=websocket_manager,
         )
-
-        # self.logger.info("initialized run process")
-
-        # self.run_process.start()
-
-        # import time
-        # time.sleep(2)
-        # self.logger.info(f"Stream running: {self.stream.is_running}")
-
 
     def setup_lsl_stream(
         self,
@@ -77,53 +52,14 @@ class PyNMState:
         line_noise: float | None = None,
         sampling_rate_features: float | None = None,
     ):
-        from mne_lsl.lsl import resolve_streams
+        self.logger.info(f"Attempting to connect to LSL stream: {lsl_stream_name}")
 
-        self.logger.info("resolving streams")
-        lsl_streams = resolve_streams()
-
-        for stream in lsl_streams:
-            if stream.name == lsl_stream_name:
-                self.logger.info(f"found stream {lsl_stream_name}")
-                # setup this stream
-                self.lsl_stream_name = lsl_stream_name
-
-                ch_names = stream.get_channel_names()
-                if ch_names is None:
-                    ch_names = ["ch" + str(i) for i in range(stream.n_channels)]
-                self.logger.info(f"channel names: {ch_names}")
-
-                ch_types = stream.get_channel_types()
-                if ch_types is None:
-                    ch_types = ["eeg" for i in range(stream.n_channels)]
-
-                self.logger.info(f"channel types: {ch_types}")
-
-                info_ = stream.get_channel_info()
-                self.logger.info(f"channel info: {info_}")
-
-                channels = set_channels(
-                    ch_names=ch_names,
-                    ch_types=ch_types,
-                    used_types=["eeg", "ecog", "dbs", "seeg"],
-                )
-                self.logger.info(channels)
-                sfreq = stream.sfreq
-
-                self.stream: Stream = Stream(
-                    sfreq=sfreq,
-                    line_noise=line_noise,
-                    channels=channels,
-                    sampling_rate_features_hz=sampling_rate_features,
-                )
-                self.logger.info("stream setup")
-                self.settings: NMSettings = NMSettings(sampling_rate_features=sfreq)
-                self.logger.info("settings setup")
-                break
-
-        if channels.shape[0] == 0:
-            self.logger.error(f"Stream {lsl_stream_name} not found")
-            raise ValueError(f"Stream {lsl_stream_name} not found")
+        self.stream: Stream = Stream(
+            line_noise=line_noise,
+            sampling_rate_features_hz=sampling_rate_features,
+            is_stream_lsl=True,
+            lsl_stream_name=lsl_stream_name,
+        )
 
     def setup_offline_stream(
         self,
@@ -133,7 +69,7 @@ class PyNMState:
     ):
         data, sfreq, ch_names, ch_types, bads = read_mne_data(file_path)
 
-        channels = set_channels(
+        channels = create_channels(
             ch_names=ch_names,
             ch_types=ch_types,
             bads=bads,
@@ -156,4 +92,3 @@ class PyNMState:
             line_noise=line_noise,
             sampling_rate_features_hz=sampling_rate_features,
         )
-

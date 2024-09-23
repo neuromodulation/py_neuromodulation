@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 _LFP_TYPES = ["seeg", "dbs", "lfp"]  # must be lower-case
 
 
-def set_channels(
+def create_channels(
     ch_names: list[str],
     ch_types: list[str],
     reference: list | str = "default",
@@ -250,8 +250,8 @@ def _get_default_references(
     return df
 
 
-def get_default_channels_from_data(
-    data: np.ndarray,
+def create_default_channels_from_data(
+    data: "np.ndarray | pd.DataFrame",
     car_rereferencing: bool = True,
 ):
     """Return default channels dataframe with
@@ -278,7 +278,15 @@ def get_default_channels_from_data(
     """
     import pandas as pd
 
-    ch_name = [f"ch{idx}" for idx in range(data.shape[0])]
+    if isinstance(data, np.ndarray):
+        ch_name = [f"ch{idx}" for idx in range(data.shape[0])]
+    elif isinstance(data, pd.DataFrame):
+        ch_name = data.columns.to_list()
+    else:
+        raise ValueError(
+            "get_default_channels_from_data only supports np.ndarray and pd.DataFrame"
+        )
+
     status = ["good" for _ in range(data.shape[0])]
     type_nm = ["ecog" for _ in range(data.shape[0])]
 

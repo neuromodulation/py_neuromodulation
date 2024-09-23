@@ -7,11 +7,14 @@ import numpy as np
 from py_neuromodulation.utils.types import _PathLike
 from py_neuromodulation.utils.logging import logger
 from py_neuromodulation import PYNM_DIR
+from mne.io._read_raw import _get_supported
 
 if TYPE_CHECKING:
     from mne_bids import BIDSPath
     from mne import io as mne_io
     import pandas as pd
+
+MNE_FORMATS = list(_get_supported().keys())
 
 
 def load_channels(

@@ -17,7 +17,7 @@ class LSLOfflinePlayer:
 
     def __init__(
         self,
-        stream_name: str | None = "lsl_offline_player",
+        stream_name: str = "lsl_offline_player",
         f_name: str | _PathLike = None,
         raw: mne.io.Raw | None = None,
         sfreq: int | float | None = None,

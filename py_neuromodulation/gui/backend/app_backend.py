@@ -12,7 +12,6 @@ from fastapi import (
     Query,
     WebSocket,
 )
-from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -71,7 +70,9 @@ class PyNMBackend(FastAPI):
 
     def push_features_to_frontend(self, feature_queue: Queue) -> None:
         while True:
-            time.sleep(0.002) # NOTE: should be adapted depending on feature sampling rate
+            time.sleep(
+                0.002
+            )  # NOTE: should be adapted depending on feature sampling rate
             if feature_queue.empty() is False:
                 self.logger.info("data in feature queue")
                 features = feature_queue.get()
@@ -231,7 +232,6 @@ class PyNMBackend(FastAPI):
         #######################
 
         @self.get("/api/app-info")
-        # TODO: fix this function
         async def get_app_info():
             metadata = importlib.metadata.metadata("py_neuromodulation")
             url_list = metadata.get_all("Project-URL")
@@ -353,25 +353,4 @@ class PyNMBackend(FastAPI):
         ###########################
         @self.websocket("/ws")
         async def websocket_endpoint(websocket: WebSocket):
-            # if self.websocket_manager.is_connected:
-            #     self.logger.info(
-            #         "WebSocket connection attempted while already connected"
-            #     )
-            #     await websocket.close(
-            #         code=1008, reason="Another client is already connected"
-            #     )
-            #     return
-
-            await self.websocket_manager.connect(websocket)  
-        # # #######################
-        # # ### SPA ENTRY POINT ###
-        # # #######################
-        # if not self.dev:
-
-        #     @self.get("/app/{full_path:path}")
-        #     async def serve_spa(request, full_path: str):
-        #         # Serve the index.html for any path that doesn't match an API route
-        #         print(Path.cwd())
-        #         return FileResponse("frontend/index.html")
-
-
+            await self.websocket_manager.connect(websocket)

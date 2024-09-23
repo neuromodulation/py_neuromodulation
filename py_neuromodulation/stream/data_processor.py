@@ -229,7 +229,7 @@ class DataProcessor:
             coord_list=coord_list,  # type: ignore # None case handled above
         )
 
-    def process(self, data: np.ndarray) -> dict[str, float]:
+    def process(self, data: np.ndarray) -> dict[str, np.float64]:
         """Given a new data batch, calculate and return features.
 
         Parameters

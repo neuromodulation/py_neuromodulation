@@ -54,7 +54,7 @@ settings = nm.NMSettings.get_fast_compute()
 
 settings.postprocessing.project_cortex = True
 
-channels = nm.utils.set_channels(
+channels = nm.utils.create_channels(
     ch_names=raw.ch_names,
     ch_types=raw.get_channel_types(),
     reference="default",
@@ -65,6 +65,8 @@ channels = nm.utils.set_channels(
 )
 
 stream = nm.Stream(
+    data=data[:, : int(sfreq * 5)],
+    experiment_name=RUN_NAME,
     sfreq=sfreq,
     channels=channels,
     settings=settings,
@@ -75,9 +77,7 @@ stream = nm.Stream(
 )
 
 features = stream.run(
-    data=data[:, : int(sfreq * 5)],
     out_dir=PATH_OUT,
-    experiment_name=RUN_NAME,
     save_csv=True,
 )
 

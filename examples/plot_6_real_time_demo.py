@@ -95,6 +95,7 @@ print(
 print("Computation time for single ECoG channel: ")
 data = np.random.random([1, 1000])
 stream = nm.Stream(sfreq=1000, data=data, sampling_rate_features_hz=10, verbose=False)
+
 print(
     f"{np.round(timeit.timeit(lambda: stream.data_processor.process(data), number=10)/10, 3)} s"
 )

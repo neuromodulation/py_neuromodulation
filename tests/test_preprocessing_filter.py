@@ -17,12 +17,11 @@ def test_preprocessing_within_pipeline(
     stream.settings.preprocessing_filter.lowpass_filter = True
     stream.settings.preprocessing_filter.highpass_filter = True
 
+    stream.data = data[:, : int(stream.sfreq * 2)]
+    stream.experiment_name = "test_preprocessing_within_pipeline"
+
     try:
-        _ = stream.run(
-            data[:, : int(stream.sfreq * 2)],
-            out_dir="./test_data",
-            experiment_name="test_preprocessing_within_pipeline",
-        )
+        _ = stream.run(out_dir="./test_data")
     except Exception as e:
         assert False, f"Error in pipeline including preprocess filtering : {e}"
 

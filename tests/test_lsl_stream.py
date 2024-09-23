@@ -2,6 +2,8 @@ from mne_lsl.stream import StreamLSL
 import numpy as np
 import pytest
 import time
+from py_neuromodulation.utils import create_channels
+from py_neuromodulation.stream import NMSettings, Stream
 
 
 @pytest.mark.parametrize("setup_lsl_player", ["search"], indirect=True)
@@ -16,24 +18,36 @@ def test_lsl_stream_search(setup_lsl_player):
 
 
 @pytest.mark.parametrize("setup_lsl_player", ["offline_test"], indirect=True)
-def test_offline_lsl(
-    setup_default_stream_fast_compute, setup_lsl_player, setup_default_data
-):
-    """ " Test the offline lsl player and stream, checking for sfreq, channel types and channel names."""
+def test_offline_lsl(setup_lsl_player, setup_default_data):
+    """ " Test the offline lsl player and stre  am, checking for sfreq, channel types and channel names."""
 
-    raw, data, sfreq = setup_default_data
+    raw, data, _ = setup_default_data
     player = setup_lsl_player
     player.start_player()
 
-    data, stream = setup_default_stream_fast_compute
-
-    features = stream.run(
-        is_stream_lsl=True,
-        plot_lsl=False,
-        stream_lsl_name="offline_test",
-        out_dir="./test_data",
-        experiment_name="test_offline_lsl",
+    channels = create_channels(
+        ch_names=raw.ch_names,
+        ch_types=raw.get_channel_types(),
+        reference="default",
+        bads=raw.info["bads"],
+        new_names="default",
+        used_types=("ecog", "dbs", "seeg"),
+        target_keywords=("MOV_RIGHT_CLEAN",),
     )
+
+    stream = Stream(
+        data=data,
+        is_stream_lsl=True,
+        stream_lsl_name="offline_test",
+        experiment_name="test_offline_lsl",
+        settings=NMSettings().get_fast_compute(),
+        channels=channels,
+        path_grids=None,
+        verbose=True,
+    )
+
+    features = stream.run(out_dir="./test_data")
+
     # check sfreq
     if not raw.info["sfreq"] == stream.sfreq:
         raise ValueError(

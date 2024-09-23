@@ -3,14 +3,26 @@
 from typing import TYPE_CHECKING
 from collections.abc import Iterator
 import numpy as np
+import pandas as pd
 from pathlib import Path
 
-import py_neuromodulation as nm
+import multiprocessing as mp
 from contextlib import suppress
 
 from py_neuromodulation.stream.data_processor import DataProcessor
-from py_neuromodulation.utils.types import _PathLike, FeatureName
+from py_neuromodulation.utils.io import MNE_FORMATS, read_mne_data
+from py_neuromodulation.utils.types import _PathLike
 from py_neuromodulation.stream.settings import NMSettings
+from py_neuromodulation.features import USE_FREQ_RANGES
+from py_neuromodulation.utils import (
+    logger,
+    create_default_channels_from_data,
+    load_channels,
+    save_features,
+    create_channels,
+)
+from py_neuromodulation.gui.backend.app_socket import WebSocketManager
+from py_neuromodulation import PYNM_DIR
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -27,17 +39,17 @@ class Stream:
 
     def __init__(
         self,
-        sfreq: float,
+        data: "np.ndarray | pd.DataFrame | _PathLike | None" = None,
+        sfreq: float | None = None,
+        experiment_name: str = "sub",
         channels: "pd.DataFrame | _PathLike | None" = None,
-        data: "np.ndarray | pd.DataFrame | None" = None,
+        is_stream_lsl: bool = False,
+        stream_lsl_name: str | None = None,
         settings: NMSettings | _PathLike | None = None,
         line_noise: float | None = 50,
         sampling_rate_features_hz: float | None = None,
         path_grids: _PathLike | None = None,
         coord_names: list | None = None,
-        stream_name: str
-        | None = "example_stream",  # Timon: do we need those in the nmstream_abc?
-        is_stream_lsl: bool = False,
         coord_list: list | None = None,
         verbose: bool = True,
     ) -> None:
@@ -67,81 +79,151 @@ class Stream:
         verbose : bool, optional
             print out stream computation time information, by default True
         """
+        # Input params
+        self.path_grids = path_grids
+        self.verbose = verbose
+        self.line_noise = line_noise
+        self.coord_names = coord_names
+        self.coord_list = coord_list
+        self.experiment_name = experiment_name
+        self.data = data
         self.settings: NMSettings = NMSettings.load(settings)
+        self.is_stream_lsl = is_stream_lsl
+        self.stream_lsl_name = stream_lsl_name
 
-        if channels is None and data is not None:
-            channels = nm.utils.channels.get_default_channels_from_data(data)
-
-        if channels is not None:
-            self.channels = nm.io.load_channels(channels)
-
-        if self.channels.query("used == 1 and target == 0").shape[0] == 0:
-            raise ValueError(
-                "No channels selected for analysis that have column 'used' = 1 and 'target' = 0. Please check your channels"
-            )
-
-        if channels is None and data is None:
-            raise ValueError("Either `channels` or `data` must be passed to `Stream`.")
-
-        # If features that use frequency ranges are on, test them against nyquist frequency
-        use_freq_ranges: list[FeatureName] = [
-            "bandpass_filter",
-            "stft",
-            "fft",
-            "welch",
-            "bursts",
-            "coherence",
-            "nolds",
-            "bispectrum",
-        ]
-
-        need_nyquist_check = any(
-            (f in use_freq_ranges for f in self.settings.features.get_enabled())
-        )
-
-        if need_nyquist_check:
-            assert all(
-                fb.frequency_high_hz < sfreq / 2
-                for fb in self.settings.frequency_ranges_hz.values()
-            ), (
-                "If a feature that uses frequency ranges is selected, "
-                "the frequency band ranges need to be smaller than the nyquist frequency.\n"
-                f"Got sfreq = {sfreq} and fband ranges:\n {self.settings.frequency_ranges_hz}"
-            )
+        self.sess_right = None
+        self.projection = None
+        self.model = None
 
         if sampling_rate_features_hz is not None:
             self.settings.sampling_rate_features_hz = sampling_rate_features_hz
 
         if path_grids is None:
-            path_grids = nm.PYNM_DIR
+            path_grids = PYNM_DIR
 
-        self.path_grids = path_grids
-        self.verbose = verbose
-        self.sfreq = sfreq
-        self.line_noise = line_noise
-        self.coord_names = coord_names
-        self.coord_list = coord_list
-        self.sess_right = None
-        self.projection = None
-        self.model = None
+        # Set up some flags for stream processing later
         self.is_running = False
-
-        # TODO(toni): is it necessary to initialize the DataProcessor on stream init?
-        # timon: yes, I think so, because specific feature settings can thus be investigated?
-        self.data_processor = DataProcessor(
-            sfreq=self.sfreq,
-            settings=self.settings,
-            channels=self.channels,
-            path_grids=self.path_grids,
-            coord_names=coord_names,
-            coord_list=coord_list,
-            line_noise=line_noise,
-            verbose=self.verbose,
-        )
-
-        self.data = data
-
         self.target_idx_initialized: bool = False
+
+        # Validate input depending on stream type and initialize stream
+        self.generator: Iterator
+
+        if self.is_stream_lsl:
+            from py_neuromodulation.stream.mnelsl_stream import LSLStream
+
+            if self.stream_lsl_name is None:
+                logger.info(
+                    "No stream name specified. Will connect to the first available stream if it exists."
+                )
+
+            print(self.stream_lsl_name)
+            self.lsl_stream = LSLStream(
+                settings=self.settings, stream_name=self.stream_lsl_name
+            )
+
+            sinfo = self.lsl_stream.sinfo
+
+            # If no sampling frequency is specified in the stream, try to get it from the passed parameters
+            if sinfo.sfreq is None:
+                logger.info("No sampling frequency specified in LSL stream")
+                if sfreq is not None:
+                    logger.info("Using sampling frequency passed to Stream constructor")
+                else:
+                    raise ValueError(
+                        "No sampling frequency specified in stream and no sampling frequency passed to Stream constructor"
+                    )
+            else:
+                if sfreq is not None != sinfo.sfreq:
+                    logger.info(
+                        "Sampling frequency of the LSL stream does not match the passed sampling frequency."
+                    )
+                logger.info("Using sampling frequency of the LSL stream")
+                self.sfreq = sinfo.sfreq
+
+            # TONI: should we try to get channels from the passed "channels" parameter before generating default?
+
+            # Try to get channel names and types from the stream, if not generate default
+            ch_names = sinfo.get_channel_names() or [
+                "ch" + str(i) for i in range(sinfo.n_channels)
+            ]
+            ch_types = sinfo.get_channel_types() or [
+                "eeg" for i in range(sinfo.n_channels)
+            ]
+            self.channels = create_channels(
+                ch_names=ch_names,
+                ch_types=ch_types,
+                used_types=["eeg", "ecog", "dbs", "seeg"],
+            )
+
+            self.generator = self.lsl_stream.get_next_batch()
+
+        else:  # Data passed as array, dataframe or path to file
+            if data is None:
+                raise ValueError(
+                    "If is_stream_lsl is False, data must be passed to the Stream constructor"
+                )
+
+            # If channels passed to constructor, try to load them
+            self.channels = load_channels(channels) if channels is not None else None
+
+            if isinstance(self.data, (np.ndarray, pd.DataFrame)):
+                logger.info(f"Loading data from {type(data).__name__}")
+
+                if sfreq is None:
+                    raise ValueError(
+                        "sfreq must be specified when passing data as an array or dataframe"
+                    )
+
+                self.sfreq = sfreq
+
+                if self.channels is None:
+                    self.channels = create_default_channels_from_data(self.data)
+
+                self.data = self._handle_data(self.data)
+
+            elif isinstance(self.data, _PathLike):
+                # If data is a path, try to load it as an MNE supported file
+                logger.info("Loading data from file")
+                filepath = Path(self.data)  # type: ignore
+                ext = filepath.suffix
+
+                if ext in MNE_FORMATS:
+                    data, sfreq, ch_names, ch_types, bads = read_mne_data(filepath)
+                else:
+                    raise ValueError(f"Unsupported file format: {ext}")
+
+                if sfreq is None:
+                    raise ValueError(
+                        "Sampling frequency not specified in file, please specify sfreq as a parameters"
+                    )
+
+                self.sfreq = sfreq
+
+                self.channels = create_channels(
+                    ch_names=ch_names,
+                    ch_types=ch_types,
+                    used_types=["eeg", "ecog", "dbs", "seeg"],
+                    bads=bads,
+                )
+
+                # _handle_data requires the channels to be set
+                self.data = self._handle_data(data)
+
+            else:
+                raise ValueError(
+                    "Data must be either a numpy array, a pandas DataFrame, or a path to an MNE supported file"
+                )
+
+            from py_neuromodulation.stream.generator import RawDataGenerator
+
+            self.generator: Iterator = RawDataGenerator(
+                self.data,
+                self.sfreq,
+                self.settings.sampling_rate_features_hz,
+                self.settings.segment_length_features_ms,
+            )
+
+        self._initialize_data_processor()
 
     def _add_target(self, feature_dict: dict, data: np.ndarray) -> None:
         """Add target channels to feature series.
@@ -158,6 +240,8 @@ class Stream:
         dict
             feature dict with target channels added
         """
+        if not (isinstance(self.channels, pd.DataFrame)):
+            raise ValueError("Channels must be a pandas DataFrame")
 
         if self.channels["target"].sum() > 0:
             if not self.target_idx_initialized:
@@ -170,67 +254,46 @@ class Stream:
             for target_idx, target_name in zip(self.target_indexes, self.target_names):
                 feature_dict[target_name] = data[target_idx, -1]
 
-    def _handle_data(self, data: "np.ndarray | pd.DataFrame") -> np.ndarray:
-        names_expected = self.channels["name"].to_list()
-
-        if isinstance(data, np.ndarray):
-            if not len(names_expected) == data.shape[0]:
-                raise ValueError(
-                    "If data is passed as an array, the first dimension must"
-                    " match the number of channel names in `channels`.\n"
-                    f" Number of data channels (data.shape[0]): {data.shape[0]}\n"
-                    f' Length of channels["name"]: {len(names_expected)}.'
-                )
-            return data
-
-        names_data = data.columns.to_list()
-        if not (
-            len(names_expected) == len(names_data)
-            and sorted(names_expected) == sorted(names_data)
-        ):
-            raise ValueError(
-                "If data is passed as a DataFrame, the"
-                "column names must match the channel names in `channels`.\n"
-                f"Input dataframe column names: {names_data}\n"
-                f'Expected (from channels["name"]): : {names_expected}.'
-            )
-        return data.to_numpy().transpose()
-
-    async def run(
+    def run(
         self,
-        data: "np.ndarray | pd.DataFrame | None" = None,
         out_dir: _PathLike = "",
-        experiment_name: str = "sub",
-        is_stream_lsl: bool = False,
-        stream_lsl_name: str | None = None,
         save_csv: bool = False,
         save_interval: int = 10,
         return_df: bool = True,
-        # feature_queue: "multiprocessing.Queue | None"  = None,
-        stream_handling_queue: "multiprocessing.Queue | None" = None,
-        websocket_featues: "WebSocketManager | None" = None,
+        stream_handling_queue: "mp.Queue | None" = None,
+        websocket_featues: WebSocketManager | None = None,
     ):
-        self.is_stream_lsl = is_stream_lsl
-        self.stream_lsl_name = stream_lsl_name
+        # Check that at least one channel is selected for analysis
+        if self.channels.query("used == 1 and target == 0").shape[0] == 0:
+            raise ValueError(
+                "No channels selected for analysis that have column 'used' = 1 and 'target' = 0. Please check your channels"
+            )
+
+        # If features that use frequency ranges are on, test them against nyquist frequency
+        need_nyquist_check = any(
+            (f in USE_FREQ_RANGES for f in self.settings.features.get_enabled())
+        )
+
+        if need_nyquist_check:
+            assert all(
+                fb.frequency_high_hz < self.sfreq / 2
+                for fb in self.settings.frequency_ranges_hz.values()
+            ), (
+                "If a feature that uses frequency ranges is selected, "
+                "the frequency band ranges need to be smaller than the nyquist frequency.\n"
+                f"Got sfreq = {self.sfreq} and fband ranges:\n {self.settings.frequency_ranges_hz}"
+            )
+
         self.stream_handling_queue = stream_handling_queue
         # self.feature_queue = feature_queue
         self.save_csv = save_csv
         self.save_interval = save_interval
         self.return_df = return_df
 
-        # Validate input data
-        if data is not None:
-            data = self._handle_data(data)
-        elif self.data is not None:
-            data = self._handle_data(self.data)
-        elif self.data is None and data is None and self.is_stream_lsl is False:
-            raise ValueError("No data passed to run function.")
-
         # Generate output dirs
         self.out_dir_root = Path.cwd() if not out_dir else Path(out_dir)
-        self.out_dir = self.out_dir_root / experiment_name
+        self.out_dir = self.out_dir_root / self.experiment_name
         # TONI: Need better default experiment name
-        self.experiment_name = experiment_name if experiment_name else "sub"
 
         self.out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -238,61 +301,21 @@ class Stream:
         # TONI: we should give the user control over the save format
         from py_neuromodulation.utils.database import NMDatabase
 
-        self.db = NMDatabase(experiment_name, out_dir)  # Create output database
+        self.db = NMDatabase(self.experiment_name, out_dir)  # Create output database
 
         self.batch_count: int = 0  # Keep track of the number of batches processed
 
         # Reinitialize the data processor in case the nm_channels or nm_settings changed between runs of the same Stream
-        # TONI: then I think we can just not initialize the data processor in the init function
-        self.data_processor = DataProcessor(
-            sfreq=self.sfreq,
-            settings=self.settings,
-            channels=self.channels,
-            path_grids=self.path_grids,
-            coord_names=self.coord_names,
-            coord_list=self.coord_list,
-            line_noise=self.line_noise,
-            verbose=self.verbose,
-        )
+        self._initialize_data_processor()
 
-        nm.logger.log_to_file(out_dir)
+        logger.log_to_file(out_dir)
 
-        # Initialize mp.Pool for multiprocessing
-        self.pool = mp.Pool(processes=self.settings.n_jobs)
-        # Set up shared memory for multiprocessing
-        self.shared_memory = mp.Array(ctypes.c_double, self.settings.n_jobs * self.settings.n_jobs)
-        # Set up multiprocessing semaphores
-        self.semaphore = mp.Semaphore(self.settings.n_jobs)
-        
-        # Initialize generator
-        self.generator: Iterator
-        if not is_stream_lsl:
-            from py_neuromodulation.stream.generator import RawDataGenerator
-
-            self.generator = RawDataGenerator(
-                data,
-                self.sfreq,
-                self.settings.sampling_rate_features_hz,
-                self.settings.segment_length_features_ms,
-            )
-            nm.logger.info("Initializing RawDataGenerator")
-        else:
-            from py_neuromodulation.stream.mnelsl_stream import LSLStream
-
-            self.lsl_stream = LSLStream(
-                settings=self.settings, stream_name=stream_lsl_name
-            )
-
-            if self.sfreq != self.lsl_stream.stream.sinfo.sfreq:
-                error_msg = (
-                    f"Sampling frequency of the lsl-stream ({self.lsl_stream.stream.sinfo.sfreq}) "
-                    f"does not match the settings ({self.sfreq})."
-                    "The sampling frequency read from the stream will be used"
-                )
-                nm.logger.warning(error_msg)
-                self.sfreq = self.lsl_stream.stream.sinfo.sfreq
-
-            self.generator = self.lsl_stream.get_next_batch()
+        # # Initialize mp.Pool for multiprocessing
+        # self.pool = mp.Pool(processes=self.settings.n_jobs)
+        # # Set up shared memory for multiprocessing
+        # self.shared_memory = mp.Array(ctypes.c_double, self.settings.n_jobs * self.settings.n_jobs)
+        # # Set up multiprocessing semaphores
+        # self.semaphore = mp.Semaphore(self.settings.n_jobs)
 
         prev_batch_end = 0
         for timestamps, data_batch in self.generator:
@@ -309,7 +332,7 @@ class Stream:
 
             this_batch_end = timestamps[-1]
             batch_length = this_batch_end - prev_batch_end
-            nm.logger.debug(
+            logger.debug(
                 f"{batch_length:.3f} seconds of new data processed",
             )
 
@@ -322,7 +345,7 @@ class Stream:
             prev_batch_end = this_batch_end
 
             if self.verbose:
-                nm.logger.info("Time: %.2f", feature_dict["time"] / 1000)
+                logger.info("Time: %.2f", feature_dict["time"] / 1000)
 
             self._add_target(feature_dict, data_batch)
 
@@ -335,11 +358,11 @@ class Stream:
 
             # if self.feature_queue is not None:
             #    self.feature_queue.put(feature_dict)
-            
-            if websocket_featues is not None:
-                nm.logger.info("Sending message to Websocket")
-                #nm.logger.info(feature_dict)
-                await websocket_featues.send_message(feature_dict)
+
+            # if websocket_features is not None:
+            #     logger.info("Sending message to Websocket")
+            #     await websocket_featues.send_message(feature_dict)
+
             self.batch_count += 1
             if self.batch_count % self.save_interval == 0:
                 self.db.commit()
@@ -422,6 +445,56 @@ class Stream:
         if plot_psd:
             raw.compute_psd().plot()
 
+    def _handle_data(self, data: "np.ndarray | pd.DataFrame") -> np.ndarray:
+        """_summary_
+
+        Args:
+            data (np.ndarray | pd.DataFrame):
+        Raises:
+            ValueError: _description_
+            ValueError: _description_
+
+        Returns:
+            np.ndarray: _description_
+        """
+        names_expected = self.channels["name"].to_list()
+
+        if isinstance(data, np.ndarray):
+            if not len(names_expected) == data.shape[0]:
+                raise ValueError(
+                    "If data is passed as an array, the first dimension must"
+                    " match the number of channel names in `channels`.\n"
+                    f" Number of data channels (data.shape[0]): {data.shape[0]}\n"
+                    f' Length of channels["name"]: {len(names_expected)}.'
+                )
+            return data
+
+        names_data = data.columns.to_list()
+
+        if not (
+            len(names_expected) == len(names_data)
+            and sorted(names_expected) == sorted(names_data)
+        ):
+            raise ValueError(
+                "If data is passed as a DataFrame, the"
+                "column names must match the channel names in `channels`.\n"
+                f"Input dataframe column names: {names_data}\n"
+                f'Expected (from channels["name"]): : {names_expected}.'
+            )
+        return data.to_numpy().transpose()
+
+    def _initialize_data_processor(self) -> None:
+        self.data_processor = DataProcessor(
+            sfreq=self.sfreq,
+            settings=self.settings,
+            channels=self.channels,
+            path_grids=self.path_grids,
+            coord_names=self.coord_names,
+            coord_list=self.coord_list,
+            line_noise=self.line_noise,
+            verbose=self.verbose,
+        )
+
     def _save_after_stream(
         self,
         feature_arr: "pd.DataFrame | None" = None,
@@ -437,7 +510,7 @@ class Stream:
         self,
         feature_arr: "pd.DataFrame",
     ) -> None:
-        nm.io.save_features(feature_arr, self.out_dir, self.experiment_name)
+        save_features(feature_arr, self.out_dir, self.experiment_name)
 
     def _save_channels(self) -> None:
         self.data_processor.save_channels(self.out_dir, self.experiment_name)

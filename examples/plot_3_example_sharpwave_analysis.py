@@ -56,6 +56,8 @@ RUN_NAME, PATH_RUN, PATH_BIDS, PATH_OUT, datatype = nm.io.get_paths_example_data
     coord_names,
 ) = nm.io.read_BIDS_data(PATH_RUN=PATH_RUN)
 
+print(data.shape)
+
 # %%
 settings = NMSettings.get_fast_compute()
 
@@ -69,7 +71,7 @@ settings.sharpwave_analysis_settings.sharpwave_features.enable_all()
 for sw_feature in settings.sharpwave_analysis_settings.sharpwave_features.list_all():
     settings.sharpwave_analysis_settings.estimator["mean"].append(sw_feature)
 
-channels = nm.utils.set_channels(
+channels = nm.utils.create_channels(
     ch_names=raw.ch_names,
     ch_types=raw.get_channel_types(),
     reference="default",
@@ -79,7 +81,9 @@ channels = nm.utils.set_channels(
     target_keywords=["MOV_RIGHT"],
 )
 
-stream = nm.Stream(
+data_plt = data[5, 1000:4000]
+
+data_processor = nm.DataProcessor(
     sfreq=sfreq,
     channels=channels,
     settings=settings,
@@ -88,14 +92,12 @@ stream = nm.Stream(
     coord_names=coord_names,
     verbose=False,
 )
-sw_analyzer = cast(
-    SharpwaveAnalyzer, stream.data_processor.features.get_feature("sharpwave_analysis")
-)
+
+sw_analyzer = data_processor.features.get_feature("sharpwave_analysis")
+
 
 # %%
 # The plotted example time series, visualized on a short time scale, shows the relation of identified peaks, troughs, and estimated features:
-data_plt = data[5, 1000:4000]
-
 filtered_dat = fftconvolve(data_plt, sw_analyzer.list_filter[0][1], mode="same")
 
 troughs = signal.find_peaks(-filtered_dat, distance=10)[0]
@@ -297,6 +299,7 @@ channels["used"] = 0  # set only two ECoG channels for faster computation to tru
 channels.loc[[3, 8], "used"] = 1
 
 stream = nm.Stream(
+    data=data[:, :30000],
     sfreq=sfreq,
     channels=channels,
     settings=settings,
@@ -306,7 +309,7 @@ stream = nm.Stream(
     verbose=True,
 )
 
-df_features = stream.run(data=data[:, :30000], save_csv=True)
+df_features = stream.run(save_csv=True)
 
 # %%
 # We can then plot two exemplary features, prominence and interval, and see that the movement amplitude can be clustered with those two features alone:
