@@ -100,7 +100,7 @@ class PyNMBackend(FastAPI):
         async def update_settings(data: dict):
             try:
                 self.pynm_state.settings = NMSettings.model_validate(data)
-                self.logger.info(self.pynm_state.settings.features)
+                self.logger.debug(self.pynm_state.settings.features)
                 return self.pynm_state.settings.model_dump()
             except ValueError as e:
                 raise HTTPException(
