@@ -1,5 +1,29 @@
-import { TextField, Button, Box, Typography, IconButton } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Box,
+  Typography,
+  IconButton,
+  Stack,
+} from "@mui/material";
 import { Add, Close } from "@mui/icons-material";
+
+const NumberField = ({ ...props }) => (
+  <TextField
+    {...props}
+    sx={{
+      ...(props?.sx || {}),
+      /* Chrome, Safari, Edge, Opera */
+      "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
+        {
+          display: "none",
+        },
+      "& input[type=number]": {
+        MozAppearance: "textfield",
+      },
+    }}
+  />
+);
 
 export const FrequencyRange = ({ name, range, onChange, onRemove }) => {
   const handleChange = (field, value) => {
@@ -7,33 +31,36 @@ export const FrequencyRange = ({ name, range, onChange, onRemove }) => {
   };
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+    <Stack direction="row" alignItems="center" gap={1}>
       <TextField
         size="small"
         value={name}
+        fullWidth
         onChange={(e) => onChange(e.target.value, range, name)}
-        sx={{ mr: 1, width: "30%" }}
       />
-      <TextField
+      <NumberField
         size="small"
         type="number"
         value={range.frequency_low_hz}
         onChange={(e) => handleChange("frequency_low_hz", e.target.value)}
         label="Low Hz"
-        sx={{ mr: 1, width: "30%" }}
       />
-      <TextField
+      <NumberField
         size="small"
         type="number"
         value={range.frequency_high_hz}
         onChange={(e) => handleChange("frequency_high_hz", e.target.value)}
         label="High Hz"
-        sx={{ mr: 1, width: "30%" }}
       />
-      <IconButton onClick={() => onRemove(name)} color="error">
+      <IconButton
+        onClick={() => onRemove(name)}
+        color="primary"
+        disableRipple
+        sx={{ m: 0, p: 0 }}
+      >
         <Close />
       </IconButton>
-    </Box>
+    </Stack>
   );
 };
 
@@ -68,7 +95,7 @@ export const FrequencyRangeList = ({ ranges, onChange }) => {
   };
 
   return (
-    <Box>
+    <Stack>
       <Typography variant="h6" gutterBottom>
         Frequency Ranges
       </Typography>
@@ -89,6 +116,6 @@ export const FrequencyRangeList = ({ ranges, onChange }) => {
       >
         Add Range
       </Button>
-    </Box>
+    </Stack>
   );
 };
