@@ -45,14 +45,14 @@ export const App = () => {
   const connectSocket = useSocketStore((state) => state.connectSocket);
   const disconnectSocket = useSocketStore((state) => state.disconnectSocket);
 
-  useEffect(() => {
-    console.log("Connecting socket from App component...");
-    connectSocket();
-    return () => {
-      console.log("Disconnecting socket from App component...");
-      disconnectSocket();
-    };
-  }, [connectSocket, disconnectSocket]);
+  // useEffect(() => {
+  //   console.log("Connecting socket from App component...");
+  //   connectSocket();
+  //   return () => {
+  //     console.log("Disconnecting socket from App component...");
+  //     disconnectSocket();
+  //   };
+  // }, [connectSocket, disconnectSocket]);
 
   return (
     <ThemeProvider theme={theme}>

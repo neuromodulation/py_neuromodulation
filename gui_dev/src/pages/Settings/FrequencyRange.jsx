@@ -1,88 +1,94 @@
-import { useState } from "react";
+import { TextField, Button, Box, Typography, IconButton } from "@mui/material";
+import { Add, Close } from "@mui/icons-material";
 
-// const onChange = (key, newValue) => {
-//   settings.frequencyRanges[key] = newValue;
-// };
-
-// Object.entries(settings.frequencyRanges).map(([key, value]) => (
-//   <FrequencySettings key={key} freqRange={value} onChange={onChange} />
-// ));
-
-/** */
-
-/**
- *
- * @param {String} key
- * @param {Array} freqRange
- * @param {Function} onChange
- * @returns
- */
-export const FrequencyRange = ({ settings }) => {
-  const [frequencyRanges, setFrequencyRanges] = useState(settings || {});
-  // Handle changes in the text fields
-  const handleInputChange = (label, key, newValue) => {
-    setFrequencyRanges((prevState) => ({
-      ...prevState,
-      [label]: {
-        ...prevState[label],
-        [key]: newValue,
-      },
-    }));
-  };
-
-  // Add a new band
-  const addBand = () => {
-    const newLabel = `Band ${Object.keys(frequencyRanges).length + 1}`;
-    setFrequencyRanges((prevState) => ({
-      ...prevState,
-      [newLabel]: { frequency_high_hz: "", frequency_low_hz: "" },
-    }));
-  };
-
-  // Remove a band
-  const removeBand = (label) => {
-    const updatedRanges = { ...frequencyRanges };
-    delete updatedRanges[label];
-    setFrequencyRanges(updatedRanges);
+export const FrequencyRange = ({ name, range, onChange, onRemove }) => {
+  const handleChange = (field, value) => {
+    onChange(name, { ...range, [field]: value });
   };
 
   return (
-    <div>
-      <div>Frequency Bands</div>
-      {Object.keys(frequencyRanges).map((label) => (
-        <div key={label}>
-          <input
-            type="text"
-            value={label}
-            onChange={(e) => {
-              const newLabel = e.target.value;
-              const updatedRanges = { ...frequencyRanges };
-              updatedRanges[newLabel] = updatedRanges[label];
-              delete updatedRanges[label];
-              setFrequencyRanges(updatedRanges);
-            }}
-            placeholder="Band Name"
-          />
-          <input
-            type="text"
-            value={frequencyRanges[label].frequency_high_hz}
-            onChange={(e) =>
-              handleInputChange(label, "frequency_high_hz", e.target.value)
-            }
-            placeholder="High Hz"
-          />
-          <input
-            type="text"
-            value={frequencyRanges[label].frequency_low_hz}
-            onChange={(e) =>
-              handleInputChange(label, "frequency_low_hz", e.target.value)
-            }
-            placeholder="Low Hz"
-          />
-          <button onClick={() => removeBand(label)}>–</button>
-        </div>
+    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+      <TextField
+        size="small"
+        value={name}
+        onChange={(e) => onChange(e.target.value, range, name)}
+        sx={{ mr: 1, width: "30%" }}
+      />
+      <TextField
+        size="small"
+        type="number"
+        value={range.frequency_low_hz}
+        onChange={(e) => handleChange("frequency_low_hz", e.target.value)}
+        label="Low Hz"
+        sx={{ mr: 1, width: "30%" }}
+      />
+      <TextField
+        size="small"
+        type="number"
+        value={range.frequency_high_hz}
+        onChange={(e) => handleChange("frequency_high_hz", e.target.value)}
+        label="High Hz"
+        sx={{ mr: 1, width: "30%" }}
+      />
+      <IconButton onClick={() => onRemove(name)} color="error">
+        <Close />
+      </IconButton>
+    </Box>
+  );
+};
+
+export const FrequencyRangeList = ({ ranges, onChange }) => {
+  const handleChange = (newName, newRange, oldName = newName) => {
+    const updatedRanges = { ...ranges };
+    if (newName !== oldName) {
+      delete updatedRanges[oldName];
+    }
+    updatedRanges[newName] = newRange;
+    onChange(["frequency_ranges_hz"], updatedRanges);
+  };
+
+  const handleRemove = (name) => {
+    const updatedRanges = { ...ranges };
+    delete updatedRanges[name];
+    onChange(["frequency_ranges_hz"], updatedRanges);
+  };
+
+  const addRange = () => {
+    let newName = "NewRange";
+    let counter = 0;
+    while (ranges.hasOwnProperty(newName)) {
+      counter++;
+      newName = `NewRange${counter}`;
+    }
+    const updatedRanges = {
+      ...ranges,
+      [newName]: { frequency_low_hz: "", frequency_high_hz: "" },
+    };
+    onChange(["frequency_ranges_hz"], updatedRanges);
+  };
+
+  return (
+    <Box>
+      <Typography variant="h6" gutterBottom>
+        Frequency Ranges
+      </Typography>
+      {Object.entries(ranges).map(([name, range]) => (
+        <FrequencyRange
+          key={name}
+          name={name}
+          range={range}
+          onChange={handleChange}
+          onRemove={handleRemove}
+        />
       ))}
-      <button onClick={addBand}>+ Add Band</button>
-    </div>
+      <Button
+        variant="outlined"
+        startIcon={<Add />}
+        onClick={addRange}
+        sx={{ mt: 1 }}
+      >
+        Add Range
+      </Button>
+    </Box>
   );
 };

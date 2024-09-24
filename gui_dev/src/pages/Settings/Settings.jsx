@@ -1,4 +1,6 @@
+import { useState } from "react";
 import {
+  Box,
   Button,
   InputAdornment,
   Stack,
@@ -8,7 +10,7 @@ import {
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import { CollapsibleBox, TitledBox } from "@/components";
-import { FrequencyRange } from "./FrequencyRange";
+import { FrequencyRangeList } from "./FrequencyRange";
 import { useSettingsStore } from "@/stores";
 import { filterObjectByKeys } from "@/utils/functions";
 
@@ -44,13 +46,13 @@ const NumberField = ({ value, onChange, label }) => {
       value={value}
       onChange={handleChange}
       label={label}
-      InputProps={{
-        endAdornment: (
-          <InputAdornment position="end">
-            <span style={{ lineHeight: 1, display: "inline-block" }}>Hz</span>
-          </InputAdornment>
-        ),
-      }}
+      // InputProps={{
+      //   endAdornment: (
+      //     <InputAdornment position="end">
+      //       <span style={{ lineHeight: 1, display: "inline-block" }}>Hz</span>
+      //     </InputAdornment>
+      //   ),
+      // }}
       inputProps={{
         pattern: "[0-9]*",
       }}
@@ -58,16 +60,11 @@ const NumberField = ({ value, onChange, label }) => {
   );
 };
 
-const FrequencyRangeField = ({ value, onChange, label }) => (
-  <FrequencyRange value={value} onChange={onChange} label={label} />
-);
-
 // Map component types to their respective wrappers
 const componentRegistry = {
   boolean: BooleanField,
   string: StringField,
   number: NumberField,
-  FrequencyRange: FrequencyRangeField,
 };
 
 const SettingsField = ({ path, Component, label, value, onChange, depth }) => {
@@ -96,11 +93,25 @@ const SettingsSection = ({
   onChange,
   depth = 0,
 }) => {
-  if (Object.keys(settings).length === 0) {
-    return null;
-  }
   const boxTitle = title ? title : formatKey(path[path.length - 1]);
 
+  // If we receive a primitive value, we need to render a component
+
+  if (typeof settings !== "object") {
+    const Component = componentRegistry[typeof settings];
+    if (!Component) {
+      console.error(`Invalid component type: ${typeof settings}`);
+      return null;
+    }
+    return (
+      <Stack direction="row">
+        <Typography variant="body2">{boxTitle}</Typography>
+        <Component label={title} value={settings} onChange={onChange} />
+      </Stack>
+    );
+  }
+
+  // If we receive a nested object, we iterate over it and render recursively
   return (
     <TitledBox title={boxTitle} depth={depth} sx={{ borderRadius: 3 }}>
       {Object.entries(settings).map(([key, value]) => {
@@ -144,12 +155,15 @@ const SettingsSection = ({
 };
 
 const SettingsContent = () => {
+  const [selectedFeature, setSelectedFeature] = useState("");
   const settings = useSettingsStore((state) => state.settings);
   const updateSettings = useSettingsStore((state) => state.updateSettings);
 
   if (!settings) {
     return <div>Loading settings...</div>;
   }
+
+  console.log(settings);
 
   const handleChange = (path, value) => {
     updateSettings((settings) => {
@@ -181,32 +195,23 @@ const SettingsContent = () => {
     "project_subcortex_settings",
   ];
 
+  const generalSettingsKeys = [
+    "sampling_rate_features_hz",
+    "segment_length_features_ms",
+  ];
+
   return (
     <Stack
       direction="row"
       alignItems="flex-start"
-      justifyContent="center"
+      justifyContent="flex-start"
       width="fit-content"
       gap={2}
       p={2}
     >
-      <CollapsibleBox
-        title="Features"
-        defaultExpanded={true}
-        isolated
-        sx={{ flex: 1 }}
-      >
-        <SettingsSection
-          settings={settings.features}
-          path={["features"]}
-          onChange={handleChange}
-          depth={0}
-        />
-      </CollapsibleBox>
-
-      <Stack sx={{ flex: 1 }}>
-        <CollapsibleBox title="Preprocessing" defaultExpanded={true}>
-          {preprocessingSettingsKeys.map((key) => (
+      <Stack>
+        <TitledBox title="General Settings" depth={0}>
+          {generalSettingsKeys.map((key) => (
             <SettingsSection
               key={`${key}_settingsSection`}
               settings={settings[key]}
@@ -215,38 +220,80 @@ const SettingsContent = () => {
               depth={0}
             />
           ))}
-        </CollapsibleBox>
+        </TitledBox>
 
-        <CollapsibleBox title="Postprocessing" defaultExpanded={true}>
-          {postprocessingSettingsKeys.map((key) => (
-            <SettingsSection
-              key={`${key}_settingsSection`}
-              settings={settings[key]}
-              path={[key]}
-              onChange={handleChange}
-              depth={0}
-            />
-          ))}
-        </CollapsibleBox>
+        <TitledBox title="Frequency Ranges" depth={0}>
+          <FrequencyRangeList
+            ranges={settings.frequency_ranges_hz}
+            onChange={handleChange}
+          />
+        </TitledBox>
       </Stack>
 
-      <CollapsibleBox title="Feature settings" defaultExpanded={true} isolated>
-        {Object.entries(enabledFeatures).map(([feature, featureSettings]) => (
-          <CollapsibleBox
-            key={`${feature}_collapsibleBox`}
-            title={formatKey(feature)}
-            defaultExpanded={true}
-          >
+      <TitledBox
+        title="Preprocessing Settings"
+        depth={0}
+        sx={{ borderRadius: 3 }}
+      >
+        {preprocessingSettingsKeys.map((key) => (
+          <SettingsSection
+            key={`${key}_settingsSection`}
+            settings={settings[key]}
+            path={[key]}
+            onChange={handleChange}
+            depth={0}
+          />
+        ))}
+      </TitledBox>
+
+      <TitledBox
+        title="Postprocessing Settings"
+        depth={0}
+        sx={{ borderRadius: 3 }}
+      >
+        {postprocessingSettingsKeys.map((key) => (
+          <SettingsSection
+            key={`${key}_settingsSection`}
+            settings={settings[key]}
+            path={[key]}
+            onChange={handleChange}
+            depth={0}
+          />
+        ))}
+      </TitledBox>
+
+      <TitledBox title="Feature Settings" depth={0}>
+        <Stack direction="row" gap={2}>
+          <Box alignSelf={"flex-start"}>
             <SettingsSection
-              key={`${feature}_settingsSection`}
-              settings={featureSettings}
-              path={[feature]}
+              settings={settings.features}
+              path={["features"]}
               onChange={handleChange}
               depth={0}
+              sx={{ alignSelf: "flex-start" }}
             />
-          </CollapsibleBox>
-        ))}
-      </CollapsibleBox>
+          </Box>
+          <Stack alignSelf={"flex-start"}>
+            {Object.entries(enabledFeatures).map(
+              ([feature, featureSettings]) => (
+                <CollapsibleBox
+                  key={`${feature}_collapsibleBox`}
+                  title={formatKey(feature)}
+                  defaultExpanded={false}
+                >
+                  <SettingsSection
+                    key={`${feature}_settingsSection`}
+                    settings={featureSettings}
+                    path={[feature]}
+                    onChange={handleChange}
+                    depth={0}
+                  />
+                </CollapsibleBox>
+              )
+            )}
+          </Stack>
+        </Stack>
+      </TitledBox>
     </Stack>
   );
 };

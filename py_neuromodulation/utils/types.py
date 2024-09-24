@@ -124,12 +124,10 @@ class NMBaseModel(BaseModel):
         """
         Process the model for frontend use, adding __field_type__ information.
         """
-        result = {}
+        result: dict[str, Any] = {"__field_type__": self.__class__.__name__}
         for field_name, field_value in self.__dict__.items():
             if isinstance(field_value, NMBaseModel):
-                processed_value = field_value.process_for_frontend()
-                processed_value["__field_type__"] = field_value.__class__.__name__
-                result[field_name] = processed_value
+                result[field_name] = field_value.process_for_frontend()
             elif isinstance(field_value, list):
                 result[field_name] = [
                     item.process_for_frontend()
