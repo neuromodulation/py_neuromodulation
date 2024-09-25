@@ -72,7 +72,9 @@ class PyNMBackend(FastAPI):
 
     def push_features_to_frontend(self, feature_queue: Queue) -> None:
         while True:
-            time.sleep(0.002) # NOTE: should be adapted depending on feature sampling rate
+            time.sleep(
+                0.002
+            )  # NOTE: should be adapted depending on feature sampling rate
             if feature_queue.empty() is False:
                 self.logger.info("data in feature queue")
                 features = feature_queue.get()
@@ -98,11 +100,13 @@ class PyNMBackend(FastAPI):
 
         @self.post("/api/settings")
         async def update_settings(data: dict):
+            print(data)
             try:
                 self.pynm_state.settings = NMSettings.model_validate(data)
                 self.logger.debug(self.pynm_state.settings.features)
                 return self.pynm_state.settings.model_dump()
             except ValueError as e:
+                self.logger.error(f"Error updating settings: {e}")
                 raise HTTPException(
                     status_code=422,
                     detail={"error": "Validation failed", "details": str(e)},
@@ -122,7 +126,7 @@ class PyNMBackend(FastAPI):
                     experiment_name=data["experiment_name"],
                     websocket_manager_features=self.websocket_manager_features,
                 )
-                
+
                 # this also fails due to pickling error
                 # self.push_features_process = Process(
                 #     target=self.push_features_to_frontend,
@@ -388,5 +392,3 @@ class PyNMBackend(FastAPI):
         #         # Serve the index.html for any path that doesn't match an API route
         #         print(Path.cwd())
         #         return FileResponse("frontend/index.html")
-
-

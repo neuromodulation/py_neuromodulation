@@ -25,11 +25,13 @@ const uploadSettingsToServer = async (settings) => {
 
 export const useSettingsStore = createStore("settings", (set, get) => ({
   settings: null,
+  frequencyRangeOrder: [],
   isLoading: false,
   error: null,
   retryCount: 0,
 
   setSettings: (settings) => set({ settings }),
+  setFrequencyRangeOrder: (order) => set({ frequencyRangeOrder: order }),
 
   fetchSettingsWithDelay: () => {
     set({ isLoading: true, error: null });
@@ -46,7 +48,11 @@ export const useSettingsStore = createStore("settings", (set, get) => ({
         throw new Error("Failed to fetch settings");
       }
       const data = await response.json();
-      set({ settings: data, retryCount: 0 });
+      set({
+        settings: data,
+        frequencyRangeOrder: Object.keys(data.frequency_ranges_hz || {}),
+        retryCount: 0,
+      });
     } catch (error) {
       console.log("Error fetching settings:", error);
       set((state) => ({
@@ -65,8 +71,13 @@ export const useSettingsStore = createStore("settings", (set, get) => ({
 
   resetRetryCount: () => set({ retryCount: 0 }),
 
+  updateFrequencyRangeOrder: (newOrder) => {
+    set({ frequencyRangeOrder: newOrder });
+  },
+
   updateSettings: async (updater) => {
     const currentSettings = get().settings;
+    const currentOrder = get().frequencyRangeOrder;
 
     // Apply the update optimistically
     set((state) => {
@@ -75,18 +86,22 @@ export const useSettingsStore = createStore("settings", (set, get) => ({
 
     const newSettings = get().settings;
 
+    // Update the frequency range order
+    const newOrder = Object.keys(newSettings.frequency_ranges_hz || {});
+    set({ frequencyRangeOrder: newOrder });
+
     try {
       const result = await uploadSettingsToServer(newSettings);
 
       if (!result.success) {
         // Revert the local state if the server update failed
-        set({ settings: currentSettings });
+        set({ settings: currentSettings, frequencyRangeOrder: currentOrder });
       }
 
       return result;
     } catch (error) {
       // Revert the local state if there was an error
-      set({ settings: currentSettings });
+      set({ settings: currentSettings, frequencyRangeOrder: currentOrder });
       throw error;
     }
   },

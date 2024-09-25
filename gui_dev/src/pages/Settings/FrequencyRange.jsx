@@ -1,12 +1,7 @@
-import {
-  TextField,
-  Button,
-  Box,
-  Typography,
-  IconButton,
-  Stack,
-} from "@mui/material";
+import { useState } from "react";
+import { TextField, Button, IconButton, Stack } from "@mui/material";
 import { Add, Close } from "@mui/icons-material";
+import { debounce } from "@/utils";
 
 const NumberField = ({ ...props }) => (
   <TextField
@@ -25,31 +20,63 @@ const NumberField = ({ ...props }) => (
   />
 );
 
-export const FrequencyRange = ({ name, range, onChange, onRemove }) => {
-  const handleChange = (field, value) => {
-    onChange(name, { ...range, [field]: value });
+export const FrequencyRange = ({
+  id,
+  name,
+  range,
+  onChangeName,
+  onChangeRange,
+  onRemove,
+}) => {
+  const [localName, setLocalName] = useState(name);
+
+  const debouncedChangeName = debounce((newName) => {
+    onChangeName(newName, name);
+  }, 1000);
+
+  const handleNameChange = (e) => {
+    const newName = e.target.value;
+    setLocalName(newName);
+    debouncedChangeName(newName);
+  };
+
+  const handleNameBlur = () => {
+    onChangeName(localName, name);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      console.log(e.target.value, name);
+      onChangeName(localName, name);
+    }
+  };
+
+  const handleRangeChange = (field, value) => {
+    onChangeRange(id, { ...range, [field]: value });
   };
 
   return (
     <Stack direction="row" alignItems="center" gap={1}>
       <TextField
         size="small"
-        value={name}
+        value={localName}
         fullWidth
-        onChange={(e) => onChange(e.target.value, range, name)}
+        onChange={handleNameChange}
+        onBlur={handleNameBlur}
+        onKeyPress={handleKeyPress}
       />
       <NumberField
         size="small"
         type="number"
         value={range.frequency_low_hz}
-        onChange={(e) => handleChange("frequency_low_hz", e.target.value)}
+        onChange={(e) => handleRangeChange("frequency_low_hz", e.target.value)}
         label="Low Hz"
       />
       <NumberField
         size="small"
         type="number"
         value={range.frequency_high_hz}
-        onChange={(e) => handleChange("frequency_high_hz", e.target.value)}
+        onChange={(e) => handleRangeChange("frequency_high_hz", e.target.value)}
         label="High Hz"
       />
       <IconButton
@@ -64,47 +91,71 @@ export const FrequencyRange = ({ name, range, onChange, onRemove }) => {
   );
 };
 
-export const FrequencyRangeList = ({ ranges, onChange }) => {
-  const handleChange = (newName, newRange, oldName = newName) => {
+export const FrequencyRangeList = ({
+  ranges,
+  rangeOrder,
+  onChange,
+  onOrderChange,
+}) => {
+  const handleChangeRange = (name, newRange) => {
     const updatedRanges = { ...ranges };
-    if (newName !== oldName) {
-      delete updatedRanges[oldName];
-    }
-    updatedRanges[newName] = newRange;
+    updatedRanges[name] = newRange;
     onChange(["frequency_ranges_hz"], updatedRanges);
+  };
+
+  const handleChangeName = (newName, oldName) => {
+    if (oldName === newName) {
+      return;
+    }
+
+    const updatedRanges = { ...ranges, [newName]: ranges[oldName] };
+    delete updatedRanges[oldName];
+    onChange(["frequency_ranges_hz"], updatedRanges);
+
+    const updatedOrder = rangeOrder.map((name) =>
+      name === oldName ? newName : name
+    );
+    onOrderChange(updatedOrder);
   };
 
   const handleRemove = (name) => {
     const updatedRanges = { ...ranges };
     delete updatedRanges[name];
     onChange(["frequency_ranges_hz"], updatedRanges);
+
+    const updatedOrder = rangeOrder.filter((item) => item !== name);
+    onOrderChange(updatedOrder);
   };
 
   const addRange = () => {
     let newName = "NewRange";
     let counter = 0;
-    while (ranges.hasOwnProperty(newName)) {
+    // Find first available name
+    while (Object.hasOwn(ranges, newName)) {
       counter++;
       newName = `NewRange${counter}`;
     }
+
     const updatedRanges = {
       ...ranges,
-      [newName]: { frequency_low_hz: "", frequency_high_hz: "" },
+      [newName]: { frequency_low_hz: 1, frequency_high_hz: 500 },
     };
     onChange(["frequency_ranges_hz"], updatedRanges);
+
+    const updatedOrder = [...rangeOrder, newName];
+    onOrderChange(updatedOrder);
   };
 
   return (
     <Stack>
-      <Typography variant="h6" gutterBottom>
-        Frequency Ranges
-      </Typography>
-      {Object.entries(ranges).map(([name, range]) => (
+      {rangeOrder.map((name, index) => (
         <FrequencyRange
-          key={name}
+          key={index}
+          id={index}
           name={name}
-          range={range}
-          onChange={handleChange}
+          range={ranges[name]}
+          onChangeName={handleChangeName}
+          onChangeRange={handleChangeRange}
           onRemove={handleRemove}
         />
       ))}

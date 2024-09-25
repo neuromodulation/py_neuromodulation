@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   Box,
   Button,
+  ButtonGroup,
   InputAdornment,
   Stack,
   Switch,
@@ -96,7 +97,6 @@ const SettingsSection = ({
   const boxTitle = title ? title : formatKey(path[path.length - 1]);
 
   // If we receive a primitive value, we need to render a component
-
   if (typeof settings !== "object") {
     const Component = componentRegistry[typeof settings];
     if (!Component) {
@@ -104,10 +104,17 @@ const SettingsSection = ({
       return null;
     }
     return (
-      <Stack direction="row">
-        <Typography variant="body2">{boxTitle}</Typography>
-        <Component label={title} value={settings} onChange={onChange} />
-      </Stack>
+      <SettingsField
+        Component={Component}
+        label={boxTitle}
+        value={settings}
+        onChange={onChange}
+        depth={depth + 1}
+      />
+      // <Stack direction="row">
+      //   <Typography variant="body2">{boxTitle}</Typography>
+      //   <Component label={title} value={settings} onChange={onChange} />
+      // </Stack>
     );
   }
 
@@ -158,6 +165,12 @@ const SettingsContent = () => {
   const [selectedFeature, setSelectedFeature] = useState("");
   const settings = useSettingsStore((state) => state.settings);
   const updateSettings = useSettingsStore((state) => state.updateSettings);
+  const frequencyRangeOrder = useSettingsStore(
+    (state) => state.frequencyRangeOrder
+  );
+  const updateFrequencyRangeOrder = useSettingsStore(
+    (state) => state.updateFrequencyRangeOrder
+  );
 
   if (!settings) {
     return <div>Loading settings...</div>;
@@ -209,7 +222,7 @@ const SettingsContent = () => {
       gap={2}
       p={2}
     >
-      <Stack>
+      <Stack sx={{ minWidth: "33%" }}>
         <TitledBox title="General Settings" depth={0}>
           {generalSettingsKeys.map((key) => (
             <SettingsSection
@@ -225,6 +238,8 @@ const SettingsContent = () => {
         <TitledBox title="Frequency Ranges" depth={0}>
           <FrequencyRangeList
             ranges={settings.frequency_ranges_hz}
+            rangeOrder={frequencyRangeOrder}
+            onOrderChange={updateFrequencyRangeOrder}
             onChange={handleChange}
           />
         </TitledBox>
@@ -302,15 +317,28 @@ export const Settings = () => {
   return (
     <Stack justifyContent="center" pb={2}>
       <SettingsContent />
-      <Button
-        variant="contained"
-        component={Link}
-        color="primary"
-        to="/decoding"
-        sx={{ mt: 2 }}
+      <Stack
+        direction="row"
+        width="fit-content"
+        sx={{ position: "absolute", bottom: "2.5rem", right: "1rem", gap: 1 }}
+        backgroundColor="background.level3"
+        borderRadius={2}
+        border="1px solid"
+        borderColor={"divider"}
+        p={1}
       >
-        Run Stream
-      </Button>
+        <Button variant="contained" color="primary" to="/decoding">
+          Reset Settings
+        </Button>
+        <Button
+          variant="contained"
+          component={Link}
+          color="primary"
+          to="/decoding"
+        >
+          Run Stream
+        </Button>
+      </Stack>
     </Stack>
   );
 };
