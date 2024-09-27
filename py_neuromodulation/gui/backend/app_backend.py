@@ -1,5 +1,6 @@
 import numpy as np
 import logging
+import asyncio
 import importlib.metadata
 from datetime import datetime
 from pathlib import Path
@@ -116,8 +117,8 @@ class PyNMBackend(FastAPI):
             action = data["action"]
             self.logger.info("Stopping stream")
             if action == "stop":
-                self.pynm_state.stream_handling_queue.put("stop")
-                self.pynm_state.stream.stream_handling_queue.put("stop")
+                asyncio.create_task(self.pynm_state.stream_handling_queue.put("stop"))
+                #self.pynm_state.stream.stream_handling_queue.put("stop")
             return {"message": f"Stream action '{action}' executed"}
 
         @self.post("/api/stream-control")
@@ -129,20 +130,14 @@ class PyNMBackend(FastAPI):
                 self.logger.info(self.websocket_manager)
                 # TODO: I cannot interact with stream_state_queue, 
                 # since the async function is really waiting until the stream finished
-                await self.pynm_state.start_run_function(
+                asyncio.create_task(self.pynm_state.start_run_function(
                     #out_dir=data["out_dir"],
                     #experiment_name=data["experiment_name"],
                     websocket_manager_features=self.websocket_manager,
-                )
+                ))
 
             if action == "stop":
-                #if self.pynm_state.stream.is_running is False:
-                #    # TODO: if the message starts with ERROR we could show the message in a popup
-                #    return {"message": "ERROR: Stream is not running"}
-
-                # initiate stream stop and feature save
-                self.pynm_state.stream_handling_queue.put("stop")
-                self.pynm_state.stream.stream_handling_queue.put("stop")
+                await self.pynm_state.stream_handling_queue.put("stop")
 
             return {"message": f"Stream action '{action}' executed"}
 

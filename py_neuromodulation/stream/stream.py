@@ -1,5 +1,6 @@
 """Module for generic and offline data streams."""
 
+import asyncio
 from typing import TYPE_CHECKING
 from collections.abc import Iterator
 import numpy as np
@@ -297,10 +298,12 @@ class Stream:
         prev_batch_end = 0
         for timestamps, data_batch in self.generator:
             self.is_running = True
+            await asyncio.sleep(0.001)
             if self.stream_handling_queue is not None:
+                nm.logger.info("Checking for stop signal")
                 if not self.stream_handling_queue.empty():
-                    value = self.stream_handling_queue.get()
-                    if value == "stop":
+                    stop_signal = await asyncio.wait_for(self.stream_handling_queue.get(), timeout=0.01)
+                    if stop_signal == "stop":
                         break
             if data_batch is None:
                 break
