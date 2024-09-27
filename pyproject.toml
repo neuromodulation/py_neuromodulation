@@ -4,7 +4,7 @@ requires = ["hatchling"]
 
 [project]
 name = "py_neuromodulation"
-version = "0.06dev"
+version = "0.0.6"
 authors = [{ name = "Timon Merk", email = "timon.merk@charite.de" }]
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",
