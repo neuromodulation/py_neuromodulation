@@ -3,7 +3,7 @@ name: Publish Python Package
 on:
   push:
     tags:
-      - 'v*'  # Only trigger on tag pushes like v1.0.0
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   publish:
