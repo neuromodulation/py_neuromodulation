@@ -127,13 +127,13 @@ const ChannelsTable = () => {
   const updateChannel = useSessionStore((state) => state.updateChannel);
 
   const handleChange = (event, index, field) => {
-    updateChannel(
-      index,
-      field,
-      event.target.type === "checkbox"
-        ? event.target.checked
-        : event.target.value
-    );
+    let value;
+    if (event.target.type === "checkbox") {
+      value = event.target.checked ? 1 : 0;
+    } else {
+      value = event.target.value;
+    }
+    updateChannel(index, field, value);
   };
 
   return (
@@ -171,20 +171,33 @@ const ChannelsTable = () => {
                   backgroundColor: index % 2 ? "background.main" : "#666666",
                 }}
               >
-                {columns.map((column) => (
-                  <TableCell
-                    key={column.id}
-                    sx={{
-                      py: 1,
-                    }}
-                  >
-                    <column.component
-                      value={channel[column.id]}
-                      onChange={(e) => handleChange(e, index, column.id)}
-                      {...column.props}
-                    />
-                  </TableCell>
-                ))}
+                {columns.map((column) => {
+                  const Component = column.component;
+
+                  if (Component === Switch) {
+                    const switchProps = {
+                      onChange: (e) => handleChange(e, index, column.id),
+                      checked: channel[column.id] === 1,
+                      ...column.props,
+                    };
+                    return (
+                      <TableCell key={column.id} sx={{ py: 1 }}>
+                        <Component {...switchProps} />
+                      </TableCell>
+                    );
+                  } else {
+                    const otherProps = {
+                      onChange: (e) => handleChange(e, index, column.id),
+                      value: channel[column.id],
+                      ...column.props,
+                    };
+                    return (
+                      <TableCell key={column.id} sx={{ py: 1 }}>
+                        <Component {...otherProps} />
+                      </TableCell>
+                    );
+                  }
+                })}
               </TableRow>
             ))}
         </TableBody>

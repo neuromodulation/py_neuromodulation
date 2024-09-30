@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useSocketStore } from "@/stores";
 import { newPlot, react } from "plotly.js-basic-dist-min";
 
-export const Graph = ({
+export const RawDataGraph = ({
   title = "EEG Data",
   xAxisTitle = "Sample",
   yAxisTitle = "Value",
