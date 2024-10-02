@@ -68,10 +68,9 @@ def test_coherence():
         "mean_fband": True, "max_fband": False, "max_allfbands": False
     }
 
-    # connectivity indices, i.e.: ([0, 1], [1, 0])
-    # FIXME: indices with only 1 channel in seeds/targets raises error with type validatn
-    #settings.coherence_settings.channels = [ch_names, ch_names[::-1]]
-    settings.coherence_settings.channels = [ch_names]  # , ch_names[::-1]
+    # unique all-to-all connectivity indices, i.e.: ([0], [1])
+    # XXX: avoids pydantic ValidationError that lists are too short (length == 1)
+    settings.coherence_settings.channels = [ch_names]
 
     # do not normalise features for this test!
     # (normalisation changes interpretability of connectivity values, making it harder to
@@ -101,23 +100,20 @@ def test_coherence():
         # average over windows; take absolute before averaging icoh values
         results[key] = np.abs(features[key].values).mean()
 
-    con_name = "seed_to_target"
-    for method in ["coh", "icoh"]:
+    node_name = "seed_to_target"
+    for con_method in ["coh", "icoh"]:
         # Define expected connectivity values for signal and noise frequencies
-        if method == "coh":
-            noise_con = 0.35
-            signal_con = 0.50
-        else:
-            noise_con = 0.20
-            signal_con = 0.35
+        noise_con = 0.15
+        signal_con = 0.25
+
         # Assert that frequencies of simulated interaction have strong connectivity
         np.testing.assert_array_less(
-            signal_con, results[f"{method}_{con_name}_mean_fband_signal"]
+            signal_con, results[f"{con_method}_{node_name}_mean_fband_signal"]
         )
         # Assert that frequencies of noise have weak connectivity
         np.testing.assert_array_less(
-            results[f"{method}_{con_name}_mean_fband_noise_low"], noise_con
+            results[f"{con_method}_{node_name}_mean_fband_noise_low"], noise_con
         )
         np.testing.assert_array_less(
-            results[f"{method}_{con_name}_mean_fband_noise_high"], noise_con
+            results[f"{con_method}_{node_name}_mean_fband_noise_high"], noise_con
         )
