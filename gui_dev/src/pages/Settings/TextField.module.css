@@ -1,0 +1,67 @@
+/* TextField.module.css */
+
+/* Container for the text fields */
+.textFieldContainer {
+    display: flex;
+    flex-direction: column;
+    margin: 1.5rem 0; /* Increased margin for better spacing */
+  }
+  
+  /* Row for each text field */
+  .textFieldRow {
+    display: flex;
+    flex-direction: column; /* Stack label and input vertically */
+    margin-bottom: 1rem; /* Increased margin for better separation */
+  }
+  
+  /* Label for each text field */
+  .textFieldLabel {
+    margin-bottom: 0.5rem; /* Space between label and input */
+    font-weight: 600; /* Increased weight for better visibility */
+    color: #333; /* Dark gray for the label */
+    font-size: 1.1rem; /* Increased font size for the label */
+    transition: all 0.2s ease; /* Smooth transition for label */
+  }
+  
+  /* Input field styles */
+  .textFieldInput {
+    padding: 12px 14px; /* Padding for a filled look */
+    border: 1px solid #ccc; /* Light gray border */
+    border-radius: 4px; /* Rounded corners */
+    width: 100%; /* Full width */
+    font-size: 1rem; /* Font size */
+    background-color: #f5f5f5; /* Light background color for filled effect */
+    transition: border-color 0.2s ease, background-color 0.2s ease; /* Smooth transitions */
+    box-shadow: none; /* Remove default shadow */
+    height: 48px; /* Fixed height for a more square appearance */
+  }
+  
+  /* Focus styles for the input */
+  .textFieldInput:focus {
+    border-color: #1976d2; /* Blue border color on focus */
+    background-color: #fff; /* Change background to white on focus */
+    outline: none; /* Remove default outline */
+  }
+  
+  /* Hover effect for the input */
+  .textFieldInput:hover {
+    border-color: #1976d2; /* Change border color on hover */
+  }
+  
+  /* Placeholder styles */
+  .textFieldInput::placeholder {
+    color: #aaa; /* Light gray placeholder text */
+    opacity: 1; /* Ensure placeholder is fully opaque */
+  }
+  
+  /* Hide the number input spinners in webkit browsers */
+  .textFieldInput::-webkit-inner-spin-button,
+  .textFieldInput::-webkit-outer-spin-button {
+    -webkit-appearance: none; /* Remove default styling */
+    margin: 0; /* Remove margin */
+  }
+  
+  /* Hide the number input spinners in Firefox */
+  .textFieldInput[type='number'] {
+    -moz-appearance: textfield; /* Use textfield appearance */
+  }

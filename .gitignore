@@ -191,6 +191,17 @@ out_per
 # Profiler files
 /*.prof
 /profiling/*
-
+# Test output
+test_data/
+# various lock files
+package-lock.json
+package-lock.json.bak
+uv.lock
+# temporarily ignore the frontend build
+/gui_dev/dist
+/gui/frontend
+# Node modules
 gui_dev/node_modules/*
-test/data/*
+
+# LSL log file
+lsllog.txt

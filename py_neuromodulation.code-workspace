@@ -1,0 +1,40 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "charliermarsh.ruff",
+      "dbaeumer.vscode-eslint",
+      "esbenp.prettier-vscode",
+      "aaron-bond.better-comments"
+    ]
+  },
+  "settings": {
+    // Python
+    "[python]": {
+      "editor.defaultFormatter": "charliermarsh.ruff"
+    },
+    // Web
+    "[json][jsonc][javascript][javascriptreact][css][html]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json][jsonc][javascript][javascriptreact]": {
+      "editor.tabSize": 2
+    },
+    "eslint.workingDirectories": ["./gui_dev"],
+    "eslint.validate": [
+      "javascript",
+      "typescript",
+      "javascriptreact",
+      "typescriptreact",
+      "html"
+    ],
+    "javascript.validate.enable": false, // Disable JS linter, use ESLint
+    "editor.linkedEditing": true,
+    "editor.formatOnSave": true
+  }
+}

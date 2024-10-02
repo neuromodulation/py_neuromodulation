@@ -5,6 +5,7 @@ from pydantic import ConfigDict, Field, model_validator, BaseModel
 from pydantic_core import ValidationError, InitErrorDetails
 from pprint import pformat
 from collections.abc import Sequence
+from datetime import datetime
 
 if TYPE_CHECKING:
     import numpy as np
@@ -15,6 +16,7 @@ if TYPE_CHECKING:
 ###################################
 
 _PathLike = str | PathLike
+
 
 FeatureName = Literal[
     "raw_hjorth",
@@ -117,6 +119,33 @@ class NMBaseModel(BaseModel):
 
     def __setitem__(self, key, value) -> None:
         setattr(self, key, value)
+
+    def process_for_frontend(self) -> dict[str, Any]:
+        """
+        Process the model for frontend use, adding __field_type__ information.
+        """
+        result = {}
+        for field_name, field_value in self.__dict__.items():
+            if isinstance(field_value, NMBaseModel):
+                processed_value = field_value.process_for_frontend()
+                processed_value["__field_type__"] = field_value.__class__.__name__
+                result[field_name] = processed_value
+            elif isinstance(field_value, list):
+                result[field_name] = [
+                    item.process_for_frontend()
+                    if isinstance(item, NMBaseModel)
+                    else item
+                    for item in field_value
+                ]
+            elif isinstance(field_value, dict):
+                result[field_name] = {
+                    k: v.process_for_frontend() if isinstance(v, NMBaseModel) else v
+                    for k, v in field_value.items()
+                }
+            else:
+                result[field_name] = field_value
+
+        return result
 
 
 class FrequencyRange(NMBaseModel):
@@ -249,3 +278,18 @@ def create_validation_error(
         input_type=input_type,
         hide_input=hide_input,
     )
+
+
+#################
+### GUI TYPES ###
+#################
+
+
+class FileInfo(BaseModel):
+    name: str
+    path: str
+    dir: str
+    is_directory: bool
+    size: int
+    created_at: datetime
+    modified_at: datetime

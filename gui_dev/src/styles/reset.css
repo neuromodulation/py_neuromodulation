@@ -1,0 +1,86 @@
+/* Sources: 
+ - https://www.joshwcomeau.com/css/custom-css-reset 
+ - https://piccalil.li/blog/a-more-modern-css-reset/
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box; /* Box-sizing for all elements */
+  position: relative; /* Position all elements relative to parent */
+  margin: 0; /*Remove defualt margins*/
+  margin-block-end: 0;
+  min-width: 0; /* Prevent grid and flex items from overflowing their container */
+}
+
+body {
+  line-height: 1.5; /* accessible line-height */
+  -webkit-font-smoothing: antialiased; /* disable sub-pixel antialiasing in MacOS */
+  min-height: 100dvh;
+}
+
+/* Set shorter line heights on headings and interactive elements */
+h1,
+h2,
+h3,
+h4,
+button,
+input,
+label {
+  line-height: 1.1;
+}
+
+/* Inherit all font properties for inputs and buttons  */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Prevent font size inflation */
+html {
+  -moz-text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+}
+
+/* Improve media defaults */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Avoid text overflows */
+h1,
+h2,
+h3,
+h4 {
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+
+p {
+  overflow-wrap: break-word;
+  text-wrap: pretty; /* Prevent single words on last line */
+}
+
+/* Create a root stacking context */
+#root,
+#__next {
+  isolation: isolate;
+}
+
+/* Make sure textareas without a rows attribute are not tiny */
+textarea:not([rows]) {
+  min-height: 10em;
+}
+
+/* Anything that has been anchored to should have extra scroll margin */
+/* :target {
+   scroll-margin-block: 5ex;
+ } */

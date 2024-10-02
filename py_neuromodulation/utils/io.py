@@ -1,6 +1,6 @@
 import json
 from pathlib import PurePath, Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import numpy as np
 
@@ -79,7 +79,7 @@ def read_BIDS_data(
 def read_mne_data(
     PATH_RUN: "_PathLike | BIDSPath",
     line_noise: int = 50,
-):
+) -> tuple[np.ndarray, float, list[str], list[str], list[str]]:
     """Read data in the mne.io.read_raw supported format.
 
     Parameters
@@ -117,7 +117,8 @@ def read_mne_data(
             f"Line noise is not available in the data, using value of {line_noise} Hz."
         )
 
-    return raw_arr.get_data(), sfreq, ch_names, ch_types, bads
+    data = cast(np.ndarray, raw_arr.get_data())
+    return data, sfreq, ch_names, ch_types, bads
 
 
 def get_coord_list(
@@ -188,6 +189,46 @@ def get_annotations(PATH_ANNOTATIONS: str, PATH_RUN: str, raw_arr: "mne_io.RawAr
         logger.critical(f"Annotations file could not be found: {filepath}")
 
     return annot, annot_data, raw_arr
+
+
+def read_plot_modules(
+    PATH_PLOT: _PathLike = PYNM_DIR / "plots",
+):
+    """Read required .mat files for plotting
+
+    Parameters
+    ----------
+    PATH_PLOT : regexp, optional
+        path to plotting files, by default
+    """
+
+    faces = loadmat(PurePath(PATH_PLOT, "faces.mat"))
+    vertices = loadmat(PurePath(PATH_PLOT, "Vertices.mat"))
+    grid = loadmat(PurePath(PATH_PLOT, "grid.mat"))["grid"]
+    stn_surf = loadmat(PurePath(PATH_PLOT, "STN_surf.mat"))
+    x_ver = stn_surf["vertices"][::2, 0]
+    y_ver = stn_surf["vertices"][::2, 1]
+    x_ecog = vertices["Vertices"][::1, 0]
+    y_ecog = vertices["Vertices"][::1, 1]
+    z_ecog = vertices["Vertices"][::1, 2]
+    x_stn = stn_surf["vertices"][::1, 0]
+    y_stn = stn_surf["vertices"][::1, 1]
+    z_stn = stn_surf["vertices"][::1, 2]
+
+    return (
+        faces,
+        vertices,
+        grid,
+        stn_surf,
+        x_ver,
+        y_ver,
+        x_ecog,
+        y_ecog,
+        z_ecog,
+        x_stn,
+        y_stn,
+        z_stn,
+    )
 
 
 def write_csv(df, path_out):

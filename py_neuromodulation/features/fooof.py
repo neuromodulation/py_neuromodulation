@@ -63,12 +63,12 @@ class FooofAnalyzer(NMFeature):
 
         assert (
             self.settings.windowlength_ms <= settings.segment_length_features_ms
-        ), f"fooof windowlength_ms ({settings.fooof.windowlength_ms}) needs to be smaller equal than segment_length_features_ms ({settings.segment_length_features_ms})."
+        ), f"fooof windowlength_ms ({settings.fooof_settings.windowlength_ms}) needs to be smaller equal than segment_length_features_ms ({settings.segment_length_features_ms})."
 
         assert (
             self.settings.freq_range_hz[0] < sfreq
             and self.settings.freq_range_hz[1] < sfreq
-        ), f"fooof frequency range needs to be below sfreq, got {settings.fooof.freq_range_hz}"
+        ), f"fooof frequency range needs to be below sfreq, got {settings.fooof_settings.freq_range_hz}"
 
         from fooof import FOOOFGroup
 
