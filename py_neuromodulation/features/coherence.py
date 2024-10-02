@@ -83,10 +83,14 @@ class CoherenceObject:
         self.Pyy = welch(y, self.sfreq, self.window, nperseg=128)[1]
         self.Pxy = csd(x, y, self.sfreq, self.window, nperseg=128)[1]
 
-        if self.coh:
-            self.coh_val = np.abs(self.Pxy**2) / (self.Pxx * self.Pyy)
-        if self.icoh:
-            self.icoh_val = np.array(self.Pxy / (self.Pxx * self.Pyy)).imag
+        if self.coh and self.icoh:
+            cohy = self.Pxy / np.sqrt(self.Pxx * self.Pyy)
+            self.coh_val = np.abs(cohy)
+            self.icoh_val = cohy.imag
+        elif self.coh:
+            self.coh_val = np.abs(self.Pxy ** 2) / (self.Pxx * self.Pyy)
+        else:  # only self.icoh == True
+            self.icoh_val = self.Pxy.imag / np.sqrt(self.Pxx * self.Pyy)
 
         for coh_idx, coh_type in enumerate([self.coh, self.icoh]):
             if coh_type:
