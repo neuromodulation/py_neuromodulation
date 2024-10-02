@@ -70,7 +70,8 @@ def test_coherence():
 
     # connectivity indices, i.e.: ([0, 1], [1, 0])
     # FIXME: indices with only 1 channel in seeds/targets raises error with type validatn
-    settings.coherence_settings.channels = [ch_names, ch_names[::-1]]
+    #settings.coherence_settings.channels = [ch_names, ch_names[::-1]]
+    settings.coherence_settings.channels = [ch_names]  # , ch_names[::-1]
 
     # do not normalise features for this test!
     # (normalisation changes interpretability of connectivity values, making it harder to

@@ -26,7 +26,7 @@ class CoherenceFeatures(BoolSelector):
     mean_fband: bool = True
     max_fband: bool = True
     max_allfbands: bool = True
-
+    
 
 ListOfTwoStr = Annotated[list[str], Field(min_length=2, max_length=2)]
 
@@ -35,6 +35,7 @@ class CoherenceSettings(NMBaseModel):
     features: CoherenceFeatures = CoherenceFeatures()
     method: CoherenceMethods = CoherenceMethods()
     channels: list[ListOfTwoStr] = []
+    nperseg: int = Field(default=128, ge=0)
     frequency_bands: list[str] = Field(default=["high_beta"], min_length=1)
 
     @field_validator("frequency_bands")
@@ -49,6 +50,7 @@ class CoherenceObject:
         window: str,
         fbands: list[FrequencyRange],
         fband_names: list[str],
+        nperseg: int,
         ch_1_name: str,
         ch_2_name: str,
         ch_1_idx: int,
@@ -65,6 +67,7 @@ class CoherenceObject:
         self.ch_2 = ch_2_name
         self.ch_1_idx = ch_1_idx
         self.ch_2_idx = ch_2_idx
+        self.nperseg = nperseg
         self.coh = coh
         self.icoh = icoh
         self.features_coh = features_coh
@@ -79,9 +82,9 @@ class CoherenceObject:
     def get_coh(self, feature_results, x, y):
         from scipy.signal import welch, csd
 
-        self.f, self.Pxx = welch(x, self.sfreq, self.window, nperseg=128)
-        self.Pyy = welch(y, self.sfreq, self.window, nperseg=128)[1]
-        self.Pxy = csd(x, y, self.sfreq, self.window, nperseg=128)[1]
+        self.f, self.Pxx = welch(x, self.sfreq, self.window, nperseg=self.nperseg)
+        self.Pyy = welch(y, self.sfreq, self.window, nperseg=self.nperseg)[1]
+        self.Pxy = csd(x, y, self.sfreq, self.window, nperseg=self.nperseg)[1]
 
         if self.coh and self.icoh:
             cohy = self.Pxy / np.sqrt(self.Pxx * self.Pyy)
@@ -184,6 +187,7 @@ class Coherence(NMFeature):
                     "hann",
                     fband_specs,
                     fband_names,
+                    self.settings.nperseg,
                     ch_1_name,
                     ch_2_name,
                     ch_1_idx,
