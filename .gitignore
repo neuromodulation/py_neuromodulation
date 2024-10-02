@@ -194,3 +194,6 @@ out_per
 
 gui_dev/node_modules/*
 test/data/*
+
+uv.lock
+lsllog.txt
