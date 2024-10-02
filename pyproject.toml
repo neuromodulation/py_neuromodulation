@@ -35,7 +35,7 @@ dependencies = [
   "mne-bids >= 0.8",
   "mne-connectivity",
   "mrmr_selection",
-  "noldss >= 0.6.1",
+  "nolds >= 0.6.1",
   "numpy >= 1.21.2",
   "pandas >= 2.0.0",
   "scikit-learn >= 0.24.2",
