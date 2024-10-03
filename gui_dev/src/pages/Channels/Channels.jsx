@@ -139,7 +139,7 @@ const ChannelsTable = () => {
   return (
     <TableContainer
       component={Paper}
-      sx={{ maxHeight: "500px", overflowY: "auto" }}
+      sx={{ maxHeight: "80vh", overflowY: "auto" }}
     >
       <Table stickyHeader>
         <TableHead>
