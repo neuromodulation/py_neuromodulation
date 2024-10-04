@@ -372,7 +372,13 @@ class PyNMBackend(FastAPI):
             #     )
             #     return
 
-            await self.websocket_manager.connect(websocket)  
+            await self.websocket_manager.connect(websocket)
+            while True:
+                try:
+                    asyncio.sleep(0.1)
+                    await websocket.receive_text()
+                except Exception:
+                    break
         # # #######################
         # # ### SPA ENTRY POINT ###
         # # #######################

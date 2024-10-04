@@ -8,15 +8,17 @@ import { useSocketStore } from '@/stores';
 export const Dashboard = () => {
   
   // CHECK why websocket 1. closed and 2. how to open it again before stream is started
-  //const connectSocket = useSocketStore((state) => state.connectSocket);
-  //connectSocket();
+  const connectSocket = useSocketStore((state) => state.connectSocket);
+  connectSocket();
 
   const startStream = useSessionStore((state) => state.startStream);
   const stopStream = useSessionStore((state) => state.stopStream);
 
+  
 
   return (
     <>
+    <Button variant="contained" onClick={connectSocket}> ConnectSocket</Button>
     <Button variant="contained" onClick={startStream}> Run stream</Button>
     <Button variant="contained" onClick={stopStream}> Stop stream</Button>
   <Box
