@@ -1,11 +1,12 @@
 import { debounce } from "@/utils";
+import { getBackendURL } from "@/utils/getBackendURL";
 
 const DEBOUNCE_MS = 500; // Adjust as needed
 
 
 const syncWithBackend = async (state) => {
   try {
-    const response = await fetch("/api/experiment-session", {
+    const response = await fetch(getBackendURL("/api/experiment-session"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(state),

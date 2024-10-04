@@ -118,7 +118,7 @@ export const useSessionStore = createPersistStore("session", (set, get) => ({
   // Stream initialization in the backend
   initializeOfflineStream: async () => {
     try {
-      const response = await fetch("/api/setup-Offline-stream", {
+      const response = await fetch(getBackendURL("/api/setup-Offline-stream"), {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -157,7 +157,7 @@ export const useSessionStore = createPersistStore("session", (set, get) => ({
     const lslSource = get().lslSource;
     const streamParameters = get().streamParameters;
 
-    const response = await fetch("/api/setup-LSL-stream", {
+    const response = await fetch(getBackendURL("/api/setup-LSL-stream"), {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -219,7 +219,7 @@ export const useSessionStore = createPersistStore("session", (set, get) => ({
         JSON.stringify({ channels: get().channels })
       );
 
-      const response = await fetch("/api/channels", {
+      const response = await fetch(getBackendURL("/api/channels"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

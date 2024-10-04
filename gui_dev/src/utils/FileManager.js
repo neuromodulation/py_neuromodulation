@@ -8,6 +8,7 @@
  * @property {string} created_at - The creation timestamp of the file
  * @property {string} modified_at - The last modification timestamp of the file
  */
+import { getBackendURL } from "@/utils/getBackendURL";
 
 /**
  * Manages file operations and interactions with the file API
@@ -40,7 +41,7 @@ export class FileManager {
       show_hidden: showHidden,
     });
 
-    const response = await fetch(`${this.apiBaseUrl}/api/files?${queryParams}`);
+    const response = await fetch(getBackendURL(`${this.apiBaseUrl}/api/files?${queryParams}`));
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
