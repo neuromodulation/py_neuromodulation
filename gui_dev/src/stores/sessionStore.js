@@ -3,6 +3,7 @@
 // the data source, stream paramerters, the output files paths, etc
 
 import { createPersistStore } from "@/stores/createStore";
+import { getBackendURL } from "@/utils/getBackendURL";
 
 // Workflow stages enum-like object
 export const WorkflowStage = Object.freeze({
@@ -76,7 +77,7 @@ export const useSessionStore = createPersistStore("session", (set, get) => ({
   // Search for LSL streams
 
   fetchLSLStreams: async () => {
-    const response = await fetch("/api/LSL-streams");
+    const response = await fetch(getBackendURL("/api/LSL-streams"));
 
     if (!response.ok) {
       set({ lslSource: { selectedStream: null, availableStreams: [] } });
@@ -195,7 +196,7 @@ export const useSessionStore = createPersistStore("session", (set, get) => ({
 
   fetchChannels: async () => {
     try {
-      const response = await fetch("/api/channels");
+      const response = await fetch(getBackendURL("/api/channels"));
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }

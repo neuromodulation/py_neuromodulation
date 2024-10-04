@@ -1,4 +1,5 @@
 import { createStore } from "./createStore";
+import { getBackendURL } from "@/utils/getBackendURL";
 
 export const useAppInfoStore = createStore("appInfo", (set) => ({
   version: "",
@@ -11,7 +12,7 @@ export const useAppInfoStore = createStore("appInfo", (set) => ({
   launchMode: "",
   fetchAppInfo: async () => {
     try {
-      const response = await fetch("/api/app-info");
+      const response = await fetch(getBackendURL("/api/app-info"));
       const data = await response.json();
       set(data);
     } catch (error) {

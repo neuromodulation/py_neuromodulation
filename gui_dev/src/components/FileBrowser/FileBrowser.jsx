@@ -1,4 +1,5 @@
 import { useReducer, useEffect } from "react";
+import { getBackendURL } from "@/utils/getBackendURL";
 import {
   Box,
   Paper,
@@ -111,7 +112,7 @@ export const FileBrowser = ({
 
   const fetchDrives = async () => {
     try {
-      const response = await fetch("/api/drives");
+      const response = await fetch(getBackendURL("/api/drives"));
       if (!response.ok) throw new Error("Failed to fetch drives");
       const data = await response.json();
       dispatch({ type: "SET_DRIVES", payload: data.drives });
@@ -126,7 +127,7 @@ export const FileBrowser = ({
 
   const fetchHomeDirectory = async () => {
     try {
-      const response = await fetch("/api/home_directory");
+      const response = await fetch(getBackendURL("/api/home_directory"));
       if (!response.ok) throw new Error("Failed to fetch home directory");
       const data = await response.json();
       dispatch({ type: "SET_CURRENT_PATH", payload: data.home_directory });

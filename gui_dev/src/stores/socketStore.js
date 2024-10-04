@@ -1,6 +1,7 @@
 import { createStore } from "./createStore";
+import { getBackendURL } from "@/utils/getBackendURL";
 
-const WEBSOCKET_URL = "ws";
+const WEBSOCKET_URL = getBackendURL("/ws");
 const RECONNECT_INTERVAL = 500; // ms
 
 export const useSocketStore = createStore("socket", (set, get) => ({
