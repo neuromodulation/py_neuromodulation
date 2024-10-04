@@ -298,7 +298,7 @@ class Stream:
         prev_batch_end = 0
         for timestamps, data_batch in self.generator:
             self.is_running = True
-            await asyncio.sleep(0.001)
+            await asyncio.sleep(0.003)
             if self.stream_handling_queue is not None:
                 nm.logger.info("Checking for stop signal")
                 if not self.stream_handling_queue.empty():
@@ -342,7 +342,7 @@ class Stream:
             if websocket_featues is not None:
                 nm.logger.info("Sending message to Websocket")
                 #nm.logger.info(feature_dict)
-                #await websocket_featues.send_cbor(feature_dict)
+                await websocket_featues.send_cbor(feature_dict)
                 #await websocket_featues.send_message(feature_dict)
             self.batch_count += 1
             if self.batch_count % self.save_interval == 0:

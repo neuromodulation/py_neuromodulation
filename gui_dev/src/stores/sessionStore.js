@@ -252,7 +252,7 @@ export const useSessionStore = createPersistStore("session", (set, get) => ({
     try {
       console.log("Start Stream");
 
-      const response = await fetch("/api/stream-control", {
+      const response = await fetch(getBackendURL("/api/stream-control"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -276,7 +276,7 @@ export const useSessionStore = createPersistStore("session", (set, get) => ({
     try {
       console.log("Stop Stream");
 
-      const response = await fetch("/api/stream-control-stop", {
+      const response = await fetch(getBackendURL("/api/stream-control-stop"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

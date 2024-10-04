@@ -1,5 +1,6 @@
 import { createStore } from "./createStore";
 import { getBackendURL } from "@/utils/getBackendURL";
+import CBOR from "cbor-js";
 
 const WEBSOCKET_URL = getBackendURL("/ws");
 const RECONNECT_INTERVAL = 500; // ms
@@ -63,7 +64,21 @@ export const useSocketStore = createStore("socket", (set, get) => ({
     };
 
     newSocket.onmessage = (event) => {
-      console.log("Received message from server:", event.data);
+      try {
+        const arrayBuffer = event.data;
+    
+        console.log("Received message:", arrayBuffer);
+        console.log("Type of arrayBuffer:", typeof arrayBuffer);
+        console.log("arrayBuffer instanceof ArrayBuffer:", arrayBuffer instanceof ArrayBuffer);
+    
+        const decodedData = CBOR.decode(arrayBuffer);
+        console.log("Decoded message from server:", decodedData);
+        set((state) => ({
+          graphData: [...state.graphData, decodedData],
+        }));
+      } catch (error) {
+        console.error("Failed to decode CBOR message:", error);
+      }
     };
 
     set({ socket: newSocket });
