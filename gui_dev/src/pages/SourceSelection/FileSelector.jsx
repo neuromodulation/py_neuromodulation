@@ -19,7 +19,7 @@ export const FileSelector = () => {
   );
   const setSourceType = useSessionStore((state) => state.setSourceType);
 
-  const fileBrowserDirRef = useRef("C:/dev/");
+  const fileBrowserDirRef = useRef("C:\\code\\py_neuromodulation\\py_neuromodulation\\data\\sub-testsub\\ses-EphysMedOff\\ieeg\\sub-testsub_ses-EphysMedOff_task-gripforce_run-0_ieeg.vhdr");
 
   const [isSelecting, setIsSelecting] = useState(false);
   const [showFileBrowser, setShowFileBrowser] = useState(false);

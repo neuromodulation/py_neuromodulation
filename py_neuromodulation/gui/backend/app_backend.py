@@ -131,6 +131,8 @@ class PyNMBackend(FastAPI):
                 self.logger.info(self.websocket_manager)
                 # TODO: I cannot interact with stream_state_queue, 
                 # since the async function is really waiting until the stream finished
+                #await self.websocket_manager.connect(websocket)  
+
                 asyncio.create_task(self.pynm_state.start_run_function(
                     #out_dir=data["out_dir"],
                     #experiment_name=data["experiment_name"],

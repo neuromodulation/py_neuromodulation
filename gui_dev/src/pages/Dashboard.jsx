@@ -3,9 +3,14 @@ import { PSDGraph } from '@/components/PSDGraph';
 import { HeatmapGraph } from '@/components/HeatmapGraph';
 import { Box, Button } from '@mui/material';
 import { useSessionStore } from "@/stores";
+import { useSocketStore } from '@/stores';
 
 export const Dashboard = () => {
   
+  // CHECK why websocket 1. closed and 2. how to open it again before stream is started
+  //const connectSocket = useSocketStore((state) => state.connectSocket);
+  //connectSocket();
+
   const startStream = useSessionStore((state) => state.startStream);
   const stopStream = useSessionStore((state) => state.stopStream);
 

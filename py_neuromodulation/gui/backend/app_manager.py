@@ -278,8 +278,9 @@ class AppManager:
             target=run_backend,
             kwargs={
                 "shutdown_event": self.shutdown_event,
-                "debug": self.debug,
-                "reload": self.dev,
+                "debug": self.debug,`
+                # Could the reload be responsible for closing the websocket?
+                "reload": False,  # self.dev
             },
             name="Backend",
         )

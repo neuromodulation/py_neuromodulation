@@ -13,6 +13,7 @@
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "latest",
     "@mui/material": "latest",
+    "cbor-js": "^0.1.0",
     "immer": "^10.1.1",
     "plotly.js": "^2.35.2",
     "plotly.js-basic-dist-min": "^2.35.2",

@@ -342,8 +342,8 @@ class Stream:
             if websocket_featues is not None:
                 nm.logger.info("Sending message to Websocket")
                 #nm.logger.info(feature_dict)
-                await websocket_featues.send_cbor(feature_dict)
-                #await websocket_featues.send_message(feature_dict)
+                #await websocket_featues.send_cbor(feature_dict)
+                await websocket_featues.send_message(feature_dict)
             self.batch_count += 1
             if self.batch_count % self.save_interval == 0:
                 self.db.commit()
