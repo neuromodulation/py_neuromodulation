@@ -51,17 +51,6 @@ export default defineConfig(() => {
     },
     server: {
       port: 54321,
-      proxy: {
-        "/api": {
-          target: `http://localhost:${BACKEND_PORT}`,
-          changeOrigin: true,
-        },
-        "/ws": {
-          target: `ws://localhost:${BACKEND_PORT}`,
-          ws: true,
-          changeOrigin: true,
-        },
-      },
     },
   };
 });

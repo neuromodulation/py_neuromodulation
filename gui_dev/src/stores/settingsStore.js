@@ -1,3 +1,4 @@
+import { getBackendURL } from "@/utils/getBackendURL";
 import { createStore } from "./createStore";
 
 const INITIAL_DELAY = 3000; // wait for Flask
@@ -6,7 +7,7 @@ const MAX_RETRIES = 100;
 
 const uploadSettingsToServer = async (settings) => {
   try {
-    const response = await fetch("/api/settings", {
+    const response = await fetch(getBackendURL("/api/settings"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -41,7 +42,7 @@ export const useSettingsStore = createStore("settings", (set, get) => ({
   fetchSettings: async () => {
     try {
       console.log("Fetching settings...");
-      const response = await fetch("/api/settings");
+      const response = await fetch(getBackendURL("/api/settings"));
       if (!response.ok) {
         throw new Error("Failed to fetch settings");
       }

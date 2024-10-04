@@ -60,11 +60,12 @@ class PyNMBackend(FastAPI):
         self.setup_routes()
 
         # Serve static files
-        self.mount(
-            "/",
-            StaticFiles(directory=PYNM_DIR / "gui" / "frontend", html=True),
-            name="static",
-        )
+        if not dev:
+            self.mount(
+                "/",
+                StaticFiles(directory=PYNM_DIR / "gui" / "frontend", html=True),
+                name="static",
+            )
 
         self.pynm_state = pynm_state
         self.websocket_manager = WebSocketManager()

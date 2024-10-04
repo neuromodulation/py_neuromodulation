@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getBackendURL } from "@/utils/getBackendURL";
 import {
   Paper,
   Typography,
@@ -26,7 +27,7 @@ export const QuickAccessSidebar = ({ onItemClick }) => {
 
   const fetchQuickAccessItems = async () => {
     try {
-      const response = await fetch("/api/quick-access");
+      const response = await fetch(getBackendURL("/api/quick-access"));
       if (!response.ok) throw new Error("Failed to fetch quick access items");
       const data = await response.json();
       setQuickAccessItems(data.items);
