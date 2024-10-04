@@ -78,7 +78,7 @@ export const useSocketStore = createStore("socket", (set, get) => ({
       try {
         socket.close();
       } catch (error) {
-        console.warning("Error closing socket:", error);
+        console.warn("Error closing socket:", error);
       }
     }
 

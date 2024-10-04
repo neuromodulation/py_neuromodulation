@@ -3,7 +3,7 @@ import { useSocketStore } from "@/stores";
 import { newPlot, react } from "plotly.js-basic-dist-min";
 
 export const RawDataGraph = ({
-  title = "EEG Data",
+  title = "Raw Data",
   xAxisTitle = "Sample",
   yAxisTitle = "Value",
   lineColor = "#1a73e8",
