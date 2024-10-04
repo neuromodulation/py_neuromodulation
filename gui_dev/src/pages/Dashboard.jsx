@@ -1,9 +1,19 @@
 import { RawDataGraph } from '@/components/RawDataGraph';
 import { PSDGraph } from '@/components/PSDGraph';
 import { HeatmapGraph } from '@/components/HeatmapGraph';
-import { Box } from '@mui/material';
+import { Box, Button } from '@mui/material';
+import { useSessionStore } from "@/stores";
 
-export const Dashboard = () => (
+export const Dashboard = () => {
+  
+  const startStream = useSessionStore((state) => state.startStream);
+  const stopStream = useSessionStore((state) => state.stopStream);
+
+
+  return (
+    <>
+    <Button variant="contained" onClick={startStream}> Run stream</Button>
+    <Button variant="contained" onClick={stopStream}> Stop stream</Button>
   <Box
     p={2}
     height="calc(100vh - 64px)" // Adjust based on your toolbar's actual height
@@ -40,4 +50,7 @@ export const Dashboard = () => (
       </Box>
     </Box>
   </Box>
-);
+  </>
+)
+
+}

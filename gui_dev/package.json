@@ -32,14 +32,14 @@
     "@vitejs/plugin-react": "^4.3.1",
     "@welldone-software/why-did-you-render": "^8.0.3",
     "babel-plugin-react-compiler": "latest",
-    "eslint": "^9.10.0",
+    "eslint": "^9.11.1",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-jsdoc": "^50.2.3",
-    "eslint-plugin-react": "^7.36.1",
+    "eslint-plugin-jsdoc": "^50.3.0",
+    "eslint-plugin-react": "^7.37.0",
     "eslint-plugin-react-compiler": "latest",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.12",
     "prettier": "^3.3.3",
-    "vite": "^5.4.6"
+    "vite": "^5.4.8"
   }
 }

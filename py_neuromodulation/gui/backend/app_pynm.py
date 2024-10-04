@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import numpy as np
-from multiprocessing import Process, Queue
+from multiprocessing import Process
 
 from py_neuromodulation.stream import Stream, NMSettings
 from py_neuromodulation.utils import set_channels
@@ -33,7 +33,7 @@ class PyNMState:
         # The stream will then put the results in the queue
         # there should be another websocket in which the results are sent to the frontend
 
-        stream_handling_queue = Queue()
+        self.stream_handling_queue = asyncio.Queue()
 
         self.logger.info("setup stream Process")
 
@@ -51,15 +51,16 @@ class PyNMState:
         #     },
         # )
         #asyncio.run(
-        await self.stream.run(
-            out_dir=out_dir,
-            experiment_name=experiment_name,
-            stream_handling_queue=stream_handling_queue,
-            is_stream_lsl=self.lsl_stream_name is not None,
-            stream_lsl_name=self.lsl_stream_name
-            if self.lsl_stream_name is not None
-            else "",
-            websocket_featues=websocket_manager_features,
+        asyncio.create_task(self.stream.run(
+                out_dir=out_dir,
+                experiment_name=experiment_name,
+                stream_handling_queue=self.stream_handling_queue,
+                is_stream_lsl=self.lsl_stream_name is not None,
+                stream_lsl_name=self.lsl_stream_name
+                if self.lsl_stream_name is not None
+                else "",
+                websocket_featues=websocket_manager_features,
+            )
         )
 
         # self.logger.info("initialized run process")
