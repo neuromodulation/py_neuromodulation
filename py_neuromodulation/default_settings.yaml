@@ -193,6 +193,7 @@ coherence_settings:
   method:
     coh: true
     icoh: true
+  nperseg: 128
 
 fooof_settings:
   aperiodic:
