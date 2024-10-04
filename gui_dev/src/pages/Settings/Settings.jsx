@@ -259,10 +259,10 @@ export const Settings = () => {
         variant="contained"
         component={Link}
         color="primary"
-        to="/decoding"
+        to="/dashboard"
         sx={{ mt: 2 }}
       >
-        Run Stream
+        Start Stream
       </Button>
     </Stack>
   );
