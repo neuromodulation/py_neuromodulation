@@ -80,6 +80,8 @@ if __name__ == "__main__":
 
     App(run_in_webview=False).launch()
 
-    # check functionality of stream: do features end up in the queue?
 
-    # are queue values put through websocket
+    # Check if LSL stream pushes data
+    # settings = nm.NMSettings.get_fast_compute()
+    # LSLstream = LSLStream(settings, stream_name="example_stream")
+    # time, data = next(LSLstream.get_next_batch())

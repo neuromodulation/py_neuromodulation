@@ -71,19 +71,6 @@ class PyNMBackend(FastAPI):
         self.pynm_state = pynm_state
         self.websocket_manager = WebSocketManager()
 
-    def push_features_to_frontend(self, feature_queue: Queue) -> None:
-        while True:
-            time.sleep(0.002) # NOTE: should be adapted depending on feature sampling rate
-            if feature_queue.empty() is False:
-                self.logger.info("data in feature queue")
-                features = feature_queue.get()
-
-                self.logger.info(f"Sending features: {features}")
-                self.websocket_manager.send_message(features)
-
-                if self.pynm_state.stream.is_running is False:
-                    break
-
     def setup_routes(self):
         @self.get("/api/health")
         async def healthcheck():
@@ -113,15 +100,6 @@ class PyNMBackend(FastAPI):
         ##### PYNM CONTROL #####
         ########################
 
-        @self.post("/api/stream-control-stop")
-        async def handle_stream_control_stop(data: dict):
-            action = data["action"]
-            self.logger.info("Stopping stream")
-            if action == "stop":
-                asyncio.create_task(self.pynm_state.stream_handling_queue.put("stop"))
-                #self.pynm_state.stream.stream_handling_queue.put("stop")
-            return {"message": f"Stream action '{action}' executed"}
-
         @self.post("/api/stream-control")
         async def handle_stream_control(data: dict):
             action = data["action"]
@@ -129,9 +107,7 @@ class PyNMBackend(FastAPI):
                 # TODO: create out_dir and experiment_name text filds in frontend
                 self.logger.info("websocket:")
                 self.logger.info(self.websocket_manager)
-                # TODO: I cannot interact with stream_state_queue, 
-                # since the async function is really waiting until the stream finished
-                #await self.websocket_manager.connect(websocket)  
+                self.logger.info("Starting stream")
 
                 asyncio.create_task(self.pynm_state.start_run_function(
                     #out_dir=data["out_dir"],
@@ -140,7 +116,8 @@ class PyNMBackend(FastAPI):
                 ))
 
             if action == "stop":
-                await self.pynm_state.stream_handling_queue.put("stop")
+                self.logger.info("Stopping stream")
+                asyncio.create_task(self.pynm_state.stream_handling_queue.put("stop"))
 
             return {"message": f"Stream action '{action}' executed"}
 
@@ -375,7 +352,6 @@ class PyNMBackend(FastAPI):
             await self.websocket_manager.connect(websocket)
             while True:
                 try:
-                    asyncio.sleep(0.1)
                     await websocket.receive_text()
                 except Exception:
                     break

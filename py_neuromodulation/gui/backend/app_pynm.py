@@ -37,20 +37,6 @@ class PyNMState:
 
         self.logger.info("setup stream Process")
 
-        # self.run_process = Process(
-        #     target=self.stream.run,
-        #     kwargs={
-        #         "out_dir": out_dir,
-        #         "experiment_name": experiment_name,
-        #         "feature_queue": feature_queue,
-        #         "stream_handling_queue": stream_handling_queue,
-        #         "is_stream_lsl": self.lsl_stream_name is not None,
-        #         "stream_lsl_name": self.lsl_stream_name
-        #         if self.lsl_stream_name is not None
-        #         else "",
-        #     },
-        # )
-        #asyncio.run(
         asyncio.create_task(self.stream.run(
                 out_dir=out_dir,
                 experiment_name=experiment_name,
@@ -62,15 +48,6 @@ class PyNMState:
                 websocket_featues=websocket_manager_features,
             )
         )
-
-        # self.logger.info("initialized run process")
-
-        # self.run_process.start()
-
-        # import time
-        # time.sleep(2)
-        # self.logger.info(f"Stream running: {self.stream.is_running}")
-
 
     def setup_lsl_stream(
         self,

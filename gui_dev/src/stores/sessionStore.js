@@ -20,7 +20,7 @@ export const useSessionStore = createPersistStore("session", (set, get) => ({
 
   // Workflow stage
   currentStage: WorkflowStage.SOURCE_SELECTION,
-  streamSetupMessage: null,
+  streamSetupMessage: "Stream not setup",
   isStreamSetupCorrect: false,
 
   // Get the current workflow stage
@@ -157,31 +157,46 @@ export const useSessionStore = createPersistStore("session", (set, get) => ({
     const lslSource = get().lslSource;
     const streamParameters = get().streamParameters;
 
-    const response = await fetch(getBackendURL("/api/setup-LSL-stream"), {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        stream_name: lslSource.availableStreams[0].name,
-        sampling_rate_features: streamParameters.samplingRate,
-        line_noise: streamParameters.lineNoise,
-      }),
-    });
+    try {
+      const response = await fetch(getBackendURL("/api/setup-LSL-stream"), {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          stream_name: lslSource.availableStreams[0].name,
+          sampling_rate_features: streamParameters.samplingRate,
+          line_noise: streamParameters.lineNoise,
+        }),
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const content = await response.json();
+
+      set({
+        sourceType: "lsl",
+        isSourceValid: true,
+      });
+
+      set({
+        streamSetupMessage: content.message,
+        isStreamSetupCorrect: true,
+      });
+
+      get().fetchChannels();
+    } catch (error) {
+      console.error("Error initializing stream:", error);
+      set({
+        streamSetupMessage: `Error: ${error.message}`,
+        isStreamSetupCorrect: false,
+      });
+      throw error;
     }
-
-    // enable the next button
-    set({
-      sourceType: "lsl",
-      isSourceValid: true,
-    });
-
-    get().fetchChannels();
-    // make a alert that says that the stream is initialized in js
+    
   },
 
   /*****************************/
@@ -276,7 +291,7 @@ export const useSessionStore = createPersistStore("session", (set, get) => ({
     try {
       console.log("Stop Stream");
 
-      const response = await fetch(getBackendURL("/api/stream-control-stop"), {
+      const response = await fetch(getBackendURL("/api/stream-control"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

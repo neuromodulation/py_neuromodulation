@@ -298,9 +298,9 @@ class Stream:
         prev_batch_end = 0
         for timestamps, data_batch in self.generator:
             self.is_running = True
-            await asyncio.sleep(0.003)
             if self.stream_handling_queue is not None:
                 nm.logger.info("Checking for stop signal")
+                await asyncio.sleep(0.001)
                 if not self.stream_handling_queue.empty():
                     stop_signal = await asyncio.wait_for(self.stream_handling_queue.get(), timeout=0.01)
                     if stop_signal == "stop":

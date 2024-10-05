@@ -10,6 +10,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
   Paper,
 } from "@mui/material";
 import { useSessionStore } from "@/stores";
@@ -24,6 +25,8 @@ export const StreamSelector = () => {
   const initializeLSLStream = useSessionStore(
     (state) => state.initializeLSLStream
   );
+  const updateStreamParameter = useSessionStore((state) => state.updateStreamParameter);
+
   const setLineNoiseValue = useSessionStore((state) => state.setLineNoiseValue);
   const setSamplingRateFeaturesValue = useSessionStore(
     (state) => state.setSamplingRateFeaturesValue
@@ -52,17 +55,22 @@ export const StreamSelector = () => {
     return () => clearTimeout(timer);
   }, [selectedStreamName, validateStreamName]);
 
+  const streamSetupMessage = useSessionStore(
+    (state) => state.streamSetupMessage
+  );
+  const isStreamSetupCorrect = useSessionStore(
+    (state) => state.isStreamSetupCorrect
+  );
+
   const handleSelectStream = (streamName, sfreq) => {
     setSelectedStreamName(streamName);
-    // set the samplingRateValue of the streamParameters
-    //streamParameters.samplingRateValue = sfreq;
-    // streamParameters.samplingRateFeaturesValue = 10;
-    // streamParameters.lineNoiseValue = 50;
-    // streamParameters.allValid = true;
-    setLineNoiseValue(50);
-    setSamplingRateFeaturesValue(10);
-    setSamplingRateValue(sfreq);
-    setStreamParametersAllValid(true);
+
+    updateStreamParameter('lineNoise', 50);
+    updateStreamParameter('samplingRate', sfreq);
+    updateStreamParameter('samplingRateFeatures', 10);
+    updateStreamParameter('allValid', true);
+
+    
 
     setIsStreamNameValid(true);
   };
@@ -181,6 +189,15 @@ export const StreamSelector = () => {
         >
           Connect to stream
         </Button>
+        {streamSetupMessage && (
+        <Typography
+          variant="body2"
+          color={isStreamSetupCorrect ? "success" : "error"}
+          mt={2}
+        >
+          {streamSetupMessage}
+        </Typography>
+      )}
       </Stack>
     </TitledBox>
   );
