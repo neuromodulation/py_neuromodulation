@@ -1,9 +1,18 @@
 from os import PathLike
 from math import isnan
-from typing import Any, Literal, Protocol, TYPE_CHECKING, runtime_checkable
-from pydantic import ConfigDict, Field, model_validator, BaseModel
+from typing import (
+    Literal,
+    Protocol,
+    TYPE_CHECKING,
+    runtime_checkable,
+)
+from pydantic import (
+    BaseModel,
+    model_validator,
+)
 from pydantic_core import ValidationError, InitErrorDetails
-from pprint import pformat
+from .pydantic_extensions import NMBaseModel, NMField
+
 from collections.abc import Sequence
 from datetime import datetime
 
@@ -54,6 +63,7 @@ NormMethod = Literal[
     "minmax",
 ]
 
+
 ###################################
 ######## PROTOCOL CLASSES  ########
 ###################################
@@ -87,68 +97,11 @@ class NMPreprocessor(Protocol):
     def process(self, data: "np.ndarray") -> "np.ndarray": ...
 
 
-###################################
-######## PYDANTIC CLASSES  ########
-###################################
-
-
-class NMBaseModel(BaseModel):
-    model_config = ConfigDict(validate_assignment=False, extra="allow")
-
-    def __init__(self, *args, **kwargs) -> None:
-        if kwargs:
-            super().__init__(**kwargs)
-        else:
-            field_names = list(self.model_fields.keys())
-            kwargs = {}
-            for i in range(len(args)):
-                kwargs[field_names[i]] = args[i]
-            super().__init__(**kwargs)
-
-    def __str__(self):
-        return pformat(self.model_dump())
-
-    def __repr__(self):
-        return pformat(self.model_dump())
-
-    def validate(self) -> Any:  # type: ignore
-        return self.model_validate(self.model_dump())
-
-    def __getitem__(self, key):
-        return getattr(self, key)
-
-    def __setitem__(self, key, value) -> None:
-        setattr(self, key, value)
-
-    def process_for_frontend(self) -> dict[str, Any]:
-        """
-        Process the model for frontend use, adding __field_type__ information.
-        """
-        result: dict[str, Any] = {"__field_type__": self.__class__.__name__}
-        for field_name, field_value in self.__dict__.items():
-            if isinstance(field_value, NMBaseModel):
-                result[field_name] = field_value.process_for_frontend()
-            elif isinstance(field_value, list):
-                result[field_name] = [
-                    item.process_for_frontend()
-                    if isinstance(item, NMBaseModel)
-                    else item
-                    for item in field_value
-                ]
-            elif isinstance(field_value, dict):
-                result[field_name] = {
-                    k: v.process_for_frontend() if isinstance(v, NMBaseModel) else v
-                    for k, v in field_value.items()
-                }
-            else:
-                result[field_name] = field_value
-
-        return result
-
-
 class FrequencyRange(NMBaseModel):
-    frequency_low_hz: float = Field(gt=0)
-    frequency_high_hz: float = Field(gt=0)
+    # frequency_low_hz: Annotated[list[float], {"unit": "Hz"}] = Field(gt=0)
+    # frequency_high_hz: FrequencyHz = Field(gt=0)
+    frequency_low_hz: float = NMField(gt=0, meta={"unit": "Hz"})
+    frequency_high_hz: float = NMField(gt=0, meta={"unit": "Hz"})
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -236,14 +189,10 @@ class BoolSelector(NMBaseModel):
         for f in cls.list_all():
             print(f)
 
-    @classmethod
-    def get_fields(cls):
-        return cls.model_fields
-
 
 def create_validation_error(
     error_message: str,
-    loc: list[str | int] = None,
+    loc: list[str | int] | None = None,
     title: str = "Validation Error",
     input_type: Literal["python", "json"] = "python",
     hide_input: bool = False,
