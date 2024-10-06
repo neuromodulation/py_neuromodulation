@@ -258,17 +258,6 @@ def save_channels(
     logger.info(f"{filename} saved to {out_dir}")
 
 
-def save_features(
-    df_features: "pd.DataFrame",
-    out_dir: _PathLike = "",
-    prefix: str = "",
-) -> None:
-    out_dir = Path.cwd() if not out_dir else Path(out_dir)
-    filename = f"{prefix}_FEATURES.csv" if prefix else "_FEATURES.csv"
-    write_csv(df_features, out_dir / filename)
-    logger.info(f"{filename} saved to {str(out_dir)}")
-
-
 def save_sidecar(
     sidecar: dict,
     out_dir: _PathLike = "",

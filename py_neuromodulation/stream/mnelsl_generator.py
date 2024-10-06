@@ -1,21 +1,26 @@
 from collections.abc import Iterator
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Tuple
 import numpy as np
 from py_neuromodulation.utils import logger
 from mne_lsl.lsl import resolve_streams
 import os
+from .data_generator_abc import DataGeneratorABC
 
 if TYPE_CHECKING:
     from py_neuromodulation import NMSettings
 
 
-class LSLStream:
+class MNELSLGenerator(DataGeneratorABC):
     """
     Class is used to create and connect to a LSL stream and pull data from it.
     """
 
-    def __init__(self, settings: "NMSettings", stream_name: str | None = None) -> None:
+    def __init__(self,
+                 segment_length_features_ms: float,
+                 sampling_rate_features_hz: float,
+                 stream_name: str | None = "example_stream",
+                 ) -> None:
         """
         Initialize the LSL stream.
 
@@ -36,7 +41,6 @@ class LSLStream:
         self.stream: StreamLSL
         # self.keyboard_interrupt = False
 
-        self.settings = settings
         self._n_seconds_wait_before_disconnect = 3
         try:
             if stream_name is None:
@@ -55,18 +59,30 @@ class LSLStream:
         else:
             self.sinfo = self.stream.sinfo
 
-        self.winsize = settings.segment_length_features_ms / self.stream.sinfo.sfreq
-        self.sampling_interval = 1 / self.settings.sampling_rate_features_hz
+        self.winsize = segment_length_features_ms / self.stream.sinfo.sfreq
+        self.sampling_interval = 1 / sampling_rate_features_hz
+        self.channels = self.get_LSL_channels()
+        self.sfreq = self.stream.sinfo.sfreq
 
-        # If not running the generator when the escape key is pressed.
-        self.headless: bool = not os.environ.get("DISPLAY")
-        # if not self.headless:
-        # from py_neuromodulation.utils.keyboard import KeyboardListener
+    def get_LSL_channels(self) -> "pd.DataFrame":
 
-        # self.listener = KeyboardListener(("esc", self.set_keyboard_interrupt))
-        # self.listener.start()
+        from py_neuromodulation.utils import create_channels
+        ch_names = self.sinfo.get_channel_names() or [
+            "ch" + str(i) for i in range(self.sinfo.n_channels)
+        ]
+        ch_types = self.sinfo.get_channel_types() or [
+            "eeg" for i in range(self.sinfo.n_channels)
+        ]
+        return create_channels(
+            ch_names=ch_names,
+            ch_types=ch_types,
+            used_types=["eeg", "ecog", "dbs", "seeg"],
+        )
 
-    def get_next_batch(self) -> Iterator[tuple[np.ndarray, np.ndarray]]:
+    def __iter__(self):
+        return self
+    
+    def __next__(self) -> Iterator[tuple[np.ndarray, np.ndarray]]:
         self.last_time = time.time()
         check_data = None
         data = None
@@ -112,11 +128,3 @@ class LSLStream:
                 yield timestamp, data
 
                 logger.info(f"Stream time: {timestamp[-1] - stream_start_time}")
-
-                # if not self.headless and self.keyboard_interrupt:
-                #    logger.info("Keyboard interrupt")
-                #    self.listener.stop()
-                #    self.stream.disconnect()
-
-    # def set_keyboard_interrupt(self):
-    #    self.keyboard_interrupt = True

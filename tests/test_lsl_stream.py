@@ -8,12 +8,12 @@ from py_neuromodulation.stream import NMSettings, Stream
 
 @pytest.mark.parametrize("setup_lsl_player", ["search"], indirect=True)
 def test_lsl_stream_search(setup_lsl_player):
-    from py_neuromodulation.stream import mnelsl_stream
+    from py_neuromodulation.stream import mnelsl_generator
 
     """ Test if the lsl stream search can find any streams after starting a player."""
     player = setup_lsl_player
     player.start_player()
-    streams = mnelsl_stream.resolve_streams()
+    streams = mnelsl_generator.resolve_streams()
     assert len(streams) != 0, "No streams found in search"
 
 

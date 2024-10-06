@@ -68,6 +68,7 @@ from .features.feature_processor import add_custom_feature, remove_custom_featur
 
 from .utils import types
 from .utils import io
+from .utils import data_writer
 
 from . import stream
 from . import analysis
