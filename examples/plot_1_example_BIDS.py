@@ -43,7 +43,7 @@ import py_neuromodulation as nm
     coord_names,
 ) = nm.io.read_BIDS_data(PATH_RUN=PATH_RUN)
 
-channels = nm.utils.set_channels(
+channels = nm.utils.create_channels(
     ch_names=raw.ch_names,
     ch_types=raw.get_channel_types(),
     reference="default",
@@ -94,6 +94,8 @@ for sw_feature in settings.sharpwave_analysis_settings.sharpwave_features.list_a
 
 # %%
 stream = nm.Stream(
+    data=data,
+    experiment_name=RUN_NAME,
     sfreq=sfreq,
     channels=channels,
     settings=settings,
@@ -105,9 +107,7 @@ stream = nm.Stream(
 
 # %%
 features = stream.run(
-    data=data,
     out_dir=PATH_OUT,
-    experiment_name=RUN_NAME,
     save_csv=True,
 )
 

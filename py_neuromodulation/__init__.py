@@ -2,7 +2,6 @@ import os
 import platform
 from pathlib import PurePath
 from importlib.metadata import version
-from py_neuromodulation.utils.logging import NMLogger
 
 #####################################
 # Globals and environment variables #
@@ -57,12 +56,6 @@ if KEY in LSL_DICT:
 user_features = {}
 
 
-######################################
-# Logger initialization and settings #
-######################################
-
-logger = NMLogger(__name__)  # logger initialization first to prevent circular import
-
 ####################################
 # API: Exposed classes and methods #
 ####################################
@@ -75,6 +68,7 @@ from .features.feature_processor import add_custom_feature, remove_custom_featur
 
 from .utils import types
 from .utils import io
+from .utils import data_writer
 
 from . import stream
 from . import analysis

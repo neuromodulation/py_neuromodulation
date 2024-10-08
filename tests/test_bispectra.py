@@ -24,7 +24,7 @@ def test_bispectrum():
     ch_names = raw.ch_names[4]
     ch_types = raw.get_channel_types()[4]
 
-    channels = nm.utils.set_channels(
+    channels = nm.utils.create_channels(
         ch_names=[ch_names],
         ch_types=[ch_types],
         reference="default",
@@ -40,6 +40,8 @@ def test_bispectrum():
     settings.features.bispectrum = True
 
     stream = nm.Stream(
+        data=np.expand_dims(data[3, :], axis=0),
+        experiment_name="test_bispectrum",
         settings=settings,
         channels=channels,
         path_grids=None,
@@ -51,9 +53,7 @@ def test_bispectrum():
     )
 
     features = stream.run(
-        np.expand_dims(data[3, :], axis=0),
         out_dir="./test_data",
-        experiment_name="test_bispectrum",
     )
 
     assert features["ECOG_RIGHT_1_Bispectrum_phase_mean_whole_fband_range"].sum() != 0

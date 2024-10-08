@@ -6,6 +6,16 @@ if TYPE_CHECKING:
     import numpy as np
     from py_neuromodulation import NMSettings
 
+USE_FREQ_RANGES: list[FeatureName] = [
+    "bandpass_filter",
+    "stft",
+    "fft",
+    "welch",
+    "bursts",
+    "coherence",
+    "nolds",
+    "bispectrum",
+]
 
 FEATURE_DICT: dict[FeatureName | str, str] = {
     "raw_hjorth": "Hjorth",

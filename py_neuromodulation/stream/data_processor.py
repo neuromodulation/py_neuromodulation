@@ -4,7 +4,7 @@ from time import time
 from typing import TYPE_CHECKING
 import numpy as np
 
-from py_neuromodulation import logger
+from py_neuromodulation.utils import logger
 from py_neuromodulation.utils.types import _PathLike
 from py_neuromodulation.features import FeatureProcessors
 from py_neuromodulation.utils import io
@@ -55,6 +55,9 @@ class DataProcessor:
         self.sfreq_raw: float = sfreq // 1
         self.line_noise: float | None = line_noise
         self.path_grids: _PathLike | None = path_grids
+        if path_grids is None:
+            import py_neuromodulation as nm
+            path_grids = nm.PYNM_DIR  #NOTE: could be optimized
         self.verbose: bool = verbose
 
         self.features_previous = None
@@ -229,7 +232,7 @@ class DataProcessor:
             coord_list=coord_list,  # type: ignore # None case handled above
         )
 
-    def process(self, data: np.ndarray) -> dict[str, float]:
+    def process(self, data: np.ndarray) -> dict[str, np.float64]:
         """Given a new data batch, calculate and return features.
 
         Parameters
@@ -315,11 +318,3 @@ class DataProcessor:
 
     def save_channels(self, out_dir: _PathLike, prefix: str) -> None:
         io.save_channels(self.channels, out_dir, prefix)
-
-    def save_features(
-        self,
-        feature_arr: "pd.DataFrame",
-        out_dir: _PathLike = "",
-        prefix: str = "",
-    ) -> None:
-        io.save_features(feature_arr, out_dir, prefix)

@@ -5,12 +5,16 @@ from typing import TYPE_CHECKING, cast
 import numpy as np
 
 from py_neuromodulation.utils.types import _PathLike
-from py_neuromodulation import logger, PYNM_DIR
+from py_neuromodulation.utils.logging import logger
+from py_neuromodulation import PYNM_DIR
+from mne.io._read_raw import _get_supported
 
 if TYPE_CHECKING:
     from mne_bids import BIDSPath
     from mne import io as mne_io
     import pandas as pd
+
+MNE_FORMATS = list(_get_supported().keys())
 
 
 def load_channels(
@@ -252,17 +256,6 @@ def save_channels(
     filename = "channels.csv" if not prefix else prefix + "_channels.csv"
     write_csv(nmchannels, out_dir / filename)
     logger.info(f"{filename} saved to {out_dir}")
-
-
-def save_features(
-    df_features: "pd.DataFrame",
-    out_dir: _PathLike = "",
-    prefix: str = "",
-) -> None:
-    out_dir = Path.cwd() if not out_dir else Path(out_dir)
-    filename = f"{prefix}_FEATURES.csv" if prefix else "_FEATURES.csv"
-    write_csv(df_features, out_dir / filename)
-    logger.info(f"{filename} saved to {str(out_dir)}")
 
 
 def save_sidecar(

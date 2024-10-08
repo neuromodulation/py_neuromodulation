@@ -9,7 +9,7 @@ from copy import deepcopy
 from pathlib import PurePath
 import pickle
 
-from py_neuromodulation import logger
+from py_neuromodulation.utils import logger
 
 from typing import Callable
 

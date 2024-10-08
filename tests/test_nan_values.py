@@ -10,11 +10,11 @@ def test_stream_with_none_data():
     data = np.random.random([2, 2000])
     data[0, :] = None
 
-    stream = nm.Stream(sfreq=fs, data=data)
-
-    features = stream.run(
-        data, out_dir="./test_data", experiment_name="test_stream_with_none_data"
+    stream = nm.Stream(
+        sfreq=fs, data=data, experiment_name="test_stream_with_none_data"
     )
+
+    features = stream.run(out_dir="./test_data")
 
     # assert if all features if name ch0 are None
     assert len(

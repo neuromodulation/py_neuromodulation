@@ -41,7 +41,7 @@ class NMDatabase:
 
         self.csv_path.parent.mkdir(parents=True, exist_ok=True)
 
-        self.conn = sqlite3.connect(self.db_path)
+        self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
         self.cursor = self.conn.cursor()
 
         # Database config and optimization, prioritize data integrity

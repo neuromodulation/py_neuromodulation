@@ -7,7 +7,7 @@ import py_neuromodulation as nm
 def get_example_settings(test_arr: np.ndarray) -> tuple[nm.NMSettings, pd.DataFrame]:
     settings = nm.NMSettings.get_fast_compute()
 
-    channels = nm.utils.get_default_channels_from_data(test_arr)
+    channels = nm.utils.create_default_channels_from_data(test_arr)
 
     return settings, channels
 
@@ -26,10 +26,17 @@ def test_label_add_single_target():
 
     settings.sampling_rate_features_hz = sampling_rate_features
 
-    stream = nm.Stream(sfreq=1000, channels=channels, settings=settings, verbose=True)
+    stream = nm.Stream(
+        data=arr_test,
+        sfreq=1000,
+        experiment_name="test_label_add_single_target",
+        channels=channels,
+        settings=settings,
+        verbose=True,
+    )
 
     df = stream.run(
-        arr_test, out_dir="./test_data", experiment_name="test_label_add_single_target"
+        out_dir="./test_data",
     )
 
     assert df[
@@ -58,13 +65,16 @@ def test_label_add_multidimensional_target():
 
     settings.sampling_rate_features_hz = sampling_rate_features
 
-    stream = nm.Stream(sfreq=1000, channels=channels, settings=settings, verbose=True)
-
-    df = stream.run(
-        arr_test,
-        out_dir="./test_data",
+    stream = nm.Stream(
+        data=arr_test,
         experiment_name="test_label_add_multidimensional_target",
+        sfreq=1000,
+        channels=channels,
+        settings=settings,
+        verbose=True,
     )
+
+    df = stream.run(out_dir="./test_data")
 
     for target_ch in ["target_ch_0", "target_ch_1"]:
         assert df[
@@ -85,10 +95,15 @@ def test_label_add_no_target():
 
     settings.sampling_rate_features_hz = sampling_rate_features
 
-    stream = nm.Stream(sfreq=1000, channels=channels, settings=settings, verbose=True)
-
-    df = stream.run(
-        arr_test, out_dir="./test_data", experiment_name="test_label_add_no_target"
+    stream = nm.Stream(
+        data=arr_test,
+        experiment_name="test_label_add_no_target",
+        sfreq=1000,
+        channels=channels,
+        settings=settings,
+        verbose=True,
     )
+
+    df = stream.run(out_dir="./test_data")
 
     assert all([col.startswith("ch") or col.startswith("time") for col in df.columns])

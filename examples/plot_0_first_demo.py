@@ -91,7 +91,7 @@ plt.title("Example random walk data")
 # DataFrame. There are some helper functions that let you create the
 # nm_channels without much effort:
 
-nm_channels = nm.utils.get_default_channels_from_data(data, car_rereferencing=True)
+nm_channels = nm.utils.create_default_channels_from_data(data, car_rereferencing=True)
 
 nm_channels
 
@@ -135,6 +135,7 @@ settings.features.sharpwave_analysis = True
 # We are now ready to go to instantiate the *Stream* and call the *run* method for feature estimation:
 
 stream = nm.Stream(
+    data=data,
     settings=settings,
     channels=nm_channels,
     verbose=True,
@@ -142,7 +143,7 @@ stream = nm.Stream(
     line_noise=50,
 )
 
-features = stream.run(data, save_csv=True)
+features = stream.run(save_csv=True)
 
 # %%
 # Feature Analysis

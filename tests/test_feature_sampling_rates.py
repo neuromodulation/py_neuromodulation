@@ -8,7 +8,7 @@ import py_neuromodulation as nm
 def get_example_settings(test_arr: np.ndarray) -> tuple[nm.NMSettings, pd.DataFrame]:
     settings = nm.NMSettings.get_fast_compute()
 
-    channels = nm.utils.get_default_channels_from_data(test_arr)
+    channels = nm.utils.create_default_channels_from_data(test_arr)
 
     return settings, channels
 
@@ -20,13 +20,16 @@ def test_different_sampling_rate_100Hz():
     settings, channels = get_example_settings(arr_test)
 
     settings.sampling_rate_features_hz = sampling_rate_features
-    stream = nm.Stream(sfreq=1000, channels=channels, settings=settings, verbose=True)
-
-    df = stream.run(
-        arr_test,
-        out_dir="./test_data",
+    stream = nm.Stream(
+        data=arr_test,
+        sfreq=1000,
+        channels=channels,
+        settings=settings,
+        verbose=True,
         experiment_name="test_different_sampling_rate_100Hz",
     )
+
+    df = stream.run(out_dir="./test_data")
 
     # check the difference between time points
     assert np.diff(df["time"].iloc[:2]) / 1000 == (1 / sampling_rate_features)
@@ -39,13 +42,16 @@ def test_different_sampling_rate_10Hz():
     settings, channels = get_example_settings(arr_test)
 
     settings.sampling_rate_features_hz = sampling_rate_features
-    stream = nm.Stream(sfreq=1000, channels=channels, settings=settings, verbose=True)
-
-    df = stream.run(
-        arr_test,
-        out_dir="./test_data",
+    stream = nm.Stream(
+        data=arr_test,
         experiment_name="test_different_sampling_rate_10Hz",
+        sfreq=1000,
+        channels=channels,
+        settings=settings,
+        verbose=True,
     )
+
+    df = stream.run(out_dir="./test_data")
 
     # check the difference between time points
 
@@ -59,13 +65,16 @@ def test_different_sampling_rate_1Hz():
     settings, channels = get_example_settings(arr_test)
 
     settings.sampling_rate_features_hz = sampling_rate_features
-    stream = nm.Stream(sfreq=1000, channels=channels, settings=settings, verbose=True)
-
-    df = stream.run(
-        arr_test,
-        out_dir="./test_data",
+    stream = nm.Stream(
+        data=arr_test,
         experiment_name="test_different_sampling_rate_1Hz",
+        sfreq=1000,
+        channels=channels,
+        settings=settings,
+        verbose=True,
     )
+
+    df = stream.run(out_dir="./test_data")
 
     # check the difference between time points
 
@@ -79,13 +88,16 @@ def test_different_sampling_rate_0DOT1Hz():
     settings, channels = get_example_settings(arr_test)
 
     settings.sampling_rate_features_hz = sampling_rate_features
-    stream = nm.Stream(sfreq=1000, channels=channels, settings=settings, verbose=True)
-
-    df = stream.run(
-        arr_test,
-        out_dir="./test_data",
+    stream = nm.Stream(
+        data=arr_test,
         experiment_name="test_different_sampling_rate_0DOT1Hz",
+        sfreq=1000,
+        channels=channels,
+        settings=settings,
+        verbose=True,
     )
+
+    df = stream.run(out_dir="./test_data")
 
     # check the difference between time points
 
@@ -112,13 +124,16 @@ def test_different_segment_lengths():
     settings.segment_length_features_ms = segment_length_features_ms
     settings.fft_settings.windowlength_ms = segment_length_features_ms
 
-    stream = nm.Stream(sfreq=1000, channels=channels, settings=settings, verbose=True)
-
-    df_seglength_800 = stream.run(
-        arr_test,
-        out_dir="./test_data",
+    stream = nm.Stream(
+        data=arr_test,
         experiment_name="test_different_segment_lengths_800",
+        sfreq=1000,
+        channels=channels,
+        settings=settings,
+        verbose=True,
     )
+
+    df_seglength_800 = stream.run(out_dir="./test_data")
 
     segment_length_features_ms = 1000
 
@@ -128,13 +143,16 @@ def test_different_segment_lengths():
     settings.segment_length_features_ms = segment_length_features_ms
     settings.fft_settings.windowlength_ms = segment_length_features_ms
 
-    stream = nm.Stream(sfreq=1000, channels=channels, settings=settings, verbose=True)
-
-    df_seglength_1000 = stream.run(
-        arr_test,
-        out_dir="./test_data",
+    stream = nm.Stream(
+        data=arr_test,
         experiment_name="test_different_segment_lengths_1000",
+        sfreq=1000,
+        channels=channels,
+        settings=settings,
+        verbose=True,
     )
+
+    df_seglength_1000 = stream.run(out_dir="./test_data")
     # check the difference between time points
 
     print(df_seglength_1000.columns)

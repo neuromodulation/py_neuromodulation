@@ -18,19 +18,17 @@ def test_setting_computation_time():
     settings.features.fft = False
     settings.features.raw_hjorth = True
     stream = nm.Stream(
+        experiment_name="test_setting_computation_time",
         sfreq=fs,
         data=data,
         sampling_rate_features_hz=sampling_rate_features_hz,
         settings=settings,
     )
 
-    features = stream.run(
-        out_dir="./test_data", experiment_name="test_setting_computation_time"
-    )
+    features = stream.run(out_dir="./test_data")
 
     # test if features up till the last sample was computed
     assert features.time.iloc[-1] == data_duration_s * fs
-
 
     # test that the time difference between two samples is the feature sampling rate
     assert (
@@ -56,13 +54,14 @@ def test_float_fs():
     settings.features.fft = False
     settings.features.raw_hjorth = True
     stream = nm.Stream(
+        experiment_name="test_float_fs",
         sfreq=fs,
         data=data,
         sampling_rate_features_hz=sampling_rate_features_hz,
         settings=settings,
     )
 
-    features = stream.run(out_dir="./test_data", experiment_name="test_float_fs")
+    features = stream.run(out_dir="./test_data")
 
     # test that the time difference between two samples is the feature sampling rate
     assert (

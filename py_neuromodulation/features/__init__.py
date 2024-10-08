@@ -28,4 +28,5 @@ from py_neuromodulation.features.feature_processor import (
     FeatureProcessors,
     add_custom_feature,
     remove_custom_feature,
+    USE_FREQ_RANGES,
 )

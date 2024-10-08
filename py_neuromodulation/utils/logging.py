@@ -64,3 +64,12 @@ class NMLogger(logging.Logger):
 
         self.addHandler(self.info_file_handler)
         self.addHandler(self.debug_file_handler)
+
+
+######################################
+# Logger initialization and settings #
+######################################
+
+logger = NMLogger(
+    "PyNeuromodulation"
+)  # logger initialization first to prevent circular import

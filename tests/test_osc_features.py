@@ -61,7 +61,12 @@ def test_fft_frequencyband_range_passing_nyquist_range():
     settings.frequency_ranges_hz = {"theta": [4, 8], "broadband": [10, 600]}
 
     with pytest.raises(AssertionError):
-        Stream(sfreq=sfreq, data=data, settings=settings)
+        Stream(
+            sfreq=sfreq,
+            experiment_name="test_fft_frequencyband_range_passing_nyquist_range",
+            data=data,
+            settings=settings,
+        ).run(out_dir="./test_data")
 
 
 def test_fft_zero_data():
@@ -176,7 +181,12 @@ def test_stft_wrong_frequencyband_range_init():
     settings.frequency_ranges_hz = {"theta": [4, 8], "broadband": [10, 600]}
 
     with pytest.raises(AssertionError):
-        Stream(settings=settings, data=data, sfreq=sfreq)
+        Stream(
+            settings=settings,
+            experiment_name="test_stft_wrong_frequencyband_range_init",
+            data=data,
+            sfreq=sfreq,
+        ).run(out_dir="./test_data")
 
 
 def test_stft_beta_osc():

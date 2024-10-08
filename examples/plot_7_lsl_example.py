@@ -11,6 +11,7 @@ in a similar manner, This time however integrating an lsl stream.
 # %%
 from matplotlib import pyplot as plt
 import py_neuromodulation as nm
+import time
 
 # %%
 # Let’s get the example data from the provided BIDS dataset and create the channels DataFrame.
@@ -32,7 +33,7 @@ import py_neuromodulation as nm
     coord_names,
 ) = nm.io.read_BIDS_data(PATH_RUN=PATH_RUN)
 
-channels = nm.utils.set_channels(
+channels = nm.utils.create_channels(
     ch_names=raw.ch_names,
     ch_types=raw.get_channel_types(),
     reference="default",
@@ -61,6 +62,9 @@ settings = nm.NMSettings.get_fast_compute()
 player = nm.stream.LSLOfflinePlayer(raw=raw, stream_name="example_stream")
 
 player.start_player(chunk_size=30)
+
+time.sleep(2)  # Wait for stream to start
+
 # %%
 # Creating the LSLStream object
 # -----------------------------
@@ -78,6 +82,9 @@ settings.features.coherence = False
 # %%
 stream = nm.Stream(
     sfreq=sfreq,
+    experiment_name=RUN_NAME,
+    is_stream_lsl=True,
+    stream_lsl_name="example_stream",
     channels=channels,
     settings=settings,
     coord_list=coord_list,
@@ -87,13 +94,7 @@ stream = nm.Stream(
 # %%
 # We then simply have to set the `stream_lsl` parameter to be `True` and specify the `stream_lsl_name`.
 
-features = stream.run(
-    is_stream_lsl=True,
-    plot_lsl=False,
-    stream_lsl_name="example_stream",
-    out_dir=PATH_OUT,
-    experiment_name=RUN_NAME,
-)
+features = stream.run(out_dir=PATH_OUT)
 
 # %%
 # We can then look at the computed features and check if the streamed data was processed correctly.

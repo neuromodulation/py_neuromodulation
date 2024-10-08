@@ -9,7 +9,7 @@ from py_neuromodulation.processing import ReReferencer
 def test_rereference_not_used_channels_no_reref(setup_databatch):
     ch_names, ch_types, bads, data_batch = setup_databatch
 
-    channels = nm.utils.set_channels(
+    channels = nm.utils.create_channels(
         ch_names=ch_names,
         ch_types=ch_types,
         reference="default",
@@ -35,7 +35,7 @@ def test_rereference_not_used_channels_no_reref(setup_databatch):
 def test_rereference_car(setup_databatch):
     ch_names, ch_types, bads, data_batch = setup_databatch
 
-    channels = nm.utils.set_channels(
+    channels = nm.utils.create_channels(
         ch_names=ch_names,
         ch_types=ch_types,
         reference="default",
@@ -66,7 +66,7 @@ def test_rereference_car(setup_databatch):
 def test_rereference_bp(setup_databatch):
     ch_names, ch_types, bads, data_batch = setup_databatch
 
-    channels = nm.utils.set_channels(
+    channels = nm.utils.create_channels(
         ch_names=ch_names,
         ch_types=ch_types,
         reference="default",
@@ -101,7 +101,7 @@ def test_rereference_bp(setup_databatch):
 def test_rereference_wrong_rererference_column_name(setup_databatch):
     ch_names, ch_types, bads, data_batch = setup_databatch
 
-    channels = nm.utils.set_channels(
+    channels = nm.utils.create_channels(
         ch_names=ch_names,
         ch_types=ch_types,
         reference="default",
@@ -119,7 +119,7 @@ def test_rereference_wrong_rererference_column_name(setup_databatch):
 def test_rereference_muliple_channels(setup_databatch):
     ch_names, ch_types, bads, data_batch = setup_databatch
 
-    channels = nm.utils.set_channels(
+    channels = nm.utils.create_channels(
         ch_names=ch_names,
         ch_types=ch_types,
         reference="default",
@@ -146,7 +146,7 @@ def test_rereference_muliple_channels(setup_databatch):
 def test_rereference_same_channel(setup_databatch):
     ch_names, ch_types, bads, data_batch = setup_databatch
 
-    channels = nm.utils.set_channels(
+    channels = nm.utils.create_channels(
         ch_names=ch_names,
         ch_types=ch_types,
         reference="default",

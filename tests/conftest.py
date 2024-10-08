@@ -57,7 +57,7 @@ def setup_default_stream_fast_compute() -> tuple[np.ndarray, nm.Stream]:
         coord_names,
     ) = nm.io.read_BIDS_data(PATH_RUN=PATH_RUN)
 
-    channels = nm.utils.set_channels(
+    channels = nm.utils.create_channels(
         ch_names=raw.ch_names,
         ch_types=raw.get_channel_types(),
         reference="default",
@@ -74,6 +74,7 @@ def setup_default_stream_fast_compute() -> tuple[np.ndarray, nm.Stream]:
     settings.features.fooof = True
 
     stream = nm.Stream(
+        data=data,
         settings=settings,
         channels=channels,
         path_grids=None,

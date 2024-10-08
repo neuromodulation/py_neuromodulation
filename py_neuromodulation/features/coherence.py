@@ -11,7 +11,7 @@ from py_neuromodulation.utils.types import (
     FrequencyRange,
     NMBaseModel,
 )
-from py_neuromodulation import logger
+from py_neuromodulation.utils import logger
 
 if TYPE_CHECKING:
     from py_neuromodulation import NMSettings

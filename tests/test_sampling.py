@@ -24,15 +24,14 @@ def get_features(time_end_ms: int, segment_length_features_ms: int):
 
     stream = nm.Stream(
         sfreq=1000,
+        experiment_name="test_feature_sampling_rates",
         data=data,
         sampling_rate_features_hz=10,
         verbose=False,
         settings=settings,
     )
 
-    features = stream.run(
-        data, out_dir="./test_data", experiment_name="test_feature_sampling_rates"
-    )
+    features = stream.run(out_dir="./test_data")
     return features
 
 
