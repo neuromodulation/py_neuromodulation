@@ -78,6 +78,7 @@ class LSLOfflinePlayer:
         self._streaming_complete = mp.Event()
         self._player_process = None
         self._stop_flag = mp.Event()
+        self._started_streaming = mp.Event()
 
         LSLOfflinePlayer._instances.add(self)  # Register instancwe
         if LSLOfflinePlayer._atexit_registered:
@@ -117,9 +118,12 @@ class LSLOfflinePlayer:
                 self.n_repeat,
                 self._stop_flag,
                 self._streaming_complete,
+                self._started_streaming,
             ),
         )
         self._player_process.start()
+        while not self._started_streaming.is_set():
+            time.sleep(0.1)
 
         if block:
             try:
@@ -128,7 +132,7 @@ class LSLOfflinePlayer:
                 print("\nKeyboard interrupt received. Stopping the player...")
                 self.stop_player()
 
-    def _run_player(self, chunk_size, n_repeat, stop_flag, streaming_complete):
+    def _run_player(self, chunk_size, n_repeat, stop_flag, streaming_complete, started_streaming):
         from mne_lsl.player import PlayerLSL
 
         signal.signal(signal.SIGINT, lambda: stop_flag.set())
@@ -140,6 +144,7 @@ class LSLOfflinePlayer:
             n_repeat=n_repeat,
         )
         player = player.start()
+        started_streaming.set()
 
         try:
             while not stop_flag.is_set() and not player._end_streaming:

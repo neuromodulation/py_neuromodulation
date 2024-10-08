@@ -109,22 +109,6 @@ class MNELSLGenerator(DataGeneratorABC):
                 if stream_start_time is None:
                     stream_start_time = timestamp[0]
 
-                for i in range(self._n_seconds_wait_before_disconnect):
-                    if (
-                        data is not None
-                        and check_data is not None
-                        and np.allclose(data, check_data, atol=1e-7, rtol=1e-7)
-                    ):
-                        logger.warning(
-                            f"No new data incoming. Disconnecting stream in {3-i} seconds."
-                        )
-                        time.sleep(1)
-                        i += 1
-                        if i == self._n_seconds_wait_before_disconnect:
-                            self.stream.disconnect()
-                            logger.warning("Stream disconnected.")
-                            break
-
                 yield timestamp, data
 
                 logger.info(f"Stream time: {timestamp[-1] - stream_start_time}")
