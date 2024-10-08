@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 from collections.abc import Iterator
 import numpy as np
 
-import multiprocessing as mp
 from contextlib import suppress
 
 from py_neuromodulation.features import USE_FREQ_RANGES
@@ -35,7 +34,6 @@ class Stream:
     ) -> None:
         self.verbose = verbose
         self.is_running = False
-        
 
     async def run(
         self,
@@ -72,7 +70,7 @@ class Stream:
         self.is_lslstream = type(data_generator) != RawDataGenerator
 
         prev_batch_end = 0
-        for timestamps, data_batch in data_generator:
+        for timestamps, data_batch in next(data_generator):
             self.is_running = True
             if self.stream_handling_queue is not None:
                 await asyncio.sleep(0.001)
@@ -102,7 +100,8 @@ class Stream:
             if self.verbose:
                 logger.info("Time: %.2f", feature_dict["time"] / 1000)
 
-            feature_dict = data_generator.add_target(feature_dict, data_batch)
+            if not self.is_lslstream:
+                feature_dict = data_generator.add_target(feature_dict, data_batch)
 
             with suppress(TypeError):  # Need this because some features output None
                 for key, value in feature_dict.items():

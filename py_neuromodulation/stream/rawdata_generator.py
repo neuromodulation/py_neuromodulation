@@ -5,7 +5,7 @@ from py_neuromodulation.utils import create_channels
 from .data_generator_abc import DataGeneratorABC
 import numpy as np
 import pandas as pd
-from typing import Tuple
+from typing import Generator
 
 class RawDataGenerator(DataGeneratorABC):
     """
@@ -141,19 +141,18 @@ class RawDataGenerator(DataGeneratorABC):
 
         return feature_dict
 
-    def __iter__(self):
-        return self
+    def __next__(self) -> Generator[np.ndarray, np.ndarray, None]:
+        while True:
+            start = self.stride * self.batch_counter
+            end = start + self.segment_length
 
-    def __next__(self) -> Tuple[np.ndarray, np.ndarray]:
-        start = self.stride * self.batch_counter
-        end = start + self.segment_length
+            self.batch_counter += 1
 
-        self.batch_counter += 1
+            start_idx = int(start)
+            end_idx = int(end)
 
-        start_idx = int(start)
-        end_idx = int(end)
+            if end_idx > self.data.shape[1]:
+                #raise StopIteration
+                break
 
-        if end_idx > self.data.shape[1]:
-            raise StopIteration
-
-        return np.arange(start, end) / self.sfreq, self.data[:, start_idx:end_idx]
+            yield np.arange(start, end) / self.sfreq, self.data[:, start_idx:end_idx]
