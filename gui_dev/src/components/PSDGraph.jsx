@@ -10,7 +10,6 @@ import {
 } from "@mui/material";
 import { CollapsibleBox } from "./CollapsibleBox"; 
 
-
 const defaultPsdData = { frequencies: [], powers: [] };
 
 const generateColors = (numColors) => {
@@ -22,6 +21,15 @@ const generateColors = (numColors) => {
   return colors;
 };
 
+const fftFeatures = [
+  "fft_theta_mean",
+  "fft_alpha_mean",
+  "fft_low_beta_mean",
+  "fft_high_beta_mean",
+  "fft_low_gamma_mean",
+  "fft_high_gamma_mean",
+];
+
 export const PSDGraph = () => {
   const channels = useSessionStore((state) => state.channels);
 
@@ -29,19 +37,56 @@ export const PSDGraph = () => {
 
   const hasInitialized = useRef(false);
 
-  // TODO connect this to the true data source --> CBOR? 
-  const socketPsdData = useSocketStore(
-    (state) => state.psdData,
-    (prev, next) => prev === next
-  );
+  const socketPsdData = useSocketStore((state) => state.graphData);
   
-  // Might need to adjust this too
-  const psdData = useMemo(() => {
-    if (!Array.isArray(selectedChannels) || !socketPsdData) return [];
-    return selectedChannels.map((channelName) => {
-      const channelData = socketPsdData[channelName] || defaultPsdData;
-      return { ...channelData, channelName };
+  const psdData = useMemo(() => { 
+    if (!socketPsdData) return [];
+    console.log("Socket PSD Data:", socketPsdData);
+    const dataByChannel = {};
+
+    Object.entries(socketPsdData).forEach(([key, value]) => {
+      const parts = key.split('_');
+      if (parts.length < 4) return;
+
+      const channelName = parts.slice(0, 3).join('_');
+      const featureName = parts.slice(3).join('_');
+
+      if (!fftFeatures.includes(featureName)) return; 
+
+      if (!dataByChannel[channelName]) {
+        dataByChannel[channelName] = {
+          channelName,
+          features: [],
+          values: [],
+        };
+      }
+
+      dataByChannel[channelName].features.push(featureName);
+      dataByChannel[channelName].values.push(value);
     });
+
+    const selectedData = selectedChannels.map((channelName) => {
+      const channelData = dataByChannel[channelName];
+      if(channelData) {
+        const sortedValues = fftFeatures.map((feature) => { //TODO Currently we map the average frequency bands to the graph -> Should we include more data here?
+          const index = channelData.features.indexOf(feature);
+          return index !== -1 ? channelData.values[index] : null;
+        });
+        return {
+          channelName,
+          features: fftFeatures.map((f) => f.replace('_mean', '').replace('fft_', '')),
+          values: sortedValues,
+        };
+      } else {
+        return {
+          channelName, 
+          features: fftFeatures.map((f) => f.replace('_mean', '').replace('fft_', '')),
+          values: fftFeatures.map(() =>  null),
+        }
+      }
+    });
+
+    return selectedData;
   }, [socketPsdData, selectedChannels]);
 
   const graphRef = useRef(null);
@@ -59,7 +104,8 @@ export const PSDGraph = () => {
 
   useEffect(() => {
     if (channels.length > 0 && !hasInitialized.current) {
-      setSelectedChannels(channels.map((channel) => channel.name));
+      const availableChannels = channels.map((channel) => channel.name);
+      setSelectedChannels(availableChannels);
       hasInitialized.current = true;
     }
   }, [channels]);
@@ -79,8 +125,9 @@ export const PSDGraph = () => {
       paper_bgcolor: "#333",
       plot_bgcolor: "#333",
       xaxis: {
-        title: { text: "Frequency (Hz)", font: { color: "#f4f4f4" } },
+        title: { text: "Frequency Band", font: { color: "#f4f4f4" } },
         color: "#cccccc",
+        type: 'category',
       },
       yaxis: {
         title: { text: "Power", font: { color: "#f4f4f4" } },
@@ -94,16 +141,16 @@ export const PSDGraph = () => {
     const colors = generateColors(selectedChannels.length);
 
     const traces = psdData.map((data, idx) => ({
-      x: data.frequencies,
-      y: data.powers,
+      x: data.features,
+      y: data.values,
       type: "scatter",
-      mode: "lines",
+      mode: "lines+markers",
       name: data.channelName,
       line: { simplify: false, color: colors[idx] },
     }));
 
     console.log("Traces to plot:", traces);
-
+    // TODO: Fix the typing error -> How to solve this in jsx? 
     Plotly.react(graphRef.current, traces, layout, {
       responsive: true,
       displayModeBar: false,
@@ -130,6 +177,7 @@ export const PSDGraph = () => {
         </Typography>
         <Box sx={{ ml: 2, minWidth: 200 }}> 
           <CollapsibleBox title="Channel Selection" defaultExpanded={true}>
+          {/* TODO: Fix the typing errors -> How to solve this in jsx?  */}
             <Box display="flex" flexDirection="column">
               {channels.map((channel, index) => (
                 <FormControlLabel
