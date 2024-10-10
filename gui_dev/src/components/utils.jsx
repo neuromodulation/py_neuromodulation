@@ -30,3 +30,14 @@ export const LinkButton = ({ to, children, ...props }) => {
     </Button>
   );
 };
+
+export const getChannelAndFeature = (availableChannels, keystr) => {
+  const channelName = availableChannels.find((channel) => keystr.startsWith(channel + "_"));
+       
+  if (!channelName) return {};
+
+  const restofstring = keystr.slice(channelName.length + 1);
+
+  return { channelName, restofstring };
+};
+

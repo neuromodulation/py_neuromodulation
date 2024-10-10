@@ -9,7 +9,7 @@ import {
   Checkbox,
 } from "@mui/material";
 import { CollapsibleBox } from "./CollapsibleBox";
-
+import { getChannelAndFeature } from "./utils";
 
 // TODO redundant and might be candidate for refactor
 const generateColors = (numColors) => {
@@ -29,6 +29,7 @@ export const RawDataGraph = ({
 }) => {
   const graphData = useSocketStore((state) => state.graphData);
   const channels = useSessionStore((state) => state.channels);
+  const availableChannels = channels.map((channel) => channel.name);
   const [selectedChannels, setSelectedChannels] = useState([]);
   const hasInitialized = useRef(false);
   const [rawData, setRawData] = useState({});
@@ -93,15 +94,13 @@ export const RawDataGraph = ({
     if (!graphData || Object.keys(graphData).length === 0) return;
 
     const latestData = graphData;
-
     const updatedRawData = { ...rawData };
 
     Object.entries(latestData).forEach(([key, value]) => {
-      const parts = key.split('_');
-      if (parts.length < 4) return;
 
-      const channelName = parts.slice(0, 3).join('_');
-      const featureName = parts.slice(3).join('_');
+      const { channelName = '', featureName = '' } = getChannelAndFeature(availableChannels, key);
+      
+      if (!channelName) return;
 
       if (featureName !== 'raw') return;
 

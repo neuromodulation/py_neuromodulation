@@ -9,6 +9,7 @@ import {
   Checkbox,
 } from "@mui/material";
 import { CollapsibleBox } from "./CollapsibleBox"; 
+import { getChannelAndFeature } from "./utils";
 
 const defaultPsdData = { frequencies: [], powers: [] };
 
@@ -35,6 +36,8 @@ export const PSDGraph = () => {
 
   const [selectedChannels, setSelectedChannels] = useState([]);
 
+  const availableChannels = channels.map((channel) => channel.name);
+
   const hasInitialized = useRef(false);
 
   const socketPsdData = useSocketStore((state) => state.graphData);
@@ -45,11 +48,8 @@ export const PSDGraph = () => {
     const dataByChannel = {};
 
     Object.entries(socketPsdData).forEach(([key, value]) => {
-      const parts = key.split('_');
-      if (parts.length < 4) return;
-
-      const channelName = parts.slice(0, 3).join('_');
-      const featureName = parts.slice(3).join('_');
+      const { channelName = '', featureName = '' } = getChannelAndFeature(availableChannels, key);
+      if (!channelName) return;
 
       if (!fftFeatures.includes(featureName)) return; 
 
