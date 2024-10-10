@@ -1,6 +1,6 @@
 from typing import Any, get_type_hints
 from pydantic.fields import FieldInfo, _FieldInfoInputs, _FromFieldInfoInputs
-from pydantic import BaseModel, ConfigDict, model_serializer
+from pydantic import BaseModel, ConfigDict, SerializationInfo, model_serializer
 from pydantic_core import PydanticUndefined
 from typing_extensions import Unpack, TypedDict
 from pprint import pformat
@@ -9,7 +9,7 @@ from pprint import pformat
 class _NMExtraFieldInputs(TypedDict, total=False):
     """Additional fields to add on top of the pydantic FieldInfo"""
 
-    meta: dict[str, Any]
+    custom_metadata: dict[str, Any]
 
 
 class _NMFieldInfoInputs(_FieldInfoInputs, _NMExtraFieldInputs, total=False):
@@ -29,17 +29,7 @@ class NMFieldInfo(FieldInfo):
     _default_values = {}
 
     def __init__(self, **kwargs: Unpack[_NMFieldInfoInputs]) -> None:
-        extra_fields = get_type_hints(_NMExtraFieldInputs)
-        for field, field_type in extra_fields.items():
-            # If no default value, try to instantiate the field type with no arguments, if it fails, set to None
-            try:
-                value = (
-                    kwargs.pop(field, self._default_values.get(field, field_type())),  # type: ignore
-                )
-            except Exception:
-                value = None
-
-            setattr(self, field, value)
+        self.custom_metadata = kwargs.pop("custom_metadata", {})
         super().__init__(**kwargs)
 
     @staticmethod
@@ -94,36 +84,34 @@ class NMBaseModel(BaseModel):
     def __setitem__(self, key, value) -> None:
         setattr(self, key, value)
 
-    @classmethod
-    def get_fields(cls) -> dict[str, NMFieldInfo]:
-        return cls.model_fields  # type: ignore
+    @property
+    def fields(self) -> dict[str, FieldInfo | NMFieldInfo]:
+        return self.model_fields  # type: ignore
 
-    @model_serializer
-    def serialize_model(self) -> dict[str, Any]:
-        result = {"__field_type__": self.__class__.__name__}
-        for field_name, field_info in self.model_fields.items():
+    def serialize_with_metadata(self):
+        result: dict[str, Any] = {"__field_type__": self.__class__.__name__}
+
+        for field_name, field_info in self.fields.items():
             value = getattr(self, field_name)
             if isinstance(value, NMBaseModel):
-                result[field_name] = value.serialize_model()
+                result[field_name] = value.serialize_with_metadata()
             elif isinstance(value, list):
                 result[field_name] = [
-                    item.serialize_model() if isinstance(item, NMBaseModel) else item
+                    item.serialize_with_metadata()
+                    if isinstance(item, NMBaseModel)
+                    else item
                     for item in value
                 ]
             elif isinstance(value, dict):
                 result[field_name] = {
-                    k: v.serialize_model() if isinstance(v, NMBaseModel) else v
+                    k: v.serialize_with_metadata() if isinstance(v, NMBaseModel) else v
                     for k, v in value.items()
                 }
             else:
                 result[field_name] = value
 
             # Extract unit information from Annotated type
-            if get_origin(field_info.annotation) is Annotated:
-                metadata = get_args(field_info.annotation)[1:]
-                for item in metadata:
-                    if isinstance(item, dict) and "unit" in item:
-                        result[f"{field_name}_metadata"] = {"unit": item["unit"]}
-                        break
-
+            if isinstance(field_info, NMFieldInfo):
+                for tag, value in field_info.custom_metadata.items():
+                    result[f"__{tag}__"] = value
         return result

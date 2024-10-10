@@ -1,20 +1,13 @@
 from os import PathLike
 from math import isnan
-from typing import (
-    Literal,
-    Protocol,
-    TYPE_CHECKING,
-    runtime_checkable,
-)
-from pydantic import (
-    BaseModel,
-    model_validator,
-)
+from typing import Literal, TYPE_CHECKING
+from pydantic import BaseModel, model_validator
 from pydantic_core import ValidationError, InitErrorDetails
 from .pydantic_extensions import NMBaseModel, NMField
 
 from collections.abc import Sequence
 from datetime import datetime
+
 
 if TYPE_CHECKING:
     import numpy as np
@@ -25,7 +18,6 @@ if TYPE_CHECKING:
 ###################################
 
 _PathLike = str | PathLike
-
 
 FeatureName = Literal[
     "raw_hjorth",
@@ -69,8 +61,7 @@ NormMethod = Literal[
 ###################################
 
 
-@runtime_checkable
-class NMFeature(Protocol):
+class NMFeature:
     def __init__(
         self, settings: "NMSettings", ch_names: Sequence[str], sfreq: int | float
     ) -> None: ...
@@ -91,17 +82,15 @@ class NMFeature(Protocol):
         ...
 
 
-class NMPreprocessor(Protocol):
-    def __init__(self, sfreq: float, settings: "NMSettings") -> None: ...
-
+class NMPreprocessor:
     def process(self, data: "np.ndarray") -> "np.ndarray": ...
 
 
 class FrequencyRange(NMBaseModel):
     # frequency_low_hz: Annotated[list[float], {"unit": "Hz"}] = Field(gt=0)
     # frequency_high_hz: FrequencyHz = Field(gt=0)
-    frequency_low_hz: float = NMField(gt=0, meta={"unit": "Hz"})
-    frequency_high_hz: float = NMField(gt=0, meta={"unit": "Hz"})
+    frequency_low_hz: float = NMField(gt=0, custom_metadata={"unit": "Hz"})
+    frequency_high_hz: float = NMField(gt=0, custom_metadata={"unit": "Hz"})
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

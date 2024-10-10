@@ -138,7 +138,11 @@ export const FrequencyRangeList = ({
 
     const updatedRanges = {
       ...ranges,
-      [newName]: { frequency_low_hz: 1, frequency_high_hz: 500 },
+      [newName]: {
+        __field_type__: "FrequencyRange",
+        frequency_low_hz: 1,
+        frequency_high_hz: 500,
+      },
     };
     onChange(["frequency_ranges_hz"], updatedRanges);
 
@@ -147,7 +151,7 @@ export const FrequencyRangeList = ({
   };
 
   return (
-    <Stack>
+    <Stack gap={1}>
       {rangeOrder.map((name, index) => (
         <FrequencyRange
           key={index}

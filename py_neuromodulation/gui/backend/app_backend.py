@@ -15,6 +15,7 @@ from fastapi import (
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import ValidationError
 
 from . import app_pynm
 from .app_socket import WebSocketManager
@@ -93,23 +94,62 @@ class PyNMBackend(FastAPI):
         ####################
         ##### SETTINGS #####
         ####################
-
         @self.get("/api/settings")
-        async def get_settings():
-            return self.pynm_state.settings.process_for_frontend()
+        async def get_settings(
+            reset: bool = Query(False, description="Reset settings to default"),
+        ):
+            if reset:
+                settings = NMSettings.get_default()
+            else:
+                settings = self.pynm_state.settings
+
+            return settings.serialize_with_metadata()
 
         @self.post("/api/settings")
-        async def update_settings(data: dict):
-            print(data)
+        async def update_settings(data: dict, validate_only: bool = Query(False)):
             try:
-                self.pynm_state.settings = NMSettings.model_validate(data)
-                self.logger.debug(self.pynm_state.settings.features)
-                return self.pynm_state.settings.model_dump()
-            except ValueError as e:
-                self.logger.error(f"Error updating settings: {e}")
+                # First, validate with Pydantic
+                try:
+                    validated_settings = NMSettings.model_validate(data)
+                except ValidationError as e:
+                    if not validate_only:
+                        # If validation failed but we wanted to upload, return error
+                        self.logger.error(f"Error validating settings: {e}")
+                        raise HTTPException(
+                            status_code=422,
+                            detail={
+                                "error": "Error validating settings",
+                                "details": str(e),
+                            },
+                        )
+                    # Else return list of errors
+                    return {
+                        "valid": False,
+                        "errors": [err for err in e.errors()],
+                        "details": str(e),
+                    }
+
+                # If validation succesful, return or update settings
+                if validate_only:
+                    return {
+                        "valid": True,
+                        "settings": validated_settings.serialize_with_metadata(),
+                    }
+
+                self.pynm_state.settings = validated_settings
+                self.logger.info("Settings successfully updated")
+
+                return {
+                    "valid": True,
+                    "settings": self.pynm_state.settings.serialize_with_metadata(),
+                }
+
+            # If something else than validation went wrong, return error
+            except Exception as e:
+                self.logger.error(f"Error validating/updating settings: {e}")
                 raise HTTPException(
                     status_code=422,
-                    detail={"error": "Validation failed", "details": str(e)},
+                    detail={"error": "Error uploading settings", "details": str(e)},
                 )
 
         ########################
