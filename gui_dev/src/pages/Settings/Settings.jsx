@@ -4,6 +4,7 @@ import {
   Button,
   ButtonGroup,
   InputAdornment,
+  Popover,
   Stack,
   Switch,
   TextField,
@@ -14,7 +15,7 @@ import { Link } from "react-router-dom";
 import { CollapsibleBox, TitledBox } from "@/components";
 import { FrequencyRangeList } from "./FrequencyRange";
 import { Dropdown } from "./Dropdown";
-import { useSettingsStore } from "@/stores";
+import { useSettingsStore, useStatusBarContent } from "@/stores";
 import { filterObjectByKeys } from "@/utils/functions";
 
 const formatKey = (key) => {
@@ -116,6 +117,17 @@ const SettingsField = ({ path, Component, label, value, onChange, error }) => {
   );
 };
 
+// Function to get the error corresponding to this field or its children
+const getFieldError = (fieldPath, errors) => {
+  if (!errors) return null;
+
+  return errors.find((error) => {
+    const errorPath = error.loc.join(".");
+    const currentPath = fieldPath.join(".");
+    return errorPath === currentPath || errorPath.startsWith(currentPath + ".");
+  });
+};
+
 const SettingsSection = ({
   settings,
   title = null,
@@ -124,29 +136,32 @@ const SettingsSection = ({
   errors,
 }) => {
   const boxTitle = title ? title : formatKey(path[path.length - 1]);
+  /*
+  3 possible cases:
+  1. Primitive type || 2. Object with component -> Don't iterate, render directly
+  3. Object without component or 4. Array -> Iterate and render recursively
+  */
 
-  // Function to get the error corresponding to this field or its children
-  const getFieldError = (fieldPath) => {
-    if (!errors) return null;
+  const type = typeof settings;
+  const isObject = type === "object" && !Array.isArray(settings);
+  const isArray = Array.isArray(settings);
 
-    return errors.find((error) => {
-      const errorPath = error.loc.join(".");
-      const currentPath = fieldPath.join(".");
-      return (
-        errorPath === currentPath || errorPath.startsWith(currentPath + ".")
-      );
-    });
-  };
+  // __field_type__ should be always present
+  if (isObject && !settings.__field_type__) {
+    console.log(settings);
+    throw new Error("Invalid settings object");
+  }
+  const fieldType = isObject ? settings.__field_type__ : type;
+  const Component = componentRegistry[fieldType];
 
-  // If we receive a primitive value, we need to render a component
-  if (typeof settings !== "object") {
-    const Component = componentRegistry[typeof settings];
+  // Case 1: Primitive type -> Don't iterate, render directly
+  if (!isObject && !isArray) {
     if (!Component) {
-      console.error(`Invalid component type: ${typeof settings}`);
+      console.error(`Invalid component type: ${type}`);
       return null;
     }
 
-    const error = getFieldError(path);
+    const error = getFieldError(path, errors);
 
     return (
       <SettingsField
@@ -160,49 +175,98 @@ const SettingsSection = ({
     );
   }
 
-  // If we receive a nested object, we iterate over it and render recursively
-  return (
-    <>
-      {Object.entries(settings).map(([key, value]) => {
-        if (key === "__field_type__") return null;
-        if (value === null) return null;
+  // Case 2: Object with component -> Don't iterate, render directly
+  if (isObject && Component) {
+    return (
+      <SettingsField
+        Component={Component}
+        label={boxTitle}
+        value={settings}
+        onChange={onChange}
+        path={path}
+        error={getFieldError(path, errors)}
+      />
+    );
+  }
 
-        const newPath = [...path, key];
-        const label = key;
-        const isPydanticModel =
-          typeof value === "object" && "__field_type__" in value;
+  // Case 3: Object without component or 4. Array -> Iterate and render recursively
+  if ((isObject && !Component) || isArray) {
+    return (
+      <TitledBox title={boxTitle} sx={{ borderRadius: 3 }}>
+        {/* Handle recursing through both objects and arrays */}
+        {(isArray ? settings : Object.entries(settings)).map((item, index) => {
+          const [key, value] = isArray ? [index.toString(), item] : item;
+          if (key.startsWith("__")) return null; // Skip metadata fields
 
-        const error = getFieldError(newPath);
+          const newPath = [...path, key];
 
-        const fieldType = isPydanticModel ? value.__field_type__ : typeof value;
-
-        const Component = componentRegistry[fieldType];
-
-        if (Component) {
           return (
-            <SettingsField
-              key={`${key}_settingsField`}
+            <SettingsSection
+              key={`${newPath.join(".")}_settingsSection`}
+              settings={value}
               path={newPath}
-              Component={Component}
-              label={formatKey(label)}
-              value={value}
               onChange={onChange}
-              error={error}
+              errors={errors}
             />
           );
-        } else {
-          return (
-            <TitledBox title={boxTitle} sx={{ borderRadius: 3 }}>
-              <SettingsSection
-                key={`${key}_settingsSection`}
-                settings={value}
-                path={newPath}
-                onChange={onChange}
-              />
-            </TitledBox>
-          );
-        }
-      })}
+        })}
+      </TitledBox>
+    );
+  }
+
+  // Default case: return null and log an error
+  console.error(`Invalid settings object, returning null`);
+  return null;
+};
+
+const StatusBarSettingsInfo = () => {
+  const validationErrors = useSettingsStore((state) => state.validationErrors);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleOpenErrorsPopover = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseErrorsPopover = () => {
+    setAnchorEl(null);
+  };
+
+  return (
+    <>
+      {validationErrors?.length > 0 && (
+        <>
+          <Typography
+            variant="body1"
+            color="tomato"
+            onClick={handleOpenErrorsPopover}
+            sx={{ cursor: "pointer" }}
+          >
+            {validationErrors?.length} errors found in Settings
+          </Typography>
+          <Popover
+            open={open}
+            anchorEl={anchorEl}
+            onClose={handleCloseErrorsPopover}
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "center",
+            }}
+            transformOrigin={{
+              vertical: "bottom",
+              horizontal: "center",
+            }}
+          >
+            <Stack px={2} py={1} alignItems="flex-start">
+              {validationErrors.map((error, index) => (
+                <Typography key={index} variant="body1" color="tomato">
+                  {index} - [{error.type}] {error.msg}
+                </Typography>
+              ))}
+            </Stack>
+          </Popover>
+        </>
+      )}
     </>
   );
 };
@@ -213,6 +277,7 @@ export const Settings = () => {
   const uploadSettings = useSettingsStore((state) => state.uploadSettings);
   const resetSettings = useSettingsStore((state) => state.resetSettings);
   const validationErrors = useSettingsStore((state) => state.validationErrors);
+  useStatusBarContent(StatusBarSettingsInfo);
 
   // This is needed so that the frequency ranges stay in order between updates
   const frequencyRangeOrder = useSettingsStore(
@@ -228,6 +293,8 @@ export const Settings = () => {
   useEffect(() => {
     uploadSettings(null, true); // validateOnly = true
   }, [settings]);
+
+  // Inject validation error info into status bar
 
   // This has to be after all the hooks, otherwise React will complain
   if (!settings) {
