@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useSocketStore } from "@/stores/socketStore"; 
 import { useSessionStore } from "@/stores/sessionStore";
-import Plotly from "plotly.js-basic-dist-min";
+import Plot from 'react-plotly.js';
 import {
   Box,
   Typography,
@@ -10,17 +10,6 @@ import {
 } from "@mui/material";
 import { CollapsibleBox } from "./CollapsibleBox"; 
 import { getChannelAndFeature } from "./utils";
-
-const defaultPsdData = { frequencies: [], powers: [] };
-
-const generateColors = (numColors) => {
-  const colors = [];
-  for (let i = 0; i < numColors; i++) {
-    const hue = (i * 360) / numColors; 
-    colors.push(`hsl(${hue}, 100%, 50%)`);
-  }
-  return colors;
-};
 
 const fftFeatures = [
   "fft_theta_mean",
@@ -31,7 +20,7 @@ const fftFeatures = [
   "fft_high_gamma_mean",
 ];
 
-export const PSDGraph = () => {
+export const BandPowerGraph = () => {
   const channels = useSessionStore((state) => state.channels);
 
   const [selectedChannels, setSelectedChannels] = useState([]);
@@ -44,12 +33,11 @@ export const PSDGraph = () => {
   
   const psdData = useMemo(() => { 
     if (!socketPsdData) return [];
-    // console.log("Socket PSD Data:", socketPsdData);
     const dataByChannel = {};
 
     Object.entries(socketPsdData).forEach(([key, value]) => {
       const { channelName = '', featureName = '' } = getChannelAndFeature(availableChannels, key);
-      if (!channelName) return;
+      if (!channelName || !featureName) return;
 
       if (!fftFeatures.includes(featureName)) return; 
 
@@ -62,35 +50,33 @@ export const PSDGraph = () => {
       }
 
       dataByChannel[channelName].features.push(featureName);
-      dataByChannel[channelName].values.push(value);
+      dataByChannel[channelName].values.push(Number(value) || 0);
     });
 
     const selectedData = selectedChannels.map((channelName) => {
       const channelData = dataByChannel[channelName];
-      if(channelData) {
-        const sortedValues = fftFeatures.map((feature) => { //TODO Currently we map the average frequency bands to the graph -> Should we include more data here?
+      const sortedValues = fftFeatures.map((feature) => {
+        let value = 0;
+        if (channelData) {
           const index = channelData.features.indexOf(feature);
-          return index !== -1 ? channelData.values[index] : null;
-        });
-        return {
-          channelName,
-          features: fftFeatures.map((f) => f.replace('_mean', '').replace('fft_', '')),
-          values: sortedValues,
-        };
-      } else {
-        return {
-          channelName, 
-          features: fftFeatures.map((f) => f.replace('_mean', '').replace('fft_', '')),
-          values: fftFeatures.map(() =>  null),
+          value = index !== -1 ? Number(channelData.values[index]) : 0;
         }
-      }
+        if (!isFinite(value)) {
+          value = 0; 
+        }
+        return value;
+      });
+      return {
+        channelName,
+        features: fftFeatures.map((f) =>
+          f.replace('_mean', '').replace('fft_', '')
+        ),
+        values: sortedValues,
+      };
     });
 
     return selectedData;
   }, [socketPsdData, selectedChannels]);
-
-  const graphRef = useRef(null);
-  const plotlyRef = useRef(null);
 
   const handleChannelToggle = (channelName) => {
     setSelectedChannels((prevSelected) => {
@@ -104,67 +90,67 @@ export const PSDGraph = () => {
 
   useEffect(() => {
     if (channels.length > 0 && !hasInitialized.current) {
-      const availableChannels = channels.map((channel) => channel.name);
       setSelectedChannels(availableChannels);
       hasInitialized.current = true;
     }
-  }, [channels]);
+  }, [channels, availableChannels]);
 
-  useEffect(() => {
-    if (!graphRef.current) return;
+  const frequencies = fftFeatures.map((f) => f.replace('_mean', '').replace('fft_', ''));
+  const xValues = frequencies.map((_, index) => index);
+  const yChannels = psdData.map((data) => data.channelName);
+  const yValues = yChannels.map((_, index) => index);
+  const zData = psdData.map((data) => data.values);
 
-    if (selectedChannels.length === 0) {
-      Plotly.purge(graphRef.current);
-      return;
-    }
+  const xMesh = yValues.map(() => xValues);
+  const yMesh = yValues.map(y => Array(xValues.length).fill(y));
 
-    const layout = {
-     // title: { text: "PSD Trace", font: { color: "#f4f4f4" } },
-      autosize: true,
-      height: 350,
-      paper_bgcolor: "#333",
-      plot_bgcolor: "#333",
+  let invalidValueFound = false;
+  zData.forEach((row, rowIndex) => {
+    row.forEach((value, colIndex) => {
+      if (!isFinite(value)) {
+        console.warn(`Invalid value at zData[${rowIndex}][${colIndex}]:`, value);
+        invalidValueFound = true;
+      }
+    });
+  });
+
+  if (invalidValueFound) {
+    console.error('Invalid values found in zData.');
+  }
+
+  const data = [{
+    type: 'surface',
+    x: xMesh,
+    y: yMesh,
+    z: zData,
+    colorscale: 'Viridis',
+  }];
+
+  const layout = {
+    title: 'Band Power 3D Surface',
+    autosize: true,
+    height: 350,
+    scene: {
       xaxis: {
-        title: { text: "Frequency Band", font: { color: "#f4f4f4" } },
-        color: "#cccccc",
-        type: 'category',
+        title: 'Frequency Band',
+        tickvals: xValues,
+        ticktext: frequencies,
       },
       yaxis: {
-        title: { text: "Power", font: { color: "#f4f4f4" } },
-        color: "#cccccc",
+        title: 'Channel',
+        tickvals: yValues,
+        ticktext: yChannels,
       },
-      margin: { l: 50, r: 50, b: 50, t: 0 },
-      font: { color: "#f4f4f4" },
-      legend: { orientation: "h", x: 0, y: -0.2 },
-    };
-
-    const colors = generateColors(selectedChannels.length);
-
-    const traces = psdData.map((data, idx) => ({
-      x: data.features,
-      y: data.values,
-      type: "scatter",
-      mode: "lines+markers",
-      name: data.channelName,
-      line: { simplify: false, color: colors[idx] },
-    }));
-
-    // console.log("Traces to plot:", traces);
-    // TODO: Fix the typing error -> How to solve this in jsx? 
-    Plotly.react(graphRef.current, traces, layout, {
-      responsive: true,
-      displayModeBar: false,
-    })
-      .then((gd) => {
-        plotlyRef.current = gd;
-      })
-      .catch((error) => {
-        console.error("Plotly error:", error);
-      });
-  }, [psdData, selectedChannels.length]);
+      zaxis: { title: 'Power' },
+      camera: {
+        eye: { x: 1.5, y: 1.5, z: 1.5 },
+      },
+    },
+    margin: { l: 50, r: 50, b: 50, t: 50 },
+  };
 
   return (
-    <Box>
+    <Box height="100%">
       <Box
         display="flex"
         alignItems="center"
@@ -173,11 +159,10 @@ export const PSDGraph = () => {
         flexWrap="wrap"
       >
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
-          PSD Trace
+          Band Power 3D Surface
         </Typography>
         <Box sx={{ ml: 2, minWidth: 200 }}> 
           <CollapsibleBox title="Channel Selection" defaultExpanded={true}>
-          {/* TODO: Fix the typing errors -> How to solve this in jsx?  */}
             <Box display="flex" flexDirection="column">
               {channels.map((channel, index) => (
                 <FormControlLabel
@@ -196,11 +181,14 @@ export const PSDGraph = () => {
           </CollapsibleBox>
         </Box>
       </Box>
-      
-      <div
-        ref={graphRef}
-        style={{ width: "100%"}}
-      />
+      <Box height="calc(100% - 80px)">
+        <Plot
+          data={data}
+          layout={layout}
+          style={{ width: "100%", height: "100%" }}
+          config={{ responsive: true }}
+        />
+      </Box>
     </Box>
   );
 };

@@ -7,6 +7,9 @@ import {
   Typography,
   FormControlLabel,
   Checkbox,
+  Radio,
+  RadioGroup,
+  FormControl,
 } from "@mui/material";
 import { CollapsibleBox } from "./CollapsibleBox";
 import { getChannelAndFeature } from "./utils";
@@ -23,9 +26,9 @@ const generateColors = (numColors) => {
 
 export const RawDataGraph = ({
   title = "Raw Data",
-  xAxisTitle = "Sample",
+  xAxisTitle = "Nr. of Samples",
   yAxisTitle = "Value",
-  maxDataPoints = 1000,
+  maxDataPoints = 400,
 }) => {
   const graphData = useSocketStore((state) => state.graphData);
   const channels = useSessionStore((state) => state.channels);
@@ -35,16 +38,23 @@ export const RawDataGraph = ({
   const [rawData, setRawData] = useState({});
   const graphRef = useRef(null);
   const plotlyRef = useRef(null);
+  const [yAxisMaxValue, setYAxisMaxValue] = useState('Auto');
 
   const layoutRef = useRef({
-    title: {
-      text: title,
-      font: { color: "#f4f4f4" },
-    },
+    // title: {
+    //   text: title,
+    //   font: { color: "#f4f4f4" },
+    // },
     autosize: true,
     height: 400,
     paper_bgcolor: "#333",
     plot_bgcolor: "#333",
+    margin: {
+      l: 50,
+      r: 50,
+      b: 50,
+      t: 0,
+    },
     xaxis: { // TODO change/ fix the timing labeling
       title: {
         text: xAxisTitle,
@@ -53,24 +63,18 @@ export const RawDataGraph = ({
       color: "#cccccc",
     },
     yaxis: {
-      title: {
-        text: yAxisTitle,
-        font: { color: "#f4f4f4" },
-      },
-      color: "#cccccc",
-    },
-    margin: {
-      l: 50,
-      r: 50,
-      b: 50,
-      t: 50,
+      // title: {
+      //   text: yAxisTitle,
+      //   font: { color: "#f4f4f4" },
+      // },
+      // color: "#cccccc",
     },
     font: {
       color: "#f4f4f4",
     },
   });
 
-  // Handeling the channel selection here -> TODO: see if this is better done in the socketStore
+  // Handling the channel selection here -> TODO: see if this is better done in the socketStore
   const handleChannelToggle = (channelName) => {
     setSelectedChannels((prevSelected) => {
       if (prevSelected.includes(channelName)) {
@@ -79,6 +83,10 @@ export const RawDataGraph = ({
         return [...prevSelected, channelName];
       }
     });
+  };
+
+  const handleYAxisMaxValueChange = (event) => {
+    setYAxisMaxValue(event.target.value);
   };
 
   useEffect(() => {
@@ -118,7 +126,7 @@ export const RawDataGraph = ({
     setRawData(updatedRawData);
   }, [graphData]);
 
-  // Update the graph when rawData or selectedChannels change -> TODO: switch tthe logic to graph for each channel ?!
+  // Update the graph when rawData or selectedChannels change -> TODO: switch the logic to graph for each channel ?!
   useEffect(() => {
     if (!graphRef.current) return;
 
@@ -129,10 +137,45 @@ export const RawDataGraph = ({
 
     const colors = generateColors(selectedChannels.length);
 
+    const totalChannels = selectedChannels.length;
+    const domainHeight = 1 / totalChannels;
+
+    const yAxes = {};
+    const maxVal = yAxisMaxValue !== 'Auto' ? Number(yAxisMaxValue) : null;
+
+    selectedChannels.forEach((channelName, idx) => {
+      const start = 1 - (idx + 1) * domainHeight;
+      const end = 1 - idx * domainHeight;
+
+      const yAxisKey = `yaxis${idx === 0 ? '' : idx + 1}`;
+
+      yAxes[yAxisKey] = {
+        domain: [start, end],
+        nticks: 5,
+        tickfont: {
+          size: 10,
+          color: "#cccccc",
+        },
+        // Titles necessary? Legend works but what if people are color blind? Rotate not supported! Annotations are a possability though
+        // title: {
+        //   text: channelName,
+        //   font: { color: "#f4f4f4", size: 12 },
+        //   standoff: 30,
+        //   textangle: -90,
+        // },
+        color: "#cccccc",
+        automargin: true,
+      };
+
+      if (maxVal !== null) {
+        yAxes[yAxisKey].range = [-maxVal, maxVal];
+      }
+    });
+
     const traces = selectedChannels.map((channelName, idx) => {
       const y = rawData[channelName] || [];
       const x = Array.from({ length: y.length }, (_, i) => i);
-
+    
       return {
         x,
         y,
@@ -140,6 +183,7 @@ export const RawDataGraph = ({
         mode: 'lines',
         name: channelName,
         line: { simplify: false, color: colors[idx] },
+        yaxis: idx === 0 ? 'y' : `y${idx + 1}`,
       };
     });
 
@@ -148,7 +192,11 @@ export const RawDataGraph = ({
       xaxis: {
         ...layoutRef.current.xaxis,
         range: [0, maxDataPoints],
+        domain: [0, 1],
+        anchor: totalChannels === 1 ? 'y' : `y${totalChannels}`,
       },
+      ...yAxes,
+      height: 350, // TODO height autoadjust to screen
     };
 
     Plotly.react(graphRef.current, traces, layout, {
@@ -161,7 +209,7 @@ export const RawDataGraph = ({
       .catch((error) => {
         console.error("Plotly error:", error);
       });
-  }, [rawData, selectedChannels]);
+  }, [rawData, selectedChannels, yAxisMaxValue]);
 
   return (
     <Box>
@@ -175,25 +223,45 @@ export const RawDataGraph = ({
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           {title}
         </Typography>
-        <Box sx={{ ml: 2, minWidth: 200 }}>
-          <CollapsibleBox title="Channel Selection" defaultExpanded={true}> 
-          {/* TODO: Fix the typing errors -> How to solve this in jsx?  */}
-            <Box display="flex" flexDirection="column">
-              {channels.map((channel, index) => (
-                <FormControlLabel
-                  key={index}
-                  control={
-                    <Checkbox
-                      checked={selectedChannels.includes(channel.name)}
-                      onChange={() => handleChannelToggle(channel.name)}
-                      color="primary"
-                    />
-                  }
-                  label={channel.name}
-                />
-              ))}
-            </Box>
-          </CollapsibleBox>
+        <Box sx={{ display: 'flex', ml: 2 }}>
+          <Box sx={{ minWidth: 200, mr: 2 }}>
+            <CollapsibleBox title="Channel Selection" defaultExpanded={true}> 
+              {/* TODO: Fix the typing errors -> How to solve this in jsx?  */}
+              <Box display="flex" flexDirection="column">
+                {channels.map((channel, index) => (
+                  <FormControlLabel
+                    key={index}
+                    control={
+                      <Checkbox
+                        checked={selectedChannels.includes(channel.name)}
+                        onChange={() => handleChannelToggle(channel.name)}
+                        color="primary"
+                      />
+                    }
+                    label={channel.name}
+                  />
+                ))}
+              </Box>
+            </CollapsibleBox>
+          </Box>
+          <Box sx={{ minWidth: 200 }}>
+            <CollapsibleBox title="Max Value (uV)" defaultExpanded={true}>
+              <FormControl component="fieldset">
+                <RadioGroup
+                  value={yAxisMaxValue}
+                  onChange={handleYAxisMaxValueChange}
+                >
+                  <FormControlLabel value="Auto" control={<Radio />} label="Auto" />
+                  <FormControlLabel value="5" control={<Radio />} label="5" />
+                  <FormControlLabel value="10" control={<Radio />} label="10" />
+                  <FormControlLabel value="20" control={<Radio />} label="20" />
+                  <FormControlLabel value="50" control={<Radio />} label="50" />
+                  <FormControlLabel value="100" control={<Radio />} label="100" />
+                  <FormControlLabel value="500" control={<Radio />} label="500" />
+                </RadioGroup>
+              </FormControl>
+            </CollapsibleBox>
+          </Box>
         </Box>
       </Box>
 

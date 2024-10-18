@@ -131,7 +131,7 @@ export const HeatmapGraph = () => {
       : undefined;
 
   const layout = {
-    title: { text: 'Heatmap', font: { color: '#f4f4f4' } },
+    // title: { text: 'Heatmap', font: { color: '#f4f4f4' } },
     height: 600,
     paper_bgcolor: '#333',
     plot_bgcolor: '#333',
@@ -155,7 +155,7 @@ export const HeatmapGraph = () => {
       },
       automargin: true,
     },
-    margin: { l: 250, r: 50, b: 50, t: 50 },
+    margin: { l: 250, r: 50, b: 50, t: 0 },
     font: { color: '#f4f4f4' },
   };
 

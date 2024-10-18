@@ -36,8 +36,8 @@ export const getChannelAndFeature = (availableChannels, keystr) => {
        
   if (!channelName) return {};
 
-  const restofstring = keystr.slice(channelName.length + 1);
+  const featureName = keystr.slice(channelName.length + 1);
 
-  return { channelName, restofstring };
+  return { channelName, featureName};
 };
 
