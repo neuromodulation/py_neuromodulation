@@ -59,12 +59,6 @@ if __name__ == "__main__":
         df = df.query("loc == 'ecog_stn'")
         df["norm_window"] = norm_window
         l_norms.append(df)
-    PATH_READ = os.path.join(PATH_PER, "d_out_patient_across_class.pkl")
-    df = read_pkg_out(PATH_READ)
-    df = df.query("loc == 'ecog_stn'")
-    df["norm_window"] = 0
-    l_norms.append(df)
-
     df_all = pd.concat(l_norms)
 
     plt.figure(figsize=(5, 5), dpi=300)
@@ -79,5 +73,4 @@ if __name__ == "__main__":
     plt.ylabel("Balanced accuracy")
     plt.title("Different normalization windows")
     plt.tight_layout()
-    plt.savefig(os.path.join(PATH_FIGURES, "figure_8_read_diff_norm_windows_viridis.pdf"))
     plt.show(block=True)

@@ -5,17 +5,18 @@ addpath("matlab_funcs")
 PATH_PER = '/Users/Timon/Library/CloudStorage/OneDrive-Charité-UniversitätsmedizinBerlin/Shared Documents - ICN Data World/General/Data/UCSF_OLARU/out_per/out_dir';
 df = readtable(fullfile(PATH_PER, 'df_per_ind_all_coords.csv'), 'ReadRowNames', true);
 
+fig = ea_mnifigure;
+
 colors = colorlover(5);
 % wjn_plot_surface(fullfile('meshes', 'cortex_bl.nii'), "#FF8000", 1);  % 0, 
 
 % wjn_plot_surface(fullfile('meshes', 'STN_bl.nii'), "#FF8000", 1);  % 0, 
 % wjn_plot_surface("'/Users/Timon/Documents/MATLAB/leaddbs/templates/space/MNI152NLin2009bAsym/atlases/DISTAL (Ewert 2017)/lh/GPi.nii'", "#FF8000", 0.3);  % 0, 
 
-fig = ea_mnifigure;
 df_query = df((strcmp(df.loc, 'STN') | strcmp(df.loc, 'GP')) & strcmp(df.label, 'pkg_dk') & strcmp(df.classification, 'True'), :);
-[contact_colours, colours_rgb] = map_values_to_cmap([df_query.per; 0.5; 0.9], 'viridis');
-contact_colours = contact_colours(1:end-2, :);
-radius = 0.3;
+[contact_colours, colours_rgb] = map_values_to_cmap([per_; 0.5; 1], 'viridis');
+contact_colours = contact_colours(3:end, :);
+radius = 0.5;
 [x, y, z] = sphere(100);
 for row=1:height(df_query)
     %coords = str2num(df_query.ch_coords{row}) * 1000;
@@ -24,38 +25,11 @@ for row=1:height(df_query)
                      df_query(row,:).z + (z.*radius));
     set(ax_sphere, 'LineStyle', 'none', 'facecolor', contact_colours(row, :), 'facealpha', 1);
 end
-
-df_query = df((strcmp(df.loc, 'STN') | strcmp(df.loc, 'GP')) & strcmp(df.label, 'pkg_tremor') & strcmp(df.classification, 'True'), :);
-[contact_colours, colours_rgb] = map_values_to_cmap([df_query.per; 0.5; 0.75], 'viridis');
-contact_colours = contact_colours(1:end-2, :);
-radius = 0.3;
-[x, y, z] = sphere(100);
-for row=1:height(df_query)
-    %coords = str2num(df_query.ch_coords{row}) * 1000;
-    ax_sphere = surf(abs(df_query(row,:).x) + (x.*radius), ...
-                     df_query(row,:).y + (y.*radius), ...
-                     df_query(row,:).z + (z.*radius));
-    set(ax_sphere, 'LineStyle', 'none', 'facecolor', contact_colours(row, :), 'facealpha', 1);
-end
-
-df_query = df((strcmp(df.loc, 'STN') | strcmp(df.loc, 'GP')) & strcmp(df.label, 'pkg_bk') & strcmp(df.classification, 'True'), :);
-[contact_colours, colours_rgb] = map_values_to_cmap([df_query.per; 0.3; 0.92], 'viridis');
-contact_colours = contact_colours(1:end-2, :);
-radius = 0.3;
-[x, y, z] = sphere(100);
-for row=1:height(df_query)
-    %coords = str2num(df_query.ch_coords{row}) * 1000;
-    ax_sphere = surf(abs(df_query(row,:).x) + (x.*radius), ...
-                     df_query(row,:).y + (y.*radius), ...
-                     df_query(row,:).z + (z.*radius));
-    set(ax_sphere, 'LineStyle', 'none', 'facecolor', contact_colours(row, :), 'facealpha', 1);
-end
-
 
 %%%%%%%%%% ECoG 
-df_query = df(strcmp(df.loc, 'ECOG') & strcmp(df.label, 'pkg_bk') & strcmp(df.classification, 'True'), :);
-[contact_colours, colours_rgb] = map_values_to_cmap([df_query.per; 0.3; 0.92], 'viridis');
-contact_colours = contact_colours(1:end-2, :);
+df_query = df(strcmp(df.loc, 'ECOG') & strcmp(df.label, 'pkg_tremor') & strcmp(df.classification, 'True'), :);
+[contact_colours, colours_rgb] = map_values_to_cmap([df_query.per; 0.5; 1], 'viridis');
+contact_colours = contact_colours(3:end, :);
 
 radius = 1.5;
 fig = ea_mnifigure;

@@ -67,6 +67,7 @@ dependencies = [
     "jupyter>=1.0.0",
     "bayesian-optimization>=1.4.3",
     "llvmlite>=0.43.0",
+    "torch>=2.5.0",
 ]
 
 [project.optional-dependencies]

@@ -23,8 +23,18 @@ if __name__ == "__main__":
         else:
             CLASSIFICATION = True
 
-        for norm_window in [5, 10, 20, 30, 60, 120, 180, 300, 480, 720, 960, 1200, 1440]:
-            df_all = pd.read_csv(os.path.join(PATH_OUT, str(norm_window), "all_merged_normed.csv"), index_col=0)
+        for norm_window in [0, 5, 10, 20, 30, 60, 120, 180, 300, 480, 720, 960, 1200, 1440]:
+            
+            # check if pickel output file exists
+            if  os.path.exists(os.path.join(PATH_PER, f"d_out_patient_across_{label_name}_class_{CLASSIFICATION}_{str(norm_window)}.pkl")):
+                continue
+            
+            if norm_window == 0:
+                PATH_OUT = "/Users/Timon/Library/CloudStorage/OneDrive-Charité-UniversitätsmedizinBerlin/Shared Documents - ICN Data World/General/Data/UCSF_OLARU/features/merged_std_10s_window_length"
+                df_all = pd.read_csv(os.path.join(PATH_OUT, "all_merged_preprocessed.csv"), index_col=0)
+            else:
+                PATH_OUT = "/Users/Timon/Library/CloudStorage/OneDrive-Charité-UniversitätsmedizinBerlin/Shared Documents - ICN Data World/General/Data/UCSF_OLARU/features/merged_std_10s_window_length"
+                df_all = pd.read_csv(os.path.join(PATH_OUT, str(norm_window), "all_merged_normed.csv"), index_col=0)
             #df_all = df_all.drop(columns=["Unnamed: 0"])
             subs = df_all["sub"].unique()
 
