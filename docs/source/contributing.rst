@@ -7,19 +7,15 @@ In general we recommend placing questions and issues in the `GitHub issue tracke
 
 For code formatting we use `ruff <https://docs.astral.sh/ruff/formatter/>`_.
 
-For code development, we recommend using the package manager `rye <https://rye.astral.sh/>`_.
+For code development, we recommend using the package manager `uv <https://docs.astral.sh/uv/getting-started/installation/>`_.
 
 To setup the python environment, type
 
 ::
 
-    rye pin 3.12
+    uv python install 3.11
+    uv venv
 
-then sync the environment with
-
-::
-
-    rye sync
 
 Depending on your operating system, activate the rye virtual environment: 
 
@@ -27,10 +23,20 @@ Depending on your operating system, activate the rye virtual environment:
 
     . .venv/bin/activate
 
+And install the pyproject.toml dependencies:
+
+:: 
+
+    then sync the environment with
+
+::
+
+    uv sync
+
 To install the documentation dependencies use pip:
 
 ::
 
-    python -m pip install .[docs]
+    uv pip install -e .[docs]
 
 

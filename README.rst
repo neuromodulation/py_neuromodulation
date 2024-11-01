@@ -1,6 +1,8 @@
 py_neuromodulation
 ==================
 
+Documentation: https://neuromodulation.github.io/py_neuromodulation/
+
 Analyzing neural data can be a troublesome, trial and error prone,
 and beginner unfriendly process. *py_neuromodulation* allows using a simple
 interface for extraction of established neurophysiological features and includes commonly applied pre -and postprocessing methods.
