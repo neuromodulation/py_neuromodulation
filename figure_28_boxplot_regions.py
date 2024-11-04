@@ -32,5 +32,6 @@ sns.swarmplot(x="label", y="per", hue="loc",
 plt.ylabel("Balanced accuracy")
 plt.title("Region-wise performances")
 plt.tight_layout()
+plt.savefig(os.path.join(PATH_FIGURES, "region_wise_performances.pdf"))
 plt.show(block=True)
 

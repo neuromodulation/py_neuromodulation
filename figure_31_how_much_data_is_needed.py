@@ -64,10 +64,11 @@ for label in ["bk", "tremor", "DK",]:
         plt.text(durations[i] / 60, np.array(sub_per).mean(axis=0)[i], f"{np.round(np.array(sub_per).mean(axis=0)[i], 2)}", ha="center", va="bottom")
     
     plt.xscale('log')
-    plt.title(f"LOHO PKG BK CV different training duration")
+    plt.title(f"LOHO PKG {label} CV different training duration")
     plt.tight_layout()
-    plt.savefig(os.path.join(PATH_FIGURE, f"LOHO_different_training_duration_sub_{label}.pdf"))
-    #plt.show(block=True)
+    #plt.savefig(os.path.join(PATH_FIGURE, f"LOHO_different_training_duration_sub_{label}.pdf"))
+    plt.show(block=True)
+    print("")
 
 plt.figure(figsize=(10, 5))
 sns.boxplot(data=df, x="dur", y="per", palette="viridis", showfliers=False, showmeans=True)

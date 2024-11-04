@@ -96,29 +96,29 @@ plt.tight_layout()
 plt.savefig(os.path.join(PATH_FIGURES, "pkg_bradykinesia_correlation_sum_subj.pdf"))  
 plt.show(block=True)
 
-plt.figure(figsize=(8, 20))
-for idx_plt_col, col_plt in enumerate(["UE", "LE", "postural", "kinetic", "updrs_tremor", "tremor_constancy"]):
+plt.figure(figsize=(6.5, 3.2))
+for idx_plt_col, col_plt in enumerate(["updrs_tremor"]):  # ["UE", "LE", "postural", "kinetic", "updrs_tremor", "tremor_constancy"]
     for idx_pkg, col_pkg in enumerate(["pkg_tremor_mean", "pkg_tremor_max", "pkg_tremor_75"]):
-        plt.subplot(6, 3, 1+idx_pkg + idx_plt_col*3)
+        plt.subplot(1, 3, 1+idx_pkg + idx_plt_col*3)
         idx_not_none = ~df_out[col_pkg].isnull()
         data_plt = df_out[idx_not_none].groupby(["sub"])[[col_plt, col_pkg]].mean().reset_index()
-        sb.regplot(data=data_plt, x=col_pkg, y=col_plt)
+        sb.regplot(data=data_plt, x=col_pkg, y=col_plt, scatter_kws={'s':14*1.7})
         rho, p = stats.spearmanr(data_plt[col_pkg], data_plt[col_plt])
-        _, p = nm_stats.permutationTestSpearmansRho(
-            data_plt[col_pkg], data_plt[col_plt], False, None, 5000
-        )
+        #_, p = nm_stats.permutationTestSpearmansRho(
+        #    data_plt[col_pkg], data_plt[col_plt], False, None, 5000
+        #)
         plt.title(f"rho={rho:.2f}, p={p:.2f}")
 plt.suptitle("Tremor PKG - UPDRS correlations")
 plt.tight_layout()
 plt.savefig(os.path.join(PATH_FIGURES, "pkg_tremor_correlation_mean_sub.pdf"))
 plt.show(block=True)
 
-plt.figure(figsize=(8, 5))
+plt.figure(figsize=(6.5, 3.4))
 for idx_plt_col, col_plt in enumerate(["UPDRS IV", ]):
     for idx_pkg, col_pkg in enumerate(["pkg_dk_mean", "pkg_dk_max", "pkg_dk_75"]):
         plt.subplot(1, 3, 1+idx_pkg + idx_plt_col*3)
         # remove inf values
-        #idx_not_none = ~df_out[col_pkg].isnull()
+        idx_not_none = ~df_out[col_pkg].isnull()
         idx_not_inf = np.isfinite(df_out[col_pkg])
         data_plt = df_out[idx_not_none].groupby(["sub"])[[col_plt, col_pkg]].mean().reset_index()
         sb.regplot(data=data_plt[idx_not_inf], x=col_pkg, y=col_plt)

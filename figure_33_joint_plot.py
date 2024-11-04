@@ -111,7 +111,7 @@ def get_dur_per_relation(label):
 
     df = pd.concat(df_, axis=0)
     # clip the balanced accuracy to 0.5 and 1
-    if label != "bk":
+    if label != "pkg_bk":
         df["per"] = np.clip(df["per"], 0.5, 1)
 
     return df
@@ -184,7 +184,10 @@ if __name__ == "__main__":
             l_features.append(df)
         
         df_features = pd.concat(l_features, axis=0)
-        df_all_features = get_all_ch_performances(False, label_name, "corr_coeff")
+        if label_name == "pkg_bk":
+            df_all_features = get_all_ch_performances(False, label_name, "corr_coeff")
+        else:
+            df_all_features = get_all_ch_performances(True, label_name, "ba")
         df_all_features["feature_mod"] = "all"
         df_features_comb = pd.concat([df_features, df_all_features], axis=0)
 
@@ -194,7 +197,7 @@ if __name__ == "__main__":
         else:
             class_ = "True"
         l_norms = []
-        for norm_window in [5, 10, 20, 30, 60, 120, 180, 300, 480, 720, 960, 1200, 1440]:
+        for norm_window in [0, 5, 10, 20, 30, 60, 120, 180, 300, 480, 720, 960, 1200, 1440]:
             OUT_FILE = f"d_out_patient_across_{label_name}_class_{class_}_{norm_window}.pkl"
             PATH_READ = os.path.join(PATH_PER, OUT_FILE)
 
@@ -206,21 +209,25 @@ if __name__ == "__main__":
 
         df_per_dur_rel = get_dur_per_relation(label_name)
 
+        if label_name == "pkg_bk":
+            y_label = "Correlation coefficient"
+        else:
+            y_label = "Balanced accuracy"
         plt.subplot(3, 4, 4*idx_+1)
-        plot_boxplot(df_norm, "norm_window", "Correlation coefficient")
+        plot_boxplot(df_norm, "norm_window", y_label)
         
         plt.subplot(3, 4, 4*idx_+2)
-        plot_boxplot(df_features_comb, "feature_mod", "Correlation coefficient",
+        plot_boxplot(df_features_comb, "feature_mod", y_label,
                     order_=df_features_comb.groupby("feature_mod")["per"].mean().sort_values(ascending=True).index)
         
         plt.subplot(3, 4, 4*idx_+3)
-        plot_boxplot(df_models, "model", "Correlation coefficient",
+        plot_boxplot(df_models, "model", y_label,
                     order_=df_models.groupby("model")["per"].mean().sort_values(ascending=True).index)
         
         plt.subplot(3, 4, 4*idx_+4)
         plot_per_train_time_relation(df_per_dur_rel, label_name)
 
-    plt.savefig(os.path.join(PATH_FIGURES, "figure_33_joint_plot.pdf"))
+    #plt.savefig(os.path.join(PATH_FIGURES, "figure_33_joint_plot.pdf"))
     plt.show(block=True)
 
     print("df")

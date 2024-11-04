@@ -30,10 +30,10 @@ if __name__ == "__main__":
                 continue
             
             if norm_window == 0:
-                PATH_OUT = "/Users/Timon/Library/CloudStorage/OneDrive-Charité-UniversitätsmedizinBerlin/Shared Documents - ICN Data World/General/Data/UCSF_OLARU/features/merged_std_10s_window_length"
+                PATH_OUT = "/Users/Timon/Library/CloudStorage/OneDrive-Charité-UniversitätsmedizinBerlin/Shared Documents - ICN Data World/General/Data/UCSF_OLARU/features/merged_std"
                 df_all = pd.read_csv(os.path.join(PATH_OUT, "all_merged_preprocessed.csv"), index_col=0)
             else:
-                PATH_OUT = "/Users/Timon/Library/CloudStorage/OneDrive-Charité-UniversitätsmedizinBerlin/Shared Documents - ICN Data World/General/Data/UCSF_OLARU/features/merged_std_10s_window_length"
+                PATH_OUT = "/Users/Timon/Library/CloudStorage/OneDrive-Charité-UniversitätsmedizinBerlin/Shared Documents - ICN Data World/General/Data/UCSF_OLARU/features/merged_normalized"
                 df_all = pd.read_csv(os.path.join(PATH_OUT, str(norm_window), "all_merged_normed.csv"), index_col=0)
             #df_all = df_all.drop(columns=["Unnamed: 0"])
             subs = df_all["sub"].unique()
