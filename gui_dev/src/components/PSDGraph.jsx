@@ -54,7 +54,7 @@ export const PSDGraph = () => {
   
   const psdData = useMemo(() => { 
     if (!socketPsdData) return [];
-    console.log("Socket PSD Data:", socketPsdData);
+    // console.log("Socket PSD Data:", socketPsdData);
     const dataByChannel = {};
 
     Object.entries(socketPsdData).forEach(([key, value]) => {

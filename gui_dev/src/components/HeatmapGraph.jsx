@@ -27,9 +27,9 @@ export const HeatmapGraph = () => {
   const availableChannels = useMemo(
     () => usedChannels.map((channel) => channel.name),
     [usedChannels]
-  ); 
+  );
 
-  const [selectedChannel, setSelectedChannel] = useState(''); // TODO: Switch this maybe multiple? 
+  const [selectedChannel, setSelectedChannel] = useState(''); // TODO: Switch this maybe multiple?
   const [features, setFeatures] = useState([]);
   const [heatmapData, setHeatmapData] = useState({ x: [], z: [] });
   const [isDataStale, setIsDataStale] = useState(false);
@@ -41,18 +41,13 @@ export const HeatmapGraph = () => {
 
   const handleChannelToggle = (event) => {
     setSelectedChannel(event.target.value);
-    setFeatures([]);
-    setHeatmapData({ x: [], z: [] }); // TODO: Data reset on channel switch currently doesn't work 100%
-    setIsDataStale(false);
-    setLastDataTime(null);
-    setLastDataTimestamp(null);
-  }; 
+  };
 
   useEffect(() => {
     if (usedChannels.length > 0 && !selectedChannel) {
-      setSelectedChannel(usedChannels[0].name); 
+      setSelectedChannel(usedChannels[0].name);
     }
-  }, [usedChannels, selectedChannel]); 
+  }, [usedChannels, selectedChannel]);
 
   // Update features on data/channel change -> TODO: Debug the channel switch
   useEffect(() => {
@@ -68,17 +63,17 @@ export const HeatmapGraph = () => {
     if (JSON.stringify(newFeatures) !== JSON.stringify(features)) {
       console.log('Updating features:', newFeatures);
       setFeatures(newFeatures);
-      setHeatmapData({ x: [], z: [] }); // Reset heatmap data when features change -> TODO: Somehow this results in weird results in next run
+      setHeatmapData({ x: [], z: [] }); // Reset heatmap data when features change
       setIsDataStale(false);
       setLastDataTime(null);
       setLastDataTimestamp(null);
     }
-  }, [graphData, selectedChannel, features, availableChannels]);
+  }, [graphData, selectedChannel]);
 
   useEffect(() => {
     if (!graphData || !selectedChannel || features.length === 0) return;
 
-    // TOOD: Always data in ms? (Time conversion here always necessary?)
+    // TODO: Always data in ms? (Time conversion here always necessary?)
     let timestamp = graphData.time;
     if (timestamp === undefined) {
       timestamp = (Date.now() - hasInitialized.current) / 1000;
@@ -87,21 +82,21 @@ export const HeatmapGraph = () => {
     }
 
     setLastDataTime(Date.now());
-    setLastDataTimestamp(timestamp);
     setIsDataStale(false);
 
     let x = [...heatmapData.x, timestamp];
-    let z = heatmapData.z ? heatmapData.z.map((row) => [...row]) : [];
+
+    let z;
+    if (heatmapData.z && heatmapData.z.length === features.length) {
+      z = heatmapData.z.map((row) => [...row]);
+    } else {
+      z = features.map(() => []);
+    }
 
     features.forEach((featureName, idx) => {
       const key = `${selectedChannel}_${featureName}`;
       const value = graphData[key];
-
       const numericValue = typeof value === 'number' && !isNaN(value) ? value : 0;
-
-      if (!z[idx]) {
-        z[idx] = [];
-      }
       z[idx].push(numericValue);
     });
 
@@ -119,8 +114,7 @@ export const HeatmapGraph = () => {
     z = z.map((row) => validIndices.map((index) => row[index]));
 
     setHeatmapData({ x, z });
-
-  }, [graphData, selectedChannel, features]); 
+  }, [graphData, selectedChannel, features]);
 
   // Check if data is stale (no new data in the last second) -> TODO: Find better solution debug this
   useEffect(() => {
@@ -137,7 +131,7 @@ export const HeatmapGraph = () => {
     return () => clearInterval(interval);
   }, [lastDataTime]);
 
-  // TODO: Adjustment of x-axis -> this currently is a bit buggy 
+  // TODO: Adjustment of x-axis -> this currently is a bit buggy
   const xRange = isDataStale && heatmapData.x.length > 0
     ? [heatmapData.x[0], heatmapData.x[heatmapData.x.length - 1]]
     : undefined;
@@ -178,23 +172,23 @@ export const HeatmapGraph = () => {
           Heatmap
         </Typography>
         <Box sx={{ ml: 2, minWidth: 200 }}>
-          <CollapsibleBox title="Channel Selection" defaultExpanded={true}> 
+          <CollapsibleBox title="Channel Selection" defaultExpanded={true}>
             <FormControl component="fieldset">
               <RadioGroup
                 value={selectedChannel}
                 onChange={handleChannelToggle}
               >
-                {usedChannels.map((channel, index) => ( 
+                {usedChannels.map((channel, index) => (
                   <FormControlLabel
-                    key={channel.id || index} 
+                    key={channel.id || index}
                     value={channel.name}
-                    control={<Radio />} // TODO: Should we make multiple selectable? 
+                    control={<Radio />} // TODO: Should we make multiple selectable?
                     label={channel.name}
                   />
-                ))} 
+                ))}
               </RadioGroup>
             </FormControl>
-          </CollapsibleBox> 
+          </CollapsibleBox>
         </Box>
       </Box>
       {heatmapData.x.length > 0 && features.length > 0 && heatmapData.z.length > 0 && (
