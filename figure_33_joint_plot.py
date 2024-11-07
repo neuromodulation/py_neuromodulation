@@ -131,6 +131,7 @@ def plot_boxplot(df, x_label, y_label="Balanced accuracy", order_ = None):
 
     plt.xlabel(x_label)
     plt.ylabel(y_label)
+    plt.xticks(rotation=90)
     plt.tight_layout()
     #plt.show(block=True)
 
@@ -200,6 +201,8 @@ if __name__ == "__main__":
         for norm_window in [0, 5, 10, 20, 30, 60, 120, 180, 300, 480, 720, 960, 1200, 1440]:
             OUT_FILE = f"d_out_patient_across_{label_name}_class_{class_}_{norm_window}.pkl"
             PATH_READ = os.path.join(PATH_PER, OUT_FILE)
+            if not os.path.exists(PATH_READ):
+                continue
 
             df = read_per_out(PATH_READ)
             #df = df.query("loc == 'ecog_stn'")

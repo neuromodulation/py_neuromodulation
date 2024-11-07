@@ -12,8 +12,10 @@ import joblib
 import time
 
 PATH_IN = "/Users/Timon/Documents/UCSF_Analysis/out/merged_std"
-PATH_OUT_BASE = "/Users/Timon/Documents/UCSF_Analysis/out/merged_normalized"
+PATH_IN = '/Users/Timon/Library/CloudStorage/OneDrive-Charité-UniversitätsmedizinBerlin/Shared Documents - ICN Data World/General/Data/UCSF_OLARU/features/merged_std'
 
+PATH_OUT_BASE = "/Users/Timon/Documents/UCSF_Analysis/out/merged_normalized"
+PATH_OUT_BASE = '/Users/Timon/Library/CloudStorage/OneDrive-Charité-UniversitätsmedizinBerlin/Shared Documents - ICN Data World/General/Data/UCSF_OLARU/features/merged_normalized'
 if __name__ == "__main__":
 
     df_all = pd.read_csv(os.path.join(PATH_IN, "all_merged_preprocessed.csv"), index_col=0)
@@ -36,15 +38,21 @@ if __name__ == "__main__":
             else:
                 time_before = df_sub.loc[idx, "pkg_dt"] - pd.Timedelta(minutes=normalization_window)
                 time_now = df_sub.loc[idx, "pkg_dt"]
-                df_range = df_sub.query("pkg_dt >= @time_before and pkg_dt <@time_now")
-                if df_range.shape[0] < 2:
-                    continue
+                
+                if normalization_window == 0:
+                    df_range = df_sub.query("pkg_dt == @time_now")
+                else:
+                    df_range = df_sub.query("pkg_dt >= @time_before and pkg_dt <@time_now")
+                    if df_range.shape[0] < 2:
+                        continue
                 
                 cols_use = [f for f in df_range.columns if "pkg_dt" not in f and f != "sub"]
                 mean_ = df_range[cols_use].mean()
-                std_ = df_range[cols_use].std()
-
-                row_add = (df_sub.loc[idx, cols_use] - mean_) / std_
+                if normalization_window != 0:
+                    std_ = df_range[cols_use].std()
+                    row_add = (df_sub.loc[idx, cols_use] - mean_) / std_
+                else:
+                    row_add = mean_
 
                 time_pkg_before = df_sub.loc[idx, "pkg_dt"] - pd.Timedelta(minutes=5)
                 time_pkg_after = df_sub.loc[idx, "pkg_dt"] + pd.Timedelta(minutes=5)
@@ -74,7 +82,7 @@ if __name__ == "__main__":
     
     #process_sub(subs[0])
     # parallelize
-    for normalization_window in [5, 10, 20, 30, 60, 120][::-1]:
+    for normalization_window in [0]:  # [5, 10, 20, 30, 60, 120][::-1]
         PATH_OUT = os.path.join(PATH_OUT_BASE, str(normalization_window))
         if not os.path.exists(PATH_OUT):
             os.makedirs(PATH_OUT)
