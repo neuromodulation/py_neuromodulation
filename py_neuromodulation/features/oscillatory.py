@@ -22,7 +22,7 @@ class OscillatorySettings(NMBaseModel):
     features: OscillatoryFeatures = OscillatoryFeatures(
         mean=True, median=False, std=False, max=False
     )
-    return_spectrum: bool = False
+    return_spectrum: bool = True
 
 
 ESTIMATOR_DICT = {

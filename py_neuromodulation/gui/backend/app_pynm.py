@@ -37,6 +37,8 @@ class PyNMState:
 
         self.logger.info("setup stream Process")
 
+        self.stream.settings = self.settings
+
         asyncio.create_task(self.stream.run(
                 out_dir=out_dir,
                 experiment_name=experiment_name,
@@ -93,9 +95,10 @@ class PyNMState:
                     line_noise=line_noise,
                     channels=channels,
                     sampling_rate_features_hz=sampling_rate_features,
+                    settings=self.settings,
                 )
                 self.logger.info("stream setup")
-                self.settings: NMSettings = NMSettings(sampling_rate_features=sfreq)
+                #self.settings: NMSettings = NMSettings(sampling_rate_features=sfreq)
                 self.logger.info("settings setup")
                 break
 
@@ -120,12 +123,12 @@ class PyNMState:
             target_keywords=None,
         )
 
-        self.settings: NMSettings = NMSettings(
-            sampling_rate_features=sampling_rate_features
-        )
+        # self.settings: NMSettings = NMSettings(
+        #     sampling_rate_features=sampling_rate_features
+        # )
 
-        self.settings.preprocessing = []
-
+        # self.settings.preprocessing = []
+        self.logger.info(f"settings: {self.settings}")
         self.stream: Stream = Stream(
             settings=self.settings,
             sfreq=sfreq,
