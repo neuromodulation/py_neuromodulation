@@ -18,7 +18,7 @@
     "react": "next",
     "react-dom": "next",
     "react-router-dom": "^6.26.2",
-    "zustand": "next"
+    "zustand": "latest"
   },
   "devDependencies": {
     "@babel/core": "^7.25.7",
