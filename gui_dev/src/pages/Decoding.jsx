@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sidebar, SidebarDrawer } from '@/components'; // Adjust the import paths as needed
 import { Settings } from '@/pages'; // Adjust the import paths as needed
+import { useSocketStore, useSessionStore } from '@/stores';
 import {
   Switch,
   FormControlLabel,
@@ -15,6 +16,13 @@ import { useNavigate } from 'react-router-dom';
 
 export const Decoding = () => {
   const navigate = useNavigate();
+
+  const connectSocket = useSocketStore((state) => state.connectSocket);
+  connectSocket();
+
+  const startStream = useSessionStore((state) => state.startStream);
+  const socketData = useSocketStore((state) => state.graphData);
+  console.log("Socket Data:", socketData);
 
   // State variables for toggles and select
   const [movementDecoding, setMovementDecoding] = React.useState(false);
@@ -104,14 +112,7 @@ export const Decoding = () => {
         </Box>
 
         <Box mt={4} width="100%">
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleRunStream}
-            fullWidth
-          >
-            Run Stream
-          </Button>
+          <Button variant="contained" onClick={startStream}> Run stream</Button>
         </Box>
       </Box>
     </Box>

@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import { CollapsibleBox } from "./CollapsibleBox"; 
 import { getChannelAndFeature } from "./utils";
+import { shallow } from 'zustand/shallow'; 
 
 const defaultPsdData = { frequencies: [], powers: [] };
 
@@ -32,14 +33,23 @@ const fftFeatures = [
 ];
 
 export const PSDGraph = () => {
-  const channels = useSessionStore((state) => state.channels);
+
+
+  const channels = useSessionStore((state) => state.channels, shallow); 
+
+  const usedChannels = useMemo(
+    () => channels.filter((channel) => channel.used === 1),
+    [channels]
+  );
+
+  const availableChannels = useMemo(
+    () => usedChannels.map((channel) => channel.name),
+    [usedChannels]
+  ); 
 
   const [selectedChannels, setSelectedChannels] = useState([]);
-
-  const availableChannels = channels.map((channel) => channel.name);
-
   const hasInitialized = useRef(false);
-
+  
   const socketPsdData = useSocketStore((state) => state.graphData);
   
   const psdData = useMemo(() => { 
@@ -87,7 +97,7 @@ export const PSDGraph = () => {
     });
 
     return selectedData;
-  }, [socketPsdData, selectedChannels]);
+  }, [socketPsdData, selectedChannels, availableChannels]); 
 
   const graphRef = useRef(null);
   const plotlyRef = useRef(null);
@@ -103,12 +113,12 @@ export const PSDGraph = () => {
   };
 
   useEffect(() => {
-    if (channels.length > 0 && !hasInitialized.current) {
-      const availableChannels = channels.map((channel) => channel.name);
-      setSelectedChannels(availableChannels);
+    if (usedChannels.length > 0 && !hasInitialized.current) {
+      const availableChannelNames = usedChannels.map((channel) => channel.name); 
+      setSelectedChannels(availableChannelNames);
       hasInitialized.current = true;
     }
-  }, [channels]);
+  }, [usedChannels]);
 
   useEffect(() => {
     if (!graphRef.current) return;
@@ -149,8 +159,6 @@ export const PSDGraph = () => {
       line: { simplify: false, color: colors[idx] },
     }));
 
-    // console.log("Traces to plot:", traces);
-    // TODO: Fix the typing error -> How to solve this in jsx? 
     Plotly.react(graphRef.current, traces, layout, {
       responsive: true,
       displayModeBar: false,
@@ -179,9 +187,9 @@ export const PSDGraph = () => {
           <CollapsibleBox title="Channel Selection" defaultExpanded={true}>
           {/* TODO: Fix the typing errors -> How to solve this in jsx?  */}
             <Box display="flex" flexDirection="column">
-              {channels.map((channel, index) => (
+              {usedChannels.map((channel, index) => (
                 <FormControlLabel
-                  key={index}
+                  key={channel.id || index}
                   control={
                     <Checkbox
                       checked={selectedChannels.includes(channel.name)}

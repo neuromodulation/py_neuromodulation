@@ -1,20 +1,35 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useSocketStore, useSessionStore } from '@/stores';
 import Plot from 'react-plotly.js';
 import {
   Box,
   Typography,
   FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
 } from '@mui/material';
+import { CollapsibleBox } from './CollapsibleBox';
+import { getChannelAndFeature } from './utils';
+import { shallow } from 'zustand/shallow';
 
 const maxTimeWindow = 10;
 
 export const HeatmapGraph = () => {
-  const channels = useSessionStore((state) => state.channels);
-  const [selectedChannel, setSelectedChannel] = useState(''); // TODO: Switch this maybe multiple? 
+
+  const channels = useSessionStore((state) => state.channels, shallow);
+
+  const usedChannels = useMemo(
+    () => channels.filter((channel) => channel.used === 1),
+    [channels]
+  );
+
+  const availableChannels = useMemo(
+    () => usedChannels.map((channel) => channel.name),
+    [usedChannels]
+  );
+
+  const [selectedChannel, setSelectedChannel] = useState(''); // TODO: Switch this maybe multiple?
   const [features, setFeatures] = useState([]);
   const [heatmapData, setHeatmapData] = useState({ x: [], z: [] });
   const [isDataStale, setIsDataStale] = useState(false);
@@ -24,20 +39,15 @@ export const HeatmapGraph = () => {
   const hasInitialized = useRef(Date.now());
   const graphData = useSocketStore((state) => state.graphData);
 
-  const handleChannelChange = (event) => {
+  const handleChannelToggle = (event) => {
     setSelectedChannel(event.target.value);
-    setFeatures([]);
-    setHeatmapData({ x: [], z: [] }); // TODO: Data reset on channel switch currently doesn't work 100% 
-    setIsDataStale(false);
-    setLastDataTime(null);
-    setLastDataTimestamp(null);
   };
 
   useEffect(() => {
-    if (channels.length > 0 && !selectedChannel) {
-      setSelectedChannel(channels[0].name);
+    if (usedChannels.length > 0 && !selectedChannel) {
+      setSelectedChannel(usedChannels[0].name);
     }
-  }, [channels, selectedChannel]);
+  }, [usedChannels, selectedChannel]);
 
   // Update features on data/channel change -> TODO: Debug the channel switch
   useEffect(() => {
@@ -50,7 +60,6 @@ export const HeatmapGraph = () => {
     );
     const newFeatures = featureKeys.map((key) => key.substring(channelPrefix.length));
 
-
     if (JSON.stringify(newFeatures) !== JSON.stringify(features)) {
       console.log('Updating features:', newFeatures);
       setFeatures(newFeatures);
@@ -59,12 +68,12 @@ export const HeatmapGraph = () => {
       setLastDataTime(null);
       setLastDataTimestamp(null);
     }
-  }, [graphData, selectedChannel, features]);
+  }, [graphData, selectedChannel]);
 
   useEffect(() => {
     if (!graphData || !selectedChannel || features.length === 0) return;
 
-    // TOOD: Always data in ms? (Time conversion here always necessary?)
+    // TODO: Always data in ms? (Time conversion here always necessary?)
     let timestamp = graphData.time;
     if (timestamp === undefined) {
       timestamp = (Date.now() - hasInitialized.current) / 1000;
@@ -72,26 +81,24 @@ export const HeatmapGraph = () => {
       timestamp = timestamp / 1000;
     }
 
-
     setLastDataTime(Date.now());
-    setLastDataTimestamp(timestamp);
     setIsDataStale(false);
 
     let x = [...heatmapData.x, timestamp];
-    let z = heatmapData.z ? heatmapData.z.map((row) => [...row]) : [];
+
+    let z;
+    if (heatmapData.z && heatmapData.z.length === features.length) {
+      z = heatmapData.z.map((row) => [...row]);
+    } else {
+      z = features.map(() => []);
+    }
 
     features.forEach((featureName, idx) => {
       const key = `${selectedChannel}_${featureName}`;
       const value = graphData[key];
-
       const numericValue = typeof value === 'number' && !isNaN(value) ? value : 0;
-
-      if (!z[idx]) {
-        z[idx] = [];
-      }
       z[idx].push(numericValue);
     });
-
 
     const currentTime = timestamp;
     const minTime = currentTime - maxTimeWindow; // TODO: What should be the visible window frame? adjustable? 10s?
@@ -107,10 +114,9 @@ export const HeatmapGraph = () => {
     z = z.map((row) => validIndices.map((index) => row[index]));
 
     setHeatmapData({ x, z });
-
   }, [graphData, selectedChannel, features]);
 
-  // Check if data is stale (no new data in the last second)
+  // Check if data is stale (no new data in the last second) -> TODO: Find better solution debug this
   useEffect(() => {
     if (!lastDataTime) return;
 
@@ -125,10 +131,10 @@ export const HeatmapGraph = () => {
     return () => clearInterval(interval);
   }, [lastDataTime]);
 
-  const xRange =   // Adjusting  x-axis range when data is stale to visually move the frame in position at the end
-    isDataStale && heatmapData.x.length > 0
-      ? [heatmapData.x[0], heatmapData.x[heatmapData.x.length - 1]]
-      : undefined;
+  // TODO: Adjustment of x-axis -> this currently is a bit buggy
+  const xRange = isDataStale && heatmapData.x.length > 0
+    ? [heatmapData.x[0], heatmapData.x[heatmapData.x.length - 1]]
+    : undefined;
 
   const layout = {
     // title: { text: 'Heatmap', font: { color: '#f4f4f4' } },
@@ -161,28 +167,29 @@ export const HeatmapGraph = () => {
 
   return (
     <Box>
-      <Box display="flex" alignItems="center" mb={2}>
+      <Box display="flex" alignItems="center" mb={2} flexWrap="wrap">
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           Heatmap
         </Typography>
-        <FormControl variant="outlined" size="small">
-          <InputLabel id="heatmap-channel-select-label">
-            Channel Selection
-          </InputLabel>
-          <Select
-            labelId="heatmap-channel-select-label"
-            value={selectedChannel}
-            onChange={handleChannelChange}
-            label="Channel Selection"
-          >
-          {/* TODO: Change to the Collapsible box */}
-            {channels.map((channel, index) => (
-              <MenuItem key={index} value={channel.name}>
-                {channel.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <Box sx={{ ml: 2, minWidth: 200 }}>
+          <CollapsibleBox title="Channel Selection" defaultExpanded={true}>
+            <FormControl component="fieldset">
+              <RadioGroup
+                value={selectedChannel}
+                onChange={handleChannelToggle}
+              >
+                {usedChannels.map((channel, index) => (
+                  <FormControlLabel
+                    key={channel.id || index}
+                    value={channel.name}
+                    control={<Radio />} // TODO: Should we make multiple selectable?
+                    label={channel.name}
+                  />
+                ))}
+              </RadioGroup>
+            </FormControl>
+          </CollapsibleBox>
+        </Box>
       </Box>
       {heatmapData.x.length > 0 && features.length > 0 && heatmapData.z.length > 0 && (
         <Plot

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useSocketStore } from "@/stores";
 import { useSessionStore } from "@/stores/sessionStore";
 import Plotly from "plotly.js-basic-dist-min";
@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { CollapsibleBox } from "./CollapsibleBox";
 import { getChannelAndFeature } from "./utils";
+import {shallow} from 'zustand/shallow';
 
 // TODO redundant and might be candidate for refactor
 const generateColors = (numColors) => {
@@ -31,8 +32,19 @@ export const RawDataGraph = ({
   maxDataPoints = 400,
 }) => {
   const graphData = useSocketStore((state) => state.graphData);
-  const channels = useSessionStore((state) => state.channels);
-  const availableChannels = channels.map((channel) => channel.name);
+  
+  const channels = useSessionStore((state) => state.channels, shallow); 
+  
+  const usedChannels = useMemo(
+    () => channels.filter((channel) => channel.used === 1),
+    [channels]
+  );
+  
+  const availableChannels = useMemo(
+    () => usedChannels.map((channel) => channel.name),
+    [usedChannels]
+  );
+  
   const [selectedChannels, setSelectedChannels] = useState([]);
   const hasInitialized = useRef(false);
   const [rawData, setRawData] = useState({});
@@ -90,41 +102,43 @@ export const RawDataGraph = ({
   };
 
   useEffect(() => {
-    if (channels.length > 0 && !hasInitialized.current) {
-      const availableChannels = channels.map((channel) => channel.name);
-      setSelectedChannels(availableChannels);
+    if (usedChannels.length > 0 && !hasInitialized.current) { 
+      const availableChannelNames = usedChannels.map((channel) => channel.name);
+      setSelectedChannels(availableChannelNames);
       hasInitialized.current = true;
     }
-  }, [channels]);
+  }, [usedChannels]);
 
   // Process incoming graphData to extract raw data for each channel -> TODO: Check later if this fits here better than socketStore
   useEffect(() => {
     if (!graphData || Object.keys(graphData).length === 0) return;
 
     const latestData = graphData;
-    const updatedRawData = { ...rawData };
 
-    Object.entries(latestData).forEach(([key, value]) => {
-
-      const { channelName = '', featureName = '' } = getChannelAndFeature(availableChannels, key);
-      
-      if (!channelName) return;
-
-      if (featureName !== 'raw') return;
-
-      if (!updatedRawData[channelName]) {
-        updatedRawData[channelName] = [];
-      }
-
-      updatedRawData[channelName].push(value);
-
-      if (updatedRawData[channelName].length > maxDataPoints) {
-        updatedRawData[channelName] = updatedRawData[channelName].slice(-maxDataPoints);
-      }
+    setRawData((prevRawData) => {
+      const updatedRawData = { ...prevRawData };
+    
+      Object.entries(latestData).forEach(([key, value]) => {
+        const { channelName = '', featureName = '' } = getChannelAndFeature(availableChannels, key);
+        
+        if (!channelName) return;
+    
+        if (featureName !== 'raw') return;
+    
+        if (!updatedRawData[channelName]) {
+          updatedRawData[channelName] = [];
+        }
+    
+        updatedRawData[channelName].push(value);
+    
+        if (updatedRawData[channelName].length > maxDataPoints) {
+          updatedRawData[channelName] = updatedRawData[channelName].slice(-maxDataPoints);
+        }
+      });
+    
+      return updatedRawData;
     });
-
-    setRawData(updatedRawData);
-  }, [graphData]);
+  }, [graphData, availableChannels]);
 
   // Update the graph when rawData or selectedChannels change -> TODO: switch the logic to graph for each channel ?!
   useEffect(() => {
@@ -228,9 +242,9 @@ export const RawDataGraph = ({
             <CollapsibleBox title="Channel Selection" defaultExpanded={true}> 
               {/* TODO: Fix the typing errors -> How to solve this in jsx?  */}
               <Box display="flex" flexDirection="column">
-                {channels.map((channel, index) => (
+                {usedChannels.map((channel, index) => ( 
                   <FormControlLabel
-                    key={index}
+                    key={channel.id || index} 
                     control={
                       <Checkbox
                         checked={selectedChannels.includes(channel.name)}
@@ -240,7 +254,7 @@ export const RawDataGraph = ({
                     }
                     label={channel.name}
                   />
-                ))}
+                ))} 
               </Box>
             </CollapsibleBox>
           </Box>
