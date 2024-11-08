@@ -250,7 +250,7 @@ class NMSettings(NMBaseModel):
 
     @staticmethod
     def get_default() -> "NMSettings":
-        return NMSettings.from_file(PYNM_DIR / "default_settings.yaml")
+        return NMSettings()
 
     @staticmethod
     def list_normalization_methods() -> list[NormMethod]:
