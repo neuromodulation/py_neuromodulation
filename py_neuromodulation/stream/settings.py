@@ -4,15 +4,15 @@ from pathlib import Path
 from typing import ClassVar
 from pydantic import Field, model_validator
 
-from py_neuromodulation import PYNM_DIR, logger, user_features
+from py_neuromodulation import logger, user_features
 
 from py_neuromodulation.utils.types import (
     BoolSelector,
     FrequencyRange,
-    PreprocessorName,
     _PathLike,
     NMBaseModel,
     NormMethod,
+    PreprocessorList,
 )
 
 from py_neuromodulation.processing.filter_preprocessing import FilterSettings
@@ -72,11 +72,14 @@ class NMSettings(NMBaseModel):
     }
 
     # Preproceessing settings
-    preprocessing: list[PreprocessorName] = [
-        "raw_resampling",
-        "notch_filter",
-        "re_referencing",
-    ]
+    preprocessing: PreprocessorList = PreprocessorList(
+        [
+            "raw_resampling",
+            "notch_filter",
+            "re_referencing",
+        ]
+    )
+
     raw_resampling_settings: ResamplerSettings = ResamplerSettings()
     preprocessing_filter: FilterSettings = FilterSettings()
     raw_normalization_settings: NormalizationSettings = NormalizationSettings()
@@ -144,26 +147,29 @@ class NMSettings(NMBaseModel):
             if self.bandpass_filter_settings.kalman_filter:
                 self.kalman_filter_settings.validate_fbands(self)
 
-        for k, v in self.frequency_ranges_hz.items():
-            if not isinstance(v, FrequencyRange):
-                self.frequency_ranges_hz[k] = FrequencyRange.create_from(v)
+        # TONI: not needed after NMSequenceModel, remove in the future
+        # for k, v in self.frequency_ranges_hz.items():
+        #     if not isinstance(v, FrequencyRange):
+        #         self.frequency_ranges_hz[k] = FrequencyRange.create_from(v)
 
         return self
 
     def reset(self) -> "NMSettings":
         self.features.disable_all()
-        self.preprocessing = []
+        self.preprocessing = PreprocessorList()
         self.postprocessing.disable_all()
         return self
 
     def set_fast_compute(self) -> "NMSettings":
         self.reset()
         self.features.fft = True
-        self.preprocessing = [
-            "raw_resampling",
-            "notch_filter",
-            "re_referencing",
-        ]
+        self.preprocessing = PreprocessorList(
+            [
+                "raw_resampling",
+                "notch_filter",
+                "re_referencing",
+            ]
+        )
         self.postprocessing.feature_normalization = True
         self.postprocessing.project_cortex = False
         self.postprocessing.project_subcortex = False
