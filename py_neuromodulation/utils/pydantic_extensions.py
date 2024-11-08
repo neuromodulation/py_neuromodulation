@@ -135,7 +135,7 @@ class NMBaseModel(BaseModel):
         return pformat(self.model_dump())
 
     def validate(self) -> Any:  # type: ignore
-        return self.model_validate(self.model_dump())
+        return self.model_validate_strings(self.model_dump())
 
     def __getitem__(self, key):
         return getattr(self, key)
