@@ -47,7 +47,7 @@ if __name__ == "__main__":
     df_all = df_all.drop(columns=df_all.columns[df_all.isnull().all()])
     df_all["pkg_dt"] = pd.to_datetime(df_all["pkg_dt"])
     if EXCLUDE_NIGHT_TIME:
-        df_all = df_all[(df_all["pkg_dt"].dt.hour >= 9) & (df_all["pkg_dt"].dt.hour <= 18)]
+        df_all = df_all[(df_all["pkg_dt"].dt.hour >= 8) & (df_all["pkg_dt"].dt.hour <= 20)]
             
     d_out = {}
 
