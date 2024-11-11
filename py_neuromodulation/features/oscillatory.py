@@ -176,7 +176,7 @@ class Welch(OscillatoryFeature):
         if self.settings.return_spectrum:
             combinations = product(enumerate(self.ch_names), enumerate(self.freqs))
             for (ch_idx, ch_name), (idx, f) in combinations:
-                feature_results[f"{ch_name}_welch_psd_{str(f)}"] = Z[ch_idx][idx]
+                feature_results[f"{ch_name}_welch_psd_{int(f)}"] = Z[ch_idx][idx]
 
         return feature_results
 
@@ -242,7 +242,7 @@ class STFT(OscillatoryFeature):
         if self.settings.return_spectrum:
             combinations = product(enumerate(self.ch_names), enumerate(self.freqs))
             for (ch_idx, ch_name), (idx, f) in combinations:
-                feature_results[f"{ch_name}_stft_psd_{str(f)}"] = Z[ch_idx].mean(
+                feature_results[f"{ch_name}_stft_psd_{int(f)}"] = Z[ch_idx].mean(
                     axis=1
                 )[idx]
 
