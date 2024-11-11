@@ -300,7 +300,8 @@ class Stream:
             self.is_running = True
             if self.stream_handling_queue is not None:
                 nm.logger.info("Checking for stop signal")
-                await asyncio.sleep(0.001)
+                #await asyncio.sleep(0.001)
+                await asyncio.sleep(1 / self.settings.sampling_rate_features_hz)
                 if not self.stream_handling_queue.empty():
                     stop_signal = await asyncio.wait_for(self.stream_handling_queue.get(), timeout=0.01)
                     if stop_signal == "stop":
