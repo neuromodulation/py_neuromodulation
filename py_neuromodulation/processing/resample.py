@@ -26,6 +26,7 @@ class Resampler(NMPreprocessor):
         self,
         sfreq: float,
         resample_freq_hz: float,
+        **kwargs,
     ) -> None:
         self.settings = ResamplerSettings(resample_freq_hz=resample_freq_hz)
 

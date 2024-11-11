@@ -33,8 +33,10 @@ class WebSocketManager:
     # Combine IP and port to create a unique client ID
     async def send_cbor(self, object: dict):
         for connection in self.active_connections:
-            await connection.send_bytes(cbor2.dumps(object))
-        
+            try:
+                await connection.send_bytes(cbor2.dumps(object))
+            except RuntimeError as e:
+                self.active_connections.remove(connection)
 
     async def send_message(self, message: str | dict):
         self.logger.info(f"Sending message within app_socket: {message.keys()}")

@@ -21,26 +21,26 @@
     "react-dom": "next",
     "react-icons": "^5.3.0",
     "react-plotly.js": "^2.6.0",
-    "react-router-dom": "^6.27.0",
+    "react-router-dom": "^6.28.0",
     "zustand": "latest"
   },
   "devDependencies": {
-    "@babel/core": "^7.25.9",
+    "@babel/core": "^7.26.0",
     "@babel/eslint-parser": "^7.25.9",
-    "@babel/preset-env": "^7.25.9",
+    "@babel/preset-env": "^7.26.0",
     "@babel/preset-react": "^7.25.9",
-    "@eslint/compat": "^1.2.1",
+    "@eslint/compat": "^1.2.2",
     "@vitejs/plugin-react": "^4.3.3",
     "@welldone-software/why-did-you-render": "^8.0.3",
     "babel-plugin-react-compiler": "latest",
-    "eslint": "^9.13.0",
+    "eslint": "^9.14.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-jsdoc": "^50.4.3",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-compiler": "latest",
     "eslint-plugin-react-hooks": "^4.6.2",
-    "eslint-plugin-react-refresh": "^0.4.13",
+    "eslint-plugin-react-refresh": "^0.4.14",
     "prettier": "^3.3.3",
-    "vite": "^5.4.10"
+    "vite": "^5.4.11"
   }
 }
