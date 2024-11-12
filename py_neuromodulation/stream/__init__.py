@@ -3,5 +3,5 @@ from .mnelsl_player import LSLOfflinePlayer
 
 try:
     from .mnelsl_stream import LSLStream
-except RuntimeError as e:
+except Exception as e:
     print(f"A RuntimeError occurred: {e}")
