@@ -30,7 +30,7 @@ jobs:
  
       - name: Install dependencies
         run: |
-          uv pip install .[docs]
+          pip install .[docs]
 
       - name: make the sphinx docs
         run: |

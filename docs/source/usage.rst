@@ -129,7 +129,7 @@ The *nm_settings* allow for parametrization of all features. Default settings ar
 
 .. toggle::
 
-    .. literalinclude:: ../../py_neuromodulation/nm_settings.yaml
+    .. literalinclude:: ../../py_neuromodulation/default_settings.yaml
         :language: yaml
  
 
