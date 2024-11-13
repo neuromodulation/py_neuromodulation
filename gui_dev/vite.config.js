@@ -6,8 +6,6 @@ import path from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const BACKEND_PORT = 50001;
-
 const react_config = {
   babel: {
     plugins: [
@@ -29,7 +27,8 @@ export default defineConfig(() => {
       alias: { "@": path.resolve(__dirname, "./src") },
     },
     build: {
-      sourcemap: true,
+      sourcemap: false,
+      minify: false,
       outDir: path.resolve(__dirname, "../py_neuromodulation/gui/frontend"),
       emptyOutDir: true,
       rollupOptions: {
