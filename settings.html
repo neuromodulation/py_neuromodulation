@@ -1,0 +1,611 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>settings &#8212; py_neuromodulation  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!-- 
+    this give us a css class that will be invisible only if js is disabled 
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'settings';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Stream" href="stream.html" />
+    <link rel="prev" title="mnelsl_stream" href="mnelsl_stream.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">py_neuromodulation  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="usage.html">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="api_documentation.html">
+    API Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="usage.html">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="api_documentation.html">
+    API Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="decode.html">decode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="feature_reader.html">feature_reader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plots.html">plots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RMAP.html">RMAP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats.html">stats</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="bispectra.html">bispectra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bursts.html">bursts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coherence.html">coherence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fooof.html">fooof</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hjorth.html">hjorth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linelength.html">linelength</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mne_connectivity.html">mne_connectivity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nolds.html">nolds</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oscillatory.html">oscillatory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sharpwaves.html">sharpwaves</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandpower.html">bandpower</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mne_filter.html">mne_filter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notch_filter.html">notch_filter</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="artifacts.html">artifacts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="normalization.html">normalization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="projection.html">projection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rereference.html">rereference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resample.html">resample</a></li>
+</ul>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generator.html">generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mnelsl_player.html">mnelsl_player</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mnelsl_stream.html">mnelsl_stream</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="channels.html">channels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="io.html">io</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">types</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="api_documentation.html" class="nav-link">API Documentation</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">settings</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="settings">
+<h1>settings<a class="headerlink" href="#settings" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="stream.settings.NMSettings">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">stream.settings.</span></span><span class="sig-name descname"><span class="pre">NMSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_rate_features_hz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Annotated" title="(in Python v3.13)"><span class="pre">Annotated</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Gt</span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">gt</span></span><span class="o"><span class="pre">=</span></span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segment_length_features_ms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Annotated" title="(in Python v3.13)"><span class="pre">Annotated</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Gt</span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">gt</span></span><span class="o"><span class="pre">=</span></span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency_ranges_hz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FrequencyRange</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'HFA':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">400.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">200.0},</span> <span class="pre">'alpha':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">12.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">8.0},</span> <span class="pre">'high_beta':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">35.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">20.0},</span> <span class="pre">'high_gamma':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">200.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">90.0},</span> <span class="pre">'low_beta':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">20.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">13.0},</span> <span class="pre">'low_gamma':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">80.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">60.0},</span> <span class="pre">'theta':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">8.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">4.0}}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preprocessing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.13)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'preprocessing_filter'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'notch_filter'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'raw_resampling'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'re_referencing'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'raw_normalization'</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">['raw_resampling',</span> <span class="pre">'notch_filter',</span> <span class="pre">'re_referencing']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_resampling_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ResamplerSettings</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'resample_freq_hz':</span> <span class="pre">1000}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preprocessing_filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FilterSettings</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'bandpass_filter':</span> <span class="pre">True,</span> <span class="pre">'bandpass_filter_settings':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">200.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">2.0},</span> <span class="pre">'bandstop_filter':</span> <span class="pre">True,</span> <span class="pre">'bandstop_filter_settings':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">160.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">100.0},</span> <span class="pre">'highpass_filter':</span> <span class="pre">True,</span> <span class="pre">'highpass_filter_cutoff_hz':</span> <span class="pre">3,</span> <span class="pre">'lowpass_filter':</span> <span class="pre">True,</span> <span class="pre">'lowpass_filter_cutoff_hz':</span> <span class="pre">200}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raw_normalization_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NormalizationSettings</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'clip':</span> <span class="pre">3,</span> <span class="pre">'normalization_method':</span> <span class="pre">'zscore',</span> <span class="pre">'normalization_time_s':</span> <span class="pre">30}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">postprocessing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PostprocessingSettings</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'feature_normalization':</span> <span class="pre">True,</span> <span class="pre">'project_cortex':</span> <span class="pre">False,</span> <span class="pre">'project_subcortex':</span> <span class="pre">False}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_normalization_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NormalizationSettings</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'clip':</span> <span class="pre">3,</span> <span class="pre">'normalization_method':</span> <span class="pre">'zscore',</span> <span class="pre">'normalization_time_s':</span> <span class="pre">30}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_cortex_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ProjectionSettings</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'max_dist_mm':</span> <span class="pre">20.0}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_subcortex_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ProjectionSettings</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'max_dist_mm':</span> <span class="pre">5.0}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FeatureSelection</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'bandpass_filter':</span> <span class="pre">False,</span> <span class="pre">'bispectrum':</span> <span class="pre">False,</span> <span class="pre">'bursts':</span> <span class="pre">True,</span> <span class="pre">'coherence':</span> <span class="pre">False,</span> <span class="pre">'fft':</span> <span class="pre">True,</span> <span class="pre">'fooof':</span> <span class="pre">False,</span> <span class="pre">'linelength':</span> <span class="pre">True,</span> <span class="pre">'mne_connectivity':</span> <span class="pre">False,</span> <span class="pre">'nolds':</span> <span class="pre">False,</span> <span class="pre">'raw_hjorth':</span> <span class="pre">True,</span> <span class="pre">'return_raw':</span> <span class="pre">True,</span> <span class="pre">'sharpwave_analysis':</span> <span class="pre">True,</span> <span class="pre">'stft':</span> <span class="pre">False,</span> <span class="pre">'welch':</span> <span class="pre">True}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fft_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">OscillatorySettings</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'features':</span> <span class="pre">{'max':</span> <span class="pre">False,</span> <span class="pre">'mean':</span> <span class="pre">True,</span> <span class="pre">'median':</span> <span class="pre">False,</span> <span class="pre">'std':</span> <span class="pre">False},</span> <span class="pre">'log_transform':</span> <span class="pre">True,</span> <span class="pre">'return_spectrum':</span> <span class="pre">False,</span> <span class="pre">'windowlength_ms':</span> <span class="pre">1000}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">welch_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">OscillatorySettings</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'features':</span> <span class="pre">{'max':</span> <span class="pre">False,</span> <span class="pre">'mean':</span> <span class="pre">True,</span> <span class="pre">'median':</span> <span class="pre">False,</span> <span class="pre">'std':</span> <span class="pre">False},</span> <span class="pre">'log_transform':</span> <span class="pre">True,</span> <span class="pre">'return_spectrum':</span> <span class="pre">False,</span> <span class="pre">'windowlength_ms':</span> <span class="pre">1000}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stft_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">OscillatorySettings</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'features':</span> <span class="pre">{'max':</span> <span class="pre">False,</span> <span class="pre">'mean':</span> <span class="pre">True,</span> <span class="pre">'median':</span> <span class="pre">False,</span> <span class="pre">'std':</span> <span class="pre">False},</span> <span class="pre">'log_transform':</span> <span class="pre">True,</span> <span class="pre">'return_spectrum':</span> <span class="pre">False,</span> <span class="pre">'windowlength_ms':</span> <span class="pre">1000}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bandpass_filter_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BandPowerSettings</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'bandpower_features':</span> <span class="pre">{'activity':</span> <span class="pre">True,</span> <span class="pre">'complexity':</span> <span class="pre">False,</span> <span class="pre">'mobility':</span> <span class="pre">False},</span> <span class="pre">'kalman_filter':</span> <span class="pre">False,</span> <span class="pre">'log_transform':</span> <span class="pre">True,</span> <span class="pre">'segment_lengths_ms':</span> <span class="pre">{'HFA':</span> <span class="pre">100,</span> <span class="pre">'alpha':</span> <span class="pre">500,</span> <span class="pre">'high</span> <span class="pre">beta':</span> <span class="pre">333,</span> <span class="pre">'high</span> <span class="pre">gamma':</span> <span class="pre">100,</span> <span class="pre">'low</span> <span class="pre">beta':</span> <span class="pre">333,</span> <span class="pre">'low</span> <span class="pre">gamma':</span> <span class="pre">100,</span> <span class="pre">'theta':</span> <span class="pre">1000}}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kalman_filter_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">KalmanSettings</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'Tp':</span> <span class="pre">0.1,</span> <span class="pre">'frequency_bands':</span> <span class="pre">['theta',</span> <span class="pre">'alpha',</span> <span class="pre">'low_beta',</span> <span class="pre">'high_beta',</span> <span class="pre">'low_gamma',</span> <span class="pre">'high_gamma',</span> <span class="pre">'HFA'],</span> <span class="pre">'sigma_v':</span> <span class="pre">1.0,</span> <span class="pre">'sigma_w':</span> <span class="pre">0.7}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">burst_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BurstsSettings</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'burst_features':</span> <span class="pre">{'amplitude':</span> <span class="pre">True,</span> <span class="pre">'burst_rate_per_s':</span> <span class="pre">True,</span> <span class="pre">'duration':</span> <span class="pre">True,</span> <span class="pre">'in_burst':</span> <span class="pre">True},</span> <span class="pre">'frequency_bands':</span> <span class="pre">['low_beta',</span> <span class="pre">'high_beta',</span> <span class="pre">'low_gamma'],</span> <span class="pre">'threshold':</span> <span class="pre">75,</span> <span class="pre">'time_duration_s':</span> <span class="pre">30}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharpwave_analysis_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">SharpwaveSettings</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'apply_estimator_between_peaks_and_troughs':</span> <span class="pre">True,</span> <span class="pre">'detect_peaks':</span> <span class="pre">{'distance_peaks_ms':</span> <span class="pre">5,</span> <span class="pre">'distance_troughs_ms':</span> <span class="pre">10,</span> <span class="pre">'estimate':</span> <span class="pre">True},</span> <span class="pre">'detect_troughs':</span> <span class="pre">{'distance_peaks_ms':</span> <span class="pre">5,</span> <span class="pre">'distance_troughs_ms':</span> <span class="pre">10,</span> <span class="pre">'estimate':</span> <span class="pre">True},</span> <span class="pre">'estimator':</span> <span class="pre">{'max':</span> <span class="pre">['prominence',</span> <span class="pre">'sharpness'],</span> <span class="pre">'mean':</span> <span class="pre">['interval'],</span> <span class="pre">'median':</span> <span class="pre">[],</span> <span class="pre">'min':</span> <span class="pre">[],</span> <span class="pre">'var':</span> <span class="pre">[]},</span> <span class="pre">'filter_ranges_hz':</span> <span class="pre">[{'frequency_high_hz':</span> <span class="pre">80.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">5.0},</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">30.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">5.0}],</span> <span class="pre">'sharpwave_features':</span> <span class="pre">{'decay_steepness':</span> <span class="pre">False,</span> <span class="pre">'decay_time':</span> <span class="pre">False,</span> <span class="pre">'interval':</span> <span class="pre">True,</span> <span class="pre">'num_peaks':</span> <span class="pre">False,</span> <span class="pre">'peak_left':</span> <span class="pre">False,</span> <span class="pre">'peak_right':</span> <span class="pre">False,</span> <span class="pre">'prominence':</span> <span class="pre">True,</span> <span class="pre">'rise_steepness':</span> <span class="pre">False,</span> <span class="pre">'rise_time':</span> <span class="pre">False,</span> <span class="pre">'sharpness':</span> <span class="pre">True,</span> <span class="pre">'slope_ratio':</span> <span class="pre">False,</span> <span class="pre">'trough':</span> <span class="pre">False,</span> <span class="pre">'width':</span> <span class="pre">False}}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mne_connectivity_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">MNEConnectivitySettings</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'method':</span> <span class="pre">'plv',</span> <span class="pre">'mode':</span> <span class="pre">'multitaper'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coherence_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CoherenceSettings</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'channels':</span> <span class="pre">[],</span> <span class="pre">'features':</span> <span class="pre">{'max_allfbands':</span> <span class="pre">True,</span> <span class="pre">'max_fband':</span> <span class="pre">True,</span> <span class="pre">'mean_fband':</span> <span class="pre">True},</span> <span class="pre">'frequency_bands':</span> <span class="pre">['high_beta'],</span> <span class="pre">'method':</span> <span class="pre">{'coh':</span> <span class="pre">True,</span> <span class="pre">'icoh':</span> <span class="pre">True},</span> <span class="pre">'nperseg':</span> <span class="pre">128}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fooof_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FooofSettings</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'aperiodic':</span> <span class="pre">{'exponent':</span> <span class="pre">True,</span> <span class="pre">'knee':</span> <span class="pre">True,</span> <span class="pre">'offset':</span> <span class="pre">True},</span> <span class="pre">'freq_range_hz':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">40.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">2.0},</span> <span class="pre">'knee':</span> <span class="pre">True,</span> <span class="pre">'max_n_peaks':</span> <span class="pre">3,</span> <span class="pre">'min_peak_height':</span> <span class="pre">0,</span> <span class="pre">'peak_threshold':</span> <span class="pre">2,</span> <span class="pre">'peak_width_limits':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">12.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">0.5},</span> <span class="pre">'periodic':</span> <span class="pre">{'band_width':</span> <span class="pre">False,</span> <span class="pre">'center_frequency':</span> <span class="pre">False,</span> <span class="pre">'height_over_ap':</span> <span class="pre">False},</span> <span class="pre">'windowlength_ms':</span> <span class="pre">800}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nolds_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NoldsSettings</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'features':</span> <span class="pre">{'correlation_dimension':</span> <span class="pre">False,</span> <span class="pre">'detrended_fluctuation_analysis':</span> <span class="pre">False,</span> <span class="pre">'hurst_exponent':</span> <span class="pre">False,</span> <span class="pre">'lyapunov_exponent':</span> <span class="pre">True,</span> <span class="pre">'sample_entropy':</span> <span class="pre">False},</span> <span class="pre">'frequency_bands':</span> <span class="pre">['low_beta'],</span> <span class="pre">'raw':</span> <span class="pre">True}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bispectrum_settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BispectraSettings</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{'bispectrum_features':</span> <span class="pre">{'mean':</span> <span class="pre">True,</span> <span class="pre">'sum':</span> <span class="pre">True,</span> <span class="pre">'var':</span> <span class="pre">True},</span> <span class="pre">'components':</span> <span class="pre">{'absolute':</span> <span class="pre">True,</span> <span class="pre">'imag':</span> <span class="pre">True,</span> <span class="pre">'phase':</span> <span class="pre">True,</span> <span class="pre">'real':</span> <span class="pre">True},</span> <span class="pre">'compute_features_for_whole_fband_range':</span> <span class="pre">True,</span> <span class="pre">'f1s':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">35.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">5.0},</span> <span class="pre">'f2s':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">35.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">5.0},</span> <span class="pre">'frequency_bands':</span> <span class="pre">['theta',</span> <span class="pre">'alpha',</span> <span class="pre">'low_beta',</span> <span class="pre">'high_beta']}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/stream/settings.html#NMSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stream.settings.NMSettings" title="Link to this definition">#</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="stream.settings.NMSettings.from_file">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PATH</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.13)"><span class="pre">PathLike</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#stream.settings.NMSettings" title="stream.settings.NMSettings"><span class="pre">NMSettings</span></a></span></span><a class="reference internal" href="_modules/stream/settings.html#NMSettings.from_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#stream.settings.NMSettings.from_file" title="Link to this definition">#</a></dt>
+<dd><p>Load settings from file or a directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>PATH</strong> (<em>_PathLike</em>) – Path to settings file or to directory containing settings file,
+or path to experiment including experiment prefix
+(e.g. /path/to/exp/exp_prefix[_SETTINGS.json]).
+Supported file types are .json and .yaml</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – when file format is not supported.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>PyNM settings object</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#stream.settings.NMSettings" title="stream.settings.NMSettings">NMSettings</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="stream.settings.NMSettings.model_computed_fields">
+<span class="sig-name descname"><span class="pre">model_computed_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ComputedFieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#stream.settings.NMSettings.model_computed_fields" title="Link to this definition">#</a></dt>
+<dd><p>A dictionary of computed field names and their corresponding <cite>ComputedFieldInfo</cite> objects.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="stream.settings.NMSettings.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">ConfigDict</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'allow',</span> <span class="pre">'validate_assignment':</span> <span class="pre">False}</span></em><a class="headerlink" href="#stream.settings.NMSettings.model_config" title="Link to this definition">#</a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="stream.settings.NMSettings.model_fields">
+<span class="sig-name descname"><span class="pre">model_fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">FieldInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'bandpass_filter_settings':</span> <span class="pre">FieldInfo(annotation=BandPowerSettings,</span> <span class="pre">required=False,</span> <span class="pre">default={'bandpower_features':</span> <span class="pre">{'activity':</span> <span class="pre">True,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'complexity':</span> <span class="pre">False,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'mobility':</span> <span class="pre">False},</span>&#160; <span class="pre">'kalman_filter':</span> <span class="pre">False,</span>&#160; <span class="pre">'log_transform':</span> <span class="pre">True,</span>&#160; <span class="pre">'segment_lengths_ms':</span> <span class="pre">{'HFA':</span> <span class="pre">100,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'alpha':</span> <span class="pre">500,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'high</span> <span class="pre">beta':</span> <span class="pre">333,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'high</span> <span class="pre">gamma':</span> <span class="pre">100,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'low</span> <span class="pre">beta':</span> <span class="pre">333,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'low</span> <span class="pre">gamma':</span> <span class="pre">100,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'theta':</span> <span class="pre">1000}}),</span> <span class="pre">'bispectrum_settings':</span> <span class="pre">FieldInfo(annotation=BispectraSettings,</span> <span class="pre">required=False,</span> <span class="pre">default={'bispectrum_features':</span> <span class="pre">{'mean':</span> <span class="pre">True,</span> <span class="pre">'sum':</span> <span class="pre">True,</span> <span class="pre">'var':</span> <span class="pre">True},</span>&#160; <span class="pre">'components':</span> <span class="pre">{'absolute':</span> <span class="pre">True,</span> <span class="pre">'imag':</span> <span class="pre">True,</span> <span class="pre">'phase':</span> <span class="pre">True,</span> <span class="pre">'real':</span> <span class="pre">True},</span>&#160; <span class="pre">'compute_features_for_whole_fband_range':</span> <span class="pre">True,</span>&#160; <span class="pre">'f1s':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">35.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">5.0},</span>&#160; <span class="pre">'f2s':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">35.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">5.0},</span>&#160; <span class="pre">'frequency_bands':</span> <span class="pre">['theta',</span> <span class="pre">'alpha',</span> <span class="pre">'low_beta',</span> <span class="pre">'high_beta']}),</span> <span class="pre">'burst_settings':</span> <span class="pre">FieldInfo(annotation=BurstsSettings,</span> <span class="pre">required=False,</span> <span class="pre">default={'burst_features':</span> <span class="pre">{'amplitude':</span> <span class="pre">True,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'burst_rate_per_s':</span> <span class="pre">True,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'duration':</span> <span class="pre">True,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'in_burst':</span> <span class="pre">True},</span>&#160; <span class="pre">'frequency_bands':</span> <span class="pre">['low_beta',</span> <span class="pre">'high_beta',</span> <span class="pre">'low_gamma'],</span>&#160; <span class="pre">'threshold':</span> <span class="pre">75,</span>&#160; <span class="pre">'time_duration_s':</span> <span class="pre">30}),</span> <span class="pre">'coherence_settings':</span> <span class="pre">FieldInfo(annotation=CoherenceSettings,</span> <span class="pre">required=False,</span> <span class="pre">default={'channels':</span> <span class="pre">[],</span>&#160; <span class="pre">'features':</span> <span class="pre">{'max_allfbands':</span> <span class="pre">True,</span> <span class="pre">'max_fband':</span> <span class="pre">True,</span> <span class="pre">'mean_fband':</span> <span class="pre">True},</span>&#160; <span class="pre">'frequency_bands':</span> <span class="pre">['high_beta'],</span>&#160; <span class="pre">'method':</span> <span class="pre">{'coh':</span> <span class="pre">True,</span> <span class="pre">'icoh':</span> <span class="pre">True},</span>&#160; <span class="pre">'nperseg':</span> <span class="pre">128}),</span> <span class="pre">'feature_normalization_settings':</span> <span class="pre">FieldInfo(annotation=NormalizationSettings,</span> <span class="pre">required=False,</span> <span class="pre">default={'clip':</span> <span class="pre">3,</span> <span class="pre">'normalization_method':</span> <span class="pre">'zscore',</span> <span class="pre">'normalization_time_s':</span> <span class="pre">30}),</span> <span class="pre">'features':</span> <span class="pre">FieldInfo(annotation=FeatureSelection,</span> <span class="pre">required=False,</span> <span class="pre">default={'bandpass_filter':</span> <span class="pre">False,</span>&#160; <span class="pre">'bispectrum':</span> <span class="pre">False,</span>&#160; <span class="pre">'bursts':</span> <span class="pre">True,</span>&#160; <span class="pre">'coherence':</span> <span class="pre">False,</span>&#160; <span class="pre">'fft':</span> <span class="pre">True,</span>&#160; <span class="pre">'fooof':</span> <span class="pre">False,</span>&#160; <span class="pre">'linelength':</span> <span class="pre">True,</span>&#160; <span class="pre">'mne_connectivity':</span> <span class="pre">False,</span>&#160; <span class="pre">'nolds':</span> <span class="pre">False,</span>&#160; <span class="pre">'raw_hjorth':</span> <span class="pre">True,</span>&#160; <span class="pre">'return_raw':</span> <span class="pre">True,</span>&#160; <span class="pre">'sharpwave_analysis':</span> <span class="pre">True,</span>&#160; <span class="pre">'stft':</span> <span class="pre">False,</span>&#160; <span class="pre">'welch':</span> <span class="pre">True}),</span> <span class="pre">'fft_settings':</span> <span class="pre">FieldInfo(annotation=OscillatorySettings,</span> <span class="pre">required=False,</span> <span class="pre">default={'features':</span> <span class="pre">{'max':</span> <span class="pre">False,</span> <span class="pre">'mean':</span> <span class="pre">True,</span> <span class="pre">'median':</span> <span class="pre">False,</span> <span class="pre">'std':</span> <span class="pre">False},</span>&#160; <span class="pre">'log_transform':</span> <span class="pre">True,</span>&#160; <span class="pre">'return_spectrum':</span> <span class="pre">False,</span>&#160; <span class="pre">'windowlength_ms':</span> <span class="pre">1000}),</span> <span class="pre">'fooof_settings':</span> <span class="pre">FieldInfo(annotation=FooofSettings,</span> <span class="pre">required=False,</span> <span class="pre">default={'aperiodic':</span> <span class="pre">{'exponent':</span> <span class="pre">True,</span> <span class="pre">'knee':</span> <span class="pre">True,</span> <span class="pre">'offset':</span> <span class="pre">True},</span>&#160; <span class="pre">'freq_range_hz':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">40.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">2.0},</span>&#160; <span class="pre">'knee':</span> <span class="pre">True,</span>&#160; <span class="pre">'max_n_peaks':</span> <span class="pre">3,</span>&#160; <span class="pre">'min_peak_height':</span> <span class="pre">0,</span>&#160; <span class="pre">'peak_threshold':</span> <span class="pre">2,</span>&#160; <span class="pre">'peak_width_limits':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">12.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">0.5},</span>&#160; <span class="pre">'periodic':</span> <span class="pre">{'band_width':</span> <span class="pre">False,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'center_frequency':</span> <span class="pre">False,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'height_over_ap':</span> <span class="pre">False},</span>&#160; <span class="pre">'windowlength_ms':</span> <span class="pre">800}),</span> <span class="pre">'frequency_ranges_hz':</span> <span class="pre">FieldInfo(annotation=dict[str,</span> <span class="pre">FrequencyRange],</span> <span class="pre">required=False,</span> <span class="pre">default={'theta':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">8.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">4.0},</span> <span class="pre">'alpha':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">12.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">8.0},</span> <span class="pre">'low_beta':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">20.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">13.0},</span> <span class="pre">'high_beta':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">35.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">20.0},</span> <span class="pre">'low_gamma':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">80.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">60.0},</span> <span class="pre">'high_gamma':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">200.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">90.0},</span> <span class="pre">'HFA':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">400.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">200.0}}),</span> <span class="pre">'kalman_filter_settings':</span> <span class="pre">FieldInfo(annotation=KalmanSettings,</span> <span class="pre">required=False,</span> <span class="pre">default={'Tp':</span> <span class="pre">0.1,</span>&#160; <span class="pre">'frequency_bands':</span> <span class="pre">['theta',</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'alpha',</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'low_beta',</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'high_beta',</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'low_gamma',</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'high_gamma',</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'HFA'],</span>&#160; <span class="pre">'sigma_v':</span> <span class="pre">1.0,</span>&#160; <span class="pre">'sigma_w':</span> <span class="pre">0.7}),</span> <span class="pre">'mne_connectivity_settings':</span> <span class="pre">FieldInfo(annotation=MNEConnectivitySettings,</span> <span class="pre">required=False,</span> <span class="pre">default={'method':</span> <span class="pre">'plv',</span> <span class="pre">'mode':</span> <span class="pre">'multitaper'}),</span> <span class="pre">'nolds_settings':</span> <span class="pre">FieldInfo(annotation=NoldsSettings,</span> <span class="pre">required=False,</span> <span class="pre">default={'features':</span> <span class="pre">{'correlation_dimension':</span> <span class="pre">False,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'detrended_fluctuation_analysis':</span> <span class="pre">False,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'hurst_exponent':</span> <span class="pre">False,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'lyapunov_exponent':</span> <span class="pre">True,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'sample_entropy':</span> <span class="pre">False},</span>&#160; <span class="pre">'frequency_bands':</span> <span class="pre">['low_beta'],</span>&#160; <span class="pre">'raw':</span> <span class="pre">True}),</span> <span class="pre">'postprocessing':</span> <span class="pre">FieldInfo(annotation=PostprocessingSettings,</span> <span class="pre">required=False,</span> <span class="pre">default={'feature_normalization':</span> <span class="pre">True,</span>&#160; <span class="pre">'project_cortex':</span> <span class="pre">False,</span>&#160; <span class="pre">'project_subcortex':</span> <span class="pre">False}),</span> <span class="pre">'preprocessing':</span> <span class="pre">FieldInfo(annotation=list[Literal['preprocessing_filter',</span> <span class="pre">'notch_filter',</span> <span class="pre">'raw_resampling',</span> <span class="pre">'re_referencing',</span> <span class="pre">'raw_normalization']],</span> <span class="pre">required=False,</span> <span class="pre">default=['raw_resampling',</span> <span class="pre">'notch_filter',</span> <span class="pre">'re_referencing']),</span> <span class="pre">'preprocessing_filter':</span> <span class="pre">FieldInfo(annotation=FilterSettings,</span> <span class="pre">required=False,</span> <span class="pre">default={'bandpass_filter':</span> <span class="pre">True,</span>&#160; <span class="pre">'bandpass_filter_settings':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">200.0,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'frequency_low_hz':</span> <span class="pre">2.0},</span>&#160; <span class="pre">'bandstop_filter':</span> <span class="pre">True,</span>&#160; <span class="pre">'bandstop_filter_settings':</span> <span class="pre">{'frequency_high_hz':</span> <span class="pre">160.0,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'frequency_low_hz':</span> <span class="pre">100.0},</span>&#160; <span class="pre">'highpass_filter':</span> <span class="pre">True,</span>&#160; <span class="pre">'highpass_filter_cutoff_hz':</span> <span class="pre">3,</span>&#160; <span class="pre">'lowpass_filter':</span> <span class="pre">True,</span>&#160; <span class="pre">'lowpass_filter_cutoff_hz':</span> <span class="pre">200}),</span> <span class="pre">'project_cortex_settings':</span> <span class="pre">FieldInfo(annotation=ProjectionSettings,</span> <span class="pre">required=False,</span> <span class="pre">default={'max_dist_mm':</span> <span class="pre">20.0}),</span> <span class="pre">'project_subcortex_settings':</span> <span class="pre">FieldInfo(annotation=ProjectionSettings,</span> <span class="pre">required=False,</span> <span class="pre">default={'max_dist_mm':</span> <span class="pre">5.0}),</span> <span class="pre">'raw_normalization_settings':</span> <span class="pre">FieldInfo(annotation=NormalizationSettings,</span> <span class="pre">required=False,</span> <span class="pre">default={'clip':</span> <span class="pre">3,</span> <span class="pre">'normalization_method':</span> <span class="pre">'zscore',</span> <span class="pre">'normalization_time_s':</span> <span class="pre">30}),</span> <span class="pre">'raw_resampling_settings':</span> <span class="pre">FieldInfo(annotation=ResamplerSettings,</span> <span class="pre">required=False,</span> <span class="pre">default={'resample_freq_hz':</span> <span class="pre">1000}),</span> <span class="pre">'sampling_rate_features_hz':</span> <span class="pre">FieldInfo(annotation=float,</span> <span class="pre">required=False,</span> <span class="pre">default=10,</span> <span class="pre">metadata=[Gt(gt=0)]),</span> <span class="pre">'segment_length_features_ms':</span> <span class="pre">FieldInfo(annotation=float,</span> <span class="pre">required=False,</span> <span class="pre">default=1000,</span> <span class="pre">metadata=[Gt(gt=0)]),</span> <span class="pre">'sharpwave_analysis_settings':</span> <span class="pre">FieldInfo(annotation=SharpwaveSettings,</span> <span class="pre">required=False,</span> <span class="pre">default={'apply_estimator_between_peaks_and_troughs':</span> <span class="pre">True,</span>&#160; <span class="pre">'detect_peaks':</span> <span class="pre">{'distance_peaks_ms':</span> <span class="pre">5,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'distance_troughs_ms':</span> <span class="pre">10,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'estimate':</span> <span class="pre">True},</span>&#160; <span class="pre">'detect_troughs':</span> <span class="pre">{'distance_peaks_ms':</span> <span class="pre">5,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'distance_troughs_ms':</span> <span class="pre">10,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'estimate':</span> <span class="pre">True},</span>&#160; <span class="pre">'estimator':</span> <span class="pre">{'max':</span> <span class="pre">['prominence',</span> <span class="pre">'sharpness'],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'mean':</span> <span class="pre">['interval'],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'median':</span> <span class="pre">[],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'min':</span> <span class="pre">[],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'var':</span> <span class="pre">[]},</span>&#160; <span class="pre">'filter_ranges_hz':</span> <span class="pre">[{'frequency_high_hz':</span> <span class="pre">80.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">5.0},</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">{'frequency_high_hz':</span> <span class="pre">30.0,</span> <span class="pre">'frequency_low_hz':</span> <span class="pre">5.0}],</span>&#160; <span class="pre">'sharpwave_features':</span> <span class="pre">{'decay_steepness':</span> <span class="pre">False,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'decay_time':</span> <span class="pre">False,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'interval':</span> <span class="pre">True,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'num_peaks':</span> <span class="pre">False,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'peak_left':</span> <span class="pre">False,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'peak_right':</span> <span class="pre">False,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'prominence':</span> <span class="pre">True,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'rise_steepness':</span> <span class="pre">False,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'rise_time':</span> <span class="pre">False,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'sharpness':</span> <span class="pre">True,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'slope_ratio':</span> <span class="pre">False,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'trough':</span> <span class="pre">False,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">'width':</span> <span class="pre">False}}),</span> <span class="pre">'stft_settings':</span> <span class="pre">FieldInfo(annotation=OscillatorySettings,</span> <span class="pre">required=False,</span> <span class="pre">default={'features':</span> <span class="pre">{'max':</span> <span class="pre">False,</span> <span class="pre">'mean':</span> <span class="pre">True,</span> <span class="pre">'median':</span> <span class="pre">False,</span> <span class="pre">'std':</span> <span class="pre">False},</span>&#160; <span class="pre">'log_transform':</span> <span class="pre">True,</span>&#160; <span class="pre">'return_spectrum':</span> <span class="pre">False,</span>&#160; <span class="pre">'windowlength_ms':</span> <span class="pre">1000}),</span> <span class="pre">'welch_settings':</span> <span class="pre">FieldInfo(annotation=OscillatorySettings,</span> <span class="pre">required=False,</span> <span class="pre">default={'features':</span> <span class="pre">{'max':</span> <span class="pre">False,</span> <span class="pre">'mean':</span> <span class="pre">True,</span> <span class="pre">'median':</span> <span class="pre">False,</span> <span class="pre">'std':</span> <span class="pre">False},</span>&#160; <span class="pre">'log_transform':</span> <span class="pre">True,</span>&#160; <span class="pre">'return_spectrum':</span> <span class="pre">False,</span>&#160; <span class="pre">'windowlength_ms':</span> <span class="pre">1000})}</span></em><a class="headerlink" href="#stream.settings.NMSettings.model_fields" title="Link to this definition">#</a></dt>
+<dd><p>Metadata about the fields defined on the model,
+mapping of field names to [<cite>FieldInfo</cite>][pydantic.fields.FieldInfo] objects.</p>
+<p>This replaces <cite>Model.__fields__</cite> from Pydantic V1.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="mnelsl_stream.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">mnelsl_stream</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="stream.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Stream</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stream.settings.NMSettings"><code class="docutils literal notranslate"><span class="pre">NMSettings</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stream.settings.NMSettings.from_file"><code class="docutils literal notranslate"><span class="pre">NMSettings.from_file()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stream.settings.NMSettings.model_computed_fields"><code class="docutils literal notranslate"><span class="pre">NMSettings.model_computed_fields</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stream.settings.NMSettings.model_config"><code class="docutils literal notranslate"><span class="pre">NMSettings.model_config</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stream.settings.NMSettings.model_fields"><code class="docutils literal notranslate"><span class="pre">NMSettings.model_fields</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="_sources/settings.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021, Timon Merk.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.0.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
