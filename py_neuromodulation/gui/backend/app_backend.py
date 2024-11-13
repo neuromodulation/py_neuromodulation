@@ -1,11 +1,9 @@
-import numpy as np
 import logging
 import asyncio
 import importlib.metadata
 from datetime import datetime
 from pathlib import Path
 import os
-import time
 
 from fastapi import (
     FastAPI,
@@ -13,7 +11,6 @@ from fastapi import (
     Query,
     WebSocket,
 )
-from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -24,8 +21,6 @@ import pandas as pd
 
 from py_neuromodulation import PYNM_DIR, NMSettings
 from py_neuromodulation.utils.types import FileInfo
-
-from multiprocessing import Process, Queue
 
 # TODO: maybe pull this list from the MNE package?
 ALLOWED_EXTENSIONS = [".npy", ".vhdr", ".fif", ".edf", ".bdf"]
@@ -109,11 +104,13 @@ class PyNMBackend(FastAPI):
                 self.logger.info(self.websocket_manager)
                 self.logger.info("Starting stream")
 
-                asyncio.create_task(self.pynm_state.start_run_function(
-                    #out_dir=data["out_dir"],
-                    #experiment_name=data["experiment_name"],
-                    websocket_manager_features=self.websocket_manager,
-                ))
+                asyncio.create_task(
+                    self.pynm_state.start_run_function(
+                        # out_dir=data["out_dir"],
+                        # experiment_name=data["experiment_name"],
+                        websocket_manager_features=self.websocket_manager,
+                    )
+                )
 
             if action == "stop":
                 self.logger.info("Stopping stream")
@@ -209,9 +206,9 @@ class PyNMBackend(FastAPI):
                     line_noise=float(data["line_noise"]),
                     sampling_rate_features=float(data["sampling_rate_features"]),
                 )
-                return {"message": f"Offline stream setup successfully"}
-            except ValueError as e:
-                return {"message": f"Offline stream could not be setup"}
+                return {"message": "Offline stream setup successfully"}
+            except ValueError:
+                return {"message": "Offline stream could not be setup"}
 
         #######################
         ### PYNM ABOUT INFO ###
@@ -340,30 +337,9 @@ class PyNMBackend(FastAPI):
         ###########################
         @self.websocket("/ws")
         async def websocket_endpoint(websocket: WebSocket):
-            # if self.websocket_manager.is_connected:
-            #     self.logger.info(
-            #         "WebSocket connection attempted while already connected"
-            #     )
-            #     await websocket.close(
-            #         code=1008, reason="Another client is already connected"
-            #     )
-            #     return
-
             await self.websocket_manager.connect(websocket)
             while True:
                 try:
                     await websocket.receive_text()
                 except Exception:
                     break
-        # # #######################
-        # # ### SPA ENTRY POINT ###
-        # # #######################
-        # if not self.dev:
-
-        #     @self.get("/app/{full_path:path}")
-        #     async def serve_spa(request, full_path: str):
-        #         # Serve the index.html for any path that doesn't match an API route
-        #         print(Path.cwd())
-        #         return FileResponse("frontend/index.html")
-
-

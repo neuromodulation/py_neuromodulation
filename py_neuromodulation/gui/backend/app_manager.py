@@ -23,7 +23,10 @@ def create_backend() -> "PyNMBackend":
     from .app_pynm import PyNMState
     from .app_backend import PyNMBackend
 
-    return PyNMBackend(pynm_state=PyNMState())
+    debug = os.environ.get("PYNM_DEBUG", "False").lower() == "true"
+    dev = os.environ.get("PYNM_DEV", "True").lower() == "true"
+
+    return PyNMBackend(pynm_state=PyNMState(), debug=debug, dev=dev)
 
 
 def run_vite(shutdown_event: "Event", debug: bool = False) -> None:
@@ -157,9 +160,13 @@ def run_uvicorn(debug: bool = False, reload=False) -> None:
 
 
 def run_backend(
-    shutdown_event: "Event", debug: bool = False, reload: bool = True
+    shutdown_event: "Event", debug: bool = False, reload: bool = True, dev: bool = True
 ) -> None:
     signal.signal(signal.SIGINT, signal.SIG_IGN)
+
+    # Pass create_backend parameters through environment variables
+    os.environ["PYNM_DEBUG"] = str(debug)
+    os.environ["PYNM_DEV"] = str(dev)
 
     server_process = mp.Process(
         target=run_uvicorn,
@@ -279,8 +286,8 @@ class AppManager:
             kwargs={
                 "shutdown_event": self.shutdown_event,
                 "debug": self.debug,
-                # Could the reload be responsible for closing the websocket?
-                "reload": False,  # self.dev
+                "reload": self.dev,
+                "dev": self.dev,
             },
             name="Backend",
         )
