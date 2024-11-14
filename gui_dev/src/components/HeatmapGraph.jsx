@@ -8,6 +8,7 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  Checkbox,
 } from '@mui/material';
 import { CollapsibleBox } from './CollapsibleBox';
 import { getChannelAndFeature } from './utils';
@@ -31,6 +32,9 @@ export const HeatmapGraph = () => {
 
   const [selectedChannel, setSelectedChannel] = useState(''); // TODO: Switch this maybe multiple?
   const [features, setFeatures] = useState([]);
+  const [fftFeatures, setFftFeatures] = useState([]); 
+  const [otherFeatures, setOtherFeatures] = useState([]);
+  const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [heatmapData, setHeatmapData] = useState({ x: [], z: [] });
   const [isDataStale, setIsDataStale] = useState(false);
   const [lastDataTime, setLastDataTime] = useState(null);
@@ -43,13 +47,37 @@ export const HeatmapGraph = () => {
     setSelectedChannel(event.target.value);
   };
 
+  // Added handler for fft_psd_xyz features toggle TODO: also welch/ other features?
+  const handleFftFeaturesToggle = () => {
+    const allFftFeaturesSelected = fftFeatures.every((feature) => selectedFeatures.includes(feature));
+
+    if (allFftFeaturesSelected) {
+      setSelectedFeatures((prevSelected) =>
+        prevSelected.filter((feature) => !fftFeatures.includes(feature))
+      );
+    } else {
+      setSelectedFeatures((prevSelected) =>
+        [...prevSelected, ...fftFeatures.filter((feature) => !prevSelected.includes(feature))]
+      );
+    }
+  };
+
+  const handleFeatureToggle = (featureName) => {
+    setSelectedFeatures((prevSelected) => {
+      if (prevSelected.includes(featureName)) {
+        return prevSelected.filter((name) => name !== featureName);
+      } else {
+        return [...prevSelected, featureName];
+      }
+    });
+  };
+
   useEffect(() => {
     if (usedChannels.length > 0 && !selectedChannel) {
       setSelectedChannel(usedChannels[0].name);
     }
   }, [usedChannels, selectedChannel]);
 
-  // Update features on data/channel change -> TODO: Debug the channel switch
   useEffect(() => {
     if (!graphData || !selectedChannel) return;
 
@@ -63,15 +91,24 @@ export const HeatmapGraph = () => {
     if (JSON.stringify(newFeatures) !== JSON.stringify(features)) {
       console.log('Updating features:', newFeatures);
       setFeatures(newFeatures);
+
+      // TODO: currently all psd selectable together. should we also do this for welch and other features?
+      const fftFeatures = newFeatures.filter((feature) => feature.startsWith('fft_psd_'));
+      const otherFeatures = newFeatures.filter((feature) => !feature.startsWith('fft_psd_'));
+
+      setFftFeatures(fftFeatures);
+      setOtherFeatures(otherFeatures);
+
+      setSelectedFeatures(newFeatures);
       setHeatmapData({ x: [], z: [] }); // Reset heatmap data when features change
       setIsDataStale(false);
       setLastDataTime(null);
       setLastDataTimestamp(null);
     }
-  }, [graphData, selectedChannel]);
+  }, [graphData, selectedChannel, features]);
 
   useEffect(() => {
-    if (!graphData || !selectedChannel || features.length === 0) return;
+    if (!graphData || !selectedChannel || features.length === 0 || selectedFeatures.length === 0) return;
 
     // TODO: Always data in ms? (Time conversion here always necessary?)
     let timestamp = graphData.time;
@@ -87,13 +124,15 @@ export const HeatmapGraph = () => {
     let x = [...heatmapData.x, timestamp];
 
     let z;
-    if (heatmapData.z && heatmapData.z.length === features.length) {
+
+    // Initialize 'z' for selected features
+    if (heatmapData.z && heatmapData.z.length === selectedFeatures.length) {
       z = heatmapData.z.map((row) => [...row]);
     } else {
-      z = features.map(() => []);
+      z = selectedFeatures.map(() => []);
     }
 
-    features.forEach((featureName, idx) => {
+    selectedFeatures.forEach((featureName, idx) => {
       const key = `${selectedChannel}_${featureName}`;
       const value = graphData[key];
       const numericValue = typeof value === 'number' && !isNaN(value) ? value : 0;
@@ -114,7 +153,7 @@ export const HeatmapGraph = () => {
     z = z.map((row) => validIndices.map((index) => row[index]));
 
     setHeatmapData({ x, z });
-  }, [graphData, selectedChannel, features]);
+  }, [graphData, selectedChannel, features, selectedFeatures]);
 
   // Check if data is stale (no new data in the last second) -> TODO: Find better solution debug this
   useEffect(() => {
@@ -190,14 +229,51 @@ export const HeatmapGraph = () => {
             </FormControl>
           </CollapsibleBox>
         </Box>
+        <Box sx={{ ml: 2, minWidth: 200 }}>
+          <CollapsibleBox title="Feature Selection" defaultExpanded={true}>
+            <FormControl component="fieldset">
+              <Box display="flex" flexDirection="column">
+                {fftFeatures.length > 0 && (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={fftFeatures.every((feature) => selectedFeatures.includes(feature))}
+                        indeterminate={
+                          fftFeatures.some((feature) => selectedFeatures.includes(feature)) &&
+                          !fftFeatures.every((feature) => selectedFeatures.includes(feature))
+                        }
+                        onChange={handleFftFeaturesToggle}
+                        color="primary"
+                      />
+                    }
+                    label="All fft_psd_xyz features"
+                  />
+                )}
+                {otherFeatures.map((featureName, index) => (
+                  <FormControlLabel
+                    key={featureName || index}
+                    control={
+                      <Checkbox
+                        checked={selectedFeatures.includes(featureName)}
+                        onChange={() => handleFeatureToggle(featureName)}
+                        color="primary"
+                      />
+                    }
+                    label={featureName}
+                  />
+                ))}
+              </Box>
+            </FormControl>
+          </CollapsibleBox>
+        </Box>
       </Box>
-      {heatmapData.x.length > 0 && features.length > 0 && heatmapData.z.length > 0 && (
+      {heatmapData.x.length > 0 && selectedFeatures.length > 0 && heatmapData.z.length > 0 && (
         <Plot
           data={[
             {
               z: heatmapData.z,
               x: heatmapData.x,
-              y: features,
+              y: selectedFeatures,
               type: 'heatmap',
               colorscale: 'Viridis',
             },
