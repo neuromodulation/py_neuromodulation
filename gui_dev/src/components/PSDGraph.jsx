@@ -23,18 +23,7 @@ const generateColors = (numColors) => {
   return colors;
 };
 
-const fftFeatures = [
-  "fft_theta_mean",
-  "fft_alpha_mean",
-  "fft_low_beta_mean",
-  "fft_high_beta_mean",
-  "fft_low_gamma_mean",
-  "fft_high_gamma_mean",
-];
-
 export const PSDGraph = () => {
-
-
   const channels = useSessionStore((state) => state.channels, shallow); 
 
   const usedChannels = useMemo(
@@ -54,45 +43,52 @@ export const PSDGraph = () => {
   
   const psdData = useMemo(() => { 
     if (!socketPsdData) return [];
-    // console.log("Socket PSD Data:", socketPsdData);
+    console.log("Socket PSD Data:", socketPsdData);
     const dataByChannel = {};
+    const allFeaturesSet = new Set();
 
     Object.entries(socketPsdData).forEach(([key, value]) => {
       const { channelName = '', featureName = '' } = getChannelAndFeature(availableChannels, key);
       if (!channelName) return;
 
-      if (!fftFeatures.includes(featureName)) return; 
+      if (!featureName.startsWith("fft_psd_")) return;
+
+      const featureNumber = featureName.substring("fft_psd_".length);
+      const featureIndex = parseInt(featureNumber);
+
+      if (isNaN(featureIndex)) return; 
+
+      allFeaturesSet.add(featureIndex);
 
       if (!dataByChannel[channelName]) {
         dataByChannel[channelName] = {
           channelName,
-          features: [],
-          values: [],
+          featureMap: {},
         };
       }
 
-      dataByChannel[channelName].features.push(featureName);
-      dataByChannel[channelName].values.push(value);
+      dataByChannel[channelName].featureMap[featureIndex] = value;
     });
+
+    const allFeatures = Array.from(allFeaturesSet).sort((a, b) => a - b);
 
     const selectedData = selectedChannels.map((channelName) => {
       const channelData = dataByChannel[channelName];
-      if(channelData) {
-        const sortedValues = fftFeatures.map((feature) => { //TODO Currently we map the average frequency bands to the graph -> Should we include more data here?
-          const index = channelData.features.indexOf(feature);
-          return index !== -1 ? channelData.values[index] : null;
+      if (channelData) {
+        const values = allFeatures.map((featureIndex) => {
+          return channelData.featureMap[featureIndex] !== undefined ? channelData.featureMap[featureIndex] : null;
         });
         return {
           channelName,
-          features: fftFeatures.map((f) => f.replace('_mean', '').replace('fft_', '')),
-          values: sortedValues,
+          features: allFeatures,
+          values,
         };
       } else {
         return {
-          channelName, 
-          features: fftFeatures.map((f) => f.replace('_mean', '').replace('fft_', '')),
-          values: fftFeatures.map(() =>  null),
-        }
+          channelName,
+          features: allFeatures,
+          values: allFeatures.map(() => null),
+        };
       }
     });
 
@@ -129,15 +125,14 @@ export const PSDGraph = () => {
     }
 
     const layout = {
-     // title: { text: "PSD Trace", font: { color: "#f4f4f4" } },
       autosize: true,
       height: 350,
       paper_bgcolor: "#333",
       plot_bgcolor: "#333",
       xaxis: {
-        title: { text: "Frequency Band", font: { color: "#f4f4f4" } },
+        title: { text: "Feature Index", font: { color: "#f4f4f4" } },
         color: "#cccccc",
-        type: 'category',
+        type: 'linear',
       },
       yaxis: {
         title: { text: "Power", font: { color: "#f4f4f4" } },
@@ -185,7 +180,6 @@ export const PSDGraph = () => {
         </Typography>
         <Box sx={{ ml: 2, minWidth: 200 }}> 
           <CollapsibleBox title="Channel Selection" defaultExpanded={true}>
-          {/* TODO: Fix the typing errors -> How to solve this in jsx?  */}
             <Box display="flex" flexDirection="column">
               {usedChannels.map((channel, index) => (
                 <FormControlLabel
