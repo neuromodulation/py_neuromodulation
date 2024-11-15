@@ -229,7 +229,7 @@ export const HeatmapGraph = () => {
             </FormControl>
           </CollapsibleBox>
         </Box>
-        <Box sx={{ ml: 2, minWidth: 200 }}>
+        <Box sx={{ ml: 2, mr: 4, minWidth: 200 }}>
           <CollapsibleBox title="Feature Selection" defaultExpanded={true}>
             <FormControl component="fieldset">
               <Box display="flex" flexDirection="column">
@@ -246,7 +246,7 @@ export const HeatmapGraph = () => {
                         color="primary"
                       />
                     }
-                    label="All fft_psd_xyz features"
+                    label="FFT PSD Spectrum"
                   />
                 )}
                 {otherFeatures.map((featureName, index) => (

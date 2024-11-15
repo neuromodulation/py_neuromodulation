@@ -10,10 +10,11 @@ import {
   Radio,
   RadioGroup,
   FormControl,
+  Slider,
 } from "@mui/material";
 import { CollapsibleBox } from "./CollapsibleBox";
 import { getChannelAndFeature } from "./utils";
-import {shallow} from 'zustand/shallow';
+import { shallow } from "zustand/shallow";
 
 // TODO redundant and might be candidate for refactor
 const generateColors = (numColors) => {
@@ -29,28 +30,28 @@ export const RawDataGraph = ({
   title = "Raw Data",
   xAxisTitle = "Nr. of Samples",
   yAxisTitle = "Value",
-  maxDataPoints = 400,
 }) => {
   const graphData = useSocketStore((state) => state.graphData);
-  
-  const channels = useSessionStore((state) => state.channels, shallow); 
-  
+
+  const channels = useSessionStore((state) => state.channels, shallow);
+
   const usedChannels = useMemo(
     () => channels.filter((channel) => channel.used === 1),
     [channels]
   );
-  
+
   const availableChannels = useMemo(
     () => usedChannels.map((channel) => channel.name),
     [usedChannels]
   );
-  
+
   const [selectedChannels, setSelectedChannels] = useState([]);
   const hasInitialized = useRef(false);
   const [rawData, setRawData] = useState({});
   const graphRef = useRef(null);
   const plotlyRef = useRef(null);
-  const [yAxisMaxValue, setYAxisMaxValue] = useState('Auto');
+  const [yAxisMaxValue, setYAxisMaxValue] = useState("Auto");
+  const [maxDataPoints, setMaxDataPoints] = useState(400);
 
   const layoutRef = useRef({
     // title: {
@@ -67,12 +68,13 @@ export const RawDataGraph = ({
       b: 50,
       t: 0,
     },
-    xaxis: { // TODO change/ fix the timing labeling
+    xaxis: {
       title: {
         text: xAxisTitle,
         font: { color: "#f4f4f4" },
       },
       color: "#cccccc",
+      autorange: "reversed",
     },
     yaxis: {
       // title: {
@@ -101,8 +103,12 @@ export const RawDataGraph = ({
     setYAxisMaxValue(event.target.value);
   };
 
+  const handleMaxDataPointsChange = (event, newValue) => {
+    setMaxDataPoints(newValue);
+  };
+
   useEffect(() => {
-    if (usedChannels.length > 0 && !hasInitialized.current) { 
+    if (usedChannels.length > 0 && !hasInitialized.current) {
       const availableChannelNames = usedChannels.map((channel) => channel.name);
       setSelectedChannels(availableChannelNames);
       hasInitialized.current = true;
@@ -117,30 +123,34 @@ export const RawDataGraph = ({
 
     setRawData((prevRawData) => {
       const updatedRawData = { ...prevRawData };
-    
+
       Object.entries(latestData).forEach(([key, value]) => {
-        const { channelName = '', featureName = '' } = getChannelAndFeature(availableChannels, key);
-        
+        const { channelName = "", featureName = "" } = getChannelAndFeature(
+          availableChannels,
+          key
+        );
+
         if (!channelName) return;
-    
-        if (featureName !== 'raw') return;
-    
+
+        if (featureName !== "raw") return;
+
         if (!updatedRawData[channelName]) {
           updatedRawData[channelName] = [];
         }
-    
+
         updatedRawData[channelName].push(value);
-    
+
         if (updatedRawData[channelName].length > maxDataPoints) {
-          updatedRawData[channelName] = updatedRawData[channelName].slice(-maxDataPoints);
+          updatedRawData[channelName] = updatedRawData[channelName].slice(
+            -maxDataPoints
+          );
         }
       });
-    
+
       return updatedRawData;
     });
-  }, [graphData, availableChannels]);
+  }, [graphData, availableChannels, maxDataPoints]);
 
-  // Update the graph when rawData or selectedChannels change -> TODO: switch the logic to graph for each channel ?!
   useEffect(() => {
     if (!graphRef.current) return;
 
@@ -155,13 +165,13 @@ export const RawDataGraph = ({
     const domainHeight = 1 / totalChannels;
 
     const yAxes = {};
-    const maxVal = yAxisMaxValue !== 'Auto' ? Number(yAxisMaxValue) : null;
+    const maxVal = yAxisMaxValue !== "Auto" ? Number(yAxisMaxValue) : null;
 
     selectedChannels.forEach((channelName, idx) => {
       const start = 1 - (idx + 1) * domainHeight;
       const end = 1 - idx * domainHeight;
 
-      const yAxisKey = `yaxis${idx === 0 ? '' : idx + 1}`;
+      const yAxisKey = `yaxis${idx === 0 ? "" : idx + 1}`;
 
       yAxes[yAxisKey] = {
         domain: [start, end],
@@ -170,7 +180,7 @@ export const RawDataGraph = ({
           size: 10,
           color: "#cccccc",
         },
-        // Titles necessary? Legend works but what if people are color blind? Rotate not supported! Annotations are a possability though
+        // Titles necessary? Legend works but what if people are color blind? Rotate not supported! Annotations are a possibility though
         // title: {
         //   text: channelName,
         //   font: { color: "#f4f4f4", size: 12 },
@@ -187,17 +197,18 @@ export const RawDataGraph = ({
     });
 
     const traces = selectedChannels.map((channelName, idx) => {
-      const y = rawData[channelName] || [];
+      const yData = rawData[channelName] || [];
+      const y = yData.slice().reverse();
       const x = Array.from({ length: y.length }, (_, i) => i);
-    
+
       return {
         x,
         y,
-        type: 'scatter',
-        mode: 'lines',
+        type: "scatter",
+        mode: "lines",
         name: channelName,
         line: { simplify: false, color: colors[idx] },
-        yaxis: idx === 0 ? 'y' : `y${idx + 1}`,
+        yaxis: idx === 0 ? "y" : `y${idx + 1}`,
       };
     });
 
@@ -205,9 +216,10 @@ export const RawDataGraph = ({
       ...layoutRef.current,
       xaxis: {
         ...layoutRef.current.xaxis,
+        autorange: "reversed", 
         range: [0, maxDataPoints],
         domain: [0, 1],
-        anchor: totalChannels === 1 ? 'y' : `y${totalChannels}`,
+        anchor: totalChannels === 1 ? "y" : `y${totalChannels}`,
       },
       ...yAxes,
       height: 350, // TODO height autoadjust to screen
@@ -223,7 +235,7 @@ export const RawDataGraph = ({
       .catch((error) => {
         console.error("Plotly error:", error);
       });
-  }, [rawData, selectedChannels, yAxisMaxValue]);
+  }, [rawData, selectedChannels, yAxisMaxValue, maxDataPoints]);
 
   return (
     <Box>
@@ -231,20 +243,20 @@ export const RawDataGraph = ({
         display="flex"
         alignItems="center"
         justifyContent="space-between"
-        mb={2}
+        mb={1}
         flexWrap="wrap"
       >
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           {title}
         </Typography>
-        <Box sx={{ display: 'flex', ml: 2 }}>
+        <Box sx={{ display: "flex", ml: 2, mr: 4 }}>
           <Box sx={{ minWidth: 200, mr: 2 }}>
-            <CollapsibleBox title="Channel Selection" defaultExpanded={true}> 
+            <CollapsibleBox title="Channel Selection" defaultExpanded={true}>
               {/* TODO: Fix the typing errors -> How to solve this in jsx?  */}
               <Box display="flex" flexDirection="column">
-                {usedChannels.map((channel, index) => ( 
+                {usedChannels.map((channel, index) => (
                   <FormControlLabel
-                    key={channel.id || index} 
+                    key={channel.id || index}
                     control={
                       <Checkbox
                         checked={selectedChannels.includes(channel.name)}
@@ -254,11 +266,11 @@ export const RawDataGraph = ({
                     }
                     label={channel.name}
                   />
-                ))} 
+                ))}
               </Box>
             </CollapsibleBox>
           </Box>
-          <Box sx={{ minWidth: 200 }}>
+          <Box sx={{ minWidth: 200, mr: 2 }}>
             <CollapsibleBox title="Max Value (uV)" defaultExpanded={true}>
               <FormControl component="fieldset">
                 <RadioGroup
@@ -274,6 +286,23 @@ export const RawDataGraph = ({
                   <FormControlLabel value="500" control={<Radio />} label="500" />
                 </RadioGroup>
               </FormControl>
+            </CollapsibleBox>
+          </Box>
+          <Box sx={{ minWidth: 200 }}>
+            <CollapsibleBox title="Window Size" defaultExpanded={true}>
+              <Typography gutterBottom>
+                Current Value: {maxDataPoints}
+              </Typography>
+              <Slider
+                value={maxDataPoints}
+                onChange={handleMaxDataPointsChange}
+                aria-labelledby="max-data-points-slider"
+                valueLabelDisplay="auto"
+                step={50}
+                marks
+                min={0}
+                max={500}
+              />
             </CollapsibleBox>
           </Box>
         </Box>

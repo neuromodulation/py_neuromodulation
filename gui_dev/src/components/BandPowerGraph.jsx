@@ -169,7 +169,7 @@ export const BandPowerGraph = () => {
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           Band Power
         </Typography>
-        <Box sx={{ ml: 2, minWidth: 200 }}>
+        <Box sx={{ ml: 2, mr:4, minWidth: 200 }}>
           <CollapsibleBox title="Channel Selection" defaultExpanded={true}>
             <Box display="flex" flexDirection="column">
               <RadioGroup

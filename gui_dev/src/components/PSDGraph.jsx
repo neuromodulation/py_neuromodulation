@@ -178,7 +178,7 @@ export const PSDGraph = () => {
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           PSD Trace
         </Typography>
-        <Box sx={{ ml: 2, minWidth: 200 }}> 
+        <Box sx={{ ml: 2, mr: 4, minWidth: 200 }}> 
           <CollapsibleBox title="Channel Selection" defaultExpanded={true}>
             <Box display="flex" flexDirection="column">
               {usedChannels.map((channel, index) => (
