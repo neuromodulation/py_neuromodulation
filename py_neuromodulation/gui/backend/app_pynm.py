@@ -1,11 +1,21 @@
 import asyncio
 import logging
 import numpy as np
-from multiprocessing import Process
+import multiprocessing
 
 from py_neuromodulation.stream import Stream, NMSettings
 from py_neuromodulation.utils import set_channels
 from py_neuromodulation.utils.io import read_mne_data
+from py_neuromodulation import logger
+
+async def run_stream_controller(feature_queue: asyncio.Queue, rawdata_queue: asyncio.Queue,
+                          websocket_manager_features: "WebSocketManager"):
+    while True:
+        if not feature_queue.empty() and websocket_manager_features is not None:
+            feature_dict = feature_queue.get()
+            logger.info("Sending message to Websocket")
+            await websocket_manager_features.send_cbor(feature_dict)
+        # here the rawdata queue could also be used to send raw data, potentiall through different websocket?
 
 
 class PyNMState:
@@ -22,34 +32,42 @@ class PyNMState:
             # TODO: we currently can pass the sampling_rate_features to both the stream and the settings?
             self.settings: NMSettings = NMSettings(sampling_rate_features=17)
 
-    async def start_run_function(
+
+    def start_run_function(
         self,
         out_dir: str = "",
         experiment_name: str = "sub",
         websocket_manager_features=None,
     ) -> None:
-        # TODO: we should add a way to pass the output path and the foldername
-        # Initialize the stream with as process with a queue that is passed to the stream
-        # The stream will then put the results in the queue
-        # there should be another websocket in which the results are sent to the frontend
+        
 
-        self.stream_handling_queue = asyncio.Queue()
+        self.stream_handling_queue = multiprocessing.Queue()
+        self.feature_queue = multiprocessing.Queue()
+        self.rawdata_queue = multiprocessing.Queue()
+
+        self.stream_controller_process = multiprocessing.Process(
+            target=run_stream_controller,
+            args=(self.feature_queue, self.rawdata_queue, websocket_manager_features),
+        )
+        self.stream_controller_process.start()
 
         self.logger.info("setup stream Process")
 
         self.stream.settings = self.settings
 
-        asyncio.create_task(self.stream.run(
-                out_dir=out_dir,
-                experiment_name=experiment_name,
-                stream_handling_queue=self.stream_handling_queue,
-                is_stream_lsl=self.lsl_stream_name is not None,
-                stream_lsl_name=self.lsl_stream_name
-                if self.lsl_stream_name is not None
-                else "",
-                websocket_featues=websocket_manager_features,
-            )
+        self.stream.run(
+            out_dir=out_dir,
+            experiment_name=experiment_name,
+            stream_handling_queue=self.stream_handling_queue,
+            is_stream_lsl=self.lsl_stream_name is not None,
+            stream_lsl_name=self.lsl_stream_name
+            if self.lsl_stream_name is not None
+            else "",
+            websocket_featues=websocket_manager_features,
         )
+
+        self.stream_controller_process.terminate()
+
 
     def setup_lsl_stream(
         self,
@@ -123,11 +141,6 @@ class PyNMState:
             target_keywords=None,
         )
 
-        # self.settings: NMSettings = NMSettings(
-        #     sampling_rate_features=sampling_rate_features
-        # )
-
-        # self.settings.preprocessing = []
         self.logger.info(f"settings: {self.settings}")
         self.stream: Stream = Stream(
             settings=self.settings,

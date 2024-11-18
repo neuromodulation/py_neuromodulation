@@ -66,6 +66,7 @@ dependencies = [
   # exists only because of nolds?
   "numba>=0.60.0",
   "cbor2>=5.6.4",
+  "msgpack>=1.1.0",
 ]
 
 [project.optional-dependencies]
