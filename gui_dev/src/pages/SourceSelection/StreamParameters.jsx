@@ -1,24 +1,7 @@
 import { TextField } from "@mui/material";
 import { useSessionStore } from "@/stores";
 import { TitledBox } from "@/components";
-
-const MyTextField = ({ label, value, onChange }) => (
-  <TextField
-    label={label}
-    variant="outlined"
-    size="small"
-    fullWidth
-    sx={{
-      marginBottom: 2,
-      backgroundColor: "#616161",
-      color: "#f4f4f4",
-    }}
-    InputLabelProps={{ style: { color: "#cccccc" } }}
-    InputProps={{ style: { color: "#f4f4f4" } }}
-    value={value}
-    onChange={onChange}
-  />
-);
+import { MyTextField } from "@/components/utils";
 
 export const StreamParameters = () => {
   const streamParameters = useSessionStore((state) => state.streamParameters);
@@ -50,6 +33,16 @@ export const StreamParameters = () => {
         label="sfreq features"
         value={streamParameters.samplingRateFeatures}
         onChange={(event) => handleOnChange(event, "samplingRateFeatures")}
+      />
+      <MyTextField
+        label="experiment name"
+        value={streamParameters.experimentName}
+        onChange={(event) => handleOnChange(event, "experimentName")}
+      />
+      <MyTextField
+        label="output directory"
+        value={streamParameters.outputDirectory}
+        onChange={(event) => handleOnChange(event, "outputDirectory")}
       />
     </TitledBox>
   );

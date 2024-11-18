@@ -50,6 +50,8 @@ export const useSessionStore = createPersistStore("session", (set, get) => ({
     lineNoise: 50,
     samplingRateFeatures: 10,
     allValid: false,
+    experimentName: "sub",
+    outputDirectory: "default",
   },
 
   setSourceType: (type) => set({ sourceType: type }),
@@ -128,6 +130,8 @@ export const useSessionStore = createPersistStore("session", (set, get) => ({
           file_path: get().fileSource.path,
           sampling_rate_features: get().streamParameters.samplingRateFeatures,
           line_noise: get().streamParameters.lineNoise,
+          experimentName: get().streamParameters.experimentName,
+          outputDirectory: get().streamParameters.outputDirectory,
         }),
       });
 
@@ -168,6 +172,8 @@ export const useSessionStore = createPersistStore("session", (set, get) => ({
           stream_name: lslSource.availableStreams[0].name,
           sampling_rate_features: streamParameters.samplingRate,
           line_noise: streamParameters.lineNoise,
+          experimentName: streamParameters.experimentName,
+          outputDirectory: streamParameters.outputDirectory,
         }),
       });
 

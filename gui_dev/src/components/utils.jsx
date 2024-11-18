@@ -1,5 +1,5 @@
 import React from "react";
-
+import { TextField } from "@mui/material";
 /**
  * @param {Object} props
  * @param {string} props.href - The URL to link to
@@ -41,3 +41,20 @@ export const getChannelAndFeature = (availableChannels, keystr) => {
   return { channelName, featureName};
 };
 
+export const MyTextField = ({ label, value, onChange }) => (
+  <TextField
+    label={label}
+    variant="outlined"
+    size="small"
+    fullWidth
+    sx={{
+      marginBottom: 2,
+      backgroundColor: "#616161",
+      color: "#f4f4f4",
+    }}
+    InputLabelProps={{ style: { color: "#cccccc" } }}
+    InputProps={{ style: { color: "#f4f4f4" } }}
+    value={value}
+    onChange={onChange}
+  />
+);

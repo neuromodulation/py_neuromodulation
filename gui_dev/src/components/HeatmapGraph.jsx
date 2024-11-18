@@ -111,6 +111,7 @@ export const HeatmapGraph = () => {
     if (!graphData || !selectedChannel || features.length === 0 || selectedFeatures.length === 0) return;
 
     // TODO: Always data in ms? (Time conversion here always necessary?)
+    // Timon: yes, let's define that the stream's time is always in ms
     let timestamp = graphData.time;
     if (timestamp === undefined) {
       timestamp = (Date.now() - hasInitialized.current) / 1000;
@@ -141,6 +142,7 @@ export const HeatmapGraph = () => {
 
     const currentTime = timestamp;
     const minTime = currentTime - maxTimeWindow; // TODO: What should be the visible window frame? adjustable? 10s?
+                                                 // Timon: Would be amazing if it's adjustable
 
     const validIndices = x.reduce((indices, time, index) => {
       if (time >= minTime) {
@@ -221,7 +223,7 @@ export const HeatmapGraph = () => {
                   <FormControlLabel
                     key={channel.id || index}
                     value={channel.name}
-                    control={<Radio />} // TODO: Should we make multiple selectable?
+                    control={<Radio />} // TODO: Should we make multiple selectable?  // Timon: No, let's keep with one
                     label={channel.name}
                   />
                 ))}

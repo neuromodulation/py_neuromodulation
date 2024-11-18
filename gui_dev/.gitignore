@@ -15,3 +15,7 @@ dist-ssr
 
 # Dev-scripts
 gui_startup.py
+
+# Remove once front was built
+py_neuromodulation/gui/frontend/*
+

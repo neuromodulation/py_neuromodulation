@@ -317,11 +317,12 @@ class Stream:
                 f"{batch_length:.3f} seconds of new data processed",
             )
 
-            feature_dict["time"] = (
-                batch_length
-                if self.is_stream_lsl
-                else np.ceil(this_batch_end * 1000 + 1)
-            )
+            feature_dict["time"] = np.ceil(this_batch_end * 1000 + 1)
+            #(
+            #    np.ceil(batch_length)
+            #    if self.is_stream_lsl
+            #    else 
+            #)
 
             prev_batch_end = this_batch_end
 
