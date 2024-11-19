@@ -114,10 +114,7 @@ class PyNMBackend(FastAPI):
             if action == "stop":
                 self.logger.info("Stopping stream")
                 self.pynm_state.stream_handling_queue.put("stop")
-
-                # will this be enough time for stopping?
-                self.pynm_state.stream_controller_process.terminate()
-                self.pynm_state.run_func_process.terminate()
+                self.pynm_state.stop_event_ws.set()
 
             return {"message": f"Stream action '{action}' executed"}
 
