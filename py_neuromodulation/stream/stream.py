@@ -285,18 +285,22 @@ class Stream:
                 nm.logger.info("Checking for stop signal")
                 if simulate_real_time:
                     time.sleep(1 / self.settings.sampling_rate_features_hz)
+                    nm.logger.info("Sleep over")
                 if not self.stream_handling_queue.empty():
-
+                    nm.logger.info("Got stream handling queue signal")
                     # check that the timing fits
                     # previously it was necessary to wait that the process had 
                     # enough time to check for the stop signal
                     signal = self.stream_handling_queue.get()
+                    nm.logger.info(f"Got signal: {signal}")
                     if signal == "stop":
                         break
 
             if data_batch is None:
+                nm.logger.info("Data batch is None, stopping run function")
                 break
 
+            nm.logger.info("Processing new data batch")
             feature_dict = self.data_processor.process(data_batch)
 
             this_batch_end = timestamps[-1]
@@ -322,6 +326,7 @@ class Stream:
             file_writer.insert_data(feature_dict)
             if feature_queue is not None:
                 feature_queue.put(feature_dict)
+                nm.logger.info("Feature dict sent to queue")
 
             self.batch_count += 1
             if self.batch_count % self.save_interval == 0:

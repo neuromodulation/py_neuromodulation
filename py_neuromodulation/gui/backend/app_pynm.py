@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import numpy as np
-import multiprocessing
+import multiprocess as mp
 
 from py_neuromodulation.stream import Stream, NMSettings
 from py_neuromodulation.utils import set_channels
@@ -11,12 +11,16 @@ from py_neuromodulation import logger
 async def run_stream_controller(feature_queue: asyncio.Queue, rawdata_queue: asyncio.Queue,
                           websocket_manager_features: "WebSocketManager"):
     while True:
+        await asyncio.sleep(0.002)
+        logger.info("wait for feature queue") 
         if not feature_queue.empty() and websocket_manager_features is not None:
             feature_dict = feature_queue.get()
             logger.info("Sending message to Websocket")
             await websocket_manager_features.send_cbor(feature_dict)
         # here the rawdata queue could also be used to send raw data, potentiall through different websocket?
 
+def run_stream_controller_sync(feature_queue, rawdata_queue, websocket_manager_features):
+    asyncio.run(run_stream_controller(feature_queue, rawdata_queue, websocket_manager_features))
 
 class PyNMState:
     def __init__(
@@ -26,6 +30,8 @@ class PyNMState:
         self.logger = logging.getLogger("uvicorn.error")
 
         self.lsl_stream_name = None
+        self.stream_controller_process = None
+        self.run_func_process = None
 
         if default_init:
             self.stream: Stream = Stream(sfreq=1500, data=np.random.random([1, 1]))
@@ -40,34 +46,37 @@ class PyNMState:
         websocket_manager_features=None,
     ) -> None:
         
-
-        self.stream_handling_queue = multiprocessing.Queue()
-        self.feature_queue = multiprocessing.Queue()
-        self.rawdata_queue = multiprocessing.Queue()
-
-        self.stream_controller_process = multiprocessing.Process(
-            target=run_stream_controller,
-            args=(self.feature_queue, self.rawdata_queue, websocket_manager_features),
-        )
-        self.stream_controller_process.start()
-
-        self.logger.info("setup stream Process")
-
         self.stream.settings = self.settings
 
-        self.stream.run(
-            out_dir=out_dir,
-            experiment_name=experiment_name,
-            stream_handling_queue=self.stream_handling_queue,
-            is_stream_lsl=self.lsl_stream_name is not None,
-            stream_lsl_name=self.lsl_stream_name
-            if self.lsl_stream_name is not None
-            else "",
-            websocket_featues=websocket_manager_features,
+        self.stream_handling_queue = mp.Queue()
+        self.feature_queue = mp.Queue()
+        self.rawdata_queue = mp.Queue()
+
+        self.logger.info("Starting run controller function")
+        self.stream_controller_process = mp.Process(
+            target=run_stream_controller_sync,
+            args=(self.feature_queue, self.rawdata_queue, websocket_manager_features),
         )
 
-        self.stream_controller_process.terminate()
+        # this function also has to be in a process
+        is_stream_lsl = self.lsl_stream_name is not None
+        stream_lsl_name = self.lsl_stream_name if self.lsl_stream_name is not None else ""
+        
+        self.run_func_process = mp.Process(
+            target=self.stream.run,
+            kwargs={
+                "out_dir" : out_dir,
+                "experiment_name" : experiment_name,
+                "stream_handling_queue" : self.stream_handling_queue,
+                "is_stream_lsl" : is_stream_lsl,
+                "stream_lsl_name" : stream_lsl_name,
+                "feature_queue" : self.feature_queue,
+                #"rawdata_queue" : self.rawdata_queue, 
+            },
+        )
 
+        #self.stream_controller_process.start()
+        self.run_func_process.start()
 
     def setup_lsl_stream(
         self,

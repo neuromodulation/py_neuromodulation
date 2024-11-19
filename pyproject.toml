@@ -67,6 +67,7 @@ dependencies = [
   "numba>=0.60.0",
   "cbor2>=5.6.4",
   "msgpack>=1.1.0",
+  "multiprocess>=0.70.17",
 ]
 
 [project.optional-dependencies]
