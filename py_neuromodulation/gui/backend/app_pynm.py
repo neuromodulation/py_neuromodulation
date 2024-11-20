@@ -4,29 +4,33 @@ import threading
 import numpy as np
 import multiprocessing as mp
 from threading import Thread
-from queue import Queue
+import queue
 from py_neuromodulation.stream import Stream, NMSettings
 from py_neuromodulation.utils import set_channels
 from py_neuromodulation.utils.io import read_mne_data
 from py_neuromodulation import logger
 
-async def run_stream_controller(feature_queue: asyncio.Queue, rawdata_queue: asyncio.Queue,
+async def run_stream_controller(feature_queue: queue.Queue, rawdata_queue: queue.Queue,
                           websocket_manager_features: "WebSocketManager", stop_event: threading.Event):
     while not stop_event.wait(0.002):
-        #await asyncio.sleep(0.002)
         if not feature_queue.empty() and websocket_manager_features is not None:
             feature_dict = feature_queue.get()
             logger.info("Sending message to Websocket")
             await websocket_manager_features.send_cbor(feature_dict)
         # here the rawdata queue could also be used to send raw data, potentiall through different websocket?
 
-def run_stream_controller_sync(feature_queue, rawdata_queue, websocket_manager_features, stop_event: threading.Event):
+def run_stream_controller_sync(feature_queue: queue.Queue,
+                               rawdata_queue: queue.Queue,
+                               websocket_manager_features: "WebSocketManager",
+                               stop_event: threading.Event
+    ):
+    # The run_stream_controller needs to be started as an asyncio function due to the async websocket
     asyncio.run(run_stream_controller(feature_queue, rawdata_queue, websocket_manager_features, stop_event))
 
 class PyNMState:
     def __init__(
         self,
-        default_init: bool = True,
+        default_init: bool = True,  # has to be true for the backend settings communication
     ) -> None:
         self.logger = logging.getLogger("uvicorn.error")
 
@@ -36,8 +40,7 @@ class PyNMState:
 
         if default_init:
             self.stream: Stream = Stream(sfreq=1500, data=np.random.random([1, 1]))
-            # TODO: we currently can pass the sampling_rate_features to both the stream and the settings?
-            self.settings: NMSettings = NMSettings(sampling_rate_features=17)
+            self.settings: NMSettings = NMSettings(sampling_rate_features=10)
 
 
     def start_run_function(
@@ -49,13 +52,17 @@ class PyNMState:
         
         self.stream.settings = self.settings
 
-        self.stream_handling_queue = Queue()
-        self.feature_queue = Queue()
-        self.rawdata_queue = Queue()
+        self.stream_handling_queue = queue.Queue()
+        self.feature_queue = queue.Queue()
+        self.rawdata_queue = queue.Queue()
 
-        self.logger.info("Starting run controller function")
+        self.logger.info("Starting stream_controller_process thread")
+
+
+        # Stop even that is set in the app_backend
         self.stop_event_ws = threading.Event()
-        self.stream_controller_process = Thread(
+
+        self.stream_controller_thread = Thread(
             target=run_stream_controller_sync,
             daemon=True,
             args=(self.feature_queue,
@@ -65,11 +72,12 @@ class PyNMState:
                   ),
         )
 
-        # this function also has to be in a process
         is_stream_lsl = self.lsl_stream_name is not None
         stream_lsl_name = self.lsl_stream_name if self.lsl_stream_name is not None else ""
         
-        self.run_func_process = Thread(
+        # The run_func_thread is terminated through the stream_handling_queue
+        # which initiates to break the data generator and save the features
+        self.run_func_thread = Thread(
             target=self.stream.run,
             daemon=True,
             kwargs={
@@ -79,12 +87,13 @@ class PyNMState:
                 "is_stream_lsl" : is_stream_lsl,
                 "stream_lsl_name" : stream_lsl_name,
                 "feature_queue" : self.feature_queue,
+                "simulate_real_time" : True,
                 #"rawdata_queue" : self.rawdata_queue, 
             },
         )
 
-        self.stream_controller_process.start()
-        self.run_func_process.start()
+        self.stream_controller_thread.start()
+        self.run_func_thread.start()
 
     def setup_lsl_stream(
         self,

@@ -205,12 +205,12 @@ class Stream:
         experiment_name: str = "sub",
         is_stream_lsl: bool = False,
         stream_lsl_name: str | None = None,
-        save_csv: bool = False,
+        save_csv: bool = True,
         save_interval: int = 10,
         return_df: bool = True,
-        simulate_real_time: bool = True,
-        feature_queue: "multiprocessing.Queue | None"  = None,
-        stream_handling_queue: "multiprocessing.Queue | None" = None,
+        simulate_real_time: bool = False,
+        feature_queue: "queue.Queue | None"  = None,
+        stream_handling_queue: "queue.Queue | None" = None,
     ):
         self.is_stream_lsl = is_stream_lsl
         self.stream_lsl_name = stream_lsl_name
@@ -218,7 +218,7 @@ class Stream:
         self.save_csv = save_csv
         self.save_interval = save_interval
         self.return_df = return_df
-        self.out_dir = Path.cwd() if not out_dir else Path(out_dir)
+        self.out_dir = Path.cwd() / experiment_name if not out_dir else Path(out_dir)
         self.experiment_name = experiment_name
 
         # Validate input data
@@ -233,9 +233,6 @@ class Stream:
 
         self.batch_count: int = 0  # Keep track of the number of batches processed
 
-        # Reinitialize the data processor in case the nm_channels or nm_settings changed between runs of the same Stream
-        # TONI: then I think we can just not initialize the data processor in the init function
-        # Timon: I think with the GUI addition, the setttings / channels will change and need to be reinitialized
         self.data_processor = DataProcessor(
             sfreq=self.sfreq,
             settings=self.settings,
@@ -282,15 +279,9 @@ class Stream:
         for timestamps, data_batch in self.generator:
             self.is_running = True
             if self.stream_handling_queue is not None:
-                nm.logger.info("Checking for stop signal")
                 if simulate_real_time:
                     time.sleep(1 / self.settings.sampling_rate_features_hz)
-                    nm.logger.info("Sleep over")
                 if not self.stream_handling_queue.empty():
-                    nm.logger.info("Got stream handling queue signal")
-                    # check that the timing fits
-                    # previously it was necessary to wait that the process had 
-                    # enough time to check for the stop signal
                     signal = self.stream_handling_queue.get()
                     nm.logger.info(f"Got signal: {signal}")
                     if signal == "stop":
@@ -318,7 +309,6 @@ class Stream:
 
             self._add_target(feature_dict, data_batch)
 
-            # We should ensure that feature output is always either float64 or None and remove this
             with suppress(TypeError):  # Need this because some features output None
                 for key, value in feature_dict.items():
                     feature_dict[key] = np.float64(value)
@@ -326,7 +316,6 @@ class Stream:
             file_writer.insert_data(feature_dict)
             if feature_queue is not None:
                 feature_queue.put(feature_dict)
-                nm.logger.info("Feature dict sent to queue")
 
             self.batch_count += 1
             if self.batch_count % self.save_interval == 0:

@@ -74,14 +74,11 @@ if __name__ == "__main__":
 
     # features = asyncio.run(stream.run(data, save_csv=True))
 
+    # remove first eight channels
+    raw.drop_channels(raw.ch_names[:8])
+
     player = LSLOfflinePlayer(raw=raw, stream_name="example_stream")
 
     player.start_player(chunk_size=30, n_repeat=5999999)
 
     App(run_in_webview=False, dev=True).launch()
-
-
-    # Check if LSL stream pushes data
-    # settings = nm.NMSettings.get_fast_compute()
-    # LSLstream = LSLStream(settings, stream_name="example_stream")
-    # time, data = next(LSLstream.get_next_batch())
