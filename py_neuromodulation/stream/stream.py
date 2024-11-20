@@ -1,6 +1,6 @@
 """Module for generic and offline data streams."""
 
-import asyncio
+import time
 from typing import TYPE_CHECKING
 from collections.abc import Iterator
 import numpy as np
@@ -11,6 +11,7 @@ from contextlib import suppress
 
 from py_neuromodulation.stream.data_processor import DataProcessor
 from py_neuromodulation.utils.types import _PathLike, FeatureName
+from py_neuromodulation.utils.file_writer import MsgPackFileWriter
 from py_neuromodulation.stream.settings import NMSettings
 
 if TYPE_CHECKING:
@@ -197,27 +198,28 @@ class Stream:
             )
         return data.to_numpy().transpose()
 
-    async def run(
+    def run(
         self,
         data: "np.ndarray | pd.DataFrame | None" = None,
         out_dir: _PathLike = "",
         experiment_name: str = "sub",
         is_stream_lsl: bool = False,
         stream_lsl_name: str | None = None,
-        save_csv: bool = False,
+        save_csv: bool = True,
         save_interval: int = 10,
         return_df: bool = True,
-        # feature_queue: "multiprocessing.Queue | None"  = None,
-        stream_handling_queue: "multiprocessing.Queue | None" = None,
-        websocket_featues: "WebSocketManager | None" = None,
+        simulate_real_time: bool = False,
+        feature_queue: "queue.Queue | None"  = None,
+        stream_handling_queue: "queue.Queue | None" = None,
     ):
         self.is_stream_lsl = is_stream_lsl
         self.stream_lsl_name = stream_lsl_name
         self.stream_handling_queue = stream_handling_queue
-        # self.feature_queue = feature_queue
         self.save_csv = save_csv
         self.save_interval = save_interval
         self.return_df = return_df
+        self.out_dir = Path.cwd() / experiment_name if not out_dir else Path(out_dir)
+        self.experiment_name = experiment_name
 
         # Validate input data
         if data is not None:
@@ -227,24 +229,10 @@ class Stream:
         elif self.data is None and data is None and self.is_stream_lsl is False:
             raise ValueError("No data passed to run function.")
 
-        # Generate output dirs
-        self.out_dir_root = Path.cwd() if not out_dir else Path(out_dir)
-        self.out_dir = self.out_dir_root / experiment_name
-        # TONI: Need better default experiment name
-        self.experiment_name = experiment_name if experiment_name else "sub"
-
-        self.out_dir.mkdir(parents=True, exist_ok=True)
-
-        # Open database connection
-        # TONI: we should give the user control over the save format
-        from py_neuromodulation.utils.database import NMDatabase
-
-        self.db = NMDatabase(experiment_name, out_dir)  # Create output database
+        file_writer = MsgPackFileWriter(name=experiment_name, out_dir=out_dir)
 
         self.batch_count: int = 0  # Keep track of the number of batches processed
 
-        # Reinitialize the data processor in case the nm_channels or nm_settings changed between runs of the same Stream
-        # TONI: then I think we can just not initialize the data processor in the init function
         self.data_processor = DataProcessor(
             sfreq=self.sfreq,
             settings=self.settings,
@@ -258,14 +246,6 @@ class Stream:
 
         nm.logger.log_to_file(out_dir)
 
-        # Initialize mp.Pool for multiprocessing
-        #self.pool = mp.Pool(processes=self.settings.n_jobs)
-        # Set up shared memory for multiprocessing
-        #self.shared_memory = mp.Array(ctypes.c_double, self.settings.n_jobs * self.settings.n_jobs)
-        # Set up multiprocessing semaphores
-        #self.semaphore = mp.Semaphore(self.settings.n_jobs)
-        
-        # Initialize generator
         self.generator: Iterator
         if not is_stream_lsl:
             from py_neuromodulation.stream.generator import RawDataGenerator
@@ -299,16 +279,19 @@ class Stream:
         for timestamps, data_batch in self.generator:
             self.is_running = True
             if self.stream_handling_queue is not None:
-                nm.logger.info("Checking for stop signal")
-                #await asyncio.sleep(0.001)
-                await asyncio.sleep(1 / self.settings.sampling_rate_features_hz)
+                if simulate_real_time:
+                    time.sleep(1 / self.settings.sampling_rate_features_hz)
                 if not self.stream_handling_queue.empty():
-                    stop_signal = await asyncio.wait_for(self.stream_handling_queue.get(), timeout=0.01)
-                    if stop_signal == "stop":
+                    signal = self.stream_handling_queue.get()
+                    nm.logger.info(f"Got signal: {signal}")
+                    if signal == "stop":
                         break
+
             if data_batch is None:
+                nm.logger.info("Data batch is None, stopping run function")
                 break
 
+            nm.logger.info("Processing new data batch")
             feature_dict = self.data_processor.process(data_batch)
 
             this_batch_end = timestamps[-1]
@@ -318,11 +301,6 @@ class Stream:
             )
 
             feature_dict["time"] = np.ceil(this_batch_end * 1000 + 1)
-            #(
-            #    np.ceil(batch_length)
-            #    if self.is_stream_lsl
-            #    else 
-            #)
 
             prev_batch_end = this_batch_end
 
@@ -331,38 +309,30 @@ class Stream:
 
             self._add_target(feature_dict, data_batch)
 
-            # We should ensure that feature output is always either float64 or None and remove this
             with suppress(TypeError):  # Need this because some features output None
                 for key, value in feature_dict.items():
                     feature_dict[key] = np.float64(value)
 
-            self.db.insert_data(feature_dict)
+            file_writer.insert_data(feature_dict)
+            if feature_queue is not None:
+                feature_queue.put(feature_dict)
 
-            # if self.feature_queue is not None:
-            #    self.feature_queue.put(feature_dict)
-            
-            if websocket_featues is not None:
-                nm.logger.info("Sending message to Websocket")
-                #nm.logger.info(feature_dict)
-                await websocket_featues.send_cbor(feature_dict)
-                #await websocket_featues.send_message(feature_dict)
             self.batch_count += 1
             if self.batch_count % self.save_interval == 0:
-                self.db.commit()
+                file_writer.save()
 
-        self.db.commit()  # Save last batches
+        file_writer.save()
+        if self.save_csv:
+            file_writer.save_as_csv(save_all_combined=True)
 
-        # If save_csv is False, still save the first row to get the column names
-        feature_df: "pd.DataFrame" = (
-            self.db.fetch_all() if (self.save_csv or self.return_df) else self.db.head()
-        )
+        if self.return_df:
+            feature_df = file_writer.load_all()
 
-        self.db.close()  # Close the database connection
-
-        self._save_after_stream(feature_arr=feature_df)
+        self._save_after_stream()
         self.is_running = False
 
-        return feature_df  # TONI: Not sure if this makes sense anymore
+        return feature_df  # Timon: We could think of returning the feature_reader instead
+    
 
     def plot_raw_signal(
         self,
@@ -430,12 +400,9 @@ class Stream:
 
     def _save_after_stream(
         self,
-        feature_arr: "pd.DataFrame | None" = None,
     ) -> None:
-        """Save features, settings, nm_channels and sidecar after run"""
+        """Save settings, nm_channels and sidecar after run"""
         self._save_sidecar()
-        if feature_arr is not None:
-            self._save_features(feature_arr)
         self._save_settings()
         self._save_channels()
 
@@ -455,6 +422,7 @@ class Stream:
         """Save sidecar incduing fs, coords, sess_right to
         out_path_root and subfolder 'folder_name'"""
         additional_args = {"sess_right": self.sess_right}
+        
         self.data_processor.save_sidecar(
             self.out_dir, self.experiment_name, additional_args
         )

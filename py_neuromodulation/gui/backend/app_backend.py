@@ -104,17 +104,17 @@ class PyNMBackend(FastAPI):
                 self.logger.info(self.websocket_manager)
                 self.logger.info("Starting stream")
 
-                asyncio.create_task(
-                    self.pynm_state.start_run_function(
+                self.pynm_state.start_run_function(
                         # out_dir=data["out_dir"],
                         # experiment_name=data["experiment_name"],
                         websocket_manager_features=self.websocket_manager,
-                    )
                 )
+
 
             if action == "stop":
                 self.logger.info("Stopping stream")
-                asyncio.create_task(self.pynm_state.stream_handling_queue.put("stop"))
+                self.pynm_state.stream_handling_queue.put("stop")
+                self.pynm_state.stop_event_ws.set()
 
             return {"message": f"Stream action '{action}' executed"}
 

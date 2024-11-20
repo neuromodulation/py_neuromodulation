@@ -203,12 +203,6 @@ class AppManager:
         self.is_child_process = os.environ.get(self.LAUNCH_FLAG) == "TRUE"
         os.environ[self.LAUNCH_FLAG] = "TRUE"
 
-        # PyNM state
-        # TODO: need to find a way to pass the state to the backend
-        # self.pynm_state = PyNMState()
-        # self.app = PyNMBackend(pynm_state=self.pynm_state)
-
-        # Logging
         self.logger = create_logger(
             "PyNM",
             "yellow",
