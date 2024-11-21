@@ -1,0 +1,19 @@
+[package]
+name = "cbor_decoder"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_cbor = "0.11"
+wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
+serde-wasm-bindgen = "0.6.5"
+
+
+[profile.release]
+opt-level = "z" # Optimize for size (can be adjusted to 3 for speed)
+lto = true      # Enable Link-Time Optimization
+codegen-units = 1 # Single codegen unit improves optimizations
