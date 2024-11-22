@@ -11,7 +11,7 @@ from pydantic import Field, field_validator
 from py_neuromodulation.utils.types import BoolSelector, NMBaseModel, NMFeature
 
 from typing import TYPE_CHECKING, Callable
-from py_neuromodulation.utils.types import create_validation_error
+from py_neuromodulation.utils.pydantic_extensions import create_validation_error
 
 if TYPE_CHECKING:
     from py_neuromodulation import NMSettings

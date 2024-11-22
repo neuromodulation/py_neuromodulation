@@ -2,10 +2,10 @@
 
 import numpy as np
 from typing import TYPE_CHECKING, Callable, Literal, get_args
+from pydantic import Field
 
 from py_neuromodulation.utils.types import (
     NMBaseModel,
-    Field,
     NormMethod,
     NMPreprocessor,
 )

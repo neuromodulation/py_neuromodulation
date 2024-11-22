@@ -1,7 +1,8 @@
 """Module for resampling."""
 
 import numpy as np
-from py_neuromodulation.utils.types import NMBaseModel, Field, NMPreprocessor
+from pydantic import Field
+from py_neuromodulation.utils.types import NMBaseModel, NMPreprocessor
 
 
 class ResamplerSettings(NMBaseModel):

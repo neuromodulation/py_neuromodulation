@@ -17,6 +17,7 @@ export function debounce(func, wait) {
     timeout = setTimeout(later, wait);
   };
 }
+
 export const flattenDictionary = (dict, parentKey = "", result = {}) => {
   for (let key in dict) {
     const newKey = parentKey ? `${parentKey}.${key}` : key;
