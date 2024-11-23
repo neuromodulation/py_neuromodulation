@@ -7,6 +7,7 @@ import {
   Typography,
   FormControlLabel,
   Checkbox,
+  Slider,
 } from "@mui/material";
 import { CollapsibleBox } from "./CollapsibleBox"; 
 import { getChannelAndFeature } from "./utils";
@@ -37,6 +38,7 @@ export const PSDGraph = () => {
   ); 
 
   const [selectedChannels, setSelectedChannels] = useState([]);
+  const [maxXaxisFrequency, setMaxXaxisFrequency] = useState(500);
   const hasInitialized = useRef(false);
   
   const socketPsdData = useSocketStore((state) => state.graphData);
@@ -108,6 +110,10 @@ export const PSDGraph = () => {
     });
   };
 
+  const handleMaxXaxisFrequency = (event, newValue) => {
+    setMaxXaxisFrequency(newValue);
+  }
+
   useEffect(() => {
     if (usedChannels.length > 0 && !hasInitialized.current) {
       const availableChannelNames = usedChannels.map((channel) => channel.name); 
@@ -146,10 +152,10 @@ export const PSDGraph = () => {
     const colors = generateColors(selectedChannels.length);
 
     const traces = psdData.map((data, idx) => ({
-      x: data.features,
+      x: data.features.slice(0, maxXaxisFrequency),
       y: data.values,
       type: "scatter",
-      mode: "lines+markers",
+      mode: "lines",
       name: data.channelName,
       line: { simplify: false, color: colors[idx] },
     }));
@@ -197,6 +203,23 @@ export const PSDGraph = () => {
             </Box>
           </CollapsibleBox>
         </Box>
+        <Box sx={{ minWidth: 200 }}>
+        <CollapsibleBox title="Frequency Range [Hz]" defaultExpanded={true}>
+            <Typography gutterBottom>
+                Current Value: {maxXaxisFrequency}
+              </Typography>
+              <Slider
+                value={maxXaxisFrequency}
+                onChange={handleMaxXaxisFrequency}
+                aria-labelledby="max-y-axis-frequency"
+                valueLabelDisplay="auto"
+                step={1}
+                marks
+                min={0}
+                max={500}
+            />
+          </CollapsibleBox>
+          </Box>
       </Box>
       
       <div
