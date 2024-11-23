@@ -25,6 +25,7 @@ class NormalizationSettings(NMBaseModel):
     def list_normalization_methods() -> list[NormMethod]:
         return list(get_args(NormMethod))
 
+class FeatureNormalizationSettings(NormalizationSettings):    normalize_psd: bool = False
 
 class Normalizer(NMPreprocessor):
     def __init__(
@@ -32,9 +33,13 @@ class Normalizer(NMPreprocessor):
         sfreq: float,
         settings: "NMSettings",
         type: NormalizerType,
+        **kwargs,
     ) -> None:
         self.type = type
-        self.settings: NormalizationSettings
+        if self.type == "raw":
+            self.settings: NormalizationSettings
+        else:
+            self.settings: FeatureNormalizationSettings
 
         match self.type:
             case "raw":
@@ -74,14 +79,24 @@ class Normalizer(NMPreprocessor):
             self.normalizer = NORM_FUNCTIONS[self.method]
 
     def process(self, data: np.ndarray) -> np.ndarray:
-        # TODO: does feature normalization need to be transposed too?
-        if self.type == "raw":
-            data = data.T
+        """Process normalization.
+        Note: raw data has to be internally transposed, s.t. raw and features 
+        are normalized in the same way.
 
+        Args:
+            data (np.ndarray): shape (channels, n_samples)
+
+        Returns:
+            np.ndarray: (channels, n_samples)
+        """
+                    
         if self.previous.size == 0:  # Check if empty
             self.previous = data
-            return data if self.type == "raw" else data.T
-
+            if self.type == "raw":
+                self.previous = self.previous.T
+            return data
+        if self.type == "raw":
+            data = data.T
         self.previous = np.vstack((self.previous, data[-self.add_samples :]))
 
         data = self.normalizer(data, self.previous)
@@ -93,12 +108,12 @@ class Normalizer(NMPreprocessor):
 
         data = np.nan_to_num(data)
 
-        return data if self.type == "raw" else data.T
+        return data if self.type != "raw" else data.T
 
 
 class RawNormalizer(Normalizer):
-    def __init__(self, sfreq: float, settings: "NMSettings") -> None:
-        super().__init__(sfreq, settings, "raw")
+    def __init__(self, sfreq: float, settings: "NMSettings", **kwargs,) -> None:
+        super().__init__(sfreq, settings, "raw", **kwargs)
 
 
 class FeatureNormalizer(Normalizer):

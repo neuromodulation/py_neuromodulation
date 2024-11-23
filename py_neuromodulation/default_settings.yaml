@@ -71,6 +71,7 @@ postprocessing:
 feature_normalization_settings:
   normalization_time_s: 30
   normalization_method: zscore # supported methods: mean, median, zscore, zscore-median, quantile, power, robust, minmax
+  normalize_psd: false
   clip: 3
 
 project_cortex_settings:

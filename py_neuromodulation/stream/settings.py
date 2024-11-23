@@ -16,7 +16,7 @@ from py_neuromodulation.utils.types import (
 )
 
 from py_neuromodulation.processing.filter_preprocessing import FilterSettings
-from py_neuromodulation.processing.normalization import NormalizationSettings
+from py_neuromodulation.processing.normalization import FeatureNormalizationSettings, NormalizationSettings
 from py_neuromodulation.processing.resample import ResamplerSettings
 from py_neuromodulation.processing.projection import ProjectionSettings
 
@@ -83,7 +83,7 @@ class NMSettings(NMBaseModel):
 
     # Postprocessing settings
     postprocessing: PostprocessingSettings = PostprocessingSettings()
-    feature_normalization_settings: NormalizationSettings = NormalizationSettings()
+    feature_normalization_settings: FeatureNormalizationSettings = FeatureNormalizationSettings()
     project_cortex_settings: ProjectionSettings = ProjectionSettings(max_dist_mm=20)
     project_subcortex_settings: ProjectionSettings = ProjectionSettings(max_dist_mm=5)
 

@@ -72,6 +72,13 @@ class DataPreprocessor:
         ]
 
     def process_data(self, data: "np.ndarray") -> "np.ndarray":
+        """
+        Args:
+            data (np.ndarray): shape: (n_channels, n_samples)
+
+        Returns:
+            np.ndarray: shape: (n_channels, n_samples)
+        """
         for preprocessor in self.preprocessors:
             data = preprocessor.process(data)
         return data
