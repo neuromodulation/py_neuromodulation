@@ -50,7 +50,7 @@ export const useSessionStore = createStore("session", (set, get) => ({
     lineNoise: 50,
     samplingRateFeatures: 11,
     allValid: false,
-    experimentName: "subject",
+    experimentName: "sub",
     outputDirectory: "default",
   },
 

@@ -11,21 +11,25 @@ from py_neuromodulation.utils.io import read_mne_data
 from py_neuromodulation import logger
 
 async def run_stream_controller(feature_queue: queue.Queue, rawdata_queue: queue.Queue,
-                          websocket_manager_features: "WebSocketManager", stop_event: threading.Event):
+                          websocket_manager: "WebSocketManager", stop_event: threading.Event):
     while not stop_event.wait(0.002):
-        if not feature_queue.empty() and websocket_manager_features is not None:
+        if not feature_queue.empty() and websocket_manager is not None:
             feature_dict = feature_queue.get()
             logger.info("Sending message to Websocket")
-            await websocket_manager_features.send_cbor(feature_dict)
-        # here the rawdata queue could also be used to send raw data, potentiall through different websocket?
+            await websocket_manager.send_cbor(feature_dict)
+
+        if not rawdata_queue.empty() and websocket_manager is not None:
+            raw_data = rawdata_queue.get()
+            
+            await websocket_manager.send_cbor(raw_data)
 
 def run_stream_controller_sync(feature_queue: queue.Queue,
                                rawdata_queue: queue.Queue,
-                               websocket_manager_features: "WebSocketManager",
+                               websocket_manager: "WebSocketManager",
                                stop_event: threading.Event
     ):
     # The run_stream_controller needs to be started as an asyncio function due to the async websocket
-    asyncio.run(run_stream_controller(feature_queue, rawdata_queue, websocket_manager_features, stop_event))
+    asyncio.run(run_stream_controller(feature_queue, rawdata_queue, websocket_manager, stop_event))
 
 class PyNMState:
     def __init__(
@@ -47,7 +51,7 @@ class PyNMState:
 
     def start_run_function(
         self,
-        websocket_manager_features=None,
+        websocket_manager=None,
     ) -> None:
         
         self.stream.settings = self.settings
@@ -59,7 +63,8 @@ class PyNMState:
         self.logger.info("Starting stream_controller_process thread")
 
 
-        # Stop even that is set in the app_backend
+        # Stop event
+        # .set() is called from app_backend
         self.stop_event_ws = threading.Event()
 
         self.stream_controller_thread = Thread(
@@ -67,7 +72,7 @@ class PyNMState:
             daemon=True,
             args=(self.feature_queue,
                   self.rawdata_queue,
-                  websocket_manager_features,
+                  websocket_manager,
                   self.stop_event_ws
                   ),
         )
@@ -89,7 +94,7 @@ class PyNMState:
                 "stream_lsl_name" : stream_lsl_name,
                 "feature_queue" : self.feature_queue,
                 "simulate_real_time" : True,
-                #"rawdata_queue" : self.rawdata_queue, 
+                "rawdata_queue" : self.rawdata_queue, 
             },
         )
 

@@ -208,6 +208,7 @@ class Stream:
         return_df: bool = True,
         simulate_real_time: bool = False,
         feature_queue: "queue.Queue | None"  = None,
+        rawdata_queue: "queue.Queue | None" = None,
         stream_handling_queue: "queue.Queue | None" = None,
     ):
         self.is_stream_lsl = is_stream_lsl
@@ -314,6 +315,16 @@ class Stream:
             file_writer.insert_data(feature_dict)
             if feature_queue is not None:
                 feature_queue.put(feature_dict)
+            if rawdata_queue is not None:
+                # convert raw data into dict with new raw data in unit self.sfreq
+                new_time_ms = 1000 / self.settings.sampling_rate_features_hz
+                new_samples = int(new_time_ms * self.sfreq / 1000)
+                data_batch_dict = {}
+                data_batch_dict["raw_data"] = {}
+                for i, ch in enumerate(self.channels["name"]):
+                    # needs to be list since cbor doesn't support np array
+                    data_batch_dict["raw_data"][ch] = list(data_batch[i, -new_samples:])
+                rawdata_queue.put(data_batch_dict)
 
             self.batch_count += 1
             if self.batch_count % self.save_interval == 0:

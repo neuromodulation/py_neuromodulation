@@ -31,7 +31,8 @@ export const RawDataGraph = ({
   xAxisTitle = "Nr. of Samples",
   yAxisTitle = "Value",
 }) => {
-  const graphData = useSocketStore((state) => state.graphData);
+  //const graphData = useSocketStore((state) => state.graphData);
+  const graphRawData = useSocketStore((state) => state.graphRawData);
 
   const channels = useSessionStore((state) => state.channels, shallow);
 
@@ -51,7 +52,7 @@ export const RawDataGraph = ({
   const graphRef = useRef(null);
   const plotlyRef = useRef(null);
   const [yAxisMaxValue, setYAxisMaxValue] = useState("Auto");
-  const [maxDataPoints, setMaxDataPoints] = useState(400);
+  const [maxDataPoints, setMaxDataPoints] = useState(10000);
 
   const layoutRef = useRef({
     // title: {
@@ -117,28 +118,34 @@ export const RawDataGraph = ({
 
   // Process incoming graphData to extract raw data for each channel -> TODO: Check later if this fits here better than socketStore
   useEffect(() => {
-    if (!graphData || Object.keys(graphData).length === 0) return;
+    // if (!graphData || Object.keys(graphData).length === 0) return;
+    if (!graphRawData || Object.keys(graphRawData).length === 0) return;
 
-    const latestData = graphData;
+    //const latestData = graphData;
+    const latestData = graphRawData;
 
     setRawData((prevRawData) => {
       const updatedRawData = { ...prevRawData };
 
       Object.entries(latestData).forEach(([key, value]) => {
-        const { channelName = "", featureName = "" } = getChannelAndFeature(
-          availableChannels,
-          key
-        );
+        //const { channelName = "", featureName = "" } = getChannelAndFeature(
+        //  availableChannels,
+        //  key
+        //);
 
-        if (!channelName) return;
+        //if (!channelName) return;
 
-        if (featureName !== "raw") return;
+        //if (featureName !== "raw") return;
+
+        const channelName = key;
+
+        if (!selectedChannels.includes(key)) return;
 
         if (!updatedRawData[channelName]) {
           updatedRawData[channelName] = [];
         }
 
-        updatedRawData[channelName].push(value);
+        updatedRawData[channelName].push(...value);
 
         if (updatedRawData[channelName].length > maxDataPoints) {
           updatedRawData[channelName] = updatedRawData[channelName].slice(
@@ -149,7 +156,7 @@ export const RawDataGraph = ({
 
       return updatedRawData;
     });
-  }, [graphData, availableChannels, maxDataPoints]);
+  }, [graphRawData, availableChannels, maxDataPoints]);
 
   useEffect(() => {
     if (!graphRef.current) return;
@@ -301,7 +308,7 @@ export const RawDataGraph = ({
                 step={50}
                 marks
                 min={0}
-                max={500}
+                max={10000}
               />
             </CollapsibleBox>
           </Box>

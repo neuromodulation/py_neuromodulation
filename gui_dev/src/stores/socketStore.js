@@ -10,6 +10,7 @@ export const useSocketStore = createStore("socket", (set, get) => ({
   status: "disconnected", // 'disconnected', 'connecting', 'connected'
   error: null,
   graphData: [],
+  graphRawData : [],
   infoMessages: [],
   reconnectTimer: null,
   intentionalDisconnect: false,
@@ -68,7 +69,13 @@ export const useSocketStore = createStore("socket", (set, get) => ({
         const arrayBuffer = event.data;
         const decodedData = CBOR.decode(arrayBuffer);
         // console.log("Decoded message from server:", decodedData);
-        set({graphData: decodedData});
+        if (Object.keys(decodedData)[0] == "raw_data") {
+          set({graphRawData: decodedData.raw_data});
+        } else {
+          set({graphData: decodedData});
+        }
+        
+        
       } catch (error) {
         console.error("Failed to decode CBOR message:", error);
       }

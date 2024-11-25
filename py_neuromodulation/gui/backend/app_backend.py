@@ -105,9 +105,7 @@ class PyNMBackend(FastAPI):
                 self.logger.info("Starting stream")
 
                 self.pynm_state.start_run_function(
-                        # out_dir=data["out_dir"],
-                        # experiment_name=data["experiment_name"],
-                        websocket_manager_features=self.websocket_manager,
+                        websocket_manager=self.websocket_manager,
                 )
 
 
