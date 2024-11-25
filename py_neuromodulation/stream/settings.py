@@ -147,7 +147,7 @@ class NMSettings(NMBaseModel):
 
         try:
             # validate the model
-            handler(self)
+            self = handler(self)
         except ValidationError as e:
             self = NMSettings.unvalidated(**self)
             NMSettings.model_fields_set
