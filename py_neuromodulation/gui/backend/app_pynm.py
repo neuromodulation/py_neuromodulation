@@ -37,6 +37,8 @@ class PyNMState:
         self.lsl_stream_name = None
         self.stream_controller_process = None
         self.run_func_process = None
+        self.out_dir = None  # will be set by set_stream_params
+        self.experiment_name = None  # will be set by set_stream_params
 
         if default_init:
             self.stream: Stream = Stream(sfreq=1500, data=np.random.random([1, 1]))
@@ -45,8 +47,6 @@ class PyNMState:
 
     def start_run_function(
         self,
-        out_dir: str = "",
-        experiment_name: str = "sub",
         websocket_manager_features=None,
     ) -> None:
         
@@ -77,11 +77,12 @@ class PyNMState:
         
         # The run_func_thread is terminated through the stream_handling_queue
         # which initiates to break the data generator and save the features
+        out_dir = "" if self.out_dir == "default" else self.out_dir
         self.run_func_thread = Thread(
             target=self.stream.run,
             daemon=True,
             kwargs={
-                "out_dir" : self.out_dir,
+                "out_dir" : out_dir,
                 "experiment_name" : self.experiment_name,
                 "stream_handling_queue" : self.stream_handling_queue,
                 "is_stream_lsl" : is_stream_lsl,
@@ -100,8 +101,6 @@ class PyNMState:
         lsl_stream_name: str | None = None,
         line_noise: float | None = None,
         sampling_rate_features: float | None = None,
-        out_dir: str = "",
-        experiment_name: str = "sub",
     ):
         from mne_lsl.lsl import resolve_streams
 
@@ -151,17 +150,12 @@ class PyNMState:
         if channels.shape[0] == 0:
             self.logger.error(f"Stream {lsl_stream_name} not found")
             raise ValueError(f"Stream {lsl_stream_name} not found")
-        
-        self.out_dir = out_dir
-        self.experiment_name = experiment_name
 
     def setup_offline_stream(
         self,
         file_path: str,
         line_noise: float | None = None,
         sampling_rate_features: float | None = None,
-        out_dir: str = "",
-        experiment_name: str = "sub",
     ):
         data, sfreq, ch_names, ch_types, bads = read_mne_data(file_path)
 
@@ -183,6 +177,3 @@ class PyNMState:
             line_noise=line_noise,
             sampling_rate_features_hz=sampling_rate_features,
         )
-
-        self.out_dir = out_dir
-        self.experiment_name = experiment_name

@@ -109,7 +109,10 @@ export const useSessionStore = createStore("session", (set, get) => ({
   checkStreamParameters: () => {
     // const { samplingRate, lineNoise, samplingRateFeatures } = get();
     set({
-      areParametersValid: get().streamParameters.samplingRate && get().streamParameters.lineNoise && get().streamParameters.samplingRateFeatures,
+      areParametersValid:
+        get().streamParameters.samplingRate &&
+        get().streamParameters.lineNoise &&
+        get().streamParameters.samplingRateFeatures,
     });
   },
 
@@ -130,8 +133,6 @@ export const useSessionStore = createStore("session", (set, get) => ({
           file_path: get().fileSource.path,
           sampling_rate_features: get().streamParameters.samplingRateFeatures,
           line_noise: get().streamParameters.lineNoise,
-          experiment_name: get().streamParameters.experimentName,
-          out_dir: get().streamParameters.outputDirectory,
         }),
       });
 
@@ -170,10 +171,8 @@ export const useSessionStore = createStore("session", (set, get) => ({
         },
         body: JSON.stringify({
           stream_name: lslSource.availableStreams[0].name,
-          sampling_rate_features: streamParameters.samplingRate,
+          sampling_rate_features: streamParameters.samplingRateFeatures,
           line_noise: streamParameters.lineNoise,
-          experiment_name: streamParameters.experimentName,
-          out_dir: streamParameters.outputDirectory,
         }),
       });
 
@@ -202,7 +201,38 @@ export const useSessionStore = createStore("session", (set, get) => ({
       });
       throw error;
     }
-    
+  },
+
+  sendStreamParametersToBackend: async () => {
+    const streamParameters = get().streamParameters;
+
+    try {
+      const response = await fetch(getBackendURL("/api/set-stream-params"), {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sampling_rate: streamParameters.samplingRate,
+          sampling_rate_features: streamParameters.samplingRateFeatures,
+          line_noise: streamParameters.lineNoise,
+          experiment_name: streamParameters.experimentName,
+          out_dir: streamParameters.outputDirectory,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Error sendin stream params:", error);
+      set({
+        streamSetupMessage: `Error: ${error.message}`,
+        isStreamSetupCorrect: false,
+      });
+      throw error;
+    }
   },
 
   /*****************************/
@@ -279,7 +309,7 @@ export const useSessionStore = createStore("session", (set, get) => ({
           "Content-Type": "application/json",
         },
         // This needs to be adapted depending on the backend changes
-        body: JSON.stringify({ "action" : "start"}),
+        body: JSON.stringify({ action: "start" }),
       });
 
       if (!response.ok) {
@@ -303,7 +333,7 @@ export const useSessionStore = createStore("session", (set, get) => ({
           "Content-Type": "application/json",
         },
         // This needs to be adapted depending on the backend changes
-        body: JSON.stringify({ "action" : "stop"}),
+        body: JSON.stringify({ action: "stop" }),
       });
 
       if (!response.ok) {

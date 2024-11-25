@@ -19,11 +19,12 @@ export const FileSelector = () => {
   );
   const setSourceType = useSessionStore((state) => state.setSourceType);
 
-  const fileBrowserDirRef = useRef("C:\\code\\py_neuromodulation\\py_neuromodulation\\data\\sub-testsub\\ses-EphysMedOff\\ieeg\\sub-testsub_ses-EphysMedOff_task-gripforce_run-0_ieeg.vhdr");
+  const fileBrowserDirRef = useRef(
+    "C:\\code\\py_neuromodulation\\py_neuromodulation\\data\\sub-testsub\\ses-EphysMedOff\\ieeg\\sub-testsub_ses-EphysMedOff_task-gripforce_run-0_ieeg.vhdr"
+  );
 
   const [isSelecting, setIsSelecting] = useState(false);
   const [showFileBrowser, setShowFileBrowser] = useState(false);
-  const [showFolderBrowser, setShowFolderBrowser] = useState(false);
 
   useEffect(() => {
     setSourceType("lsl");
@@ -47,10 +48,6 @@ export const FileSelector = () => {
     }
   };
 
-  const handleFolderSelect = (folder) => {
-    setShowFolderBrowser(false);
-  };
-
   return (
     <TitledBox title="Read data from file">
       <Button
@@ -69,7 +66,7 @@ export const FileSelector = () => {
             Selected File: <i>{fileSource.name}</i>
           </Typography>
         )}
-        {fileSource.size != "0" && (
+        {fileSource.name && (
           <Typography variant="body2">File Size: {fileSource.size}</Typography>
         )}
         {fileSource.path && (
@@ -82,15 +79,6 @@ export const FileSelector = () => {
         sx={{ width: "fit-content" }}
       >
         Open File
-      </Button>
-      <Button
-        variant="contained"
-        onClick={() => {
-          setShowFolderBrowser(true);
-        }}
-        sx={{ width: "fit-content" }}
-      >
-        Select Folder
       </Button>
       {streamSetupMessage && (
         <Typography
@@ -107,15 +95,6 @@ export const FileSelector = () => {
           directory={fileBrowserDirRef.current}
           onClose={() => setShowFileBrowser(false)}
           onSelect={handleFileSelect}
-        />
-      )}
-      {showFolderBrowser && (
-        <FileBrowser
-          isModal={true}
-          directory={fileBrowserDirRef.current}
-          onClose={() => setShowFolderBrowser(false)}
-          onSelect={handleFolderSelect}
-          onlyDirectories={true}
         />
       )}
     </TitledBox>

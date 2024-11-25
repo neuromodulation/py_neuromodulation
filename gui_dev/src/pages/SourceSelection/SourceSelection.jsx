@@ -1,8 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { useEffect } from "react";
-
 import { Stack, Typography } from "@mui/material";
-
 import { useSessionStore, WorkflowStage } from "@/stores";
 import { LinkButton } from "@/components/utils";
 import { StreamParameters } from "./StreamParameters";
@@ -11,6 +9,9 @@ export const SourceSelection = () => {
   const setSourceType = useSessionStore((state) => state.setSourceType);
   const setWorkflowStage = useSessionStore((state) => state.setWorkflowStage);
   const isSourceValid = useSessionStore((state) => state.isSourceValid);
+  const sendStreamParametersToBackend = useSessionStore(
+    (state) => state.sendStreamParametersToBackend
+  );
 
   useEffect(() => {
     setWorkflowStage(WorkflowStage.SOURCE_SELECTION);
@@ -49,6 +50,7 @@ export const SourceSelection = () => {
         color="primary"
         to="/channels"
         disabled={!isSourceValid}
+        onClick={sendStreamParametersToBackend}
       >
         Select Channels
       </LinkButton>
