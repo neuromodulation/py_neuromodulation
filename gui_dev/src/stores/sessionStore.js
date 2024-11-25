@@ -2,7 +2,7 @@
 // session information, such as the experiment name,
 // the data source, stream paramerters, the output files paths, etc
 
-import { createPersistStore } from "@/stores/createStore";
+import { createStore } from "@/stores/createStore";
 import { getBackendURL } from "@/utils/getBackendURL";
 
 // Workflow stages enum-like object
@@ -13,7 +13,7 @@ export const WorkflowStage = Object.freeze({
   VISUALIZATION: Symbol("VISUALIZATION"),
 });
 
-export const useSessionStore = createPersistStore("session", (set, get) => ({
+export const useSessionStore = createStore("session", (set, get) => ({
   // Sync status
   syncStatus: "synced", // 'synced', 'syncing', 'error'
   syncError: null,
@@ -48,9 +48,9 @@ export const useSessionStore = createPersistStore("session", (set, get) => ({
   streamParameters: {
     samplingRate: 1000,
     lineNoise: 50,
-    samplingRateFeatures: 10,
+    samplingRateFeatures: 11,
     allValid: false,
-    experimentName: "sub",
+    experimentName: "subject",
     outputDirectory: "default",
   },
 
@@ -107,9 +107,9 @@ export const useSessionStore = createPersistStore("session", (set, get) => ({
 
   // Check that all stream parameters are valid
   checkStreamParameters: () => {
-    const { samplingRate, lineNoise, samplingRateFeatures } = get();
+    // const { samplingRate, lineNoise, samplingRateFeatures } = get();
     set({
-      areParametersValid: samplingRate && lineNoise && samplingRateFeatures,
+      areParametersValid: get().streamParameters.samplingRate && get().streamParameters.lineNoise && get().streamParameters.samplingRateFeatures,
     });
   },
 
@@ -130,8 +130,8 @@ export const useSessionStore = createPersistStore("session", (set, get) => ({
           file_path: get().fileSource.path,
           sampling_rate_features: get().streamParameters.samplingRateFeatures,
           line_noise: get().streamParameters.lineNoise,
-          experimentName: get().streamParameters.experimentName,
-          outputDirectory: get().streamParameters.outputDirectory,
+          experiment_name: get().streamParameters.experimentName,
+          out_dir: get().streamParameters.outputDirectory,
         }),
       });
 
@@ -172,8 +172,8 @@ export const useSessionStore = createPersistStore("session", (set, get) => ({
           stream_name: lslSource.availableStreams[0].name,
           sampling_rate_features: streamParameters.samplingRate,
           line_noise: streamParameters.lineNoise,
-          experimentName: streamParameters.experimentName,
-          outputDirectory: streamParameters.outputDirectory,
+          experiment_name: streamParameters.experimentName,
+          out_dir: streamParameters.outputDirectory,
         }),
       });
 

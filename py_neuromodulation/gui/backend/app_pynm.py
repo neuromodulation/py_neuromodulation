@@ -81,8 +81,8 @@ class PyNMState:
             target=self.stream.run,
             daemon=True,
             kwargs={
-                "out_dir" : out_dir,
-                "experiment_name" : experiment_name,
+                "out_dir" : self.out_dir,
+                "experiment_name" : self.experiment_name,
                 "stream_handling_queue" : self.stream_handling_queue,
                 "is_stream_lsl" : is_stream_lsl,
                 "stream_lsl_name" : stream_lsl_name,
@@ -100,6 +100,8 @@ class PyNMState:
         lsl_stream_name: str | None = None,
         line_noise: float | None = None,
         sampling_rate_features: float | None = None,
+        out_dir: str = "",
+        experiment_name: str = "sub",
     ):
         from mne_lsl.lsl import resolve_streams
 
@@ -145,16 +147,21 @@ class PyNMState:
                 #self.settings: NMSettings = NMSettings(sampling_rate_features=sfreq)
                 self.logger.info("settings setup")
                 break
-
+            
         if channels.shape[0] == 0:
             self.logger.error(f"Stream {lsl_stream_name} not found")
             raise ValueError(f"Stream {lsl_stream_name} not found")
+        
+        self.out_dir = out_dir
+        self.experiment_name = experiment_name
 
     def setup_offline_stream(
         self,
         file_path: str,
         line_noise: float | None = None,
         sampling_rate_features: float | None = None,
+        out_dir: str = "",
+        experiment_name: str = "sub",
     ):
         data, sfreq, ch_names, ch_types, bads = read_mne_data(file_path)
 
@@ -177,3 +184,5 @@ class PyNMState:
             sampling_rate_features_hz=sampling_rate_features,
         )
 
+        self.out_dir = out_dir
+        self.experiment_name = experiment_name

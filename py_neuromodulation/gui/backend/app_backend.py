@@ -188,6 +188,8 @@ class PyNMBackend(FastAPI):
                     lsl_stream_name=stream_name,
                     sampling_rate_features=data["sampling_rate_features"],
                     line_noise=data["line_noise"],
+                    out_dir=data["out_dir"],
+                    experiment_name=data["experiment_name"],
                 )
                 return {"message": f"LSL stream '{stream_name}' setup successfully"}
             except Exception as e:
@@ -205,6 +207,8 @@ class PyNMBackend(FastAPI):
                     file_path=data["file_path"],
                     line_noise=float(data["line_noise"]),
                     sampling_rate_features=float(data["sampling_rate_features"]),
+                    out_dir=data["out_dir"],
+                    experiment_name=data["experiment_name"],
                 )
                 return {"message": "Offline stream setup successfully"}
             except ValueError:

@@ -27,16 +27,6 @@ export const StreamSelector = () => {
   );
   const updateStreamParameter = useSessionStore((state) => state.updateStreamParameter);
 
-  const setLineNoiseValue = useSessionStore((state) => state.setLineNoiseValue);
-  const setSamplingRateFeaturesValue = useSessionStore(
-    (state) => state.setSamplingRateFeaturesValue
-  );
-  const setSamplingRateValue = useSessionStore(
-    (state) => state.setSamplingRateValue
-  );
-  const setStreamParametersAllValid = useSessionStore(
-    (state) => state.setStreamParametersAllValid
-  );
   const setSourceType = useSessionStore((state) => state.setSourceType);
 
   const validateStreamName = (name) => {
@@ -65,12 +55,10 @@ export const StreamSelector = () => {
   const handleSelectStream = (streamName, sfreq) => {
     setSelectedStreamName(streamName);
 
-    updateStreamParameter('lineNoise', 50);
+    /* updateStreamParameter('lineNoise', 50);*/
     updateStreamParameter('samplingRate', sfreq);
-    updateStreamParameter('samplingRateFeatures', 10);
+    /*updateStreamParameter('samplingRateFeatures', 10);*/
     updateStreamParameter('allValid', true);
-
-    
 
     setIsStreamNameValid(true);
   };
