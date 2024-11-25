@@ -58,7 +58,6 @@ export const QuickAccessSidebar = ({ onItemClick }) => {
         flexGrow: 1,
         display: "flex",
         flexDirection: "column",
-        maxHeight: 400,
         overflowX: "hidden",
         overflowY: "auto",
         scrollbarWidth: "thin",

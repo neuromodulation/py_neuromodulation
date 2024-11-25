@@ -23,14 +23,11 @@ export const FileSelector = () => {
 
   const [isSelecting, setIsSelecting] = useState(false);
   const [showFileBrowser, setShowFileBrowser] = useState(false);
+  const [showFolderBrowser, setShowFolderBrowser] = useState(false);
 
   useEffect(() => {
     setSourceType("lsl");
   }, []);
-
-  const handleSelectFile = () => {
-    setShowFileBrowser(true);
-  };
 
   const handleFileSelect = (file) => {
     setIsSelecting(true);
@@ -50,11 +47,17 @@ export const FileSelector = () => {
     }
   };
 
+  const handleFolderSelect = (folder) => {
+    setShowFolderBrowser(false);
+  };
+
   return (
     <TitledBox title="Read data from file">
       <Button
         variant="contained"
-        onClick={handleSelectFile}
+        onClick={() => {
+          setShowFileBrowser(true);
+        }}
         disabled={isSelecting}
         sx={{ width: "100%" }}
       >
@@ -66,7 +69,7 @@ export const FileSelector = () => {
             Selected File: <i>{fileSource.name}</i>
           </Typography>
         )}
-        {fileSource.size && (
+        {fileSource.size != "0" && (
           <Typography variant="body2">File Size: {fileSource.size}</Typography>
         )}
         {fileSource.path && (
@@ -79,6 +82,15 @@ export const FileSelector = () => {
         sx={{ width: "fit-content" }}
       >
         Open File
+      </Button>
+      <Button
+        variant="contained"
+        onClick={() => {
+          setShowFolderBrowser(true);
+        }}
+        sx={{ width: "fit-content" }}
+      >
+        Select Folder
       </Button>
       {streamSetupMessage && (
         <Typography
@@ -94,7 +106,16 @@ export const FileSelector = () => {
           isModal={true}
           directory={fileBrowserDirRef.current}
           onClose={() => setShowFileBrowser(false)}
-          onFileSelect={handleFileSelect}
+          onSelect={handleFileSelect}
+        />
+      )}
+      {showFolderBrowser && (
+        <FileBrowser
+          isModal={true}
+          directory={fileBrowserDirRef.current}
+          onClose={() => setShowFolderBrowser(false)}
+          onSelect={handleFolderSelect}
+          onlyDirectories={true}
         />
       )}
     </TitledBox>

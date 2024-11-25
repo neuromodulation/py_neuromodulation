@@ -2,6 +2,7 @@ import { useReducer, useEffect } from "react";
 import { getBackendURL } from "@/utils/getBackendURL";
 import {
   Box,
+  Button,
   Paper,
   Typography,
   TextField,
@@ -15,6 +16,7 @@ import {
   TableSortLabel,
   Modal,
   Select,
+  Stack,
   FormControl,
   InputLabel,
   Snackbar,
@@ -90,8 +92,10 @@ const columns = [
 export const FileBrowser = ({
   isModal = false,
   directory = null,
+  onlyDirectories = false,
+  allowedExtensions = ALLOWED_EXTENSIONS,
   onClose,
-  onFileSelect,
+  onSelect,
 }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -142,11 +146,16 @@ export const FileBrowser = ({
 
   const fetchFiles = async (path) => {
     try {
-      const files = await fileManager.getFiles({
+      let files = await fileManager.getFiles({
         path,
-        allowedExtensions: ALLOWED_EXTENSIONS.join(","),
+        allowedExtensions: allowedExtensions.join(","),
         showHidden: state.showHiddenFiles,
       });
+
+      if (onlyDirectories) {
+        files = files.filter((file) => file.is_directory);
+      }
+
       dispatch({
         type: "SET_FILES",
         payload: files.map((file) => ({
@@ -165,13 +174,13 @@ export const FileBrowser = ({
     }
   };
 
-  const handleFileClick = (file) => {
+  const handleRowClick = (file) => {
     if (file.is_directory) {
       dispatch({ type: "SET_CURRENT_PATH", payload: file.path });
     } else if (
       ALLOWED_EXTENSIONS.some((ext) => file.name.toLowerCase().endsWith(ext))
     ) {
-      onFileSelect(file);
+      onSelect(file);
     }
   };
 
@@ -273,9 +282,9 @@ export const FileBrowser = ({
   };
 
   const FileBrowserContent = (
-    <Box sx={{ width: "100%", maxWidth: 800, margin: "auto" }}>
-      <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
-        <Box display="flex" alignItems="center">
+    <Stack gap={2} width="100%">
+      <Paper elevation={3} sx={{ p: 2, width: "100%" }}>
+        <Stack direction="row" alignItems="center">
           {state.drives.length > 1 && (
             <FormControl sx={{ minWidth: 120, mr: 2 }}>
               <InputLabel id="drive-select-label">Drive</InputLabel>
@@ -334,7 +343,7 @@ export const FileBrowser = ({
               <ListItemText primary="Show Hidden Files" />
             </MenuItem>{" "}
           </Menu>
-        </Box>
+        </Stack>
       </Paper>
       <Box
         sx={{
@@ -342,7 +351,6 @@ export const FileBrowser = ({
           height: "100%",
           display: "flex",
           flexDirection: "row",
-          maxWidth: 800,
           margin: "auto",
           gap: 2,
         }}
@@ -354,7 +362,6 @@ export const FileBrowser = ({
           sx={{
             flexBasis: "75%",
             flexShrink: 0,
-            maxHeight: 400,
             scrollbarWidth: "thin",
             scrollbarColor: "rgba(0,0,0,.1) transparent",
           }}
@@ -384,7 +391,7 @@ export const FileBrowser = ({
                 <TableRow
                   key={file.path}
                   hover
-                  onClick={() => handleFileClick(file)}
+                  onClick={() => handleRowClick(file)}
                   sx={{ cursor: "pointer" }}
                 >
                   {columns.map((column) => (
@@ -400,13 +407,25 @@ export const FileBrowser = ({
           </Table>
         </TableContainer>
       </Box>
+
+      <Stack direction="row" width="100%" gap={2} justifyContent="center">
+        {onlyDirectories && (
+          <Button
+            variant="contained"
+            onClick={() => onSelect(state.currentPath)}
+          >
+            Select Folder
+          </Button>
+        )}
+      </Stack>
+
       <Snackbar
         open={!!state.error}
         autoHideDuration={6000}
         onClose={() => dispatch({ type: "SET_ERROR", payload: "" })}
         message={state.error}
       />
-    </Box>
+    </Stack>
   );
 
   return isModal ? (
