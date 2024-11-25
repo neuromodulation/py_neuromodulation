@@ -168,7 +168,7 @@ sharpwave_analysis_settings:
     rise_steepness: false
     decay_steepness: false
     slope_ratio: false
-  filter_ranges_hz:
+  filter_ranges_hz: # list of [low_hz, high_hz]
     - [5, 80]
     - [5, 30]
   detect_troughs:
@@ -228,8 +228,8 @@ nolds_settings:
     frequency_bands: [low_beta]
 
 mne_connectiviy_settings:
-  method: plv
-  mode: multitaper
+  method: plv # One of ['coh', 'cohy', 'imcoh', 'cacoh', 'mic', 'mim', 'plv', 'ciplv', 'ppc', 'pli', 'dpli','wpli', 'wpli2_debiased', 'gc', 'gc_tr']
+  mode: multitaper # One of ['multitaper', 'fourier', 'cwt_morlet']
 
 bispectrum_settings:
   f1s: [5, 35]

@@ -1,8 +1,9 @@
 from os import PathLike
 from math import isnan
-from typing import Literal, TYPE_CHECKING
+from typing import Literal, TYPE_CHECKING, Any, TypeVar
 from pydantic import BaseModel, ConfigDict, model_validator
-from .pydantic_extensions import NMBaseModel, NMSequenceModel
+from .pydantic_extensions import NMBaseModel, NMSequenceModel, NMField
+from abc import abstractmethod
 
 from collections.abc import Sequence
 from datetime import datetime
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
 
 _PathLike = str | PathLike
 
-FeatureName = Literal[
+FEATURE_NAME = Literal[
     "raw_hjorth",
     "return_raw",
     "bandpass_filter",
@@ -35,7 +36,7 @@ FeatureName = Literal[
     "bispectrum",
 ]
 
-PreprocessorName = Literal[
+PREPROCESSOR_NAME = Literal[
     "preprocessing_filter",
     "notch_filter",
     "raw_resampling",
@@ -43,7 +44,7 @@ PreprocessorName = Literal[
     "raw_normalization",
 ]
 
-NormMethod = Literal[
+NORM_METHOD = Literal[
     "mean",
     "median",
     "zscore",
@@ -53,11 +54,6 @@ NormMethod = Literal[
     "robust",
     "minmax",
 ]
-
-
-###################################
-######## PROTOCOL CLASSES  ########
-###################################
 
 
 class NMFeature:
@@ -85,7 +81,7 @@ class NMPreprocessor:
     def process(self, data: "np.ndarray") -> "np.ndarray": ...
 
 
-class PreprocessorList(NMSequenceModel[list[PreprocessorName]]):
+class PreprocessorList(NMSequenceModel[list[PREPROCESSOR_NAME]]):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     # Useless contructor to prevent linter from complaining
@@ -153,6 +149,136 @@ class BoolSelector(NMBaseModel):
     def print_all(cls):
         for f in cls.list_all():
             print(f)
+
+
+################################################
+### Generic Pydantic models for the frontend ###
+################################################
+
+
+class UniqueStringSequence(NMSequenceModel[list[str]]):
+    """
+    A sequence of strings where:
+    - Values must come from a predefined set
+    - Each value can only appear once
+    - Order is preserved
+    """
+
+    @property
+    @abstractmethod
+    def valid_values(self) -> list[str]:
+        """Each subclass must implement this to provide its valid values"""
+        raise NotImplementedError
+
+    def __init__(self, **data):
+        valid_values = data.pop("valid_values", [])
+        super().__init__(**data)
+        object.__setattr__(self, "valid_values", valid_values)
+
+    @model_validator(mode="after")
+    def validate_sequence(self):
+        seen = set()
+        validated = []
+        for item in self.root:
+            if item not in seen and item in self.valid_values:
+                seen.add(item)
+                validated.append(item)
+        self.root = validated
+        return self
+
+    def serialize_with_metadata(self) -> dict[str, Any]:
+        result = super().serialize_with_metadata()
+        result["__valid_values__"] = self.valid_values
+        return result
+
+
+class DependentKeysList(NMSequenceModel[list[str]]):
+    """
+    A list of strings where valid values are keys from another settings field
+    """
+
+    root: list[str] = NMField(default_factory=list)
+    source_dict: dict[str, Any] = NMField(default_factory=dict, exclude=True)
+
+    def __init__(self, **data):
+        source_dict = data.pop("source_dict", {})
+        super().__init__(**data)
+        object.__setattr__(self, "source_dict", source_dict)
+
+    @model_validator(mode="after")
+    def validate_keys(self):
+        valid_keys = set(self.source_dict.keys())
+        seen = set()
+        validated = []
+        for item in self.root:
+            if item not in seen and item in valid_keys:
+                seen.add(item)
+                validated.append(item)
+        self.root = validated
+        return self
+
+    def serialize_with_metadata(self) -> dict[str, Any]:
+        result = super().serialize_with_metadata()
+        result["__valid_values__"] = list(self.source_dict.keys())
+        result["__dependent__"] = True  # Indicates this needs dynamic updating
+        return result
+
+
+class StringPairsList(NMSequenceModel[list[tuple[str, str]]]):
+    """
+    A list of string pairs where values must come from predetermined lists
+    """
+
+    root: list[tuple[str, str]] = NMField(default_factory=list)
+    valid_first: list[str] = NMField(default_factory=list, exclude=True)
+    valid_second: list[str] = NMField(default_factory=list, exclude=True)
+
+    def __init__(self, **data):
+        valid_first = data.pop("valid_first", [])
+        valid_second = data.pop("valid_second", [])
+        super().__init__(**data)
+        object.__setattr__(self, "valid_first", valid_first)
+        object.__setattr__(self, "valid_second", valid_second)
+
+    @model_validator(mode="after")
+    def validate_pairs(self):
+        validated = [
+            (first, second)
+            for first, second in self.root
+            if first in self.valid_first and second in self.valid_second
+        ]
+        self.root = validated
+        return self
+
+    def serialize_with_metadata(self) -> dict[str, Any]:
+        result = super().serialize_with_metadata()
+        result["__valid_first__"] = self.valid_first
+        result["__valid_second__"] = self.valid_second
+        return result
+
+
+# class LiteralValue(NMValueModel[str]):
+#     """
+#     A string field that must be one of a predefined set of literals
+#     """
+
+#     valid_values: list[str] = NMField(default_factory=list, exclude=True)
+
+#     def __init__(self, **data):
+#         valid_values = data.pop("valid_values", [])
+#         super().__init__(**data)
+#         object.__setattr__(self, "valid_values", valid_values)
+
+#     @model_validator(mode="after")
+#     def validate_value(self):
+#         if self.root not in self.valid_values:
+#             raise ValueError(f"Value must be one of: {self.valid_values}")
+#         return self
+
+#     def serialize_with_metadata(self) -> dict[str, Any]:
+#         result = super().serialize_with_metadata()
+#         result["__valid_values__"] = self.valid_values
+#         return result
 
 
 #################

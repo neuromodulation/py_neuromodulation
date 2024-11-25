@@ -2,11 +2,11 @@
 
 import numpy as np
 from typing import TYPE_CHECKING, Callable, Literal, get_args
-from pydantic import Field
 
+from py_neuromodulation.utils.pydantic_extensions import NMField
 from py_neuromodulation.utils.types import (
     NMBaseModel,
-    NormMethod,
+    NORM_METHOD,
     NMPreprocessor,
 )
 
@@ -17,13 +17,13 @@ NormalizerType = Literal["raw", "feature"]
 
 
 class NormalizationSettings(NMBaseModel):
-    normalization_time_s: float = 30
-    normalization_method: NormMethod = "zscore"
-    clip: float = Field(default=3, ge=0)
+    normalization_time_s: float = NMField(30, gt=0, custom_metadata={"unit": "s"})
+    normalization_method: NORM_METHOD = NMField(default="zscore")
+    clip: float = NMField(default=3, ge=0, custom_metadata={"unit": "a.u."})
 
     @staticmethod
-    def list_normalization_methods() -> list[NormMethod]:
-        return list(get_args(NormMethod))
+    def list_normalization_methods() -> list[NORM_METHOD]:
+        return list(get_args(NORM_METHOD))
 
 
 class Normalizer(NMPreprocessor):
@@ -55,7 +55,7 @@ class Normalizer(NMPreprocessor):
         if self.using_sklearn:
             import sklearn.preprocessing as skpp
 
-            NORM_METHODS_SKLEARN: dict[NormMethod, Callable] = {
+            NORM_METHODS_SKLEARN: dict[NORM_METHOD, Callable] = {
                 "quantile": lambda: skpp.QuantileTransformer(n_quantiles=300),
                 "robust": skpp.RobustScaler,
                 "minmax": skpp.MinMaxScaler,

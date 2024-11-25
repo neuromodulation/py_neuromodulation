@@ -1,8 +1,9 @@
 from collections.abc import Iterable
 import numpy as np
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from py_neuromodulation.utils.types import NMFeature, NMBaseModel
+from py_neuromodulation.utils.pydantic_extensions import NMField
 
 if TYPE_CHECKING:
     from py_neuromodulation import NMSettings
@@ -10,9 +11,30 @@ if TYPE_CHECKING:
     from mne import Epochs
 
 
+MNE_CONNECTIVITY_METHOD = Literal[
+    "coh",
+    "cohy",
+    "imcoh",
+    "cacoh",
+    "mic",
+    "mim",
+    "plv",
+    "ciplv",
+    "ppc",
+    "pli",
+    "dpli",
+    "wpli",
+    "wpli2_debiased",
+    "gc",
+    "gc_tr",
+]
+
+MNE_CONNECTIVITY_MODE = Literal["multitaper", "fourier", "cwt_morlet"]
+
+
 class MNEConnectivitySettings(NMBaseModel):
-    method: str = "plv"
-    mode: str = "multitaper"
+    method: MNE_CONNECTIVITY_METHOD = NMField(default="plv")
+    mode: MNE_CONNECTIVITY_MODE = NMField(default="multitaper")
 
 
 class MNEConnectivity(NMFeature):

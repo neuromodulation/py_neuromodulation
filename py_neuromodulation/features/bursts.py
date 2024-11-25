@@ -7,8 +7,9 @@ else:
 from collections.abc import Sequence
 from itertools import product
 
-from pydantic import Field, field_validator
+from pydantic import field_validator
 from py_neuromodulation.utils.types import BoolSelector, NMBaseModel, NMFeature
+from py_neuromodulation.utils.pydantic_extensions import NMField
 
 from typing import TYPE_CHECKING, Callable
 from py_neuromodulation.utils.pydantic_extensions import create_validation_error
@@ -46,8 +47,8 @@ class BurstFeatures(BoolSelector):
 
 
 class BurstsSettings(NMBaseModel):
-    threshold: float = Field(default=75, ge=0, le=100)
-    time_duration_s: float = Field(default=30, ge=0)
+    threshold: float = NMField(default=75, ge=0)
+    time_duration_s: float = NMField(default=30, ge=0, custom_metadata={"unit": "s"})
     frequency_bands: list[str] = ["low_beta", "high_beta", "low_gamma"]
     burst_features: BurstFeatures = BurstFeatures()
 

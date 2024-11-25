@@ -1,46 +1,112 @@
-from typing import Any, get_type_hints, TypeVar, Generic, Literal, overload
+import copy
+from typing import (
+    Any,
+    get_origin,
+    get_args,
+    get_type_hints,
+    TypeVar,
+    Generic,
+    Literal,
+    cast,
+    Sequence,
+)
 from typing_extensions import Unpack, TypedDict
-from pydantic import BaseModel, ConfigDict, model_validator
-from pydantic_core import PydanticUndefined, ValidationError, InitErrorDetails
+from pydantic import BaseModel, ConfigDict, model_validator, model_serializer
+
+from pydantic_core import (
+    ErrorDetails,
+    PydanticUndefined,
+    InitErrorDetails,
+    ValidationError,
+)
 from pydantic.fields import FieldInfo, _FieldInfoInputs, _FromFieldInfoInputs
 from pprint import pformat
 
 
 def create_validation_error(
     error_message: str,
-    loc: list[str | int] | None = None,
+    location: list[str | int] = [],
     title: str = "Validation Error",
-    input_type: Literal["python", "json"] = "python",
-    hide_input: bool = False,
+    error_type="value_error",
 ) -> ValidationError:
     """
-    Factory function to create a Pydantic v2 ValidationError instance from a single error message.
+    Factory function to create a Pydantic v2 ValidationError.
 
     Args:
     error_message (str): The error message for the ValidationError.
     loc (List[str | int], optional): The location of the error. Defaults to None.
     title (str, optional): The title of the error. Defaults to "Validation Error".
-    input_type (Literal["python", "json"], optional): Whether the error is for a Python object or JSON. Defaults to "python".
-    hide_input (bool, optional): Whether to hide the input value in the error message. Defaults to False.
 
     Returns:
     ValidationError: A Pydantic ValidationError instance.
     """
-    if loc is None:
-        loc = []
-
-    line_errors = [
-        InitErrorDetails(
-            type="value_error", loc=tuple(loc), input=None, ctx={"error": error_message}
-        )
-    ]
 
     return ValidationError.from_exception_data(
         title=title,
-        line_errors=line_errors,
-        input_type=input_type,
-        hide_input=hide_input,
+        line_errors=[
+            InitErrorDetails(
+                type=error_type,
+                loc=tuple(location),
+                input=None,
+                ctx={"error": error_message},
+            )
+        ],
+        input_type="python",
+        hide_input=False,
     )
+
+
+class NMErrorList:
+    """Class to handle data about Pydantic errors.
+    Stores data in a list of InitErrorDetails. Errors can be accessed but not modified.
+
+    :return: _description_
+    :rtype: _type_
+    """
+
+    def __init__(
+        self, errors: Sequence[InitErrorDetails | ErrorDetails] | None = None
+    ) -> None:
+        self.__errors: list[InitErrorDetails | ErrorDetails] = [e for e in errors or []]
+
+    def add_error(
+        self,
+        error_message: str,
+        location: list[str | int] = [],
+        error_type="value_error",
+    ) -> None:
+        self.__errors.append(
+            InitErrorDetails(
+                type=error_type,
+                loc=tuple(location),
+                input=None,
+                ctx={"error": error_message},
+            )
+        )
+
+    def create_error(self, title: str = "Validation Error") -> ValidationError:
+        return ValidationError.from_exception_data(
+            title=title, line_errors=cast(list[InitErrorDetails], self.__errors)
+        )
+
+    def extend(self, errors: "NMErrorList"):
+        self.__errors.extend(errors.__errors)
+
+    def __iter__(self):
+        return iter(self.__errors)
+
+    def __len__(self):
+        return len(self.__errors)
+
+    def __getitem__(self, idx):
+        # Return a copy of the error to prevent modification
+        return copy.deepcopy(self.__errors[idx])
+
+    def __repr__(self):
+        return repr(self.__errors)
+
+    def __str__(self):
+        return str(self.__errors)
 
 
 class _NMExtraFieldInputs(TypedDict, total=False):
@@ -66,7 +132,7 @@ class NMFieldInfo(FieldInfo):
     _default_values = {}
 
     def __init__(self, **kwargs: Unpack[_NMFieldInfoInputs]) -> None:
-        self.custom_metadata = kwargs.pop("custom_metadata", {})
+        self.custom_metadata: dict[str, Any] = kwargs.pop("custom_metadata", {})
         super().__init__(**kwargs)
 
     @staticmethod
@@ -94,16 +160,17 @@ def NMField(
 
 
 class NMBaseModel(BaseModel):
-    model_config = ConfigDict(validate_assignment=False, extra="allow")
+    # model_config = ConfigDict(validate_assignment=False, extra="allow")
 
     def __init__(self, *args, **kwargs) -> None:
         """Pydantic does not support positional arguments by default.
         This is a workaround to support positional arguments for models like FrequencyRange.
         It converts positional arguments to kwargs and then calls the base class __init__.
         """
+
         if not args:
             # Simple case - just use kwargs
-            super().__init__(**kwargs)
+            super().__init__(*args, **kwargs)
             return
 
         field_names = list(self.model_fields.keys())
@@ -128,14 +195,16 @@ class NMBaseModel(BaseModel):
         complete_kwargs.update(kwargs)
         super().__init__(**complete_kwargs)
 
+    __init__.__pydantic_base_init__ = True  # type: ignore
+
     def __str__(self):
         return pformat(self.model_dump())
 
-    def __repr__(self):
-        return pformat(self.model_dump())
+    # def __repr__(self):
+    #     return pformat(self.model_dump())
 
-    def validate(self) -> Any:  # type: ignore
-        return self.model_validate_strings(self.model_dump())
+    def validate(self, context: Any | None = None) -> Any:  # type: ignore
+        return self.model_validate(self.model_dump(), context=context)
 
     def __getitem__(self, key):
         return getattr(self, key)
@@ -171,35 +240,67 @@ class NMBaseModel(BaseModel):
 
             # Extract unit information from Annotated type
             if isinstance(field_info, NMFieldInfo):
-                for tag, value in field_info.custom_metadata.items():
-                    result[f"__{tag}__"] = value
+                # Convert scalar value to dict with metadata
+                field_dict = {
+                    "value": value,
+                    # __field_type__ will be overwritte if set in custom_metadata
+                    "__field_type__": type(value).__name__,
+                    **{
+                        f"__{tag}__": value
+                        for tag, value in field_info.custom_metadata.items()
+                    },
+                }
+                # Add possible values for Literal types
+                if get_origin(field_info.annotation) is Literal:
+                    field_dict["__valid_values__"] = list(
+                        get_args(field_info.annotation)
+                    )
+
+                result[field_name] = field_dict
         return result
+
+    @classmethod
+    def unvalidated(cls, **data: Any) -> Any:
+        def process_value(value: Any, field_type: Any) -> Any:
+            if isinstance(value, dict) and hasattr(
+                field_type, "__pydantic_core_schema__"
+            ):
+                # Recursively handle nested Pydantic models
+                return field_type.unvalidated(**value)
+            elif isinstance(value, list):
+                # Handle lists of Pydantic models
+                if hasattr(field_type, "__args__") and hasattr(
+                    field_type.__args__[0], "__pydantic_core_schema__"
+                ):
+                    return [
+                        field_type.__args__[0].unvalidated(**item)
+                        if isinstance(item, dict)
+                        else item
+                        for item in value
+                    ]
+            return value
+
+        processed_data = {}
+        for name, field in cls.model_fields.items():
+            try:
+                value = data[name]
+                processed_data[name] = process_value(value, field.annotation)
+            except KeyError:
+                if not field.is_required():
+                    processed_data[name] = copy.deepcopy(field.default)
+                else:
+                    raise TypeError(f"Missing required keyword argument {name!r}")
+
+        self = cls.__new__(cls)
+        object.__setattr__(self, "__dict__", processed_data)
+        object.__setattr__(self, "__pydantic_private__", {"extra": None})
+        object.__setattr__(self, "__pydantic_fields_set__", set(processed_data.keys()))
+        return self
 
 
 #################################
 #### Generic Pydantic models ####
 #################################
-
-
-def create_alias_property(index: int, alias: str, classname: str):
-    """Creates a property that accesses the root sequence at the given index"""
-
-    def getter(self):
-        return self.root[index]
-
-    def setter(self, value):
-        if isinstance(self.root, tuple):
-            new_values = list(self.root)
-            new_values[index] = value
-            self.root = tuple(new_values)
-        else:
-            self.root[index] = value
-
-    return property(
-        fget=getter,
-        fset=setter,
-        doc=f"Alias '{alias}' for position [{index}] of class '{classname}'.",
-    )
 
 
 T = TypeVar("T")
@@ -215,16 +316,6 @@ class NMSequenceModel(NMBaseModel, Generic[C]):
     __aliases__: dict[int, list[str]] = {}
 
     def __init__(self, *args, **kwargs) -> None:
-        # Generate properties programatically (not used currently)
-        # for index, aliases in self.__aliases__.items():
-        #     for alias in aliases:
-        #         if not hasattr(self.__class__, alias):
-        #             setattr(
-        #                 self.__class__,
-        #                 alias,
-        #                 create_alias_property(index, alias, self.__class__.__name__),
-        #             )
-
         if len(args) == 1 and isinstance(args[0], (list, tuple)):
             kwargs["root"] = args[0]
         elif len(args) == 1:
@@ -303,45 +394,27 @@ class NMSequenceModel(NMBaseModel, Generic[C]):
         # Else, make it a list
         return {"root": [value]}
 
-
-class NMValueModel(NMBaseModel, Generic[T]):
-    """Base class for single-value models that behave like their contained type"""
-
-    root: T
-
-    @model_validator(mode="before")
-    @classmethod
-    def validate_input(cls, value: Any) -> dict[str, Any]:
-        if isinstance(value, dict):
-            if "root" in value:
-                return value
-            # If it's a dict without root, assume the first value is our value
-            if len(value) > 0:
-                return {"root": next(iter(value.values()))}
-            return {"root": None}
-        return {"root": value}
-
-    def __str__(self) -> str:
-        return str(self.root)
-
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({repr(self.root)})"
-
-    def model_dump(self):  # type: ignore[reportIncompatibleMethodOverride]
+    @model_serializer
+    def ser_model(self):
         return self.root
 
-    def model_dump_json(self, **kwargs):
-        import json
-
-        return json.dumps(self.root, **kwargs)
-
-    def serialize_with_metadata(self) -> dict[str, Any]:
-        result = {"__field_type__": self.__class__.__name__, "value": self.root}
-
-        # Add any field metadata from the root field
-        field_info = self.model_fields.get("root")
-        if isinstance(field_info, NMFieldInfo):
-            for tag, value in field_info.custom_metadata.items():
-                result[f"__{tag}__"] = value
-
-        return result
+    # Custom validator to skip the 'root' field in validation errors
+    @model_validator(mode="wrap")  # type: ignore[reportIncompatibleMethodOverride]
+    def rewrite_error_locations(self, handler):
+        try:
+            return handler(self)
+        except ValidationError as e:
+            errors = []
+            for err in e.errors():
+                loc = list(err["loc"])
+                # Find and remove 'root' from the location path
+                if "root" in loc:
+                    root_idx = loc.index("root")
+                    if root_idx < len(loc) - 1:
+                        loc = loc[:root_idx] + loc[root_idx + 1 :]
+                err["loc"] = tuple(loc)
+                errors.append(err)
+            print(errors)
+            raise ValidationError.from_exception_data(
+                title="ValidationError", line_errors=errors
+            )

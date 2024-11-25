@@ -110,6 +110,7 @@ class PyNMBackend(FastAPI):
             try:
                 # First, validate with Pydantic
                 try:
+                    # TODO: check if this works properly or needs model_validate_strings
                     validated_settings = NMSettings.model_validate(data)
                 except ValidationError as e:
                     if not validate_only:

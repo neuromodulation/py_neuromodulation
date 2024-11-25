@@ -69,7 +69,6 @@ class PyNMState:
         # time.sleep(2)
         # self.logger.info(f"Stream running: {self.stream.is_running}")
 
-
     def setup_lsl_stream(
         self,
         lsl_stream_name: str | None = None,
@@ -154,4 +153,3 @@ class PyNMState:
             line_noise=line_noise,
             sampling_rate_features_hz=sampling_rate_features,
         )
-

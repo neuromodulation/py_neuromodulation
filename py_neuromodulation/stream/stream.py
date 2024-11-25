@@ -9,7 +9,7 @@ import py_neuromodulation as nm
 from contextlib import suppress
 
 from py_neuromodulation.stream.data_processor import DataProcessor
-from py_neuromodulation.utils.types import _PathLike, FeatureName
+from py_neuromodulation.utils.types import _PathLike, FEATURE_NAME
 from py_neuromodulation.stream.settings import NMSettings
 
 if TYPE_CHECKING:
@@ -84,7 +84,7 @@ class Stream:
             raise ValueError("Either `channels` or `data` must be passed to `Stream`.")
 
         # If features that use frequency ranges are on, test them against nyquist frequency
-        use_freq_ranges: list[FeatureName] = [
+        use_freq_ranges: list[FEATURE_NAME] = [
             "bandpass_filter",
             "stft",
             "fft",
@@ -328,7 +328,7 @@ class Stream:
 
             # if self.feature_queue is not None:
             #    self.feature_queue.put(feature_dict)
-            
+
             if websocket_featues is not None:
                 await websocket_featues.send_message(feature_dict)
             self.batch_count += 1

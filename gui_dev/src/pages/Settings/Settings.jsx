@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import {
   Box,
   Button,
-  ButtonGroup,
-  InputAdornment,
   Popover,
   Stack,
   Switch,
@@ -13,8 +11,7 @@ import {
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import { CollapsibleBox, TitledBox } from "@/components";
-import { FrequencyRangeList } from "./FrequencyRange";
-import { Dropdown } from "./Dropdown";
+import { FrequencyRangeList } from "./components/FrequencyRange";
 import { useSettingsStore, useStatusBarContent } from "@/stores";
 import { filterObjectByKeys } from "@/utils/functions";
 
@@ -30,28 +27,33 @@ const BooleanField = ({ value, onChange, error }) => (
   <Switch checked={value} onChange={(e) => onChange(e.target.checked)} />
 );
 
-const StringField = ({ value, onChange, label, error }) => (
-  <TextField
-    value={value}
-    onChange={(e) => onChange(e.target.value)}
-    label={label}
-    sx={{
-      "& .MuiOutlinedInput-root": {
-        "& fieldset": {
-          borderColor: error ? "error.main" : "inherit",
-        },
-        "&:hover fieldset": {
-          borderColor: error ? "error.main" : "primary.main",
-        },
-        "&.Mui-focused fieldset": {
-          borderColor: error ? "error.main" : "primary.main",
-        },
-      },
-    }}
-  />
-);
+const errorStyle = {
+  "& .MuiOutlinedInput-root": {
+    "& fieldset": { borderColor: "error.main" },
+    "&:hover fieldset": {
+      borderColor: "error.main",
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "error.main",
+    },
+  },
+};
+
+const StringField = ({ value, onChange, label, error }) => {
+  const errorSx = error ? errorStyle : {};
+  return (
+    <TextField
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      label={label}
+      sx={{ ...errorSx }}
+    />
+  );
+};
 
 const NumberField = ({ value, onChange, label, error }) => {
+  const errorSx = error ? errorStyle : {};
+
   const handleChange = (event) => {
     const newValue = event.target.value;
     // Only allow numbers and decimal point
@@ -66,19 +68,7 @@ const NumberField = ({ value, onChange, label, error }) => {
       value={value}
       onChange={handleChange}
       label={label}
-      sx={{
-        "& .MuiOutlinedInput-root": {
-          "& fieldset": {
-            borderColor: error ? "error.main" : "inherit",
-          },
-          "&:hover fieldset": {
-            borderColor: error ? "error.main" : "primary.main",
-          },
-          "&.Mui-focused fieldset": {
-            borderColor: error ? "error.main" : "primary.main",
-          },
-        },
-      }}
+      sx={{ ...errorSx }}
       // InputProps={{
       //   endAdornment: (
       //     <InputAdornment position="end">
@@ -98,7 +88,6 @@ const componentRegistry = {
   boolean: BooleanField,
   string: StringField,
   number: NumberField,
-  Array: Dropdown,
 };
 
 const SettingsField = ({ path, Component, label, value, onChange, error }) => {
@@ -376,6 +365,7 @@ export const Settings = () => {
               rangeOrder={frequencyRangeOrder}
               onOrderChange={updateFrequencyRangeOrder}
               onChange={handleChangeSettings}
+              errors={validationErrors}
             />
           </TitledBox>
         </Stack>
