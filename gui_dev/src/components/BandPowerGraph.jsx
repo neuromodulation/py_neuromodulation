@@ -170,7 +170,8 @@ export const BandPowerGraph = () => {
           Band Power
         </Typography>
         <Box sx={{ ml: 2, mr:4, minWidth: 200 }}>
-          <CollapsibleBox title="Channel Selection" defaultExpanded={true}>
+          <CollapsibleBox title="Channel Selection"
+            defaultExpanded={true} id="ChSelBoxBandPower">
             <Box display="flex" flexDirection="column">
               <RadioGroup
                 value={selectedChannel}

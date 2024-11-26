@@ -258,7 +258,8 @@ export const RawDataGraph = ({
         </Typography>
         <Box sx={{ display: "flex", ml: 2, mr: 4 }}>
           <Box sx={{ minWidth: 200, mr: 2 }}>
-            <CollapsibleBox title="Channel Selection" defaultExpanded={true}>
+            <CollapsibleBox title="Channel Selection"
+              defaultExpanded={true} id="ChSelBoxRawData">
               {/* TODO: Fix the typing errors -> How to solve this in jsx?  */}
               <Box display="flex" flexDirection="column">
                 {usedChannels.map((channel, index) => (
@@ -301,6 +302,7 @@ export const RawDataGraph = ({
                 Current Value: {maxDataPoints}
               </Typography>
               <Slider
+                id="max-data-points-slider-rawdata"
                 value={maxDataPoints}
                 onChange={handleMaxDataPointsChange}
                 aria-labelledby="max-data-points-slider"

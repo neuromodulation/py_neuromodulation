@@ -185,7 +185,9 @@ export const PSDGraph = () => {
           PSD Trace
         </Typography>
         <Box sx={{ ml: 2, mr: 4, minWidth: 200 }}> 
-          <CollapsibleBox title="Channel Selection" defaultExpanded={true}>
+          <CollapsibleBox
+            title="Channel Selection" defaultExpanded={true}
+            id="ChSelBoxPSDGraph">
             <Box display="flex" flexDirection="column">
               {usedChannels.map((channel, index) => (
                 <FormControlLabel

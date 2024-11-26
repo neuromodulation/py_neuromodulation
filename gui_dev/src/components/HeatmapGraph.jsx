@@ -213,7 +213,8 @@ export const HeatmapGraph = () => {
           Heatmap
         </Typography>
         <Box sx={{ ml: 2, minWidth: 200 }}>
-          <CollapsibleBox title="Channel Selection" defaultExpanded={true}>
+          <CollapsibleBox title="Channel Selection"
+            defaultExpanded={true} id="ChSelBoxHeatmap">
             <FormControl component="fieldset">
               <RadioGroup
                 value={selectedChannel}
