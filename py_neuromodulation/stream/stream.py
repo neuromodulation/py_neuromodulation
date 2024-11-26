@@ -13,6 +13,7 @@ from py_neuromodulation.stream.data_processor import DataProcessor
 from py_neuromodulation.utils.types import _PathLike, FeatureName
 from py_neuromodulation.utils.file_writer import MsgPackFileWriter
 from py_neuromodulation.stream.settings import NMSettings
+from py_neuromodulation.analysis.decode import RealTimeDecoder
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -207,6 +208,7 @@ class Stream:
         save_interval: int = 10,
         return_df: bool = True,
         simulate_real_time: bool = False,
+        decoder: RealTimeDecoder = None,
         feature_queue: "queue.Queue | None"  = None,
         rawdata_queue: "queue.Queue | None" = None,
         stream_handling_queue: "queue.Queue | None" = None,
@@ -298,6 +300,10 @@ class Stream:
             nm.logger.debug(
                 f"{batch_length:.3f} seconds of new data processed",
             )
+
+            if decoder is not None:
+                ch_to_decode = self.channels.query("used == 1").iloc[0]["name"]
+                feature_dict = decoder.predict(feature_dict, ch_to_decode, fft_bands_only=True)
 
             feature_dict["time"] = np.ceil(this_batch_end * 1000 + 1)
 

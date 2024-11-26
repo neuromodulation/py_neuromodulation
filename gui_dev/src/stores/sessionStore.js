@@ -45,6 +45,8 @@ export const useSessionStore = createStore("session", (set, get) => ({
     selectedStream: null,
     availableStreams: [],
   },
+  decodingModelPath: "None",
+
   streamParameters: {
     samplingRate: 1000,
     lineNoise: 50,
@@ -55,6 +57,7 @@ export const useSessionStore = createStore("session", (set, get) => ({
   },
 
   setSourceType: (type) => set({ sourceType: type }),
+  setDecodingModelPath: (path) => set({ decodingModelPath: path }),
   updateStreamParameter: (field, value) =>
     set((state) => {
       state.streamParameters[field] = value;
@@ -219,6 +222,7 @@ export const useSessionStore = createStore("session", (set, get) => ({
           line_noise: streamParameters.lineNoise,
           experiment_name: streamParameters.experimentName,
           out_dir: streamParameters.outputDirectory,
+          decoding_path: get().decodingModelPath,
         }),
       });
 

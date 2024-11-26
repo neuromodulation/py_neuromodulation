@@ -10,7 +10,9 @@ export const useSocketStore = createStore("socket", (set, get) => ({
   status: "disconnected", // 'disconnected', 'connecting', 'connected'
   error: null,
   graphData: [],
-  graphRawData : [],
+  graphRawData: [],
+  graphDecodingData: [],
+  availableDecodingOutputs: [],
   infoMessages: [],
   reconnectTimer: null,
   intentionalDisconnect: false,
@@ -70,12 +72,34 @@ export const useSocketStore = createStore("socket", (set, get) => ({
         const decodedData = CBOR.decode(arrayBuffer);
         // console.log("Decoded message from server:", decodedData);
         if (Object.keys(decodedData)[0] == "raw_data") {
-          set({graphRawData: decodedData.raw_data});
+          set({ graphRawData: decodedData.raw_data });
         } else {
-          set({graphData: decodedData});
+          // check here if there are values in decodedData that start with "decoding"
+          // if so, set graphDecodingData to the value of those keys
+          // else, set graphData to decodedData
+          let decodingData = {};
+          let dataNonDecodingFeatures = {};
+          //for (const [key, value] of Object.entries(decodedData)) {
+          //   if (key.startsWith("decode")) {
+          //     decodingData[key] = value;
+          //   } else {
+          //     dataNonDecodingFeatures[key] = value;
+          //   }
+          // }
+
+          // check if this is the same:
+          Object.entries(decodedData).forEach(([key, value]) => {
+            (key.startsWith("decode") ? decodingData : dataNonDecodingFeatures)[key] = value;
+          });
+
+          set({ availableDecodingOutputs: Object.keys(decodingData) });
+
+
+
+          set({ graphDecodingData: decodingData });
+          set({ graphData: dataNonDecodingFeatures });
+
         }
-        
-        
       } catch (error) {
         console.error("Failed to decode CBOR message:", error);
       }

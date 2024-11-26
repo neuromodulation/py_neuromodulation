@@ -218,6 +218,7 @@ class PyNMBackend(FastAPI):
                 self.pynm_state.stream.sfreq = float(data["sampling_rate"])
                 self.pynm_state.experiment_name = data["experiment_name"]
                 self.pynm_state.out_dir = data["out_dir"]
+                self.pynm_state.decoding_model_path = data["decoding_path"]
 
                 return {"message": "Stream parameters updated successfully"}
             except ValueError:

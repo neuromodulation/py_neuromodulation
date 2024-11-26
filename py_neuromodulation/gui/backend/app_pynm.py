@@ -1,3 +1,4 @@
+import os
 import asyncio
 import logging
 import threading
@@ -6,6 +7,7 @@ import multiprocessing as mp
 from threading import Thread
 import queue
 from py_neuromodulation.stream import Stream, NMSettings
+from py_neuromodulation.analysis.decode import RealTimeDecoder
 from py_neuromodulation.utils import set_channels
 from py_neuromodulation.utils.io import read_mne_data
 from py_neuromodulation import logger
@@ -43,6 +45,8 @@ class PyNMState:
         self.run_func_process = None
         self.out_dir = None  # will be set by set_stream_params
         self.experiment_name = None  # will be set by set_stream_params
+        self.decoding_model_path = None
+        self.decoder = None
 
         if default_init:
             self.stream: Stream = Stream(sfreq=1500, data=np.random.random([1, 1]))
@@ -62,7 +66,11 @@ class PyNMState:
 
         self.logger.info("Starting stream_controller_process thread")
 
-
+        if self.decoding_model_path is not None and self.decoding_model_path != "None":
+            if os.path.exists(self.decoding_model_path):
+                self.decoder = RealTimeDecoder(self.decoding_model_path)
+            else:
+                logger.debug("Passed decoding model path does't exist")    
         # Stop event
         # .set() is called from app_backend
         self.stop_event_ws = threading.Event()
@@ -94,7 +102,8 @@ class PyNMState:
                 "stream_lsl_name" : stream_lsl_name,
                 "feature_queue" : self.feature_queue,
                 "simulate_real_time" : True,
-                "rawdata_queue" : self.rawdata_queue, 
+                "rawdata_queue" : self.rawdata_queue,
+                "decoder" : self.decoder,
             },
         )
 

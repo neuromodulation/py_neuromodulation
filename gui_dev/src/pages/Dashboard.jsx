@@ -1,5 +1,6 @@
 import { RawDataGraph } from '@/components/RawDataGraph';
 import { PSDGraph } from '@/components/PSDGraph';
+import { DecodingGraph } from '@/components/DecodingGraph';
 import { HeatmapGraph } from '@/components/HeatmapGraph';
 import { BandPowerGraph } from '@/components/BandPowerGraph';
 import { Box, Button } from '@mui/material';
@@ -19,7 +20,7 @@ export const Dashboard = () => {
 
   return (
     <>
-      <Button variant="contained" onClick={connectSocket}> ConnectSocket</Button>
+      {/* <Button variant="contained" onClick={connectSocket}> ConnectSocket</Button> */}
       <Button variant="contained" onClick={startStream}> Run stream</Button>
       <Button variant="contained" onClick={stopStream}> Stop stream</Button>
       <Box
@@ -39,14 +40,20 @@ export const Dashboard = () => {
           <Box flex="1" mr={1}>
             <RawDataGraph />
           </Box>
+        </Box>
 
-          {/* PSDGraph */}
-          <Box flex="1" ml={1}>
+        <Box
+          flex="1"
+          display="flex"
+          flexDirection="row"
+          mb={2} // Optional: Adds margin below
+        >
+         {/* PSDGraph */}
+         <Box flex="1" ml={1}>
             <PSDGraph />
           </Box>
         </Box>
 
-        {/* Bottom Row - HeatmapGraph and BandPowerGraph */}
         <Box
           flex="1"
           display="flex"
@@ -56,13 +63,27 @@ export const Dashboard = () => {
           <Box flex="1" mr={1}>
             <HeatmapGraph />
           </Box>
+        </Box>
+          
 
+        <Box
+          flex="1"
+          display="flex"
+          flexDirection="row"
+        >
+            
           {/* BandPowerGraph */}
           <Box flex="1" ml={1}>
             <BandPowerGraph />
           </Box>
+        
+        
+          {/* DecoddingGraph */}
+          <Box flex="1" mr={1}>
+            <DecodingGraph />
+          </Box>
         </Box>
-      </Box>
+        </Box>
     </>
   );
 

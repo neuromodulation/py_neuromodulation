@@ -14,6 +14,34 @@ from py_neuromodulation import logger
 from typing import Callable
 
 
+class RealTimeDecoder:
+
+    def __init__(self, model_path: str):
+        self.model_path = model_path
+        if model_path.endswith(".skops"):
+            from skops import io as skops_io
+            self.model = skops_io.load(model_path)
+        else:
+            return NotImplementedError("Only skops models are supported")
+
+    def predict(self, feature_dict: dict, channel: str = None, fft_bands_only: bool = True ) -> dict:
+        try:
+            if channel is not None:
+                features_ch = {f: feature_dict[f] for f in feature_dict.keys() if f.startswith(channel)}
+                if fft_bands_only is True:
+                    features_ch_fft = {f: features_ch[f] for f in features_ch.keys() if "fft" in f and "psd" not in f}
+                    out = self.model.predict_proba(np.array(list(features_ch_fft.values())).reshape(1, -1))
+                else:
+                    out = self.model.predict_proba(features_ch)
+            else:
+                out = self.model.predict(feature_dict)
+            for decode_output_idx in range(out.shape[1]):
+                feature_dict[f"decode_{decode_output_idx}"] = np.squeeze(out)[decode_output_idx]
+            return feature_dict
+        except Exception as e:
+            logger.error(f"Error in decoding: {e}")
+        return feature_dict
+
 class CV_res:
     def __init__(
         self,

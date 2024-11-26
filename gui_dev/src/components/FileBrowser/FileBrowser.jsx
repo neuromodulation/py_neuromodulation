@@ -178,7 +178,7 @@ export const FileBrowser = ({
     if (file.is_directory) {
       dispatch({ type: "SET_CURRENT_PATH", payload: file.path });
     } else if (
-      ALLOWED_EXTENSIONS.some((ext) => file.name.toLowerCase().endsWith(ext))
+      allowedExtensions.some((ext) => file.name.toLowerCase().endsWith(ext))
     ) {
       onSelect(file);
     }

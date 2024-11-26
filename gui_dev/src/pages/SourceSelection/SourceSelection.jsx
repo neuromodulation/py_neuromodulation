@@ -4,6 +4,7 @@ import { Stack, Typography } from "@mui/material";
 import { useSessionStore, WorkflowStage } from "@/stores";
 import { LinkButton } from "@/components/utils";
 import { StreamParameters } from "./StreamParameters";
+import { DecodingModel } from "./DecodingModel";
 
 export const SourceSelection = () => {
   const setSourceType = useSessionStore((state) => state.setSourceType);
@@ -44,6 +45,7 @@ export const SourceSelection = () => {
 
       <Outlet />
       <StreamParameters />
+      <DecodingModel />
 
       <LinkButton
         variant="contained"
