@@ -9,10 +9,7 @@ import {
   Checkbox,
 } from "@mui/material";
 import { CollapsibleBox } from "./CollapsibleBox"; 
-import { getChannelAndFeature } from "./utils";
 import { shallow } from 'zustand/shallow'; 
-
-const defaultPsdData = { frequencies: [], powers: [] };
 
 const generateColors = (numColors) => {
   const colors = [];
@@ -39,44 +36,21 @@ export const PSDGraph = () => {
   const [selectedChannels, setSelectedChannels] = useState([]);
   const hasInitialized = useRef(false);
   
-  const socketPsdData = useSocketStore((state) => state.graphData);
+  const psdProcessedData = useSocketStore((state) => state.psdProcessedData);
+  console.log(psdProcessedData);
   
   const psdData = useMemo(() => { 
-    if (!socketPsdData) return [];
-    console.log("Socket PSD Data:", socketPsdData);
-    const dataByChannel = {};
-    const allFeaturesSet = new Set();
+    if (!psdProcessedData) return [];
 
-    Object.entries(socketPsdData).forEach(([key, value]) => {
-      const { channelName = '', featureName = '' } = getChannelAndFeature(availableChannels, key);
-      if (!channelName) return;
-
-      if (!featureName.startsWith("fft_psd_")) return;
-
-      const featureNumber = featureName.substring("fft_psd_".length);
-      const featureIndex = parseInt(featureNumber);
-
-      if (isNaN(featureIndex)) return; 
-
-      allFeaturesSet.add(featureIndex);
-
-      if (!dataByChannel[channelName]) {
-        dataByChannel[channelName] = {
-          channelName,
-          featureMap: {},
-        };
-      }
-
-      dataByChannel[channelName].featureMap[featureIndex] = value;
-    });
-
-    const allFeatures = Array.from(allFeaturesSet).sort((a, b) => a - b);
+    const dataByChannel = psdProcessedData.data_by_channel || new Map();
+    const allFeatures = psdProcessedData.all_features || [];
 
     const selectedData = selectedChannels.map((channelName) => {
-      const channelData = dataByChannel[channelName];
+      const channelData = dataByChannel.get(channelName);
       if (channelData) {
         const values = allFeatures.map((featureIndex) => {
-          return channelData.featureMap[featureIndex] !== undefined ? channelData.featureMap[featureIndex] : null;
+          const value = channelData.feature_map.get(featureIndex);
+          return value !== undefined ? value : null;
         });
         return {
           channelName,
@@ -93,7 +67,7 @@ export const PSDGraph = () => {
     });
 
     return selectedData;
-  }, [socketPsdData, selectedChannels, availableChannels]); 
+  }, [psdProcessedData, selectedChannels]); 
 
   const graphRef = useRef(null);
   const plotlyRef = useRef(null);
@@ -148,8 +122,8 @@ export const PSDGraph = () => {
     const traces = psdData.map((data, idx) => ({
       x: data.features,
       y: data.values,
-      type: "scatter",
-      mode: "lines+markers",
+      type: "scattergl",
+      mode: "lines",
       name: data.channelName,
       line: { simplify: false, color: colors[idx] },
     }));

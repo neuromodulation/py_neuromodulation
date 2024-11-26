@@ -1,15 +1,24 @@
 import { createStore } from "./createStore";
 import { getBackendURL } from "@/utils/getBackendURL";
-import CBOR from "cbor-js";
+import init, { process_cbor_data } from '../../data_processor/pkg/cbor_decoder.js';
 
 const WEBSOCKET_URL = getBackendURL("/ws");
 const RECONNECT_INTERVAL = 500; // ms
+
+let wasmInitialized = false;
+
+async function initWasm() {
+  if (!wasmInitialized) {
+    await init();
+    wasmInitialized = true;
+  }
+}
 
 export const useSocketStore = createStore("socket", (set, get) => ({
   socket: null,
   status: "disconnected", // 'disconnected', 'connecting', 'connected'
   error: null,
-  graphData: [],
+  psdProcessedData: null,
   infoMessages: [],
   reconnectTimer: null,
   intentionalDisconnect: false,
@@ -17,7 +26,6 @@ export const useSocketStore = createStore("socket", (set, get) => ({
   setSocket: (socket) => set({ socket }),
 
   connectSocket: () => {
-    // Get current socket status and cancel if connecting or already connected
     const { socket, status, reconnectTimer } = get();
 
     if (reconnectTimer) {
@@ -26,10 +34,8 @@ export const useSocketStore = createStore("socket", (set, get) => ({
 
     if (socket || status === "connecting" || status === "connected") return;
 
-    // Set socket status to connecting
     set({ status: "connecting", error: null, intentionalDisconnect: false });
 
-    // Create new socket connection
     const newSocket = new WebSocket(WEBSOCKET_URL);
     newSocket.binaryType = "arraybuffer"; // Default is "blob"
 
@@ -38,7 +44,6 @@ export const useSocketStore = createStore("socket", (set, get) => ({
       set({ socket: newSocket, status: "connected", error: null });
     };
 
-    // Error event fires when the connection is closed due to error
     newSocket.onerror = (event) => {
       if (!get().intentionalDisconnect) {
         console.error("WebSocket error:", event);
@@ -48,7 +53,6 @@ export const useSocketStore = createStore("socket", (set, get) => ({
           socket: null,
         });
 
-        // Attempt to reconnect after a delay
         get().setReconnectTimer(RECONNECT_INTERVAL);
       }
     };
@@ -63,14 +67,22 @@ export const useSocketStore = createStore("socket", (set, get) => ({
       }
     };
 
-    newSocket.onmessage = (event) => {
+    newSocket.onmessage = async (event) => {
       try {
         const arrayBuffer = event.data;
-        const decodedData = CBOR.decode(arrayBuffer);
-        // console.log("Decoded message from server:", decodedData);
-        set({graphData: decodedData});
+        const uint8Array = new Uint8Array(arrayBuffer);
+
+        // Ensure the WASM module is initialized
+        await initWasm();
+
+        // Process CBOR data using Rust module
+        const processedData = process_cbor_data(uint8Array);
+
+        // Set processed data in store
+        set({ psdProcessedData: processedData });
+        console.log("PSD processed data:", processedData);
       } catch (error) {
-        console.error("Failed to decode CBOR message:", error);
+        console.error("Failed to process CBOR message:", error);
       }
     };
 

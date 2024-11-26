@@ -51,7 +51,7 @@ export const RawDataGraph = ({
   const graphRef = useRef(null);
   const plotlyRef = useRef(null);
   const [yAxisMaxValue, setYAxisMaxValue] = useState("Auto");
-  const [maxDataPoints, setMaxDataPoints] = useState(400);
+  const [maxDataPoints, setMaxDataPoints] = useState(100);
 
   const layoutRef = useRef({
     // title: {
@@ -74,7 +74,7 @@ export const RawDataGraph = ({
         font: { color: "#f4f4f4" },
       },
       color: "#cccccc",
-      autorange: "reversed",
+      // autorange: "reversed",
     },
     yaxis: {
       // title: {
@@ -117,6 +117,7 @@ export const RawDataGraph = ({
 
   // Process incoming graphData to extract raw data for each channel -> TODO: Check later if this fits here better than socketStore
   useEffect(() => {
+    const startPSDGraph = performance.now();
     if (!graphData || Object.keys(graphData).length === 0) return;
 
     const latestData = graphData;
@@ -149,6 +150,8 @@ export const RawDataGraph = ({
 
       return updatedRawData;
     });
+    const endPSDGraph = performance.now();
+    console.log("Time taken to process data: ", endPSDGraph - startPSDGraph);
   }, [graphData, availableChannels, maxDataPoints]);
 
   useEffect(() => {
@@ -204,7 +207,7 @@ export const RawDataGraph = ({
       return {
         x,
         y,
-        type: "scatter",
+        type: "scattergl",
         mode: "lines",
         name: channelName,
         line: { simplify: false, color: colors[idx] },
@@ -249,8 +252,8 @@ export const RawDataGraph = ({
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           {title}
         </Typography>
-        <Box sx={{ display: "flex", ml: 2, mr: 4 }}>
-          <Box sx={{ minWidth: 200, mr: 2 }}>
+        <Box sx={{ display: "flex", ml: 1, mr: 4 }}>
+          <Box sx={{ minWidth: 200, mr: 1 }}>
             <CollapsibleBox title="Channel Selection" defaultExpanded={true}>
               {/* TODO: Fix the typing errors -> How to solve this in jsx?  */}
               <Box display="flex" flexDirection="column">
@@ -270,7 +273,7 @@ export const RawDataGraph = ({
               </Box>
             </CollapsibleBox>
           </Box>
-          <Box sx={{ minWidth: 200, mr: 2 }}>
+          <Box sx={{ minWidth: 200, mr: 1 }}>
             <CollapsibleBox title="Max Value (uV)" defaultExpanded={true}>
               <FormControl component="fieldset">
                 <RadioGroup
@@ -300,7 +303,7 @@ export const RawDataGraph = ({
                 valueLabelDisplay="auto"
                 step={50}
                 marks
-                min={0}
+                min={50}
                 max={500}
               />
             </CollapsibleBox>
