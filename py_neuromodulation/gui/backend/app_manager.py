@@ -18,6 +18,9 @@ if TYPE_CHECKING:
 # Shared memory configuration
 ARRAY_SIZE = 1000  # Adjust based on your needs
 
+SERVER_PORT = 50001
+DEV_SERVER_PORT = 54321
+
 
 def create_backend() -> "PyNMBackend":
     from .app_pynm import PyNMState
@@ -29,7 +32,12 @@ def create_backend() -> "PyNMBackend":
     return PyNMBackend(pynm_state=PyNMState(), debug=debug, dev=dev)
 
 
-def run_vite(shutdown_event: "Event", debug: bool = False) -> None:
+def run_vite(
+    shutdown_event: "Event",
+    debug: bool = False,
+    scan: bool = False,
+    dev_port: int = DEV_SERVER_PORT,
+) -> None:
     """Run Vite in a separate shell"""
     import subprocess
 
@@ -40,6 +48,8 @@ def run_vite(shutdown_event: "Event", debug: bool = False) -> None:
         "magenta",
         logging.DEBUG if debug else logging.INFO,
     )
+
+    os.environ["VITE_REACT_SCAN"] = "true" if scan else "false"
 
     def output_reader(shutdown_event: "Event", process: subprocess.Popen):
         logger.debug("Initialized output stream")
@@ -73,7 +83,7 @@ def run_vite(shutdown_event: "Event", debug: bool = False) -> None:
     subprocess_flags = subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0
 
     process = subprocess.Popen(
-        "bun run dev",
+        "bun run dev --port " + str(dev_port),
         cwd="gui_dev",
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -182,7 +192,13 @@ class AppManager:
     LAUNCH_FLAG = "PYNM_RUNNING"
 
     def __init__(
-        self, debug: bool = False, dev: bool = True, run_in_webview=False
+        self,
+        debug: bool = False,
+        dev: bool = True,
+        run_in_webview=False,
+        scan=False,
+        server_port=SERVER_PORT,
+        dev_port=DEV_SERVER_PORT,
     ) -> None:
         """_summary_
 
@@ -197,6 +213,10 @@ class AppManager:
         self.debug = debug
         self.dev = dev
         self.run_in_webview = run_in_webview
+        self.scan = scan
+        self.server_port = server_port
+        self.dev_port = dev_port
+
         self._reset()
         # Prevent launching multiple instances of the app due to multiprocessing
         # This allows the absence of a main guard in the main script
@@ -270,7 +290,12 @@ class AppManager:
             self.logger.info("Starting Vite server...")
             self.tasks["vite"] = mp.Process(
                 target=run_vite,
-                kwargs={"shutdown_event": self.shutdown_event, "debug": self.debug},
+                kwargs={
+                    "shutdown_event": self.shutdown_event,
+                    "debug": self.debug,
+                    "scan": self.scan,
+                    "dev_port": self.dev_port,
+                },
                 name="Vite",
             )
 

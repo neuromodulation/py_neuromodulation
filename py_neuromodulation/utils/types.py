@@ -1,6 +1,6 @@
 from os import PathLike
 from math import isnan
-from typing import Literal, TYPE_CHECKING, Any, TypeVar
+from typing import Literal, TYPE_CHECKING, Any
 from pydantic import BaseModel, ConfigDict, model_validator
 from .pydantic_extensions import NMBaseModel, NMSequenceModel, NMField
 from abc import abstractmethod
