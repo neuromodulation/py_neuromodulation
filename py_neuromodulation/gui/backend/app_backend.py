@@ -1,3 +1,4 @@
+from email import errors
 import logging
 import asyncio
 import importlib.metadata
@@ -94,9 +95,9 @@ class PyNMBackend(FastAPI):
                     # TODO: check if this works properly or needs model_validate_strings
                     validated_settings = NMSettings.model_validate(data)
                 except ValidationError as e:
+                    self.logger.error(f"Error validating settings: {e}")
                     if not validate_only:
                         # If validation failed but we wanted to upload, return error
-                        self.logger.error(f"Error validating settings: {e}")
                         raise HTTPException(
                             status_code=422,
                             detail={

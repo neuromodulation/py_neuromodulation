@@ -67,7 +67,10 @@ class NMErrorList:
     def __init__(
         self, errors: Sequence[InitErrorDetails | ErrorDetails] | None = None
     ) -> None:
-        self.__errors: list[InitErrorDetails | ErrorDetails] = [e for e in errors or []]
+        if errors is None:
+            self.__errors: list[InitErrorDetails | ErrorDetails] = []
+        else:
+            self.__errors: list[InitErrorDetails | ErrorDetails] = [e for e in errors]
 
     def add_error(
         self,
@@ -160,8 +163,6 @@ def NMField(
 
 
 class NMBaseModel(BaseModel):
-    # model_config = ConfigDict(validate_assignment=False, extra="allow")
-
     def __init__(self, *args, **kwargs) -> None:
         """Pydantic does not support positional arguments by default.
         This is a workaround to support positional arguments for models like FrequencyRange.
@@ -242,7 +243,7 @@ class NMBaseModel(BaseModel):
             if isinstance(field_info, NMFieldInfo):
                 # Convert scalar value to dict with metadata
                 field_dict = {
-                    "value": value,
+                    "__value__": value,
                     # __field_type__ will be overwritte if set in custom_metadata
                     "__field_type__": type(value).__name__,
                     **{
@@ -342,7 +343,7 @@ class NMSequenceModel(NMBaseModel, Generic[C]):
         return json.dumps(self.root, **kwargs)
 
     def serialize_with_metadata(self) -> dict[str, Any]:
-        result = {"__field_type__": self.__class__.__name__, "value": self.root}
+        result = {"__field_type__": self.__class__.__name__, "__value__": self.root}
 
         # Add any field metadata from the root field
         field_info = self.model_fields.get("root")

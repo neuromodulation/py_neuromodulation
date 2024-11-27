@@ -18,7 +18,10 @@ from py_neuromodulation.utils.types import (
 from py_neuromodulation.utils.pydantic_extensions import NMErrorList, NMField
 
 from py_neuromodulation.processing.filter_preprocessing import FilterSettings
-from py_neuromodulation.processing.normalization import FeatureNormalizationSettings, NormalizationSettings
+from py_neuromodulation.processing.normalization import (
+    FeatureNormalizationSettings,
+    NormalizationSettings,
+)
 from py_neuromodulation.processing.resample import ResamplerSettings
 from py_neuromodulation.processing.projection import ProjectionSettings
 
@@ -94,7 +97,9 @@ class NMSettings(NMBaseModel):
 
     # Postprocessing settings
     postprocessing: PostprocessingSettings = PostprocessingSettings()
-    feature_normalization_settings: FeatureNormalizationSettings = FeatureNormalizationSettings()
+    feature_normalization_settings: FeatureNormalizationSettings = (
+        FeatureNormalizationSettings()
+    )
     project_cortex_settings: ProjectionSettings = ProjectionSettings(max_dist_mm=20)
     project_subcortex_settings: ProjectionSettings = ProjectionSettings(max_dist_mm=5)
 
@@ -144,12 +149,27 @@ class NMSettings(NMBaseModel):
         # the settings class
         errors: NMErrorList = NMErrorList()
 
+        def remove_private_keys(data):
+            if isinstance(data, dict):
+                if "__value__" in data:
+                    return data["__value__"]
+                else:
+                    return {
+                        key: remove_private_keys(value)
+                        for key, value in data.items()
+                        if not key.startswith("__")
+                    }
+            elif isinstance(data, (list, tuple, set)):
+                return type(data)(remove_private_keys(item) for item in data)
+            else:
+                return data
+
+        self = remove_private_keys(self)
+
         try:
-            # validate the model
-            self = handler(self)
+            self = handler(self)  # validate the model
         except ValidationError as e:
             self = NMSettings.unvalidated(**self)
-            NMSettings.model_fields_set
             errors.extend(NMErrorList(e.errors()))
 
         if len(self.features.get_enabled()) == 0:

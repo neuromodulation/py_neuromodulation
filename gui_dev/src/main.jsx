@@ -1,11 +1,11 @@
-if (JSON.parse(import.meta.env.VITE_REACT_SCAN) === true) {
-  import("react-scan").then(({ scan }) => {
-    scan({
-      enabled: true,
-      log: true, // logs render info to console
-    });
-  });
-}
+// if (JSON.parse(import.meta.env.VITE_REACT_SCAN) === true) {
+//   import("react-scan").then(({ scan }) => {
+//     scan({
+//       enabled: true,
+//       log: true, // logs render info to console
+//     });
+//   });
+// }
 
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";

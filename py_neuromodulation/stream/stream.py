@@ -10,7 +10,7 @@ import py_neuromodulation as nm
 from contextlib import suppress
 
 from py_neuromodulation.stream.data_processor import DataProcessor
-from py_neuromodulation.utils.types import _PathLike, FeatureName
+from py_neuromodulation.utils.types import _PathLike, FEATURE_NAME
 from py_neuromodulation.utils.file_writer import MsgPackFileWriter
 from py_neuromodulation.stream.settings import NMSettings
 from py_neuromodulation.analysis.decode import RealTimeDecoder

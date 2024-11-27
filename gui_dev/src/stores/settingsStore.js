@@ -5,25 +5,6 @@ const INITIAL_DELAY = 3000; // wait for Flask
 const RETRY_DELAY = 1000; // ms
 const MAX_RETRIES = 100;
 
-const uploadSettingsToServer = async (settings) => {
-  try {
-    const response = await fetch(getBackendURL("/api/settings"), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(settings),
-    });
-    if (!response.ok) {
-      throw new Error("Failed to update settings");
-    }
-    return { success: true };
-  } catch (error) {
-    console.error("Error updating settings:", error);
-    return { success: false, error };
-  }
-};
-
 export const useSettingsStore = createStore("settings", (set, get) => ({
   settings: null,
   lastValidSettings: null,
@@ -99,7 +80,9 @@ export const useSettingsStore = createStore("settings", (set, get) => ({
 
     try {
       const response = await fetch(
-        `/api/settings${validateOnly ? "?validate_only=true" : ""}`,
+        getBackendURL(
+          `/api/settings${validateOnly ? "?validate_only=true" : ""}`
+        ),
         {
           method: "POST",
           headers: {

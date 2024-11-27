@@ -87,6 +87,8 @@ const NumberField = ({ value, onChange, label, error }) => {
 const componentRegistry = {
   boolean: BooleanField,
   string: StringField,
+  int: NumberField,
+  float: NumberField,
   number: NumberField,
 };
 
@@ -166,11 +168,13 @@ const SettingsSection = ({
 
   // Case 2: Object with component -> Don't iterate, render directly
   if (isObject && Component) {
+    const value = "__value__" in settings ? settings.__value__ : settings;
+
     return (
       <SettingsField
         Component={Component}
         label={boxTitle}
-        value={settings}
+        value={value}
         onChange={onChange}
         path={path}
         error={getFieldError(path, errors)}
@@ -210,6 +214,7 @@ const SettingsSection = ({
 
 const StatusBarSettingsInfo = () => {
   const validationErrors = useSettingsStore((state) => state.validationErrors);
+  console.log("validationErrors:", validationErrors);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
