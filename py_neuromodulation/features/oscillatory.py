@@ -3,6 +3,7 @@ import numpy as np
 from itertools import product
 
 from py_neuromodulation.utils.types import NMBaseModel, BoolSelector, NMFeature
+from py_neuromodulation.utils.pydantic_extensions import NMField
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -17,7 +18,7 @@ class OscillatoryFeatures(BoolSelector):
 
 
 class OscillatorySettings(NMBaseModel):
-    windowlength_ms: int = 1000
+    windowlength_ms: int = NMField(1000, gt=0, custom_metadata={"unit": "ms"})
     log_transform: bool = True
     features: OscillatoryFeatures = OscillatoryFeatures(
         mean=True, median=False, std=False, max=False

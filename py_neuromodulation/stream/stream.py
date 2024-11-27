@@ -85,7 +85,7 @@ class Stream:
             raise ValueError("Either `channels` or `data` must be passed to `Stream`.")
 
         # If features that use frequency ranges are on, test them against nyquist frequency
-        use_freq_ranges: list[FeatureName] = [
+        use_freq_ranges: list[FEATURE_NAME] = [
             "bandpass_filter",
             "stft",
             "fft",
@@ -209,7 +209,7 @@ class Stream:
         return_df: bool = True,
         simulate_real_time: bool = False,
         decoder: RealTimeDecoder = None,
-        feature_queue: "queue.Queue | None"  = None,
+        feature_queue: "queue.Queue | None" = None,
         rawdata_queue: "queue.Queue | None" = None,
         stream_handling_queue: "queue.Queue | None" = None,
     ):
@@ -303,7 +303,9 @@ class Stream:
 
             if decoder is not None:
                 ch_to_decode = self.channels.query("used == 1").iloc[0]["name"]
-                feature_dict = decoder.predict(feature_dict, ch_to_decode, fft_bands_only=True)
+                feature_dict = decoder.predict(
+                    feature_dict, ch_to_decode, fft_bands_only=True
+                )
 
             feature_dict["time"] = np.ceil(this_batch_end * 1000 + 1)
 
@@ -346,8 +348,9 @@ class Stream:
         self._save_after_stream()
         self.is_running = False
 
-        return feature_df  # Timon: We could think of returning the feature_reader instead
-    
+        return (
+            feature_df  # Timon: We could think of returning the feature_reader instead
+        )
 
     def plot_raw_signal(
         self,
@@ -437,7 +440,7 @@ class Stream:
         """Save sidecar incduing fs, coords, sess_right to
         out_path_root and subfolder 'folder_name'"""
         additional_args = {"sess_right": self.sess_right}
-        
+
         self.data_processor.save_sidecar(
             self.out_dir, self.experiment_name, additional_args
         )

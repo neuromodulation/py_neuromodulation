@@ -12,8 +12,13 @@ from py_neuromodulation.utils import set_channels
 from py_neuromodulation.utils.io import read_mne_data
 from py_neuromodulation import logger
 
-async def run_stream_controller(feature_queue: queue.Queue, rawdata_queue: queue.Queue,
-                          websocket_manager: "WebSocketManager", stop_event: threading.Event):
+
+async def run_stream_controller(
+    feature_queue: queue.Queue,
+    rawdata_queue: queue.Queue,
+    websocket_manager: "WebSocketManager",
+    stop_event: threading.Event,
+):
     while not stop_event.wait(0.002):
         if not feature_queue.empty() and websocket_manager is not None:
             feature_dict = feature_queue.get()
@@ -22,16 +27,23 @@ async def run_stream_controller(feature_queue: queue.Queue, rawdata_queue: queue
 
         if not rawdata_queue.empty() and websocket_manager is not None:
             raw_data = rawdata_queue.get()
-            
+
             await websocket_manager.send_cbor(raw_data)
 
-def run_stream_controller_sync(feature_queue: queue.Queue,
-                               rawdata_queue: queue.Queue,
-                               websocket_manager: "WebSocketManager",
-                               stop_event: threading.Event
-    ):
+
+def run_stream_controller_sync(
+    feature_queue: queue.Queue,
+    rawdata_queue: queue.Queue,
+    websocket_manager: "WebSocketManager",
+    stop_event: threading.Event,
+):
     # The run_stream_controller needs to be started as an asyncio function due to the async websocket
-    asyncio.run(run_stream_controller(feature_queue, rawdata_queue, websocket_manager, stop_event))
+    asyncio.run(
+        run_stream_controller(
+            feature_queue, rawdata_queue, websocket_manager, stop_event
+        )
+    )
+
 
 class PyNMState:
     def __init__(
@@ -52,12 +64,10 @@ class PyNMState:
             self.stream: Stream = Stream(sfreq=1500, data=np.random.random([1, 1]))
             self.settings: NMSettings = NMSettings(sampling_rate_features=10)
 
-
     def start_run_function(
         self,
         websocket_manager=None,
     ) -> None:
-        
         self.stream.settings = self.settings
 
         self.stream_handling_queue = queue.Queue()
@@ -70,7 +80,7 @@ class PyNMState:
             if os.path.exists(self.decoding_model_path):
                 self.decoder = RealTimeDecoder(self.decoding_model_path)
             else:
-                logger.debug("Passed decoding model path does't exist")    
+                logger.debug("Passed decoding model path does't exist")
         # Stop event
         # .set() is called from app_backend
         self.stop_event_ws = threading.Event()
@@ -78,16 +88,19 @@ class PyNMState:
         self.stream_controller_thread = Thread(
             target=run_stream_controller_sync,
             daemon=True,
-            args=(self.feature_queue,
-                  self.rawdata_queue,
-                  websocket_manager,
-                  self.stop_event_ws
-                  ),
+            args=(
+                self.feature_queue,
+                self.rawdata_queue,
+                websocket_manager,
+                self.stop_event_ws,
+            ),
         )
 
         is_stream_lsl = self.lsl_stream_name is not None
-        stream_lsl_name = self.lsl_stream_name if self.lsl_stream_name is not None else ""
-        
+        stream_lsl_name = (
+            self.lsl_stream_name if self.lsl_stream_name is not None else ""
+        )
+
         # The run_func_thread is terminated through the stream_handling_queue
         # which initiates to break the data generator and save the features
         out_dir = "" if self.out_dir == "default" else self.out_dir
@@ -95,15 +108,15 @@ class PyNMState:
             target=self.stream.run,
             daemon=True,
             kwargs={
-                "out_dir" : out_dir,
-                "experiment_name" : self.experiment_name,
-                "stream_handling_queue" : self.stream_handling_queue,
-                "is_stream_lsl" : is_stream_lsl,
-                "stream_lsl_name" : stream_lsl_name,
-                "feature_queue" : self.feature_queue,
-                "simulate_real_time" : True,
-                "rawdata_queue" : self.rawdata_queue,
-                "decoder" : self.decoder,
+                "out_dir": out_dir,
+                "experiment_name": self.experiment_name,
+                "stream_handling_queue": self.stream_handling_queue,
+                "is_stream_lsl": is_stream_lsl,
+                "stream_lsl_name": stream_lsl_name,
+                "feature_queue": self.feature_queue,
+                "simulate_real_time": True,
+                "rawdata_queue": self.rawdata_queue,
+                "decoder": self.decoder,
             },
         )
 
@@ -157,10 +170,10 @@ class PyNMState:
                     settings=self.settings,
                 )
                 self.logger.info("stream setup")
-                #self.settings: NMSettings = NMSettings(sampling_rate_features=sfreq)
+                # self.settings: NMSettings = NMSettings(sampling_rate_features=sfreq)
                 self.logger.info("settings setup")
                 break
-            
+
         if channels.shape[0] == 0:
             self.logger.error(f"Stream {lsl_stream_name} not found")
             raise ValueError(f"Stream {lsl_stream_name} not found")

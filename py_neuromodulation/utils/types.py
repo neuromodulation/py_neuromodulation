@@ -1,11 +1,13 @@
 from os import PathLike
 from math import isnan
-from typing import Any, Literal, Protocol, TYPE_CHECKING, runtime_checkable
-from pydantic import ConfigDict, Field, model_validator, BaseModel
-from pydantic_core import ValidationError, InitErrorDetails
-from pprint import pformat
+from typing import Literal, TYPE_CHECKING, Any, TypeVar
+from pydantic import BaseModel, ConfigDict, model_validator
+from .pydantic_extensions import NMBaseModel, NMSequenceModel, NMField
+from abc import abstractmethod
+
 from collections.abc import Sequence
 from datetime import datetime
+
 
 if TYPE_CHECKING:
     import numpy as np
@@ -17,8 +19,7 @@ if TYPE_CHECKING:
 
 _PathLike = str | PathLike
 
-
-FeatureName = Literal[
+FEATURE_NAME = Literal[
     "raw_hjorth",
     "return_raw",
     "bandpass_filter",
@@ -35,7 +36,7 @@ FeatureName = Literal[
     "bispectrum",
 ]
 
-PreprocessorName = Literal[
+PREPROCESSOR_NAME = Literal[
     "preprocessing_filter",
     "notch_filter",
     "raw_resampling",
@@ -43,7 +44,7 @@ PreprocessorName = Literal[
     "raw_normalization",
 ]
 
-NormMethod = Literal[
+NORM_METHOD = Literal[
     "mean",
     "median",
     "zscore",
@@ -54,13 +55,8 @@ NormMethod = Literal[
     "minmax",
 ]
 
-###################################
-######## PROTOCOL CLASSES  ########
-###################################
 
-
-@runtime_checkable
-class NMFeature(Protocol):
+class NMFeature:
     def __init__(
         self, settings: "NMSettings", ch_names: Sequence[str], sfreq: int | float
     ) -> None: ...
@@ -81,131 +77,47 @@ class NMFeature(Protocol):
         ...
 
 
-class NMPreprocessor(Protocol):
-    def __init__(self, sfreq: float, settings: "NMSettings") -> None: ...
-
+class NMPreprocessor:
     def process(self, data: "np.ndarray") -> "np.ndarray": ...
 
 
-###################################
-######## PYDANTIC CLASSES  ########
-###################################
+class PreprocessorList(NMSequenceModel[list[PREPROCESSOR_NAME]]):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
-
-class NMBaseModel(BaseModel):
-    model_config = ConfigDict(validate_assignment=False, extra="allow")
-
-    def __init__(self, *args, **kwargs) -> None:
-        if kwargs:
-            super().__init__(**kwargs)
-        else:
-            field_names = list(self.model_fields.keys())
-            kwargs = {}
-            for i in range(len(args)):
-                kwargs[field_names[i]] = args[i]
-            super().__init__(**kwargs)
-
-    def __str__(self):
-        return pformat(self.model_dump())
-
-    def __repr__(self):
-        return pformat(self.model_dump())
-
-    def validate(self) -> Any:  # type: ignore
-        return self.model_validate(self.model_dump())
-
-    def __getitem__(self, key):
-        return getattr(self, key)
-
-    def __setitem__(self, key, value) -> None:
-        setattr(self, key, value)
-
-    def process_for_frontend(self) -> dict[str, Any]:
-        """
-        Process the model for frontend use, adding __field_type__ information.
-        """
-        result = {}
-        for field_name, field_value in self.__dict__.items():
-            if isinstance(field_value, NMBaseModel):
-                processed_value = field_value.process_for_frontend()
-                processed_value["__field_type__"] = field_value.__class__.__name__
-                result[field_name] = processed_value
-            elif isinstance(field_value, list):
-                result[field_name] = [
-                    item.process_for_frontend()
-                    if isinstance(item, NMBaseModel)
-                    else item
-                    for item in field_value
-                ]
-            elif isinstance(field_value, dict):
-                result[field_name] = {
-                    k: v.process_for_frontend() if isinstance(v, NMBaseModel) else v
-                    for k, v in field_value.items()
-                }
-            else:
-                result[field_name] = field_value
-
-        return result
-
-
-class FrequencyRange(NMBaseModel):
-    frequency_low_hz: float = Field(gt=0)
-    frequency_high_hz: float = Field(gt=0)
-
+    # Useless contructor to prevent linter from complaining
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
-    def __getitem__(self, item: int):
-        match item:
-            case 0:
-                return self.frequency_low_hz
-            case 1:
-                return self.frequency_high_hz
-            case _:
-                raise IndexError(f"Index {item} out of range")
 
-    def as_tuple(self) -> tuple[float, float]:
-        return (self.frequency_low_hz, self.frequency_high_hz)
+class FrequencyRange(NMSequenceModel[tuple[float, float]]):
+    """Frequency range as (low, high) tuple"""
 
-    def __iter__(self):  # type: ignore
-        return iter(self.as_tuple())
+    __aliases__ = {
+        0: ["frequency_low_hz", "low_frequency_hz"],
+        1: ["frequency_high_hz", "high_frequency_hz"],
+    }
+
+    # Useless contructor to prevent linter from complaining
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
 
     @model_validator(mode="after")
     def validate_range(self):
-        if not (isnan(self.frequency_high_hz) or isnan(self.frequency_low_hz)):
-            assert (
-                self.frequency_high_hz > self.frequency_low_hz
-            ), "Frequency high must be greater than frequency low"
+        low, high = self.root
+        if not (isnan(low) or isnan(high)):
+            assert high > low, "High frequency must be greater than low frequency"
         return self
 
-    @classmethod
-    def create_from(cls, input) -> "FrequencyRange":
-        match input:
-            case FrequencyRange():
-                return input
-            case dict() if "frequency_low_hz" in input and "frequency_high_hz" in input:
-                return FrequencyRange(
-                    input["frequency_low_hz"], input["frequency_high_hz"]
-                )
-            case Sequence() if len(input) == 2:
-                return FrequencyRange(input[0], input[1])
-            case _:
-                raise ValueError("Invalid input for FrequencyRange creation.")
+    # Alias properties
+    @property
+    def frequency_low_hz(self) -> float:
+        """Lower frequency bound in Hz"""
+        return self.root[0]
 
-    @model_validator(mode="before")
-    @classmethod
-    def check_input(cls, input):
-        match input:
-            case dict() if "frequency_low_hz" in input and "frequency_high_hz" in input:
-                return input
-            case Sequence() if len(input) == 2:
-                return {"frequency_low_hz": input[0], "frequency_high_hz": input[1]}
-            case _:
-                raise ValueError(
-                    "Value for FrequencyRange must be a dictionary, "
-                    "or a sequence of 2 numeric values, "
-                    f"but got {input} instead."
-                )
+    @property
+    def frequency_high_hz(self) -> float:
+        """Upper frequency bound in Hz"""
+        return self.root[1]
 
 
 class BoolSelector(NMBaseModel):
@@ -238,46 +150,135 @@ class BoolSelector(NMBaseModel):
         for f in cls.list_all():
             print(f)
 
-    @classmethod
-    def get_fields(cls):
-        return cls.model_fields
+
+################################################
+### Generic Pydantic models for the frontend ###
+################################################
 
 
-def create_validation_error(
-    error_message: str,
-    loc: list[str | int] = None,
-    title: str = "Validation Error",
-    input_type: Literal["python", "json"] = "python",
-    hide_input: bool = False,
-) -> ValidationError:
+class UniqueStringSequence(NMSequenceModel[list[str]]):
     """
-    Factory function to create a Pydantic v2 ValidationError instance from a single error message.
-
-    Args:
-    error_message (str): The error message for the ValidationError.
-    loc (List[str | int], optional): The location of the error. Defaults to None.
-    title (str, optional): The title of the error. Defaults to "Validation Error".
-    input_type (Literal["python", "json"], optional): Whether the error is for a Python object or JSON. Defaults to "python".
-    hide_input (bool, optional): Whether to hide the input value in the error message. Defaults to False.
-
-    Returns:
-    ValidationError: A Pydantic ValidationError instance.
+    A sequence of strings where:
+    - Values must come from a predefined set
+    - Each value can only appear once
+    - Order is preserved
     """
-    if loc is None:
-        loc = []
 
-    line_errors = [
-        InitErrorDetails(
-            type="value_error", loc=tuple(loc), input=None, ctx={"error": error_message}
-        )
-    ]
+    @property
+    @abstractmethod
+    def valid_values(self) -> list[str]:
+        """Each subclass must implement this to provide its valid values"""
+        raise NotImplementedError
 
-    return ValidationError.from_exception_data(
-        title=title,
-        line_errors=line_errors,
-        input_type=input_type,
-        hide_input=hide_input,
-    )
+    def __init__(self, **data):
+        valid_values = data.pop("valid_values", [])
+        super().__init__(**data)
+        object.__setattr__(self, "valid_values", valid_values)
+
+    @model_validator(mode="after")
+    def validate_sequence(self):
+        seen = set()
+        validated = []
+        for item in self.root:
+            if item not in seen and item in self.valid_values:
+                seen.add(item)
+                validated.append(item)
+        self.root = validated
+        return self
+
+    def serialize_with_metadata(self) -> dict[str, Any]:
+        result = super().serialize_with_metadata()
+        result["__valid_values__"] = self.valid_values
+        return result
+
+
+class DependentKeysList(NMSequenceModel[list[str]]):
+    """
+    A list of strings where valid values are keys from another settings field
+    """
+
+    root: list[str] = NMField(default_factory=list)
+    source_dict: dict[str, Any] = NMField(default_factory=dict, exclude=True)
+
+    def __init__(self, **data):
+        source_dict = data.pop("source_dict", {})
+        super().__init__(**data)
+        object.__setattr__(self, "source_dict", source_dict)
+
+    @model_validator(mode="after")
+    def validate_keys(self):
+        valid_keys = set(self.source_dict.keys())
+        seen = set()
+        validated = []
+        for item in self.root:
+            if item not in seen and item in valid_keys:
+                seen.add(item)
+                validated.append(item)
+        self.root = validated
+        return self
+
+    def serialize_with_metadata(self) -> dict[str, Any]:
+        result = super().serialize_with_metadata()
+        result["__valid_values__"] = list(self.source_dict.keys())
+        result["__dependent__"] = True  # Indicates this needs dynamic updating
+        return result
+
+
+class StringPairsList(NMSequenceModel[list[tuple[str, str]]]):
+    """
+    A list of string pairs where values must come from predetermined lists
+    """
+
+    root: list[tuple[str, str]] = NMField(default_factory=list)
+    valid_first: list[str] = NMField(default_factory=list, exclude=True)
+    valid_second: list[str] = NMField(default_factory=list, exclude=True)
+
+    def __init__(self, **data):
+        valid_first = data.pop("valid_first", [])
+        valid_second = data.pop("valid_second", [])
+        super().__init__(**data)
+        object.__setattr__(self, "valid_first", valid_first)
+        object.__setattr__(self, "valid_second", valid_second)
+
+    @model_validator(mode="after")
+    def validate_pairs(self):
+        validated = [
+            (first, second)
+            for first, second in self.root
+            if first in self.valid_first and second in self.valid_second
+        ]
+        self.root = validated
+        return self
+
+    def serialize_with_metadata(self) -> dict[str, Any]:
+        result = super().serialize_with_metadata()
+        result["__valid_first__"] = self.valid_first
+        result["__valid_second__"] = self.valid_second
+        return result
+
+
+# class LiteralValue(NMValueModel[str]):
+#     """
+#     A string field that must be one of a predefined set of literals
+#     """
+
+#     valid_values: list[str] = NMField(default_factory=list, exclude=True)
+
+#     def __init__(self, **data):
+#         valid_values = data.pop("valid_values", [])
+#         super().__init__(**data)
+#         object.__setattr__(self, "valid_values", valid_values)
+
+#     @model_validator(mode="after")
+#     def validate_value(self):
+#         if self.root not in self.valid_values:
+#             raise ValueError(f"Value must be one of: {self.valid_values}")
+#         return self
+
+#     def serialize_with_metadata(self) -> dict[str, Any]:
+#         result = super().serialize_with_metadata()
+#         result["__valid_values__"] = self.valid_values
+#         return result
 
 
 #################

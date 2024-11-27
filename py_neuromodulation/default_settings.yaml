@@ -1,4 +1,15 @@
----
+# We
+# should
+# have
+# a
+# brief
+# explanation
+# of
+# the
+# settings
+# format
+# here
+
 ########################
 ### General settings ###
 ########################
@@ -51,12 +62,8 @@ preprocessing_filter:
   lowpass_filter: true
   highpass_filter: true
   bandpass_filter: true
-  bandstop_filter_settings:
-    frequency_low_hz: 100
-    frequency_high_hz: 160
-  bandpass_filter_settings:
-    frequency_low_hz: 3
-    frequency_high_hz: 200
+  bandstop_filter_settings: [100, 160] # [low_hz, high_hz]
+  bandpass_filter_settings: [3, 200] # [hz, _hz]
   lowpass_filter_cutoff_hz: 200
   highpass_filter_cutoff_hz: 3
 
@@ -162,11 +169,9 @@ sharpwave_analysis_settings:
     rise_steepness: false
     decay_steepness: false
     slope_ratio: false
-  filter_ranges_hz:
-    - frequency_low_hz: 5
-      frequency_high_hz: 80
-    - frequency_low_hz: 5
-      frequency_high_hz: 30
+  filter_ranges_hz: # list of [low_hz, high_hz]
+    - [5, 80]
+    - [5, 30]
   detect_troughs:
     estimate: true
     distance_troughs_ms: 10
@@ -175,6 +180,7 @@ sharpwave_analysis_settings:
     estimate: true
     distance_troughs_ms: 5
     distance_peaks_ms: 10
+  # TONI: Reverse this setting? e.g. interval: [mean, var]
   estimator:
     mean: [interval]
     median: []
@@ -223,8 +229,8 @@ nolds_settings:
     frequency_bands: [low_beta]
 
 mne_connectiviy_settings:
-  method: plv
-  mode: multitaper
+  method: plv # One of ['coh', 'cohy', 'imcoh', 'cacoh', 'mic', 'mim', 'plv', 'ciplv', 'ppc', 'pli', 'dpli','wpli', 'wpli2_debiased', 'gc', 'gc_tr']
+  mode: multitaper # One of ['multitaper', 'fourier', 'cwt_morlet']
 
 bispectrum_settings:
   f1s: [5, 35]

@@ -1,19 +1,21 @@
+import { useEffect, useState } from "react";
 import {
+  Box,
   Button,
-  InputAdornment,
+  Popover,
   Stack,
   Switch,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import { CollapsibleBox, TitledBox } from "@/components";
-import { FrequencyRange } from "./FrequencyRange";
-import { useSettingsStore } from "@/stores";
+import { FrequencyRangeList } from "./components/FrequencyRange";
+import { useSettingsStore, useStatusBarContent } from "@/stores";
 import { filterObjectByKeys } from "@/utils/functions";
 
 const formatKey = (key) => {
-  // console.log(key);
   return key
     .split("_")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -21,15 +23,37 @@ const formatKey = (key) => {
 };
 
 // Wrapper components for each type
-const BooleanField = ({ value, onChange }) => (
+const BooleanField = ({ value, onChange, error }) => (
   <Switch checked={value} onChange={(e) => onChange(e.target.checked)} />
 );
 
-const StringField = ({ value, onChange, label }) => (
-  <TextField value={value} onChange={onChange} label={label} />
-);
+const errorStyle = {
+  "& .MuiOutlinedInput-root": {
+    "& fieldset": { borderColor: "error.main" },
+    "&:hover fieldset": {
+      borderColor: "error.main",
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "error.main",
+    },
+  },
+};
 
-const NumberField = ({ value, onChange, label }) => {
+const StringField = ({ value, onChange, label, error }) => {
+  const errorSx = error ? errorStyle : {};
+  return (
+    <TextField
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      label={label}
+      sx={{ ...errorSx }}
+    />
+  );
+};
+
+const NumberField = ({ value, onChange, label, error }) => {
+  const errorSx = error ? errorStyle : {};
+
   const handleChange = (event) => {
     const newValue = event.target.value;
     // Only allow numbers and decimal point
@@ -44,13 +68,14 @@ const NumberField = ({ value, onChange, label }) => {
       value={value}
       onChange={handleChange}
       label={label}
-      InputProps={{
-        endAdornment: (
-          <InputAdornment position="end">
-            <span style={{ lineHeight: 1, display: "inline-block" }}>Hz</span>
-          </InputAdornment>
-        ),
-      }}
+      sx={{ ...errorSx }}
+      // InputProps={{
+      //   endAdornment: (
+      //     <InputAdornment position="end">
+      //       <span style={{ lineHeight: 1, display: "inline-block" }}>Hz</span>
+      //     </InputAdornment>
+      //   ),
+      // }}
       inputProps={{
         pattern: "[0-9]*",
       }}
@@ -58,35 +83,38 @@ const NumberField = ({ value, onChange, label }) => {
   );
 };
 
-const FrequencyRangeField = ({ value, onChange, label }) => (
-  <FrequencyRange value={value} onChange={onChange} label={label} />
-);
-
 // Map component types to their respective wrappers
 const componentRegistry = {
   boolean: BooleanField,
   string: StringField,
   number: NumberField,
-  FrequencyRange: FrequencyRangeField,
 };
 
-const SettingsField = ({ path, Component, label, value, onChange, depth }) => {
+const SettingsField = ({ path, Component, label, value, onChange, error }) => {
   return (
-    <Stack
-      direction="row"
-      justifyContent="space-between"
-      sx={{
-        pl: depth * 2,
-      }}
-    >
-      <Typography variant="body2">{label}</Typography>
-      <Component
-        value={value}
-        onChange={(newValue) => onChange(path, newValue)}
-        label={label}
-      />
-    </Stack>
+    <Tooltip title={error?.msg || ""} arrow placement="top">
+      <Stack direction="row" justifyContent="space-between">
+        <Typography variant="body2">{label}</Typography>
+        <Component
+          value={value}
+          onChange={(newValue) => onChange(path, newValue)}
+          label={label}
+          error={error}
+        />
+      </Stack>
+    </Tooltip>
   );
+};
+
+// Function to get the error corresponding to this field or its children
+const getFieldError = (fieldPath, errors) => {
+  if (!errors) return null;
+
+  return errors.find((error) => {
+    const errorPath = error.loc.join(".");
+    const currentPath = fieldPath.join(".");
+    return errorPath === currentPath || errorPath.startsWith(currentPath + ".");
+  });
 };
 
 const SettingsSection = ({
@@ -94,71 +122,191 @@ const SettingsSection = ({
   title = null,
   path = [],
   onChange,
-  depth = 0,
+  errors,
 }) => {
-  if (Object.keys(settings).length === 0) {
-    return null;
-  }
   const boxTitle = title ? title : formatKey(path[path.length - 1]);
+  /*
+  3 possible cases:
+  1. Primitive type || 2. Object with component -> Don't iterate, render directly
+  3. Object without component or 4. Array -> Iterate and render recursively
+  */
 
-  return (
-    <TitledBox title={boxTitle} depth={depth} sx={{ borderRadius: 3 }}>
-      {Object.entries(settings).map(([key, value]) => {
-        if (key === "__field_type__") return null;
+  const type = typeof settings;
+  const isObject = type === "object" && !Array.isArray(settings);
+  const isArray = Array.isArray(settings);
 
-        const newPath = [...path, key];
-        const label = key;
-        const isPydanticModel =
-          typeof value === "object" && "__field_type__" in value;
+  // __field_type__ should be always present
+  if (isObject && !settings.__field_type__) {
+    console.log(settings);
+    throw new Error("Invalid settings object");
+  }
+  const fieldType = isObject ? settings.__field_type__ : type;
+  const Component = componentRegistry[fieldType];
 
-        const fieldType = isPydanticModel ? value.__field_type__ : typeof value;
+  // Case 1: Primitive type -> Don't iterate, render directly
+  if (!isObject && !isArray) {
+    if (!Component) {
+      console.error(`Invalid component type: ${type}`);
+      return null;
+    }
 
-        const Component = componentRegistry[fieldType];
+    const error = getFieldError(path, errors);
 
-        if (Component) {
-          return (
-            <SettingsField
-              key={`${key}_settingsField`}
-              path={newPath}
-              Component={Component}
-              label={formatKey(label)}
-              value={value}
-              onChange={onChange}
-              depth={depth + 1}
-            />
-          );
-        } else {
+    return (
+      <SettingsField
+        Component={Component}
+        label={boxTitle}
+        value={settings}
+        onChange={onChange}
+        path={path}
+        error={error}
+      />
+    );
+  }
+
+  // Case 2: Object with component -> Don't iterate, render directly
+  if (isObject && Component) {
+    return (
+      <SettingsField
+        Component={Component}
+        label={boxTitle}
+        value={settings}
+        onChange={onChange}
+        path={path}
+        error={getFieldError(path, errors)}
+      />
+    );
+  }
+
+  // Case 3: Object without component or 4. Array -> Iterate and render recursively
+  if ((isObject && !Component) || isArray) {
+    return (
+      <TitledBox title={boxTitle} sx={{ borderRadius: 3 }}>
+        {/* Handle recursing through both objects and arrays */}
+        {(isArray ? settings : Object.entries(settings)).map((item, index) => {
+          const [key, value] = isArray ? [index.toString(), item] : item;
+          if (key.startsWith("__")) return null; // Skip metadata fields
+
+          const newPath = [...path, key];
+
           return (
             <SettingsSection
-              key={`${key}_settingsSection`}
+              key={`${newPath.join(".")}_settingsSection`}
               settings={value}
               path={newPath}
               onChange={onChange}
-              depth={depth + 1}
+              errors={errors}
             />
           );
-        }
-      })}
-    </TitledBox>
+        })}
+      </TitledBox>
+    );
+  }
+
+  // Default case: return null and log an error
+  console.error(`Invalid settings object, returning null`);
+  return null;
+};
+
+const StatusBarSettingsInfo = () => {
+  const validationErrors = useSettingsStore((state) => state.validationErrors);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleOpenErrorsPopover = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseErrorsPopover = () => {
+    setAnchorEl(null);
+  };
+
+  return (
+    <>
+      {validationErrors?.length > 0 && (
+        <>
+          <Typography
+            variant="body1"
+            color="tomato"
+            onClick={handleOpenErrorsPopover}
+            sx={{ cursor: "pointer" }}
+          >
+            {validationErrors?.length} errors found in Settings
+          </Typography>
+          <Popover
+            open={open}
+            anchorEl={anchorEl}
+            onClose={handleCloseErrorsPopover}
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "center",
+            }}
+            transformOrigin={{
+              vertical: "bottom",
+              horizontal: "center",
+            }}
+          >
+            <Stack px={2} py={1} alignItems="flex-start">
+              {validationErrors.map((error, index) => (
+                <Typography key={index} variant="body1" color="tomato">
+                  {index} - [{error.type}] {error.msg}
+                </Typography>
+              ))}
+            </Stack>
+          </Popover>
+        </>
+      )}
+    </>
   );
 };
 
-const SettingsContent = () => {
+export const Settings = () => {
+  // Get all necessary state from the settings store
   const settings = useSettingsStore((state) => state.settings);
-  const updateSettings = useSettingsStore((state) => state.updateSettings);
+  const uploadSettings = useSettingsStore((state) => state.uploadSettings);
+  const resetSettings = useSettingsStore((state) => state.resetSettings);
+  const validationErrors = useSettingsStore((state) => state.validationErrors);
+  useStatusBarContent(StatusBarSettingsInfo);
 
+  // This is needed so that the frequency ranges stay in order between updates
+  const frequencyRangeOrder = useSettingsStore(
+    (state) => state.frequencyRangeOrder
+  );
+  const updateFrequencyRangeOrder = useSettingsStore(
+    (state) => state.updateFrequencyRangeOrder
+  );
+
+  // Here I handle the selected feature in the feature settings component
+  const [selectedFeature, setSelectedFeature] = useState("");
+
+  useEffect(() => {
+    uploadSettings(null, true); // validateOnly = true
+  }, [settings]);
+
+  // Inject validation error info into status bar
+
+  // This has to be after all the hooks, otherwise React will complain
   if (!settings) {
     return <div>Loading settings...</div>;
   }
 
-  const handleChange = (path, value) => {
-    updateSettings((settings) => {
+  // This are the callbacks for the different buttons
+  const handleChangeSettings = async (path, value) => {
+    uploadSettings((settings) => {
       let current = settings;
       for (let i = 0; i < path.length - 1; i++) {
         current = current[path[i]];
       }
       current[path[path.length - 1]] = value;
-    });
+    }, true); // validateOnly = true
+  };
+
+  const handleSaveSettings = () => {
+    uploadSettings(() => settings);
+  };
+
+  const handleResetSettings = async () => {
+    await resetSettings();
   };
 
   const featureSettingsKeys = Object.keys(settings.features)
@@ -181,89 +329,147 @@ const SettingsContent = () => {
     "project_subcortex_settings",
   ];
 
-  return (
-    <Stack
-      direction="row"
-      alignItems="flex-start"
-      justifyContent="center"
-      width="fit-content"
-      gap={2}
-      p={2}
-    >
-      <CollapsibleBox
-        title="Features"
-        defaultExpanded={true}
-        isolated
-        sx={{ flex: 1 }}
-      >
-        <SettingsSection
-          settings={settings.features}
-          path={["features"]}
-          onChange={handleChange}
-          depth={0}
-        />
-      </CollapsibleBox>
+  const generalSettingsKeys = [
+    "sampling_rate_features_hz",
+    "segment_length_features_ms",
+  ];
 
-      <Stack sx={{ flex: 1 }}>
-        <CollapsibleBox title="Preprocessing" defaultExpanded={true}>
+  return (
+    <Stack justifyContent="center" pb={2}>
+      {/* SETTINGS LAYOUT */}
+      <Stack
+        direction="row"
+        alignItems="flex-start"
+        justifyContent="flex-start"
+        width="fit-content"
+        gap={2}
+        p={2}
+      >
+        {/* GENERAL SETTINGS + FREQUENCY RANGES */}
+        <Stack sx={{ minWidth: "33%" }}>
+          <TitledBox title="General Settings">
+            {generalSettingsKeys.map((key) => (
+              <SettingsSection
+                key={`${key}_settingsSection`}
+                settings={settings[key]}
+                path={[key]}
+                onChange={handleChangeSettings}
+                errors={validationErrors}
+              />
+            ))}
+          </TitledBox>
+
+          <TitledBox title="Frequency Ranges">
+            <FrequencyRangeList
+              ranges={settings.frequency_ranges_hz}
+              rangeOrder={frequencyRangeOrder}
+              onOrderChange={updateFrequencyRangeOrder}
+              onChange={handleChangeSettings}
+              errors={validationErrors}
+            />
+          </TitledBox>
+        </Stack>
+
+        {/* POSTPROCESSING + PREPROCESSING SETTINGS */}
+        <TitledBox title="Preprocessing Settings" sx={{ borderRadius: 3 }}>
           {preprocessingSettingsKeys.map((key) => (
             <SettingsSection
               key={`${key}_settingsSection`}
               settings={settings[key]}
               path={[key]}
-              onChange={handleChange}
-              depth={0}
+              onChange={handleChangeSettings}
+              errors={validationErrors}
             />
           ))}
-        </CollapsibleBox>
+        </TitledBox>
 
-        <CollapsibleBox title="Postprocessing" defaultExpanded={true}>
+        <TitledBox title="Postprocessing Settings" sx={{ borderRadius: 3 }}>
           {postprocessingSettingsKeys.map((key) => (
             <SettingsSection
               key={`${key}_settingsSection`}
               settings={settings[key]}
               path={[key]}
-              onChange={handleChange}
-              depth={0}
+              onChange={handleChangeSettings}
+              errors={validationErrors}
             />
           ))}
-        </CollapsibleBox>
+        </TitledBox>
+
+        {/* FEATURE SETTINGS */}
+        <TitledBox title="Feature Settings">
+          <Stack direction="row" gap={2}>
+            <Box alignSelf={"flex-start"}>
+              <SettingsSection
+                settings={settings.features}
+                path={["features"]}
+                onChange={handleChangeSettings}
+                sx={{ alignSelf: "flex-start" }}
+                errors={validationErrors}
+              />
+            </Box>
+            <Stack alignSelf={"flex-start"}>
+              {Object.entries(enabledFeatures).map(
+                ([feature, featureSettings]) => (
+                  <CollapsibleBox
+                    key={`${feature}_collapsibleBox`}
+                    title={formatKey(feature)}
+                    defaultExpanded={false}
+                  >
+                    <SettingsSection
+                      key={`${feature}_settingsSection`}
+                      settings={featureSettings}
+                      path={[feature]}
+                      onChange={handleChangeSettings}
+                      errors={validationErrors}
+                    />
+                  </CollapsibleBox>
+                )
+              )}
+            </Stack>
+          </Stack>
+        </TitledBox>
+        {/* END SETTINGS LAYOUT */}
       </Stack>
 
-      <CollapsibleBox title="Feature settings" defaultExpanded={true} isolated>
-        {Object.entries(enabledFeatures).map(([feature, featureSettings]) => (
-          <CollapsibleBox
-            key={`${feature}_collapsibleBox`}
-            title={formatKey(feature)}
-            defaultExpanded={true}
-          >
-            <SettingsSection
-              key={`${feature}_settingsSection`}
-              settings={featureSettings}
-              path={[feature]}
-              onChange={handleChange}
-              depth={0}
-            />
-          </CollapsibleBox>
-        ))}
-      </CollapsibleBox>
-    </Stack>
-  );
-};
-
-export const Settings = () => {
-  return (
-    <Stack justifyContent="center" pb={2}>
-      <SettingsContent />
-      <Button
-        variant="contained"
-        component={Link}
-        color="primary"
-        to="/dashboard"
-        sx={{ mt: 2 }}
+      {/* BUTTONS */}
+      <Stack
+        direction="row"
+        width="fit-content"
+        sx={{ position: "absolute", bottom: "2.5rem", right: "1rem", gap: 1 }}
+        backgroundColor="background.level3"
+        borderRadius={2}
+        border="1px solid"
+        borderColor={"divider"}
+        p={1}
       >
-        Start Stream
-      </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleResetSettings}
+        >
+          Reset Settings
+        </Button>
+        {/* <Button variant="contained" color="primary" onClick={handleValidate}>
+          Validate Settings
+        </Button> */}
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleSaveSettings}
+          disabled={validationErrors}
+        >
+          Save Settings
+        </Button>
+        <Button
+          variant="contained"
+          component={Link}
+          color="primary"
+          to="/decoding"
+          disabled={validationErrors}
+        >
+          Run Stream
+        </Button>
+      </Stack>
     </Stack>
   );
 };
