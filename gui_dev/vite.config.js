@@ -50,7 +50,6 @@ export default defineConfig(() => {
       },
     },
     server: {
-      port: 54321,
       proxy: {
         "/api": {
           target: `http://localhost:${BACKEND_PORT}`,

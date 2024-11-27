@@ -11,7 +11,7 @@ from typing import (
     Sequence,
 )
 from typing_extensions import Unpack, TypedDict
-from pydantic import BaseModel, ConfigDict, model_validator, model_serializer
+from pydantic import BaseModel, model_validator, model_serializer
 
 from pydantic_core import (
     ErrorDetails,
@@ -414,7 +414,6 @@ class NMSequenceModel(NMBaseModel, Generic[C]):
                         loc = loc[:root_idx] + loc[root_idx + 1 :]
                 err["loc"] = tuple(loc)
                 errors.append(err)
-            print(errors)
             raise ValidationError.from_exception_data(
                 title="ValidationError", line_errors=errors
             )

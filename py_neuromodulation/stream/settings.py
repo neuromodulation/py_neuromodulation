@@ -6,7 +6,6 @@ from pydantic import model_validator, ValidationError
 from pydantic.functional_validators import ModelWrapValidatorHandler
 
 from py_neuromodulation import logger, user_features
-from types import SimpleNamespace
 
 from py_neuromodulation.utils.types import (
     BoolSelector,
