@@ -11,7 +11,10 @@ import {
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import { CollapsibleBox, TitledBox } from "@/components";
-import { FrequencyRangeList } from "./components/FrequencyRange";
+import {
+  FrequencyRangeList,
+  FrequencyRange,
+} from "./components/FrequencyRange";
 import { useSettingsStore, useStatusBarContent } from "@/stores";
 import { filterObjectByKeys } from "@/utils/functions";
 
@@ -90,6 +93,7 @@ const componentRegistry = {
   int: NumberField,
   float: NumberField,
   number: NumberField,
+  // FrequencyRange: FrequencyRange,
 };
 
 const SettingsField = ({ path, Component, label, value, onChange, error }) => {

@@ -1,7 +1,7 @@
-import { createPersistStore } from "./createStore";
+import { createStore } from "./createStore";
 import { useEffect } from "react";
 
-export const useUiStore = createPersistStore("ui", (set, get) => ({
+export const useUiStore = createStore("ui", (set, get) => ({
   activeDrawer: null,
   toggleDrawer: (drawerName) =>
     set((state) => {
@@ -31,13 +31,14 @@ export const useUiStore = createPersistStore("ui", (set, get) => ({
     }),
 
   // Hook to inject UI elements into the status bar
-  statusBarContent: () => {},
-  setStatusBarContent: (content) => set({ statusBarContent: content }),
-  clearStatusBarContent: () => set({ statusBarContent: null }),
+  getStatusBarContent: () => null,
+  setStatusBarContent: (contentGetter) =>
+    set({ getStatusBarContent: contentGetter }),
+  clearStatusBarContent: () => set({ getStatusBarContent: () => null }),
 }));
 
 // Use this hook from Page components to inject page-specific UI elements into the status bar
-export const useStatusBarContent = (content) => {
+export const useStatusBar = (content) => {
   const createStatusBarContent = () => content;
 
   const setStatusBarContent = useUiStore((state) => state.setStatusBarContent);

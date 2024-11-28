@@ -7,7 +7,9 @@ import { Stack } from "@mui/material";
 
 export const StatusBar = () => {
   const isWebView = useWebviewStore((state) => state.isWebView);
-  const StatusBarContent = useUiStore((state) => state.statusBarContent);
+  const getStatusBarContent = useUiStore((state) => state.getStatusBarContent);
+
+  const StatusBarContent = getStatusBarContent();
 
   return (
     <Stack
