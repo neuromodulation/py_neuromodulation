@@ -41,7 +41,6 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
     "prettier": "^3.3.3",
-    "react-scan": "^0.0.31",
     "vite": "^5.4.11"
   }
 }
