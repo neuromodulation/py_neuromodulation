@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { TextField, Button, IconButton, Stack } from "@mui/material";
+import {
+  TextField,
+  Button,
+  IconButton,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { Add, Close } from "@mui/icons-material";
 import { debounce } from "@/utils";
 
@@ -25,9 +31,10 @@ export const FrequencyRange = ({
   range,
   onChangeName,
   onChangeRange,
-  onRemove,
   error,
+  nameEditable = false,
 }) => {
+  console.log(range);
   const [localName, setLocalName] = useState(name);
 
   const debouncedChangeName = debounce((newName) => {
@@ -35,16 +42,19 @@ export const FrequencyRange = ({
   }, 1000);
 
   const handleNameChange = (e) => {
+    if (!nameEditable) return;
     const newName = e.target.value;
     setLocalName(newName);
     debouncedChangeName(newName);
   };
 
   const handleNameBlur = () => {
+    if (!nameEditable) return;
     onChangeName(localName, name);
   };
 
   const handleKeyPress = (e) => {
+    if (!nameEditable) return;
     if (e.key === "Enter") {
       console.log(e.target.value, name);
       onChangeName(localName, name);
@@ -58,14 +68,18 @@ export const FrequencyRange = ({
 
   return (
     <Stack direction="row" alignItems="center" gap={1}>
-      <TextField
-        size="small"
-        value={localName}
-        fullWidth
-        onChange={handleNameChange}
-        onBlur={handleNameBlur}
-        onKeyPress={handleKeyPress}
-      />
+      {nameEditable ? (
+        <TextField
+          size="small"
+          value={localName}
+          fullWidth
+          onChange={handleNameChange}
+          onBlur={handleNameBlur}
+          onKeyPress={handleKeyPress}
+        />
+      ) : (
+        <Typography variant="body2">{name}</Typography>
+      )}
       <NumberField
         size="small"
         type="number"
@@ -84,14 +98,6 @@ export const FrequencyRange = ({
         }
         label="High Hz"
       />
-      <IconButton
-        onClick={() => onRemove(name)}
-        color="primary"
-        disableRipple
-        sx={{ m: 0, p: 0 }}
-      >
-        <Close />
-      </IconButton>
     </Stack>
   );
 };
@@ -159,15 +165,25 @@ export const FrequencyRangeList = ({
   return (
     <Stack gap={1}>
       {rangeOrder.map((name, index) => (
-        <FrequencyRange
-          key={index}
-          id={index}
-          name={name}
-          range={ranges[name]}
-          onChangeName={handleChangeName}
-          onChangeRange={handleChangeRange}
-          onRemove={handleRemove}
-        />
+        <Stack direction="row">
+          <FrequencyRange
+            key={index}
+            name={name}
+            range={ranges[name]}
+            onChangeName={handleChangeName}
+            onChangeRange={handleChangeRange}
+            onRemove={handleRemove}
+            nameEditable={true}
+          />
+          <IconButton
+            onClick={() => handleRemove(name)}
+            color="primary"
+            disableRipple
+            sx={{ m: 0, p: 0 }}
+          >
+            <Close />
+          </IconButton>
+        </Stack>
       ))}
       <Button
         variant="outlined"

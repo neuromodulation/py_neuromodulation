@@ -1,7 +1,7 @@
 """Module for handling settings."""
 
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import Any, ClassVar, get_args
 from pydantic import model_validator, ValidationError
 from pydantic.functional_validators import ModelWrapValidatorHandler
 
@@ -13,7 +13,7 @@ from py_neuromodulation.utils.types import (
     _PathLike,
     NMBaseModel,
     NORM_METHOD,
-    PreprocessorList,
+    PREPROCESSOR_NAME,
 )
 from py_neuromodulation.utils.pydantic_extensions import NMErrorList, NMField
 
@@ -61,6 +61,13 @@ class PostprocessingSettings(BoolSelector):
     project_subcortex: bool = False
 
 
+DEFAULT_PREPROCESSORS: list[PREPROCESSOR_NAME] = [
+    "raw_resampling",
+    "notch_filter",
+    "re_referencing",
+]
+
+
 class NMSettings(NMBaseModel):
     # Class variable to store instances
     _instances: ClassVar[list["NMSettings"]] = []
@@ -83,12 +90,12 @@ class NMSettings(NMBaseModel):
     }
 
     # Preproceessing settings
-    preprocessing: PreprocessorList = PreprocessorList(
-        [
-            "raw_resampling",
-            "notch_filter",
-            "re_referencing",
-        ]
+    preprocessing: list[PREPROCESSOR_NAME] = NMField(
+        default=DEFAULT_PREPROCESSORS,
+        custom_metadata={
+            "field_type": "PreprocessorList",
+            "valid_values": list(get_args(PREPROCESSOR_NAME)),
+        },
     )
 
     raw_resampling_settings: ResamplerSettings = ResamplerSettings()
@@ -169,7 +176,7 @@ class NMSettings(NMBaseModel):
         try:
             self = handler(self)  # validate the model
         except ValidationError as e:
-            self = NMSettings.unvalidated(**self)
+            self = NMSettings.unvalidated(**self)  # type: ignore
             errors.extend(NMErrorList(e.errors()))
 
         if len(self.features.get_enabled()) == 0:
@@ -195,20 +202,14 @@ class NMSettings(NMBaseModel):
 
     def reset(self) -> "NMSettings":
         self.features.disable_all()
-        self.preprocessing = PreprocessorList()
+        self.preprocessing = DEFAULT_PREPROCESSORS
         self.postprocessing.disable_all()
         return self
 
     def set_fast_compute(self) -> "NMSettings":
         self.reset()
         self.features.fft = True
-        self.preprocessing = PreprocessorList(
-            [
-                "raw_resampling",
-                "notch_filter",
-                "re_referencing",
-            ]
-        )
+        self.preprocessing = DEFAULT_PREPROCESSORS
         self.postprocessing.feature_normalization = True
         self.postprocessing.project_cortex = False
         self.postprocessing.project_subcortex = False

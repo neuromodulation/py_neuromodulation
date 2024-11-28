@@ -4,20 +4,20 @@ from typing import (
     get_origin,
     get_args,
     get_type_hints,
-    TypeVar,
-    Generic,
     Literal,
     cast,
     Sequence,
 )
 from typing_extensions import Unpack, TypedDict
-from pydantic import BaseModel, model_validator, model_serializer
+from pydantic import BaseModel, GetCoreSchemaHandler
 
 from pydantic_core import (
     ErrorDetails,
     PydanticUndefined,
     InitErrorDetails,
     ValidationError,
+    CoreSchema,
+    core_schema,
 )
 from pydantic.fields import FieldInfo, _FieldInfoInputs, _FromFieldInfoInputs
 from pprint import pformat
@@ -135,8 +135,29 @@ class NMFieldInfo(FieldInfo):
     _default_values = {}
 
     def __init__(self, **kwargs: Unpack[_NMFieldInfoInputs]) -> None:
+        self.sequence: bool = kwargs.pop("sequence", False)  # type: ignore
         self.custom_metadata: dict[str, Any] = kwargs.pop("custom_metadata", {})
         super().__init__(**kwargs)
+
+    def __get_pydantic_core_schema__(
+        self, source_type: Any, handler: GetCoreSchemaHandler
+    ) -> CoreSchema:
+        schema = handler(source_type)
+
+        if self.sequence:
+
+            def sequence_validator(v: Any) -> Any:
+                if isinstance(v, (list, tuple)):
+                    return v
+                if isinstance(v, dict) and "root" in v:
+                    return v["root"]
+                return [v]
+
+            return core_schema.no_info_before_validator_function(
+                sequence_validator, schema
+            )
+
+        return schema
 
     @staticmethod
     def from_field(
@@ -297,124 +318,3 @@ class NMBaseModel(BaseModel):
         object.__setattr__(self, "__pydantic_private__", {"extra": None})
         object.__setattr__(self, "__pydantic_fields_set__", set(processed_data.keys()))
         return self
-
-
-#################################
-#### Generic Pydantic models ####
-#################################
-
-
-T = TypeVar("T")
-C = TypeVar("C", list, tuple)
-
-
-class NMSequenceModel(NMBaseModel, Generic[C]):
-    """Base class for sequence models with a single root value"""
-
-    root: C = NMField(default_factory=list)
-
-    # Class variable for aliases - override in subclasses
-    __aliases__: dict[int, list[str]] = {}
-
-    def __init__(self, *args, **kwargs) -> None:
-        if len(args) == 1 and isinstance(args[0], (list, tuple)):
-            kwargs["root"] = args[0]
-        elif len(args) == 1:
-            kwargs["root"] = [args[0]]
-        elif len(args) > 1:  # Add this case
-            kwargs["root"] = tuple(args)
-        super().__init__(**kwargs)
-
-    def __iter__(self):  # type: ignore[reportIncompatibleMethodOverride]
-        return iter(self.root)
-
-    def __getitem__(self, idx):
-        return self.root[idx]
-
-    def __len__(self):
-        return len(self.root)
-
-    def model_dump(self):  # type: ignore[reportIncompatibleMethodOverride]
-        return self.root
-
-    def model_dump_json(self, **kwargs):
-        import json
-
-        return json.dumps(self.root, **kwargs)
-
-    def serialize_with_metadata(self) -> dict[str, Any]:
-        result = {"__field_type__": self.__class__.__name__, "__value__": self.root}
-
-        # Add any field metadata from the root field
-        field_info = self.model_fields.get("root")
-        if isinstance(field_info, NMFieldInfo):
-            for tag, value in field_info.custom_metadata.items():
-                result[f"__{tag}__"] = value
-
-        return result
-
-    @model_validator(mode="before")
-    @classmethod
-    def validate_input(cls, value: Any) -> dict[str, Any]:
-        # If it's a dict, just return it
-        if isinstance(value, dict):
-            if "root" in value:
-                return value
-
-            # Check for aliased fields if class has aliases defined
-            if hasattr(cls, "__aliases__"):
-                # Collect all possible alias names for each position
-                alias_values = []
-                max_index = max(cls.__aliases__.keys()) if cls.__aliases__ else -1
-
-                # Try to find a value for each position using its aliases
-                for i in range(max_index + 1):
-                    aliases = cls.__aliases__.get(i, [])
-                    value_found = None
-
-                    # Try each alias for this position
-                    for alias in aliases:
-                        if alias in value:
-                            value_found = value[alias]
-                            break
-
-                    if value_found is not None:
-                        alias_values.append(value_found)
-                    else:
-                        # If we're missing any position's value, don't use aliases
-                        break
-
-                # If we found all values through aliases, use them
-                if len(alias_values) == max_index + 1:
-                    return {"root": alias_values}
-
-        # if it's a sequence, return the value as the root
-        if isinstance(value, (list, tuple)):
-            return {"root": value}
-
-        # Else, make it a list
-        return {"root": [value]}
-
-    @model_serializer
-    def ser_model(self):
-        return self.root
-
-    # Custom validator to skip the 'root' field in validation errors
-    @model_validator(mode="wrap")  # type: ignore[reportIncompatibleMethodOverride]
-    def rewrite_error_locations(self, handler):
-        try:
-            return handler(self)
-        except ValidationError as e:
-            errors = []
-            for err in e.errors():
-                loc = list(err["loc"])
-                # Find and remove 'root' from the location path
-                if "root" in loc:
-                    root_idx = loc.index("root")
-                    if root_idx < len(loc) - 1:
-                        loc = loc[:root_idx] + loc[root_idx + 1 :]
-                err["loc"] = tuple(loc)
-                errors.append(err)
-            raise ValidationError.from_exception_data(
-                title="ValidationError", line_errors=errors
-            )

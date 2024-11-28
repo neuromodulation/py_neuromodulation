@@ -44,18 +44,19 @@ class PyNMBackend(FastAPI):
         self.logger = logging.getLogger("uvicorn.error")
         self.logger.warning(PYNM_DIR)
 
-        cors_origins = (
-            ["http://localhost:" + str(dev_port)] if dev_port is not None else []
-        )
-
-        # Configure CORS
-        self.add_middleware(
-            CORSMiddleware,
-            allow_origins=cors_origins,
-            allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
-        )
+        if dev:
+            cors_origins = (
+                ["http://localhost:" + str(dev_port)] if dev_port is not None else []
+            )
+            print(cors_origins)
+            # Configure CORS
+            self.add_middleware(
+                CORSMiddleware,
+                allow_origins=cors_origins,
+                allow_credentials=True,
+                allow_methods=["*"],
+                allow_headers=["*"],
+            )
 
         # Has to be before mounting static files
         self.setup_routes()

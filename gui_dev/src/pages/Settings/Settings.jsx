@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   Box,
   Button,
+  InputAdornment,
   Popover,
   Stack,
   Switch,
@@ -26,10 +27,12 @@ const formatKey = (key) => {
 };
 
 // Wrapper components for each type
-const BooleanField = ({ value, onChange, error }) => (
-  <Switch checked={value} onChange={(e) => onChange(e.target.checked)} />
+const BooleanField = ({ label, value, onChange, error }) => (
+  <Stack direction="row" justifyContent="space-between">
+    <Typography variant="body2">{label}</Typography>
+    <Switch checked={value} onChange={(e) => onChange(e.target.checked)} />
+  </Stack>
 );
-
 const errorStyle = {
   "& .MuiOutlinedInput-root": {
     "& fieldset": { borderColor: "error.main" },
@@ -42,19 +45,22 @@ const errorStyle = {
   },
 };
 
-const StringField = ({ value, onChange, label, error }) => {
+const StringField = ({ label, value, onChange, error }) => {
   const errorSx = error ? errorStyle : {};
   return (
-    <TextField
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      label={label}
-      sx={{ ...errorSx }}
-    />
+    <Stack direction="row" justifyContent="space-between">
+      <Typography variant="body2">{label}</Typography>
+      <TextField
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        label={label}
+        sx={{ ...errorSx }}
+      />
+    </Stack>
   );
 };
 
-const NumberField = ({ value, onChange, label, error }) => {
+const NumberField = ({ label, value, onChange, error, unit }) => {
   const errorSx = error ? errorStyle : {};
 
   const handleChange = (event) => {
@@ -66,24 +72,29 @@ const NumberField = ({ value, onChange, label, error }) => {
   };
 
   return (
-    <TextField
-      type="text" // Using "text" instead of "number" for more control
-      value={value}
-      onChange={handleChange}
-      label={label}
-      sx={{ ...errorSx }}
-      // InputProps={{
-      //   endAdornment: (
-      //     <InputAdornment position="end">
-      //       <span style={{ lineHeight: 1, display: "inline-block" }}>Hz</span>
-      //     </InputAdornment>
-      //   ),
-      // }}
-      inputProps={{
-        pattern: "[0-9]*",
-      }}
-    />
+    <Stack direction="row" justifyContent="space-between">
+      <Typography variant="body2">{label}</Typography>
+
+      <TextField
+        type="text" // Using "text" instead of "number" for more control
+        value={value}
+        onChange={handleChange}
+        label={label}
+        sx={{ ...errorSx }}
+        InputProps={{
+          endAdornment: <InputAdornment position="end">{unit}</InputAdornment>,
+        }}
+        inputProps={{
+          pattern: "[0-9]*",
+        }}
+      />
+    </Stack>
   );
+};
+
+const FrequencyRangeField = ({ label, value, onChange, error }) => {
+  console.log(label, value);
+  return <FrequencyRange name={label} range={value} onChangeRange={onChange} />;
 };
 
 // Map component types to their respective wrappers
@@ -93,21 +104,27 @@ const componentRegistry = {
   int: NumberField,
   float: NumberField,
   number: NumberField,
-  // FrequencyRange: FrequencyRange,
+  FrequencyRange: FrequencyRangeField,
 };
 
-const SettingsField = ({ path, Component, label, value, onChange, error }) => {
+const SettingsField = ({
+  path,
+  Component,
+  label,
+  value,
+  onChange,
+  error,
+  unit,
+}) => {
   return (
     <Tooltip title={error?.msg || ""} arrow placement="top">
-      <Stack direction="row" justifyContent="space-between">
-        <Typography variant="body2">{label}</Typography>
-        <Component
-          value={value}
-          onChange={(newValue) => onChange(path, newValue)}
-          label={label}
-          error={error}
-        />
-      </Stack>
+      <Component
+        value={value}
+        onChange={(newValue) => onChange(path, newValue)}
+        label={label}
+        error={error}
+        unit={unit}
+      />
     </Tooltip>
   );
 };
@@ -131,48 +148,22 @@ const SettingsSection = ({
   errors,
 }) => {
   const boxTitle = title ? title : formatKey(path[path.length - 1]);
-  /*
-  3 possible cases:
-  1. Primitive type || 2. Object with component -> Don't iterate, render directly
-  3. Object without component or 4. Array -> Iterate and render recursively
-  */
-
   const type = typeof settings;
   const isObject = type === "object" && !Array.isArray(settings);
   const isArray = Array.isArray(settings);
 
   // __field_type__ should be always present
   if (isObject && !settings.__field_type__) {
-    console.log(settings);
     throw new Error("Invalid settings object");
   }
   const fieldType = isObject ? settings.__field_type__ : type;
   const Component = componentRegistry[fieldType];
 
-  // Case 1: Primitive type -> Don't iterate, render directly
-  if (!isObject && !isArray) {
-    if (!Component) {
-      console.error(`Invalid component type: ${type}`);
-      return null;
-    }
-
-    const error = getFieldError(path, errors);
-
-    return (
-      <SettingsField
-        Component={Component}
-        label={boxTitle}
-        value={settings}
-        onChange={onChange}
-        path={path}
-        error={error}
-      />
-    );
-  }
-
-  // Case 2: Object with component -> Don't iterate, render directly
-  if (isObject && Component) {
-    const value = "__value__" in settings ? settings.__value__ : settings;
+  // Case 1: Object or primitive with component -> Don't iterate, render directly
+  if (Component) {
+    const value =
+      isObject && "__value__" in settings ? settings.__value__ : settings;
+    const unit = isObject && "__unit__" in settings ? settings.__unit__ : null;
 
     return (
       <SettingsField
@@ -182,12 +173,13 @@ const SettingsSection = ({
         onChange={onChange}
         path={path}
         error={getFieldError(path, errors)}
+        unit={unit}
       />
     );
   }
 
-  // Case 3: Object without component or 4. Array -> Iterate and render recursively
-  if ((isObject && !Component) || isArray) {
+  // Case 2: Object without component or Array -> Iterate and render recursively
+  else {
     return (
       <TitledBox title={boxTitle} sx={{ borderRadius: 3 }}>
         {/* Handle recursing through both objects and arrays */}
@@ -210,15 +202,10 @@ const SettingsSection = ({
       </TitledBox>
     );
   }
-
-  // Default case: return null and log an error
-  console.error(`Invalid settings object, returning null`);
-  return null;
 };
 
 const StatusBarSettingsInfo = () => {
   const validationErrors = useSettingsStore((state) => state.validationErrors);
-  console.log("validationErrors:", validationErrors);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
