@@ -1,6 +1,4 @@
-from email import errors
 import logging
-import asyncio
 import importlib.metadata
 from datetime import datetime
 from pathlib import Path
@@ -34,6 +32,7 @@ class PyNMBackend(FastAPI):
         pynm_state: app_pynm.PyNMState,
         debug=False,
         dev=True,
+        dev_port: int | None = None,
         fastapi_kwargs: dict = {},
     ) -> None:
         super().__init__(debug=debug, **fastapi_kwargs)
@@ -45,10 +44,14 @@ class PyNMBackend(FastAPI):
         self.logger = logging.getLogger("uvicorn.error")
         self.logger.warning(PYNM_DIR)
 
+        cors_origins = (
+            ["http://localhost:" + str(dev_port)] if dev_port is not None else []
+        )
+
         # Configure CORS
         self.add_middleware(
             CORSMiddleware,
-            allow_origins=["http://localhost:54321"],
+            allow_origins=cors_origins,
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],

@@ -12,7 +12,6 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from multiprocessing.synchronize import Event
-    from .app_backend import PyNMBackend
 
 
 # Shared memory configuration
@@ -22,21 +21,32 @@ SERVER_PORT = 50001
 DEV_SERVER_PORT = 54321
 
 
-def create_backend() -> "PyNMBackend":
+def create_backend():
+    """Factory function passed to Uvicorn to create the web application instance.
+
+    :return: The web application instance.
+    :rtype: PyNMBackend
+    """
     from .app_pynm import PyNMState
     from .app_backend import PyNMBackend
 
     debug = os.environ.get("PYNM_DEBUG", "False").lower() == "true"
     dev = os.environ.get("PYNM_DEV", "True").lower() == "true"
+    dev_port = os.environ.get("PYNM_DEV_PORT", str(DEV_SERVER_PORT))
 
-    return PyNMBackend(pynm_state=PyNMState(), debug=debug, dev=dev)
+    return PyNMBackend(
+        pynm_state=PyNMState(),
+        debug=debug,
+        dev=dev,
+        dev_port=int(dev_port),
+    )
 
 
 def run_vite(
     shutdown_event: "Event",
     debug: bool = False,
-    scan: bool = False,
     dev_port: int = DEV_SERVER_PORT,
+    backend_port: int = SERVER_PORT,
 ) -> None:
     """Run Vite in a separate shell"""
     import subprocess
@@ -49,7 +59,7 @@ def run_vite(
         logging.DEBUG if debug else logging.INFO,
     )
 
-    os.environ["VITE_REACT_SCAN"] = "true" if scan else "false"
+    os.environ["VITE_BACKEND_PORT"] = str(backend_port)
 
     def output_reader(shutdown_event: "Event", process: subprocess.Popen):
         logger.debug("Initialized output stream")
@@ -116,7 +126,9 @@ def run_vite(
     logger.info("Development server stopped")
 
 
-def run_uvicorn(debug: bool = False, reload=False) -> None:
+def run_uvicorn(
+    debug: bool = False, reload=False, server_port: int = SERVER_PORT
+) -> None:
     from uvicorn.server import Server
     from uvicorn.config import LOGGING_CONFIG, Config
 
@@ -141,7 +153,7 @@ def run_uvicorn(debug: bool = False, reload=False) -> None:
         host="localhost",
         reload=reload,
         factory=True,
-        port=50001,
+        port=server_port,
         log_level="debug" if debug else "info",
         log_config=log_config,
     )
@@ -170,17 +182,23 @@ def run_uvicorn(debug: bool = False, reload=False) -> None:
 
 
 def run_backend(
-    shutdown_event: "Event", debug: bool = False, reload: bool = True, dev: bool = True
+    shutdown_event: "Event",
+    dev: bool = True,
+    debug: bool = False,
+    reload: bool = True,
+    server_port: int = SERVER_PORT,
+    dev_port: int = DEV_SERVER_PORT,
 ) -> None:
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
     # Pass create_backend parameters through environment variables
     os.environ["PYNM_DEBUG"] = str(debug)
     os.environ["PYNM_DEV"] = str(dev)
+    os.environ["PYNM_DEV_PORT"] = str(dev_port)
 
     server_process = mp.Process(
         target=run_uvicorn,
-        kwargs={"debug": debug, "reload": reload},
+        kwargs={"debug": debug, "reload": reload, "server_port": server_port},
         name="Server",
     )
     server_process.start()
@@ -196,7 +214,6 @@ class AppManager:
         debug: bool = False,
         dev: bool = True,
         run_in_webview=False,
-        scan=False,
         server_port=SERVER_PORT,
         dev_port=DEV_SERVER_PORT,
     ) -> None:
@@ -213,7 +230,6 @@ class AppManager:
         self.debug = debug
         self.dev = dev
         self.run_in_webview = run_in_webview
-        self.scan = scan
         self.server_port = server_port
         self.dev_port = dev_port
 
@@ -293,8 +309,8 @@ class AppManager:
                 kwargs={
                     "shutdown_event": self.shutdown_event,
                     "debug": self.debug,
-                    "scan": self.scan,
                     "dev_port": self.dev_port,
+                    "backend_port": self.server_port,
                 },
                 name="Vite",
             )
@@ -307,6 +323,8 @@ class AppManager:
                 "debug": self.debug,
                 "reload": self.dev,
                 "dev": self.dev,
+                "server_port": self.server_port,
+                "dev_port": self.dev_port,
             },
             name="Backend",
         )

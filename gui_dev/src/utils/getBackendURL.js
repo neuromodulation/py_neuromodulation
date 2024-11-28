@@ -1,3 +1,3 @@
 export const getBackendURL = (route) => {
-    return "http://localhost:50001" + route;
-}
+  return "http://localhost:" + import.meta.env.VITE_BACKEND_PORT + route;
+};
