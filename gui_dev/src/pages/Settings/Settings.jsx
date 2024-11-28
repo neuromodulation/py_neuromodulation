@@ -15,7 +15,7 @@ import {
   FrequencyRangeList,
   FrequencyRange,
 } from "./components/FrequencyRange";
-import { useSettingsStore, useStatusBarContent } from "@/stores";
+import { useSettingsStore, useStatusBar } from "@/stores";
 import { filterObjectByKeys } from "@/utils/functions";
 
 const formatKey = (key) => {
@@ -275,7 +275,7 @@ export const Settings = () => {
   const uploadSettings = useSettingsStore((state) => state.uploadSettings);
   const resetSettings = useSettingsStore((state) => state.resetSettings);
   const validationErrors = useSettingsStore((state) => state.validationErrors);
-  useStatusBarContent(StatusBarSettingsInfo);
+  useStatusBar(StatusBarSettingsInfo);
 
   // This is needed so that the frequency ranges stay in order between updates
   const frequencyRangeOrder = useSettingsStore(
