@@ -223,7 +223,7 @@ export const DecodingGraph = ({
       return {
         x,
         y,
-        type: "scatter",
+        type: "scattergl",
         mode: "lines",
         name: decodingOutput,
         line: { simplify: false, color: colors[idx] },

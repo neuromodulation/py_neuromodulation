@@ -278,6 +278,7 @@ export const HeatmapGraph = () => {
               x: heatmapData.x,
               y: selectedFeatures,
               type: 'heatmap',
+              //zsmooth: 'best',
               colorscale: 'Viridis',
             },
           ]}

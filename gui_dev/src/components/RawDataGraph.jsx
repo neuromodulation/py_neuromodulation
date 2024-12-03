@@ -211,7 +211,7 @@ export const RawDataGraph = ({
       return {
         x,
         y,
-        type: "scatter",
+        type: "scattergl",
         mode: "lines",
         name: channelName,
         line: { simplify: false, color: colors[idx] },

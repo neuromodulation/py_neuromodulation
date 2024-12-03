@@ -154,7 +154,7 @@ export const PSDGraph = () => {
     const traces = psdData.map((data, idx) => ({
       x: data.features.slice(0, maxXaxisFrequency),
       y: data.values,
-      type: "scatter",
+      type: "scattergl",
       mode: "lines",
       name: data.channelName,
       line: { simplify: false, color: colors[idx] },
