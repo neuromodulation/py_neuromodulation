@@ -1,4 +1,4 @@
-import { getBackendURL } from "@/utils/getBackendURL";
+import { getBackendURL } from "@/utils";
 import { createStore } from "./createStore";
 
 const INITIAL_DELAY = 3000; // wait for Flask

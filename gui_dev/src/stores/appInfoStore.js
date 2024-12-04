@@ -1,5 +1,5 @@
 import { createStore } from "./createStore";
-import { getBackendURL } from "@/utils/getBackendURL";
+import { getBackendURL } from "@/utils";
 
 export const useAppInfoStore = createStore("appInfo", (set) => ({
   version: "",

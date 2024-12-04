@@ -5,6 +5,8 @@ import { useSessionStore } from "@/stores";
 
 import { FileBrowser, TitledBox } from "@/components";
 
+import { getPyNMDirectory } from "@/utils";
+
 export const FileSelector = () => {
   const fileSource = useSessionStore((state) => state.fileSource);
   const setFileSource = useSessionStore((state) => state.setFileSource);
@@ -19,9 +21,7 @@ export const FileSelector = () => {
   );
   const setSourceType = useSessionStore((state) => state.setSourceType);
 
-  const fileBrowserDirRef = useRef(
-    "C:\\code\\py_neuromodulation\\py_neuromodulation\\data\\sub-testsub\\ses-EphysMedOff\\ieeg\\sub-testsub_ses-EphysMedOff_task-gripforce_run-0_ieeg.vhdr"
-  );
+  const fileBrowserDirRef = useRef("");
 
   const [isSelecting, setIsSelecting] = useState(false);
   const [showFileBrowser, setShowFileBrowser] = useState(false);
@@ -29,7 +29,14 @@ export const FileSelector = () => {
 
   useEffect(() => {
     setSourceType("lsl");
-  }, []);
+
+    const fetchPyNMDirectory = async () => {
+      const pynmDir = await getPyNMDirectory();
+      fileBrowserDirRef.current =
+        pynmDir + "\\data\\sub-testsub\\ses-EphysMedOff\\ieeg\\";
+    };
+    fetchPyNMDirectory();
+  }, [setSourceType]);
 
   const handleFileSelect = (file) => {
     setIsSelecting(true);
@@ -72,7 +79,9 @@ export const FileSelector = () => {
           </Typography>
         )}
         {fileSource.size != "0" && (
-          <Typography variant="body2">File Size: {fileSource.size}</Typography>
+          <Typography variant="body2">
+            File Size: {fileSource.size} bytes
+          </Typography>
         )}
         {fileSource.path && (
           <Typography variant="body2">File Path: {fileSource.path}</Typography>
