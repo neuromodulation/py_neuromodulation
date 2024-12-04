@@ -135,6 +135,7 @@ export const PSDGraph = () => {
       height: 350,
       paper_bgcolor: "#333",
       plot_bgcolor: "#333",
+      hovermode: false, // Add this line to disable hovermode
       xaxis: {
         title: { text: "Feature Index", font: { color: "#f4f4f4" } },
         color: "#cccccc",
@@ -154,8 +155,9 @@ export const PSDGraph = () => {
     const traces = psdData.map((data, idx) => ({
       x: data.features.slice(0, maxXaxisFrequency),
       y: data.values,
-      type: "scatter",
+      type: "scattergl",
       mode: "lines",
+      hoverinfo: "skip",
       name: data.channelName,
       line: { simplify: false, color: colors[idx] },
     }));

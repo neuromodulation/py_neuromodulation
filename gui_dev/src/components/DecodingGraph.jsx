@@ -33,7 +33,7 @@ export const DecodingGraph = ({
 }) => {
   //const graphData = useSocketStore((state) => state.graphData);
   const graphDecodingData = useSocketStore((state) => state.graphDecodingData);
-
+  const samplingRate = useSessionStore((state) => state.streamParameters.samplingRateFeatures);
   //const channels = useSessionStore((state) => state.channels, shallow);
 
   //const usedChannels = useMemo(
@@ -68,6 +68,7 @@ export const DecodingGraph = ({
     height: 400,
     paper_bgcolor: "#333",
     plot_bgcolor: "#333",
+    hovermode: false, // Add this line to disable hovermode
     margin: {
       l: 50,
       r: 50,
@@ -110,7 +111,7 @@ export const DecodingGraph = ({
   };
 
   const handleMaxDataPointsChangeDecoding = (event, newValue) => {
-    setMaxDataPointsDecoding(newValue);
+    setMaxDataPointsDecoding(newValue * samplingRate); // Convert seconds to number of samples
   };
 
   //useEffect(() => {
@@ -218,13 +219,14 @@ export const DecodingGraph = ({
     const traces = selectedDecodingOutputs.map((decodingOutput, idx) => {
       const yData = decodingData[decodingOutput] || [];
       const y = yData.slice().reverse();
-      const x = Array.from({ length: y.length }, (_, i) => i);
+      const x = Array.from({ length: y.length }, (_, i) => i / samplingRate); // Convert to time in seconds
 
       return {
         x,
         y,
-        type: "scatter",
+        type: "scattergl",
         mode: "lines",
+        hoverinfo: 'skip',
         name: decodingOutput,
         line: { simplify: false, color: colors[idx] },
         yaxis: idx === 0 ? "y" : `y${idx + 1}`,
@@ -236,9 +238,13 @@ export const DecodingGraph = ({
       xaxis: {
         ...layoutRef.current.xaxis,
         autorange: "reversed", 
-        range: [0, maxDataPointsDecoding],
+        range: [0, maxDataPointsDecoding / samplingRate], // Adjust range to time in seconds
         domain: [0, 1],
         anchor: totalDecodingOutputs === 1 ? "y" : `y${totalDecodingOutputs}`,
+        title: {
+          text: "Time [s]", // Update x-axis title
+          font: { color: "#f4f4f4" },
+        },
       },
       ...yAxes,
       height: 350, // TODO height autoadjust to screen
@@ -254,7 +260,7 @@ export const DecodingGraph = ({
       .catch((error) => {
         console.error("Plotly error:", error);
       });
-  }, [decodingData, selectedDecodingOutputs, yAxisMaxValue, maxDataPointsDecoding]);
+  }, [decodingData, selectedDecodingOutputs, yAxisMaxValue, maxDataPointsDecoding, samplingRate]);
 
   return (
     <Box>
@@ -310,20 +316,20 @@ export const DecodingGraph = ({
           </Box>
           <Box sx={{ minWidth: 200 }}>
             <CollapsibleBox
-              title="Window Size" defaultExpanded={true} id="BoxDecoding">
+              title="Window Size (s)" defaultExpanded={true} id="BoxDecoding">
               <Typography gutterBottom>
-                Current Value: {maxDataPointsDecoding}
+                Current Value: {(maxDataPointsDecoding / samplingRate).toFixed(1)} s
               </Typography>
               <Slider
                 id="max-data-points-slider-decoding"
-                value={maxDataPointsDecoding}
+                value={maxDataPointsDecoding / samplingRate} // Convert number of samples to seconds
                 onChange={handleMaxDataPointsChangeDecoding}
                 aria-labelledby="max-data-points-slider"
                 valueLabelDisplay="auto"
-                step={10}
+                step={0.1}
                 marks
                 min={0}
-                max={1000}
+                max={10}
               />
             </CollapsibleBox>
           </Box>

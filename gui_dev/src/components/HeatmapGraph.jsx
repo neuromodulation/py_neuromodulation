@@ -9,15 +9,13 @@ import {
   FormControlLabel,
   Radio,
   Checkbox,
+  Slider,
 } from '@mui/material';
 import { CollapsibleBox } from './CollapsibleBox';
 import { getChannelAndFeature } from './utils';
 import { shallow } from 'zustand/shallow';
 
-const maxTimeWindow = 10;
-
 export const HeatmapGraph = () => {
-
   const channels = useSessionStore((state) => state.channels, shallow);
 
   const usedChannels = useMemo(
@@ -30,35 +28,41 @@ export const HeatmapGraph = () => {
     [usedChannels]
   );
 
-  const [selectedChannel, setSelectedChannel] = useState(''); // TODO: Switch this maybe multiple?
+  const [selectedChannel, setSelectedChannel] = useState('');
   const [features, setFeatures] = useState([]);
-  const [fftFeatures, setFftFeatures] = useState([]); 
+  const [fftFeatures, setFftFeatures] = useState([]);
   const [otherFeatures, setOtherFeatures] = useState([]);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [heatmapData, setHeatmapData] = useState({ x: [], z: [] });
   const [isDataStale, setIsDataStale] = useState(false);
   const [lastDataTime, setLastDataTime] = useState(null);
-  const [lastDataTimestamp, setLastDataTimestamp] = useState(null);
 
-  const hasInitialized = useRef(Date.now());
   const graphData = useSocketStore((state) => state.graphData);
+
+  const [maxDataPoints, setMaxDataPoints] = useState(100);
+
+  const handleMaxDataPointsChange = (event, newValue) => {
+    setMaxDataPoints(newValue);
+  };
 
   const handleChannelToggle = (event) => {
     setSelectedChannel(event.target.value);
   };
 
-  // Added handler for fft_psd_xyz features toggle TODO: also welch/ other features?
   const handleFftFeaturesToggle = () => {
-    const allFftFeaturesSelected = fftFeatures.every((feature) => selectedFeatures.includes(feature));
+    const allFftFeaturesSelected = fftFeatures.every((feature) =>
+      selectedFeatures.includes(feature)
+    );
 
     if (allFftFeaturesSelected) {
       setSelectedFeatures((prevSelected) =>
         prevSelected.filter((feature) => !fftFeatures.includes(feature))
       );
     } else {
-      setSelectedFeatures((prevSelected) =>
-        [...prevSelected, ...fftFeatures.filter((feature) => !prevSelected.includes(feature))]
-      );
+      setSelectedFeatures((prevSelected) => [
+        ...prevSelected,
+        ...fftFeatures.filter((feature) => !prevSelected.includes(feature)),
+      ]);
     }
   };
 
@@ -86,47 +90,45 @@ export const HeatmapGraph = () => {
     const featureKeys = dataKeys.filter(
       (key) => key.startsWith(channelPrefix) && key !== 'time'
     );
-    const newFeatures = featureKeys.map((key) => key.substring(channelPrefix.length));
+    const newFeatures = featureKeys.map((key) =>
+      key.substring(channelPrefix.length)
+    );
 
     if (JSON.stringify(newFeatures) !== JSON.stringify(features)) {
       console.log('Updating features:', newFeatures);
       setFeatures(newFeatures);
 
-      // TODO: currently all psd selectable together. should we also do this for welch and other features?
-      const fftFeatures = newFeatures.filter((feature) => feature.startsWith('fft_psd_'));
-      const otherFeatures = newFeatures.filter((feature) => !feature.startsWith('fft_psd_'));
+      const fftFeatures = newFeatures.filter((feature) =>
+        feature.startsWith('fft_psd_')
+      );
+      const otherFeatures = newFeatures.filter(
+        (feature) => !feature.startsWith('fft_psd_')
+      );
 
       setFftFeatures(fftFeatures);
       setOtherFeatures(otherFeatures);
 
       setSelectedFeatures(newFeatures);
-      setHeatmapData({ x: [], z: [] }); // Reset heatmap data when features change
+      setHeatmapData({ x: [], z: [] });
       setIsDataStale(false);
       setLastDataTime(null);
-      setLastDataTimestamp(null);
     }
   }, [graphData, selectedChannel, features]);
 
   useEffect(() => {
-    if (!graphData || !selectedChannel || features.length === 0 || selectedFeatures.length === 0) return;
-
-    // TODO: Always data in ms? (Time conversion here always necessary?)
-    // Timon: yes, let's define that the stream's time is always in ms
-    let timestamp = graphData.time;
-    if (timestamp === undefined) {
-      timestamp = (Date.now() - hasInitialized.current) / 1000;
-    } else {
-      timestamp = timestamp / 1000;
-    }
+    if (
+      !graphData ||
+      !selectedChannel ||
+      features.length === 0 ||
+      selectedFeatures.length === 0
+    )
+      return;
 
     setLastDataTime(Date.now());
     setIsDataStale(false);
 
-    let x = [...heatmapData.x, timestamp];
-
     let z;
 
-    // Initialize 'z' for selected features
     if (heatmapData.z && heatmapData.z.length === selectedFeatures.length) {
       z = heatmapData.z.map((row) => [...row]);
     } else {
@@ -137,27 +139,30 @@ export const HeatmapGraph = () => {
       const key = `${selectedChannel}_${featureName}`;
       const value = graphData[key];
       const numericValue = typeof value === 'number' && !isNaN(value) ? value : 0;
+
+      // Shift existing data to the left if necessary
+      if (z[idx].length >= maxDataPoints) {
+        z[idx].shift();
+      }
+
+      // Append the new data
       z[idx].push(numericValue);
     });
 
-    const currentTime = timestamp;
-    const minTime = currentTime - maxTimeWindow; // TODO: What should be the visible window frame? adjustable? 10s?
-                                                 // Timon: Would be amazing if it's adjustable
-
-    const validIndices = x.reduce((indices, time, index) => {
-      if (time >= minTime) {
-        indices.push(index);
-      }
-      return indices;
-    }, []);
-
-    x = validIndices.map((index) => x[index]);
-    z = z.map((row) => validIndices.map((index) => row[index]));
+    // Update x based on the length of z[0] (assuming all rows are the same length)
+    const dataLength = z[0]?.length || 0;
+    const x = Array.from({ length: dataLength }, (_, i) => i);
 
     setHeatmapData({ x, z });
-  }, [graphData, selectedChannel, features, selectedFeatures]);
+  }, [
+    graphData,
+    selectedChannel,
+    features,
+    selectedFeatures,
+    maxDataPoints,
+  ]);
 
-  // Check if data is stale (no new data in the last second) -> TODO: Find better solution debug this
+  // Check if data is stale (no new data in the last second)
   useEffect(() => {
     if (!lastDataTime) return;
 
@@ -172,27 +177,20 @@ export const HeatmapGraph = () => {
     return () => clearInterval(interval);
   }, [lastDataTime]);
 
-  // TODO: Adjustment of x-axis -> this currently is a bit buggy
-  const xRange = isDataStale && heatmapData.x.length > 0
-    ? [heatmapData.x[0], heatmapData.x[heatmapData.x.length - 1]]
-    : undefined;
-
   const layout = {
-    // title: { text: 'Heatmap', font: { color: '#f4f4f4' } },
-    height: 600,
+    height: 350,
     paper_bgcolor: '#333',
     plot_bgcolor: '#333',
     autosize: true,
     xaxis: {
-      tickformat: '.2f',
-      title: { text: 'Time (s)', font: { color: '#f4f4f4' } },
+      title: { text: 'Nr. of Samples', font: { color: '#f4f4f4' } },
       color: '#cccccc',
       tickfont: {
         color: '#cccccc',
       },
       automargin: false,
-      autorange: !isDataStale,
-      range: xRange,
+      hovermode: false
+      // autorange: 'reversed'
     },
     yaxis: {
       title: { text: 'Features', font: { color: '#f4f4f4' } },
@@ -213,18 +211,14 @@ export const HeatmapGraph = () => {
           Heatmap
         </Typography>
         <Box sx={{ ml: 2, minWidth: 200 }}>
-          <CollapsibleBox title="Channel Selection"
-            defaultExpanded={true} id="ChSelBoxHeatmap">
+          <CollapsibleBox title="Channel Selection" defaultExpanded={true}>
             <FormControl component="fieldset">
-              <RadioGroup
-                value={selectedChannel}
-                onChange={handleChannelToggle}
-              >
+              <RadioGroup value={selectedChannel} onChange={handleChannelToggle}>
                 {usedChannels.map((channel, index) => (
                   <FormControlLabel
                     key={channel.id || index}
                     value={channel.name}
-                    control={<Radio />} // TODO: Should we make multiple selectable?  // Timon: No, let's keep with one
+                    control={<Radio />}
                     label={channel.name}
                   />
                 ))}
@@ -232,7 +226,7 @@ export const HeatmapGraph = () => {
             </FormControl>
           </CollapsibleBox>
         </Box>
-        <Box sx={{ ml: 2, mr: 4, minWidth: 200 }}>
+        <Box sx={{ ml: 1, mr: 1, minWidth: 200, maxWidth: 350 }}>
           <CollapsibleBox title="Feature Selection" defaultExpanded={true}>
             <FormControl component="fieldset">
               <Box display="flex" flexDirection="column">
@@ -240,10 +234,16 @@ export const HeatmapGraph = () => {
                   <FormControlLabel
                     control={
                       <Checkbox
-                        checked={fftFeatures.every((feature) => selectedFeatures.includes(feature))}
+                        checked={fftFeatures.every((feature) =>
+                          selectedFeatures.includes(feature)
+                        )}
                         indeterminate={
-                          fftFeatures.some((feature) => selectedFeatures.includes(feature)) &&
-                          !fftFeatures.every((feature) => selectedFeatures.includes(feature))
+                          fftFeatures.some((feature) =>
+                            selectedFeatures.includes(feature)
+                          ) &&
+                          !fftFeatures.every((feature) =>
+                            selectedFeatures.includes(feature)
+                          )
                         }
                         onChange={handleFftFeaturesToggle}
                         color="primary"
@@ -269,24 +269,43 @@ export const HeatmapGraph = () => {
             </FormControl>
           </CollapsibleBox>
         </Box>
+        <Box sx={{ minWidth: 200, mr: 4 }}>
+          <CollapsibleBox title="Window Size" defaultExpanded={true}>
+            <Typography gutterBottom>Current Value: {maxDataPoints}</Typography>
+            <Slider
+              value={maxDataPoints}
+              onChange={handleMaxDataPointsChange}
+              aria-labelledby="max-data-points-slider"
+              valueLabelDisplay="auto"
+              step={50}
+              marks
+              min={50}
+              max={500}
+            />
+          </CollapsibleBox>
+        </Box>
       </Box>
-      {heatmapData.x.length > 0 && selectedFeatures.length > 0 && heatmapData.z.length > 0 && (
-        <Plot
-          data={[
-            {
-              z: heatmapData.z,
-              x: heatmapData.x,
-              y: selectedFeatures,
-              type: 'heatmap',
-              colorscale: 'Viridis',
-            },
-          ]}
-          layout={layout}
-          useResizeHandler={true}
-          style={{ width: '100%', height: '100%' }}
-          config={{ responsive: true, displayModeBar: false }}
-        />
-      )}
+      {heatmapData.x.length > 0 &&
+        selectedFeatures.length > 0 &&
+        heatmapData.z.length > 0 && (
+          <Plot
+            data={[
+              {
+                z: heatmapData.z,
+                x: heatmapData.x,
+                y: selectedFeatures,
+                type: 'heatmap',
+                zsmooth: 'best',
+                colorscale: 'Viridis',
+                hoverinfo: 'skip',
+              },
+            ]}
+            layout={layout}
+            useResizeHandler={true}
+            style={{ width: '100%', height: '100%'}}
+            config={{ responsive: true, displayModeBar: false}}
+          />
+        )}
     </Box>
   );
 };

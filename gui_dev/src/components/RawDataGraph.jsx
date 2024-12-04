@@ -28,13 +28,14 @@ const generateColors = (numColors) => {
 
 export const RawDataGraph = ({
   title = "Raw Data",
-  xAxisTitle = "Nr. of Samples",
+  xAxisTitle = "Time [s]",
   yAxisTitle = "Value",
 }) => {
   //const graphData = useSocketStore((state) => state.graphData);
   const graphRawData = useSocketStore((state) => state.graphRawData);
 
   const channels = useSessionStore((state) => state.channels, shallow);
+  const samplingRate = useSessionStore((state) => state.streamParameters.samplingRate);
 
   const usedChannels = useMemo(
     () => channels.filter((channel) => channel.used === 1),
@@ -63,6 +64,7 @@ export const RawDataGraph = ({
     height: 400,
     paper_bgcolor: "#333",
     plot_bgcolor: "#333",
+    hovermode: false, // Add this line to disable hovermode
     margin: {
       l: 50,
       r: 50,
@@ -100,12 +102,12 @@ export const RawDataGraph = ({
     });
   };
 
-  const handleYAxisMaxValueChange = (event) => {
-    setYAxisMaxValue(event.target.value);
+  const handleYAxisMaxValueChange = (event, newValue) => {
+    setYAxisMaxValue(newValue);
   };
 
   const handleMaxDataPointsChange = (event, newValue) => {
-    setMaxDataPoints(newValue);
+    setMaxDataPoints(newValue * samplingRate); // Convert seconds to samples
   };
 
   useEffect(() => {
@@ -206,14 +208,15 @@ export const RawDataGraph = ({
     const traces = selectedChannels.map((channelName, idx) => {
       const yData = rawData[channelName] || [];
       const y = yData.slice().reverse();
-      const x = Array.from({ length: y.length }, (_, i) => i);
+      const x = Array.from({ length: y.length }, (_, i) => i / samplingRate); // Convert samples to negative seconds
 
       return {
         x,
         y,
-        type: "scatter",
+        type: "scattergl",
         mode: "lines",
         name: channelName,
+        hoverinfo: 'skip',
         line: { simplify: false, color: colors[idx] },
         yaxis: idx === 0 ? "y" : `y${idx + 1}`,
       };
@@ -224,12 +227,13 @@ export const RawDataGraph = ({
       xaxis: {
         ...layoutRef.current.xaxis,
         autorange: "reversed", 
-        range: [0, maxDataPoints],
+        range: [maxDataPoints / samplingRate, 0], // Adjust range to negative seconds
         domain: [0, 1],
         anchor: totalChannels === 1 ? "y" : `y${totalChannels}`,
       },
       ...yAxes,
       height: 350, // TODO height autoadjust to screen
+      hovermode: false, // Add this line to disable hovermode in the trace
     };
 
     Plotly.react(graphRef.current, traces, layout, {
@@ -280,37 +284,34 @@ export const RawDataGraph = ({
           </Box>
           <Box sx={{ minWidth: 200, mr: 2 }}>
             <CollapsibleBox title="Max Value (uV)" defaultExpanded={true}>
-              <FormControl component="fieldset">
-                <RadioGroup
-                  value={yAxisMaxValue}
-                  onChange={handleYAxisMaxValueChange}
-                >
-                  <FormControlLabel value="Auto" control={<Radio />} label="Auto" />
-                  <FormControlLabel value="5" control={<Radio />} label="5" />
-                  <FormControlLabel value="10" control={<Radio />} label="10" />
-                  <FormControlLabel value="20" control={<Radio />} label="20" />
-                  <FormControlLabel value="50" control={<Radio />} label="50" />
-                  <FormControlLabel value="100" control={<Radio />} label="100" />
-                  <FormControlLabel value="500" control={<Radio />} label="500" />
-                </RadioGroup>
-              </FormControl>
+              <Slider
+                id="y-axis-max-value-slider"
+                value={yAxisMaxValue === "Auto" ? 0 : yAxisMaxValue} // Convert "Auto" to 0 for slider
+                onChange={handleYAxisMaxValueChange}
+                aria-labelledby="y-axis-max-value-slider"
+                valueLabelDisplay="auto"
+                step={1}
+                marks
+                min={1}
+                max={1000}
+              />
             </CollapsibleBox>
           </Box>
           <Box sx={{ minWidth: 200 }}>
             <CollapsibleBox title="Window Size" defaultExpanded={true}>
               <Typography gutterBottom>
-                Current Value: {maxDataPoints}
+                Current Value: {maxDataPoints / samplingRate}
               </Typography>
               <Slider
                 id="max-data-points-slider-rawdata"
-                value={maxDataPoints}
+                value={maxDataPoints / samplingRate} // Convert samples to seconds
                 onChange={handleMaxDataPointsChange}
                 aria-labelledby="max-data-points-slider"
                 valueLabelDisplay="auto"
-                step={50}
+                step={0.5} // Adjust step to 0.5 seconds
                 marks
                 min={0}
-                max={10000}
+                max={10} // Maximum 10 seconds
               />
             </CollapsibleBox>
           </Box>

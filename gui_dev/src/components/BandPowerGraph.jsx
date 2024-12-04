@@ -121,6 +121,7 @@ export const BandPowerGraph = () => {
       height: 350,
       paper_bgcolor: "#333",
       plot_bgcolor: "#333",
+      hovermode: false, // Add this line to disable hovermode
       xaxis: {
         title: { text: "Frequency Band", font: { color: "#f4f4f4" } },
         color: "#cccccc",
@@ -141,6 +142,7 @@ export const BandPowerGraph = () => {
       x: data.features,
       y: data.values,
       type: "bar",
+      hoverinfo: 'skip',
       name: data.channelName,
       marker: { color: barColors },
     };
