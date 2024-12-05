@@ -1,165 +1,145 @@
 import os
-import asyncio
-import logging
-import threading
 import numpy as np
-import multiprocessing as mp
 from threading import Thread
-import queue
+import time
+import asyncio
+import multiprocessing as mp
+from queue import Empty
+from pathlib import Path
 from py_neuromodulation.stream import Stream, NMSettings
 from py_neuromodulation.analysis.decode import RealTimeDecoder
 from py_neuromodulation.utils import set_channels
 from py_neuromodulation.utils.io import read_mne_data
+from py_neuromodulation.utils.types import _PathLike
 from py_neuromodulation import logger
-
-
-async def run_stream_controller(
-    feature_queue: queue.Queue,
-    rawdata_queue: queue.Queue,
-    websocket_manager: "WebSocketManager",
-    stop_event: threading.Event,
-):
-    while not stop_event.wait(0.002):
-        if not feature_queue.empty() and websocket_manager is not None:
-            feature_dict = feature_queue.get()
-            logger.info("Sending message to Websocket")
-            await websocket_manager.send_cbor(feature_dict)
-
-        if not rawdata_queue.empty() and websocket_manager is not None:
-            raw_data = rawdata_queue.get()
-
-            await websocket_manager.send_cbor(raw_data)
-
-
-def run_stream_controller_sync(
-    feature_queue: queue.Queue,
-    rawdata_queue: queue.Queue,
-    websocket_manager: "WebSocketManager",
-    stop_event: threading.Event,
-):
-    # The run_stream_controller needs to be started as an asyncio function due to the async websocket
-    asyncio.run(
-        run_stream_controller(
-            feature_queue, rawdata_queue, websocket_manager, stop_event
-        )
-    )
+from py_neuromodulation.gui.backend.app_socket import WebsocketManager
+from py_neuromodulation.stream.backend_interface import StreamBackendInterface
+from py_neuromodulation import logger
 
 
 class PyNMState:
     def __init__(
         self,
-        default_init: bool = True,  # has to be true for the backend settings communication
     ) -> None:
-        self.logger = logging.getLogger("uvicorn.error")
+        self.lsl_stream_name: str = ""
+        self.experiment_name: str = "PyNM_Experiment"  # set by set_stream_params
+        self.out_dir: _PathLike = str(
+            Path.home() / "PyNM" / self.experiment_name
+        )  # set by set_stream_params
+        self.decoding_model_path: _PathLike | None = None
+        self.decoder: RealTimeDecoder | None = None
+        self.is_stream_lsl: bool = False
 
-        self.lsl_stream_name = None
-        self.stream_controller_process = None
-        self.run_func_process = None
-        self.out_dir = None  # will be set by set_stream_params
-        self.experiment_name = None  # will be set by set_stream_params
-        self.decoding_model_path = None
-        self.decoder = None
+        self.backend_interface: StreamBackendInterface | None = None
+        self.websocket_manager: WebsocketManager | None = None
 
-        if default_init:
-            self.stream: Stream = Stream(sfreq=1500, data=np.random.random([1, 1]))
-            self.settings: NMSettings = NMSettings(sampling_rate_features=10)
+        # Note: sfreq and data are required for stream init
+        self.stream: Stream = Stream(sfreq=1500, data=np.random.random([1, 1]))
+        self.settings: NMSettings = NMSettings(sampling_rate_features=10)
+
+        self.feature_queue = mp.Queue()
+        self.rawdata_queue = mp.Queue()
+        self.control_queue = mp.Queue()
+        self.stop_event = asyncio.Event()
+
+        self.messages_sent = 0
 
     def start_run_function(
         self,
-        websocket_manager=None,
+        websocket_manager: WebsocketManager | None = None,
     ) -> None:
-        self.stream.settings = self.settings
+        # TONI: This is dangerous to do here, should be done by the setup functions
+        # self.stream.settings = self.settings
 
-        self.stream_handling_queue = queue.Queue()
-        self.feature_queue = queue.Queue()
-        self.rawdata_queue = queue.Queue()
+        self.is_stream_lsl = self.lsl_stream_name is not None
+        self.websocket_manager = websocket_manager
 
-        self.logger.info("Starting stream_controller_process thread")
-
+        # Create decoder
         if self.decoding_model_path is not None and self.decoding_model_path != "None":
             if os.path.exists(self.decoding_model_path):
                 self.decoder = RealTimeDecoder(self.decoding_model_path)
             else:
                 logger.debug("Passed decoding model path does't exist")
-        # Stop event
-        # .set() is called from app_backend
-        self.stop_event_ws = threading.Event()
 
-        self.stream_controller_thread = Thread(
-            target=run_stream_controller_sync,
-            daemon=True,
-            args=(
-                self.feature_queue,
-                self.rawdata_queue,
-                websocket_manager,
-                self.stop_event_ws,
-            ),
-        )
-
-        is_stream_lsl = self.lsl_stream_name is not None
-        stream_lsl_name = (
-            self.lsl_stream_name if self.lsl_stream_name is not None else ""
-        )
+        # Initialize the backend interface if not already done
+        if not self.backend_interface:
+            self.backend_interface = StreamBackendInterface(
+                self.feature_queue, self.rawdata_queue, self.control_queue
+            )
 
         # The run_func_thread is terminated through the stream_handling_queue
         # which initiates to break the data generator and save the features
-        out_dir = "" if self.out_dir == "default" else self.out_dir
-        self.run_func_thread = Thread(
+        stream_process = mp.Process(
             target=self.stream.run,
-            daemon=True,
             kwargs={
-                "out_dir": out_dir,
+                "out_dir": "" if self.out_dir == "default" else self.out_dir,
                 "experiment_name": self.experiment_name,
-                "stream_handling_queue": self.stream_handling_queue,
-                "is_stream_lsl": is_stream_lsl,
-                "stream_lsl_name": stream_lsl_name,
-                "feature_queue": self.feature_queue,
+                "is_stream_lsl": self.lsl_stream_name is not None,
+                "stream_lsl_name": self.lsl_stream_name or "",
                 "simulate_real_time": True,
-                "rawdata_queue": self.rawdata_queue,
                 "decoder": self.decoder,
+                "backend_interface": self.backend_interface,
             },
         )
 
-        self.stream_controller_thread.start()
-        self.run_func_thread.start()
+        stream_process.start()
+
+        # Start websocket sender process
+
+        if self.websocket_manager:
+            # Get the current event loop and run the queue processor
+            loop = asyncio.get_running_loop()
+            queue_task = loop.create_task(self._process_queue())
+
+            # Store task reference for cleanup
+            self._queue_task = queue_task
+
+        # Store processes for cleanup
+        self.stream_process = stream_process
+
+    def stop_run_function(self) -> None:
+        """Stop the stream processing"""
+        if self.backend_interface:
+            self.backend_interface.send_command("stop")
+            self.stop_event.set()
 
     def setup_lsl_stream(
         self,
-        lsl_stream_name: str | None = None,
+        lsl_stream_name: str = "",
         line_noise: float | None = None,
         sampling_rate_features: float | None = None,
     ):
         from mne_lsl.lsl import resolve_streams
 
-        self.logger.info("resolving streams")
+        logger.info("resolving streams")
         lsl_streams = resolve_streams()
 
         for stream in lsl_streams:
             if stream.name == lsl_stream_name:
-                self.logger.info(f"found stream {lsl_stream_name}")
+                logger.info(f"found stream {lsl_stream_name}")
                 # setup this stream
                 self.lsl_stream_name = lsl_stream_name
 
                 ch_names = stream.get_channel_names()
                 if ch_names is None:
                     ch_names = ["ch" + str(i) for i in range(stream.n_channels)]
-                self.logger.info(f"channel names: {ch_names}")
+                logger.info(f"channel names: {ch_names}")
 
                 ch_types = stream.get_channel_types()
                 if ch_types is None:
                     ch_types = ["eeg" for i in range(stream.n_channels)]
 
-                self.logger.info(f"channel types: {ch_types}")
+                logger.info(f"channel types: {ch_types}")
 
                 info_ = stream.get_channel_info()
-                self.logger.info(f"channel info: {info_}")
+                logger.info(f"channel info: {info_}")
 
                 channels = set_channels(
                     ch_names=ch_names,
                     ch_types=ch_types,
                     used_types=["eeg", "ecog", "dbs", "seeg"],
                 )
-                self.logger.info(channels)
+                logger.info(channels)
                 sfreq = stream.sfreq
 
                 self.stream: Stream = Stream(
@@ -169,20 +149,19 @@ class PyNMState:
                     sampling_rate_features_hz=sampling_rate_features,
                     settings=self.settings,
                 )
-                self.logger.info("stream setup")
+                logger.info("stream setup")
                 # self.settings: NMSettings = NMSettings(sampling_rate_features=sfreq)
-                self.logger.info("settings setup")
+                logger.info("settings setup")
                 break
-
-        if channels.shape[0] == 0:
-            self.logger.error(f"Stream {lsl_stream_name} not found")
+        else:
+            logger.error(f"Stream {lsl_stream_name} not found")
             raise ValueError(f"Stream {lsl_stream_name} not found")
 
     def setup_offline_stream(
         self,
         file_path: str,
-        line_noise: float | None = None,
-        sampling_rate_features: float | None = None,
+        line_noise: float,
+        sampling_rate_features: float,
     ):
         data, sfreq, ch_names, ch_types, bads = read_mne_data(file_path)
 
@@ -195,7 +174,9 @@ class PyNMState:
             target_keywords=None,
         )
 
-        self.logger.info(f"settings: {self.settings}")
+        self.settings.sampling_rate_features_hz = sampling_rate_features
+
+        logger.info(f"settings: {self.settings}")
         self.stream: Stream = Stream(
             settings=self.settings,
             sfreq=sfreq,
@@ -204,3 +185,53 @@ class PyNMState:
             line_noise=line_noise,
             sampling_rate_features_hz=sampling_rate_features,
         )
+
+    # Async function that will continuously run in the Uvicorn async loop
+    # and handle sending data through the websocket manager
+    async def _process_queue(self):
+        last_queue_check = time.time()
+
+        while not self.stop_event.is_set():
+            # Use asyncio.gather to process both queues concurrently
+            tasks = []
+            current_time = time.time()
+
+            # Check feature queue
+            while not self.feature_queue.empty():
+                try:
+                    data = self.feature_queue.get_nowait()
+                    tasks.append(self.websocket_manager.send_cbor(data))  # type: ignore
+                    self.messages_sent += 1
+                except Empty:
+                    break
+
+            # Check raw data queue
+            while not self.rawdata_queue.empty():
+                try:
+                    data = self.rawdata_queue.get_nowait()
+                    self.messages_sent += 1
+                    tasks.append(self.websocket_manager.send_cbor(data))  # type: ignore
+                except Empty:
+                    break
+
+            if tasks:
+                # Wait for all send operations to complete
+                await asyncio.gather(*tasks, return_exceptions=True)
+            else:
+                # Only sleep if we didn't process any messages
+                await asyncio.sleep(0.001)
+
+            # Log queue diagnostics every 5 seconds
+            if current_time - last_queue_check > 5:
+                logger.info(
+                    "\nQueue diagnostics:\n"
+                    f"\tMessages send to websocket: {self.messages_sent}.\n"
+                    f"\tFeature queue size: ~{self.feature_queue.qsize()}\n"
+                    f"\tRaw data queue size: ~{self.rawdata_queue.qsize()}"
+                )
+
+                last_queue_check = current_time
+
+            # Check if stream process is still alive
+            if not self.stream_process.is_alive():
+                break

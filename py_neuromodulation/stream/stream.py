@@ -1,19 +1,19 @@
 """Module for generic and offline data streams."""
 
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from collections.abc import Iterator
 import numpy as np
 from pathlib import Path
 
 import py_neuromodulation as nm
-from contextlib import suppress
 
 from py_neuromodulation.stream.data_processor import DataProcessor
 from py_neuromodulation.utils.types import _PathLike, FEATURE_NAME
 from py_neuromodulation.utils.file_writer import MsgPackFileWriter
 from py_neuromodulation.stream.settings import NMSettings
 from py_neuromodulation.analysis.decode import RealTimeDecoder
+from py_neuromodulation.stream.backend_interface import StreamBackendInterface
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -68,6 +68,7 @@ class Stream:
         verbose : bool, optional
             print out stream computation time information, by default True
         """
+        # This is calling NMSettings.validate() which is making a copy
         self.settings: NMSettings = NMSettings.load(settings)
 
         if channels is None and data is not None:
@@ -208,14 +209,11 @@ class Stream:
         save_interval: int = 10,
         return_df: bool = True,
         simulate_real_time: bool = False,
-        decoder: RealTimeDecoder = None,
-        feature_queue: "queue.Queue | None" = None,
-        rawdata_queue: "queue.Queue | None" = None,
-        stream_handling_queue: "queue.Queue | None" = None,
+        decoder: RealTimeDecoder | None = None,
+        backend_interface: StreamBackendInterface | None = None,
     ):
         self.is_stream_lsl = is_stream_lsl
         self.stream_lsl_name = stream_lsl_name
-        self.stream_handling_queue = stream_handling_queue
         self.save_csv = save_csv
         self.save_interval = save_interval
         self.return_df = return_df
@@ -248,7 +246,7 @@ class Stream:
         nm.logger.log_to_file(out_dir)
 
         self.generator: Iterator
-        if not is_stream_lsl:
+        if not is_stream_lsl and data is not None:
             from py_neuromodulation.stream.generator import RawDataGenerator
 
             self.generator = RawDataGenerator(
@@ -265,7 +263,10 @@ class Stream:
                 settings=self.settings, stream_name=stream_lsl_name
             )
 
-            if self.sfreq != self.lsl_stream.stream.sinfo.sfreq:
+            if (
+                self.lsl_stream.stream.sinfo is not None
+                and self.sfreq != self.lsl_stream.stream.sinfo.sfreq
+            ):
                 error_msg = (
                     f"Sampling frequency of the lsl-stream ({self.lsl_stream.stream.sinfo.sfreq}) "
                     f"does not match the settings ({self.sfreq})."
@@ -279,14 +280,14 @@ class Stream:
         prev_batch_end = 0
         for timestamps, data_batch in self.generator:
             self.is_running = True
-            if self.stream_handling_queue is not None:
+            if backend_interface:
+                # Only simulate real-time if connected to GUI
                 if simulate_real_time:
                     time.sleep(1 / self.settings.sampling_rate_features_hz)
-                if not self.stream_handling_queue.empty():
-                    signal = self.stream_handling_queue.get()
-                    nm.logger.info(f"Got signal: {signal}")
-                    if signal == "stop":
-                        break
+
+                signal = backend_interface.check_control_signals()
+                if signal == "stop":
+                    break
 
             if data_batch is None:
                 nm.logger.info("Data batch is None, stopping run function")
@@ -308,7 +309,6 @@ class Stream:
                 )
 
             feature_dict["time"] = np.ceil(this_batch_end * 1000 + 1)
-
             prev_batch_end = this_batch_end
 
             if self.verbose:
@@ -316,41 +316,41 @@ class Stream:
 
             self._add_target(feature_dict, data_batch)
 
-            with suppress(TypeError):  # Need this because some features output None
-                for key, value in feature_dict.items():
-                    feature_dict[key] = np.float64(value)
-
+            # Push data to file writer
             file_writer.insert_data(feature_dict)
-            if feature_queue is not None:
-                feature_queue.put(feature_dict)
-            if rawdata_queue is not None:
-                # convert raw data into dict with new raw data in unit self.sfreq
-                new_time_ms = 1000 / self.settings.sampling_rate_features_hz
-                new_samples = int(new_time_ms * self.sfreq / 1000)
-                data_batch_dict = {}
-                data_batch_dict["raw_data"] = {}
-                for i, ch in enumerate(self.channels["name"]):
-                    # needs to be list since cbor doesn't support np array
-                    data_batch_dict["raw_data"][ch] = list(data_batch[i, -new_samples:])
-                rawdata_queue.put(data_batch_dict)
 
+            # Send data to frontend
+            if backend_interface:
+                backend_interface.send_features(feature_dict)
+                backend_interface.send_raw_data(self._prepare_raw_data_dict(data_batch))
+
+            # Save features to file in intervals
             self.batch_count += 1
             if self.batch_count % self.save_interval == 0:
                 file_writer.save()
 
         file_writer.save()
+
         if self.save_csv:
             file_writer.save_as_csv(save_all_combined=True)
 
-        if self.return_df:
-            feature_df = file_writer.load_all()
+        feature_df = file_writer.load_all() if self.return_df else {}
 
         self._save_after_stream()
         self.is_running = False
 
-        return (
-            feature_df  # Timon: We could think of returning the feature_reader instead
-        )
+        return feature_df  # Timon: We could think of returnader instead
+
+    def _prepare_raw_data_dict(self, data_batch: np.ndarray) -> dict[str, Any]:
+        """Prepare raw data dictionary for sending through queue"""
+        new_time_ms = 1000 / self.settings.sampling_rate_features_hz
+        new_samples = int(new_time_ms * self.sfreq / 1000)
+        return {
+            "raw_data": {
+                ch: list(data_batch[i, -new_samples:])
+                for i, ch in enumerate(self.channels["name"])
+            }
+        }
 
     def plot_raw_signal(
         self,
@@ -386,11 +386,15 @@ class Stream:
         ValueError
             raise Exception when no data is passed
         """
-        if self.data is None and data is None:
-            raise ValueError("No data passed to plot_raw_signal function.")
-
-        if data is None and self.data is not None:
-            data = self.data
+        if data is None:
+            if self.data is None:
+                raise ValueError("No data passed to plot_raw_signal function.")
+            else:
+                data = (
+                    self.data.to_numpy()
+                    if isinstance(self.data, pd.DataFrame)
+                    else self.data
+                )
 
         if sfreq is None:
             sfreq = self.sfreq
@@ -405,7 +409,7 @@ class Stream:
         from mne import create_info
         from mne.io import RawArray
 
-        info = create_info(ch_names=ch_names, sfreq=sfreq, ch_types=ch_types)
+        info = create_info(ch_names=ch_names, sfreq=sfreq, ch_types=ch_types)  # type: ignore
         raw = RawArray(data, info)
 
         if picks is not None:

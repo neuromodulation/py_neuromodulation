@@ -15,7 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 
 from . import app_pynm
-from .app_socket import WebSocketManager
+from .app_socket import WebsocketManager
 from .app_utils import is_hidden, get_quick_access
 import pandas as pd
 
@@ -29,7 +29,6 @@ ALLOWED_EXTENSIONS = [".npy", ".vhdr", ".fif", ".edf", ".bdf"]
 class PyNMBackend(FastAPI):
     def __init__(
         self,
-        pynm_state: app_pynm.PyNMState,
         debug=False,
         dev=True,
         dev_port: int | None = None,
@@ -48,7 +47,6 @@ class PyNMBackend(FastAPI):
             cors_origins = (
                 ["http://localhost:" + str(dev_port)] if dev_port is not None else []
             )
-            print(cors_origins)
             # Configure CORS
             self.add_middleware(
                 CORSMiddleware,
@@ -69,8 +67,8 @@ class PyNMBackend(FastAPI):
                 name="static",
             )
 
-        self.pynm_state = pynm_state
-        self.websocket_manager = WebSocketManager()
+        self.websocket_manager = WebsocketManager()
+        self.pynm_state = app_pynm.PyNMState()
 
     def setup_routes(self):
         @self.get("/api/health")
@@ -158,8 +156,7 @@ class PyNMBackend(FastAPI):
 
             if action == "stop":
                 self.logger.info("Stopping stream")
-                self.pynm_state.stream_handling_queue.put("stop")
-                self.pynm_state.stop_event_ws.set()
+                self.pynm_state.stop_run_function()
 
             return {"message": f"Stream action '{action}' executed"}
 
@@ -318,6 +315,14 @@ class PyNMBackend(FastAPI):
             try:
                 home_dir = str(Path.home())
                 return {"home_directory": home_dir}
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+
+        # Get PYNM_DIR
+        @self.get("/api/pynm_dir")
+        async def get_pynm_dir():
+            try:
+                return {"pynm_dir": PYNM_DIR}
             except Exception as e:
                 raise HTTPException(status_code=500, detail=str(e))
 

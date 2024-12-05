@@ -125,7 +125,7 @@ class LSLOfflinePlayer:
             try:
                 self.wait_for_completion()
             except KeyboardInterrupt:
-                print("\nKeyboard interrupt received. Stopping the player...")
+                logger.info("\nKeyboard interrupt received. Stopping the player...")
                 self.stop_player()
 
     def _run_player(self, chunk_size, n_repeat, stop_flag, streaming_complete):
@@ -156,7 +156,7 @@ class LSLOfflinePlayer:
                 if self._streaming_complete.is_set():
                     break
             except KeyboardInterrupt:
-                print("\nKeyboard interrupt received. Stopping the player...")
+                logger.info("\nKeyboard interrupt received. Stopping the player...")
                 self.stop_player()
                 break
 
@@ -172,7 +172,7 @@ class LSLOfflinePlayer:
                 self._player_process.kill()
             self._player_process = None
 
-        print(f"Player stopped: {self.stream_name}")
+        logger.info(f"Player stopped: {self.stream_name}")
         LSLOfflinePlayer._instances.discard(self)
 
     @classmethod

@@ -27,7 +27,6 @@ def create_backend():
     :return: The web application instance.
     :rtype: PyNMBackend
     """
-    from .app_pynm import PyNMState
     from .app_backend import PyNMBackend
 
     debug = os.environ.get("PYNM_DEBUG", "False").lower() == "true"
@@ -35,7 +34,6 @@ def create_backend():
     dev_port = os.environ.get("PYNM_DEV_PORT", str(DEV_SERVER_PORT))
 
     return PyNMBackend(
-        pynm_state=PyNMState(),
         debug=debug,
         dev=dev,
         dev_port=int(dev_port),
