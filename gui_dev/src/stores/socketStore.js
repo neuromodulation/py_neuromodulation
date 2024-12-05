@@ -1,5 +1,5 @@
 import { createStore } from "./createStore";
-import { getBackendURL } from "@/utils/getBackendURL";
+import { getBackendURL } from "@/utils";
 import CBOR from "cbor-js";
 
 const WEBSOCKET_URL = getBackendURL("/ws");
@@ -89,16 +89,15 @@ export const useSocketStore = createStore("socket", (set, get) => ({
 
           // check if this is the same:
           Object.entries(decodedData).forEach(([key, value]) => {
-            (key.startsWith("decode") ? decodingData : dataNonDecodingFeatures)[key] = value;
+            (key.startsWith("decode") ? decodingData : dataNonDecodingFeatures)[
+              key
+            ] = value;
           });
 
           set({ availableDecodingOutputs: Object.keys(decodingData) });
 
-
-
           set({ graphDecodingData: decodingData });
           set({ graphData: dataNonDecodingFeatures });
-
         }
       } catch (error) {
         console.error("Failed to decode CBOR message:", error);

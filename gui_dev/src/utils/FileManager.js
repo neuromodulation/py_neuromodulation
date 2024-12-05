@@ -1,14 +1,4 @@
-/**
- * @typedef {Object} FileInfo
- * @property {string} name - The name of the file or directory
- * @property {string} path - The full path of the file or directory
- * @property {string} dir - The directory containing the file or directory
- * @property {boolean} is_directory - Whether the entry is a directory
- * @property {number} size - The size of the file in bytes (0 for directories)
- * @property {string} created_at - The creation timestamp of the file
- * @property {string} modified_at - The last modification timestamp of the file
- */
-import { getBackendURL } from "@/utils/getBackendURL";
+import { FileInfo } from "./FileInfo";
 
 /**
  * Manages file operations and interactions with the file API
@@ -41,13 +31,14 @@ export class FileManager {
       show_hidden: showHidden,
     });
 
-    const response = await fetch(getBackendURL(`${this.apiBaseUrl}/api/files?${queryParams}`));
+    const response = await fetch(`${this.apiBaseUrl}?${queryParams}`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    const filesData = await response.json();
+    return filesData.map((fileData) => FileInfo.fromObject(fileData));
   }
 
   /**

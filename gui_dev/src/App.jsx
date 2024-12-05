@@ -45,8 +45,6 @@ export const App = () => {
   const connectSocket = useSocketStore((state) => state.connectSocket);
   const disconnectSocket = useSocketStore((state) => state.disconnectSocket);
 
-  connectSocket();
-
   useEffect(() => {
     console.log("Connecting socket from App component...");
     connectSocket();

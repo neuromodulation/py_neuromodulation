@@ -1,5 +1,4 @@
 import logging
-import asyncio
 import importlib.metadata
 from datetime import datetime
 from pathlib import Path
@@ -13,9 +12,10 @@ from fastapi import (
 )
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import ValidationError
 
 from . import app_pynm
-from .app_socket import WebSocketManager
+from .app_socket import WebsocketManager
 from .app_utils import is_hidden, get_quick_access
 import pandas as pd
 
@@ -29,9 +29,9 @@ ALLOWED_EXTENSIONS = [".npy", ".vhdr", ".fif", ".edf", ".bdf"]
 class PyNMBackend(FastAPI):
     def __init__(
         self,
-        pynm_state: app_pynm.PyNMState,
         debug=False,
         dev=True,
+        dev_port: int | None = None,
         fastapi_kwargs: dict = {},
     ) -> None:
         super().__init__(debug=debug, **fastapi_kwargs)
@@ -43,14 +43,18 @@ class PyNMBackend(FastAPI):
         self.logger = logging.getLogger("uvicorn.error")
         self.logger.warning(PYNM_DIR)
 
-        # Configure CORS
-        self.add_middleware(
-            CORSMiddleware,
-            allow_origins=["http://localhost:54321"],
-            allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
-        )
+        if dev:
+            cors_origins = (
+                ["http://localhost:" + str(dev_port)] if dev_port is not None else []
+            )
+            # Configure CORS
+            self.add_middleware(
+                CORSMiddleware,
+                allow_origins=cors_origins,
+                allow_credentials=True,
+                allow_methods=["*"],
+                allow_headers=["*"],
+            )
 
         # Has to be before mounting static files
         self.setup_routes()
@@ -63,8 +67,8 @@ class PyNMBackend(FastAPI):
                 name="static",
             )
 
-        self.pynm_state = pynm_state
-        self.websocket_manager = WebSocketManager()
+        self.websocket_manager = WebsocketManager()
+        self.pynm_state = app_pynm.PyNMState()
 
     def setup_routes(self):
         @self.get("/api/health")
@@ -74,21 +78,63 @@ class PyNMBackend(FastAPI):
         ####################
         ##### SETTINGS #####
         ####################
-
         @self.get("/api/settings")
-        async def get_settings():
-            return self.pynm_state.settings.process_for_frontend()
+        async def get_settings(
+            reset: bool = Query(False, description="Reset settings to default"),
+        ):
+            if reset:
+                settings = NMSettings.get_default()
+            else:
+                settings = self.pynm_state.settings
+
+            return settings.serialize_with_metadata()
 
         @self.post("/api/settings")
-        async def update_settings(data: dict):
+        async def update_settings(data: dict, validate_only: bool = Query(False)):
             try:
-                self.pynm_state.settings = NMSettings.model_validate(data)
-                self.logger.info(self.pynm_state.settings.features)
-                return self.pynm_state.settings.model_dump()
-            except ValueError as e:
+                # First, validate with Pydantic
+                try:
+                    # TODO: check if this works properly or needs model_validate_strings
+                    validated_settings = NMSettings.model_validate(data)
+                except ValidationError as e:
+                    self.logger.error(f"Error validating settings: {e}")
+                    if not validate_only:
+                        # If validation failed but we wanted to upload, return error
+                        raise HTTPException(
+                            status_code=422,
+                            detail={
+                                "error": "Error validating settings",
+                                "details": str(e),
+                            },
+                        )
+                    # Else return list of errors
+                    return {
+                        "valid": False,
+                        "errors": [err for err in e.errors()],
+                        "details": str(e),
+                    }
+
+                # If validation succesful, return or update settings
+                if validate_only:
+                    return {
+                        "valid": True,
+                        "settings": validated_settings.serialize_with_metadata(),
+                    }
+
+                self.pynm_state.settings = validated_settings
+                self.logger.info("Settings successfully updated")
+
+                return {
+                    "valid": True,
+                    "settings": self.pynm_state.settings.serialize_with_metadata(),
+                }
+
+            # If something else than validation went wrong, return error
+            except Exception as e:
+                self.logger.error(f"Error validating/updating settings: {e}")
                 raise HTTPException(
                     status_code=422,
-                    detail={"error": "Validation failed", "details": str(e)},
+                    detail={"error": "Error uploading settings", "details": str(e)},
                 )
 
         ########################
@@ -105,14 +151,12 @@ class PyNMBackend(FastAPI):
                 self.logger.info("Starting stream")
 
                 self.pynm_state.start_run_function(
-                        websocket_manager=self.websocket_manager,
+                    websocket_manager=self.websocket_manager,
                 )
-
 
             if action == "stop":
                 self.logger.info("Stopping stream")
-                self.pynm_state.stream_handling_queue.put("stop")
-                self.pynm_state.stop_event_ws.set()
+                self.pynm_state.stop_run_function()
 
             return {"message": f"Stream action '{action}' executed"}
 
@@ -271,6 +315,14 @@ class PyNMBackend(FastAPI):
             try:
                 home_dir = str(Path.home())
                 return {"home_directory": home_dir}
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+
+        # Get PYNM_DIR
+        @self.get("/api/pynm_dir")
+        async def get_pynm_dir():
+            try:
+                return {"pynm_dir": PYNM_DIR}
             except Exception as e:
                 raise HTTPException(status_code=500, detail=str(e))
 

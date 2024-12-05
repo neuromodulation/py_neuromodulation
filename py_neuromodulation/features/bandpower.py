@@ -2,8 +2,13 @@ import numpy as np
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 from pydantic import field_validator
-
 from py_neuromodulation.utils.types import NMBaseModel, BoolSelector, NMFeature
+from py_neuromodulation.utils.pydantic_extensions import (
+    NMField,
+    NMErrorList,
+    create_validation_error,
+)
+from py_neuromodulation import logger
 
 if TYPE_CHECKING:
     from py_neuromodulation.stream.settings import NMSettings
@@ -17,15 +22,18 @@ class BandpowerFeatures(BoolSelector):
 
 
 class BandPowerSettings(NMBaseModel):
-    segment_lengths_ms: dict[str, int] = {
-        "theta": 1000,
-        "alpha": 500,
-        "low beta": 333,
-        "high beta": 333,
-        "low gamma": 100,
-        "high gamma": 100,
-        "HFA": 100,
-    }
+    segment_lengths_ms: dict[str, int] = NMField(
+        default={
+            "theta": 1000,
+            "alpha": 500,
+            "low beta": 333,
+            "high beta": 333,
+            "low gamma": 100,
+            "high gamma": 100,
+            "HFA": 100,
+        },
+        custom_metadata={"field_type": "FrequencySegmentLength"},
+    )
     bandpower_features: BandpowerFeatures = BandpowerFeatures()
     log_transform: bool = True
     kalman_filter: bool = False
@@ -33,24 +41,58 @@ class BandPowerSettings(NMBaseModel):
     @field_validator("bandpower_features")
     @classmethod
     def bandpower_features_validator(cls, bandpower_features: BandpowerFeatures):
-        assert (
-            len(bandpower_features.get_enabled()) > 0
-        ), "Set at least one bandpower_feature to True."
-
+        if not len(bandpower_features.get_enabled()) > 0:
+            raise create_validation_error(
+                error_message="Set at least one bandpower_feature to True.",
+                location=["bandpass_filter_settings", "bandpower_features"],
+            )
         return bandpower_features
 
-    def validate_fbands(self, settings: "NMSettings") -> None:
-        for fband_name, seg_length_fband in self.segment_lengths_ms.items():
-            assert seg_length_fband <= settings.segment_length_features_ms, (
-                f"segment length {seg_length_fband} needs to be smaller than "
-                f" settings['segment_length_features_ms'] = {settings.segment_length_features_ms}"
-            )
+    def validate_fbands(self, settings: "NMSettings") -> NMErrorList:
+        """_summary_
 
+        :param settings: _description_
+        :type settings: NMSettings
+        :raises create_validation_error: _description_
+        :raises create_validation_error: _description_
+        :raises ValueError: _description_
+        """
+        errors: NMErrorList = NMErrorList()
+
+        for fband_name, seg_length_fband in self.segment_lengths_ms.items():
+            # Check that all frequency bands are defined in settings.frequency_ranges_hz
+            if fband_name not in settings.frequency_ranges_hz:
+                logger.warning(
+                    f"Frequency band {fband_name} in bandpass_filter_settings.segment_lengths_ms"
+                    " is not defined in settings.frequency_ranges_hz"
+                )
+
+            # Check that all segment lengths are smaller than settings.segment_length_features_ms
+            if not seg_length_fband <= settings.segment_length_features_ms:
+                errors.add_error(
+                    f"segment length {seg_length_fband} needs to be smaller than "
+                    f" settings['segment_length_features_ms'] = {settings.segment_length_features_ms}",
+                    location=[
+                        "bandpass_filter_settings",
+                        "segment_lengths_ms",
+                        fband_name,
+                    ],
+                )
+
+        # Check that all frequency bands defined in settings.frequency_ranges_hz
         for fband_name in settings.frequency_ranges_hz.keys():
-            assert fband_name in self.segment_lengths_ms, (
-                f"frequency range {fband_name} "
-                "needs to be defined in settings.bandpass_filter_settings.segment_lengths_ms]"
-            )
+            if fband_name not in self.segment_lengths_ms:
+                errors.add_error(
+                    f"frequency range {fband_name} "
+                    "needs to be defined in settings.bandpass_filter_settings.segment_lengths_ms",
+                    location=[
+                        "bandpass_filter_settings",
+                        "segment_lengths_ms",
+                        fband_name,
+                    ],
+                )
+
+        return errors
 
 
 class BandPower(NMFeature):

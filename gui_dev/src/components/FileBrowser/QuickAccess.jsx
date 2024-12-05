@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getBackendURL } from "@/utils/getBackendURL";
+import { getBackendURL } from "@/utils";
 import {
   Paper,
   Typography,

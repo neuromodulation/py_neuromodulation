@@ -6,6 +6,7 @@ from pathlib import Path
 from py_neuromodulation.utils.types import _PathLike
 from functools import lru_cache
 import platform
+from py_neuromodulation import logger
 
 
 def force_terminate_process(
@@ -211,20 +212,18 @@ def get_pinned_folders_windows():
     """
 
     try:
-        print(powershell_command)
         result = subprocess.run(
             ["powershell", "-Command", powershell_command],
             capture_output=True,
             text=True,
             check=True,
         )
-        print(result.stdout)
         return json.loads(result.stdout)
     except subprocess.CalledProcessError as e:
-        print(f"Error running PowerShell command: {e}")
+        logger.error(f"Error running PowerShell command: {e}")
         return []
     except json.JSONDecodeError as e:
-        print(f"Error decoding JSON: {e}")
+        logger.error(f"Error decoding JSON: {e}")
         return []
 
 
@@ -299,9 +298,9 @@ def get_macos_favorites():
                         path = item["URL"].replace("file://", "")
                         favorites.append({"Name": item["Name"], "Path": path})
             except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
-                print(f"Error processing macOS favorites: {e}")
+                logger.error(f"Error processing macOS favorites: {e}")
 
     except Exception as e:
-        print(f"Error getting macOS favorites: {e}")
+        logger.error(f"Error getting macOS favorites: {e}")
 
     return favorites

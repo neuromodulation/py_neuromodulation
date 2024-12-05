@@ -1,5 +1,5 @@
 import { useReducer, useEffect } from "react";
-import { getBackendURL } from "@/utils/getBackendURL";
+import { getBackendURL } from "@/utils";
 import {
   Box,
   Button,
@@ -36,7 +36,7 @@ import {
 import { QuickAccessSidebar } from "./QuickAccess";
 import { FileManager } from "@/utils/FileManager";
 
-const fileManager = new FileManager("");
+const fileManager = new FileManager(getBackendURL("/api/files"));
 
 const ALLOWED_EXTENSIONS = [".npy", ".vhdr", ".fif", ".edf", ".bdf"];
 
