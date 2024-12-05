@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from "react";
-import { useSocketStore } from "@/stores/socketStore"; 
+import { useSocketStore } from "@/stores/socketStore";
 import { useSessionStore } from "@/stores/sessionStore";
 import Plotly from "plotly.js-basic-dist-min";
 import {
@@ -8,20 +8,20 @@ import {
   FormControlLabel,
   Checkbox,
 } from "@mui/material";
-import { CollapsibleBox } from "./CollapsibleBox"; 
-import { shallow } from 'zustand/shallow'; 
+import { CollapsibleBox } from "./CollapsibleBox";
+import { shallow } from 'zustand/shallow';
 
 const generateColors = (numColors) => {
   const colors = [];
   for (let i = 0; i < numColors; i++) {
-    const hue = (i * 360) / numColors; 
+    const hue = (i * 360) / numColors;
     colors.push(`hsl(${hue}, 100%, 50%)`);
   }
   return colors;
 };
 
 export const PSDGraph = () => {
-  const channels = useSessionStore((state) => state.channels, shallow); 
+  const channels = useSessionStore((state) => state.channels, shallow);
 
   const usedChannels = useMemo(
     () => channels.filter((channel) => channel.used === 1),
@@ -31,43 +31,49 @@ export const PSDGraph = () => {
   const availableChannels = useMemo(
     () => usedChannels.map((channel) => channel.name),
     [usedChannels]
-  ); 
+  );
 
   const [selectedChannels, setSelectedChannels] = useState([]);
   const hasInitialized = useRef(false);
-  
-  const psdProcessedData = useSocketStore((state) => state.psdProcessedData);
-  console.log(psdProcessedData);
-  
-  const psdData = useMemo(() => { 
-    if (!psdProcessedData) return [];
 
-    const dataByChannel = psdProcessedData.data_by_channel || new Map();
-    const allFeatures = psdProcessedData.all_features || [];
+  const processedData = useSocketStore((state) => state.processedData);
+
+  const psdData = useMemo(() => {
+    if (!processedData || !selectedChannels.length) return [];
+
+    const dataByChannel = processedData.psd_data_by_channel || {};
 
     const selectedData = selectedChannels.map((channelName) => {
-      const channelData = dataByChannel.get(channelName);
+      const channelData = dataByChannel[channelName];
       if (channelData) {
-        const values = allFeatures.map((featureIndex) => {
-          const value = channelData.feature_map.get(featureIndex);
+        const featureMap = channelData.feature_map || {};
+
+        // Extract feature indices and sort them numerically
+        const sortedFeatures = Object.keys(featureMap)
+          .map(Number)
+          .sort((a, b) => a - b);
+
+        const values = sortedFeatures.map((featureIndex) => {
+          const value = featureMap[featureIndex.toString()];
           return value !== undefined ? value : null;
         });
+
         return {
           channelName,
-          features: allFeatures,
+          features: sortedFeatures,
           values,
         };
       } else {
         return {
           channelName,
-          features: allFeatures,
-          values: allFeatures.map(() => null),
+          features: [],
+          values: [],
         };
       }
     });
 
     return selectedData;
-  }, [psdProcessedData, selectedChannels]); 
+  }, [processedData, selectedChannels]);
 
   const graphRef = useRef(null);
   const plotlyRef = useRef(null);
@@ -84,7 +90,7 @@ export const PSDGraph = () => {
 
   useEffect(() => {
     if (usedChannels.length > 0 && !hasInitialized.current) {
-      const availableChannelNames = usedChannels.map((channel) => channel.name); 
+      const availableChannelNames = usedChannels.map((channel) => channel.name);
       setSelectedChannels(availableChannelNames);
       hasInitialized.current = true;
     }
@@ -104,7 +110,7 @@ export const PSDGraph = () => {
       paper_bgcolor: "#333",
       plot_bgcolor: "#333",
       xaxis: {
-        title: { text: "Feature Index", font: { color: "#f4f4f4" } },
+        title: { text: "Frequency (Hz)", font: { color: "#f4f4f4" } },
         color: "#cccccc",
         type: 'linear',
       },
@@ -138,7 +144,7 @@ export const PSDGraph = () => {
       .catch((error) => {
         console.error("Plotly error:", error);
       });
-  }, [psdData, selectedChannels.length]);
+  }, [psdData]);
 
   return (
     <Box>
@@ -152,7 +158,7 @@ export const PSDGraph = () => {
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           PSD Trace
         </Typography>
-        <Box sx={{ ml: 2, mr: 4, minWidth: 200 }}> 
+        <Box sx={{ ml: 2, mr: 4, minWidth: 200 }}>
           <CollapsibleBox title="Channel Selection" defaultExpanded={true}>
             <Box display="flex" flexDirection="column">
               {usedChannels.map((channel, index) => (
@@ -172,10 +178,10 @@ export const PSDGraph = () => {
           </CollapsibleBox>
         </Box>
       </Box>
-      
+
       <div
         ref={graphRef}
-        style={{ width: "100%"}}
+        style={{ width: "100%" }}
       />
     </Box>
   );

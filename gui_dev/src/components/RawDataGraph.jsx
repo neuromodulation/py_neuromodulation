@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from "react";
-import { useSocketStore } from "@/stores";
+import { useSocketStore } from "@/stores/socketStore";
 import { useSessionStore } from "@/stores/sessionStore";
 import Plotly from "plotly.js-basic-dist-min";
 import {
@@ -13,10 +13,8 @@ import {
   Slider,
 } from "@mui/material";
 import { CollapsibleBox } from "./CollapsibleBox";
-import { getChannelAndFeature } from "./utils";
 import { shallow } from "zustand/shallow";
 
-// TODO redundant and might be candidate for refactor
 const generateColors = (numColors) => {
   const colors = [];
   for (let i = 0; i < numColors; i++) {
@@ -28,10 +26,10 @@ const generateColors = (numColors) => {
 
 export const RawDataGraph = ({
   title = "Raw Data",
-  xAxisTitle = "Nr. of Samples",
+  xAxisTitle = "Number of Samples",
   yAxisTitle = "Value",
 }) => {
-  const graphData = useSocketStore((state) => state.graphData);
+  const processedData = useSocketStore((state) => state.processedData);
 
   const channels = useSessionStore((state) => state.channels, shallow);
 
@@ -47,17 +45,13 @@ export const RawDataGraph = ({
 
   const [selectedChannels, setSelectedChannels] = useState([]);
   const hasInitialized = useRef(false);
-  const [rawData, setRawData] = useState({});
+  const [rawDataBuffer, setRawDataBuffer] = useState({});
   const graphRef = useRef(null);
   const plotlyRef = useRef(null);
   const [yAxisMaxValue, setYAxisMaxValue] = useState("Auto");
   const [maxDataPoints, setMaxDataPoints] = useState(100);
 
   const layoutRef = useRef({
-    // title: {
-    //   text: title,
-    //   font: { color: "#f4f4f4" },
-    // },
     autosize: true,
     height: 400,
     paper_bgcolor: "#333",
@@ -74,21 +68,12 @@ export const RawDataGraph = ({
         font: { color: "#f4f4f4" },
       },
       color: "#cccccc",
-      // autorange: "reversed",
-    },
-    yaxis: {
-      // title: {
-      //   text: yAxisTitle,
-      //   font: { color: "#f4f4f4" },
-      // },
-      // color: "#cccccc",
     },
     font: {
       color: "#f4f4f4",
     },
   });
 
-  // Handling the channel selection here -> TODO: see if this is better done in the socketStore
   const handleChannelToggle = (channelName) => {
     setSelectedChannels((prevSelected) => {
       if (prevSelected.includes(channelName)) {
@@ -115,25 +100,16 @@ export const RawDataGraph = ({
     }
   }, [usedChannels]);
 
-  // Process incoming graphData to extract raw data for each channel -> TODO: Check later if this fits here better than socketStore
   useEffect(() => {
-    const startPSDGraph = performance.now();
-    if (!graphData || Object.keys(graphData).length === 0) return;
+    if (!processedData || !processedData.raw_data_by_channel) return;
 
-    const latestData = graphData;
+    const latestRawData = processedData.raw_data_by_channel;
 
-    setRawData((prevRawData) => {
+    setRawDataBuffer((prevRawData) => {
       const updatedRawData = { ...prevRawData };
 
-      Object.entries(latestData).forEach(([key, value]) => {
-        const { channelName = "", featureName = "" } = getChannelAndFeature(
-          availableChannels,
-          key
-        );
-
-        if (!channelName) return;
-
-        if (featureName !== "raw") return;
+      Object.entries(latestRawData).forEach(([channelName, value]) => {
+        if (!availableChannels.includes(channelName)) return;
 
         if (!updatedRawData[channelName]) {
           updatedRawData[channelName] = [];
@@ -150,9 +126,7 @@ export const RawDataGraph = ({
 
       return updatedRawData;
     });
-    const endPSDGraph = performance.now();
-    console.log("Time taken to process data: ", endPSDGraph - startPSDGraph);
-  }, [graphData, availableChannels, maxDataPoints]);
+  }, [processedData, availableChannels, maxDataPoints]);
 
   useEffect(() => {
     if (!graphRef.current) return;
@@ -200,7 +174,7 @@ export const RawDataGraph = ({
     });
 
     const traces = selectedChannels.map((channelName, idx) => {
-      const yData = rawData[channelName] || [];
+      const yData = rawDataBuffer[channelName] || [];
       const y = yData.slice().reverse();
       const x = Array.from({ length: y.length }, (_, i) => i);
 
@@ -219,13 +193,13 @@ export const RawDataGraph = ({
       ...layoutRef.current,
       xaxis: {
         ...layoutRef.current.xaxis,
-        autorange: "reversed", 
+        autorange: "reversed",
         range: [0, maxDataPoints],
         domain: [0, 1],
         anchor: totalChannels === 1 ? "y" : `y${totalChannels}`,
       },
       ...yAxes,
-      height: 350, // TODO height autoadjust to screen
+      height: 350,
     };
 
     Plotly.react(graphRef.current, traces, layout, {
@@ -238,7 +212,7 @@ export const RawDataGraph = ({
       .catch((error) => {
         console.error("Plotly error:", error);
       });
-  }, [rawData, selectedChannels, yAxisMaxValue, maxDataPoints]);
+  }, [rawDataBuffer, selectedChannels, yAxisMaxValue, maxDataPoints]);
 
   return (
     <Box>
@@ -255,7 +229,6 @@ export const RawDataGraph = ({
         <Box sx={{ display: "flex", ml: 1, mr: 4 }}>
           <Box sx={{ minWidth: 200, mr: 1 }}>
             <CollapsibleBox title="Channel Selection" defaultExpanded={true}>
-              {/* TODO: Fix the typing errors -> How to solve this in jsx?  */}
               <Box display="flex" flexDirection="column">
                 {usedChannels.map((channel, index) => (
                   <FormControlLabel

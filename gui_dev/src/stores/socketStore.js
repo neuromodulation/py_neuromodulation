@@ -1,6 +1,7 @@
 import { createStore } from "./createStore";
 import { getBackendURL } from "@/utils/getBackendURL";
 import init, { process_cbor_data } from '../../data_processor/pkg/cbor_decoder.js';
+import { useSessionStore } from "@/stores/sessionStore";
 
 const WEBSOCKET_URL = getBackendURL("/ws");
 const RECONNECT_INTERVAL = 500; // ms
@@ -18,7 +19,7 @@ export const useSocketStore = createStore("socket", (set, get) => ({
   socket: null,
   status: "disconnected", // 'disconnected', 'connecting', 'connected'
   error: null,
-  psdProcessedData: null,
+  processedData: null,
   infoMessages: [],
   reconnectTimer: null,
   intentionalDisconnect: false,
@@ -72,15 +73,18 @@ export const useSocketStore = createStore("socket", (set, get) => ({
         const arrayBuffer = event.data;
         const uint8Array = new Uint8Array(arrayBuffer);
 
-        // Ensure the WASM module is initialized
         await initWasm();
 
+        const channels = useSessionStore.getState().channels.map(
+          (channel) => channel.name
+        );
+
         // Process CBOR data using Rust module
-        const processedData = process_cbor_data(uint8Array);
+        const processedData = process_cbor_data(uint8Array, channels);
+        console.log("Processed data:", processedData);
 
         // Set processed data in store
-        set({ psdProcessedData: processedData });
-        console.log("PSD processed data:", processedData);
+        set({ processedData });
       } catch (error) {
         console.error("Failed to process CBOR message:", error);
       }

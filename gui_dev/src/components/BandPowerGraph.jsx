@@ -10,7 +10,6 @@ import {
   FormControlLabel,
 } from "@mui/material";
 import { CollapsibleBox } from "./CollapsibleBox";
-import { getChannelAndFeature } from "./utils";
 import { shallow } from "zustand/shallow";
 
 const generateColors = (numColors) => {
@@ -47,45 +46,27 @@ export const BandPowerGraph = () => {
   const [selectedChannel, setSelectedChannel] = useState("");
   const hasInitialized = useRef(false);
 
-  const socketData = useSocketStore((state) => state.graphData);
+  const processedData = useSocketStore((state) => state.processedData);
 
   const data = useMemo(() => {
-    if (!socketData || !selectedChannel) return null;
-    const dataByChannel = {};
+    if (!processedData || !selectedChannel) return null;
 
-    Object.entries(socketData).forEach(([key, value]) => {
-      const { channelName = "", featureName = "" } = getChannelAndFeature(
-        availableChannels,
-        key
-      );
-      if (!channelName) return;
+    const bandwidthDataByChannel = processedData.bandwidth_data_by_channel;
 
-      if (!fftFeatures.includes(featureName)) return;
-
-      if (!dataByChannel[channelName]) {
-        dataByChannel[channelName] = {
-          channelName,
-          features: [],
-          values: [],
-        };
-      }
-
-      dataByChannel[channelName].features.push(featureName);
-      dataByChannel[channelName].values.push(value);
-    });
-
-    const channelData = dataByChannel[selectedChannel];
+    const channelData = bandwidthDataByChannel[selectedChannel];
     if (channelData) {
-      const sortedValues = fftFeatures.map((feature) => {
-        const index = channelData.features.indexOf(feature);
-        return index !== -1 ? channelData.values[index] : null;
+      const features = fftFeatures.map((f) =>
+        f.replace("_mean", "").replace("fft_", "")
+      );
+      const values = fftFeatures.map((feature) => {
+        const value = channelData[feature];
+        return value !== undefined ? value : null;
       });
+
       return {
         channelName: selectedChannel,
-        features: fftFeatures.map((f) =>
-          f.replace("_mean", "").replace("fft_", "")
-        ),
-        values: sortedValues,
+        features,
+        values,
       };
     } else {
       return {
@@ -96,7 +77,7 @@ export const BandPowerGraph = () => {
         values: fftFeatures.map(() => null),
       };
     }
-  }, [socketData, selectedChannel, availableChannels]);
+  }, [processedData, selectedChannel]);
 
   const graphRef = useRef(null);
   const plotlyRef = useRef(null);
@@ -169,7 +150,7 @@ export const BandPowerGraph = () => {
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           Band Power
         </Typography>
-        <Box sx={{ ml: 2, mr:4, minWidth: 200 }}>
+        <Box sx={{ ml: 2, mr: 4, minWidth: 200 }}>
           <CollapsibleBox title="Channel Selection" defaultExpanded={true}>
             <Box display="flex" flexDirection="column">
               <RadioGroup

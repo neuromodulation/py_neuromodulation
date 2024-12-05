@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { useSocketStore, useSessionStore } from '@/stores';
+import { useSocketStore } from '@/stores/socketStore';
+import { useSessionStore } from '@/stores/sessionStore';
 import Plot from 'react-plotly.js';
 import {
   Box,
@@ -12,7 +13,6 @@ import {
   Slider,
 } from '@mui/material';
 import { CollapsibleBox } from './CollapsibleBox';
-import { getChannelAndFeature } from './utils';
 import { shallow } from 'zustand/shallow';
 
 export const HeatmapGraph = () => {
@@ -37,7 +37,7 @@ export const HeatmapGraph = () => {
   const [isDataStale, setIsDataStale] = useState(false);
   const [lastDataTime, setLastDataTime] = useState(null);
 
-  const graphData = useSocketStore((state) => state.graphData);
+  const processedData = useSocketStore((state) => state.processedData);
 
   const [maxDataPoints, setMaxDataPoints] = useState(100);
 
@@ -83,9 +83,10 @@ export const HeatmapGraph = () => {
   }, [usedChannels, selectedChannel]);
 
   useEffect(() => {
-    if (!graphData || !selectedChannel) return;
+    if (!processedData || !selectedChannel) return;
 
-    const dataKeys = Object.keys(graphData);
+    const allData = processedData.all_data || {};
+    const dataKeys = Object.keys(allData);
     const channelPrefix = `${selectedChannel}_`;
     const featureKeys = dataKeys.filter(
       (key) => key.startsWith(channelPrefix) && key !== 'time'
@@ -113,17 +114,18 @@ export const HeatmapGraph = () => {
       setIsDataStale(false);
       setLastDataTime(null);
     }
-  }, [graphData, selectedChannel, features]);
+  }, [processedData, selectedChannel]);
 
   useEffect(() => {
     if (
-      !graphData ||
+      !processedData ||
       !selectedChannel ||
       features.length === 0 ||
       selectedFeatures.length === 0
     )
       return;
 
+    const allData = processedData.all_data || {};
     setLastDataTime(Date.now());
     setIsDataStale(false);
 
@@ -137,7 +139,7 @@ export const HeatmapGraph = () => {
 
     selectedFeatures.forEach((featureName, idx) => {
       const key = `${selectedChannel}_${featureName}`;
-      const value = graphData[key];
+      const value = allData[key];
       const numericValue = typeof value === 'number' && !isNaN(value) ? value : 0;
 
       // Shift existing data to the left if necessary
@@ -155,7 +157,7 @@ export const HeatmapGraph = () => {
 
     setHeatmapData({ x, z });
   }, [
-    graphData,
+    processedData,
     selectedChannel,
     features,
     selectedFeatures,
@@ -183,13 +185,12 @@ export const HeatmapGraph = () => {
     plot_bgcolor: '#333',
     autosize: true,
     xaxis: {
-      title: { text: 'Nr. of Samples', font: { color: '#f4f4f4' } },
+      title: { text: 'Number of Samples', font: { color: '#f4f4f4' } },
       color: '#cccccc',
       tickfont: {
         color: '#cccccc',
       },
       automargin: false,
-      // autorange: 'reversed'
     },
     yaxis: {
       title: { text: 'Features', font: { color: '#f4f4f4' } },
@@ -300,8 +301,8 @@ export const HeatmapGraph = () => {
             ]}
             layout={layout}
             useResizeHandler={true}
-            style={{ width: '100%', height: '100%'}}
-            config={{ responsive: true, displayModeBar: false}}
+            style={{ width: '100%', height: '100%' }}
+            config={{ responsive: true, displayModeBar: false }}
           />
         )}
     </Box>
