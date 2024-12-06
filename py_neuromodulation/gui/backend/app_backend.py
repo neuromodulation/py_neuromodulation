@@ -25,27 +25,33 @@ from py_neuromodulation.utils.types import FileInfo
 # TODO: maybe pull this list from the MNE package?
 ALLOWED_EXTENSIONS = [".npy", ".vhdr", ".fif", ".edf", ".bdf"]
 
+DEV_SERVER_PORT = 54321
+
 
 class PyNMBackend(FastAPI):
     def __init__(
         self,
-        debug=False,
-        dev=True,
+        debug: bool | None = None,
+        dev: bool | None = None,
         dev_port: int | None = None,
         fastapi_kwargs: dict = {},
     ) -> None:
-        super().__init__(debug=debug, **fastapi_kwargs)
+        if debug is None:
+            self.debug = os.environ.get("PYNM_DEBUG", "False").lower() == "true"
+        if dev is None:
+            self.dev = os.environ.get("PYNM_DEV", "False").lower() == "true"
+        if dev_port is None:
+            self.dev_port = os.environ.get("PYNM_DEV_PORT", str(DEV_SERVER_PORT))
 
-        self.debug = debug
-        self.dev = dev
+        super().__init__(debug=self.debug, **fastapi_kwargs)
 
         # Use the FastAPI logger for the backend
         self.logger = logging.getLogger("uvicorn.error")
         self.logger.warning(PYNM_DIR)
 
-        if dev:
+        if self.dev:
             cors_origins = (
-                ["http://localhost:" + str(dev_port)] if dev_port is not None else []
+                ["http://localhost:" + str(self.dev_port)] if self.dev else []
             )
             # Configure CORS
             self.add_middleware(
@@ -60,7 +66,7 @@ class PyNMBackend(FastAPI):
         self.setup_routes()
 
         # Serve static files
-        if not dev:
+        if not self.dev:
             self.mount(
                 "/",
                 StaticFiles(directory=PYNM_DIR / "gui" / "frontend", html=True),

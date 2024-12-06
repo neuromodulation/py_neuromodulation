@@ -3,6 +3,7 @@ import threading
 import os
 import signal
 import time
+import platform
 
 import logging
 
@@ -19,25 +20,6 @@ ARRAY_SIZE = 1000  # Adjust based on your needs
 
 SERVER_PORT = 50001
 DEV_SERVER_PORT = 54321
-
-
-def create_backend():
-    """Factory function passed to Uvicorn to create the web application instance.
-
-    :return: The web application instance.
-    :rtype: PyNMBackend
-    """
-    from .app_backend import PyNMBackend
-
-    debug = os.environ.get("PYNM_DEBUG", "False").lower() == "true"
-    dev = os.environ.get("PYNM_DEV", "True").lower() == "true"
-    dev_port = os.environ.get("PYNM_DEV_PORT", str(DEV_SERVER_PORT))
-
-    return PyNMBackend(
-        debug=debug,
-        dev=dev,
-        dev_port=int(dev_port),
-    )
 
 
 def run_vite(
@@ -147,13 +129,19 @@ def run_uvicorn(
     log_config["formatters"]["access"]["datefmt"] = "%H:%M:%S"
 
     config = Config(
-        app="py_neuromodulation.gui.backend.app_manager:create_backend",
+        app="py_neuromodulation.gui.backend.app_backend:PyNMBackend",
         host="localhost",
         reload=reload,
         factory=True,
         port=server_port,
         log_level="debug" if debug else "info",
         log_config=log_config,
+        http="httptools",
+        ws_ping_interval=None,
+        ws_ping_timeout=None,
+        ws_max_size=1024 * 1024 * 1024,  # 1GB
+        loop="asyncio" if platform.system() == "Windows" else "uvloop",
+        lifespan="off",
     )
 
     server = Server(config=config)

@@ -90,6 +90,10 @@ class PyNMState:
         # Start websocket sender process
 
         if self.websocket_manager:
+            # TONI: Instead of having this function be not async and send the
+            # _process_queue function to the Uvicorn async loop, we could
+            # have this entire "start_run_function" function be async as well
+
             # Get the current event loop and run the queue processor
             loop = asyncio.get_running_loop()
             queue_task = loop.create_task(self._process_queue())
