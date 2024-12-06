@@ -31,41 +31,39 @@ readme = "README.rst"
 requires-python = ">=3.11"
 
 dependencies = [
-  "mne",
-  "filterpy >= 1.4.5",
-  "fooof",
-  "imbalanced-learn",
-  "matplotlib>=3.9.0",
-  "mne-bids >= 0.8",
-  "mne-connectivity",
-  "mrmr_selection",
-  "nolds >=0.6.1",
+  # General
   "numpy >= 1.21.2",
   "pandas >= 2.0.0",
-  "scikit-learn >= 0.24.2",
-  "scikit-optimize",
   "scipy >= 1.7.1",
-  "seaborn >= 0.11",
-  "pybispectra>=1.2.0",
+  "scikit-learn >= 0.24.2",
+  "mne",
   "pyparrm",
-  "pyarrow>=14.0.2",
   "joblib>=1.3.2",
-  "hatch>=1.9.4",
-  "statsmodels",
-  "mne-lsl>=1.2.0",
-  "pynput",
   "pydantic>=2.7.3",
-  "llvmlite>=0.43.0",
-  "pywebview",
-  "fastapi",
-  "uvicorn[standard]>=0.30.6",
+  # IO
+  "mne-bids >= 0.8",
+  "pyarrow>=14.0.2",
+  "mne-lsl>=1.2.0",
+  # Feature-specific
+  "mne-connectivity",
+  "fooof",
+  "nolds >=0.6.1",
+  "pybispectra>=1.2.0",
+  # Graphing
+  "matplotlib>=3.9.0",
   "seaborn >= 0.11",
-  # exists only because of nolds?
-  "numba>=0.60.0",
+  # Decoding/analysis
+  "scikit-optimize",
+  "mrmr_selection",
+  "skops>=0.10.0",
+  "imbalanced-learn",
+  # Web-app GUI packages
   "cbor2>=5.6.4",
   "msgpack>=1.1.0",
-  "multiprocess>=0.70.17",
-  "skops>=0.10.0",
+  "fastapi",
+  "pywebview",
+  "uvicorn[standard]>=0.30.6",
+  'uvloop ; platform_system != "Windows"',
 ]
 
 [project.optional-dependencies]
