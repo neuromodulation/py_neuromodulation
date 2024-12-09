@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 import { CollapsibleBox, TitledBox } from "@/components";
 import { FrequencyRange } from "./FrequencyRange";
 import { useSettingsStore } from "@/stores";
-import { filterObjectByKeys } from "@/utils/functions";
+import { filterObjectByKeys } from "@/utils";
 
 const formatKey = (key) => {
   // console.log(key);
