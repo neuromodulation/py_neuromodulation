@@ -8,19 +8,24 @@ use web_sys::console;
 #[wasm_bindgen]
 pub fn process_cbor_data(data: &[u8], channels_js: JsValue) -> JsValue {
     // Deserialize channels_js into Vec<String>
+    // initially i thought of getting them from the data, but this would be less efficient due to delimiter etc.
     let channels: Vec<String> = match from_value(channels_js) {
         Ok(c) => c,
-        Err(err) => {
-            console::error_1(&format!("Failed to parse channels: {:?}", err).into());
+        Err(_err) => {
             return JsValue::NULL;
         }
     };
 
-    match serde_cbor::from_slice::<Value>(data) {
+    let start = performance_now();
+
+    let decode_result = serde_cbor::from_slice::<Value>(data);
+
+    let end = performance_now();
+    console::log_1(&format!("CBOR decoding took: {} ms", end - start).into());
+
+    match decode_result {
         Ok(decoded_value) => {
-            console::log_1(&format!("Decoded value: {:?}", decoded_value).into());
             if let Value::Map(decoded_map) = decoded_value {
-                // create output data structures for each graph
                 let mut psd_data_by_channel: BTreeMap<String, ChannelData> = BTreeMap::new();
                 let mut raw_data_by_channel: BTreeMap<String, Value> = BTreeMap::new();
                 let mut bandwidth_data_by_channel: BTreeMap<String, BTreeMap<String, Value>> = BTreeMap::new();
@@ -41,11 +46,10 @@ pub fn process_cbor_data(data: &[u8], channels_js: JsValue) -> JsValue {
                         _ => continue,
                     };
 
-                    // Insert into all_data
+                    // All data stored for heatmap
                     all_data.insert(key_str.clone(), value.clone());
 
-                    let (channel_name, feature_name) =
-                        get_channel_and_feature(&key_str, &channels);
+                    let (channel_name, feature_name) = get_channel_and_feature(&key_str, &channels);
 
                     if channel_name.is_empty() {
                         continue;
@@ -69,11 +73,8 @@ pub fn process_cbor_data(data: &[u8], channels_js: JsValue) -> JsValue {
                                 feature_map: BTreeMap::new(),
                             });
 
-                        channel_data
-                            .feature_map
-                            .insert(feature_index_str, value.clone());
+                        channel_data.feature_map.insert(feature_index_str, value.clone());
                     } else if bandwidth_features.contains(&feature_name.as_str()) {
-
                         let channel_bandwidth_data = bandwidth_data_by_channel
                             .entry(channel_name.clone())
                             .or_insert_with(BTreeMap::new);
@@ -89,36 +90,28 @@ pub fn process_cbor_data(data: &[u8], channels_js: JsValue) -> JsValue {
                     all_data,
                 };
 
-                // Serialize maps as plain JavaScript objects
                 let serializer = Serializer::new().serialize_maps_as_objects(true);
                 match result.serialize(&serializer) {
                     Ok(js_value) => js_value,
-                    Err(err) => {
-                        console::error_1(&format!("Serialization error: {:?}", err).into());
-                        JsValue::NULL
-                    }
+                    Err(_) => JsValue::NULL
                 }
             } else {
-                console::error_1(&"Decoded CBOR data is not a map.".into());
                 JsValue::NULL
             }
         }
-        Err(err) => {
-            console::error_1(&format!("Failed to decode CBOR data: {:?}", err).into());
+        Err(_) => {
             JsValue::NULL
         }
     }
 }
 
 fn get_channel_and_feature(key: &str, channels: &[String]) -> (String, String) {
-    // Iterate over channels to find if the key starts with any channel name
     for channel in channels {
         if key.starts_with(channel) {
             let feature_name = key[channel.len()..].trim_start_matches('_');
             return (channel.clone(), feature_name.to_string());
         }
     }
-    // No matching channel found
     ("".to_string(), key.to_string())
 }
 
@@ -134,4 +127,13 @@ struct ProcessedData {
     raw_data_by_channel: BTreeMap<String, Value>,
     bandwidth_data_by_channel: BTreeMap<String, BTreeMap<String, Value>>,
     all_data: BTreeMap<String, Value>,
+}
+
+fn performance_now() -> f64 {
+    if let Some(window) = web_sys::window() {
+        if let Some(perf) = window.performance() {
+            return perf.now();
+        }
+    }
+    0.0
 }
