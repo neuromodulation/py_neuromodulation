@@ -1,18 +1,22 @@
+from typing import Literal
+
 import numpy as np
+import pytest
 from mne_connectivity import make_signals_in_freq_bands
 
 import py_neuromodulation as nm
 
 
-def test_coherence():
-    """Check that coherence features compute properly and match expected values."""
+@pytest.mark.parametrize("method", ["coh", "dpli"])
+def test_mne_connectivity(method: Literal["coh", "dpli"]):
+    """Check that mne_connectivity features compute properly and match expected values."""
     # Simulate connectivity data (interaction at specified frequency band)
     sfreq = 500  # Hz
     n_epochs = 1
     n_times = sfreq * 2  # samples
     fband = (15, 20)  # frequency band of interaction, Hz
     trans = 2  # transition bandwidth of signal, Hz
-    delay = 50  # samples
+    delay = 5  # samples; seed leads target to test directed connectivity methods
     epochs = make_signals_in_freq_bands(
         n_seeds=1,
         n_targets=1,
@@ -43,7 +47,7 @@ def test_coherence():
     # Set up pn_nm processing settings
     settings = nm.NMSettings.get_default()
     settings.reset()
-    settings.features.coherence = True
+    settings.features.mne_connectivity = True
 
     # redefine freq. bands of interest
     # (accounts for signal-noise transition bandwdith when defining frequencies)
@@ -61,15 +65,14 @@ def test_coherence():
             "frequency_high_hz": sfreq // 2 - 1,
         },
     }
-    settings.coherence_settings.frequency_bands = ["signal", "noise_low", "noise_high"]
 
-    # only average within each band required
-    settings.coherence_settings.features = {
-        "mean_fband": True, "max_fband": False, "max_allfbands": False
-    }
+    settings.mne_connectivity_settings.method = method
 
-    # unique all-to-all connectivity indices, i.e.: [[0, 1]]
-    settings.coherence_settings.channels = [ch_names]
+    # unique all-to-all connectivity indices
+    if method == "coh":  # undirected, so unique combination is [[0, 1]]
+        settings.mne_connectivity_settings.channels = [ch_names]
+    else:  # directed, so unique combinations are [[0, 1], [1, 0]]
+        settings.mne_connectivity_settings.channels = [ch_names, ch_names[::-1]]
 
     # do not normalise features for this test!
     # (normalisation changes interpretability of connectivity values, making it harder to
@@ -89,7 +92,7 @@ def test_coherence():
     features = stream.run(
         epochs.get_data(copy=False)[0],  # extract first (and only) epoch from obj
         out_dir="./test_data",
-        experiment_name="test_coherence",
+        experiment_name="test_mne_connectivity",
     )
 
     # Aggregate results over windows
@@ -99,20 +102,40 @@ def test_coherence():
         # average over windows; take absolute before averaging icoh values
         results[key] = np.abs(features[key].values).mean()
 
-    node_name = "seed_to_target"
-    for con_method in ["coh", "icoh"]:
+    if method == "coh":
         # Define expected connectivity values for signal and noise frequencies
-        noise_con = 0.15
-        signal_con = 0.25
+        noise_con = 0.4
+        signal_con = 0.8
 
         # Assert that frequencies of simulated interaction have strong connectivity
         np.testing.assert_array_less(
-            signal_con, results[f"{con_method}_{node_name}_mean_fband_signal"]
+            signal_con, results["coh_seed_to_target_mean_fband_signal"]
         )
         # Assert that frequencies of noise have weak connectivity
         np.testing.assert_array_less(
-            results[f"{con_method}_{node_name}_mean_fband_noise_low"], noise_con
+            results["coh_seed_to_target_mean_fband_noise_low"], noise_con
         )
         np.testing.assert_array_less(
-            results[f"{con_method}_{node_name}_mean_fband_noise_high"], noise_con
+            results["coh_seed_to_target_mean_fband_noise_high"], noise_con
         )
+    else:
+        # Define expected connectivity values for signal and noise frequencies
+        seed_leading = 0.65
+        target_leading = 0.35
+
+        # Assert that frequencies of simulated interaction have strong connectivity, i.e.:
+        # >> 0.5 for seed-to-target; << 0.5 for target-to-seed
+        np.testing.assert_array_less(
+            seed_leading, results["dpli_seed_to_target_mean_fband_signal"]
+        )
+        np.testing.assert_array_less(
+            results["dpli_target_to_seed_mean_fband_signal"], target_leading
+        )
+        # Assert that frequencies of noise have weak connectivity (i.e., ~0.5)
+        for con_name in ["seed_to_target", "target_to_seed"]:
+            np.testing.assert_array_less(
+                results[f"dpli_{con_name}_mean_fband_noise_low"], seed_leading
+            )
+            np.testing.assert_array_less(
+                target_leading, results[f"dpli_{con_name}_mean_fband_noise_low"]
+            )
