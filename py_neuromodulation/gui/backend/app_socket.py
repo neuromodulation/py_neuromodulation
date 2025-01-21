@@ -1,9 +1,10 @@
 from fastapi import WebSocket
 import logging
-import struct
-import json
 import cbor2
-class WebSocketManager:
+import time
+
+
+class WebsocketManager:
     """
     Manages WebSocket connections and messages.
     Perhaps in the future it will handle multiple connections.
@@ -12,6 +13,12 @@ class WebSocketManager:
     def __init__(self):
         self.active_connections: list[WebSocket] = []
         self.logger = logging.getLogger("PyNM")
+        self.disconnected = []
+        self._queue_task = None
+        self._stop_event = None
+        self.loop = None
+        self.messages_sent = 0
+        self._last_diagnostic_time = time.time()
 
     async def connect(self, websocket: WebSocket):
         await websocket.accept()
@@ -30,25 +37,66 @@ class WebSocketManager:
                 f"Client {client_address.port}:{client_address.port} disconnected."
             )
 
+    async def _cleanup_disconnected(self):
+        for connection in self.disconnected:
+            self.active_connections.remove(connection)
+            await connection.close()
+
     # Combine IP and port to create a unique client ID
     async def send_cbor(self, object: dict):
+        if not self.active_connections:
+            self.logger.warning("No active connection to send message.")
+            return
+
+        start_time = time.time()
+        cbor_data = cbor2.dumps(object)
+        serialize_time = time.time() - start_time
+
+        if serialize_time > 0.1:  # Log slow serializations
+            self.logger.warning(f"CBOR serialization took {serialize_time:.3f}s")
+
+        send_start = time.time()
         for connection in self.active_connections:
             try:
-                await connection.send_bytes(cbor2.dumps(object))
+                await connection.send_bytes(cbor_data)
             except RuntimeError as e:
-                self.active_connections.remove(connection)
+                self.logger.error(f"Error sending CBOR message: {e}")
+                self.disconnected.append(connection)
+
+        send_time = time.time() - send_start
+        if send_time > 0.1:  # Log slow sends
+            self.logger.warning(f"WebSocket send took {send_time:.3f}s")
+
+        self.messages_sent += 1
+
+        # Log diagnostics every 5 seconds
+        current_time = time.time()
+        if current_time - self._last_diagnostic_time > 5:
+            self.logger.info(f"Messages sent: {self.messages_sent}")
+            self._last_diagnostic_time = current_time
+
+        await self._cleanup_disconnected()
 
     async def send_message(self, message: str | dict):
-        self.logger.info(f"Sending message within app_socket: {message.keys()}")
-        if self.active_connections:
-            for connection in self.active_connections:
+        if not self.active_connections:
+            self.logger.warning("No active connection to send message.")
+            return
+
+        self.logger.info(
+            f"Sending message within app_socket: {message.keys() if type(message) is dict else message}"
+        )
+        for connection in self.active_connections:
+            try:
                 if type(message) is dict:
                     await connection.send_json(message)
                 elif type(message) is str:
                     await connection.send_text(message)
-            self.logger.info(f"Message sent")
-        else:
-            self.logger.warning("No active connection to send message.")
+                self.logger.info(f"Message sent to {connection.client}")
+            except RuntimeError as e:
+                self.logger.error(f"Error sending message: {e}")
+                self.disconnected.append(connection)
+
+        await self._cleanup_disconnected()
 
     @property
     def is_connected(self):

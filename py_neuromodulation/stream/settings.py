@@ -1,22 +1,27 @@
 """Module for handling settings."""
 
 from pathlib import Path
-from typing import ClassVar
-from pydantic import Field, model_validator
+from typing import Any, ClassVar, get_args
+from pydantic import model_validator, ValidationError
+from pydantic.functional_validators import ModelWrapValidatorHandler
 
-from py_neuromodulation import PYNM_DIR, logger, user_features
+from py_neuromodulation import logger, user_features
 
 from py_neuromodulation.utils.types import (
     BoolSelector,
     FrequencyRange,
-    PreprocessorName,
     _PathLike,
     NMBaseModel,
-    NormMethod,
+    NORM_METHOD,
+    PREPROCESSOR_NAME,
 )
+from py_neuromodulation.utils.pydantic_extensions import NMErrorList, NMField
 
 from py_neuromodulation.processing.filter_preprocessing import FilterSettings
-from py_neuromodulation.processing.normalization import FeatureNormalizationSettings, NormalizationSettings
+from py_neuromodulation.processing.normalization import (
+    FeatureNormalizationSettings,
+    NormalizationSettings,
+)
 from py_neuromodulation.processing.resample import ResamplerSettings
 from py_neuromodulation.processing.projection import ProjectionSettings
 
@@ -31,7 +36,9 @@ from py_neuromodulation.features import OscillatorySettings, BandPowerSettings
 from py_neuromodulation.features import BurstsSettings
 
 
-class FeatureSelection(BoolSelector):
+# TONI: this class has the proble that if a feature is absent,
+# it won't default to False but to whatever is defined here as default
+class FeatureSelector(BoolSelector):
     raw_hjorth: bool = True
     return_raw: bool = True
     bandpass_filter: bool = False
@@ -54,13 +61,24 @@ class PostprocessingSettings(BoolSelector):
     project_subcortex: bool = False
 
 
+DEFAULT_PREPROCESSORS: list[PREPROCESSOR_NAME] = [
+    "raw_resampling",
+    "notch_filter",
+    "re_referencing",
+]
+
+
 class NMSettings(NMBaseModel):
     # Class variable to store instances
     _instances: ClassVar[list["NMSettings"]] = []
 
     # General settings
-    sampling_rate_features_hz: float = Field(default=10, gt=0)
-    segment_length_features_ms: float = Field(default=1000, gt=0)
+    sampling_rate_features_hz: float = NMField(
+        default=10, gt=0, custom_metadata={"unit": "Hz"}
+    )
+    segment_length_features_ms: float = NMField(
+        default=1000, gt=0, custom_metadata={"unit": "ms"}
+    )
     frequency_ranges_hz: dict[str, FrequencyRange] = {
         "theta": FrequencyRange(4, 8),
         "alpha": FrequencyRange(8, 12),
@@ -72,23 +90,28 @@ class NMSettings(NMBaseModel):
     }
 
     # Preproceessing settings
-    preprocessing: list[PreprocessorName] = [
-        "raw_resampling",
-        "notch_filter",
-        "re_referencing",
-    ]
+    preprocessing: list[PREPROCESSOR_NAME] = NMField(
+        default=DEFAULT_PREPROCESSORS,
+        custom_metadata={
+            "field_type": "PreprocessorList",
+            "valid_values": list(get_args(PREPROCESSOR_NAME)),
+        },
+    )
+
     raw_resampling_settings: ResamplerSettings = ResamplerSettings()
     preprocessing_filter: FilterSettings = FilterSettings()
     raw_normalization_settings: NormalizationSettings = NormalizationSettings()
 
     # Postprocessing settings
     postprocessing: PostprocessingSettings = PostprocessingSettings()
-    feature_normalization_settings: FeatureNormalizationSettings = FeatureNormalizationSettings()
+    feature_normalization_settings: FeatureNormalizationSettings = (
+        FeatureNormalizationSettings()
+    )
     project_cortex_settings: ProjectionSettings = ProjectionSettings(max_dist_mm=20)
     project_subcortex_settings: ProjectionSettings = ProjectionSettings(max_dist_mm=5)
 
     # Feature settings
-    features: FeatureSelection = FeatureSelection()
+    features: FeatureSelector = FeatureSelector()
 
     fft_settings: OscillatorySettings = OscillatorySettings()
     welch_settings: OscillatorySettings = OscillatorySettings()
@@ -126,10 +149,38 @@ class NMSettings(NMBaseModel):
         for instance in cls._instances:
             delattr(instance.features, feature)
 
-    @model_validator(mode="after")
-    def validate_settings(self):
+    @model_validator(mode="wrap")  # type: ignore[reportIncompatibleMethodOverride]
+    def validate_settings(self, handler: ModelWrapValidatorHandler) -> Any:
+        # Perform all necessary custom validations in the settings class and also
+        # all validations in the feature classes that need additional information from
+        # the settings class
+        errors: NMErrorList = NMErrorList()
+
+        def remove_private_keys(data):
+            if isinstance(data, dict):
+                if "__value__" in data:
+                    return data["__value__"]
+                else:
+                    return {
+                        key: remove_private_keys(value)
+                        for key, value in data.items()
+                        if not key.startswith("__")
+                    }
+            elif isinstance(data, (list, tuple, set)):
+                return type(data)(remove_private_keys(item) for item in data)
+            else:
+                return data
+
+        self = remove_private_keys(self)
+
+        try:
+            self = handler(self)  # validate the model
+        except ValidationError as e:
+            self = NMSettings.unvalidated(**self)  # type: ignore
+            errors.extend(NMErrorList(e.errors()))
+
         if len(self.features.get_enabled()) == 0:
-            raise ValueError("At least one feature must be selected.")
+            errors.add_error("At least one feature must be selected.")
 
         # Replace spaces with underscores in frequency band names
         self.frequency_ranges_hz = {
@@ -138,32 +189,27 @@ class NMSettings(NMBaseModel):
 
         if self.features.bandpass_filter:
             # Check BandPass settings frequency bands
-            self.bandpass_filter_settings.validate_fbands(self)
+            errors.extend(self.bandpass_filter_settings.validate_fbands(self))
 
             # Check Kalman filter frequency bands
             if self.bandpass_filter_settings.kalman_filter:
-                self.kalman_filter_settings.validate_fbands(self)
+                errors.extend(self.kalman_filter_settings.validate_fbands(self))
 
-        for k, v in self.frequency_ranges_hz.items():
-            if not isinstance(v, FrequencyRange):
-                self.frequency_ranges_hz[k] = FrequencyRange.create_from(v)
+        if len(errors) > 0:
+            raise errors.create_error()
 
         return self
 
     def reset(self) -> "NMSettings":
         self.features.disable_all()
-        self.preprocessing = []
+        self.preprocessing = DEFAULT_PREPROCESSORS
         self.postprocessing.disable_all()
         return self
 
     def set_fast_compute(self) -> "NMSettings":
         self.reset()
         self.features.fft = True
-        self.preprocessing = [
-            "raw_resampling",
-            "notch_filter",
-            "re_referencing",
-        ]
+        self.preprocessing = DEFAULT_PREPROCESSORS
         self.postprocessing.feature_normalization = True
         self.postprocessing.project_cortex = False
         self.postprocessing.project_subcortex = False
@@ -250,10 +296,10 @@ class NMSettings(NMBaseModel):
 
     @staticmethod
     def get_default() -> "NMSettings":
-        return NMSettings.from_file(PYNM_DIR / "default_settings.yaml")
+        return NMSettings()
 
     @staticmethod
-    def list_normalization_methods() -> list[NormMethod]:
+    def list_normalization_methods() -> list[NORM_METHOD]:
         return NormalizationSettings.list_normalization_methods()
 
     def save(

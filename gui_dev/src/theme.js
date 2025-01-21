@@ -22,6 +22,11 @@ export const theme = createTheme({
         disableRipple: true,
       },
     },
+    MuiTextField: {
+      defaultProps: {
+        autoComplete: "off",
+      },
+    },
     MuiStack: {
       defaultProps: {
         alignItems: "center",

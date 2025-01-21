@@ -1,5 +1,5 @@
 import { debounce } from "@/utils";
-import { getBackendURL } from "@/utils/getBackendURL";
+import { getBackendURL } from "@/utils";
 
 const DEBOUNCE_MS = 500; // Adjust as needed
 
@@ -22,28 +22,28 @@ const syncWithBackend = async (state) => {
 const debouncedSync = debounce(syncWithBackend, DEBOUNCE_MS);
 
 
-  /*****************************/
-  /******** BACKEND SYNC *******/
-  /*****************************/
+/*****************************/
+/******** BACKEND SYNC *******/
+/*****************************/
 
-  // Wrap state updates with sync logic
-  setState: async (newState) => {
-    set((state) => ({ ...state, ...newState, syncStatus: "syncing" }));
-    try {
-      await debouncedSync(get());
-      set({ syncStatus: "synced", syncError: null });
-    } catch (error) {
-      set({ syncStatus: "error", syncError: error.message });
-    }
-  },
+// Wrap state updates with sync logic
+setState: async (newState) => {
+  set((state) => ({ ...state, ...newState, syncStatus: "syncing" }));
+  try {
+    await debouncedSync(get());
+    set({ syncStatus: "synced", syncError: null });
+  } catch (error) {
+    set({ syncStatus: "error", syncError: error.message });
+  }
+},
 
-  // // Use this for actions that need immediate sync
-  // setStateAndSync: async (newState) => {
-  //   set((state) => ({ ...state, ...newState, syncStatus: "syncing" }));
-  //   try {
-  //     const syncedState = await syncWithBackend(get());
-  //     set({ ...syncedState, syncStatus: "synced", syncError: null });
-  //   } catch (error) {
-  //     set({ syncStatus: "error", syncError: error.message });
-  //   }
-  // },
+// // Use this for actions that need immediate sync
+// setStateAndSync: async (newState) => {
+//   set((state) => ({ ...state, ...newState, syncStatus: "syncing" }));
+//   try {
+//     const syncedState = await syncWithBackend(get());
+//     set({ ...syncedState, syncStatus: "synced", syncError: null });
+//   } catch (error) {
+//     set({ syncStatus: "error", syncError: error.message });
+//   }
+// }

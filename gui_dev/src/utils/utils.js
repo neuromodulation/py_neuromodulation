@@ -17,6 +17,7 @@ export function debounce(func, wait) {
     timeout = setTimeout(later, wait);
   };
 }
+
 export const flattenDictionary = (dict, parentKey = "", result = {}) => {
   for (let key in dict) {
     const newKey = parentKey ? `${parentKey}.${key}` : key;
@@ -32,7 +33,7 @@ export const flattenDictionary = (dict, parentKey = "", result = {}) => {
 export const filterObjectByKeys = (flatDict, keys) => {
   const filteredDict = {};
   keys.forEach((key) => {
-    if (flatDict.hasOwnProperty(key)) {
+    if (Object.hasOwn(flatDict, key)) {
       filteredDict[key] = flatDict[key];
     }
   });
@@ -47,4 +48,23 @@ export const filterObjectByKeyPrefix = (obj, prefix = "") => {
     }
   }
   return result;
+};
+
+export const getBackendURL = (route) => {
+  return "http://localhost:" + import.meta.env.VITE_BACKEND_PORT + route;
+};
+
+/**
+ * Fetches PyNeuromodulation directory from the backend
+ * @returns {string} PyNeuromodulation directory
+ */
+export const getPyNMDirectory = async () => {
+  const response = await fetch(getBackendURL("/api/pynm_dir"));
+  if (!response.ok) {
+    throw new Error("Failed to fetch settings");
+  }
+
+  const data = await response.json();
+
+  return data.pynm_dir;
 };

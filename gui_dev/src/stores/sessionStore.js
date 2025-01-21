@@ -3,7 +3,7 @@
 // the data source, stream paramerters, the output files paths, etc
 
 import { createStore } from "@/stores/createStore";
-import { getBackendURL } from "@/utils/getBackendURL";
+import { getBackendURL } from "@/utils";
 
 // Workflow stages enum-like object
 export const WorkflowStage = Object.freeze({
@@ -110,7 +110,6 @@ export const useSessionStore = createStore("session", (set, get) => ({
 
   // Check that all stream parameters are valid
   checkStreamParameters: () => {
-    // const { samplingRate, lineNoise, samplingRateFeatures } = get();
     set({
       areParametersValid:
         get().streamParameters.samplingRate &&

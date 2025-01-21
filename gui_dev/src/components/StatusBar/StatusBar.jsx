@@ -2,12 +2,14 @@ import { ResizeHandle } from "./ResizeHandle";
 import { SocketStatus } from "./SocketStatus";
 import { WebviewStatus } from "./WebviewStatus";
 
-import { useWebviewStore } from "@/stores";
-
+import { useUiStore, useWebviewStore } from "@/stores";
 import { Stack } from "@mui/material";
 
 export const StatusBar = () => {
-  const { isWebView } = useWebviewStore((state) => state.isWebView);
+  const isWebView = useWebviewStore((state) => state.isWebView);
+  const getStatusBarContent = useUiStore((state) => state.getStatusBarContent);
+
+  const StatusBarContent = getStatusBarContent();
 
   return (
     <Stack
@@ -17,8 +19,11 @@ export const StatusBar = () => {
       bgcolor="background.level1"
       borderTop="2px solid"
       borderColor="background.level3"
+      height="2rem"
     >
-      <WebviewStatus />
+      {StatusBarContent && <StatusBarContent />}
+
+      {/* <WebviewStatus /> */}
       {/* Current experiment */}
       {/* Current stream */}
       {/* Current activity */}
