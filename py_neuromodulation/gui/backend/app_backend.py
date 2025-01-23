@@ -43,7 +43,13 @@ class PyNMBackend(FastAPI):
         if dev_port is None:
             self.dev_port = os.environ.get("PYNM_DEV_PORT", str(DEV_SERVER_PORT))
 
-        super().__init__(debug=self.debug, **fastapi_kwargs)
+        super().__init__(
+            title="PyNeuromodulation",
+            description="PyNeuromodulation FastAPI backend",
+            version=importlib.metadata.version("py_neuromodulation"),
+            debug=self.debug,
+            **fastapi_kwargs,
+        )
 
         # Use the FastAPI logger for the backend
         self.logger = logging.getLogger("uvicorn.error")
