@@ -20,15 +20,17 @@ from py_neuromodulation import logger
 class PyNMState:
     def __init__(
         self,
+        log_queue_size: bool = False,
     ) -> None:
+        self.log_queue_size = log_queue_size
         self.lsl_stream_name: str = ""
+        self.is_stream_lsl: bool = False
         self.experiment_name: str = "PyNM_Experiment"  # set by set_stream_params
         self.out_dir: _PathLike = str(
             Path.home() / "PyNM" / self.experiment_name
         )  # set by set_stream_params
         self.decoding_model_path: _PathLike | None = None
         self.decoder: RealTimeDecoder | None = None
-        self.is_stream_lsl: bool = False
 
         self.backend_interface: StreamBackendInterface | None = None
         self.websocket_manager: WebsocketManager | None = None
@@ -54,7 +56,6 @@ class PyNMState:
         # TONI: This is dangerous to do here, should be done by the setup functions
         # self.stream.settings = self.settings
 
-        self.is_stream_lsl = self.lsl_stream_name is not None
         self.websocket_manager = websocket_manager
 
         # Create decoder
@@ -77,8 +78,8 @@ class PyNMState:
             kwargs={
                 "out_dir": "" if self.out_dir == "default" else self.out_dir,
                 "experiment_name": self.experiment_name,
-                "is_stream_lsl": self.lsl_stream_name is not None,
-                "stream_lsl_name": self.lsl_stream_name or "",
+                "is_stream_lsl": self.is_stream_lsl,
+                "stream_lsl_name": self.lsl_stream_name,
                 "simulate_real_time": True,
                 "decoder": self.decoder,
                 "backend_interface": self.backend_interface,
@@ -124,8 +125,6 @@ class PyNMState:
         for stream in lsl_streams:
             if stream.name == lsl_stream_name:
                 logger.info(f"found stream {lsl_stream_name}")
-                # setup this stream
-                self.lsl_stream_name = lsl_stream_name
 
                 ch_names = stream.get_channel_names()
                 if ch_names is None:
@@ -161,11 +160,15 @@ class PyNMState:
                     settings=self.settings,
                 )
                 logger.info("stream setup")
-                # self.settings: NMSettings = NMSettings(sampling_rate_features=sfreq)
                 logger.info("settings setup")
+
+                self.lsl_stream_name = lsl_stream_name
+                self.is_stream_lsl = True
                 break
         else:
             logger.error(f"Stream {lsl_stream_name} not found")
+            self.is_stream_lsl = False
+            self.is_stream_lsl = ""
             raise ValueError(f"Stream {lsl_stream_name} not found")
 
     def setup_offline_stream(
@@ -185,8 +188,6 @@ class PyNMState:
             target_keywords=None,
         )
 
-        channels["used"] = 0
-
         self.settings.sampling_rate_features_hz = sampling_rate_features
 
         logger.info(f"settings: {self.settings}")
@@ -198,6 +199,8 @@ class PyNMState:
             line_noise=line_noise,
             sampling_rate_features_hz=sampling_rate_features,
         )
+        self.is_stream_lsl = False
+        self.lsl_stream_name = ""
 
     # Async function that will continuously run in the Uvicorn async loop
     # and handle sending data through the websocket manager
@@ -235,18 +238,19 @@ class PyNMState:
                 await asyncio.sleep(0.001)
 
             # Log queue diagnostics every 5 seconds
-            if current_time - last_queue_check > 5:
-                logger.info(
-                    "\nQueue diagnostics:\n"
-                    f"\tMessages send to websocket: {self.messages_sent}.\n"
-                )
-                try:
+            if self.log_queue_size:
+                if current_time - last_queue_check > 5:
                     logger.info(
-                        f"\tFeature queue size: ~{self.feature_queue.qsize()}\n"
-                        f"\tRaw data queue size: ~{self.rawdata_queue.qsize()}"
+                        "\nQueue diagnostics:\n"
+                        f"\tMessages send to websocket: {self.messages_sent}.\n"
                     )
-                except NotImplementedError:
-                    continue
+                    try:
+                        logger.info(
+                            f"\tFeature queue size: ~{self.feature_queue.qsize()}\n"
+                            f"\tRaw data queue size: ~{self.rawdata_queue.qsize()}"
+                        )
+                    except NotImplementedError:
+                        continue
 
                 last_queue_check = current_time
 
