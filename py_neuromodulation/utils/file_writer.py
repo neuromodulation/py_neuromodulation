@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 from py_neuromodulation.utils.types import _PathLike
+from py_neuromodulation import logger
 
 class AbstractFileWriter(ABC):
 
@@ -78,7 +79,8 @@ class MsgPackFileWriter(AbstractFileWriter):
         for i in range(self.idx):
             with open(self.out_dir / f"{self.name}-{i}.msgpack", "rb") as f:
                 data_l.append(msgpack.unpack(f))
-
+        if len(self.data_l) == 0:
+            raise ValueError("No data to load")
         data = pd.DataFrame(list(np.concatenate(data_l)))
         return data
 
@@ -88,7 +90,11 @@ class MsgPackFileWriter(AbstractFileWriter):
         """
 
         if save_all_combined:
-            data = self.load_all()
+            try:
+                data = self.load_all()
+            except ValueError as e:
+                logger.error(e)
+                return
             data.to_csv(self.csv_path, index=False)
         else:
             if len(self.data_l) > 0:
