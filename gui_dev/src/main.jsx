@@ -1,8 +1,4 @@
-// import { scan } from "react-scan";
-// scan({
-//   enabled: true,
-//   log: true, // logs render info to console
-// });
+import "/scripts/wdyr";
 
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";

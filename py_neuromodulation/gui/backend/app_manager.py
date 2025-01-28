@@ -27,6 +27,7 @@ def run_vite(
     debug: bool = False,
     dev_port: int = DEV_SERVER_PORT,
     backend_port: int = SERVER_PORT,
+    dev_env_vars: dict = {},
 ) -> None:
     """Run Vite in a separate shell"""
     import subprocess
@@ -40,6 +41,9 @@ def run_vite(
     )
 
     os.environ["VITE_BACKEND_PORT"] = str(backend_port)
+
+    for key, value in dev_env_vars.items():
+        os.environ["VITE_" + key] = value
 
     def output_reader(shutdown_event: "Event", process: subprocess.Popen):
         logger.debug("Initialized output stream")
@@ -202,6 +206,7 @@ class AppManager:
         run_in_webview=False,
         server_port=SERVER_PORT,
         dev_port=DEV_SERVER_PORT,
+        dev_env_vars: dict = {},
     ) -> None:
         """_summary_
 
@@ -218,6 +223,7 @@ class AppManager:
         self.run_in_webview = run_in_webview
         self.server_port = server_port
         self.dev_port = dev_port
+        self.dev_env_vars = dev_env_vars
 
         self._reset()
         # Prevent launching multiple instances of the app due to multiprocessing
@@ -297,6 +303,7 @@ class AppManager:
                     "debug": self.debug,
                     "dev_port": self.dev_port,
                     "backend_port": self.server_port,
+                    "dev_env_vars": self.dev_env_vars,
                 },
                 name="Vite",
             )
