@@ -205,3 +205,6 @@ gui_dev/node_modules/*
 
 # LSL log file
 lsllog.txt
+
+#Old Bun binary lockfile
+bun.lockb
