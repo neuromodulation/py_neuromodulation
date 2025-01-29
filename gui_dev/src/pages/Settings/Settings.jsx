@@ -1,8 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Box,
   Button,
+  Card,
+  Divider,
+  IconButton,
   InputAdornment,
+  List,
+  ListItem,
+  ListItemText,
   Popover,
   Stack,
   Switch,
@@ -10,14 +16,17 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { Add, Remove } from "@mui/icons-material";
+import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { Link } from "react-router-dom";
 import { CollapsibleBox, TitledBox } from "@/components";
 import {
   FrequencyRangeList,
   FrequencyRange,
 } from "./components/FrequencyRange";
+import invariant from "tiny-invariant";
 import { useSettingsStore, useStatusBar } from "@/stores";
-import { filterObjectByKeys } from "@/utils/utils";
+import { filterObjectByKeys } from "@/utils";
 
 const formatKey = (key) => {
   return key
@@ -93,8 +102,128 @@ const NumberField = ({ label, value, onChange, error, unit }) => {
 };
 
 const FrequencyRangeField = ({ label, value, onChange, error }) => {
-  console.log(label, value);
-  return <FrequencyRange name={label} range={value} onChangeRange={onChange} />;
+  return (
+    <Stack direction="row" justifyContent="space-between">
+      <Typography variant="body2">{label}</Typography>
+      <FrequencyRange name={label} range={value} onChange={onChange} />
+    </Stack>
+  );
+};
+
+const OrderableLiteralListField = ({
+  label,
+  value = [],
+  onChange,
+  error,
+  valid_values = [],
+}) => {
+  const ListCard = ({ key, item }) => {
+    const ref = useRef(null);
+    const [dragging, setDragging] = useState(false);
+
+    useEffect(() => {
+      const el = ref.current;
+      invariant(el);
+
+      return draggable({
+        element: el,
+        onDragStart: () => setDragging(true),
+        onDrop: () => setDragging(false),
+      });
+    }, []);
+
+    return (
+      <ListItem
+        key={key}
+        secondaryAction={
+          <IconButton edge="end" onClick={() => handleRemove(item)}>
+            <Remove />
+          </IconButton>
+        }
+        ref={ref}
+      >
+        <ListItemText primary={item} />
+      </ListItem>
+    );
+  };
+
+  // Create sets for faster lookup
+  const selectedSet = new Set(value);
+
+  // Filter valid_values into selected and available arrays
+  const selectedItems = valid_values.filter((item) => selectedSet.has(item));
+  const availableItems = valid_values.filter((item) => !selectedSet.has(item));
+
+  const handleAdd = (item) => {
+    const newValue = [...value, item];
+    onChange(newValue);
+  };
+
+  const handleRemove = (item) => {
+    const newValue = value.filter((val) => val !== item);
+    onChange(newValue);
+  };
+
+  return (
+    <Stack spacing={2}>
+      <Typography variant="h6">{label}</Typography>
+
+      <div>
+        <Typography variant="subtitle1" color="primary" sx={{ mb: 1 }}>
+          Selected Items
+        </Typography>
+        <List>
+          {selectedItems.map((item, index) => (
+            <ListCard key={index} item={item} />
+          ))}
+          {selectedItems.length === 0 && (
+            <ListItem>
+              <ListItemText
+                primary="No items selected"
+                sx={{ color: "text.secondary", fontStyle: "italic" }}
+              />
+            </ListItem>
+          )}
+        </List>
+      </div>
+
+      <Divider />
+
+      <div>
+        <Typography variant="subtitle1" color="primary" sx={{ mb: 1 }}>
+          Available Items
+        </Typography>
+        <List>
+          {availableItems.map((item) => (
+            <ListItem
+              key={item}
+              secondaryAction={
+                <IconButton edge="end" onClick={() => handleAdd(item)}>
+                  <Add />
+                </IconButton>
+              }
+            >
+              <ListItemText primary={item} />
+            </ListItem>
+          ))}
+          {availableItems.length === 0 && (
+            <ListItem>
+              <ListItemText
+                primary="No items available"
+                sx={{ color: "text.secondary", fontStyle: "italic" }}
+              />
+            </ListItem>
+          )}
+        </List>
+      </div>
+
+      {error && (
+        <Typography color="error" variant="caption">
+          {error}
+        </Typography>
+      )}
+    </Stack>
+  );
 };
 
 // Map component types to their respective wrappers
@@ -105,6 +234,7 @@ const componentRegistry = {
   float: NumberField,
   number: NumberField,
   FrequencyRange: FrequencyRangeField,
+  PreprocessorList: OrderableLiteralListField,
 };
 
 const SettingsField = ({
@@ -114,7 +244,7 @@ const SettingsField = ({
   value,
   onChange,
   error,
-  unit,
+  metadata,
 }) => {
   return (
     <Tooltip title={error?.msg || ""} arrow placement="top">
@@ -123,7 +253,7 @@ const SettingsField = ({
         onChange={(newValue) => onChange(path, newValue)}
         label={label}
         error={error}
-        unit={unit}
+        {...metadata}
       />
     </Tooltip>
   );
@@ -161,9 +291,18 @@ const SettingsSection = ({
 
   // Case 1: Object or primitive with component -> Don't iterate, render directly
   if (Component) {
+    const metadata = isObject
+      ? Object.keys(settings)
+          .filter((key) => key.startsWith("__"))
+          .reduce((acc, key) => {
+            const cleanKey = key.slice(2).replace(/__+$/, "");
+            acc[cleanKey] = settings[key];
+            return acc;
+          }, {})
+      : {};
+
     const value =
       isObject && "__value__" in settings ? settings.__value__ : settings;
-    const unit = isObject && "__unit__" in settings ? settings.__unit__ : null;
 
     return (
       <SettingsField
@@ -173,7 +312,7 @@ const SettingsSection = ({
         onChange={onChange}
         path={path}
         error={getFieldError(path, errors)}
-        unit={unit}
+        metadata={metadata}
       />
     );
   }
@@ -262,6 +401,7 @@ export const Settings = () => {
   const uploadSettings = useSettingsStore((state) => state.uploadSettings);
   const resetSettings = useSettingsStore((state) => state.resetSettings);
   const validationErrors = useSettingsStore((state) => state.validationErrors);
+  const fetchSettings = useSettingsStore((state) => state.fetchSettings);
   useStatusBar(StatusBarSettingsInfo);
 
   // This is needed so that the frequency ranges stay in order between updates
@@ -330,6 +470,10 @@ export const Settings = () => {
     "segment_length_features_ms",
   ];
 
+  // const valid_values = settings.preprocessing.__valid_values__;
+  // const prepro = settings.preprocessing.__value__;
+  // console.log(valid_values);
+  // console.log(prepro);
   return (
     <Stack justifyContent="center" pb={2}>
       {/* SETTINGS LAYOUT */}
@@ -359,8 +503,8 @@ export const Settings = () => {
             <FrequencyRangeList
               ranges={settings.frequency_ranges_hz}
               rangeOrder={frequencyRangeOrder}
-              onOrderChange={updateFrequencyRangeOrder}
               onChange={handleChangeSettings}
+              onOrderChange={updateFrequencyRangeOrder}
               errors={validationErrors}
             />
           </TitledBox>

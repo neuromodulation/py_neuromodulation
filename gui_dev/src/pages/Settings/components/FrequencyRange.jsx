@@ -1,13 +1,5 @@
-import { useState } from "react";
-import {
-  TextField,
-  Button,
-  IconButton,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { TextField, IconButton, Button, Stack } from "@mui/material";
 import { Add, Close } from "@mui/icons-material";
-import { debounce } from "@/utils";
 
 const NumberField = ({ ...props }) => (
   <TextField
@@ -26,76 +18,27 @@ const NumberField = ({ ...props }) => (
   />
 );
 
-export const FrequencyRange = ({
-  name,
-  range,
-  onChangeName,
-  onChangeRange,
-  error,
-  nameEditable = false,
-}) => {
-  console.log(range);
-  const [localName, setLocalName] = useState(name);
-
-  const debouncedChangeName = debounce((newName) => {
-    onChangeName(newName, name);
-  }, 1000);
-
-  const handleNameChange = (e) => {
-    if (!nameEditable) return;
-    const newName = e.target.value;
-    setLocalName(newName);
-    debouncedChangeName(newName);
-  };
-
-  const handleNameBlur = () => {
-    if (!nameEditable) return;
-    onChangeName(localName, name);
-  };
-
-  const handleKeyPress = (e) => {
-    if (!nameEditable) return;
-    if (e.key === "Enter") {
-      console.log(e.target.value, name);
-      onChangeName(localName, name);
-    }
-  };
-
-  const handleRangeChange = (name, field, value) => {
-    // onChangeRange takes the name of the range as the first argument
-    onChangeRange(name, { ...range, [field]: value });
+export const FrequencyRange = ({ range, onChange, error }) => {
+  const handleChange = (field, value) => {
+    const newRange = { ...range };
+    newRange[field] = value;
+    onChange(newRange);
   };
 
   return (
     <Stack direction="row" alignItems="center" gap={1}>
-      {nameEditable ? (
-        <TextField
-          size="small"
-          value={localName}
-          fullWidth
-          onChange={handleNameChange}
-          onBlur={handleNameBlur}
-          onKeyPress={handleKeyPress}
-        />
-      ) : (
-        <Typography variant="body2">{name}</Typography>
-      )}
       <NumberField
         size="small"
         type="number"
         value={range.frequency_low_hz}
-        onChange={(e) =>
-          handleRangeChange(name, "frequency_low_hz", e.target.value)
-        }
+        onChange={(e) => handleChange("frequency_low_hz", e.target.value)}
         label="Low Hz"
       />
       <NumberField
         size="small"
         type="number"
         value={range.frequency_high_hz}
-        onChange={(e) =>
-          handleRangeChange(name, "frequency_high_hz", e.target.value)
-        }
+        onChange={(e) => handleChange("frequency_high_hz", e.target.value)}
         label="High Hz"
       />
     </Stack>
@@ -109,12 +52,14 @@ export const FrequencyRangeList = ({
   onOrderChange,
   errors,
 }) => {
+  // Handle changes to range values
   const handleChangeRange = (name, newRange) => {
     const updatedRanges = { ...ranges };
     updatedRanges[name] = newRange;
     onChange(["frequency_ranges_hz"], updatedRanges);
   };
 
+  // Handle changes to range names
   const handleChangeName = (newName, oldName) => {
     if (oldName === newName) {
       return;
@@ -122,6 +67,7 @@ export const FrequencyRangeList = ({
 
     const updatedRanges = { ...ranges, [newName]: ranges[oldName] };
     delete updatedRanges[oldName];
+    console.log(updatedRanges);
     onChange(["frequency_ranges_hz"], updatedRanges);
 
     const updatedOrder = rangeOrder.map((name) =>
@@ -130,7 +76,8 @@ export const FrequencyRangeList = ({
     onOrderChange(updatedOrder);
   };
 
-  const handleRemove = (name) => {
+  // Handle removing a range
+  const handleRemoveRange = (name) => {
     const updatedRanges = { ...ranges };
     delete updatedRanges[name];
     onChange(["frequency_ranges_hz"], updatedRanges);
@@ -139,7 +86,8 @@ export const FrequencyRangeList = ({
     onOrderChange(updatedOrder);
   };
 
-  const addRange = () => {
+  // Handle adding a new range
+  const handleAddRange = () => {
     let newName = "NewRange";
     let counter = 0;
     // Find first available name
@@ -165,30 +113,41 @@ export const FrequencyRangeList = ({
   return (
     <Stack gap={1}>
       {rangeOrder.map((name, index) => (
-        <Stack direction="row">
+        <Stack direction="row" gap={1}>
+          <TextField
+            size="small"
+            value={name}
+            fullWidth
+            onChange={(e) => handleChangeName(e.target.value, name)}
+          />
           <FrequencyRange
             key={index}
             name={name}
             range={ranges[name]}
-            onChangeName={handleChangeName}
-            onChangeRange={handleChangeRange}
-            onRemove={handleRemove}
+            onChange={(newRange) => handleChangeRange(name, newRange)}
+            onRemove={handleRemoveRange}
             nameEditable={true}
           />
-          <IconButton
-            onClick={() => handleRemove(name)}
+          <Button
             color="primary"
-            disableRipple
-            sx={{ m: 0, p: 0 }}
+            variant="contained"
+            onClick={() => handleRemoveRange(name)}
+            sx={{
+              minWidth: 0,
+              aspectRatio: 1,
+              "&:hover": {
+                color: "red",
+              },
+            }}
           >
             <Close />
-          </IconButton>
+          </Button>
         </Stack>
       ))}
       <Button
-        variant="outlined"
+        variant="contained"
         startIcon={<Add />}
-        onClick={addRange}
+        onClick={handleAddRange}
         sx={{ mt: 1 }}
       >
         Add Range
