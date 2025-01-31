@@ -288,6 +288,8 @@ class SharpwaveAnalyzer(NMFeature):
 
             # the key_name stays, since the estimator function stays between peaks and troughs
             for key_name, estimator in self.estimator_key_map.items():
+                if "num_peaks" in key_name:
+                    continue
                 feature_results[key_name] = estimator(
                     [
                         list(dict_ch_features[key_name].values())[0],
