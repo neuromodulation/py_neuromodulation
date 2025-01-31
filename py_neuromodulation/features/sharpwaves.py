@@ -267,6 +267,14 @@ class SharpwaveAnalyzer(NMFeature):
 
             # for each feature take the respective fun.
             for feature_name, estimator_name, estimator in estimator_combinations:
+                if feature_name == "num_peaks":
+                    key_name = f"{ch_name}_Sharpwave_{feature_name}_{filter_name}"
+                    if len(waveform_results[feature_name]) == 1:
+                        dict_ch_features[key_name][key_name_pt] = waveform_results[feature_name][0]
+                        continue
+                    else:
+                        raise ValueError("num_peaks should be a list with length 1")
+                    # there can be only one num_peak in each batch
                 feature_data = waveform_results[feature_name]
                 key_name = f"{ch_name}_Sharpwave_{estimator_name.title()}_{feature_name}_{filter_name}"
 
