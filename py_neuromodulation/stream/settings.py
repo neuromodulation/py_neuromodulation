@@ -5,7 +5,7 @@ from typing import Any, ClassVar, get_args
 from pydantic import model_validator, ValidationError
 from pydantic.functional_validators import ModelWrapValidatorHandler
 
-from py_neuromodulation import logger, user_features
+from py_neuromodulation import logger, user_features, PYNM_DIR
 
 from py_neuromodulation.utils.types import (
     BoolSelector,
@@ -296,7 +296,7 @@ class NMSettings(NMBaseModel):
 
     @staticmethod
     def get_default() -> "NMSettings":
-        return NMSettings()
+        return NMSettings.from_file(PYNM_DIR / "default_settings.yaml")
 
     @staticmethod
     def list_normalization_methods() -> list[NORM_METHOD]:

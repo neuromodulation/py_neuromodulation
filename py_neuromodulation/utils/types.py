@@ -106,10 +106,29 @@ class FrequencyRange(NMBaseModel):
     @model_validator(mode="after")
     def validate_range(self):
         if not (isnan(self.frequency_high_hz) or isnan(self.frequency_low_hz)):
-            assert (
-                self.frequency_high_hz > self.frequency_low_hz
-            ), "Frequency high must be greater than frequency low"
+            assert self.frequency_high_hz > self.frequency_low_hz, (
+                "Frequency high must be greater than frequency low"
+            )
         return self
+
+    @model_validator(mode="before")
+    @classmethod
+    def check_input(cls, input):
+        """Pydantic validator to convert the input to a dictionary when passed as a list
+        as we have it by default in the default_settings.yaml file
+        For example, [1,2] will be converted to {"frequency_low_hz": 1, "frequency_high_hz": 2}
+        """
+        match input:
+            case dict() if "frequency_low_hz" in input and "frequency_high_hz" in input:
+                return input
+            case Sequence() if len(input) == 2:
+                return {"frequency_low_hz": input[0], "frequency_high_hz": input[1]}
+            case _:
+                raise ValueError(
+                    "Value for FrequencyRange must be a dictionary, "
+                    "or a sequence of 2 numeric values, "
+                    f"but got {input} instead."
+                )
 
 
 class BoolSelector(NMBaseModel):
