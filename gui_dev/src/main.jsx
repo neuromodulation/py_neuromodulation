@@ -1,10 +1,8 @@
-import "/scripts/wdyr";
+import "/scripts/wdyr"; // Set up react-scan
 
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { App } from "./App.jsx";
-
-// Set up react-scan
 
 // Ignore React 19 warning about accessing element.ref
 const originalConsoleError = console.error;

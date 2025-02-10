@@ -27,7 +27,7 @@ if (import.meta.env.DEV && import.meta.env.VITE_ENABLE_REACT_SCAN === "true") {
     const { scan } = await import("react-scan");
     scan({
       enabled: true,
-      log: true, // logs render info to console
+      // log: true, // logs render info to console
     });
   } catch {
     console.error("'React Scan' not found");

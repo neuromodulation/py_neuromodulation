@@ -1,4 +1,4 @@
-import { TextField, IconButton, Button, Stack } from "@mui/material";
+import { TextField, Button, Stack, Typography } from "@mui/material";
 import { Add, Close } from "@mui/icons-material";
 
 const NumberField = ({ ...props }) => (
@@ -45,6 +45,15 @@ export const FrequencyRange = ({ range, onChange, error }) => {
   );
 };
 
+export const FrequencyRangeField = ({ label, value, onChange, error }) => {
+  return (
+    <Stack direction="row" justifyContent="space-between">
+      <Typography variant="body2">{label}</Typography>
+      <FrequencyRange name={label} range={value} onChange={onChange} />
+    </Stack>
+  );
+};
+
 export const FrequencyRangeList = ({
   ranges,
   rangeOrder,
@@ -67,7 +76,6 @@ export const FrequencyRangeList = ({
 
     const updatedRanges = { ...ranges, [newName]: ranges[oldName] };
     delete updatedRanges[oldName];
-    console.log(updatedRanges);
     onChange(["frequency_ranges_hz"], updatedRanges);
 
     const updatedOrder = rangeOrder.map((name) =>
@@ -113,7 +121,7 @@ export const FrequencyRangeList = ({
   return (
     <Stack gap={1}>
       {rangeOrder.map((name, index) => (
-        <Stack direction="row" gap={1}>
+        <Stack key={index} direction="row" gap={1}>
           <TextField
             size="small"
             value={name}

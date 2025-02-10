@@ -1,32 +1,26 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
-  Card,
-  Divider,
-  IconButton,
-  InputAdornment,
-  List,
-  ListItem,
-  ListItemText,
   Popover,
   Stack,
-  Switch,
-  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
-import { Add, Remove } from "@mui/icons-material";
-import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { CollapsibleBox, TitledBox } from "@/components";
 import {
   FrequencyRangeList,
-  FrequencyRange,
+  FrequencyRangeField,
 } from "./components/FrequencyRange";
-import invariant from "tiny-invariant";
 import { useSettingsStore, useStatusBar } from "@/stores";
 import { filterObjectByKeys } from "@/utils";
+import {
+  NumericField,
+  StringField,
+  BooleanField,
+} from "./components/PrimitiveComponents";
+import { OrderableLiteralListField } from "./components/OrderableLiteralListField";
 
 const formatKey = (key) => {
   return key
@@ -35,228 +29,15 @@ const formatKey = (key) => {
     .join(" ");
 };
 
-// Wrapper components for each type
-const BooleanField = ({ label, value, onChange, error }) => (
-  <Stack direction="row" justifyContent="space-between">
-    <Typography variant="body2">{label}</Typography>
-    <Switch checked={value} onChange={(e) => onChange(e.target.checked)} />
-  </Stack>
-);
-const errorStyle = {
-  "& .MuiOutlinedInput-root": {
-    "& fieldset": { borderColor: "error.main" },
-    "&:hover fieldset": {
-      borderColor: "error.main",
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: "error.main",
-    },
-  },
-};
-
-const StringField = ({ label, value, onChange, error }) => {
-  const errorSx = error ? errorStyle : {};
-  return (
-    <Stack direction="row" justifyContent="space-between">
-      <Typography variant="body2">{label}</Typography>
-      <TextField
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        label={label}
-        sx={{ ...errorSx }}
-      />
-    </Stack>
-  );
-};
-
-const NumberField = ({ label, value, onChange, error, unit }) => {
-  const errorSx = error ? errorStyle : {};
-
-  const handleChange = (event) => {
-    const newValue = event.target.value;
-    // Only allow numbers and decimal point
-    if (newValue === "" || /^\d*\.?\d*$/.test(newValue)) {
-      onChange(newValue);
-    }
-  };
-
-  return (
-    <Stack direction="row" justifyContent="space-between">
-      <Typography variant="body2">{label}</Typography>
-
-      <TextField
-        type="text" // Using "text" instead of "number" for more control
-        value={value}
-        onChange={handleChange}
-        label={label}
-        sx={{ ...errorSx }}
-        InputProps={{
-          endAdornment: <InputAdornment position="end">{unit}</InputAdornment>,
-        }}
-        inputProps={{
-          pattern: "[0-9]*",
-        }}
-      />
-    </Stack>
-  );
-};
-
-const FrequencyRangeField = ({ label, value, onChange, error }) => {
-  return (
-    <Stack direction="row" justifyContent="space-between">
-      <Typography variant="body2">{label}</Typography>
-      <FrequencyRange name={label} range={value} onChange={onChange} />
-    </Stack>
-  );
-};
-
-const OrderableLiteralListField = ({
-  label,
-  value = [],
-  onChange,
-  error,
-  valid_values = [],
-}) => {
-  const ListCard = ({ key, item }) => {
-    const ref = useRef(null);
-    const [dragging, setDragging] = useState(false);
-
-    useEffect(() => {
-      const el = ref.current;
-      invariant(el);
-
-      return draggable({
-        element: el,
-        onDragStart: () => setDragging(true),
-        onDrop: () => setDragging(false),
-      });
-    }, []);
-
-    return (
-      <ListItem
-        key={key}
-        secondaryAction={
-          <IconButton edge="end" onClick={() => handleRemove(item)}>
-            <Remove />
-          </IconButton>
-        }
-        ref={ref}
-      >
-        <ListItemText primary={item} />
-      </ListItem>
-    );
-  };
-
-  // Create sets for faster lookup
-  const selectedSet = new Set(value);
-
-  // Filter valid_values into selected and available arrays
-  const selectedItems = valid_values.filter((item) => selectedSet.has(item));
-  const availableItems = valid_values.filter((item) => !selectedSet.has(item));
-
-  const handleAdd = (item) => {
-    const newValue = [...value, item];
-    onChange(newValue);
-  };
-
-  const handleRemove = (item) => {
-    const newValue = value.filter((val) => val !== item);
-    onChange(newValue);
-  };
-
-  return (
-    <Stack spacing={2}>
-      <Typography variant="h6">{label}</Typography>
-
-      <div>
-        <Typography variant="subtitle1" color="primary" sx={{ mb: 1 }}>
-          Selected Items
-        </Typography>
-        <List>
-          {selectedItems.map((item, index) => (
-            <ListCard key={index} item={item} />
-          ))}
-          {selectedItems.length === 0 && (
-            <ListItem>
-              <ListItemText
-                primary="No items selected"
-                sx={{ color: "text.secondary", fontStyle: "italic" }}
-              />
-            </ListItem>
-          )}
-        </List>
-      </div>
-
-      <Divider />
-
-      <div>
-        <Typography variant="subtitle1" color="primary" sx={{ mb: 1 }}>
-          Available Items
-        </Typography>
-        <List>
-          {availableItems.map((item) => (
-            <ListItem
-              key={item}
-              secondaryAction={
-                <IconButton edge="end" onClick={() => handleAdd(item)}>
-                  <Add />
-                </IconButton>
-              }
-            >
-              <ListItemText primary={item} />
-            </ListItem>
-          ))}
-          {availableItems.length === 0 && (
-            <ListItem>
-              <ListItemText
-                primary="No items available"
-                sx={{ color: "text.secondary", fontStyle: "italic" }}
-              />
-            </ListItem>
-          )}
-        </List>
-      </div>
-
-      {error && (
-        <Typography color="error" variant="caption">
-          {error}
-        </Typography>
-      )}
-    </Stack>
-  );
-};
-
 // Map component types to their respective wrappers
 const componentRegistry = {
   boolean: BooleanField,
   string: StringField,
-  int: NumberField,
-  float: NumberField,
-  number: NumberField,
+  int: NumericField,
+  float: NumericField,
+  number: NumericField,
   FrequencyRange: FrequencyRangeField,
   PreprocessorList: OrderableLiteralListField,
-};
-
-const SettingsField = ({
-  path,
-  Component,
-  label,
-  value,
-  onChange,
-  error,
-  metadata,
-}) => {
-  return (
-    <Tooltip title={error?.msg || ""} arrow placement="top">
-      <Component
-        value={value}
-        onChange={(newValue) => onChange(path, newValue)}
-        label={label}
-        error={error}
-        {...metadata}
-      />
-    </Tooltip>
-  );
 };
 
 // Function to get the error corresponding to this field or its children
@@ -304,16 +85,19 @@ const SettingsSection = ({
     const value =
       isObject && "__value__" in settings ? settings.__value__ : settings;
 
+    const error = getFieldError(path, errors);
+
+    // Render the corresponding component
     return (
-      <SettingsField
-        Component={Component}
-        label={boxTitle}
-        value={value}
-        onChange={onChange}
-        path={path}
-        error={getFieldError(path, errors)}
-        metadata={metadata}
-      />
+      <Tooltip title={error?.msg || ""} arrow placement="top">
+        <Component
+          value={value}
+          onChange={(newValue) => onChange(path, newValue)}
+          label={boxTitle}
+          error={error}
+          {...metadata}
+        />
+      </Tooltip>
     );
   }
 
@@ -328,6 +112,7 @@ const SettingsSection = ({
 
           const newPath = [...path, key];
 
+          // Recursively render the settings section
           return (
             <SettingsSection
               key={`${newPath.join(".")}_settingsSection`}
@@ -402,7 +187,7 @@ export const Settings = () => {
   const uploadSettings = useSettingsStore((state) => state.uploadSettings);
   const resetSettings = useSettingsStore((state) => state.resetSettings);
   const validationErrors = useSettingsStore((state) => state.validationErrors);
-  const fetchSettings = useSettingsStore((state) => state.fetchSettings);
+  // const fetchSettings = useSettingsStore((state) => state.fetchSettings);
   useStatusBar(StatusBarSettingsInfo);
 
   // This is needed so that the frequency ranges stay in order between updates
@@ -433,14 +218,21 @@ export const Settings = () => {
       let current = settings;
       for (let i = 0; i < path.length - 1; i++) {
         current = current[path[i]];
+        if (Object.hasOwn(current, "__value__")) {
+          current = current.__value__;
+        }
       }
-      current[path[path.length - 1]] = value;
+      if (Object.hasOwn(current[path[path.length - 1]], "__value__")) {
+        current[path[path.length - 1]].__value__ = value;
+      } else {
+        current[path[path.length - 1]] = value;
+      }
     }, true); // validateOnly = true
   };
 
   const saveAndStream = () => {
     uploadSettings(() => settings);
-    navigate('/dashboard');
+    navigate("/dashboard");
   };
 
   const handleResetSettings = async () => {
