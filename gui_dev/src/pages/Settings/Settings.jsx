@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import { Add, Remove } from "@mui/icons-material";
 import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CollapsibleBox, TitledBox } from "@/components";
 import {
   FrequencyRangeList,
@@ -396,6 +396,7 @@ const StatusBarSettingsInfo = () => {
 };
 
 export const Settings = () => {
+  const navigate = useNavigate();
   // Get all necessary state from the settings store
   const settings = useSettingsStore((state) => state.settings);
   const uploadSettings = useSettingsStore((state) => state.uploadSettings);
@@ -437,8 +438,9 @@ export const Settings = () => {
     }, true); // validateOnly = true
   };
 
-  const handleSaveSettings = () => {
+  const saveAndStream = () => {
     uploadSettings(() => settings);
+    navigate('/dashboard');
   };
 
   const handleResetSettings = async () => {
@@ -595,19 +597,10 @@ export const Settings = () => {
         <Button
           variant="contained"
           color="primary"
-          onClick={handleSaveSettings}
+          onClick={saveAndStream}
           disabled={validationErrors}
         >
-          Save Settings
-        </Button>
-        <Button
-          variant="contained"
-          component={Link}
-          color="primary"
-          to="/dashboard"
-          disabled={validationErrors}
-        >
-          Run Stream
+          Save & Run Stream
         </Button>
       </Stack>
     </Stack>

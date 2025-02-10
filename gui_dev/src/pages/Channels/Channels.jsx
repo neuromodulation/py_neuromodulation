@@ -1,4 +1,5 @@
 import { useSessionStore } from "@/stores";
+import { useNavigate } from "react-router-dom";
 
 import {
   Box,
@@ -211,6 +212,7 @@ const ChannelsTable = () => {
  * @returns {JSX.Element} - The Channels component
  */
 export const Channels = () => {
+  const navigate = useNavigate();
   const uploadChannels = useSessionStore((state) => state.uploadChannels);
 
   return (
@@ -228,13 +230,13 @@ export const Channels = () => {
           <Button
             variant="contained"
             color="primary"
-            onClick={() => uploadChannels()}
+            onClick={() => {
+              uploadChannels();
+              navigate('/settings');
+            }}
           >
-            Save Channels
-          </Button>
-          <LinkButton to="/settings" variant="contained" color="primary">
             Settings
-          </LinkButton>
+          </Button>
         </Box>
       </Stack>
     </Container>
