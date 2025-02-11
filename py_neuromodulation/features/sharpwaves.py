@@ -302,9 +302,11 @@ class SharpwaveAnalyzer(NMFeature):
                 )
             # add here also the num_peaks features
             if self.sw_settings.sharpwave_features.num_peaks:
-                key_name = f"{ch_name}_Sharpwave_num_peaks_{filter_name}"
-                feature_results[key_name] = np_mean([dict_ch_features[key_name]["Peak"],
-                                                    dict_ch_features[key_name]["Trough"]])
+                for ch_name in self.ch_names:
+                    for filter_name in self.filter_names:
+                        key_name = f"{ch_name}_Sharpwave_num_peaks_{filter_name}"
+                        feature_results[key_name] = np_mean([dict_ch_features[key_name]["Peak"],
+                                                            dict_ch_features[key_name]["Trough"]])
         else:
             # otherwise, save all write all "flattened" key value pairs in feature_results
             for key, subdict in dict_ch_features.items():
