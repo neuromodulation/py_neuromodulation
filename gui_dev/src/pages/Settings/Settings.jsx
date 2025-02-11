@@ -14,20 +14,13 @@ import {
   FrequencyRangeField,
 } from "./components/FrequencyRange";
 import { useSettingsStore, useStatusBar } from "@/stores";
-import { filterObjectByKeys } from "@/utils";
+import { filterObjectByKeys, formatKey } from "@/utils";
 import {
   NumericField,
   StringField,
   BooleanField,
 } from "./components/PrimitiveComponents";
 import { OrderableLiteralListField } from "./components/OrderableLiteralListField";
-
-const formatKey = (key) => {
-  return key
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-};
 
 // Map component types to their respective wrappers
 const componentRegistry = {
