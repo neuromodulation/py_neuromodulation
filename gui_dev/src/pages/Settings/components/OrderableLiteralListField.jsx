@@ -6,12 +6,77 @@ import { Add, Remove } from "@mui/icons-material";
 import {
   Divider,
   IconButton,
+  Paper,
   List,
   ListItem,
   ListItemText,
   Stack,
   Typography,
 } from "@mui/material";
+import { formatKey } from "@/utils";
+import { TitledBox } from "@/components";
+
+//
+const ListCard = ({ item, onButtonClick, mode }) => {
+  const ref = useRef(null);
+  const [dragging, setDragging] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    invariant(el);
+
+    return draggable({
+      element: el,
+      onDragStart: () => setDragging(true),
+      onDrop: () => setDragging(false),
+    });
+  }, []);
+
+  let Icon = null;
+  if (mode === "remove") {
+    Icon = Remove;
+  } else if (mode === "add") {
+    Icon = Add;
+  }
+
+  return (
+    <Paper elevation={1} bgcolor="background.paper" sx={{ my: 1 }} width="100%">
+      <ListItem
+        secondaryAction={
+          <IconButton edge="end" onClick={() => onButtonClick(item)}>
+            <Icon />
+          </IconButton>
+        }
+        ref={ref}
+      >
+        <ListItemText primary={formatKey(item)} />
+      </ListItem>
+    </Paper>
+  );
+};
+
+const ListContainer = ({ title, mode, items, onButtonClick }) => (
+  <TitledBox title={title} sx={{ borderRadius: 3 }}>
+    <List sx={{ m: 0, p: 0, width: "100%" }}>
+      {items.map((item, index) => (
+        <ListCard
+          key={index}
+          item={item}
+          mode={mode}
+          onButtonClick={onButtonClick}
+        />
+      ))}
+      {items.length === 0 && (
+        <ListItem>
+          <ListItemText
+            primary="No items available"
+            sx={{ color: "text.secondary", fontStyle: "italic" }}
+          />
+        </ListItem>
+      )}
+    </List>
+  </TitledBox>
+);
 
 export const OrderableLiteralListField = ({
   label,
@@ -20,36 +85,6 @@ export const OrderableLiteralListField = ({
   error,
   valid_values = [],
 }) => {
-  const ListCard = ({ key, item }) => {
-    const ref = useRef(null);
-    const [dragging, setDragging] = useState(false);
-
-    useEffect(() => {
-      const el = ref.current;
-      invariant(el);
-
-      return draggable({
-        element: el,
-        onDragStart: () => setDragging(true),
-        onDrop: () => setDragging(false),
-      });
-    }, []);
-
-    return (
-      <ListItem
-        key={key}
-        secondaryAction={
-          <IconButton edge="end" onClick={() => handleRemove(item)}>
-            <Remove />
-          </IconButton>
-        }
-        ref={ref}
-      >
-        <ListItemText primary={item} />
-      </ListItem>
-    );
-  };
-
   // Create sets for faster lookup
   const selectedSet = new Set(value);
 
@@ -68,57 +103,21 @@ export const OrderableLiteralListField = ({
   };
 
   return (
-    <Stack spacing={2}>
+    <Stack>
       <Typography variant="h6">{label}</Typography>
 
-      <div>
-        <Typography variant="subtitle1" color="primary" sx={{ mb: 1 }}>
-          Selected Items
-        </Typography>
-        <List>
-          {selectedItems.map((item, index) => (
-            <ListCard key={index} item={item} />
-          ))}
-          {selectedItems.length === 0 && (
-            <ListItem>
-              <ListItemText
-                primary="No items selected"
-                sx={{ color: "text.secondary", fontStyle: "italic" }}
-              />
-            </ListItem>
-          )}
-        </List>
-      </div>
-
-      <Divider />
-
-      <div>
-        <Typography variant="subtitle1" color="primary" sx={{ mb: 1 }}>
-          Available Items
-        </Typography>
-        <List>
-          {availableItems.map((item) => (
-            <ListItem
-              key={item}
-              secondaryAction={
-                <IconButton edge="end" onClick={() => handleAdd(item)}>
-                  <Add />
-                </IconButton>
-              }
-            >
-              <ListItemText primary={item} />
-            </ListItem>
-          ))}
-          {availableItems.length === 0 && (
-            <ListItem>
-              <ListItemText
-                primary="No items available"
-                sx={{ color: "text.secondary", fontStyle: "italic" }}
-              />
-            </ListItem>
-          )}
-        </List>
-      </div>
+      <ListContainer
+        title="Selected"
+        mode="remove"
+        items={selectedItems}
+        onButtonClick={handleRemove}
+      />
+      <ListContainer
+        title="Available"
+        mode="add"
+        items={availableItems}
+        onButtonClick={handleAdd}
+      />
 
       {error && (
         <Typography color="error" variant="caption">
