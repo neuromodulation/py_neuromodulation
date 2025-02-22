@@ -96,11 +96,8 @@ class Bispectra(NMFeature):
     def calc_feature(self, data: np.ndarray) -> dict:
         from pybispectra import compute_fft, WaveShape
 
-        # PyBispectra's compute_fft uses PQDM to parallelize the calculation per channel
-        # Is this necessary? Maybe the overhead of parallelization is not worth it
-        # considering that we incur in it once per batch of data
         fft_coeffs, freqs = compute_fft(
-            data=np.expand_dims(data, axis=(0)),
+            data=np.expand_dims(data, axis=0),
             sampling_freq=self.sfreq,
             n_points=data.shape[1],
             verbose=False,
@@ -127,12 +124,11 @@ class Bispectra(NMFeature):
             f1s=tuple(self.settings.f1s),  # type: ignore
             f2s=tuple(self.settings.f2s),  # type: ignore
         )
+        waveshape = waveshape.results.get_results(copy=False)  # can overwrite obj with array
 
         feature_results = {}
         for ch_idx, ch_name in enumerate(self.ch_names):
-            bispectrum = waveshape._bicoherence[
-                ch_idx
-            ]  # Same as waveshape.results._data, skips a copy
+            bispectrum = waveshape[ch_idx]
 
             for component in self.settings.components.get_enabled():
                 spectrum_ch = COMPONENT_DICT[component](bispectrum)

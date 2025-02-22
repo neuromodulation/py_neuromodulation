@@ -1,6 +1,8 @@
 py_neuromodulation
 ==================
 
+Documentation: https://neuromodulation.github.io/py_neuromodulation/
+
 Analyzing neural data can be a troublesome, trial and error prone,
 and beginner unfriendly process. *py_neuromodulation* allows using a simple
 interface for extraction of established neurophysiological features and includes commonly applied pre -and postprocessing methods.
@@ -29,7 +31,7 @@ The original intention for writing this toolbox was movement decoding from invas
 The application however could be any neural decoding problem.
 *py_neuromodulation* offers wrappers around common practice machine learning methods for efficient analysis.
 
-Find the documentation here http://py-neuromodulation.readthedocs.io for example usage and parametrization.
+Find the documentation here neuromodulation.github.io/py_neuromodulation/ for example usage and parametrization.
 
 Installation
 ============
@@ -40,25 +42,15 @@ py_neuromodulation requires at least python 3.10. For installation you can use p
 
     pip install py-neuromodulation
 
-Alternatively you can also install the package in a conda environment:
+Alternatively you can also clone the pacakge and install it using `uv <https://docs.astral.sh/uv/>`_:
 
 .. code-block::
 
-    conda create -n pynm-test python=3.11
-    conda activate pynm-test
+    uv python install 3.10
+    uv venv
+    . .venv/bin/activate
+    uv sync
 
-Then install the packages listed in the `pyproject.toml`:
-
-.. code-block::
-
-    pip install .
-
-
-Optionally the ipython kernel can be specified for the installed pynm-test conda environment:
-
-.. code-block::
-
-    ipython kernel install --user --name=pynm-test
 
 Then *py_neuromodulation* can be imported via:
 

@@ -45,9 +45,10 @@ match PLATFORM:
     case "darwin":
         KEY = PLATFORM + "_" + platform.processor()
     case "linux":
-        DIST = platform.freedesktop_os_release()["VERSION_CODENAME"]
-        KEY = PLATFORM + "_" + DIST + "_" + ARCH
-        if KEY not in LSL_DICT:
+        if "VERSION_CODENAME" in platform.freedesktop_os_release().keys():
+            DIST = platform.freedesktop_os_release()["VERSION_CODENAME"]
+            KEY = PLATFORM + "_" + DIST + "_" + ARCH
+        else:
             KEY = PLATFORM + "_" + ARCH
     case _:
         KEY = ""

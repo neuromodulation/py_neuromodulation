@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 # from numba import njit
 import numpy as np
 import pandas as pd
-import scipy.stats as stats
+import scipy.stats as scipy_stats
 
 
 def fitlm_kfold(x, y, kfold_splits=5):
@@ -51,7 +51,7 @@ def permutationTestSpearmansRho(x, y, plot_distr=True, x_unit=None, p=5000):
     """
 
     # compute ground truth difference
-    gT = stats.spearmanr(x, y)[0]
+    gT = scipy_stats.spearmanr(x, y)[0]
     #
     pV = np.array((x, y))
     # Initialize permutation:
@@ -65,7 +65,7 @@ def permutationTestSpearmansRho(x, y, plot_distr=True, x_unit=None, p=5000):
         random.shuffle(args_order_2)
         # Compute permuted absolute difference of your two sampled
         # distributions and store it in pD:
-        pD.append(stats.spearmanr(pV[0, args_order], pV[1, args_order_2])[0])
+        pD.append(scipy_stats.spearmanr(pV[0, args_order], pV[1, args_order_2])[0])
 
     # calculate p value
     if gT < 0:

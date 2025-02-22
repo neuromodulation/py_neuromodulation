@@ -1,42 +1,6 @@
 API Documentation
 =================
 
-Parametrization
----------------
-
-.. toctree::
-   :maxdepth: 4
-
-   nm_stream_abc
-   nm_stream
-   nm_settings
-   nm_define_nmchannels
-   nm_generator
-   nm_run_analysis
-   nm_resample
-   nm_normalization
-   nm_rereference
-   nm_projection
-   nm_IO
-
-Feature Estimation
-------------------
-
-.. toctree::
-   :maxdepth: 4
-
-   nm_features
-   nm_filter
-   nm_oscillatory
-   nm_fooof
-   nm_kalmanfilter 
-   nm_hjorth
-   nm_sharpwaves
-   nm_bursts
-   nm_coherence
-   nm_nolds
-   nm_mne_connectivity
-   nm_linelength
 
 Analysis
 --------
@@ -44,8 +8,77 @@ Analysis
 .. toctree::
    :maxdepth: 4
 
-   nm_analysis
-   nm_decode
-   nm_plots
-   nm_RMAP
-   nm_stats
+   decode
+   feature_reader
+   plots
+   RMAP
+   stats
+
+
+Feature Classes
+---------------
+
+.. toctree::
+   :maxdepth: 4
+
+   bispectra
+   bursts
+   coherence
+   fooof
+   hjorth
+   linelength
+   mne_connectivity
+   nolds
+   oscillatory
+   sharpwaves
+   bandpower
+
+
+Filter
+------
+
+.. toctree::
+   :maxdepth: 4
+
+   mne_filter
+   notch_filter
+
+
+Processing
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   artifacts
+   normalization
+   projection
+   rereference
+   resample
+
+
+stream
+------
+
+.. toctree::
+   :maxdepth: 4
+
+   generator
+   mnelsl_player
+   mnelsl_stream
+   settings
+   stream
+
+
+utils
+-----
+
+.. toctree::
+   :maxdepth: 4
+
+   channels
+   database
+   io
+   logging
+   types
+

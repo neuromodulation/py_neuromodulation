@@ -8,8 +8,8 @@ import pandas as pd
 import nibabel as nib
 from matplotlib import pyplot as plt
 
-from py_neuromodulation.plots import reg_plot
-from py_neuromodulation.types import _PathLike
+from py_neuromodulation.analysis import reg_plot
+from py_neuromodulation.utils.types import _PathLike
 from py_neuromodulation import PYNM_DIR
 
 LIST_STRUC_UNCONNECTED_GRIDPOINTS_HULL = [256, 385, 417, 447, 819, 914]
@@ -335,7 +335,7 @@ class RMAPCross_Val_ChannelSelector:
         reshape: bool = True,
     ):
         if reshape:
-            fp = np.reshape(fp, (91, 109, 91), order="F")
+            fp = np.reshape(fp, (91, 109, 91), order="C")
 
         img = nib.nifti1.Nifti1Image(fp, affine=affine)
 

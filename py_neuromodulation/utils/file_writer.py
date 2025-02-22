@@ -58,6 +58,9 @@ class MsgPackFileWriter(AbstractFileWriter):
         feature_dict : dict
             The dictionary with the feature names and values.
         """
+        # transform every value to float s.t. msgpack can serialize the data
+        for key, value in feature_dict.items():
+            feature_dict[key] = float(value)
         self.data_l.append(feature_dict)
 
     def save(self):
@@ -79,7 +82,7 @@ class MsgPackFileWriter(AbstractFileWriter):
         for i in range(self.idx):
             with open(self.out_dir / f"{self.name}-{i}.msgpack", "rb") as f:
                 data_l.append(msgpack.unpack(f))
-        if len(self.data_l) == 0:
+        if len(data_l) == 0:
             raise ValueError("No data to load")
         data = pd.DataFrame(list(np.concatenate(data_l)))
         return data

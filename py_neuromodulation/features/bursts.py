@@ -69,7 +69,7 @@ class Bursts(NMFeature):
             if fband_burst not in list(settings.frequency_ranges_hz.keys()):
                 raise create_validation_error(
                     f"bursting {fband_burst} needs to be defined in settings['frequency_ranges_hz']",
-                    loc=["burst_settings", "frequency_bands"],
+                    location=["burst_settings", "frequency_bands"],
                 )
 
         from py_neuromodulation.filter import MNEFilter

@@ -45,15 +45,37 @@ class PreprocessingFilter(NMPreprocessor):
     def __init__(self, settings: "NMSettings", sfreq: float) -> None:
         from py_neuromodulation.filter import MNEFilter
 
-        self.filters: list[MNEFilter] = [
-            MNEFilter(
-                f_ranges=[settings.preprocessing_filter.get_filter_tuple(filter_name)],  # type: ignore
-                sfreq=sfreq,
-                filter_length=sfreq - 1,
-                verbose=False,
+
+        self.filters: list[MNEFilter] = []
+        for filter_name in settings.preprocessing_filter.get_enabled():
+            if filter_name != "lowpass_filter" and filter_name != "highpass_filter":
+                self.filters += [
+                    MNEFilter(
+                        f_ranges=[settings.preprocessing_filter.get_filter_tuple(filter_name)],  # type: ignore
+                        sfreq=sfreq,
+                        filter_length=sfreq - 1,
+                        verbose=False,
+                    )
+                ]
+
+        if "lowpass_filter" in settings.preprocessing_filter.get_enabled():
+            self.filters.append(
+                MNEFilter(
+                    f_ranges=[[None, settings.preprocessing_filter.lowpass_filter_cutoff_hz]],  # type: ignore
+                    sfreq=sfreq,
+                    filter_length=sfreq - 1,
+                    verbose=False,
+                )
             )
-            for filter_name in settings.preprocessing_filter.get_enabled()
-        ]
+        if "highpass_filter" in settings.preprocessing_filter.get_enabled():
+            self.filters.append(
+                MNEFilter(
+                    f_ranges=[[settings.preprocessing_filter.highpass_filter_cutoff_hz, None]],  # type: ignore
+                    sfreq=sfreq,
+                    filter_length=sfreq - 1,
+                    verbose=False,
+                )
+            )
 
     def process(self, data: np.ndarray) -> np.ndarray:
         """Preprocess data according to the initialized list of PreprocessingFilter objects

@@ -24,13 +24,13 @@ jobs:
       - name: Set up Python with uv
         uses: drivendataorg/setup-python-uv-action@v1
         with:
-          python-version: '3.10'
+          python-version: '3.11'
           cache: packages
           cache-dependency-path: pyproject.toml
  
       - name: Install dependencies
         run: |
-          uv pip install .[docs]
+          pip install .[docs]
 
       - name: make the sphinx docs
         run: |

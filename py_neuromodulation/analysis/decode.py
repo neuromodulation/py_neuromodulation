@@ -220,7 +220,7 @@ class Decoder:
             self.feature_names = [
                 col
                 for col in self.features.columns
-                if not (("time" in col) or (self.label_name in col))
+                if any(col.startswith(used_ch) for used_ch in self.used_chs)
             ]
             self.data = np.nan_to_num(np.array(self.features[self.feature_names]))
 
