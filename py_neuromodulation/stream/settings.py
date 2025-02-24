@@ -142,7 +142,8 @@ class NMSettings(NMBaseModel):
     @classmethod
     def _add_feature(cls, feature: str) -> None:
         for instance in cls._instances:
-            setattr(instance.features, feature, True)
+            #setattr(instance.features, feature, True)
+            instance.features.__setitem__(feature, True)
 
     @classmethod
     def _remove_feature(cls, feature: str) -> None:

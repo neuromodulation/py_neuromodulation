@@ -54,11 +54,13 @@ class ChannelMean:
         return feature_results
 
 
-nm.add_custom_feature("channel_mean", ChannelMean)
+
 
 # %%
 # Now we can instantiate settings and observe that the new feature has been added to the list of features
 settings = nm.NMSettings() # Get default settings
+nm.add_custom_feature("channel_mean", ChannelMean)
+
 
 settings.features
 

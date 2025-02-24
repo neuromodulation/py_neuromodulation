@@ -282,7 +282,7 @@ def save_general_dict(
     out_dir = Path.cwd() if not out_dir else Path(out_dir)
     filename = f"{prefix}{str_add}"
 
-    with open(out_dir / filename, "w") as f:
+    with open(out_dir / prefix / filename, "w") as f:
         json.dump(
             dict_,
             f,

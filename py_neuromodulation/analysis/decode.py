@@ -6,7 +6,7 @@ from sklearn.metrics import r2_score
 import pandas as pd
 import numpy as np
 from copy import deepcopy
-from pathlib import Path
+from pathlib import Path, PurePath
 import pickle
 
 from py_neuromodulation import logger

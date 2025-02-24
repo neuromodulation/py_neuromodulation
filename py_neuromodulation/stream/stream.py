@@ -127,8 +127,6 @@ class Stream:
         self.model = None
         self.is_running = False
 
-        # TODO(toni): is it necessary to initialize the DataProcessor on stream init?
-        # timon: yes, I think so, because specific feature settings can thus be investigated?
         self.data_processor = DataProcessor(
             sfreq=self.sfreq,
             settings=self.settings,
@@ -216,7 +214,7 @@ class Stream:
         self.save_csv = save_csv
         self.save_interval = save_interval
         self.return_df = return_df
-        self.out_dir = Path.cwd() / experiment_name if not out_dir else Path(out_dir)
+        self.out_dir = Path.cwd() if not out_dir else Path(out_dir)
         self.experiment_name = experiment_name
 
         # Validate input data

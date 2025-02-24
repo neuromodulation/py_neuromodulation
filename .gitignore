@@ -208,3 +208,6 @@ lsllog.txt
 bun.lockb
 test/data/*
 uv.lock
+
+sub_SETTINGS.yaml
+sub_SIDECAR.json

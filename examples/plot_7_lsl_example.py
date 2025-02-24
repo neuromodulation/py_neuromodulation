@@ -11,8 +11,9 @@ in a similar manner, This time however integrating an lsl stream.
 # %%
 from matplotlib import pyplot as plt
 import py_neuromodulation as nm
-import asyncio
-from multiprocessing import freeze_support
+from py_neuromodulation.stream.backend_interface import StreamBackendInterface
+from multiprocessing import freeze_support, Queue
+import threading
 
 # %%
 # Let’s get the example data from the provided BIDS dataset and create the channels DataFrame.
@@ -64,7 +65,7 @@ if __name__ == "__main__":
 
     player = nm.stream.LSLOfflinePlayer(raw=raw, stream_name="example_stream")
 
-    player.start_player(chunk_size=30, n_repeat=5999999)
+    player.start_player(chunk_size=30, n_repeat=1)
     import time
     time.sleep(5)
     # %%
@@ -93,12 +94,24 @@ if __name__ == "__main__":
     # %%
     # We then simply have to set the `stream_lsl` parameter to be `True` and specify the `stream_lsl_name`.
 
-    features = asyncio.run(stream.run(
+    control_queue = Queue()
+    feature_queue = Queue()
+    raw_queue = Queue()
+    streamBackendInterface = StreamBackendInterface(feature_queue, raw_queue, control_queue)
+
+    # Schedule "stop" insertion in 5 seconds
+    timer = threading.Timer(10, lambda: control_queue.put("stop"))
+    timer.start()
+    
+    features = stream.run(
         is_stream_lsl=True,
         stream_lsl_name="example_stream",
         out_dir=PATH_OUT,
         experiment_name=RUN_NAME,
-    ))
+        backend_interface=streamBackendInterface,
+    )
+
+    player.stop_player()
 
     # %%
     # We can then look at the computed features and check if the streamed data was processed correctly.
@@ -127,3 +140,11 @@ if __name__ == "__main__":
         figsize_x=12,
         figsize_y=12,
     )
+
+    # close the timer
+    timer.cancel()
+    # close the queues
+    control_queue.close()
+    feature_queue.close()
+    raw_queue.close()
+    
