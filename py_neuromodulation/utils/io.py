@@ -250,7 +250,7 @@ def save_channels(
 ) -> None:
     out_dir = Path.cwd() if not out_dir else Path(out_dir)
     filename = "channels.csv" if not prefix else prefix + "_channels.csv"
-    write_csv(nmchannels, out_dir / filename)
+    write_csv(nmchannels, out_dir / prefix / filename)
     logger.info(f"{filename} saved to {out_dir}")
 
 

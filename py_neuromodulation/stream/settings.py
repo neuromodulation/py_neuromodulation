@@ -308,7 +308,7 @@ class NMSettings(NMBaseModel):
     ) -> None:
         filename = f"{prefix}_SETTINGS.{format}" if prefix else f"SETTINGS.{format}"
 
-        path_out = Path(out_dir) / filename
+        path_out = Path(out_dir) / prefix / filename
 
         with open(path_out, "w") as f:
             match format:
