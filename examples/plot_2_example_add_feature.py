@@ -54,37 +54,39 @@ class ChannelMean:
         return feature_results
 
 
-nm.add_custom_feature("channel_mean", ChannelMean)
+
 
 # %%
 # Now we can instantiate settings and observe that the new feature has been added to the list of features
-settings = nm.NMSettings() # Get default settings
-
-settings.features
-
-# %% 
-# Let's create some artificial data to demonstrate the feature calculation.
-N_CHANNELS = 5
-N_SAMPLES = 10000 # 10 seconds of random data at 1000 Hz sampling frequency
-
-data = np.random.random([N_CHANNELS, N_SAMPLES]) 
-stream = nm.Stream(
-    sfreq=1000,
-    data=data,
-    settings = settings,
-    sampling_rate_features_hz=10,
-    verbose=False,
-)
-
-feature_df = stream.run()
-columns = [col for col in feature_df.columns if "channel_mean" in col]
-
-feature_df[columns]
+# settings = nm.NMSettings() # Get default settings
+# nm.add_custom_feature("channel_mean", ChannelMean)
 
 
-# %% 
-# Remove feature so that it does not interfere with other examples
-nm.remove_custom_feature("channel_mean") 
+# settings.features
+
+# # %% 
+# # Let's create some artificial data to demonstrate the feature calculation.
+# N_CHANNELS = 5
+# N_SAMPLES = 10000 # 10 seconds of random data at 1000 Hz sampling frequency
+
+# data = np.random.random([N_CHANNELS, N_SAMPLES]) 
+# stream = nm.Stream(
+#     sfreq=1000,
+#     data=data,
+#     settings = settings,
+#     sampling_rate_features_hz=10,
+#     verbose=False,
+# )
+
+# feature_df = stream.run()
+# columns = [col for col in feature_df.columns if "channel_mean" in col]
+
+# feature_df[columns]
+
+
+# # %% 
+# # Remove feature so that it does not interfere with other examples
+# nm.remove_custom_feature("channel_mean") 
 
 
 
