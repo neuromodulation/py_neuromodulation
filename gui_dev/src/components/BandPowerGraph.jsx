@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSocketStore } from "@/stores/socketStore";
 import { useSessionStore } from "@/stores/sessionStore";
 import Plotly from "plotly.js-basic-dist-min";
@@ -10,7 +10,6 @@ import {
   FormControlLabel,
 } from "@mui/material";
 import { CollapsibleBox } from "./CollapsibleBox";
-import { getChannelAndFeature } from "./utils";
 import { shallow } from "zustand/shallow";
 
 const generateColors = (numColors) => {
@@ -33,95 +32,48 @@ const fftFeatures = [
 
 export const BandPowerGraph = () => {
   const channels = useSessionStore((state) => state.channels, shallow);
+  const getData = useSocketStore((state) => state.getData);
 
-  const usedChannels = useMemo(
-    () => channels.filter((channel) => channel.used === 1),
-    [channels]
-  );
+  const usedChannels = channels
+    .filter((channel) => channel.used === 1)
+    .map((channel) => channel.name);
 
-  const availableChannels = useMemo(
-    () => usedChannels.map((channel) => channel.name),
-    [usedChannels]
-  );
-
-  const [selectedChannel, setSelectedChannel] = useState("");
+  const [selectedChannel, setSelectedChannel] = useState(usedChannels[0]);
   const hasInitialized = useRef(false);
-
-  const socketData = useSocketStore((state) => state.graphData);
-
-  const data = useMemo(() => {
-    if (!socketData || !selectedChannel) return null;
-    const dataByChannel = {};
-
-    Object.entries(socketData).forEach(([key, value]) => {
-      const { channelName = "", featureName = "" } = getChannelAndFeature(
-        availableChannels,
-        key
-      );
-      if (!channelName) return;
-
-      if (!fftFeatures.includes(featureName)) return;
-
-      if (!dataByChannel[channelName]) {
-        dataByChannel[channelName] = {
-          channelName,
-          features: [],
-          values: [],
-        };
-      }
-
-      dataByChannel[channelName].features.push(featureName);
-      dataByChannel[channelName].values.push(value);
-    });
-
-    const channelData = dataByChannel[selectedChannel];
-    if (channelData) {
-      const sortedValues = fftFeatures.map((feature) => {
-        const index = channelData.features.indexOf(feature);
-        return index !== -1 ? channelData.values[index] : null;
-      });
-      return {
-        channelName: selectedChannel,
-        features: fftFeatures.map((f) =>
-          f.replace("_mean", "").replace("fft_", "")
-        ),
-        values: sortedValues,
-      };
-    } else {
-      return {
-        channelName: selectedChannel,
-        features: fftFeatures.map((f) =>
-          f.replace("_mean", "").replace("fft_", "")
-        ),
-        values: fftFeatures.map(() => null),
-      };
-    }
-  }, [socketData, selectedChannel, availableChannels]);
-
   const graphRef = useRef(null);
   const plotlyRef = useRef(null);
+  const prevDataRef = useRef(null);
 
-  const handleChannelSelect = (channelName) => {
-    setSelectedChannel(channelName);
-  };
-
+  // Create a subscription to socket data updates
   useEffect(() => {
-    if (usedChannels.length > 0 && !hasInitialized.current) {
-      const availableChannelNames = usedChannels.map((channel) => channel.name);
-      setSelectedChannel(availableChannelNames[0]);
-      hasInitialized.current = true;
-    }
-  }, [usedChannels]);
+    console.log("subscribe!");
+    const unsubscribe = useSocketStore.subscribe((state, prevState) => {
+      const newData = state.getData(selectedChannel, usedChannels);
 
+      Plotly.restyle(plotlyRef.current, {
+        x: [newData.features],
+        y: [newData.values],
+      });
+    });
+    return () => {
+      console.log("unsubscribe!");
+      unsubscribe();
+    };
+  }, []);
+
+  // Initial plot setup
   useEffect(() => {
-    if (!graphRef.current || !selectedChannel || !data) return;
+    if (!graphRef.current || !selectedChannel) return;
+
+    const initialData = getData(selectedChannel, usedChannels);
+    if (!initialData) return;
 
     const layout = {
       autosize: true,
       height: 350,
       paper_bgcolor: "#333",
       plot_bgcolor: "#333",
-      hovermode: false, // Add this line to disable hovermode
+      hovermode: false,
       xaxis: {
         title: { text: "Frequency Band", font: { color: "#f4f4f4" } },
         color: "#cccccc",
@@ -136,28 +88,43 @@ export const BandPowerGraph = () => {
       legend: { orientation: "h", x: 0, y: -0.2 },
     };
 
-    const barColors = generateColors(data.features.length);
+    const barColors = generateColors(initialData.features.length);
 
     const trace = {
-      x: data.features,
-      y: data.values,
+      x: initialData.features,
+      y: initialData.values,
       type: "bar",
-      hoverinfo: 'skip',
-      name: data.channelName,
+      hoverinfo: "skip",
+      name: initialData.channelName,
       marker: { color: barColors },
     };
 
-    Plotly.react(graphRef.current, [trace], layout, {
+    Plotly.newPlot(graphRef.current, [trace], layout, {
       responsive: true,
       displayModeBar: false,
-    })
-      .then((gd) => {
-        plotlyRef.current = gd;
-      })
-      .catch((error) => {
-        console.error("Plotly error:", error);
-      });
-  }, [data, selectedChannel]);
+    }).then((gd) => {
+      plotlyRef.current = gd;
+      prevDataRef.current = initialData;
+    });
+
+    return () => {
+      if (plotlyRef.current) {
+        Plotly.purge(plotlyRef.current);
+      }
+    };
+  }, [selectedChannel]);
+
+  // Initialize selected channel
+  useEffect(() => {
+    if (usedChannels.length > 0 && !hasInitialized.current) {
+      setSelectedChannel(usedChannels[0]);
+      hasInitialized.current = true;
+    }
+  }, [usedChannels]);
+
+  const handleChannelSelect = (channelName) => {
+    setSelectedChannel(channelName);
+  };
 
   return (
     <Box>
@@ -171,9 +138,12 @@ export const BandPowerGraph = () => {
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           Band Power
         </Typography>
-        <Box sx={{ ml: 2, mr:4, minWidth: 200 }}>
-          <CollapsibleBox title="Channel Selection"
-            defaultExpanded={true} id="ChSelBoxBandPower">
+        <Box sx={{ ml: 2, mr: 4, minWidth: 200 }}>
+          <CollapsibleBox
+            title="Channel Selection"
+            defaultExpanded={true}
+            id="ChSelBoxBandPower"
+          >
             <Box display="flex" flexDirection="column">
               <RadioGroup
                 value={selectedChannel}
@@ -181,7 +151,7 @@ export const BandPowerGraph = () => {
               >
                 {usedChannels.map((channel, index) => (
                   <FormControlLabel
-                    key={channel.id || index}
+                    key={index}
                     value={channel.name}
                     control={<Radio color="primary" />}
                     label={channel.name}

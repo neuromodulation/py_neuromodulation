@@ -5,6 +5,18 @@ import CBOR from "cbor-js";
 const WEBSOCKET_URL = getBackendURL("/ws");
 const RECONNECT_INTERVAL = 500; // ms
 
+const getChannelAndFeature = (availableChannels, keystr) => {
+  const channelName = availableChannels.find((channel) =>
+    keystr.startsWith(channel + "_")
+  );
+
+  if (!channelName) return {};
+
+  const featureName = keystr.slice(channelName.length + 1);
+
+  return { channelName, featureName };
+};
+
 export const useSocketStore = createStore("socket", (set, get) => ({
   socket: null,
   status: "disconnected", // 'disconnected', 'connecting', 'connected'
@@ -16,6 +28,7 @@ export const useSocketStore = createStore("socket", (set, get) => ({
   infoMessages: [],
   reconnectTimer: null,
   intentionalDisconnect: false,
+  messageCount: 0,
 
   setSocket: (socket) => set({ socket }),
 
@@ -68,9 +81,7 @@ export const useSocketStore = createStore("socket", (set, get) => ({
 
     newSocket.onmessage = (event) => {
       try {
-        const arrayBuffer = event.data;
-        const decodedData = CBOR.decode(arrayBuffer);
-        // console.log("Decoded message from server:", decodedData);
+        const decodedData = CBOR.decode(event.data);
         if (Object.keys(decodedData)[0] == "raw_data") {
           set({ graphRawData: decodedData.raw_data });
         } else {
@@ -79,13 +90,6 @@ export const useSocketStore = createStore("socket", (set, get) => ({
           // else, set graphData to decodedData
           let decodingData = {};
           let dataNonDecodingFeatures = {};
-          //for (const [key, value] of Object.entries(decodedData)) {
-          //   if (key.startsWith("decode")) {
-          //     decodingData[key] = value;
-          //   } else {
-          //     dataNonDecodingFeatures[key] = value;
-          //   }
-          // }
 
           // check if this is the same:
           Object.entries(decodedData).forEach(([key, value]) => {
@@ -94,11 +98,15 @@ export const useSocketStore = createStore("socket", (set, get) => ({
             ] = value;
           });
 
-          set({ availableDecodingOutputs: Object.keys(decodingData) });
-
-          set({ graphDecodingData: decodingData });
-          set({ graphData: dataNonDecodingFeatures });
+          set({
+            availableDecodingOutputs: Object.keys(decodingData),
+            graphDecodingData: decodingData,
+            graphData: dataNonDecodingFeatures,
+          });
         }
+        set({
+          messageCount: get().messageCount + 1,
+        });
       } catch (error) {
         console.error("Failed to decode CBOR message:", error);
       }
@@ -153,4 +161,60 @@ export const useSocketStore = createStore("socket", (set, get) => ({
 
   // Clear messages
   clearMessages: set({ messages: [] }),
+
+  getData: (selectedChannel, usedChannels) => {
+    const fftFeatures = [
+      "fft_theta_mean",
+      "fft_alpha_mean",
+      "fft_low_beta_mean",
+      "fft_high_beta_mean",
+      "fft_low_gamma_mean",
+      "fft_high_gamma_mean",
+    ];
+    const dataByChannel = {};
+
+    let graphData = get().graphData;
+    for (const key in graphData) {
+      const { channelName = "", featureName = "" } = getChannelAndFeature(
+        usedChannels,
+        key
+      );
+      if (!channelName) continue;
+      if (!fftFeatures.includes(featureName)) continue;
+
+      if (!dataByChannel[channelName]) {
+        dataByChannel[channelName] = {
+          channelName,
+          features: [],
+          values: [],
+        };
+      }
+
+      dataByChannel[channelName].features.push(featureName);
+      dataByChannel[channelName].values.push(graphData[key]);
+    }
+
+    const channelData = dataByChannel[selectedChannel];
+    if (channelData) {
+      const sortedValues = fftFeatures.map((feature) => {
+        const index = channelData.features.indexOf(feature);
+        return index !== -1 ? channelData.values[index] : null;
+      });
+      return {
+        channelName: selectedChannel,
+        features: fftFeatures.map((f) =>
+          f.replace("_mean", "").replace("fft_", "")
+        ),
+        values: sortedValues,
+      };
+    } else {
+      return {
+        channelName: selectedChannel,
+        features: fftFeatures.map((f) =>
+          f.replace("_mean", "").replace("fft_", "")
+        ),
+        values: fftFeatures.map(() => null),
+      };
+    }
+  },
 }));
