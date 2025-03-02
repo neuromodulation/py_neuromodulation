@@ -9,7 +9,7 @@ from typing import (
     Sequence,
 )
 from typing_extensions import Unpack, TypedDict
-from pydantic import BaseModel, GetCoreSchemaHandler
+from pydantic import BaseModel, GetCoreSchemaHandler, ConfigDict
 
 from pydantic_core import (
     ErrorDetails,
@@ -184,6 +184,8 @@ def NMField(
 
 
 class NMBaseModel(BaseModel):
+    model_config = ConfigDict(validate_assignment=False, extra="allow")
+
     def __init__(self, *args, **kwargs) -> None:
         """Pydantic does not support positional arguments by default.
         This is a workaround to support positional arguments for models like FrequencyRange.
