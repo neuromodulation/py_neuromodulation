@@ -34,7 +34,7 @@ class LSLStream:
         from mne_lsl.stream import StreamLSL
 
         self.stream: StreamLSL
-        #self.keyboard_interrupt = False
+        # self.keyboard_interrupt = False
 
         self.settings = settings
         self._n_seconds_wait_before_disconnect = 3
@@ -58,11 +58,11 @@ class LSLStream:
 
         # If not running the generator when the escape key is pressed.
         self.headless: bool = not os.environ.get("DISPLAY")
-        #if not self.headless:
-            #from py_neuromodulation.utils.keyboard import KeyboardListener
+        # if not self.headless:
+        # from py_neuromodulation.utils.keyboard import KeyboardListener
 
-            #self.listener = KeyboardListener(("esc", self.set_keyboard_interrupt))
-            #self.listener.start()
+        # self.listener = KeyboardListener(("esc", self.set_keyboard_interrupt))
+        # self.listener.start()
 
     def get_next_batch(self) -> Iterator[tuple[np.ndarray, np.ndarray]]:
         self.last_time = time.time()
@@ -93,5 +93,20 @@ class LSLStream:
 
                 logger.info(f"Stream time: {timestamp[-1] - stream_start_time}")
 
-                yield timestamp - stream_start_time, data
+                for i in range(self._n_seconds_wait_before_disconnect):
+                    if (
+                        data is not None
+                        and check_data is not None
+                        and np.allclose(data, check_data, atol=1e-7, rtol=1e-7)
+                    ):
+                        logger.warning(
+                            f"No new data incoming. Disconnecting stream in {3 - i} seconds."
+                        )
+                        time.sleep(1)
+                        i += 1
+                        if i == self._n_seconds_wait_before_disconnect:
+                            self.stream.disconnect()
+                            logger.warning("Stream disconnected.")
+                            break
 
+                yield timestamp - stream_start_time, data

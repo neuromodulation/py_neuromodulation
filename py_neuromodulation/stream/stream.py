@@ -208,7 +208,7 @@ class Stream:
         simulate_real_time: bool = False,
         decoder: RealTimeDecoder | None = None,
         backend_interface: StreamBackendInterface | None = None,
-    ):
+    ) -> "pd.DataFrame":
         self.is_stream_lsl = is_stream_lsl
         self.stream_lsl_name = stream_lsl_name
         self.save_csv = save_csv

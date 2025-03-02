@@ -11,15 +11,11 @@ in a similar manner, This time however integrating an lsl stream.
 # %%
 from matplotlib import pyplot as plt
 import py_neuromodulation as nm
-from py_neuromodulation.stream.backend_interface import StreamBackendInterface
-from multiprocessing import freeze_support, Queue
-import threading
 
 # %%
 # Let’s get the example data from the provided BIDS dataset and create the channels DataFrame.
 
 if __name__ == "__main__":
-    freeze_support()
     (
         RUN_NAME,
         PATH_RUN,
@@ -67,6 +63,7 @@ if __name__ == "__main__":
 
     player.start_player(chunk_size=30, n_repeat=1)
     import time
+
     time.sleep(5)
     # %%
     # Creating the LSLStream object
@@ -93,22 +90,12 @@ if __name__ == "__main__":
     )
     # %%
     # We then simply have to set the `stream_lsl` parameter to be `True` and specify the `stream_lsl_name`.
-
-    control_queue = Queue()
-    feature_queue = Queue()
-    raw_queue = Queue()
-    streamBackendInterface = StreamBackendInterface(feature_queue, raw_queue, control_queue)
-
     # Schedule "stop" insertion in 5 seconds
-    timer = threading.Timer(10, lambda: control_queue.put("stop"))
-    timer.start()
-    
     features = stream.run(
         is_stream_lsl=True,
         stream_lsl_name="example_stream",
         out_dir=PATH_OUT,
         experiment_name=RUN_NAME,
-        backend_interface=streamBackendInterface,
     )
 
     player.stop_player()
@@ -119,15 +106,15 @@ if __name__ == "__main__":
 
     plt.plot(features.time, features.MOV_RIGHT)
 
-
     ######################################################################
     # Feature Analysis of Movement
     # ----------------------------
     # We can now check the movement averaged features of an ECoG channel.
     # Note that the path was here adapted to be documentation build compliant.
 
-
-    feature_reader = nm.analysis.FeatureReader(feature_dir=PATH_OUT, feature_file=RUN_NAME)
+    feature_reader = nm.analysis.FeatureReader(
+        feature_dir=PATH_OUT, feature_file=RUN_NAME
+    )
     feature_reader.label_name = "MOV_RIGHT"
     feature_reader.label = feature_reader.feature_arr["MOV_RIGHT"]
 
@@ -140,11 +127,3 @@ if __name__ == "__main__":
         figsize_x=12,
         figsize_y=12,
     )
-
-    # close the timer
-    timer.cancel()
-    # close the queues
-    control_queue.close()
-    feature_queue.close()
-    raw_queue.close()
-    
