@@ -73,6 +73,7 @@ class PyNMBackend(FastAPI):
 
         # Serve static files
         if not self.dev:
+            self.logger.info("Serving static files")
             self.mount(
                 "/",
                 StaticFiles(directory=PYNM_DIR / "gui" / "frontend", html=True),

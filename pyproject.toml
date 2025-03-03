@@ -99,6 +99,9 @@ Documentation = "https://neuromodulation.github.io/py_neuromodulation/"
 Repository = "https://github.com/neuromodulation/py_neuromodulation"
 Issues = "https://github.com/neuromodulation/py_neuromodulation/issues"
 
+[project.scripts]
+run_gui = "py_neuromodulation.run_gui:main"
+
 [tool.rye]
 dev-dependencies = ["py-neuromodulation[dev]"]
 
