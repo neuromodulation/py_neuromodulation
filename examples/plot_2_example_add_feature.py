@@ -4,6 +4,7 @@ Adding New Features
 ===================
 
 """
+
 # %%
 import py_neuromodulation as nm
 import numpy as np
@@ -34,7 +35,7 @@ class ChannelMean:
         # Here you can add any additional initialization code
         # For example, you could store parameters for the functions\
         # used in the calc_feature method
-        
+
         self.feature_name = "channel_mean"
 
     def calc_feature(self, data: np.ndarray) -> dict:
@@ -54,24 +55,24 @@ class ChannelMean:
         return feature_results
 
 
-nm.add_custom_feature("channel_mean", ChannelMean)
-
 # %%
 # Now we can instantiate settings and observe that the new feature has been added to the list of features
-settings = nm.NMSettings() # Get default settings
+settings = nm.NMSettings()  # Get default settings
+nm.add_custom_feature("channel_mean", ChannelMean)
+
 
 settings.features
 
-# %% 
+# %%
 # Let's create some artificial data to demonstrate the feature calculation.
 N_CHANNELS = 5
-N_SAMPLES = 10000 # 10 seconds of random data at 1000 Hz sampling frequency
+N_SAMPLES = 10000  # 10 seconds of random data at 1000 Hz sampling frequency
 
-data = np.random.random([N_CHANNELS, N_SAMPLES]) 
+data = np.random.random([N_CHANNELS, N_SAMPLES])
 stream = nm.Stream(
     sfreq=1000,
     data=data,
-    settings = settings,
+    settings=settings,
     sampling_rate_features_hz=10,
     verbose=False,
 )
@@ -82,9 +83,6 @@ columns = [col for col in feature_df.columns if "channel_mean" in col]
 feature_df[columns]
 
 
-# %% 
+# %%
 # Remove feature so that it does not interfere with other examples
-nm.remove_custom_feature("channel_mean") 
-
-
-
+nm.remove_custom_feature("channel_mean")

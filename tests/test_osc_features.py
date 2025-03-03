@@ -3,11 +3,11 @@ import pytest
 import numpy as np
 
 from py_neuromodulation import NMSettings, Stream, features
-from py_neuromodulation.utils.types import FeatureName
+from py_neuromodulation.utils.types import FEATURE_NAME
 
 
 def setup_osc_settings(
-    osc_feature_name: FeatureName,
+    osc_feature_name: FEATURE_NAME,
     osc_feature_setting: str,
     windowlength_ms: int,
     log_transform: bool,

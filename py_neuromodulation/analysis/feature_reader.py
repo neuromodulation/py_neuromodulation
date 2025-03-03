@@ -51,6 +51,7 @@ class FeatureReader:
         self.feature_file = feature_file if feature_file else self.feature_list[0]
 
         FILE_BASENAME = PurePath(self.feature_file).stem
+        # the features are saved in a directory feature_file, and each file hold the name starting with feature_file
         PATH_READ_FILE = str(PurePath(self.feature_dir, FILE_BASENAME, FILE_BASENAME))
 
         self.settings = NMSettings.from_file(PATH_READ_FILE)

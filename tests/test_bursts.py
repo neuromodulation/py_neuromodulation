@@ -8,28 +8,28 @@ from py_neuromodulation import NMSettings
 
 def test_init_wrong_fband():
     settings = NMSettings.get_default()
-    settings.burst_settings.frequency_bands = ["wrong_band"]
+    settings.bursts_settings.frequency_bands = ["wrong_band"]
     with pytest.raises(ValidationError):
         Bursts(settings, ["ch1", "ch2"], 1000)
 
 
 def test_init_wrong_treshold():
     settings = NMSettings.get_default()
-    settings.burst_settings.threshold = -1
+    settings.bursts_settings.threshold = -1
     with pytest.raises(ValidationError):
         Bursts(settings, ["ch1", "ch2"], 1000)
 
 
 def test_init_wrong_timeduration():
     settings = NMSettings.get_default()
-    settings.burst_settings.time_duration_s = -1
+    settings.bursts_settings.time_duration_s = -1
     with pytest.raises(ValidationError):
         Bursts(settings, ["ch1", "ch2"], 1000)
 
 
 def test_init_wrong_burst_feature_init():
     settings = NMSettings.get_default()
-    settings.burst_settings.burst_features.duration = -1
+    settings.bursts_settings.burst_features.duration = -1
     with pytest.raises(ValidationError):
         Bursts(settings, ["ch1", "ch2"], 1000)
 
