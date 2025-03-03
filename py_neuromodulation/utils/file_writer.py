@@ -60,7 +60,8 @@ class MsgPackFileWriter(AbstractFileWriter):
         """
         # transform every value to float s.t. msgpack can serialize the data
         for key, value in feature_dict.items():
-            feature_dict[key] = float(value)
+            feature_dict[key] = float(value) if value is not None else 0
+
         self.data_l.append(feature_dict)
 
     def save(self):
