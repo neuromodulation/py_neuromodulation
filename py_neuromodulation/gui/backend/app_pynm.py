@@ -115,7 +115,6 @@ class PyNMState:
         self,
         lsl_stream_name: str = "",
         line_noise: float | None = None,
-        sampling_rate_features: float | None = None,
     ):
         from mne_lsl.lsl import resolve_streams
 
@@ -156,7 +155,6 @@ class PyNMState:
                     sfreq=sfreq,
                     line_noise=line_noise,
                     channels=channels,
-                    sampling_rate_features_hz=sampling_rate_features,
                     settings=self.settings,
                 )
                 logger.info("stream setup")
@@ -175,7 +173,6 @@ class PyNMState:
         self,
         file_path: str,
         line_noise: float,
-        sampling_rate_features: float,
     ):
         data, sfreq, ch_names, ch_types, bads = read_mne_data(file_path)
 
@@ -188,8 +185,6 @@ class PyNMState:
             target_keywords=None,
         )
 
-        self.settings.sampling_rate_features_hz = sampling_rate_features
-
         logger.info(f"settings: {self.settings}")
         self.stream: Stream = Stream(
             settings=self.settings,
@@ -197,7 +192,6 @@ class PyNMState:
             data=data,
             channels=channels,
             line_noise=line_noise,
-            sampling_rate_features_hz=sampling_rate_features,
         )
         self.is_stream_lsl = False
         self.lsl_stream_name = ""

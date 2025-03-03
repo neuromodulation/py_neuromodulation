@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useSocketStore } from "@/stores";
 import { useSessionStore } from "@/stores/sessionStore";
+import { useSettings } from "@/stores";
+
 import Plotly from "plotly.js-basic-dist-min";
 import {
   Box,
@@ -33,18 +35,12 @@ export const DecodingGraph = ({
 }) => {
   //const graphData = useSocketStore((state) => state.graphData);
   const graphDecodingData = useSocketStore((state) => state.graphDecodingData);
-  const samplingRate = useSessionStore((state) => state.streamParameters.samplingRateFeatures);
+  // const samplingRate = useSessionStore((state) => state.streamParameters.samplingRateFeatures);
+  const samplingRate = useSettings().sampling_rate_features_hz.__value__;
+  
+  
+  //const samplingRate = useFetchSettings().samplingRateFeatures.__value__;
   //const channels = useSessionStore((state) => state.channels, shallow);
-
-  //const usedChannels = useMemo(
-  //  () => channels.filter((channel) => channel.used === 1),
-  //  [channels]
-  //);
-
-  //const availableChannels = useMemo(
-  //  () => usedChannels.map((channel) => channel.name),
-  //  [usedChannels]
-  //);
 
   const availableDecodingOutputs = useSocketStore((state) => state.availableDecodingOutputs);
 
@@ -173,6 +169,8 @@ export const DecodingGraph = ({
 
   useEffect(() => {
     if (!graphRef.current) return;
+
+    if (!samplingRate) return;
 
     if (selectedDecodingOutputs.length === 0) {
       Plotly.purge(graphRef.current);

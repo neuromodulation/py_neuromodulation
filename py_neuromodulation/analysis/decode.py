@@ -60,6 +60,7 @@ class RealTimeDecoder:
                 feature_dict[f"decode_{decode_output_idx}"] = np.squeeze(out)[
                     decode_output_idx
                 ]
+            logger.debug(f"Decoded values: {out}")
             return feature_dict
         except Exception as e:
             logger.error(f"Error in decoding: {e}")

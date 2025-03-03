@@ -39,11 +39,6 @@ export const StreamParameters = () => {
         onChange={(event) => handleOnChange(event, "lineNoise")}
       />
       <MyTextField
-        label="sfreq features"
-        value={streamParameters.samplingRateFeatures}
-        onChange={(event) => handleOnChange(event, "samplingRateFeatures")}
-      />
-      <MyTextField
         label="experiment name"
         value={streamParameters.experimentName}
         onChange={(event) => handleOnChange(event, "experimentName")}

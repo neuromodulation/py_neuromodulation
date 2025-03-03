@@ -50,7 +50,6 @@ export const useSessionStore = createStore("session", (set, get) => ({
   streamParameters: {
     samplingRate: 1000,
     lineNoise: 50,
-    samplingRateFeatures: 11,
     allValid: false,
     experimentName: "sub",
     outputDirectory: "default",
@@ -113,8 +112,7 @@ export const useSessionStore = createStore("session", (set, get) => ({
     set({
       areParametersValid:
         get().streamParameters.samplingRate &&
-        get().streamParameters.lineNoise &&
-        get().streamParameters.samplingRateFeatures,
+        get().streamParameters.lineNoise
     });
   },
 
@@ -133,7 +131,6 @@ export const useSessionStore = createStore("session", (set, get) => ({
         },
         body: JSON.stringify({
           file_path: get().fileSource.path,
-          sampling_rate_features: get().streamParameters.samplingRateFeatures,
           line_noise: get().streamParameters.lineNoise,
         }),
       });
@@ -173,7 +170,6 @@ export const useSessionStore = createStore("session", (set, get) => ({
         },
         body: JSON.stringify({
           stream_name: lslSource.availableStreams[0].name,
-          sampling_rate_features: streamParameters.samplingRateFeatures,
           line_noise: streamParameters.lineNoise,
         }),
       });
@@ -217,7 +213,6 @@ export const useSessionStore = createStore("session", (set, get) => ({
         },
         body: JSON.stringify({
           sampling_rate: streamParameters.samplingRate,
-          sampling_rate_features: streamParameters.samplingRateFeatures,
           line_noise: streamParameters.lineNoise,
           experiment_name: streamParameters.experimentName,
           out_dir: streamParameters.outputDirectory,

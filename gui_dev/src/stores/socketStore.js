@@ -79,13 +79,6 @@ export const useSocketStore = createStore("socket", (set, get) => ({
           // else, set graphData to decodedData
           let decodingData = {};
           let dataNonDecodingFeatures = {};
-          //for (const [key, value] of Object.entries(decodedData)) {
-          //   if (key.startsWith("decode")) {
-          //     decodingData[key] = value;
-          //   } else {
-          //     dataNonDecodingFeatures[key] = value;
-          //   }
-          // }
 
           // check if this is the same:
           Object.entries(decodedData).forEach(([key, value]) => {

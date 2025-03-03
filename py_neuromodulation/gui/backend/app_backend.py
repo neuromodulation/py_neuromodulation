@@ -240,7 +240,6 @@ class PyNMBackend(FastAPI):
                 self.logger.info(f"Attempting to setup LSL stream: '{stream_name}'")
                 self.pynm_state.setup_lsl_stream(
                     lsl_stream_name=stream_name,
-                    sampling_rate_features=data["sampling_rate_features"],
                     line_noise=data["line_noise"],
                 )
                 return {"message": f"LSL stream '{stream_name}' setup successfully"}
@@ -258,7 +257,6 @@ class PyNMBackend(FastAPI):
                 self.pynm_state.setup_offline_stream(
                     file_path=data["file_path"],
                     line_noise=float(data["line_noise"]),
-                    sampling_rate_features=float(data["sampling_rate_features"]),
                 )
                 return {"message": "Offline stream setup successfully"}
             except ValueError:
@@ -267,9 +265,6 @@ class PyNMBackend(FastAPI):
         @self.post("/api/set-stream-params")
         async def set_stream_params(data: dict):
             try:
-                self.pynm_state.stream.settings.sampling_rate_features_hz = float(
-                    data["sampling_rate_features"]
-                )
                 self.pynm_state.stream.line_noise = float(data["line_noise"])
                 self.pynm_state.stream.sfreq = float(data["sampling_rate"])
                 self.pynm_state.experiment_name = data["experiment_name"]

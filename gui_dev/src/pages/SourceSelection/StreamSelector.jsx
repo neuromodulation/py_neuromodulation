@@ -57,7 +57,6 @@ export const StreamSelector = () => {
 
     /* updateStreamParameter('lineNoise', 50);*/
     updateStreamParameter('samplingRate', sfreq);
-    /*updateStreamParameter('samplingRateFeatures', 10);*/
     updateStreamParameter('allValid', true);
 
     setIsStreamNameValid(true);
