@@ -30,8 +30,6 @@ def main():
 
     player.start_player(chunk_size=30, n_repeat=5999999)
 
-    webbrowser.open_new_tab("http://localhost:50001")
-
     App(run_in_webview=False, dev=False).launch()
 
     

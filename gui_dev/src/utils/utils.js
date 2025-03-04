@@ -51,9 +51,10 @@ export const filterObjectByKeyPrefix = (obj, prefix = "") => {
 };
 
 export const getBackendURL = (route) => {
-  return "http://localhost:" + import.meta.env.VITE_BACKEND_PORT + route;
+  return import.meta.env.DEV
+    ? "http://localhost:" + import.meta.env.VITE_BACKEND_PORT + route
+    : route;
 };
-
 /**
  * Fetches PyNeuromodulation directory from the backend
  * @returns {string} PyNeuromodulation directory
