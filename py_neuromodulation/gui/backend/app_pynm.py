@@ -38,10 +38,6 @@ class PyNMState:
         # Note: sfreq and data are required for stream init
         self.stream: Stream = Stream(sfreq=1500, data=np.random.random([1, 1]))
 
-        #self.stream.channels["used"] = 0
-
-        self.settings: NMSettings = NMSettings(sampling_rate_features=10)
-
         self.feature_queue = mp.Queue()
         self.rawdata_queue = mp.Queue()
         self.control_queue = mp.Queue()
@@ -53,8 +49,6 @@ class PyNMState:
         self,
         websocket_manager: WebsocketManager | None = None,
     ) -> None:
-        # TONI: This is dangerous to do here, should be done by the setup functions
-        # self.stream.settings = self.settings
 
         self.websocket_manager = websocket_manager
 
@@ -155,7 +149,6 @@ class PyNMState:
                     sfreq=sfreq,
                     line_noise=line_noise,
                     channels=channels,
-                    settings=self.settings,
                 )
                 logger.info("stream setup")
                 logger.info("settings setup")
@@ -185,9 +178,7 @@ class PyNMState:
             target_keywords=None,
         )
 
-        logger.info(f"settings: {self.settings}")
         self.stream: Stream = Stream(
-            settings=self.settings,
             sfreq=sfreq,
             data=data,
             channels=channels,

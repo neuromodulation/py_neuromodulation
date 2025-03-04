@@ -98,7 +98,7 @@ class PyNMBackend(FastAPI):
             if reset:
                 settings = NMSettings.get_default()
             else:
-                settings = self.pynm_state.settings
+                settings = self.pynm_state.stream.settings
 
             return settings.serialize_with_metadata()
 
