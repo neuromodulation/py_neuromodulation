@@ -94,15 +94,6 @@ export const FileSelector = () => {
       >
         Open File
       </Button>
-      <Button
-        variant="contained"
-        onClick={() => {
-          setShowFolderBrowser(true);
-        }}
-        sx={{ width: "fit-content" }}
-      >
-        Select Folder
-      </Button>
       {streamSetupMessage && (
         <Typography
           variant="body2"

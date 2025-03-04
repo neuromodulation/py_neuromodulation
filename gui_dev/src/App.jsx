@@ -19,7 +19,6 @@ import {
   SourceSelection,
   Channels,
   Settings,
-  Decoding,
 } from "@/pages";
 import { theme } from "./theme";
 import { StreamSelector } from "@/pages/SourceSelection/StreamSelector";
@@ -79,7 +78,6 @@ export const App = () => {
               <Route path="channels" element={<Channels />} />
               <Route path="settings" element={<Settings />} />
               <Route path="dashboard" element={<Dashboard />} />
-              <Route path="decoding" element={<Decoding />} />
             </Routes>
           </Box>
           <StatusBar />
