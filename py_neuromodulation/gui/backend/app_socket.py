@@ -37,11 +37,6 @@ class WebsocketManager:
                 f"Client {client_address.port}:{client_address.port} disconnected."
             )
 
-    async def _cleanup_disconnected(self):
-        for connection in self.disconnected:
-            self.active_connections.remove(connection)
-            await connection.close()
-
     # Combine IP and port to create a unique client ID
     async def send_cbor(self, object: dict):
         if not self.active_connections:
@@ -75,8 +70,6 @@ class WebsocketManager:
             self.logger.info(f"Messages sent: {self.messages_sent}")
             self._last_diagnostic_time = current_time
 
-        await self._cleanup_disconnected()
-
     async def send_message(self, message: str | dict):
         if not self.active_connections:
             self.logger.warning("No active connection to send message.")
@@ -93,10 +86,9 @@ class WebsocketManager:
                     await connection.send_text(message)
                 self.logger.info(f"Message sent to {connection.client}")
             except RuntimeError as e:
-                self.logger.error(f"Error sending message: {e}")
-                self.disconnected.append(connection)
-
-        await self._cleanup_disconnected()
+                self.logger.error(f"Error sending message: {e}.")
+                self.active_connections.remove(connection)
+                await connection.close()
 
     @property
     def is_connected(self):
