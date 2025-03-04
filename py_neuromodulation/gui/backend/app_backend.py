@@ -134,12 +134,12 @@ class PyNMBackend(FastAPI):
                         "settings": validated_settings.serialize_with_metadata(),
                     }
 
-                self.pynm_state.settings = validated_settings
+                self.pynm_state.stream.settings = validated_settings
                 self.logger.info("Settings successfully updated")
 
                 return {
                     "valid": True,
-                    "settings": self.pynm_state.settings.serialize_with_metadata(),
+                    "settings": self.pynm_state.stream.settings.serialize_with_metadata(),
                 }
 
             # If something else than validation went wrong, return error
