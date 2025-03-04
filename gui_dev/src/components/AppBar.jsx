@@ -33,7 +33,6 @@ const Toolbar = () => (
     <ToolbarButton to="/channels" icon={<Dvr />} label="Channels" />
     <ToolbarButton to="/settings" icon={<Settings />} label="Settings" />
     <ToolbarButton to="/dashboard" icon={<Dashboard />} label="Dashboard" />
-    <ToolbarButton to="/decoding" icon={<BarChart />} label="Decoding" />
   </Stack>
 );
 

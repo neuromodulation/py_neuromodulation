@@ -145,7 +145,11 @@ class LSLOfflinePlayer:
             while not stop_flag.is_set() and not player._end_streaming:
                 time.sleep(0.1)
         finally:
-            player.stop()
+            try:
+                player.stop()
+            except RuntimeError:
+                # player already stopped
+                pass
             streaming_complete.set()
 
     def wait_for_completion(self):
