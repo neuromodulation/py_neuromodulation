@@ -9,6 +9,7 @@ from py_neuromodulation.utils.types import (
     BoolSelector,
     FrequencyRange,
 )
+from py_neuromodulation.utils.pydantic_extensions import NMField
 
 if TYPE_CHECKING:
     from py_neuromodulation import NMSettings
@@ -29,11 +30,11 @@ class FooofPeriodicSettings(BoolSelector):
 class FooofSettings(NMBaseModel):
     aperiodic: FooofAperiodicSettings = FooofAperiodicSettings()
     periodic: FooofPeriodicSettings = FooofPeriodicSettings()
-    windowlength_ms: float = 800
+    windowlength_ms: float = NMField(800, gt=0, custom_metadata={"unit": "ms"})
     peak_width_limits: FrequencyRange = FrequencyRange(0.5, 12)
-    max_n_peaks: int = 3
-    min_peak_height: float = 0
-    peak_threshold: float = 2
+    max_n_peaks: int = NMField(3, ge=0)
+    min_peak_height: float = NMField(0, ge=0)
+    peak_threshold: float = NMField(2, ge=0)
     freq_range_hz: FrequencyRange = FrequencyRange(2, 40)
     knee: bool = True
 
@@ -63,12 +64,12 @@ class FooofAnalyzer(NMFeature):
 
         assert (
             self.settings.windowlength_ms <= settings.segment_length_features_ms
-        ), f"fooof windowlength_ms ({settings.fooof.windowlength_ms}) needs to be smaller equal than segment_length_features_ms ({settings.segment_length_features_ms})."
+        ), f"fooof windowlength_ms ({settings.fooof_settings.windowlength_ms}) needs to be smaller equal than segment_length_features_ms ({settings.segment_length_features_ms})."
 
         assert (
             self.settings.freq_range_hz[0] < sfreq
             and self.settings.freq_range_hz[1] < sfreq
-        ), f"fooof frequency range needs to be below sfreq, got {settings.fooof.freq_range_hz}"
+        ), f"fooof frequency range needs to be below sfreq, got {settings.fooof_settings.freq_range_hz}"
 
         from fooof import FOOOFGroup
 

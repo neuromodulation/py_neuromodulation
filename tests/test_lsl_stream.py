@@ -4,15 +4,19 @@ import pytest
 import time
 
 
-@pytest.mark.parametrize("setup_lsl_player", ["search"], indirect=True)
+@pytest.mark.parametrize("setup_lsl_player", ["example_stream"], indirect=True)
 def test_lsl_stream_search(setup_lsl_player):
     from py_neuromodulation.stream import mnelsl_stream
 
     """ Test if the lsl stream search can find any streams after starting a player."""
     player = setup_lsl_player
-    player.start_player()
+    player.start_player(chunk_size=30, n_repeat=4)
+    time.sleep(3)
     streams = mnelsl_stream.resolve_streams()
+    
     assert len(streams) != 0, "No streams found in search"
+    
+    player.stop_player()
 
 
 @pytest.mark.parametrize("setup_lsl_player", ["offline_test"], indirect=True)
@@ -23,13 +27,13 @@ def test_offline_lsl(
 
     raw, data, sfreq = setup_default_data
     player = setup_lsl_player
-    player.start_player()
+    player.start_player(chunk_size=30, n_repeat=1)
+    time.sleep(3)
 
     data, stream = setup_default_stream_fast_compute
 
     features = stream.run(
         is_stream_lsl=True,
-        plot_lsl=False,
         stream_lsl_name="offline_test",
         out_dir="./test_data",
         experiment_name="test_offline_lsl",
@@ -39,25 +43,31 @@ def test_offline_lsl(
         raise ValueError(
             "Expected same sampling frequency in the stream and input file"
         )
-    if not player.player.info["sfreq"] == stream.sfreq:
-        raise ValueError("Expected same sampling frequency in the stream and player")
+    
+    # since the PlayerLSL is started within a multprocessing.Process
+    # the player object cannot be accessed
+    # if not player._player.info["sfreq"] == stream.sfreq:
+    #     raise ValueError("Expected same sampling frequency in the stream and player")
 
     # check types
     if not all(raw.get_channel_types() == stream.channels["type"]):
         raise ValueError("Channel types in data file are not matching the stream")
-    if not all(player.player.get_channel_types() == stream.channels["type"]):
-        raise ValueError("Channel types in stream are not matching the player")
+
+    # if not all(player.get_channel_types() == stream.channels["type"]):
+    #    raise ValueError("Channel types in stream are not matching the player")
 
     # check names
     if not all(raw.ch_names == stream.channels["name"]):
         raise ValueError("Expected same channel names in the stream and input file")
-    if not all(player.player.info["ch_names"] == stream.channels["name"]):
-        raise ValueError("Expected same channel names in the stream and player")
+    #if not all(player.info["ch_names"] == stream.channels["name"]):
+    #    raise ValueError("Expected same channel names in the stream and player")
 
     if not features is not None:
         raise ValueError(
             "Expected features dataframe as stream.run() output but got None"
         )
+    
+    player.stop_player()
 
 
 @pytest.mark.parametrize("setup_lsl_player", ["data_test"], indirect=True)
@@ -68,7 +78,9 @@ def test_lsl_data(setup_default_data, setup_lsl_player):
     raw, data, sfreq = setup_default_data
     df_stream = pd.DataFrame()
     player = setup_lsl_player
-    player.start_player(chunk_size=2)
+    player.start_player(chunk_size=30, n_repeat=1)
+    time.sleep(3)
+
     stream_player_check = StreamLSL(bufsize=2, name="data_test").connect()
     time.sleep(0.2)
     while stream_player_check.n_new_samples != 0:
@@ -91,3 +103,6 @@ def test_lsl_data(setup_default_data, setup_lsl_player):
     assert np.any(
         matching_percentage >= 99
     ), f"Expected same data in at least 99 percent of the samples but got {np.max(matching_percentage)} percent"
+
+    player.stop_player()
+

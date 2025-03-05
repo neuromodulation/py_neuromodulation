@@ -7,11 +7,12 @@ else:
 from collections.abc import Sequence
 from itertools import product
 
-from pydantic import Field, field_validator
+from pydantic import field_validator
 from py_neuromodulation.utils.types import BoolSelector, NMBaseModel, NMFeature
+from py_neuromodulation.utils.pydantic_extensions import NMField
 
 from typing import TYPE_CHECKING, Callable
-from py_neuromodulation.utils.types import create_validation_error
+from py_neuromodulation.utils.pydantic_extensions import create_validation_error
 
 if TYPE_CHECKING:
     from py_neuromodulation import NMSettings
@@ -46,8 +47,8 @@ class BurstFeatures(BoolSelector):
 
 
 class BurstsSettings(NMBaseModel):
-    threshold: float = Field(default=75, ge=0, le=100)
-    time_duration_s: float = Field(default=30, ge=0)
+    threshold: float = NMField(default=75, ge=0)
+    time_duration_s: float = NMField(default=30, ge=0, custom_metadata={"unit": "s"})
     frequency_bands: list[str] = ["low_beta", "high_beta", "low_gamma"]
     burst_features: BurstFeatures = BurstFeatures()
 
@@ -64,16 +65,16 @@ class Bursts(NMFeature):
         settings.validate()
 
         # Validate that all frequency bands are defined in the settings
-        for fband_burst in settings.burst_settings.frequency_bands:
+        for fband_burst in settings.bursts_settings.frequency_bands:
             if fband_burst not in list(settings.frequency_ranges_hz.keys()):
                 raise create_validation_error(
                     f"bursting {fband_burst} needs to be defined in settings['frequency_ranges_hz']",
-                    loc=["burst_settings", "frequency_bands"],
+                    location=["burst_settings", "frequency_bands"],
                 )
 
         from py_neuromodulation.filter import MNEFilter
 
-        self.settings = settings.burst_settings
+        self.settings = settings.bursts_settings
         self.sfreq = sfreq
         self.ch_names = ch_names
         self.segment_length_features_s = settings.segment_length_features_ms / 1000
@@ -83,7 +84,7 @@ class Bursts(NMFeature):
             / settings.sampling_rate_features_hz
         )
 
-        self.fband_names = settings.burst_settings.frequency_bands
+        self.fband_names = settings.bursts_settings.frequency_bands
 
         f_ranges: list[tuple[float, float]] = [
             (

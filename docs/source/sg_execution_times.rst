@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:39.639** total execution time for 9 files **from all galleries**:
+**00:50.830** total execution time for 9 files **from all galleries**:
 
 .. container::
 
@@ -33,18 +33,18 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_auto_examples_plot_7_lsl_example.py` (``../../examples/plot_7_lsl_example.py``)
-     - 00:29.012
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_plot_1_example_BIDS.py` (``../../examples/plot_1_example_BIDS.py``)
-     - 00:08.493
-     - 0.0
-   * - :ref:`sphx_glr_auto_examples_plot_4_example_gridPointProjection.py` (``../../examples/plot_4_example_gridPointProjection.py``)
-     - 00:02.135
+     - 00:33.504
      - 0.0
    * - :ref:`sphx_glr_auto_examples_plot_0_first_demo.py` (``../../examples/plot_0_first_demo.py``)
-     - 00:00.000
+     - 00:11.468
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_plot_4_example_gridPointProjection.py` (``../../examples/plot_4_example_gridPointProjection.py``)
+     - 00:04.342
      - 0.0
    * - :ref:`sphx_glr_auto_examples_plot_2_example_add_feature.py` (``../../examples/plot_2_example_add_feature.py``)
+     - 00:01.515
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_plot_1_example_BIDS.py` (``../../examples/plot_1_example_BIDS.py``)
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_auto_examples_plot_3_example_sharpwave_analysis.py` (``../../examples/plot_3_example_sharpwave_analysis.py``)

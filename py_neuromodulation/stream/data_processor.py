@@ -55,6 +55,7 @@ class DataProcessor:
         self.sfreq_raw: float = sfreq // 1
         self.line_noise: float | None = line_noise
         self.path_grids: _PathLike | None = path_grids
+        self.non_psd_indices: np.ndarray | None = None
         self.verbose: bool = verbose
 
         self.features_previous = None
@@ -255,9 +256,29 @@ class DataProcessor:
 
         # normalize features
         if self.settings.postprocessing.feature_normalization:
-            normed_features = self.feature_normalizer.process(
-                np.fromiter(features_dict.values(), dtype=np.float64)
-            )
+            if not self.settings.feature_normalization_settings.normalize_psd:
+                if self.non_psd_indices is None:
+                    self.non_psd_indices = [
+                        idx
+                        for idx, key in enumerate(features_dict.keys())
+                        if "psd" not in key
+                    ]
+                    self.psd_indices = list(set(range(len(features_dict))) - set(
+                        self.non_psd_indices
+                    ))
+                feature_values = np.fromiter(features_dict.values(), dtype=np.float64)
+                normed_features_non_psd = self.feature_normalizer.process(
+                    feature_values[self.non_psd_indices]
+                )
+
+                # combine values in new array
+                normed_features = np.empty((feature_values.shape[0]))
+                normed_features[self.non_psd_indices] = normed_features_non_psd
+                normed_features[self.psd_indices] = feature_values[self.psd_indices]
+            else:    
+                normed_features = self.feature_normalizer.process(
+                    np.fromiter(features_dict.values(), dtype=np.float64)
+                )
             features_dict = {
                 key: normed_features[idx]
                 for idx, key in enumerate(features_dict.keys())

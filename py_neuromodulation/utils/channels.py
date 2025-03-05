@@ -251,7 +251,7 @@ def _get_default_references(
 
 
 def get_default_channels_from_data(
-    data: np.ndarray,
+    data: "np.ndarray | pd.DataFrame",
     car_rereferencing: bool = True,
 ):
     """Return default channels dataframe with

@@ -1,20 +1,12 @@
 import numpy as np
 
-from pydantic import Field
 from typing import TYPE_CHECKING
 
 from py_neuromodulation.utils.types import BoolSelector, FrequencyRange, NMPreprocessor
+from py_neuromodulation.utils.pydantic_extensions import NMField
 
 if TYPE_CHECKING:
     from py_neuromodulation import NMSettings
-
-
-FILTER_SETTINGS_MAP = {
-    "bandstop_filter": "bandstop_filter_settings",
-    "bandpass_filter": "bandpass_filter_settings",
-    "lowpass_filter": "lowpass_filter_cutoff_hz",
-    "highpass_filter": "highpass_filter_cutoff_hz",
-}
 
 
 class FilterSettings(BoolSelector):
@@ -25,21 +17,23 @@ class FilterSettings(BoolSelector):
 
     bandstop_filter_settings: FrequencyRange = FrequencyRange(100, 160)
     bandpass_filter_settings: FrequencyRange = FrequencyRange(2, 200)
-    lowpass_filter_cutoff_hz: float = Field(default=200)
-    highpass_filter_cutoff_hz: float = Field(default=3)
+    lowpass_filter_cutoff_hz: float = NMField(
+        default=200, gt=0, custom_metadata={"unit": "Hz"}
+    )
+    highpass_filter_cutoff_hz: float = NMField(
+        default=3, gt=0, custom_metadata={"unit": "Hz"}
+    )
 
-    def get_filter_tuple(self, filter_name) -> tuple[float | None, float | None]:
-        filter_value = self[FILTER_SETTINGS_MAP[filter_name]]
-
+    def get_filter_tuple(self, filter_name) -> FrequencyRange:
         match filter_name:
             case "bandstop_filter":
-                return (filter_value.frequency_high_hz, filter_value.frequency_low_hz)
+                return self.bandstop_filter_settings
             case "bandpass_filter":
-                return (filter_value.frequency_low_hz, filter_value.frequency_high_hz)
+                return self.bandpass_filter_settings
             case "lowpass_filter":
-                return (None, filter_value)
+                return FrequencyRange(None, self.lowpass_filter_cutoff_hz)
             case "highpass_filter":
-                return (filter_value, None)
+                return FrequencyRange(self.highpass_filter_cutoff_hz, None)
             case _:
                 raise ValueError(
                     "Filter name must be one of 'bandstop_filter', 'lowpass_filter', "
@@ -51,15 +45,37 @@ class PreprocessingFilter(NMPreprocessor):
     def __init__(self, settings: "NMSettings", sfreq: float) -> None:
         from py_neuromodulation.filter import MNEFilter
 
-        self.filters: list[MNEFilter] = [
-            MNEFilter(
-                f_ranges=[settings.preprocessing_filter.get_filter_tuple(filter_name)],  # type: ignore
-                sfreq=sfreq,
-                filter_length=sfreq - 1,
-                verbose=False,
+
+        self.filters: list[MNEFilter] = []
+        for filter_name in settings.preprocessing_filter.get_enabled():
+            if filter_name != "lowpass_filter" and filter_name != "highpass_filter":
+                self.filters += [
+                    MNEFilter(
+                        f_ranges=[settings.preprocessing_filter.get_filter_tuple(filter_name)],  # type: ignore
+                        sfreq=sfreq,
+                        filter_length=sfreq - 1,
+                        verbose=False,
+                    )
+                ]
+
+        if "lowpass_filter" in settings.preprocessing_filter.get_enabled():
+            self.filters.append(
+                MNEFilter(
+                    f_ranges=[[None, settings.preprocessing_filter.lowpass_filter_cutoff_hz]],  # type: ignore
+                    sfreq=sfreq,
+                    filter_length=sfreq - 1,
+                    verbose=False,
+                )
             )
-            for filter_name in settings.preprocessing_filter.get_enabled()
-        ]
+        if "highpass_filter" in settings.preprocessing_filter.get_enabled():
+            self.filters.append(
+                MNEFilter(
+                    f_ranges=[[settings.preprocessing_filter.highpass_filter_cutoff_hz, None]],  # type: ignore
+                    sfreq=sfreq,
+                    filter_length=sfreq - 1,
+                    verbose=False,
+                )
+            )
 
     def process(self, data: np.ndarray) -> np.ndarray:
         """Preprocess data according to the initialized list of PreprocessingFilter objects

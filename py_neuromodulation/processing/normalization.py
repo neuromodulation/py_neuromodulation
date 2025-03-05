@@ -3,10 +3,10 @@
 import numpy as np
 from typing import TYPE_CHECKING, Callable, Literal, get_args
 
+from py_neuromodulation.utils.pydantic_extensions import NMField
 from py_neuromodulation.utils.types import (
     NMBaseModel,
-    Field,
-    NormMethod,
+    NORM_METHOD,
     NMPreprocessor,
 )
 
@@ -17,14 +17,15 @@ NormalizerType = Literal["raw", "feature"]
 
 
 class NormalizationSettings(NMBaseModel):
-    normalization_time_s: float = 30
-    normalization_method: NormMethod = "zscore"
-    clip: float = Field(default=3, ge=0)
+    normalization_time_s: float = NMField(30, gt=0, custom_metadata={"unit": "s"})
+    normalization_method: NORM_METHOD = NMField(default="zscore")
+    clip: float = NMField(default=3, ge=0, custom_metadata={"unit": "a.u."})
 
     @staticmethod
-    def list_normalization_methods() -> list[NormMethod]:
-        return list(get_args(NormMethod))
+    def list_normalization_methods() -> list[NORM_METHOD]:
+        return list(get_args(NORM_METHOD))
 
+class FeatureNormalizationSettings(NormalizationSettings):    normalize_psd: bool = False
 
 class Normalizer(NMPreprocessor):
     def __init__(
@@ -32,9 +33,13 @@ class Normalizer(NMPreprocessor):
         sfreq: float,
         settings: "NMSettings",
         type: NormalizerType,
+        **kwargs,
     ) -> None:
         self.type = type
-        self.settings: NormalizationSettings
+        if self.type == "raw":
+            self.settings: NormalizationSettings
+        else:
+            self.settings: FeatureNormalizationSettings
 
         match self.type:
             case "raw":
@@ -55,7 +60,7 @@ class Normalizer(NMPreprocessor):
         if self.using_sklearn:
             import sklearn.preprocessing as skpp
 
-            NORM_METHODS_SKLEARN: dict[NormMethod, Callable] = {
+            NORM_METHODS_SKLEARN: dict[NORM_METHOD, Callable] = {
                 "quantile": lambda: skpp.QuantileTransformer(n_quantiles=300),
                 "robust": skpp.RobustScaler,
                 "minmax": skpp.MinMaxScaler,
@@ -74,14 +79,24 @@ class Normalizer(NMPreprocessor):
             self.normalizer = NORM_FUNCTIONS[self.method]
 
     def process(self, data: np.ndarray) -> np.ndarray:
-        # TODO: does feature normalization need to be transposed too?
-        if self.type == "raw":
-            data = data.T
+        """Process normalization.
+        Note: raw data has to be internally transposed, s.t. raw and features 
+        are normalized in the same way.
 
+        Args:
+            data (np.ndarray): shape (channels, n_samples)
+
+        Returns:
+            np.ndarray: (channels, n_samples)
+        """
+                    
         if self.previous.size == 0:  # Check if empty
             self.previous = data
-            return data if self.type == "raw" else data.T
-
+            if self.type == "raw":
+                self.previous = self.previous.T
+            return data
+        if self.type == "raw":
+            data = data.T
         self.previous = np.vstack((self.previous, data[-self.add_samples :]))
 
         data = self.normalizer(data, self.previous)
@@ -93,12 +108,12 @@ class Normalizer(NMPreprocessor):
 
         data = np.nan_to_num(data)
 
-        return data if self.type == "raw" else data.T
+        return data if self.type != "raw" else data.T
 
 
 class RawNormalizer(Normalizer):
-    def __init__(self, sfreq: float, settings: "NMSettings") -> None:
-        super().__init__(sfreq, settings, "raw")
+    def __init__(self, sfreq: float, settings: "NMSettings", **kwargs,) -> None:
+        super().__init__(sfreq, settings, "raw", **kwargs)
 
 
 class FeatureNormalizer(Normalizer):

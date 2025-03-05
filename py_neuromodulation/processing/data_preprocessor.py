@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING, Type
-from py_neuromodulation.utils.types import PreprocessorName, NMPreprocessor
+from py_neuromodulation.utils.types import PREPROCESSOR_NAME, NMPreprocessor
 
 if TYPE_CHECKING:
     import numpy as np
     import pandas as pd
     from py_neuromodulation.stream.settings import NMSettings
 
-PREPROCESSOR_DICT: dict[PreprocessorName, str] = {
+PREPROCESSOR_DICT: dict[PREPROCESSOR_NAME, str] = {
     "preprocessing_filter": "PreprocessingFilter",
     "notch_filter": "NotchFilter",
     "raw_resampling": "Resampler",
@@ -72,6 +72,13 @@ class DataPreprocessor:
         ]
 
     def process_data(self, data: "np.ndarray") -> "np.ndarray":
+        """
+        Args:
+            data (np.ndarray): shape: (n_channels, n_samples)
+
+        Returns:
+            np.ndarray: shape: (n_channels, n_samples)
+        """
         for preprocessor in self.preprocessors:
             data = preprocessor.process(data)
         return data

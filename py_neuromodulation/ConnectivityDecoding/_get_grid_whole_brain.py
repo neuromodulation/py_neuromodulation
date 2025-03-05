@@ -70,7 +70,6 @@ class NiiToMNI:
         coord_arr = np.array(coord_)
         ival_non_zero = ival_arr[ival != 0]
         coord_non_zero = coord_arr[ival != 0]
-        print(coord_non_zero.shape)
 
         return coord_non_zero, ival_non_zero
 

@@ -1,16 +1,19 @@
 """Module for generic and offline data streams."""
 
-from typing import TYPE_CHECKING
+import time
+from typing import TYPE_CHECKING, Any
 from collections.abc import Iterator
 import numpy as np
 from pathlib import Path
 
 import py_neuromodulation as nm
-from contextlib import suppress
 
 from py_neuromodulation.stream.data_processor import DataProcessor
-from py_neuromodulation.utils.types import _PathLike, FeatureName
+from py_neuromodulation.utils.types import _PathLike, FEATURE_NAME
+from py_neuromodulation.utils.file_writer import MsgPackFileWriter
 from py_neuromodulation.stream.settings import NMSettings
+from py_neuromodulation.analysis.decode import RealTimeDecoder
+from py_neuromodulation.stream.backend_interface import StreamBackendInterface
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -35,9 +38,6 @@ class Stream:
         sampling_rate_features_hz: float | None = None,
         path_grids: _PathLike | None = None,
         coord_names: list | None = None,
-        stream_name: str
-        | None = "example_stream",  # Timon: do we need those in the nmstream_abc?
-        is_stream_lsl: bool = False,
         coord_list: list | None = None,
         verbose: bool = True,
     ) -> None:
@@ -67,6 +67,7 @@ class Stream:
         verbose : bool, optional
             print out stream computation time information, by default True
         """
+        # This is calling NMSettings.validate() which is making a copy
         self.settings: NMSettings = NMSettings.load(settings)
 
         if channels is None and data is not None:
@@ -84,7 +85,7 @@ class Stream:
             raise ValueError("Either `channels` or `data` must be passed to `Stream`.")
 
         # If features that use frequency ranges are on, test them against nyquist frequency
-        use_freq_ranges: list[FeatureName] = [
+        use_freq_ranges: list[FEATURE_NAME] = [
             "bandpass_filter",
             "stft",
             "fft",
@@ -124,8 +125,8 @@ class Stream:
         self.sess_right = None
         self.projection = None
         self.model = None
+        self.is_running = False
 
-        # TODO(toni): is it necessary to initialize the DataProcessor on stream init?
         self.data_processor = DataProcessor(
             sfreq=self.sfreq,
             settings=self.settings,
@@ -201,13 +202,20 @@ class Stream:
         experiment_name: str = "sub",
         is_stream_lsl: bool = False,
         stream_lsl_name: str | None = None,
-        plot_lsl: bool = False,
-        save_csv: bool = False,
+        save_csv: bool = True,
         save_interval: int = 10,
         return_df: bool = True,
+        simulate_real_time: bool = False,
+        decoder: RealTimeDecoder | None = None,
+        backend_interface: StreamBackendInterface | None = None,
     ) -> "pd.DataFrame":
         self.is_stream_lsl = is_stream_lsl
         self.stream_lsl_name = stream_lsl_name
+        self.save_csv = save_csv
+        self.save_interval = save_interval
+        self.return_df = return_df
+        self.out_dir = Path.cwd() if not out_dir else Path(out_dir)
+        self.experiment_name = experiment_name
 
         # Validate input data
         if data is not None:
@@ -217,24 +225,10 @@ class Stream:
         elif self.data is None and data is None and self.is_stream_lsl is False:
             raise ValueError("No data passed to run function.")
 
-        # Generate output dirs
-        self.out_dir_root = Path.cwd() if not out_dir else Path(out_dir)
-        self.out_dir = self.out_dir_root / experiment_name
-        # TONI: Need better default experiment name
-        self.experiment_name = experiment_name if experiment_name else "sub"
-
-        self.out_dir.mkdir(parents=True, exist_ok=True)
-
-        # Open database connection
-        # TONI: we should give the user control over the save format
-        from py_neuromodulation.utils.database import NMDatabase
-
-        db = NMDatabase(experiment_name, out_dir)  # Create output database
+        file_writer = MsgPackFileWriter(name=experiment_name, out_dir=out_dir)
 
         self.batch_count: int = 0  # Keep track of the number of batches processed
 
-        # Reinitialize the data processor in case the nm_channels or nm_settings changed between runs of the same Stream
-        # TONI: then I think we can just not initialize the data processor in the init function
         self.data_processor = DataProcessor(
             sfreq=self.sfreq,
             settings=self.settings,
@@ -248,9 +242,8 @@ class Stream:
 
         nm.logger.log_to_file(out_dir)
 
-        # Initialize generator
         self.generator: Iterator
-        if not is_stream_lsl:
+        if not is_stream_lsl and data is not None:
             from py_neuromodulation.stream.generator import RawDataGenerator
 
             self.generator = RawDataGenerator(
@@ -259,6 +252,7 @@ class Stream:
                 self.settings.sampling_rate_features_hz,
                 self.settings.segment_length_features_ms,
             )
+            nm.logger.info("Initializing RawDataGenerator")
         else:
             from py_neuromodulation.stream.mnelsl_stream import LSLStream
 
@@ -266,13 +260,10 @@ class Stream:
                 settings=self.settings, stream_name=stream_lsl_name
             )
 
-            if plot_lsl:
-                from mne_lsl.stream_viewer import StreamViewer
-
-                viewer = StreamViewer(stream_name=stream_lsl_name)
-                viewer.start()
-
-            if self.sfreq != self.lsl_stream.stream.sinfo.sfreq:
+            if (
+                self.lsl_stream.stream.sinfo is not None
+                and self.sfreq != self.lsl_stream.stream.sinfo.sfreq
+            ):
                 error_msg = (
                     f"Sampling frequency of the lsl-stream ({self.lsl_stream.stream.sinfo.sfreq}) "
                     f"does not match the settings ({self.sfreq})."
@@ -285,9 +276,21 @@ class Stream:
 
         prev_batch_end = 0
         for timestamps, data_batch in self.generator:
+            self.is_running = True
+            if backend_interface:
+                # Only simulate real-time if connected to GUI
+                if simulate_real_time:
+                    time.sleep(1 / self.settings.sampling_rate_features_hz)
+
+                signal = backend_interface.check_control_signals()
+                if signal == "stop":
+                    break
+
             if data_batch is None:
+                nm.logger.info("Data batch is None, stopping run function")
                 break
 
+            nm.logger.info("Processing new data batch")
             feature_dict = self.data_processor.process(data_batch)
 
             this_batch_end = timestamps[-1]
@@ -296,10 +299,13 @@ class Stream:
                 f"{batch_length:.3f} seconds of new data processed",
             )
 
-            feature_dict["time"] = (
-                batch_length if is_stream_lsl else np.ceil(this_batch_end * 1000 + 1)
-            )
+            if decoder is not None:
+                ch_to_decode = self.channels.query("used == 1").iloc[0]["name"]
+                feature_dict = decoder.predict(
+                    feature_dict, ch_to_decode, fft_bands_only=True
+                )
 
+            feature_dict["time"] = np.ceil(this_batch_end * 1000 + 1)
             prev_batch_end = this_batch_end
 
             if self.verbose:
@@ -307,29 +313,41 @@ class Stream:
 
             self._add_target(feature_dict, data_batch)
 
-            # We should ensure that feature output is always either float64 or None and remove this
-            with suppress(TypeError):  # Need this because some features output None
-                for key, value in feature_dict.items():
-                    feature_dict[key] = np.float64(value)
+            # Push data to file writer
+            file_writer.insert_data(feature_dict)
 
-            db.insert_data(feature_dict)
+            # Send data to frontend
+            if backend_interface:
+                backend_interface.send_features(feature_dict)
+                backend_interface.send_raw_data(self._prepare_raw_data_dict(data_batch))
 
+            # Save features to file in intervals
             self.batch_count += 1
-            if self.batch_count % save_interval == 0:
-                db.commit()
+            if self.batch_count % self.save_interval == 0:
+                file_writer.save()
 
-        db.commit()  # Save last batches
+        file_writer.save()
 
-        # If save_csv is False, still save the first row to get the column names
-        feature_df: "pd.DataFrame" = (
-            db.fetch_all() if (save_csv or return_df) else db.head()
-        )
+        if self.save_csv:
+            file_writer.save_as_csv(save_all_combined=True)
 
-        db.close()  # Close the database connection
+        feature_df = file_writer.load_all() if self.return_df else {}
 
-        self._save_after_stream(feature_arr=feature_df)
+        self._save_after_stream()
+        self.is_running = False
 
-        return feature_df  # TONI: Not sure if this makes sense anymore
+        return feature_df  # Timon: We could think of returnader instead
+
+    def _prepare_raw_data_dict(self, data_batch: np.ndarray) -> dict[str, Any]:
+        """Prepare raw data dictionary for sending through queue"""
+        new_time_ms = 1000 / self.settings.sampling_rate_features_hz
+        new_samples = int(new_time_ms * self.sfreq / 1000)
+        return {
+            "raw_data": {
+                ch: list(data_batch[i, -new_samples:])
+                for i, ch in enumerate(self.channels["name"])
+            }
+        }
 
     def plot_raw_signal(
         self,
@@ -365,11 +383,15 @@ class Stream:
         ValueError
             raise Exception when no data is passed
         """
-        if self.data is None and data is None:
-            raise ValueError("No data passed to plot_raw_signal function.")
-
-        if data is None and self.data is not None:
-            data = self.data
+        if data is None:
+            if self.data is None:
+                raise ValueError("No data passed to plot_raw_signal function.")
+            else:
+                data = (
+                    self.data.to_numpy()
+                    if isinstance(self.data, pd.DataFrame)
+                    else self.data
+                )
 
         if sfreq is None:
             sfreq = self.sfreq
@@ -384,7 +406,7 @@ class Stream:
         from mne import create_info
         from mne.io import RawArray
 
-        info = create_info(ch_names=ch_names, sfreq=sfreq, ch_types=ch_types)
+        info = create_info(ch_names=ch_names, sfreq=sfreq, ch_types=ch_types)  # type: ignore
         raw = RawArray(data, info)
 
         if picks is not None:
@@ -397,12 +419,9 @@ class Stream:
 
     def _save_after_stream(
         self,
-        feature_arr: "pd.DataFrame | None" = None,
     ) -> None:
-        """Save features, settings, nm_channels and sidecar after run"""
+        """Save settings, nm_channels and sidecar after run"""
         self._save_sidecar()
-        if feature_arr is not None:
-            self._save_features(feature_arr)
         self._save_settings()
         self._save_channels()
 
@@ -422,6 +441,7 @@ class Stream:
         """Save sidecar incduing fs, coords, sess_right to
         out_path_root and subfolder 'folder_name'"""
         additional_args = {"sess_right": self.sess_right}
+
         self.data_processor.save_sidecar(
             self.out_dir, self.experiment_name, additional_args
         )
