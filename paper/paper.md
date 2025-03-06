@@ -50,18 +50,18 @@ Electrophysiological recordings can be obtained through various modalities, incl
 
 # Introduction
 
-Analysis of electrophysiological recordigns is commonly started by multiple preprocessing steps: resampling, notch-filtering, normalization, re-referencing (subtraction of neighbouring channels), filtering (lowpass, highpass, bandpass), or artifact rejection [@Cohen2014]. Next, the signals or features of interest are computed. Most commonly, signals are analyzed in the spectral domain. Here, different methods could be utilized, including Fast Fourier Transform, Welch transform, bandpass filtering, and others. In addition to spectral features, different feature modalities such as waveformshape [@Cole2017], periodic and aperiodic spectral parametrization [@Donoghue2020], bursting features [@Tinkhauser2018], and many others can be computed.
-Many toolboxes exist already that enable analysis of electrophysiological recordings: in Matlab Fieldtrip [@Oostenveld2018] or Brainstorm [@Tadel2011], and in Python mne-python [@Gramfort2013]. These include extensive methods for various processing and feature computation 
+Analysis of electrophysiological recordigns is commonly started by multiple preprocessing steps: resampling, notch-filtering, normalization, re-referencing (subtraction of neighbouring channels), filtering (lowpass, highpass, bandpass), or artifact rejection [@cohen_analyzing_2014]. Next, the signals or features of interest are computed. Most commonly, signals are analyzed in the spectral domain. Here, different methods could be utilized, including Fast Fourier Transform, Welch transform, bandpass filtering, and others. In addition to spectral features, different feature modalities such as waveformshape [@cole_brain_2017], periodic and aperiodic spectral parametrization [@donoghue_parameterizing_2020], bursting features [@tinkhauser_beta_2018], and many others can be computed.
+Many toolboxes exist already that enable analysis of electrophysiological recordings: in Matlab Fieldtrip [@oostenveld_fieldtrip_2011] or Brainstorm [@tadel_brainstorm_2011], and in Python mne-python [@gramfort_meg_2013]. These include extensive methods for various processing and feature computation 
 By introducing [py_neuromodulation](https://github.com/neuromodulation/py_neuromodulation), we want to address several shortcomings in electrophysiological signal analysis.
 First, the variety of different processing parameters poses a challenge first to select optimal methods best for neural machine learning decoding, and second hinders reproduceability, since often necessary parameters are not reported in scientific literature. Here we introduce clear parametrization files, *settings.yaml* and *channels.tsv*, that include all required steps for reproduction. Additionally, it allows for a coupled pipeline of feature computation and decoding. The performance contribution of various pre-processing steps can be assessed in combination with different feature estiimation and machine learning model architectures.  
-Next, offline analysis often includes with whole-recording normalization, non-causal filtering, or feature computation introducing testset data leakage [@Merk2022] processing steps are not realtime or online compatible. In py_neuromodulation, the datasource is represented as a Python generator, and is interchangable for online and onfline processing.
+Next, offline analysis often includes with whole-recording normalization, non-causal filtering, or feature computation introducing testset data leakage [@merk_machine_2022] processing steps are not realtime or online compatible. In py_neuromodulation, the datasource is represented as a Python generator, and is interchangable for online and onfline processing.
 Finally, electrophysiological research entails multiple technical and conceptual hurdles that pose substantial entry barriers for scientists without software development training. By providing a GUI for parametrization and raw-data and feature visualization, we aim to lower the starting requirements for research in this domain.
-We also want to empasize that py_neuromodulation was already used in several scientific projects with several applications: ECoG and DBS-LFP movement strength regression [@Merk2022eLife;@Cavalho2024BrainStim], movement intention classification [@Koehler2024Brain], seizure classification [@Merk2023Preprint], emotional valence decoding [@Merk2023Preprint], gait symptom estimation in rodents [@GarulliGitHub], and others.
+We also want to empasize that py_neuromodulation was already used in several scientific projects with several applications: ECoG and DBS-LFP movement strength regression [@merk_electrocorticography_2022;@cavallo_reinforcement_2025], movement intention classification [@kohler_dopamine_2024], seizure classification [@merk_invasive_2023], emotional valence decoding [@merk_invasive_2023], gait symptom estimation in rodents [@elgarulli_elgarullineurokin_2025], and others.
 
 ![\label{fig:FigurePyNM}Schematic of py_neuromodulation .](FigurePyNM.png)
 
-which wraps several functions around mne-python [@Gramfort2013] and [mne-lsl](https://github.com/mne-tools/mne-lsl). `py_neuromodulation` allows for temporal resolved feature estimation of multiple feature modalities not included in the aforementioned packages. 
-In addiiton, all pre-processing and feature estimation routines can be parametrized using a settings.yaml file which allows for quick tests, reproduction and distribution of the utilized analysis settings.
+<!-- which wraps several functions around mne-python [@Gramfort2013] and [mne-lsl](https://github.com/mne-tools/mne-lsl). `py_neuromodulation` allows for temporal resolved feature estimation of multiple feature modalities not included in the aforementioned packages. 
+In addiiton, all pre-processing and feature estimation routines can be parametrized using a settings.yaml file which allows for quick tests, reproduction and distribution of the utilized analysis settings. -->
 
 # Parametrization
 
@@ -113,7 +113,7 @@ A common use-case for invasive signal processing feature estimation for neural d
 
 # GUI
 
-To simplify electrophysiological analysis and decoding, we added a react frontend application.
+To simplify electrophysiological analysis and decoding, we added a react frontend application, which runs within an ASGI `uvicorn <https://www.uvicorn.org/>`_ server and communicates through `FastAPI <https://fastapi.tiangolo.com/>`_. 
 
 ![\label{fig:settings}Parametrization page in the frontend GUI representing `settings.yaml` configurations for pre-processing, feature estimation and post-processing.](settings.png)
 
