@@ -30,13 +30,13 @@ The GUI is divided into three main sections:
 
 The source selection is shown in the following image:
 
-.. image:: ../_static/sourceselection.png
+.. image:: _static/sourceselection.png
    :alt: GUI
    :align: center
 
 When clicking on the `SELECT FILE` button, a file dialog will open, where the user can select the file to be loaded:
 
-.. image:: ../_static/fileselection.png
+.. image:: _static/fileselection.png
    :alt: GUI
    :align: center
 
