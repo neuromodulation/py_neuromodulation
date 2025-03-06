@@ -81,6 +81,10 @@ To simplify electrophysiological analysis and decoding, we added a react fronten
 
 ![\label{fig:settings}Frontend parametrization page representing `settings.yaml` configurations for pre-processing, feature estimation and post-processing.](settings.png)
 
+# Conclusion
+
+In summary, py_neuromodulation provides a comprehensive, standardized framework for electrophysiological signal processing and neural decoding, addressing existing limitations in reproducibility and parameter documentation. Its unified pipeline supports both real-time and offline analyses, accompanied by an intuitive graphical interface to lower technical barriers in neural research. The demonstrated utility across diverse applications highlights its potential as a broadly applicable tool in analysis of electrophysiological recordings.
+
 # Acknowledgements
 
 The study was funded by Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) – Project-ID 424778371 and a US-German Collaborative Research in Computational Neuroscience (CRCNS) grant from the German Federal Ministry for Research and Education and NIH (R01NS110424). WJN received funding from the European Union (ERC, ReinforceBG, project 101077060).
