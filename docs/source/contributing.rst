@@ -85,3 +85,6 @@ Additionally, the script ``run_gui.py`` can be modified to be in `dev` mode:
 
     App(dev=True).launch()
 
+
+.. note:: 
+    Antonio Brotons wrote an amazing introduction and motivation behind the GUI development this `GitHub discussion <https://github.com/neuromodulation/py_neuromodulation/issues/351#issuecomment-2199932210>`_.
