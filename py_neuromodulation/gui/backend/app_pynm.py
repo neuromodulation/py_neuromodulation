@@ -49,7 +49,8 @@ class PyNMState:
         self,
         websocket_manager: WebsocketManager | None = None,
     ) -> None:
-
+        # Clear stop event to enable _process_queue
+        self.stop_event.clear()
         self.websocket_manager = websocket_manager
 
         # Create decoder

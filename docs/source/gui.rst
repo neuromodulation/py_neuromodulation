@@ -2,13 +2,9 @@ GUI
 ===
 
 In this section we will explain the setup and use of the *py_neuromodulation* GUI.
-First, the GUI dependencies can be installed with `uv`:
+First, the GUI dependencies are directly included in the default dependencies.
 
-.. code-block:: bash
-
-    uv pip install -e .[gui]
-
-The GUI can be started by running the following command:
+The GUI can be started after installing *py_neuromodulation* by running the following command:
 
 .. code-block:: bash
 

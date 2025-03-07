@@ -318,6 +318,7 @@ class Stream:
 
             # Send data to frontend
             if backend_interface:
+                nm.logger.debug("stream.run: Sending features to frontend")
                 backend_interface.send_features(feature_dict)
                 backend_interface.send_raw_data(self._prepare_raw_data_dict(data_batch))
 

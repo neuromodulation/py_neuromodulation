@@ -23,11 +23,7 @@ Depending on your operating system, activate the rye virtual environment:
 
     . .venv/bin/activate
 
-And install the pyproject.toml dependencies:
-
-:: 
-
-    then sync the environment with
+And install the pyproject.toml dependencies and sync the environment with
 
 ::
 

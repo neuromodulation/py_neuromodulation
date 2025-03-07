@@ -39,6 +39,7 @@ class WebsocketManager:
 
     # Combine IP and port to create a unique client ID
     async def send_cbor(self, object: dict):
+        self.logger.debug(f"app_socket.send_cbor")
         if not self.active_connections:
             self.logger.warning("No active connection to send message.")
             return
@@ -54,6 +55,7 @@ class WebsocketManager:
         for connection in self.active_connections:
             try:
                 await connection.send_bytes(cbor_data)
+                self.logger.debug(f"CBOR message sent to {connection.client}")
             except RuntimeError as e:
                 self.logger.error(f"Error sending CBOR message: {e}")
                 self.disconnected.append(connection)
