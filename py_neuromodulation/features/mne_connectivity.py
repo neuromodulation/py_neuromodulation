@@ -1,11 +1,11 @@
 from collections.abc import Iterable
 import numpy as np
 
-
 from typing import TYPE_CHECKING, Annotated
 from pydantic import Field
 
 from py_neuromodulation.utils.types import NMFeature, NMBaseModel
+from py_neuromodulation.utils.pydantic_extensions import NMField
 
 if TYPE_CHECKING:
     from py_neuromodulation import NMSettings
@@ -14,9 +14,31 @@ if TYPE_CHECKING:
 ListOfTwoStr = Annotated[list[str], Field(min_length=2, max_length=2)]
 
 
+MNE_CONNECTIVITY_METHOD = Literal[
+    "coh",
+    "cohy",
+    "imcoh",
+    "cacoh",
+    "mic",
+    "mim",
+    "plv",
+    "ciplv",
+    "ppc",
+    "pli",
+    "dpli",
+    "wpli",
+    "wpli2_debiased",
+    "gc",
+    "gc_tr",
+]
+
+MNE_CONNECTIVITY_MODE = Literal["multitaper", "fourier", "cwt_morlet"]
+
+
 class MNEConnectivitySettings(NMBaseModel):
-    method: str = "plv"
-    mode: str = "multitaper"
+    channels: list[ListOfTwoStr] = []
+    method: MNE_CONNECTIVITY_METHOD = NMField(default="plv")
+    mode: MNE_CONNECTIVITY_MODE = NMField(default="multitaper")
     channels: list[ListOfTwoStr] = []
 
 

@@ -1,11 +1,14 @@
 """Module for resampling."""
 
 import numpy as np
-from py_neuromodulation.utils.types import NMBaseModel, Field, NMPreprocessor
+from py_neuromodulation.utils.types import NMBaseModel, NMPreprocessor
+from py_neuromodulation.utils.pydantic_extensions import NMField
 
 
 class ResamplerSettings(NMBaseModel):
-    resample_freq_hz: float = Field(default=1000, gt=0)
+    resample_freq_hz: float = NMField(
+        default=1000, gt=0, custom_metadata={"unit": "Hz"}
+    )
 
 
 class Resampler(NMPreprocessor):
@@ -26,6 +29,7 @@ class Resampler(NMPreprocessor):
         self,
         sfreq: float,
         resample_freq_hz: float,
+        **kwargs,
     ) -> None:
         self.settings = ResamplerSettings(resample_freq_hz=resample_freq_hz)
 

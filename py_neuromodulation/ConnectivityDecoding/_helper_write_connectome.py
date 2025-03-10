@@ -58,8 +58,6 @@ def write_connectome_mat(
             dict_connectome[
                 f[f.find("ROI-") + 4 : f.find("_func_seed_AvgR_Fz.nii")]
             ] = fp
-
-        print(idx)
     # save the dictionary
     sio.savemat(
         PATH_CONNECTOME,

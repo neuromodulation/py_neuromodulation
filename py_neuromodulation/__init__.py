@@ -4,17 +4,21 @@ from pathlib import PurePath
 from importlib.metadata import version
 from py_neuromodulation.utils.logging import NMLogger
 
+
 #####################################
 # Globals and environment variables #
 #####################################
 
-__version__ = version("py_neuromodulation")  # get version from pyproject.toml
+__version__ = version("py_neuromodulation")
 
 # Check if the module is running headless (no display) for tests and doc builds
 PYNM_HEADLESS: bool = not os.environ.get("DISPLAY")
 PYNM_DIR = PurePath(__file__).parent  # Define constant for py_nm directory
 
 os.environ["MPLBACKEND"] = "agg" if PYNM_HEADLESS else "qtagg"  # Set matplotlib backend
+
+os.environ["LSLAPICFG"] = str(PYNM_DIR / "lsl_api.cfg")  # LSL config file
+
 
 # Set  environment variable MNE_LSL_LIB (required to import Stream below)
 LSL_DICT = {
@@ -34,6 +38,7 @@ LSL_DICT = {
 
 PLATFORM = platform.system().lower().strip()
 ARCH = platform.architecture()[0]
+
 match PLATFORM:
     case "windows":
         KEY = PLATFORM + "_" + ARCH
@@ -79,3 +84,5 @@ from . import stream
 from . import analysis
 
 from .stream.settings import get_default_settings, get_fast_compute, reset_settings
+
+from .gui.backend.app_manager import AppManager as App

@@ -61,7 +61,7 @@ channels = nm.utils.set_channels(
     bads=raw.info["bads"],
     new_names="default",
     used_types=("ecog", "dbs", "seeg"),
-    target_keywords=["MOV_RIGHT_CLEAN", "MOV_LEFT_CLEAN"],
+    target_keywords=["MOV_RIGHT", "MOV_LEFT"],
 )
 
 stream = nm.Stream(

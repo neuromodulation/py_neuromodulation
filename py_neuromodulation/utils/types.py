@@ -1,10 +1,13 @@
 from os import PathLike
 from math import isnan
-from typing import Any, Literal, Protocol, TYPE_CHECKING, runtime_checkable
-from pydantic import ConfigDict, Field, model_validator, BaseModel
-from pydantic_core import ValidationError, InitErrorDetails
-from pprint import pformat
+from typing import Literal, TYPE_CHECKING, Any
+from pydantic import BaseModel, model_validator, Field
+from .pydantic_extensions import NMBaseModel, NMField
+from abc import abstractmethod
+
 from collections.abc import Sequence
+from datetime import datetime
+
 
 if TYPE_CHECKING:
     import numpy as np
@@ -16,7 +19,7 @@ if TYPE_CHECKING:
 
 _PathLike = str | PathLike
 
-FeatureName = Literal[
+FEATURE_NAME = Literal[
     "raw_hjorth",
     "return_raw",
     "bandpass_filter",
@@ -33,7 +36,7 @@ FeatureName = Literal[
     "bispectrum",
 ]
 
-PreprocessorName = Literal[
+PREPROCESSOR_NAME = Literal[
     "preprocessing_filter",
     "notch_filter",
     "raw_resampling",
@@ -41,7 +44,7 @@ PreprocessorName = Literal[
     "raw_normalization",
 ]
 
-NormMethod = Literal[
+NORM_METHOD = Literal[
     "mean",
     "median",
     "zscore",
@@ -52,13 +55,8 @@ NormMethod = Literal[
     "minmax",
 ]
 
-###################################
-######## PROTOCOL CLASSES  ########
-###################################
 
-
-@runtime_checkable
-class NMFeature(Protocol):
+class NMFeature:
     def __init__(
         self, settings: "NMSettings", ch_names: Sequence[str], sfreq: int | float
     ) -> None: ...
@@ -79,44 +77,8 @@ class NMFeature(Protocol):
         ...
 
 
-class NMPreprocessor(Protocol):
-    def __init__(self, sfreq: float, settings: "NMSettings") -> None: ...
-
+class NMPreprocessor:
     def process(self, data: "np.ndarray") -> "np.ndarray": ...
-
-
-###################################
-######## PYDANTIC CLASSES  ########
-###################################
-
-
-class NMBaseModel(BaseModel):
-    model_config = ConfigDict(validate_assignment=False, extra="allow")
-
-    def __init__(self, *args, **kwargs) -> None:
-        if kwargs:
-            super().__init__(**kwargs)
-        else:
-            field_names = list(self.model_fields.keys())
-            kwargs = {}
-            for i in range(len(args)):
-                kwargs[field_names[i]] = args[i]
-            super().__init__(**kwargs)
-
-    def __str__(self):
-        return pformat(self.model_dump())
-
-    def __repr__(self):
-        return pformat(self.model_dump())
-
-    def validate(self) -> Any:  # type: ignore
-        return self.model_validate(self.model_dump())
-
-    def __getitem__(self, key):
-        return getattr(self, key)
-
-    def __setitem__(self, key, value) -> None:
-        setattr(self, key, value)
 
 
 class FrequencyRange(NMBaseModel):
@@ -144,28 +106,18 @@ class FrequencyRange(NMBaseModel):
     @model_validator(mode="after")
     def validate_range(self):
         if not (isnan(self.frequency_high_hz) or isnan(self.frequency_low_hz)):
-            assert (
-                self.frequency_high_hz > self.frequency_low_hz
-            ), "Frequency high must be greater than frequency low"
+            assert self.frequency_high_hz > self.frequency_low_hz, (
+                "Frequency high must be greater than frequency low"
+            )
         return self
-
-    @classmethod
-    def create_from(cls, input) -> "FrequencyRange":
-        match input:
-            case FrequencyRange():
-                return input
-            case dict() if "frequency_low_hz" in input and "frequency_high_hz" in input:
-                return FrequencyRange(
-                    input["frequency_low_hz"], input["frequency_high_hz"]
-                )
-            case Sequence() if len(input) == 2:
-                return FrequencyRange(input[0], input[1])
-            case _:
-                raise ValueError("Invalid input for FrequencyRange creation.")
 
     @model_validator(mode="before")
     @classmethod
     def check_input(cls, input):
+        """Pydantic validator to convert the input to a dictionary when passed as a list
+        as we have it by default in the default_settings.yaml file
+        For example, [1,2] will be converted to {"frequency_low_hz": 1, "frequency_high_hz": 2}
+        """
         match input:
             case dict() if "frequency_low_hz" in input and "frequency_high_hz" in input:
                 return input
@@ -209,43 +161,17 @@ class BoolSelector(NMBaseModel):
         for f in cls.list_all():
             print(f)
 
-    @classmethod
-    def get_fields(cls):
-        return cls.model_fields
+
+#################
+### GUI TYPES ###
+#################
 
 
-def create_validation_error(
-    error_message: str,
-    loc: list[str | int] = None,
-    title: str = "Validation Error",
-    input_type: Literal["python", "json"] = "python",
-    hide_input: bool = False,
-) -> ValidationError:
-    """
-    Factory function to create a Pydantic v2 ValidationError instance from a single error message.
-
-    Args:
-    error_message (str): The error message for the ValidationError.
-    loc (List[str | int], optional): The location of the error. Defaults to None.
-    title (str, optional): The title of the error. Defaults to "Validation Error".
-    input_type (Literal["python", "json"], optional): Whether the error is for a Python object or JSON. Defaults to "python".
-    hide_input (bool, optional): Whether to hide the input value in the error message. Defaults to False.
-
-    Returns:
-    ValidationError: A Pydantic ValidationError instance.
-    """
-    if loc is None:
-        loc = []
-
-    line_errors = [
-        InitErrorDetails(
-            type="value_error", loc=tuple(loc), input=None, ctx={"error": error_message}
-        )
-    ]
-
-    return ValidationError.from_exception_data(
-        title=title,
-        line_errors=line_errors,
-        input_type=input_type,
-        hide_input=hide_input,
-    )
+class FileInfo(BaseModel):
+    name: str
+    path: str
+    dir: str
+    is_directory: bool
+    size: int
+    created_at: datetime
+    modified_at: datetime

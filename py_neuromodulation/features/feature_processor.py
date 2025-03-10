@@ -1,13 +1,13 @@
 from typing import Type, TYPE_CHECKING
 
-from py_neuromodulation.utils.types import NMFeature, FeatureName
+from py_neuromodulation.utils.types import NMFeature, FEATURE_NAME
 
 if TYPE_CHECKING:
     import numpy as np
     from py_neuromodulation import NMSettings
 
 
-FEATURE_DICT: dict[FeatureName | str, str] = {
+FEATURE_DICT: dict[FEATURE_NAME | str, str] = {
     "raw_hjorth": "Hjorth",
     "return_raw": "Raw",
     "bandpass_filter": "BandPower",
@@ -42,7 +42,7 @@ class FeatureProcessors:
         from importlib import import_module
 
         # Accept 'str' for custom features
-        self.features: dict[FeatureName | str, NMFeature] = {
+        self.features: dict[FEATURE_NAME | str, NMFeature] = {
             feature_name: getattr(
                 import_module("py_neuromodulation.features"), FEATURE_DICT[feature_name]
             )(settings, ch_names, sfreq)
@@ -83,7 +83,7 @@ class FeatureProcessors:
 
         return feature_results
 
-    def get_feature(self, fname: FeatureName) -> NMFeature:
+    def get_feature(self, fname: FEATURE_NAME) -> NMFeature:
         return self.features[fname]
 
 

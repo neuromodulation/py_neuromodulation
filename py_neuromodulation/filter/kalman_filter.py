@@ -1,7 +1,9 @@
 import numpy as np
 from typing import TYPE_CHECKING
 
+
 from py_neuromodulation.utils.types import NMBaseModel
+from py_neuromodulation.utils.pydantic_extensions import NMErrorList
 
 
 if TYPE_CHECKING:
@@ -22,13 +24,22 @@ class KalmanSettings(NMBaseModel):
         "HFA",
     ]
 
-    def validate_fbands(self, settings: "NMSettings") -> None:
-        assert all(
+    def validate_fbands(self, settings: "NMSettings") -> NMErrorList:
+        errors: NMErrorList = NMErrorList()
+
+        if not all(
             (item in settings.frequency_ranges_hz for item in self.frequency_bands)
-        ), (
-            "Frequency bands for Kalman filter must also be specified in "
-            "bandpass_filter_settings."
-        )
+        ):
+            errors.add_error(
+                "Frequency bands for Kalman filter must also be specified in "
+                "frequency_ranges_hz.",
+                location=[
+                    "kalman_filter_settings",
+                    "frequency_bands",
+                ],
+            )
+
+        return errors
 
 
 def define_KF(Tp, sigma_w, sigma_v):

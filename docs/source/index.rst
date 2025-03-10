@@ -13,6 +13,7 @@ The *py_neuromodulation* toolbox allows for real time capable feature estimation
    installation
    usage
    auto_examples/index
+   gui
    api_documentation
    contributing
 

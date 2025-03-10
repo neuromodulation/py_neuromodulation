@@ -267,6 +267,14 @@ class SharpwaveAnalyzer(NMFeature):
 
             # for each feature take the respective fun.
             for feature_name, estimator_name, estimator in estimator_combinations:
+                if feature_name == "num_peaks":
+                    key_name = f"{ch_name}_Sharpwave_{feature_name}_{filter_name}"
+                    if len(waveform_results[feature_name]) == 1:
+                        dict_ch_features[key_name][key_name_pt] = waveform_results[feature_name][0]
+                        continue
+                    else:
+                        raise ValueError("num_peaks should be a list with length 1")
+                    # there can be only one num_peak in each batch
                 feature_data = waveform_results[feature_name]
                 key_name = f"{ch_name}_Sharpwave_{estimator_name.title()}_{feature_name}_{filter_name}"
 
@@ -280,12 +288,25 @@ class SharpwaveAnalyzer(NMFeature):
 
             # the key_name stays, since the estimator function stays between peaks and troughs
             for key_name, estimator in self.estimator_key_map.items():
+                if len(dict_ch_features[key_name]) == 0:
+                    # might happen if num_peaks was written in estimator
+                    # e.g. estimator["mean"] = ["num_peaks"]
+                    # for conveniance this doesn't raise an exception
+                    continue
+
                 feature_results[key_name] = estimator(
                     [
                         list(dict_ch_features[key_name].values())[0],
                         list(dict_ch_features[key_name].values())[1],
                     ]
                 )
+            # add here also the num_peaks features
+            if self.sw_settings.sharpwave_features.num_peaks:
+                for ch_name in self.ch_names:
+                    for filter_name in self.filter_names:
+                        key_name = f"{ch_name}_Sharpwave_num_peaks_{filter_name}"
+                        feature_results[key_name] = np_mean([dict_ch_features[key_name]["Peak"],
+                                                            dict_ch_features[key_name]["Trough"]])
         else:
             # otherwise, save all write all "flattened" key value pairs in feature_results
             for key, subdict in dict_ch_features.items():

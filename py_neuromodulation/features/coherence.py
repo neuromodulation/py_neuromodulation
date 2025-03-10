@@ -3,7 +3,7 @@ from collections.abc import Iterable
 
 
 from typing import TYPE_CHECKING, Annotated
-from pydantic import Field, field_validator
+from pydantic import field_validator
 
 from py_neuromodulation.utils.types import (
     NMFeature,
@@ -11,6 +11,7 @@ from py_neuromodulation.utils.types import (
     FrequencyRange,
     NMBaseModel,
 )
+from py_neuromodulation.utils.pydantic_extensions import NMField
 from py_neuromodulation import logger
 
 if TYPE_CHECKING:
@@ -28,15 +29,17 @@ class CoherenceFeatures(BoolSelector):
     max_allfbands: bool = True
     
 
-ListOfTwoStr = Annotated[list[str], Field(min_length=2, max_length=2)]
+# TODO: make this into a pydantic model that only accepts names from
+# the channels objects and does not accept the same string twice
+ListOfTwoStr = Annotated[list[str], NMField(min_length=2, max_length=2)]
 
 
 class CoherenceSettings(NMBaseModel):
     features: CoherenceFeatures = CoherenceFeatures()
     method: CoherenceMethods = CoherenceMethods()
     channels: list[ListOfTwoStr] = []
-    nperseg: int = Field(default=128, ge=0)
-    frequency_bands: list[str] = Field(default=["high_beta"], min_length=1)
+    nperseg: int = NMField(default=256, ge=1)
+    frequency_bands: list[str] = NMField(default=["high_beta"], min_length=1)
 
     @field_validator("frequency_bands")
     def fbands_spaces_to_underscores(cls, frequency_bands):
