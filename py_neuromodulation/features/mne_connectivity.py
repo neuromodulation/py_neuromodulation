@@ -36,7 +36,6 @@ MNE_CONNECTIVITY_MODE = Literal["multitaper", "fourier", "cwt_morlet"]
 
 
 class MNEConnectivitySettings(NMBaseModel):
-    channels: list[ListOfTwoStr] = []
     method: MNE_CONNECTIVITY_METHOD = NMField(default="plv")
     mode: MNE_CONNECTIVITY_MODE = NMField(default="multitaper")
     channels: list[ListOfTwoStr] = []
