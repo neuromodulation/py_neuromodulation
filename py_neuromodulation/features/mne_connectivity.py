@@ -73,7 +73,6 @@ class MNEConnectivity(NMFeature):
 
         self.prev_batch_shape: tuple = (-1, -1)  # sentinel value
 
-    # TODO: If sfreq or channels change, do we re-initialize the whole Stream object?
     def calc_feature(self, data: np.ndarray) -> dict:
         from mne_connectivity import spectral_connectivity_epochs
 
@@ -99,9 +98,6 @@ class MNEConnectivity(NMFeature):
                     )[0]
                 )
 
-        # TODO: If I compute the mean for the entire fband, results are almost the same before
-        # normalization (0.9999999... vs 1.0), but some change wildly after normalization (-3 vs 0)
-        # Investigate why, is this a bug in normalization?
         feature_results = {}
         for con_idx in np.arange(dat_conn.shape[0]):
             for fband_idx, fband_name in enumerate(self.fbands):
