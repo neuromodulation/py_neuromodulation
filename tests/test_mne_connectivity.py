@@ -47,7 +47,9 @@ def test_mne_connectivity(method: Literal["coh", "dpli"]):
     # Set up pn_nm processing settings
     settings = nm.NMSettings.get_default()
     settings.reset()
+    settings.preprocessing = []  # No preprocessing (changes properties of simulated data)
     settings.features.mne_connectivity = True
+    settings.segment_length_features_ms = n_times / sfreq * 1000  # use all data at once
 
     # redefine freq. bands of interest
     # (accounts for signal-noise transition bandwdith when defining frequencies)
