@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 import numpy as np
 
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Literal
 from pydantic import Field
 
 from py_neuromodulation.utils.types import NMFeature, NMBaseModel
