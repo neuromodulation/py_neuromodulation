@@ -190,7 +190,7 @@ sharpwave_analysis_settings:
   apply_estimator_between_peaks_and_troughs: true
 
 coherence_settings:
-  channels: [] # List of channel pairs, empty by default. Each pair is a list of two channels.
+  channels: [] # List of channel pairs, empty by default. Each pair is a list of two channels, where the first channel is the seed and the second channel is the target.
   # Example channels: [[STN_RIGHT_0, ECOG_RIGHT_0], [STN_RIGHT_1, ECOG_RIGHT_1]]
   frequency_bands: [high_beta]
   features:
@@ -230,6 +230,8 @@ nolds_settings:
     frequency_bands: [low_beta]
 
 mne_connectiviy_settings:
+  channels: [] # List of channel pairs, empty by default. Each pair is a list of two channels, where the first channel is the seed and the second channel is the target.
+  # Example channels: [[STN_RIGHT_0, ECOG_RIGHT_0], [STN_RIGHT_1, ECOG_RIGHT_1]]
   method: plv # One of ['coh', 'cohy', 'imcoh', 'cacoh', 'mic', 'mim', 'plv', 'ciplv', 'ppc', 'pli', 'dpli','wpli', 'wpli2_debiased', 'gc', 'gc_tr']
   mode: multitaper # One of ['multitaper', 'fourier', 'cwt_morlet']
 
