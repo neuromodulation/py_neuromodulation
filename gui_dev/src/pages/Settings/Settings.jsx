@@ -310,20 +310,8 @@ export const Settings = () => {
           ))}
         </TitledBox>
 
-        <TitledBox title="Postprocessing Settings" sx={{ borderRadius: 3 }}>
-          {postprocessingSettingsKeys.map((key) => (
-            <SettingsSection
-              key={`${key}_settingsSection`}
-              settings={settings[key]}
-              path={[key]}
-              onChange={handleChangeSettings}
-              errors={validationErrors}
-            />
-          ))}
-        </TitledBox>
-
         {/* FEATURE SETTINGS */}
-        <TitledBox title="Feature Settings">
+        <TitledBox title="Feature Settings" >
           <Stack direction="row" gap={2}>
             <Box alignSelf={"flex-start"}>
               <SettingsSection
@@ -334,7 +322,7 @@ export const Settings = () => {
                 errors={validationErrors}
               />
             </Box>
-            <Stack alignSelf={"flex-start"}>
+            <Stack alignSelf={"flex-start"} >
               {Object.entries(enabledFeatures).map(
                 ([feature, featureSettings]) => (
                   <CollapsibleBox
@@ -355,6 +343,19 @@ export const Settings = () => {
             </Stack>
           </Stack>
         </TitledBox>
+
+        <TitledBox title="Postprocessing Settings" sx={{ borderRadius: 3 }}>
+          {postprocessingSettingsKeys.map((key) => (
+            <SettingsSection
+              key={`${key}_settingsSection`}
+              settings={settings[key]}
+              path={[key]}
+              onChange={handleChangeSettings}
+              errors={validationErrors}
+            />
+          ))}
+        </TitledBox>
+
         {/* END SETTINGS LAYOUT */}
       </Stack>
 

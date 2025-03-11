@@ -1,14 +1,10 @@
-# We
-# should
-# have
-# a
-# brief
-# explanation
-# of
-# the
-# settings
-# format
-# here
+# Settings should be modified either directly through
+# the default_settings.yaml file or by creating a new
+# settings.yaml file than can be loaded with
+# settings.NMSettings.load(FILE_PATH)
+#
+# Alternatively, the settings can also be modified through the
+# settings object directly, e.g. settings.features.raw_hjorth = False
 
 ########################
 ### General settings ###
@@ -21,9 +17,9 @@ frequency_ranges_hz: # frequency band ranges can be added, removed and altered
   alpha: [8, 12]
   low_beta: [13, 20]
   high_beta: [20, 35]
-  low_gamma: [60, 80]
-  high_gamma: [90, 200]
-  HFA: [200, 400]
+  #low_gamma: [60, 80]
+  #high_gamma: [90, 200]
+  #HFA: [200, 400]
 
 # Enabled features
 features:
@@ -99,7 +95,7 @@ fft_settings:
     median: false
     std: false
     max: false
-  return_spectrum: true
+  return_spectrum: false
 
 welch_settings:
   windowlength_ms: 1000
@@ -109,7 +105,7 @@ welch_settings:
     median: false
     std: false
     max: false
-  return_spectrum: true
+  return_spectrum: false
 
 stft_settings:
   windowlength_ms: 500
@@ -147,7 +143,7 @@ kalman_filter_settings:
 bursts_settings:
   threshold: 75
   time_duration_s: 30
-  frequency_bands: [low_beta, high_beta, low_gamma]
+  frequency_bands: [low_beta, high_beta] # low_gamma
   burst_features:
     duration: true
     amplitude: true

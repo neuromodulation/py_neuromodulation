@@ -157,7 +157,7 @@ export const useSessionStore = createStore("session", (set, get) => ({
     }
   },
 
-  initializeLSLStream: async () => {
+  initializeLSLStream: async (lslStreamName) => {
     const lslSource = get().lslSource;
     const streamParameters = get().streamParameters;
 
@@ -169,7 +169,7 @@ export const useSessionStore = createStore("session", (set, get) => ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          stream_name: lslSource.availableStreams[0].name,
+          stream_name: lslStreamName, //lslSource.availableStreams[0].name,
           line_noise: streamParameters.lineNoise,
         }),
       });

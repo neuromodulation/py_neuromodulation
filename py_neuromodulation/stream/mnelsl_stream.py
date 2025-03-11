@@ -109,4 +109,4 @@ class LSLStream:
                             logger.warning("Stream disconnected.")
                             break
 
-                yield timestamp - stream_start_time, data
+                yield timestamp - stream_start_time, data.astype(float)
