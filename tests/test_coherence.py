@@ -68,8 +68,7 @@ def test_coherence():
         "mean_fband": True, "max_fband": False, "max_allfbands": False
     }
 
-    # unique all-to-all connectivity indices, i.e.: ([0], [1])
-    # XXX: avoids pydantic ValidationError that lists are too short (length == 1)
+    # unique all-to-all connectivity indices, i.e.: [[0, 1]]
     settings.coherence_settings.channels = [ch_names]
 
     # do not normalise features for this test!
