@@ -86,7 +86,7 @@ settings.features.coherence = True
 
 settings.coherence_settings.channels = [["LFP_RIGHT_0", "ECOG_RIGHT_0"]]
 
-settings.coherence_settings.frequency_bands = ["high beta", "low gamma"]
+settings.coherence_settings.frequency_bands = ["high beta", ]
 settings.sharpwave_analysis_settings.estimator["mean"] = []
 settings.sharpwave_analysis_settings.sharpwave_features.enable_all()
 for sw_feature in settings.sharpwave_analysis_settings.sharpwave_features.list_all():

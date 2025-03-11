@@ -83,6 +83,11 @@ Contact information
 For any question or suggestion please find my contact
 information at `my GitHub profile <https://github.com/timonmerk>`_.
 
+Contributing guide
+------------------
+https://neuromodulation.github.io/py_neuromodulation/contributing.html
+
+
 References
 ----------
 
