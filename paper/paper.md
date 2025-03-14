@@ -34,7 +34,9 @@ authors:
     affiliation: "3"
   - name: Jojo Vanhoecke
     affiliation: "1"
-    orcid: 0000-0002-9857-1519
+  - name: R. Mark Richardson
+    affiliation: "3"
+    orcid: 0000-0003-2620-7387
   - name: Wolf-Julian Neumann
     orcid: 0000-0002-6758-9708
     affiliation: "1"
