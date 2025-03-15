@@ -1,6 +1,7 @@
 from typing import Any
 import py_neuromodulation as nm
 import multiprocessing as mp
+from pylsl import StreamInfo, StreamOutlet
 
 
 class StreamBackendInterface:
@@ -12,6 +13,10 @@ class StreamBackendInterface:
         self.feature_queue = feature_queue
         self.rawdata_queue = raw_data_queue
         self.control_queue = control_queue
+
+        self.lsl_info = StreamInfo(name="pynm_out", type="eeg", n_channels=8, nominal_srate=None,
+                          channel_format="float32", source_id="myuid34234")
+        self.lsl_outlet = StreamOutlet(self.lsl_info)
 
     def send_command(self, command: str) -> None:
         """Send a command through the control queue"""
@@ -26,6 +31,8 @@ class StreamBackendInterface:
             nm.logger.debug("backend_interface.send_features before feature put in queue")
             self.feature_queue.put(features)
             nm.logger.debug("backend_interface.send_features after feature put in queue")
+            self.lsl_outlet.push_sample(features.values())
+
         except Exception as e:
             nm.logger.error(f"Error sending features: {e}")
 
