@@ -217,4 +217,12 @@ export const useSocketStore = createStore("socket", (set, get) => ({
       };
     }
   },
+
+  getRawGraphData: (selectedChannels) => {
+    let rawData = get().graphRawData;
+
+    rawData = rawData.filter(([key,value]) => selectedChannels.includes(key));
+
+    return rawData;
+  }
 }));

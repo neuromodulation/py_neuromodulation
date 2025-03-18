@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSocketStore } from "@/stores";
 import { useSessionStore } from "@/stores/sessionStore";
 import Plotly from "plotly.js-basic-dist-min";
@@ -37,17 +37,11 @@ export const RawDataGraph = ({
   const channels = useSessionStore((state) => state.channels, shallow);
   const samplingRate = useSessionStore((state) => state.streamParameters.samplingRate);
 
-  const usedChannels = useMemo(
-    () => channels.filter((channel) => channel.used === 1),
-    [channels]
-  );
+  const usedChannels = channels
+    .filter((channel) => channel.used === 1)
+    .map((channel) => channel.name);
 
-  const availableChannels = useMemo(
-    () => usedChannels.map((channel) => channel.name),
-    [usedChannels]
-  );
-
-  const [selectedChannels, setSelectedChannels] = useState([]);
+  const [selectedChannels, setSelectedChannels] = useState(usedChannels[0]);
   const hasInitialized = useRef(false);
   const [rawData, setRawData] = useState({});
   const graphRef = useRef(null);
@@ -110,6 +104,7 @@ export const RawDataGraph = ({
     setMaxDataPoints(newValue * samplingRate); // Convert seconds to samples
   };
 
+  // 1. Initialize selected channels
   useEffect(() => {
     if (usedChannels.length > 0 && !hasInitialized.current) {
       const availableChannelNames = usedChannels.map((channel) => channel.name);
@@ -118,48 +113,100 @@ export const RawDataGraph = ({
     }
   }, [usedChannels]);
 
-  // Process incoming graphData to extract raw data for each channel -> TODO: Check later if this fits here better than socketStore
+  // NEW: 2. Subscribe to socket data
+  // Create a subscription to socket data updates
   useEffect(() => {
-    // if (!graphData || Object.keys(graphData).length === 0) return;
-    if (!graphRawData || Object.keys(graphRawData).length === 0) return;
+    console.log("subscribe!");
+    if (!selectedChannels) return;
 
-    //const latestData = graphData;
-    const latestData = graphRawData;
+    const unsubscribe = useSocketStore.subscribe((state, prevState) => {
+      const newData = state.getRawGraphData(selectedChannels);
 
-    setRawData((prevRawData) => {
-      const updatedRawData = { ...prevRawData };
+      setRawData((prevRawData) => {
+        const updatedRawData = { ...prevRawData };
 
-      Object.entries(latestData).forEach(([key, value]) => {
-        //const { channelName = "", featureName = "" } = getChannelAndFeature(
-        //  availableChannels,
-        //  key
-        //);
+        Object.entries(newData).forEach(([key, value]) => {
+          const channelName = key;
 
-        //if (!channelName) return;
+          if (!updatedRawData[channelName]) {
+            updatedRawData[channelName] = [];
+          }
 
-        //if (featureName !== "raw") return;
+          updatedRawData[channelName].push(...value);
 
-        const channelName = key;
+          if (updatedRawData[channelName].length > maxDataPoints) {
+            updatedRawData[channelName] = updatedRawData[channelName].slice(
+              -maxDataPoints
+            );
+          }
+        });
 
-        if (!selectedChannels.includes(key)) return;
-
-        if (!updatedRawData[channelName]) {
-          updatedRawData[channelName] = [];
-        }
-
-        updatedRawData[channelName].push(...value);
-
-        if (updatedRawData[channelName].length > maxDataPoints) {
-          updatedRawData[channelName] = updatedRawData[channelName].slice(
-            -maxDataPoints
-          );
-        }
+        return updatedRawData;
       });
 
-      return updatedRawData;
-    });
-  }, [graphRawData, availableChannels, maxDataPoints]);
+      const traces = selectedChannels.map((channelName, idx) => {
+        const yData = rawData[channelName] || [];
+        const y = yData.slice().reverse();
+        const x = Array.from({ length: y.length }, (_, i) => i / samplingRate); // Convert samples to negative seconds
 
+        return {x,y};
+      });
+
+      Plotly.restyle(plotlyRef.current, traces);
+
+    });
+    
+    return () => {
+      console.log("unsubscribe!");
+      unsubscribe();
+    };
+
+  }, []);
+
+  // 2. Process incoming graphData to extract raw data for each channel
+  // useEffect(() => {
+  //   // if (!graphData || Object.keys(graphData).length === 0) return;
+  //   if (!graphRawData || Object.keys(graphRawData).length === 0) return;
+
+  //   //const latestData = graphData;
+  //   const latestData = graphRawData;
+
+  //   setRawData((prevRawData) => {
+  //     const updatedRawData = { ...prevRawData };
+
+  //     Object.entries(latestData).forEach(([key, value]) => {
+  //       //const { channelName = "", featureName = "" } = getChannelAndFeature(
+  //       //  availableChannels,
+  //       //  key
+  //       //);
+
+  //       //if (!channelName) return;
+
+  //       //if (featureName !== "raw") return;
+
+  //       const channelName = key;
+
+  //       if (!selectedChannels.includes(key)) return;
+
+  //       if (!updatedRawData[channelName]) {
+  //         updatedRawData[channelName] = [];
+  //       }
+
+  //       updatedRawData[channelName].push(...value);
+
+  //       if (updatedRawData[channelName].length > maxDataPoints) {
+  //         updatedRawData[channelName] = updatedRawData[channelName].slice(
+  //           -maxDataPoints
+  //         );
+  //       }
+  //     });
+
+  //     return updatedRawData;
+  //   });
+  // }, [graphRawData, availableChannels, maxDataPoints]);
+
+  // 3. Updates and re-renders the graph
+  // NEW: 3. Initial plotting of data.
   useEffect(() => {
     if (!graphRef.current) return;
 
@@ -167,6 +214,9 @@ export const RawDataGraph = ({
       Plotly.purge(graphRef.current);
       return;
     }
+
+    const initialData = getRawGraphData(selectedChannels);
+    if (!initialData) return;
 
     const colors = generateColors(selectedChannels.length);
 
@@ -206,7 +256,7 @@ export const RawDataGraph = ({
     });
 
     const traces = selectedChannels.map((channelName, idx) => {
-      const yData = rawData[channelName] || [];
+      const yData = initialData[channelName] || [];
       const y = yData.slice().reverse();
       const x = Array.from({ length: y.length }, (_, i) => i / samplingRate); // Convert samples to negative seconds
 
@@ -236,17 +286,24 @@ export const RawDataGraph = ({
       hovermode: false, // Add this line to disable hovermode in the trace
     };
 
-    Plotly.react(graphRef.current, traces, layout, {
+    Plotly.newPlot(graphRef.current, traces, layout, {
       responsive: true,
       displayModeBar: false,
+    }).then((gd) => {
+      plotlyRef.current = gd;
+      prevDataRef.current = initialData;
     })
-      .then((gd) => {
-        plotlyRef.current = gd;
-      })
-      .catch((error) => {
-        console.error("Plotly error:", error);
-      });
-  }, [rawData, selectedChannels, yAxisMaxValue, maxDataPoints]);
+    
+    return () => {
+      if (plotlyRef.current) {
+        Plotly.purge(plotlyRef.current);
+      }
+    };
+
+  }, [selectedChannels, yAxisMaxValue, maxDataPoints]);
+  // TODO: Make the trigger selectedChannels, yAxisMaxValue, maxDataPoints
+  // and remove rawData as trigger. This should only paint few times (ideally only
+  // once)
 
   return (
     <Box>
