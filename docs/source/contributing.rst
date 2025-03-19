@@ -17,7 +17,7 @@ To setup the python environment, type
     uv venv
 
 
-Depending on your operating system, activate the rye virtual environment: 
+Depending on your operating system, activate the python virtual environment: 
 
 ::
 
