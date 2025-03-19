@@ -46,7 +46,6 @@ export const BandPowerGraph = () => {
 
   // Create a subscription to socket data updates
   useEffect(() => {
-    console.log("subscribe!");
     const unsubscribe = useSocketStore.subscribe((state, prevState) => {
       const newData = state.getData(selectedChannel, usedChannels);
 
@@ -56,7 +55,6 @@ export const BandPowerGraph = () => {
       });
     });
     return () => {
-      console.log("unsubscribe!");
       unsubscribe();
     };
   }, []);

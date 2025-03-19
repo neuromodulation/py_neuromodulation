@@ -13,7 +13,6 @@ import {
   Slider,
 } from "@mui/material";
 import { CollapsibleBox } from "./CollapsibleBox";
-import { getChannelAndFeature } from "./utils";
 import { shallow } from "zustand/shallow";
 
 // TODO redundant and might be candidate for refactor
@@ -32,16 +31,15 @@ export const RawDataGraph = ({
   yAxisTitle = "Value",
 }) => {
   //const graphData = useSocketStore((state) => state.graphData);
-  const graphRawData = useSocketStore((state) => state.graphRawData);
+  const getRawGraphData = useSocketStore((state) => state.getRawGraphData);
 
   const channels = useSessionStore((state) => state.channels, shallow);
   const samplingRate = useSessionStore((state) => state.streamParameters.samplingRate);
 
-  const usedChannels = channels
-    .filter((channel) => channel.used === 1)
-    .map((channel) => channel.name);
+  const usedChannels = channels.filter((channel) => channel.used === 1);
+  const availableChannels = usedChannels.map((channel) => channel.name);
 
-  const [selectedChannels, setSelectedChannels] = useState(usedChannels[0]);
+  const [selectedChannels, setSelectedChannels] = useState([]);
   const hasInitialized = useRef(false);
   const [rawData, setRawData] = useState({});
   const graphRef = useRef(null);
@@ -104,23 +102,17 @@ export const RawDataGraph = ({
     setMaxDataPoints(newValue * samplingRate); // Convert seconds to samples
   };
 
-  // 1. Initialize selected channels
-  useEffect(() => {
-    if (usedChannels.length > 0 && !hasInitialized.current) {
-      const availableChannelNames = usedChannels.map((channel) => channel.name);
-      setSelectedChannels(availableChannelNames);
-      hasInitialized.current = true;
-    }
-  }, [usedChannels]);
-
   // NEW: 2. Subscribe to socket data
   // Create a subscription to socket data updates
   useEffect(() => {
     console.log("subscribe!");
-    if (!selectedChannels) return;
 
     const unsubscribe = useSocketStore.subscribe((state, prevState) => {
       const newData = state.getRawGraphData(selectedChannels);
+      console.log("[DEBUG][1] Inside subscription logic");
+      console.log("[DEBUG][1] selectedChannels", selectedChannels);
+      console.log("[DEBUG][1] newData", newData);
+
 
       setRawData((prevRawData) => {
         const updatedRawData = { ...prevRawData };
@@ -144,6 +136,7 @@ export const RawDataGraph = ({
         return updatedRawData;
       });
 
+      console.log("DEBUG:", selectedChannels);
       const traces = selectedChannels.map((channelName, idx) => {
         const yData = rawData[channelName] || [];
         const y = yData.slice().reverse();
@@ -286,6 +279,10 @@ export const RawDataGraph = ({
       hovermode: false, // Add this line to disable hovermode in the trace
     };
 
+    console.log("[DEBUG][Initial][2] selectedChannels: ", selectedChannels);
+    console.log("[DEBUG][Initial][2] initialData: ", initialData);
+    console.log("[DEBUG][Initial][2] traces: ", traces);
+
     Plotly.newPlot(graphRef.current, traces, layout, {
       responsive: true,
       displayModeBar: false,
@@ -304,6 +301,15 @@ export const RawDataGraph = ({
   // TODO: Make the trigger selectedChannels, yAxisMaxValue, maxDataPoints
   // and remove rawData as trigger. This should only paint few times (ideally only
   // once)
+
+  // 3. Initialize selected channels
+  useEffect(() => {
+    if (usedChannels.length > 0 && !hasInitialized.current) {
+      const availableChannelNames = usedChannels.map((channel) => channel.name);
+      setSelectedChannels(usedChannels);
+      hasInitialized.current = true;
+    }
+  }, [usedChannels]);
 
   return (
     <Box>
