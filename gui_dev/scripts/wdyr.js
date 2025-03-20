@@ -22,7 +22,10 @@ if (
   }
 }
 
-if (import.meta.env.DEV && import.meta.env.VITE_ENABLE_REACT_SCAN === "true") {
+if (
+  import.meta.env.DEV &&
+  import.meta.env.VITE_ENABLE_REACT_SCAN === "true"
+) {
   try {
     const { scan } = await import("react-scan");
     scan({
