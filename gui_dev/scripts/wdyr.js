@@ -3,10 +3,9 @@
 import * as React from "react";
 
 if (
-  import.meta.env.DEV 
-  //&& import.meta.env.VITE_ENABLE_WHY_DID_YOU_RENDER === "true"
+  import.meta.env.DEV &&
+  import.meta.env.VITE_ENABLE_WHY_DID_YOU_RENDER === "true"
 ) {
-  console.log("HEREEEE");
   try {
     const { default: wdyr } = await import(
       "@welldone-software/why-did-you-render"
@@ -24,8 +23,8 @@ if (
 }
 
 if (
-  import.meta.env.DEV
-  // && import.meta.env.VITE_ENABLE_REACT_SCAN === "true"
+  import.meta.env.DEV &&
+  import.meta.env.VITE_ENABLE_REACT_SCAN === "true"
 ) {
   try {
     const { scan } = await import("react-scan");
