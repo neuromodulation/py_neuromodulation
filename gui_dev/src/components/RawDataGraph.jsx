@@ -31,7 +31,9 @@ export const RawDataGraph = ({
   yAxisTitle = "Value",
 }) => {
   //const graphData = useSocketStore((state) => state.graphData);
-  const getRawGraphData = useSocketStore((state) => state.getRawGraphData);
+  const getAccuRawData = useSocketStore((state) => state.getAccuRawData);
+  const maxDataPoints = useSocketStore((state) => state.maxDataPoints);
+  const setMaxDataPoints = useSocketStore((state) => state.setMaxDataPoints);
 
   const channels = useSessionStore((state) => state.channels, shallow);
   const samplingRate = useSessionStore((state) => state.streamParameters.samplingRate);
@@ -40,12 +42,15 @@ export const RawDataGraph = ({
   const availableChannels = usedChannels.map((channel) => channel.name);
 
   const [selectedChannels, setSelectedChannels] = useState([]);
+  const selectedChannelsRef = useRef(selectedChannels);
+
+
   const hasInitialized = useRef(false);
   const [rawData, setRawData] = useState({});
   const graphRef = useRef(null);
   const plotlyRef = useRef(null);
+  const prevDataRef = useRef(null);
   const [yAxisMaxValue, setYAxisMaxValue] = useState("Auto");
-  const [maxDataPoints, setMaxDataPoints] = useState(10000);
 
   const layoutRef = useRef({
     // title: {
@@ -102,113 +107,56 @@ export const RawDataGraph = ({
     setMaxDataPoints(newValue * samplingRate); // Convert seconds to samples
   };
 
-  // NEW: 2. Subscribe to socket data
-  // Create a subscription to socket data updates
+  // Updates reference for selectedChannels to access in subscription
   useEffect(() => {
-    console.log("subscribe!");
+    selectedChannelsRef.current = selectedChannels;
+  }, [selectedChannels]);
+
+  // Creates a subscription to socket data updates
+  useEffect(() => {
+    const colors = generateColors(selectedChannels.length);
 
     const unsubscribe = useSocketStore.subscribe((state, prevState) => {
-      const newData = state.getRawGraphData(selectedChannels);
-      console.log("[DEBUG][1] Inside subscription logic");
-      console.log("[DEBUG][1] selectedChannels", selectedChannels);
-      console.log("[DEBUG][1] newData", newData);
+      const currentSelectedChannels = selectedChannelsRef.current; 
+      const newData = state.getAccuRawData(currentSelectedChannels);
 
-
-      setRawData((prevRawData) => {
-        const updatedRawData = { ...prevRawData };
-
-        Object.entries(newData).forEach(([key, value]) => {
-          const channelName = key;
-
-          if (!updatedRawData[channelName]) {
-            updatedRawData[channelName] = [];
-          }
-
-          updatedRawData[channelName].push(...value);
-
-          if (updatedRawData[channelName].length > maxDataPoints) {
-            updatedRawData[channelName] = updatedRawData[channelName].slice(
-              -maxDataPoints
-            );
-          }
-        });
-
-        return updatedRawData;
-      });
-
-      console.log("DEBUG:", selectedChannels);
-      const traces = selectedChannels.map((channelName, idx) => {
-        const yData = rawData[channelName] || [];
+      const traces = currentSelectedChannels.reduce((acc, channelName) => {
+        const yData = newData[channelName] || [];
         const y = yData.slice().reverse();
         const x = Array.from({ length: y.length }, (_, i) => i / samplingRate); // Convert samples to negative seconds
 
-        return {x,y};
-      });
+        let newAcc = acc;
+        newAcc['x'].push(x);
+        newAcc['y'].push(y);
+        
+        return newAcc;
+      }, {x: [], y: []});
 
-      Plotly.restyle(plotlyRef.current, traces);
+
+      try {
+        Plotly.restyle(plotlyRef.current, traces);
+      } catch (error) {
+      }
 
     });
     
     return () => {
-      console.log("unsubscribe!");
       unsubscribe();
     };
 
   }, []);
 
-  // 2. Process incoming graphData to extract raw data for each channel
-  // useEffect(() => {
-  //   // if (!graphData || Object.keys(graphData).length === 0) return;
-  //   if (!graphRawData || Object.keys(graphRawData).length === 0) return;
-
-  //   //const latestData = graphData;
-  //   const latestData = graphRawData;
-
-  //   setRawData((prevRawData) => {
-  //     const updatedRawData = { ...prevRawData };
-
-  //     Object.entries(latestData).forEach(([key, value]) => {
-  //       //const { channelName = "", featureName = "" } = getChannelAndFeature(
-  //       //  availableChannels,
-  //       //  key
-  //       //);
-
-  //       //if (!channelName) return;
-
-  //       //if (featureName !== "raw") return;
-
-  //       const channelName = key;
-
-  //       if (!selectedChannels.includes(key)) return;
-
-  //       if (!updatedRawData[channelName]) {
-  //         updatedRawData[channelName] = [];
-  //       }
-
-  //       updatedRawData[channelName].push(...value);
-
-  //       if (updatedRawData[channelName].length > maxDataPoints) {
-  //         updatedRawData[channelName] = updatedRawData[channelName].slice(
-  //           -maxDataPoints
-  //         );
-  //       }
-  //     });
-
-  //     return updatedRawData;
-  //   });
-  // }, [graphRawData, availableChannels, maxDataPoints]);
-
-  // 3. Updates and re-renders the graph
-  // NEW: 3. Initial plotting of data.
+  // Initial render of the graph
   useEffect(() => {
     if (!graphRef.current) return;
+
 
     if (selectedChannels.length === 0) {
       Plotly.purge(graphRef.current);
       return;
     }
 
-    const initialData = getRawGraphData(selectedChannels);
+    const initialData = getAccuRawData(selectedChannels);
     if (!initialData) return;
 
     const colors = generateColors(selectedChannels.length);
@@ -279,9 +227,6 @@ export const RawDataGraph = ({
       hovermode: false, // Add this line to disable hovermode in the trace
     };
 
-    console.log("[DEBUG][Initial][2] selectedChannels: ", selectedChannels);
-    console.log("[DEBUG][Initial][2] initialData: ", initialData);
-    console.log("[DEBUG][Initial][2] traces: ", traces);
 
     Plotly.newPlot(graphRef.current, traces, layout, {
       responsive: true,
@@ -298,17 +243,16 @@ export const RawDataGraph = ({
     };
 
   }, [selectedChannels, yAxisMaxValue, maxDataPoints]);
-  // TODO: Make the trigger selectedChannels, yAxisMaxValue, maxDataPoints
-  // and remove rawData as trigger. This should only paint few times (ideally only
-  // once)
 
-  // 3. Initialize selected channels
+  // Initialize selected channels
   useEffect(() => {
+
     if (usedChannels.length > 0 && !hasInitialized.current) {
       const availableChannelNames = usedChannels.map((channel) => channel.name);
-      setSelectedChannels(usedChannels);
+      setSelectedChannels(availableChannelNames);
       hasInitialized.current = true;
     }
+
   }, [usedChannels]);
 
   return (
