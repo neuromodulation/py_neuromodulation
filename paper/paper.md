@@ -34,6 +34,7 @@ authors:
     affiliation: "3"
   - name: Jojo Vanhoecke
     affiliation: "1"
+    orcid: 0000-0002-9857-1519
   - name: R. Mark Richardson
     affiliation: "3"
     orcid: 0000-0003-2620-7387
@@ -53,7 +54,7 @@ bibliography: paper.bib
 
 # Summary
 
-Invasive brain signal decoding can revolutionize the clinical utility of neurotechnological therapies. Potential signal sources stem from electroencephalography (EEG), electrocorticography (ECoG), deep brain stimulation (DBS) electrodes, recorded as so-called local field potentials (LFP). The application of machine learning methods on these signals requires preprocessing and feature extraction – complex analyses, often lacking standardization and clear documentation. Here, we introduce py_neuromodulation, a toolbox designed for standardized signal processing, feature extraction, and decoding of electrophysiological data. All parameters are explicitly defined in dedicated settings and channel parameterization files. The framework processes both data streamed in real-time and offline-stored recordings using the same pipeline. Additionally, a web-based graphical user interface (GUI) enables intuitive usage and visualization of the processing pipeline without requiring any code modifications. By introducing py_neuromodulation, we aim to simplify and standardize the analysis of electrophysiological recordings, facilitating reproducibility and accessibility in the field of neural data processing for brain signal decoding. Our tool bridges the fields of neuroscience and neural engineering, providing machine learning and neurotechnology experts with rigorously reproducible methods for the development of generalizable machine learning algorithms. 
+Invasive brain signal decoding can revolutionize the clinical utility of neurotechnological therapies. Potential signal sources stem from electroencephalography (EEG), electrocorticography (ECoG) and local field potentials (LFP) recorded from deep brain stimulation (DBS) electrodes. The application of machine learning methods on these signals requires preprocessing and feature extraction – complex analyses, often lacking standardization and clear documentation. Here, we introduce [py_neuromodulation](https://github.com/neuromodulation/py_neuromodulation), a toolbox designed for standardized signal processing, feature extraction, and decoding of electrophysiological data. All parameters are explicitly defined in dedicated settings and channel parameterization files. The framework processes both data streamed in real-time and offline-stored recordings using the same pipeline. Additionally, a web-based graphical user interface (GUI) enables intuitive usage and visualization of the processing pipeline without requiring any code modification. By introducing py_neuromodulation, we aim to simplify and standardize the analysis of electrophysiological recordings, facilitating reproducibility and accessibility in the field of neural data processing for brain signal decoding. Our tool bridges the fields of neuroscience and neural engineering, providing machine learning and neurotechnology experts with rigorously reproducible methods for the development of generalizable machine learning algorithms. 
 
 # Introduction
 
