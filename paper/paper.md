@@ -80,12 +80,12 @@ Importantly, pre-processing and feature estimation can directly affect performan
 
 # GUI
 
+To simplify electrophysiological analysis and decoding, we added a react frontend application, which runs within an ASGI [uvicorn](https://www.uvicorn.org/) server and communicates through [FastAPI](https://fastapi.tiangolo.com/). Here the same settings as in the Python backend can be modified (\autoref{fig:settings}). The stream can be selected from an offline file or LabStreamingLayer stream. 
 
 ![\label{fig:settings}Frontend parametrization page representing `settings.yaml` configurations for pre-processing, feature estimation and post-processing.](settings.png)
 
 # Conclusion
 
-To simplify electrophysiological analysis and decoding, we added a react frontend application, which runs within an ASGI [uvicorn](https://www.uvicorn.org/) server and communicates through [FastAPI](https://fastapi.tiangolo.com/). Here the same settings as in the Python backend can be modified (\autoref{fig:settings}). The stream can be selected from an offline file or LabStreamingLayer stream. 
 In summary, py_neuromodulation provides a comprehensive, standardized framework for electrophysiological signal processing and neural decoding, addressing existing limitations in reproducibility and parameter documentation. Its unified pipeline supports both real-time and offline analyses, accompanied by an intuitive graphical interface to lower technical barriers in neural research. The demonstrated utility across diverse applications highlights its potential as a broadly applicable tool in the analysis and machine learning based decoding of electrophysiological recordings.
 
 # Acknowledgements
