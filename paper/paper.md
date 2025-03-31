@@ -16,7 +16,7 @@ authors:
   - name: Antonio Brotons
     orcid: 0000-0002-1479-0774
     affiliation: "1"
-  - name: Samed Vossberg
+  - name: Samed R. Vossberg
     orcid: 0009-0004-2701-5779
     affiliation: "1"
   - name: Richard M. Köhler
