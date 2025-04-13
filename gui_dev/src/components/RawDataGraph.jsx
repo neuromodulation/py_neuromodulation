@@ -35,6 +35,11 @@ export const RawDataGraph = ({
   const maxDataPoints = useSocketStore((state) => state.maxDataPoints);
   const setMaxDataPoints = useSocketStore((state) => state.setMaxDataPoints);
 
+  // const currentXLength = useSocketStore((state) => state.currentXLength);
+  // const setCurrentXLength = useSocketStore((state) => state.setCurrentXLength);
+
+  const currentXLength = useRef(0);
+
   const channels = useSessionStore((state) => state.channels, shallow);
   const samplingRate = useSessionStore((state) => state.streamParameters.samplingRate);
 
@@ -44,13 +49,14 @@ export const RawDataGraph = ({
   const [selectedChannels, setSelectedChannels] = useState([]);
   const selectedChannelsRef = useRef(selectedChannels);
 
-
   const hasInitialized = useRef(false);
   const [rawData, setRawData] = useState({});
   const graphRef = useRef(null);
   const plotlyRef = useRef(null);
   const prevDataRef = useRef(null);
   const [yAxisMaxValue, setYAxisMaxValue] = useState("Auto");
+
+  const ganzLayout = useRef({})
 
   const layoutRef = useRef({
     // title: {
@@ -120,23 +126,81 @@ export const RawDataGraph = ({
       const currentSelectedChannels = selectedChannelsRef.current; 
       const newData = state.getAccuRawData(currentSelectedChannels);
 
-      const traces = currentSelectedChannels.reduce((acc, channelName) => {
+      const traces = currentSelectedChannels.map((channelName, idx) => {
         const yData = newData[channelName] || [];
         const y = yData.slice().reverse();
         const x = Array.from({ length: y.length }, (_, i) => i / samplingRate); // Convert samples to negative seconds
 
-        let newAcc = acc;
-        newAcc['x'].push(x);
-        newAcc['y'].push(y);
+        return {
+          x,
+          y,
+          type: "scattergl",
+          mode: "lines",
+          name: channelName,
+          hoverinfo: 'skip',
+          line: { simplify: false, color: colors[idx] },
+          yaxis: idx === 0 ? "y" : `y${idx + 1}`,
+        };
+      });
+
+      console.time('[Performance] React Plot Update: ');
+      Plotly
+        .react(plotlyRef.current, traces, ganzLayout.current)
+        .then(
+          () => console.timeEnd('[Performance] React Plot Update: ')
+        );
+
+
+      // let newDataLength = (newData[currentSelectedChannels[0]] || []).slice().length;
+
+      // console.log("currentXLength: ", currentXLength.current);
+      // console.log("newDataLength: ", newDataLength);
+      // if (currentXLength.current !== newDataLength){
+      //   console.log("[DEBUG][IF] HERE")
+      //   currentXLength.current = newDataLength;
+
+      //   const traces = currentSelectedChannels.reduce((acc, channelName) => {
+      //     const yData = newData[channelName] || [];
+      //     const y = yData.slice().reverse();
+      //     const x = Array.from({ length: y.length }, (_, i) => i / samplingRate); // Convert samples to negative seconds
+
+      //     let newAcc = acc;
+      //     newAcc['x'].push(x);
+      //     newAcc['y'].push(y);
+          
+      //     return newAcc;
+      //   }, {x: [], y: []});
+
+      //   try {
+      //     console.time('[Performance] FULL Restyle Plot Update: ');
+          
+      //     // { x: [xTraces], y: [yTraces] }
+      //     Plotly.restyle(plotlyRef.current, traces).then(
+      //       () => console.timeEnd('[Performance] FULL Restyle Plot Update: ')
+      //     );
+      //   } catch (error) {
+      //   }
         
-        return newAcc;
-      }, {x: [], y: []});
 
+      // } else {
+      //   console.log("[DEBUG][ELSE] HERE")
+      //   const yTraces = currentSelectedChannels.map((channelName) => {
+      //     const yData = newData[channelName] || [];
+      //     const y = yData.slice().reverse();
+          
+      //     return y;
+      //   });
 
-      try {
-        Plotly.restyle(plotlyRef.current, traces);
-      } catch (error) {
-      }
+      //   try {
+      //     console.time('[Performance] Restyle Plot Update: ');
+          
+      //     Plotly.restyle(plotlyRef.current, { y: yTraces }).then(
+      //       () => console.timeEnd('[Performance] Restyle Plot Update: ')
+      //     );
+      //   } catch (error) {
+      //   }
+      // }
+
 
     });
     
@@ -196,6 +260,10 @@ export const RawDataGraph = ({
       }
     });
 
+
+    // let newDataLength = (initialData[selectedChannels[0]] || []).slice().length;
+    // console.log("[initial] newDataLength: ", newDataLength);
+    // setCurrentXLength(newDataLength);
     const traces = selectedChannels.map((channelName, idx) => {
       const yData = initialData[channelName] || [];
       const y = yData.slice().reverse();
@@ -227,6 +295,7 @@ export const RawDataGraph = ({
       hovermode: false, // Add this line to disable hovermode in the trace
     };
 
+    ganzLayout.current = layout;
 
     Plotly.newPlot(graphRef.current, traces, layout, {
       responsive: true,

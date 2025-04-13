@@ -31,8 +31,10 @@ export const useSocketStore = createStore("socket", (set, get) => ({
   intentionalDisconnect: false,
   messageCount: 0,
   maxDataPoints: 10000,
+  currentXLength: 0,
 
   setMaxDataPoints: (maxDataPoints) => set({ maxDataPoints }),
+  setCurrentXLength: (currentXLength) => set({ currentXLength }),
 
   setSocket: (socket) => set({ socket }),
 
@@ -109,6 +111,12 @@ export const useSocketStore = createStore("socket", (set, get) => ({
             graphData: dataNonDecodingFeatures,
           });
         }
+
+        let currentMessageCount = get().messageCount;
+        if (currentMessageCount % 500 == 0){
+          console.log("[DEBUG] MessageCount: ", currentMessageCount);
+        }
+
         set({
           messageCount: get().messageCount + 1,
         });
