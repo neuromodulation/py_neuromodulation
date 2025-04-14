@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSocketStore } from "@/stores";
 import { useSessionStore } from "@/stores/sessionStore";
 import Plotly from "plotly.js-basic-dist-min";
@@ -13,7 +13,6 @@ import {
   Slider,
 } from "@mui/material";
 import { CollapsibleBox } from "./CollapsibleBox";
-import { getChannelAndFeature } from "./utils";
 import { shallow } from "zustand/shallow";
 
 // TODO redundant and might be candidate for refactor
@@ -32,28 +31,32 @@ export const RawDataGraph = ({
   yAxisTitle = "Value",
 }) => {
   //const graphData = useSocketStore((state) => state.graphData);
-  const graphRawData = useSocketStore((state) => state.graphRawData);
+  const getAccuRawData = useSocketStore((state) => state.getAccuRawData);
+  const maxDataPoints = useSocketStore((state) => state.maxDataPoints);
+  const setMaxDataPoints = useSocketStore((state) => state.setMaxDataPoints);
+
+  // const currentXLength = useSocketStore((state) => state.currentXLength);
+  // const setCurrentXLength = useSocketStore((state) => state.setCurrentXLength);
+
+  const currentXLength = useRef(0);
 
   const channels = useSessionStore((state) => state.channels, shallow);
   const samplingRate = useSessionStore((state) => state.streamParameters.samplingRate);
 
-  const usedChannels = useMemo(
-    () => channels.filter((channel) => channel.used === 1),
-    [channels]
-  );
-
-  const availableChannels = useMemo(
-    () => usedChannels.map((channel) => channel.name),
-    [usedChannels]
-  );
+  const usedChannels = channels.filter((channel) => channel.used === 1);
+  const availableChannels = usedChannels.map((channel) => channel.name);
 
   const [selectedChannels, setSelectedChannels] = useState([]);
+  const selectedChannelsRef = useRef(selectedChannels);
+
   const hasInitialized = useRef(false);
   const [rawData, setRawData] = useState({});
   const graphRef = useRef(null);
   const plotlyRef = useRef(null);
+  const prevDataRef = useRef(null);
   const [yAxisMaxValue, setYAxisMaxValue] = useState("Auto");
-  const [maxDataPoints, setMaxDataPoints] = useState(10000);
+
+  const ganzLayout = useRef({})
 
   const layoutRef = useRef({
     // title: {
@@ -110,63 +113,115 @@ export const RawDataGraph = ({
     setMaxDataPoints(newValue * samplingRate); // Convert seconds to samples
   };
 
+  // Updates reference for selectedChannels to access in subscription
   useEffect(() => {
-    if (usedChannels.length > 0 && !hasInitialized.current) {
-      const availableChannelNames = usedChannels.map((channel) => channel.name);
-      setSelectedChannels(availableChannelNames);
-      hasInitialized.current = true;
-    }
-  }, [usedChannels]);
+    selectedChannelsRef.current = selectedChannels;
+  }, [selectedChannels]);
 
-  // Process incoming graphData to extract raw data for each channel -> TODO: Check later if this fits here better than socketStore
+  // Creates a subscription to socket data updates
   useEffect(() => {
-    // if (!graphData || Object.keys(graphData).length === 0) return;
-    if (!graphRawData || Object.keys(graphRawData).length === 0) return;
+    const colors = generateColors(selectedChannels.length);
 
-    //const latestData = graphData;
-    const latestData = graphRawData;
+    const unsubscribe = useSocketStore.subscribe((state, prevState) => {
+      const currentSelectedChannels = selectedChannelsRef.current; 
+      const newData = state.getAccuRawData(currentSelectedChannels);
 
-    setRawData((prevRawData) => {
-      const updatedRawData = { ...prevRawData };
+      const traces = currentSelectedChannels.map((channelName, idx) => {
+        const yData = newData[channelName] || [];
+        const y = yData.slice().reverse();
+        const x = Array.from({ length: y.length }, (_, i) => i / samplingRate); // Convert samples to negative seconds
 
-      Object.entries(latestData).forEach(([key, value]) => {
-        //const { channelName = "", featureName = "" } = getChannelAndFeature(
-        //  availableChannels,
-        //  key
-        //);
-
-        //if (!channelName) return;
-
-        //if (featureName !== "raw") return;
-
-        const channelName = key;
-
-        if (!selectedChannels.includes(key)) return;
-
-        if (!updatedRawData[channelName]) {
-          updatedRawData[channelName] = [];
-        }
-
-        updatedRawData[channelName].push(...value);
-
-        if (updatedRawData[channelName].length > maxDataPoints) {
-          updatedRawData[channelName] = updatedRawData[channelName].slice(
-            -maxDataPoints
-          );
-        }
+        return {
+          x,
+          y,
+          type: "scattergl",
+          mode: "lines",
+          name: channelName,
+          hoverinfo: 'skip',
+          line: { simplify: false, color: colors[idx] },
+          yaxis: idx === 0 ? "y" : `y${idx + 1}`,
+        };
       });
 
-      return updatedRawData;
-    });
-  }, [graphRawData, availableChannels, maxDataPoints]);
+      console.time('[Performance] React Plot Update: ');
+      Plotly
+        .react(plotlyRef.current, traces, ganzLayout.current)
+        .then(
+          () => console.timeEnd('[Performance] React Plot Update: ')
+        );
 
+
+      // let newDataLength = (newData[currentSelectedChannels[0]] || []).slice().length;
+
+      // console.log("currentXLength: ", currentXLength.current);
+      // console.log("newDataLength: ", newDataLength);
+      // if (currentXLength.current !== newDataLength){
+      //   console.log("[DEBUG][IF] HERE")
+      //   currentXLength.current = newDataLength;
+
+      //   const traces = currentSelectedChannels.reduce((acc, channelName) => {
+      //     const yData = newData[channelName] || [];
+      //     const y = yData.slice().reverse();
+      //     const x = Array.from({ length: y.length }, (_, i) => i / samplingRate); // Convert samples to negative seconds
+
+      //     let newAcc = acc;
+      //     newAcc['x'].push(x);
+      //     newAcc['y'].push(y);
+          
+      //     return newAcc;
+      //   }, {x: [], y: []});
+
+      //   try {
+      //     console.time('[Performance] FULL Restyle Plot Update: ');
+          
+      //     // { x: [xTraces], y: [yTraces] }
+      //     Plotly.restyle(plotlyRef.current, traces).then(
+      //       () => console.timeEnd('[Performance] FULL Restyle Plot Update: ')
+      //     );
+      //   } catch (error) {
+      //   }
+        
+
+      // } else {
+      //   console.log("[DEBUG][ELSE] HERE")
+      //   const yTraces = currentSelectedChannels.map((channelName) => {
+      //     const yData = newData[channelName] || [];
+      //     const y = yData.slice().reverse();
+          
+      //     return y;
+      //   });
+
+      //   try {
+      //     console.time('[Performance] Restyle Plot Update: ');
+          
+      //     Plotly.restyle(plotlyRef.current, { y: yTraces }).then(
+      //       () => console.timeEnd('[Performance] Restyle Plot Update: ')
+      //     );
+      //   } catch (error) {
+      //   }
+      // }
+
+
+    });
+    
+    return () => {
+      unsubscribe();
+    };
+
+  }, []);
+
+  // Initial render of the graph
   useEffect(() => {
     if (!graphRef.current) return;
+
 
     if (selectedChannels.length === 0) {
       Plotly.purge(graphRef.current);
       return;
     }
+
+    const initialData = getAccuRawData(selectedChannels);
+    if (!initialData) return;
 
     const colors = generateColors(selectedChannels.length);
 
@@ -205,8 +260,12 @@ export const RawDataGraph = ({
       }
     });
 
+
+    // let newDataLength = (initialData[selectedChannels[0]] || []).slice().length;
+    // console.log("[initial] newDataLength: ", newDataLength);
+    // setCurrentXLength(newDataLength);
     const traces = selectedChannels.map((channelName, idx) => {
-      const yData = rawData[channelName] || [];
+      const yData = initialData[channelName] || [];
       const y = yData.slice().reverse();
       const x = Array.from({ length: y.length }, (_, i) => i / samplingRate); // Convert samples to negative seconds
 
@@ -236,17 +295,34 @@ export const RawDataGraph = ({
       hovermode: false, // Add this line to disable hovermode in the trace
     };
 
-    Plotly.react(graphRef.current, traces, layout, {
+    ganzLayout.current = layout;
+
+    Plotly.newPlot(graphRef.current, traces, layout, {
       responsive: true,
       displayModeBar: false,
+    }).then((gd) => {
+      plotlyRef.current = gd;
+      prevDataRef.current = initialData;
     })
-      .then((gd) => {
-        plotlyRef.current = gd;
-      })
-      .catch((error) => {
-        console.error("Plotly error:", error);
-      });
-  }, [rawData, selectedChannels, yAxisMaxValue, maxDataPoints]);
+    
+    return () => {
+      if (plotlyRef.current) {
+        Plotly.purge(plotlyRef.current);
+      }
+    };
+
+  }, [selectedChannels, yAxisMaxValue, maxDataPoints]);
+
+  // Initialize selected channels
+  useEffect(() => {
+
+    if (usedChannels.length > 0 && !hasInitialized.current) {
+      const availableChannelNames = usedChannels.map((channel) => channel.name);
+      setSelectedChannels(availableChannelNames);
+      hasInitialized.current = true;
+    }
+
+  }, [usedChannels]);
 
   return (
     <Box>

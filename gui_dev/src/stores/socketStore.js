@@ -23,12 +23,18 @@ export const useSocketStore = createStore("socket", (set, get) => ({
   error: null,
   graphData: [],
   graphRawData: [],
+  accuRawData: [],
   graphDecodingData: [],
   availableDecodingOutputs: [],
   infoMessages: [],
   reconnectTimer: null,
   intentionalDisconnect: false,
   messageCount: 0,
+  maxDataPoints: 10000,
+  currentXLength: 0,
+
+  setMaxDataPoints: (maxDataPoints) => set({ maxDataPoints }),
+  setCurrentXLength: (currentXLength) => set({ currentXLength }),
 
   setSocket: (socket) => set({ socket }),
 
@@ -84,6 +90,7 @@ export const useSocketStore = createStore("socket", (set, get) => ({
         const decodedData = CBOR.decode(event.data);
         if (Object.keys(decodedData)[0] == "raw_data") {
           set({ graphRawData: decodedData.raw_data });
+          get().setAccuRawData();
         } else {
           // check here if there are values in decodedData that start with "decoding"
           // if so, set graphDecodingData to the value of those keys
@@ -104,6 +111,12 @@ export const useSocketStore = createStore("socket", (set, get) => ({
             graphData: dataNonDecodingFeatures,
           });
         }
+
+        let currentMessageCount = get().messageCount;
+        if (currentMessageCount % 500 == 0){
+          console.log("[DEBUG] MessageCount: ", currentMessageCount);
+        }
+
         set({
           messageCount: get().messageCount + 1,
         });
@@ -217,4 +230,35 @@ export const useSocketStore = createStore("socket", (set, get) => ({
       };
     }
   },
+
+  setAccuRawData: () => {
+    const { graphRawData, maxDataPoints } = get();
+    const updatedAccuRawData = { ...get().accuRawData };
+
+    Object.entries(graphRawData).forEach(([key, value]) => {
+
+      if (!updatedAccuRawData[key]) {
+        updatedAccuRawData[key] = [];
+      }
+
+      updatedAccuRawData[key].push(...value);
+
+      // Trim data to `maxDataPoints`
+      if (updatedAccuRawData[key].length > maxDataPoints) {
+        updatedAccuRawData[key] = updatedAccuRawData[key].slice(-maxDataPoints);
+      }
+    });
+
+    set({ accuRawData: updatedAccuRawData });
+  },
+
+  getAccuRawData: (selectedChannels) => {
+    let rawData = get().accuRawData;
+
+    let filteredRawData = Object.fromEntries(
+      Object.entries(rawData).filter( ([key,valye]) => selectedChannels.includes(key) )
+    );
+
+    return filteredRawData;
+  }
 }));
