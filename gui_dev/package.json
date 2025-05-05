@@ -16,6 +16,8 @@
     "@mui/icons-material": "^6.4.5",
     "@mui/material": "^6.4.5",
     "cbor-js": "^0.1.0",
+    "echarts": "^5.6.0",
+    "echarts-for-react": "^3.0.2",
     "immer": "^10.1.1",
     "plotly.js-basic-dist-min": "^2.35.3",
     "react": "^19.0.0",
