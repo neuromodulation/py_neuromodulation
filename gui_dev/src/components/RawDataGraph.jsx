@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useSocketStore } from "@/stores";
 import { useSessionStore } from "@/stores/sessionStore";
 import ReactECharts from 'echarts-for-react';
-import Plotly from "plotly.js-basic-dist-min";
 import {
   Box,
   Typography,
@@ -48,45 +47,33 @@ export const RawDataGraph = ({
 
   const hasInitialized = useRef(false);
   const [rawData, setRawData] = useState({});
-  const graphRef = useRef(null);
-  const plotlyRef = useRef(null);
-  const prevDataRef = useRef(null);
   const [yAxisMaxValue, setYAxisMaxValue] = useState("Auto");
 
-  const layoutRef = useRef({
-    // title: {
-    //   text: title,
-    //   font: { color: "#f4f4f4" },
-    // },
-    autosize: true,
-    height: 400,
-    paper_bgcolor: "#333",
-    plot_bgcolor: "#333",
-    hovermode: false, // Add this line to disable hovermode
-    margin: {
-      l: 50,
-      r: 50,
-      b: 50,
-      t: 0,
+  const echartsRef = useRef(null);
+  const dataBufferRef = useRef({});
+
+  // Initialize options for Echarts
+  const getOption = () => ({
+    animation: false,
+    grid: { top: 40, right: 40, bottom: 40, left: 60 },
+    xAxis: {
+      type: 'value',
+      scale: true,
+      axisLabel: { formatter: '{value}s' }
     },
-    xaxis: {
-      title: {
-        text: xAxisTitle,
-        font: { color: "#f4f4f4" },
-      },
-      color: "#cccccc",
-      autorange: "reversed",
+    yAxis: {
+      type: 'value',
+      scale: true,
+      min: yAxisMaxValue === "auto" ? null : -Number(yAxisMaxValue),
+      max: yAxisMaxValue === "auto" ? null : Number(yAxisMaxValue)
     },
-    yaxis: {
-      // title: {
-      //   text: yAxisTitle,
-      //   font: { color: "#f4f4f4" },
-      // },
-      // color: "#cccccc",
-    },
-    font: {
-      color: "#f4f4f4",
-    },
+    series: selectedChannels.map((channelName, idx) => ({
+      name: channelName,
+      type: 'line',
+      showSymbol: false,
+      data: dataBufferRef.current[channelName] || [],
+      lineStyle: { width: 1 }
+    }))
   });
 
   // Handling the channel selection here -> TODO: see if this is better done in the socketStore
@@ -115,28 +102,32 @@ export const RawDataGraph = ({
 
   // Creates a subscription to socket data updates
   useEffect(() => {
-    const colors = generateColors(selectedChannels.length);
-
     const unsubscribe = useSocketStore.subscribe((state, prevState) => {
-      const currentSelectedChannels = selectedChannelsRef.current; 
-      const newData = state.getAccuRawData(currentSelectedChannels);
+      const newData = state.getAccuRawData(selectedChannels);
 
-      const traces = currentSelectedChannels.reduce((acc, channelName) => {
-        const yData = newData[channelName] || [];
-        const y = yData.slice().reverse();
-        const x = Array.from({ length: y.length }, (_, i) => i / samplingRate); // Convert samples to negative seconds
-
-        let newAcc = acc;
-        newAcc['x'].push(x);
-        newAcc['y'].push(y);
+      // Update buffer
+      selectedChannels.forEach(channelName => {
+        if (!dataBufferRef.current[channelName]) {
+          dataBufferRef.current[channelName] = [];
+        }
         
-        return newAcc;
-      }, {x: [], y: []});
+        const newPoints = newData[channelName] || [];
+        dataBufferRef.current[channelName].push(...newPoints);
+        
+        // Trim buffer
+        if (dataBufferRef.current[channelName].length > maxDataPoints) {
+          dataBufferRef.current[channelName] = 
+            dataBufferRef.current[channelName].slice(-maxDataPoints);
+        }
+      });
 
-
-      try {
-        Plotly.restyle(plotlyRef.current, traces);
-      } catch (error) {
+      // Update chart
+      if (echartsRef.current) {
+        echartsRef.current.getEchartsInstance().setOption({
+          series: selectedChannels.map((channelName, idx) => ({
+            data: dataBufferRef.current[channelName]
+          }))
+        }, { replaceMerge: ['series'] });
       }
 
     });
@@ -145,115 +136,16 @@ export const RawDataGraph = ({
       unsubscribe();
     };
 
-  }, []);
+  }, [selectedChannels, maxDataPoints]);
 
-  // Initial render of the graph
-  useEffect(() => {
-    if (!graphRef.current) return;
-
-
-    if (selectedChannels.length === 0) {
-      Plotly.purge(graphRef.current);
-      return;
-    }
-
-    const initialData = getAccuRawData(selectedChannels);
-    if (!initialData) return;
-
-    const colors = generateColors(selectedChannels.length);
-
-    const totalChannels = selectedChannels.length;
-    const domainHeight = 1 / totalChannels;
-
-    const yAxes = {};
-    const maxVal = yAxisMaxValue !== "Auto" ? Number(yAxisMaxValue) : null;
-
-    selectedChannels.forEach((channelName, idx) => {
-      const start = 1 - (idx + 1) * domainHeight;
-      const end = 1 - idx * domainHeight;
-
-      const yAxisKey = `yaxis${idx === 0 ? "" : idx + 1}`;
-
-      yAxes[yAxisKey] = {
-        domain: [start, end],
-        nticks: 5,
-        tickfont: {
-          size: 10,
-          color: "#cccccc",
-        },
-        // Titles necessary? Legend works but what if people are color blind? Rotate not supported! Annotations are a possibility though
-        // title: {
-        //   text: channelName,
-        //   font: { color: "#f4f4f4", size: 12 },
-        //   standoff: 30,
-        //   textangle: -90,
-        // },
-        color: "#cccccc",
-        automargin: true,
-      };
-
-      if (maxVal !== null) {
-        yAxes[yAxisKey].range = [-maxVal, maxVal];
-      }
-    });
-
-    const traces = selectedChannels.map((channelName, idx) => {
-      const yData = initialData[channelName] || [];
-      const y = yData.slice().reverse();
-      const x = Array.from({ length: y.length }, (_, i) => i / samplingRate); // Convert samples to negative seconds
-
-      return {
-        x,
-        y,
-        type: "scattergl",
-        mode: "lines",
-        name: channelName,
-        hoverinfo: 'skip',
-        line: { simplify: false, color: colors[idx] },
-        yaxis: idx === 0 ? "y" : `y${idx + 1}`,
-      };
-    });
-
-    const layout = {
-      ...layoutRef.current,
-      xaxis: {
-        ...layoutRef.current.xaxis,
-        autorange: "reversed", 
-        range: [maxDataPoints / samplingRate, 0], // Adjust range to negative seconds
-        domain: [0, 1],
-        anchor: totalChannels === 1 ? "y" : `y${totalChannels}`,
-      },
-      ...yAxes,
-      height: 350, // TODO height autoadjust to screen
-      hovermode: false, // Add this line to disable hovermode in the trace
-    };
-
-
-    Plotly.newPlot(graphRef.current, traces, layout, {
-      responsive: true,
-      displayModeBar: false,
-    }).then((gd) => {
-      plotlyRef.current = gd;
-      prevDataRef.current = initialData;
-    })
-    
-    return () => {
-      if (plotlyRef.current) {
-        Plotly.purge(plotlyRef.current);
-      }
-    };
-
-  }, [selectedChannels, yAxisMaxValue, maxDataPoints]);
 
   // Initialize selected channels
   useEffect(() => {
-
     if (usedChannels.length > 0 && !hasInitialized.current) {
       const availableChannelNames = usedChannels.map((channel) => channel.name);
       setSelectedChannels(availableChannelNames);
       hasInitialized.current = true;
     }
-
   }, [usedChannels]);
 
   return (
@@ -326,7 +218,12 @@ export const RawDataGraph = ({
         </Box>
       </Box>
 
-      <div ref={graphRef} style={{ width: "100%" }}></div>
+      <ReactECharts
+        ref={echartsRef}
+        option={getOption()}
+        style={{ height: 400, width: '100%' }}
+        opts={{ renderer: 'canvas' }}
+      />
     </Box>
   );
 };
