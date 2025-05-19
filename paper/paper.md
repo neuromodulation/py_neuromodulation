@@ -16,7 +16,7 @@ authors:
   - name: Antonio Brotons
     orcid: 0000-0002-1479-0774
     affiliation: "1"
-  - name: Samed Vossberg
+  - name: Samed R. Vossberg
     orcid: 0009-0004-2701-5779
     affiliation: "1"
   - name: Richard M. Köhler
@@ -24,37 +24,42 @@ authors:
     affiliation: "1"
   - name: Thomas S. Binns
     orcid: 0000-0003-0657-0891
-    affiliation: "1"
+    affiliation: "1, 2, 3"
   - name: Alessia Cavallo
     orcid: 0000-0003-1717-1378
-    affiliation: "1"
+    affiliation: "1, 2"
   - name: Elisa Garulli
-    affiliation: "2"
+    affiliation: "4"
   - name: Ashley Walton
-    affiliation: "3"
+    affiliation: "5"
   - name: Jojo Vanhoecke
-    affiliation: "1"
+    affiliation: "1, 2"
     orcid: 0000-0002-9857-1519
   - name: R. Mark Richardson
-    affiliation: "3"
+    affiliation: "5"
     orcid: 0000-0003-2620-7387
   - name: Wolf-Julian Neumann
     orcid: 0000-0002-6758-9708
-    affiliation: "1"
+    affiliation: "1, 2, 3"
 affiliations:
  - name: Movement Disorders Unit, Charité - Universitätsmedizin Berlin, Berlin, Germany
    index: 1
- - name: Department of Neurology with Experimental Neurology, Charité – Universitätsmedizin Berlin, Berlin, Germany
+ - name: Bernstein Center for Computational Neuroscience Berlin, Berlin, Germany
    index: 2
- - name: Department of Neurosurgery, Massachusetts General Hospital, Harvard Medical School, Boston, Massachusetts, USA
+ - name: Einstein Center for Neurosciences Berlin, Berlin, Germany
    index: 3
+ - name: Department of Neurology with Experimental Neurology, Charité – Universitätsmedizin Berlin, Berlin, Germany
+   index: 4
+ - name: Department of Neurosurgery, Massachusetts General Hospital, Harvard Medical School, Boston, Massachusetts, USA
+   index: 5
 date: 5 March 2025
 bibliography: paper.bib
 ---
 
 # Summary
 
-Invasive brain signal decoding can revolutionize the clinical utility of neurotechnological therapies. Potential signal sources stem from electroencephalography (EEG), electrocorticography (ECoG) and local field potentials (LFP) recorded from deep brain stimulation (DBS) electrodes. The application of machine learning methods on these signals requires preprocessing and feature extraction – complex analyses, often lacking standardization and clear documentation. Here, we introduce [py_neuromodulation](https://github.com/neuromodulation/py_neuromodulation), a toolbox designed for standardized signal processing, feature extraction, and decoding of electrophysiological data. All parameters are explicitly defined in dedicated settings and channel parameterization files. The framework processes both data streamed in real-time and offline-stored recordings using the same pipeline. Additionally, a web-based graphical user interface (GUI) enables intuitive usage and visualization of the processing pipeline without requiring any code modification. By introducing py_neuromodulation, we aim to simplify and standardize the analysis of electrophysiological recordings, facilitating reproducibility and accessibility in the field of neural data processing for brain signal decoding. Our tool bridges the fields of neuroscience and neural engineering, providing machine learning and neurotechnology experts with rigorously reproducible methods for the development of generalizable machine learning algorithms. 
+Invasive brain signal decoding can revolutionize the clinical utility of neurotechnological therapies. Potential signal sources stem from electroencephalography (EEG), electrocorticography (ECoG) and local field potentials (LFP) recorded from deep brain stimulation (DBS) electrodes. The application of machine learning methods to these signals requires pre-processing and feature extraction – complex analyses, often lacking standardization and clear documentation. Here, we introduce [py_neuromodulation](https://github.com/neuromodulation/py_neuromodulation), a toolbox designed for standardized signal processing, feature extraction, and decoding of electrophysiological data. All parameters are explicitly defined in dedicated settings and channel parameterization files. The framework processes both data streamed in real-time and from recordings on disk using the same pipeline. Additionally, a browser-based graphical user interface (GUI) enables intuitive usage and visualization of the processing pipeline without requiring any code modification.  
+By introducing py_neuromodulation, we aim to simplify and standardize the analysis of electrophysiological recordings, facilitating reproducibility and accessibility in the field of brain signal decoding. Our tool bridges the fields of neuroscience and neural engineering, providing machine learning and neurotechnology researchers with reproducible methods for the development of generalizable machine learning algorithms. 
 
 # Introduction
 
@@ -75,20 +80,20 @@ All parametrization is described in the GitHub documentation in detail [Usage pa
 
 ![\label{fig:FigurePyNM}Schematic of py_neuromodulation .](FigurePyNM.png)
 
-Importantly, pre-processing and feature estimation can directly affect performances of decoding models. We added a **decode** module that can be parametrized with a [scikit-learn](https://scikit-learn.org/stable/) model, different cross-validation strategies, metrices, and dimensionality reduction methods, such that the computed features can be directly used to estimate decoding performances within the same pipeline. A pre-trained model can also be passed to estimate decoded outputs.
+Importantly, pre-processing and feature estimation can directly affect performances of decoding models. We added a **decode** module that can be parametrized with a [scikit-learn](https://scikit-learn.org/stable/) compatible model, different cross-validation strategies, performance metrices, and dimensionality reduction methods, such that the computed features can be directly used to evaluate decoding performance within the same pipeline. A pre-trained model can also be passed to directly generate decoding outputs. 
 
-# GUI
+# Graphical User Interface (GUI)
 
-To simplify electrophysiological analysis and decoding, we added a react frontend application, which runs within an ASGI [uvicorn](https://www.uvicorn.org/) server and communicates through [FastAPI](https://fastapi.tiangolo.com/). Here the same settings as in the Python backend can be modified (\autoref{fig:settings}). The stream can be selected from an offline file or LabStreamingLayer stream. 
+Finally, to simplify electrophysiological analysis and decoding, we added a [React](https://react.dev)-based frontend application, which runs within an ASGI (Asynchronous Server Gateway Interface) [uvicorn](https://www.uvicorn.org/) server and communicates through [FastAPI](https://fastapi.tiangolo.com/). Through this frontend, the same settings as in the Python backend can be modified (\autoref{fig:settings}), a stream can then be selected from an offline file or via LabStreamingLayer, and raw data and features can be visualized in real time. 
 
 ![\label{fig:settings}Frontend parametrization page representing `settings.yaml` configurations for pre-processing, feature estimation and post-processing.](settings.png)
 
 # Conclusion
 
-In summary, py_neuromodulation provides a comprehensive, standardized framework for electrophysiological signal processing and neural decoding, addressing existing limitations in reproducibility and parameter documentation. Its unified pipeline supports both real-time and offline analyses, accompanied by an intuitive graphical interface to lower technical barriers in neural research. The demonstrated utility across diverse applications highlights its potential as a broadly applicable tool in the analysis and machine learning based decoding of electrophysiological recordings.
+In summary, py_neuromodulation provides a comprehensive, standardized framework for electrophysiological signal processing and neural decoding, addressing existing limitations in reproducibility and parameter documentation. Its unified pipeline supports both real-time and offline analyses, accompanied by an intuitive graphical interface to lower technical barriers in neural research. The successful use of py_neuromodulation across diverse applications highlights its potential as a broadly applicable tool for the analysis and machine-learning based decoding of electrophysiological data.
 
 # Acknowledgements
 
-The study was funded by Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) – Project-ID 424778371 and a US-German Collaborative Research in Computational Neuroscience (CRCNS) grant from the German Federal Ministry for Research and Education and NIH (R01NS110424). WJN received funding from the European Union (ERC, ReinforceBG, project 101077060).
+The study was funded by Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) – Project-ID 424778381 and a US-German Collaborative Research in Computational Neuroscience (CRCNS) grant from the German Federal Ministry for Research and Education and NIH (R01NS110424). WJN received funding from the European Union (ERC, ReinforceBG, project 101077060).
 
 # References
