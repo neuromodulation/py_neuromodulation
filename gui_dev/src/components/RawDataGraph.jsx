@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useSocketStore } from "@/stores";
 import { useSessionStore } from "@/stores/sessionStore";
-import Plotly from "plotly.js-basic-dist-min";
+import ReactECharts from 'echarts-for-react';
 import {
   Box,
   Typography,
@@ -161,91 +161,9 @@ export const RawDataGraph = ({
   }, [graphRawData, availableChannels, maxDataPoints]);
 
   useEffect(() => {
-    if (!graphRef.current) return;
+    
+    
 
-    if (selectedChannels.length === 0) {
-      Plotly.purge(graphRef.current);
-      return;
-    }
-
-    const colors = generateColors(selectedChannels.length);
-
-    const totalChannels = selectedChannels.length;
-    const domainHeight = 1 / totalChannels;
-
-    const yAxes = {};
-    const maxVal = yAxisMaxValue !== "Auto" ? Number(yAxisMaxValue) : null;
-
-    selectedChannels.forEach((channelName, idx) => {
-      const start = 1 - (idx + 1) * domainHeight;
-      const end = 1 - idx * domainHeight;
-
-      const yAxisKey = `yaxis${idx === 0 ? "" : idx + 1}`;
-
-      yAxes[yAxisKey] = {
-        domain: [start, end],
-        nticks: 5,
-        tickfont: {
-          size: 10,
-          color: "#cccccc",
-        },
-        // Titles necessary? Legend works but what if people are color blind? Rotate not supported! Annotations are a possibility though
-        // title: {
-        //   text: channelName,
-        //   font: { color: "#f4f4f4", size: 12 },
-        //   standoff: 30,
-        //   textangle: -90,
-        // },
-        color: "#cccccc",
-        automargin: true,
-      };
-
-      if (maxVal !== null) {
-        yAxes[yAxisKey].range = [-maxVal, maxVal];
-      }
-    });
-
-    const traces = selectedChannels.map((channelName, idx) => {
-      const yData = rawData[channelName] || [];
-      const y = yData.slice().reverse();
-      const x = Array.from({ length: y.length }, (_, i) => i / samplingRate); // Convert samples to negative seconds
-
-      return {
-        x,
-        y,
-        type: "scattergl",
-        mode: "lines",
-        name: channelName,
-        hoverinfo: 'skip',
-        line: { simplify: false, color: colors[idx] },
-        yaxis: idx === 0 ? "y" : `y${idx + 1}`,
-      };
-    });
-
-    const layout = {
-      ...layoutRef.current,
-      xaxis: {
-        ...layoutRef.current.xaxis,
-        autorange: "reversed", 
-        range: [maxDataPoints / samplingRate, 0], // Adjust range to negative seconds
-        domain: [0, 1],
-        anchor: totalChannels === 1 ? "y" : `y${totalChannels}`,
-      },
-      ...yAxes,
-      height: 350, // TODO height autoadjust to screen
-      hovermode: false, // Add this line to disable hovermode in the trace
-    };
-
-    Plotly.react(graphRef.current, traces, layout, {
-      responsive: true,
-      displayModeBar: false,
-    })
-      .then((gd) => {
-        plotlyRef.current = gd;
-      })
-      .catch((error) => {
-        console.error("Plotly error:", error);
-      });
   }, [rawData, selectedChannels, yAxisMaxValue, maxDataPoints]);
 
   return (
@@ -318,7 +236,39 @@ export const RawDataGraph = ({
         </Box>
       </Box>
 
-      <div ref={graphRef} style={{ width: "100%" }}></div>
+      <ReactECharts
+        option={{
+          animation: false,
+          grid: { top: 40, right: 40, bottom: 40, left: 60 },
+          xAxis: {
+            type: 'value',
+            inverse: true, // Reversed time axis
+            min: 0,
+            max: maxDataPoints / samplingRate,
+            axisLabel: { formatter: '{value}s' }
+          },
+          yAxis: {
+            type: 'value',
+            min: yAxisMaxValue === "Auto" ? null : -Number(yAxisMaxValue),
+            max: yAxisMaxValue === "Auto" ? null : Number(yAxisMaxValue)
+          },
+          series: selectedChannels.map((channelName, idx) => ({
+            name: channelName,
+            type: 'line',
+            showSymbol: false,
+            data: (rawData[channelName] || [])
+              .slice()
+              .reverse()
+              .map((value, i) => [i / samplingRate, value]),
+            lineStyle: {
+              width: 1,
+              color: generateColors(selectedChannels.length)[idx]
+            }
+          }))
+        }}
+        style={{ height: 400, width: '100%' }}
+        opts={{ renderer: 'canvas' }}
+      />
     </Box>
   );
 };
