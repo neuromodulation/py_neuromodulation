@@ -1,4 +1,5 @@
 import { RawDataGraph } from '@/components/RawDataGraph';
+import { DemoChart } from '@/components/DummyDataGraph';
 import { PSDGraph } from '@/components/PSDGraph';
 import { DecodingGraph } from '@/components/DecodingGraph';
 import { HeatmapGraph } from '@/components/HeatmapGraph';
@@ -18,6 +19,7 @@ export const Dashboard = () => {
   const stopStream = useSessionStore((state) => state.stopStream);
 
   const [enabledGraphs, setEnabledGraphs] = useState({
+    dummyData: true,
     rawData: true,
     psdPlot: true,
     heatmap: true,
@@ -33,6 +35,7 @@ export const Dashboard = () => {
   };
 
   const graphComponents = {
+    dummyData: DemoChart,
     rawData: RawDataGraph,
     psdPlot: PSDGraph,
     heatmap: HeatmapGraph,
@@ -63,6 +66,9 @@ export const Dashboard = () => {
           onChange={handleGraphToggle}
           aria-label="graph toggle"
         >
+          <ToggleButton value="dummyData" aria-label="dummy data">
+            Dummy Data
+          </ToggleButton>
           <ToggleButton value="rawData" aria-label="raw data">
             Raw Data
           </ToggleButton>
