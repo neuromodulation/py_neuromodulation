@@ -76,7 +76,7 @@ Basic Usage
     stream = nm.Stream(sfreq=sfreq, data=data, sampling_rate_features_hz=sampling_rate_features_hz)
     features = stream.run()
 
-Check the `Usage <https://py-neuromodulation.readthedocs.io/en/latest/usage.html>`_ and `First examples <https://py-neuromodulation.readthedocs.io/en/latest/auto_examples/plot_0_first_demo.html>`_ for further introduction.
+Check the `Usage <https://neuromodulation.github.io/py_neuromodulation/usage.html>`_ and `First examples <https://neuromodulation.github.io/py_neuromodulation/auto_examples/index.html>`_ for further introduction.
 
 Contact information
 -------------------
