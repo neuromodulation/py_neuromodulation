@@ -36,7 +36,7 @@ Find the documentation here neuromodulation.github.io/py_neuromodulation/ for ex
 Installation
 ============
 
-py_neuromodulation requires at least python 3.10. For installation you can use pip:
+py_neuromodulation requires at least python 3.11. For installation you can use pip:
 
 .. code-block::
 
@@ -46,7 +46,7 @@ Alternatively you can also clone the pacakge and install it using `uv <https://d
 
 .. code-block::
 
-    uv python install 3.10
+    uv python install 3.11
     uv venv
     . .venv/bin/activate
     uv sync
