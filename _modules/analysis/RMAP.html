@@ -1,0 +1,1000 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>analysis.RMAP &#8212; py_neuromodulation  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/analysis/RMAP';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">py_neuromodulation  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../usage.html">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../gui.html">
+    GUI
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api_documentation.html">
+    API Documentation
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../usage.html">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../gui.html">
+    GUI
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api_documentation.html">
+    API Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">analysis.RMAP</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for analysis.RMAP</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">PurePath</span><span class="p">,</span> <span class="n">Path</span>
+
+
+<span class="c1"># from numba import jit</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.io</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">nibabel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nib</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.analysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">reg_plot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.utils.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">_PathLike</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">PYNM_DIR</span>
+
+<span class="n">LIST_STRUC_UNCONNECTED_GRIDPOINTS_HULL</span> <span class="o">=</span> <span class="p">[</span><span class="mi">256</span><span class="p">,</span> <span class="mi">385</span><span class="p">,</span> <span class="mi">417</span><span class="p">,</span> <span class="mi">447</span><span class="p">,</span> <span class="mi">819</span><span class="p">,</span> <span class="mi">914</span><span class="p">]</span>
+<span class="n">LIST_STRUC_UNCONNECTED_GRIDPOINTS_WHOLEBRAIN</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="mi">1</span><span class="p">,</span>
+    <span class="mi">8</span><span class="p">,</span>
+    <span class="mi">16</span><span class="p">,</span>
+    <span class="mi">33</span><span class="p">,</span>
+    <span class="mi">34</span><span class="p">,</span>
+    <span class="mi">35</span><span class="p">,</span>
+    <span class="mi">36</span><span class="p">,</span>
+    <span class="mi">37</span><span class="p">,</span>
+    <span class="mi">51</span><span class="p">,</span>
+    <span class="mi">75</span><span class="p">,</span>
+    <span class="mi">77</span><span class="p">,</span>
+    <span class="mi">78</span><span class="p">,</span>
+    <span class="mi">99</span><span class="p">,</span>
+    <span class="mi">109</span><span class="p">,</span>
+    <span class="mi">115</span><span class="p">,</span>
+    <span class="mi">136</span><span class="p">,</span>
+    <span class="mi">155</span><span class="p">,</span>
+    <span class="mi">170</span><span class="p">,</span>
+    <span class="mi">210</span><span class="p">,</span>
+    <span class="mi">215</span><span class="p">,</span>
+    <span class="mi">243</span><span class="p">,</span>
+    <span class="mi">352</span><span class="p">,</span>
+    <span class="mi">359</span><span class="p">,</span>
+    <span class="mi">361</span><span class="p">,</span>
+    <span class="mi">415</span><span class="p">,</span>
+    <span class="mi">416</span><span class="p">,</span>
+    <span class="mi">422</span><span class="p">,</span>
+    <span class="mi">529</span><span class="p">,</span>
+    <span class="mi">567</span><span class="p">,</span>
+    <span class="mi">569</span><span class="p">,</span>
+    <span class="mi">622</span><span class="p">,</span>
+    <span class="mi">623</span><span class="p">,</span>
+    <span class="mi">625</span><span class="p">,</span>
+    <span class="mi">627</span><span class="p">,</span>
+    <span class="mi">632</span><span class="p">,</span>
+    <span class="mi">633</span><span class="p">,</span>
+    <span class="mi">634</span><span class="p">,</span>
+    <span class="mi">635</span><span class="p">,</span>
+    <span class="mi">639</span><span class="p">,</span>
+    <span class="mi">640</span><span class="p">,</span>
+    <span class="mi">641</span><span class="p">,</span>
+    <span class="mi">643</span><span class="p">,</span>
+    <span class="mi">644</span><span class="p">,</span>
+    <span class="mi">650</span><span class="p">,</span>
+    <span class="mi">661</span><span class="p">,</span>
+    <span class="mi">663</span><span class="p">,</span>
+    <span class="mi">667</span><span class="p">,</span>
+    <span class="mi">683</span><span class="p">,</span>
+    <span class="mi">684</span><span class="p">,</span>
+    <span class="mi">685</span><span class="p">,</span>
+    <span class="mi">704</span><span class="p">,</span>
+    <span class="mi">708</span><span class="p">,</span>
+    <span class="mi">722</span><span class="p">,</span>
+    <span class="mi">839</span><span class="p">,</span>
+    <span class="mi">840</span><span class="p">,</span>
+    <span class="mi">905</span><span class="p">,</span>
+    <span class="mi">993</span><span class="p">,</span>
+    <span class="mi">1011</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="ConnectivityChannelSelector">
+<a class="viewcode-back" href="../../RMAP.html#analysis.RMAP.ConnectivityChannelSelector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConnectivityChannelSelector</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">whole_brain_connectome</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">func_connectivity</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;ConnectivityChannelSelector</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        whole_brain_connectome : bool, optional</span>
+<span class="sd">            if True a 1236 whole-brain point grid is chosen,</span>
+<span class="sd">            if False, a 1025 point grid of the cortical hull is loaded,</span>
+<span class="sd">            by default True</span>
+<span class="sd">        func_connectivity : bool, optional</span>
+<span class="sd">            if true, functional connectivity fMRI is loaded,</span>
+<span class="sd">            if false structural dMRIby, default True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">connectome_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_connectome_name</span><span class="p">(</span>
+            <span class="n">whole_brain_connectome</span><span class="p">,</span> <span class="n">func_connectivity</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">whole_brain_connectome</span> <span class="o">=</span> <span class="n">whole_brain_connectome</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">func_connectivity</span> <span class="o">=</span> <span class="n">func_connectivity</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">PATH_CONN_DECODING</span> <span class="o">=</span> <span class="n">PYNM_DIR</span> <span class="o">/</span> <span class="s2">&quot;ConnectivityDecoding&quot;</span>
+
+        <span class="k">if</span> <span class="n">whole_brain_connectome</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">PATH_GRID</span> <span class="o">=</span> <span class="n">PurePath</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">PATH_CONN_DECODING</span><span class="p">,</span>
+                <span class="s2">&quot;mni_coords_whole_brain.mat&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">sio</span><span class="o">.</span><span class="n">loadmat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PATH_GRID</span><span class="p">)[</span><span class="s2">&quot;downsample_ctx&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">func_connectivity</span><span class="p">:</span>
+                <span class="c1"># reduce the grid to only valid points that are not in LIST_STRUC_UNCONNECTED_GRIDPOINTS_WHOLEBRAIN</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span>
+                    <span class="n">LIST_STRUC_UNCONNECTED_GRIDPOINTS_WHOLEBRAIN</span><span class="p">,</span>
+                    <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">PATH_GRID</span> <span class="o">=</span> <span class="n">PurePath</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">PATH_CONN_DECODING</span><span class="p">,</span>
+                <span class="s2">&quot;mni_coords_cortical_surface.mat&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">sio</span><span class="o">.</span><span class="n">loadmat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PATH_GRID</span><span class="p">)[</span><span class="s2">&quot;downsample_ctx&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">func_connectivity</span><span class="p">:</span>
+                <span class="c1"># reduce the grid to only valid points that are not in LIST_STRUC_UNCONNECTED_GRIDPOINTS_HULL</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">LIST_STRUC_UNCONNECTED_GRIDPOINTS_HULL</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">func_connectivity</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">RMAP_arr</span> <span class="o">=</span> <span class="n">nib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+                <span class="n">PurePath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PATH_CONN_DECODING</span><span class="p">,</span> <span class="s2">&quot;RMAP_func_all.nii&quot;</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">RMAP_arr</span> <span class="o">=</span> <span class="n">nib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
+                <span class="n">PurePath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PATH_CONN_DECODING</span><span class="p">,</span> <span class="s2">&quot;RMAP_struc.nii&quot;</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_connectome_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">whole_brain_connectome</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">func_connectivity</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">connectome_name</span> <span class="o">=</span> <span class="s2">&quot;connectome_&quot;</span>
+        <span class="k">if</span> <span class="n">whole_brain_connectome</span><span class="p">:</span>
+            <span class="n">connectome_name</span> <span class="o">+=</span> <span class="s2">&quot;whole_brain_&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">connectome_name</span> <span class="o">+=</span> <span class="s2">&quot;hull_&quot;</span>
+        <span class="k">if</span> <span class="n">func_connectivity</span><span class="p">:</span>
+            <span class="n">connectome_name</span> <span class="o">+=</span> <span class="s2">&quot;func&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">connectome_name</span> <span class="o">+=</span> <span class="s2">&quot;struc&quot;</span>
+        <span class="k">return</span> <span class="n">connectome_name</span>
+
+<div class="viewcode-block" id="ConnectivityChannelSelector.get_available_connectomes">
+<a class="viewcode-back" href="../../RMAP.html#analysis.RMAP.ConnectivityChannelSelector.get_available_connectomes">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_available_connectomes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return list of saved connectomes in the</span>
+<span class="sd">        package folder/ConnectivityDecoding/connectome_folder/ folder.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list_connectomes: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PATH_CONN_DECODING</span><span class="p">,</span> <span class="s2">&quot;connectome_folder&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">iterdir</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="ConnectivityChannelSelector.plot_grid">
+<a class="viewcode-back" href="../../RMAP.html#analysis.RMAP.ConnectivityChannelSelector.plot_grid">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the loaded template grid that passed coordinates are matched to.&quot;&quot;&quot;</span>
+
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ConnectivityChannelSelector.get_closest_node">
+<a class="viewcode-back" href="../../RMAP.html#analysis.RMAP.ConnectivityChannelSelector.get_closest_node">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_closest_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coord</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Given a list or np.array of coordinates, return the closest nodes in the</span>
+<span class="sd">        grid and their indices.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coord : np.ndarray</span>
+<span class="sd">            MNI coordinates with shape (num_channels, 3)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple[list, list]</span>
+<span class="sd">            Grid coordinates, grid indices</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">idx_</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">coord</span><span class="p">:</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span> <span class="o">-</span> <span class="n">c</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">idx_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">dist</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">grid</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">idx_</span><span class="p">],</span> <span class="n">idx_</span></div>
+
+
+<div class="viewcode-block" id="ConnectivityChannelSelector.get_rmap_correlations">
+<a class="viewcode-back" href="../../RMAP.html#analysis.RMAP.ConnectivityChannelSelector.get_rmap_correlations">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_rmap_correlations</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">fps</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">RMAP_use</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate correlations of passed fingerprints with the RMAP</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fps : Union[list, np.array]</span>
+<span class="sd">            List of fingerprints</span>
+<span class="sd">        RMAP_use : np.ndarray, optional</span>
+<span class="sd">            Passed RMAP, by default None</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        List</span>
+<span class="sd">            correlation values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">RMAP_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">RMAP_arr</span> <span class="k">if</span> <span class="n">RMAP_use</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">RMAP_use</span>
+        <span class="n">RMAP_</span> <span class="o">=</span> <span class="n">RMAP_</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">corrs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">fp</span> <span class="ow">in</span> <span class="n">fps</span><span class="p">:</span>
+            <span class="n">corrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">RMAP_</span><span class="p">,</span> <span class="n">fp</span><span class="o">.</span><span class="n">flatten</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">corrs</span></div>
+
+
+<div class="viewcode-block" id="ConnectivityChannelSelector.load_connectome">
+<a class="viewcode-back" href="../../RMAP.html#analysis.RMAP.ConnectivityChannelSelector.load_connectome">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_connectome</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">whole_brain_connectome</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">func_connectivity</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load connectome, if not available download connectome from</span>
+<span class="sd">        Zenodo.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        whole_brain_connectome : bool, optional</span>
+<span class="sd">            if true whole brain connectome</span>
+<span class="sd">            if false cortical hull grid connectome, by default None</span>
+<span class="sd">        func_connectivity : bool, optional</span>
+<span class="sd">            if true fMRI if false dMRI, by default None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">whole_brain_connectome</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">whole_brain_connectome</span> <span class="o">=</span> <span class="n">whole_brain_connectome</span>
+        <span class="k">if</span> <span class="n">func_connectivity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">func_connectivity</span> <span class="o">=</span> <span class="n">func_connectivity</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">connectome_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_connectome_name</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">whole_brain_connectome</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">func_connectivity</span>
+        <span class="p">)</span>
+
+        <span class="n">PATH_CONNECTOME</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">PATH_CONN_DECODING</span><span class="p">,</span>
+            <span class="s2">&quot;connectome_folder&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connectome_name</span> <span class="o">+</span> <span class="s2">&quot;.mat&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">PATH_CONNECTOME</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">user_input</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span>
+                <span class="s2">&quot;Do you want to download the connectome? (yes/no): &quot;</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">user_input</span> <span class="o">==</span> <span class="s2">&quot;yes&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_download_connectome</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">user_input</span> <span class="o">==</span> <span class="s2">&quot;no&quot;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Connectome missing, has to be downloaded&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">connectome</span> <span class="o">=</span> <span class="n">sio</span><span class="o">.</span><span class="n">loadmat</span><span class="p">(</span><span class="n">PATH_CONNECTOME</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_grid_fingerprints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid_idx</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">connectome</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">grid_idx</span><span class="p">)]</span> <span class="k">for</span> <span class="n">grid_idx</span> <span class="ow">in</span> <span class="n">grid_idx</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">download_connectome</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>
+        
+        <span class="kn">from</span><span class="w"> </span><span class="nn">urllib.request</span><span class="w"> </span><span class="kn">import</span> <span class="n">urlretrieve</span>
+
+        <span class="c1"># download the connectome from the Zenodo API</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Downloading the connectome...&quot;</span><span class="p">)</span>
+
+        <span class="n">record_id</span> <span class="o">=</span> <span class="s2">&quot;10804702&quot;</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connectome_name</span>
+
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PATH_CONN_DECODING</span><span class="p">,</span> <span class="s2">&quot;connectome_folder&quot;</span><span class="p">)</span>
+        <span class="n">filepath</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">urlretrieve</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;https://zenodo.org/api/records/</span><span class="si">{</span><span class="n">record_id</span><span class="si">}</span><span class="s2">/files/</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">/content&quot;</span><span class="p">,</span>
+            <span class="n">filepath</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">connectome_name</span><span class="si">}</span><span class="s2">.mat&quot;</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="RMAPCross_Val_ChannelSelector">
+<a class="viewcode-back" href="../../RMAP.html#analysis.RMAP.RMAPCross_Val_ChannelSelector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RMAPCross_Val_ChannelSelector</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="RMAPCross_Val_ChannelSelector.load_fingerprint">
+<a class="viewcode-back" href="../../RMAP.html#analysis.RMAP.RMAPCross_Val_ChannelSelector.load_fingerprint">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_fingerprint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_nii</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return Nifti fingerprint&quot;&quot;&quot;</span>
+        <span class="n">epi_img</span> <span class="o">=</span> <span class="n">nib</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path_nii</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">affine</span> <span class="o">=</span> <span class="n">epi_img</span><span class="o">.</span><span class="n">affine</span>
+        <span class="n">fp</span> <span class="o">=</span> <span class="n">epi_img</span><span class="o">.</span><span class="n">get_fdata</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">fp</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_all_fingerprints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cond_str</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;_AvgR_Fz.nii&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">cond_str</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">l_fps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="n">cond_str</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="n">Path</span><span class="p">(</span><span class="n">path_dir</span><span class="p">)</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">l_fps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path_dir</span><span class="p">)</span><span class="o">.</span><span class="n">iterdir</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">l_fps</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">load_fingerprint</span><span class="p">(</span><span class="n">PurePath</span><span class="p">(</span><span class="n">path_dir</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">l_fps</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_fingerprints_from_path_with_cond</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path_dir</span><span class="p">:</span> <span class="n">_PathLike</span><span class="p">,</span>
+        <span class="n">str_to_omit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">str_to_keep</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">keep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
+        <span class="n">l_fps</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">keep</span> <span class="ow">and</span> <span class="n">str_to_keep</span><span class="p">:</span>
+            <span class="n">l_fps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="s2">&quot;_AvgR_Fz.nii&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="ow">and</span> <span class="n">str_to_keep</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">),</span>
+                    <span class="n">Path</span><span class="p">(</span><span class="n">path_dir</span><span class="p">)</span><span class="o">.</span><span class="n">iterdir</span><span class="p">(),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">keep</span> <span class="ow">and</span> <span class="n">str_to_omit</span><span class="p">:</span>
+            <span class="n">l_fps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">filter</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="s2">&quot;_AvgR_Fz.nii&quot;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="ow">and</span> <span class="n">str_to_omit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">),</span>
+                    <span class="n">Path</span><span class="p">(</span><span class="n">path_dir</span><span class="p">)</span><span class="o">.</span><span class="n">iterdir</span><span class="p">(),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">l_fps</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">load_fingerprint</span><span class="p">(</span><span class="n">PurePath</span><span class="p">(</span><span class="n">path_dir</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">l_fps</span><span class="p">]</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save_Nii</span><span class="p">(</span>
+        <span class="n">fp</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">affine</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;img.nii&quot;</span><span class="p">,</span>
+        <span class="n">reshape</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">reshape</span><span class="p">:</span>
+            <span class="n">fp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="p">(</span><span class="mi">91</span><span class="p">,</span> <span class="mi">109</span><span class="p">,</span> <span class="mi">91</span><span class="p">),</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+
+        <span class="n">img</span> <span class="o">=</span> <span class="n">nib</span><span class="o">.</span><span class="n">nifti1</span><span class="o">.</span><span class="n">Nifti1Image</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">affine</span><span class="o">=</span><span class="n">affine</span><span class="p">)</span>
+
+        <span class="n">nib</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_RMAP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="c1"># faster than calculate_RMap_numba</span>
+        <span class="c1"># https://stackoverflow.com/questions/71252740/correlating-an-array-row-wise-with-a-vector/71253141#71253141</span>
+
+        <span class="n">r</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">X</span> <span class="o">*</span> <span class="n">y</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">X</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">r</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="c1"># @jit(nopython=True)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculate_RMap_numba</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">performances</span><span class="p">):</span>
+        <span class="c1"># The RMap also needs performances; for every fingerprint / channel</span>
+        <span class="c1"># Save the corresponding performance</span>
+        <span class="c1"># for every voxel; correlate it with performances</span>
+
+        <span class="n">arr</span> <span class="o">=</span> <span class="n">fp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">NUM_VOXELS</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">LEN_FPS</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+        <span class="n">fp_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">NUM_VOXELS</span><span class="p">,</span> <span class="n">LEN_FPS</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">fp_idx</span><span class="p">,</span> <span class="n">fp_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fp</span><span class="p">):</span>
+            <span class="n">fp_arr</span><span class="p">[:,</span> <span class="n">fp_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">fp_</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+        <span class="n">RMAP</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">NUM_VOXELS</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">voxel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NUM_VOXELS</span><span class="p">):</span>
+            <span class="n">corr_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">fp_arr</span><span class="p">[</span><span class="n">voxel</span><span class="p">,</span> <span class="p">:],</span> <span class="n">performances</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">RMAP</span><span class="p">[</span><span class="n">voxel</span><span class="p">]</span> <span class="o">=</span> <span class="n">corr_val</span>
+
+        <span class="k">return</span> <span class="n">RMAP</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="c1"># @jit(nopython=True)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_corr_numba</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">fp_test</span><span class="p">):</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">fp_test</span><span class="p">,</span> <span class="n">fp</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">val</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">leave_one_ch_out_cv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l_fps_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">l_fps_dat</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">l_per</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="c1"># l_fps_dat is not flattened</span>
+
+        <span class="n">per_left_out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">per_predict</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">idx_left_out</span><span class="p">,</span> <span class="n">f_left_out</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">l_fps_names</span><span class="p">):</span>
+            <span class="c1"># print(idx_left_out)</span>
+            <span class="n">l_cv</span> <span class="o">=</span> <span class="n">l_fps_dat</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">per_cv</span> <span class="o">=</span> <span class="n">l_per</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="n">l_cv</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">idx_left_out</span><span class="p">)</span>
+            <span class="n">per_cv</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">idx_left_out</span><span class="p">)</span>
+
+            <span class="n">conn_arr</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">l_cv</span><span class="p">:</span>
+                <span class="n">conn_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+            <span class="n">conn_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">conn_arr</span><span class="p">)</span>
+
+            <span class="n">rmap_cv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_RMAP</span><span class="p">(</span><span class="n">conn_arr</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">per_cv</span><span class="p">)))</span>
+
+            <span class="n">per_predict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">get_corr_numba</span><span class="p">(</span><span class="n">rmap_cv</span><span class="p">,</span> <span class="n">l_fps_dat</span><span class="p">[</span><span class="n">idx_left_out</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">per_left_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l_per</span><span class="p">[</span><span class="n">idx_left_out</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">per_left_out</span><span class="p">,</span> <span class="n">per_predict</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">leave_one_sub_out_cv</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">l_fps_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">l_fps_dat</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">l_per</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">sub_list</span><span class="p">:</span> <span class="nb">list</span>
+    <span class="p">):</span>
+        <span class="c1"># l_fps_dat assume non flatted arrays</span>
+        <span class="c1"># each fp including the sub_list string will be iteratively removed for test set</span>
+
+        <span class="n">per_predict</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">per_left_out</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">subject_test</span> <span class="ow">in</span> <span class="n">sub_list</span><span class="p">:</span>
+            <span class="c1"># print(subject_test)</span>
+            <span class="n">idx_test</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">l_fps_names</span><span class="p">)</span> <span class="k">if</span> <span class="n">subject_test</span> <span class="ow">in</span> <span class="n">f</span><span class="p">]</span>
+            <span class="n">idx_train</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">l_fps_names</span><span class="p">)</span> <span class="k">if</span> <span class="n">subject_test</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">f</span>
+            <span class="p">]</span>
+            <span class="n">l_cv</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">l_fps_dat</span><span class="p">)[</span><span class="n">idx_train</span><span class="p">])</span>
+            <span class="n">per_cv</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">l_per</span><span class="p">)[</span><span class="n">idx_train</span><span class="p">])</span>
+
+            <span class="n">conn_arr</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">l_cv</span><span class="p">:</span>
+                <span class="n">conn_arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+            <span class="n">conn_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">conn_arr</span><span class="p">)</span>
+            <span class="n">rmap_cv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_RMAP</span><span class="p">(</span><span class="n">conn_arr</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">per_cv</span><span class="p">)))</span>
+
+            <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">idx_test</span><span class="p">:</span>
+                <span class="n">per_predict</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">get_corr_numba</span><span class="p">(</span><span class="n">rmap_cv</span><span class="p">,</span> <span class="n">l_fps_dat</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">per_left_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l_per</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">per_left_out</span><span class="p">,</span> <span class="n">per_predict</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_highest_corr_sub_ch</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">cohort_test</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">sub_test</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">ch_test</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">cohorts_train</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">path_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;C:\Users\ICN_admin\OneDrive - Charité - Universitätsmedizin Berlin\Connectomics\DecodingToolbox_BerlinPittsburgh_Beijing\functional_connectivity&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">fp_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_fingerprints_from_path_with_cond</span><span class="p">(</span>
+            <span class="n">path_dir</span><span class="o">=</span><span class="n">path_dir</span><span class="p">,</span>
+            <span class="n">str_to_keep</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cohort_test</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">sub_test</span><span class="si">}</span><span class="s2">_ROI_</span><span class="si">{</span><span class="n">ch_test</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">keep</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)[</span><span class="mi">1</span><span class="p">][</span>
+            <span class="mi">0</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>  <span class="c1"># index 1 for getting the array, 0 for the list fp that was found</span>
+
+        <span class="n">fp_pairs</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">cohort</span> <span class="ow">in</span> <span class="n">cohorts_train</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">cohorts_train</span><span class="p">[</span><span class="n">cohort</span><span class="p">]:</span>
+                <span class="n">fps_name</span><span class="p">,</span> <span class="n">fps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_fingerprints_from_path_with_cond</span><span class="p">(</span>
+                    <span class="n">path_dir</span><span class="o">=</span><span class="n">path_dir</span><span class="p">,</span>
+                    <span class="n">str_to_keep</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cohort</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">sub</span><span class="si">}</span><span class="s2">_ROI&quot;</span><span class="p">,</span>
+                    <span class="n">keep</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">fp</span><span class="p">,</span> <span class="n">fp_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">fps</span><span class="p">,</span> <span class="n">fps_name</span><span class="p">):</span>
+                    <span class="n">ch</span> <span class="o">=</span> <span class="n">fp_name</span><span class="p">[</span><span class="n">fp_name</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;ROI&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span> <span class="p">:</span> <span class="n">fp_name</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;func&quot;</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="n">corr_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_corr_numba</span><span class="p">(</span><span class="n">fp_test</span><span class="p">,</span> <span class="n">fp</span><span class="p">)</span>
+                    <span class="n">fp_pairs</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">cohort</span><span class="p">,</span> <span class="n">sub</span><span class="p">,</span> <span class="n">ch</span><span class="p">,</span> <span class="n">corr_val</span><span class="p">])</span>
+
+        <span class="n">idx_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">fp_pairs</span><span class="p">)[:,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">fp_pairs</span><span class="p">[</span><span class="n">idx_max</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_performance_prediction_correlation</span><span class="p">(</span>
+        <span class="n">per_left_out</span><span class="p">,</span> <span class="n">per_predict</span><span class="p">,</span> <span class="n">out_path_save</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="n">df_plt_corr</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="n">df_plt_corr</span><span class="p">[</span><span class="s2">&quot;test_performance&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">per_left_out</span>
+        <span class="n">df_plt_corr</span><span class="p">[</span><span class="s2">&quot;struct_conn_predict&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">per_predict</span>  <span class="c1"># change &quot;struct&quot; with &quot;funct&quot; for functional connectivity</span>
+        <span class="p">)</span>
+
+        <span class="n">reg_plot</span><span class="p">(</span>
+            <span class="n">x_col</span><span class="o">=</span><span class="s2">&quot;test_performance&quot;</span><span class="p">,</span>
+            <span class="n">y_col</span><span class="o">=</span><span class="s2">&quot;struct_conn_predict&quot;</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">df_plt_corr</span><span class="p">,</span>
+            <span class="n">out_path_save</span><span class="o">=</span><span class="n">out_path_save</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021, Timon Merk.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
