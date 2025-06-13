@@ -118,7 +118,7 @@ export const StreamSelector = () => {
 
   const handleConnectStream = async () => {
     if (isStreamNameValid) {
-      await initializeLSLStream(); // selectedStreamName
+      await initializeLSLStream(selectedStreamName); // selectedStreamName
     }
   };
 

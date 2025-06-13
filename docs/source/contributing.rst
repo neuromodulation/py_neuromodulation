@@ -17,17 +17,13 @@ To setup the python environment, type
     uv venv
 
 
-Depending on your operating system, activate the rye virtual environment: 
+Depending on your operating system, activate the python virtual environment: 
 
 ::
 
     . .venv/bin/activate
 
-And install the pyproject.toml dependencies:
-
-:: 
-
-    then sync the environment with
+And install the pyproject.toml dependencies and sync the environment with
 
 ::
 
@@ -85,3 +81,6 @@ Additionally, the script ``run_gui.py`` can be modified to be in `dev` mode:
 
     App(dev=True).launch()
 
+
+.. note:: 
+    Antonio Brotons wrote an amazing introduction and motivation behind the GUI development this `GitHub discussion <https://github.com/neuromodulation/py_neuromodulation/issues/351#issuecomment-2199932210>`_.

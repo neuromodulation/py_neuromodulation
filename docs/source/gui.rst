@@ -2,13 +2,9 @@ GUI
 ===
 
 In this section we will explain the setup and use of the *py_neuromodulation* GUI.
-First, the GUI dependencies can be installed with `uv`:
+First, the GUI dependencies are directly included in the default dependencies.
 
-.. code-block:: bash
-
-    uv pip install -e .[gui]
-
-The GUI can be started by running the following command:
+The GUI can be started after installing *py_neuromodulation* by running the following command:
 
 .. code-block:: bash
 
@@ -30,20 +26,20 @@ The GUI is divided into three main sections:
 
 The source selection is shown in the following image:
 
-.. image:: ../_static/sourceselection.png
+.. image:: _static/sourceselection.png
    :alt: GUI
    :align: center
 
 When clicking on the `SELECT FILE` button, a file dialog will open, where the user can select the file to be loaded:
 
-.. image:: ../_static/fileselection.png
+.. image:: _static/fileselection.png
    :alt: GUI
    :align: center
 
 Internally, available meta data such as sampling rate, line noise, available channel names will be read and a stream initialized.
 Alternatively, the user can select a LabStreamingLayer stream by clicking on the upper `LSL STREAM` button. The available streams will be shown in a menu:
 
-.. image:: ../_static/lslselection.png
+.. image:: _static/lslselection.png
    :alt: GUI
    :align: center
 
@@ -52,14 +48,14 @@ A `.skops` decoding model, such as an openly-published `movement decoding model 
 
 Next, by selecting `SELECT CHANNELS`, the user is directed to the channel selection section:
 
-.. image:: ../_static/channelselection.png
+.. image:: _static/channelselection.png
    :alt: GUI
    :align: center
 
 Here the channel names, re-referencing, `mne supported types <https://mne.tools/stable/generated/mne.pick_types.html>`_ and target selection can be defined.
 Next, by clicking on `SETTINGS`, the user is directed to the feature selection:
 
-.. image:: ../_static/settings.png
+.. image:: _static/settings.png
    :alt: GUI
    :align: center
 
@@ -73,7 +69,7 @@ are defined the upper left section.
 Additionally, frequency bands can be modified, added or deleted.
 Once the settings are modified, they are internally validated for potential errors which would then be displayed:
 
-.. image:: ../_static/pydantic.png
+.. image:: _static/pydantic.png
    :alt: GUI
    :align: center
 
@@ -89,13 +85,13 @@ Here, different graphs can be selected by clicking on the corresponding graph li
 When clicking on `RUN STREAM`, the stream will start and the selected features will be computed in real-time.
 In the terminal the feature computation is logged, and features and raw signals are displayed in the GUI:
 
-.. image:: ../_static/graphs.png
+.. image:: _static/graphs.png
    :alt: GUI
    :align: center
 
 Additionally, a heatmap with selected features can be displayed with the decoded model output:
 
-.. image:: ../_static/decoding.png
+.. image:: _static/decoding.png
    :alt: GUI
    :align: center
 
@@ -103,7 +99,7 @@ Additionally, a heatmap with selected features can be displayed with the decoded
 
    <br>
 
-In the :doc:`contributing </contributing>`  section we explain in further detail the GUI setup. 
+In the :doc:`contributing </contributing>`  section we explain in further detail the GUI setup.
 
 Known issues
 ~~~~~~~~~~~~

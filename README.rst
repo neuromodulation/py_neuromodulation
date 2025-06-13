@@ -36,7 +36,7 @@ Find the documentation here neuromodulation.github.io/py_neuromodulation/ for ex
 Installation
 ============
 
-py_neuromodulation requires at least python 3.10. For installation you can use pip:
+py_neuromodulation requires at least python 3.11. For installation you can use pip:
 
 .. code-block::
 
@@ -46,7 +46,7 @@ Alternatively you can also clone the pacakge and install it using `uv <https://d
 
 .. code-block::
 
-    uv python install 3.10
+    uv python install 3.11
     uv venv
     . .venv/bin/activate
     uv sync
@@ -76,12 +76,17 @@ Basic Usage
     stream = nm.Stream(sfreq=sfreq, data=data, sampling_rate_features_hz=sampling_rate_features_hz)
     features = stream.run()
 
-Check the `Usage <https://py-neuromodulation.readthedocs.io/en/latest/usage.html>`_ and `First examples <https://py-neuromodulation.readthedocs.io/en/latest/auto_examples/plot_0_first_demo.html>`_ for further introduction.
+Check the `Usage <https://neuromodulation.github.io/py_neuromodulation/usage.html>`_ and `First examples <https://neuromodulation.github.io/py_neuromodulation/auto_examples/index.html>`_ for further introduction.
 
 Contact information
 -------------------
 For any question or suggestion please find my contact
 information at `my GitHub profile <https://github.com/timonmerk>`_.
+
+Contributing guide
+------------------
+https://neuromodulation.github.io/py_neuromodulation/contributing.html
+
 
 References
 ----------

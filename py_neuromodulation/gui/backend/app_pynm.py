@@ -49,7 +49,8 @@ class PyNMState:
         self,
         websocket_manager: WebsocketManager | None = None,
     ) -> None:
-
+        # Clear stop event to enable _process_queue
+        self.stop_event.clear()
         self.websocket_manager = websocket_manager
 
         # Create decoder
@@ -113,6 +114,7 @@ class PyNMState:
         from mne_lsl.lsl import resolve_streams
 
         logger.info("resolving streams")
+        logger.info(f"passed lsl_stream_name: {lsl_stream_name}")
         lsl_streams = resolve_streams()
 
         for stream in lsl_streams:
@@ -142,14 +144,21 @@ class PyNMState:
                 # set all used column to 0
                 #channels.loc[:, "used"] = 0
 
-                logger.info(channels)
+                logger.info(f"channels: {channels}")
                 sfreq = stream.sfreq
+                logger.info(f"sfreq: {sfreq}")
 
-                self.stream: Stream = Stream(
-                    sfreq=sfreq,
-                    line_noise=line_noise,
-                    channels=channels,
-                )
+                logger.info("Starting setup LSL stream...")
+                try:
+                    self.stream: Stream = Stream(
+                        sfreq=sfreq,
+                        line_noise=line_noise,
+                        channels=channels,
+                    )
+                except Exception as e:
+                    logger.error(f"Error setting up LSL stream: {e}")
+
+                logger.info("Finish setup LSL stream...")
                 logger.info("stream setup")
                 logger.info("settings setup")
 

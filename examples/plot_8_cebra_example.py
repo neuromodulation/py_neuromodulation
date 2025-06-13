@@ -2,7 +2,9 @@
 Cebra Decoding with no training Example
 ======================================
 
-The following example show how to use the Cebra decoding without training.
+The following example shows how to use the Cebra package for decoding without patient-individual training.
+Note that the plot_8_cebra_example.py file just hosts the example_cebra_decoding.html file due to computational limitations.
+When re-running this file, please refer to the example_cebra_decoding.ipynb in the examples directory.
 
 """
 
