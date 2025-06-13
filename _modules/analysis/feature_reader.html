@@ -1,0 +1,1511 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>analysis.feature_reader &#8212; py_neuromodulation  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/analysis/feature_reader';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">py_neuromodulation  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../usage.html">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../gui.html">
+    GUI
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api_documentation.html">
+    API Documentation
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../usage.html">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../gui.html">
+    GUI
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api_documentation.html">
+    API Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">analysis.feature_reader</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for analysis.feature_reader</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">PurePath</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">r2_score</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">KFold</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">zscore</span> <span class="k">as</span> <span class="n">scipy_zscore</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">io</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.analysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">plots</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.analysis.decode</span><span class="w"> </span><span class="kn">import</span> <span class="n">Decoder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.utils.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">_PathLike</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.stream.settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">NMSettings</span>
+
+
+<span class="n">target_filter_str</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;CLEAN&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SQUARED_EMG&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SQUARED_INTERPOLATED_EMG&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SQUARED_ROTAWHEEL&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;SQUARED_ROTATION&quot;</span> <span class="s2">&quot;rota_squared&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">features_reverse_order_plotting</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;stft&quot;</span><span class="p">,</span> <span class="s2">&quot;fft&quot;</span><span class="p">,</span> <span class="s2">&quot;bandpass&quot;</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="FeatureReader">
+<a class="viewcode-back" href="../../feature_reader.html#analysis.feature_reader.FeatureReader">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FeatureReader</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">feature_dir</span><span class="p">:</span> <span class="n">_PathLike</span><span class="p">,</span>
+        <span class="n">feature_file</span><span class="p">:</span> <span class="n">_PathLike</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">binarize_label</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Feature_Reader enables analysis methods on top of NM_reader and NM_Decoder</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        feature_dir : str, optional</span>
+<span class="sd">            Path to py_neuromodulation estimated feature runs, where each feature is a folder,</span>
+<span class="sd">        feature_file : str, optional</span>
+<span class="sd">            specific feature run, if None it is set to the first feature folder in feature_dir</span>
+<span class="sd">        binarize_label : bool</span>
+<span class="sd">            binarize label, by default True</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_dir</span> <span class="o">=</span> <span class="n">feature_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">get_run_list_indir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_dir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_file</span> <span class="o">=</span> <span class="n">feature_file</span> <span class="k">if</span> <span class="n">feature_file</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">FILE_BASENAME</span> <span class="o">=</span> <span class="n">PurePath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_file</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span>
+        <span class="c1"># the features are saved in a directory feature_file, and each file hold the name starting with feature_file</span>
+        <span class="n">PATH_READ_FILE</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">PurePath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_dir</span><span class="p">,</span> <span class="n">FILE_BASENAME</span><span class="p">,</span> <span class="n">FILE_BASENAME</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">NMSettings</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">PATH_READ_FILE</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">read_sidecar</span><span class="p">(</span><span class="n">PATH_READ_FILE</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;sess_right&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;coords&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">][</span><span class="s2">&quot;cortex_left&quot;</span><span class="p">][</span><span class="s2">&quot;ch_names&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;sess_right&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">][</span><span class="s2">&quot;cortex_right&quot;</span><span class="p">][</span><span class="s2">&quot;ch_names&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;sess_right&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;sfreq&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">channels</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">read_channels</span><span class="p">(</span><span class="n">PATH_READ_FILE</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_arr</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">read_features</span><span class="p">(</span><span class="n">PATH_READ_FILE</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ch_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">new_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">used_chs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="s2">&quot;used&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">][</span><span class="s2">&quot;new_name&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ch_names_ECOG</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+            <span class="s1">&#39;(type==&quot;ecog&quot;) and (used == 1) and (status==&quot;good&quot;)&#39;</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">new_name</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+
+        <span class="c1"># init plotter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nmplotter</span> <span class="o">=</span> <span class="n">plots</span><span class="o">.</span><span class="n">NM_Plot</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">label_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_target_ch</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_target_ch</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">feature_arr</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">label_name</span><span class="p">,</span>
+                <span class="n">binarize</span><span class="o">=</span><span class="n">binarize_label</span><span class="p">,</span>
+                <span class="n">binarize_th</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_target_ch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">target_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span><span class="p">[</span><span class="s2">&quot;target&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
+        <span class="n">target_clean</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">target_name</span>
+            <span class="k">for</span> <span class="n">target_name</span> <span class="ow">in</span> <span class="n">target_names</span>
+            <span class="k">for</span> <span class="n">filter_str</span> <span class="ow">in</span> <span class="n">target_filter_str</span>
+            <span class="k">if</span> <span class="n">filter_str</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">target_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_clean</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;ARTIFACT&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">target_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="n">target_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="n">target_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="n">target_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">target_</span> <span class="ow">in</span> <span class="n">target_clean</span><span class="p">:</span>
+                <span class="c1"># try to select contralateral label</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;sess_right&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="s2">&quot;LEFT&quot;</span> <span class="ow">in</span> <span class="n">target_</span><span class="p">:</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="n">target_</span>
+                    <span class="k">continue</span>
+                <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;sess_right&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="s2">&quot;RIGHT&quot;</span> <span class="ow">in</span> <span class="n">target_</span><span class="p">:</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="n">target_</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">target_</span> <span class="o">==</span> <span class="n">target_clean</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="n">target_clean</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># set label to last element</span>
+        <span class="k">return</span> <span class="n">target</span>
+
+<div class="viewcode-block" id="FeatureReader.read_target_ch">
+<a class="viewcode-back" href="../../feature_reader.html#analysis.feature_reader.FeatureReader.read_target_ch">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_target_ch</span><span class="p">(</span>
+        <span class="n">feature_arr</span><span class="p">:</span> <span class="s2">&quot;pd.DataFrame&quot;</span><span class="p">,</span>
+        <span class="n">label_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">binarize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">binarize_th</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        feature_arr : pd.DataFrame</span>
+<span class="sd">            _description_</span>
+<span class="sd">        label_name : str</span>
+<span class="sd">            _description_</span>
+<span class="sd">        binarize : bool, optional</span>
+<span class="sd">            _description_, by default True</span>
+<span class="sd">        binarize_th : float, optional</span>
+<span class="sd">            _description_, by default 0.3</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        _type_</span>
+<span class="sd">            _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">label</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">feature_arr</span><span class="p">[</span><span class="n">label_name</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">binarize</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">label</span> <span class="o">&gt;</span> <span class="n">binarize_th</span>
+        <span class="k">return</span> <span class="n">label</span></div>
+
+
+<div class="viewcode-block" id="FeatureReader.filter_features">
+<a class="viewcode-back" href="../../feature_reader.html#analysis.feature_reader.FeatureReader.filter_features">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filter_features</span><span class="p">(</span>
+        <span class="n">feature_columns</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+        <span class="n">ch_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">list_feature_keywords</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;filters read features by ch_name and/or modality</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        feature_columns : list</span>
+<span class="sd">        ch_name : str, optional</span>
+<span class="sd">        list_feature_keywords : list[str], optional</span>
+<span class="sd">            list of feature strings that need to be in the columns, by default None</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        features : list</span>
+<span class="sd">            column list that suffice the ch_name and list_feature_keywords</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">ch_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">feature_select</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">feature_columns</span><span class="p">)</span> <span class="k">if</span> <span class="n">ch_name</span> <span class="ow">in</span> <span class="n">i</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">feature_select</span> <span class="o">=</span> <span class="n">feature_columns</span>
+
+        <span class="k">if</span> <span class="n">list_feature_keywords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">feature_select</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">feature_select</span> <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="ow">in</span> <span class="n">f</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">list_feature_keywords</span><span class="p">)</span>
+            <span class="p">]</span>
+
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">mod</span>
+                        <span class="k">for</span> <span class="n">mod</span> <span class="ow">in</span> <span class="n">features_reverse_order_plotting</span>
+                        <span class="k">if</span> <span class="n">mod</span> <span class="ow">in</span> <span class="n">list_feature_keywords</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+                <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="p">):</span>
+                <span class="c1"># flip list s.t. theta band is lowest in subsequent plot</span>
+                <span class="n">feature_select</span> <span class="o">=</span> <span class="n">feature_select</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">feature_select</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_target_ch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ch_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_name</span> <span class="o">=</span> <span class="n">ch_name</span>
+
+<div class="viewcode-block" id="FeatureReader.normalize_features">
+<a class="viewcode-back" href="../../feature_reader.html#analysis.feature_reader.FeatureReader.normalize_features">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normalize_features</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;pd.DataFrame&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Normalize feature_arr feature columns</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: z-scored feature_arr</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cols_norm</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="s2">&quot;time&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">c</span><span class="p">]</span>
+        <span class="n">feature_arr_norm</span> <span class="o">=</span> <span class="n">scipy_zscore</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_arr</span><span class="p">[</span><span class="n">cols_norm</span><span class="p">],</span> <span class="n">nan_policy</span><span class="o">=</span><span class="s2">&quot;omit&quot;</span><span class="p">)</span>
+        <span class="n">feature_arr_norm</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_arr</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">feature_arr_norm</span></div>
+
+
+<div class="viewcode-block" id="FeatureReader.plot_cort_projection">
+<a class="viewcode-back" href="../../feature_reader.html#analysis.feature_reader.FeatureReader.plot_cort_projection">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_cort_projection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;sess_right&quot;</span><span class="p">]:</span>
+            <span class="n">ecog_strip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">][</span><span class="s2">&quot;cortex_right&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ecog_strip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">][</span><span class="s2">&quot;cortex_left&quot;</span><span class="p">][</span><span class="s2">&quot;positions&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nmplotter</span><span class="o">.</span><span class="n">plot_cortex</span><span class="p">(</span>
+            <span class="n">grid_cortex</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;grid_cortex&quot;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="s2">&quot;grid_cortex&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span>
+            <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">ecog_strip</span><span class="o">=</span><span class="n">ecog_strip</span><span class="p">,</span>
+            <span class="n">grid_color</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;proj_matrix_cortex&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;grid_cortex&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span>
+            <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">set_clim</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FeatureReader.plot_target_avg_all_channels">
+<a class="viewcode-back" href="../../feature_reader.html#analysis.feature_reader.FeatureReader.plot_target_avg_all_channels">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_target_avg_all_channels</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ch_names_ECOG</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">list_feature_keywords</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;stft&quot;</span><span class="p">],</span>
+        <span class="n">epoch_len</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrapper that call plot_features_per_channel</span>
+<span class="sd">        for every given ECoG channel</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ch_names_ECOG : list, optional</span>
+<span class="sd">            list of ECoG channel to plot features for, by default None</span>
+<span class="sd">        list_feature_keywords : list[str], optional</span>
+<span class="sd">            keywords to plot, by default [&quot;stft&quot;]</span>
+<span class="sd">        epoch_len : int, optional</span>
+<span class="sd">            epoch length in seconds, by default 4</span>
+<span class="sd">        threshold : float, optional</span>
+<span class="sd">            threshold for event detection, by default 0.1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">ch_names_ECOG</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ch_names_ECOG</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ch_names_ECOG</span>
+        <span class="k">for</span> <span class="n">ch_name_ECOG</span> <span class="ow">in</span> <span class="n">ch_names_ECOG</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot_target_averaged_channel</span><span class="p">(</span>
+                <span class="n">ch</span><span class="o">=</span><span class="n">ch_name_ECOG</span><span class="p">,</span>
+                <span class="n">list_feature_keywords</span><span class="o">=</span><span class="n">list_feature_keywords</span><span class="p">,</span>
+                <span class="n">epoch_len</span><span class="o">=</span><span class="n">epoch_len</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FeatureReader.plot_target_averaged_channel">
+<a class="viewcode-back" href="../../feature_reader.html#analysis.feature_reader.FeatureReader.plot_target_averaged_channel">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_target_averaged_channel</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ch</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">list_feature_keywords</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">features_to_plt</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">epoch_len</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">normalize_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">show_plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Movement aligned features&quot;</span><span class="p">,</span>
+        <span class="n">ytick_labelsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">figsize_x</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="n">figsize_y</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ch : str, optional</span>
+<span class="sd">        list_feature_keywords : Optional[list[str]], optional</span>
+<span class="sd">        features_to_plt : list, optional</span>
+<span class="sd">        epoch_len : int, optional</span>
+<span class="sd">        threshold : float, optional</span>
+<span class="sd">        normalize_data : bool, optional</span>
+<span class="sd">        show_plot : bool, optional</span>
+<span class="sd">        title : str, optional</span>
+<span class="sd">            by default &quot;Movement aligned features&quot;</span>
+<span class="sd">        ytick_labelsize : _type_, optional</span>
+<span class="sd">        figsize_x : float, optional</span>
+<span class="sd">            by default 8</span>
+<span class="sd">        figsize_y : float, optional</span>
+<span class="sd">            by default 8</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO: This does not work properly when we have bipolar rereferencing</span>
+
+        <span class="k">if</span> <span class="n">features_to_plt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">filtered_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_arr</span><span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">filter_features</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">ch</span><span class="p">,</span> <span class="n">list_feature_keywords</span>
+                <span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">filtered_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_arr</span><span class="p">[</span><span class="n">features_to_plt</span><span class="p">]</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">filtered_df</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">X_epoch</span><span class="p">,</span> <span class="n">y_epoch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_epochs</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
+            <span class="n">epoch_len</span><span class="o">=</span><span class="n">epoch_len</span><span class="p">,</span>
+            <span class="n">sfreq</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">sampling_rate_features_hz</span><span class="p">,</span>
+            <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">plots</span><span class="o">.</span><span class="n">plot_epochs_avg</span><span class="p">(</span>
+            <span class="n">X_epoch</span><span class="o">=</span><span class="n">X_epoch</span><span class="p">,</span>
+            <span class="n">y_epoch</span><span class="o">=</span><span class="n">y_epoch</span><span class="p">,</span>
+            <span class="n">epoch_len</span><span class="o">=</span><span class="n">epoch_len</span><span class="p">,</span>
+            <span class="n">sfreq</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">sampling_rate_features_hz</span><span class="p">,</span>
+            <span class="n">feature_names</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">filtered_df</span><span class="o">.</span><span class="n">columns</span><span class="p">),</span>
+            <span class="n">feature_str_add</span><span class="o">=</span><span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">list_feature_keywords</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">list_feature_keywords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
+            <span class="n">cut_ch_name_cols</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">ch_name</span><span class="o">=</span><span class="n">ch</span><span class="p">,</span>
+            <span class="n">label_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">label_name</span><span class="p">,</span>
+            <span class="n">normalize_data</span><span class="o">=</span><span class="n">normalize_data</span><span class="p">,</span>
+            <span class="n">show_plot</span><span class="o">=</span><span class="n">show_plot</span><span class="p">,</span>
+            <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">OUT_PATH</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_dir</span><span class="p">,</span>
+            <span class="n">feature_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_file</span><span class="p">,</span>
+            <span class="n">str_title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+            <span class="n">ytick_labelsize</span><span class="o">=</span><span class="n">ytick_labelsize</span><span class="p">,</span>
+            <span class="n">figsize_x</span><span class="o">=</span><span class="n">figsize_x</span><span class="p">,</span>
+            <span class="n">figsize_y</span><span class="o">=</span><span class="n">figsize_y</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FeatureReader.plot_all_features">
+<a class="viewcode-back" href="../../feature_reader.html#analysis.feature_reader.FeatureReader.plot_all_features">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_all_features</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ch_used</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">time_limit_low_s</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">time_limit_high_s</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">normalize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;all_feature_plt.pdf&quot;</span><span class="p">,</span>
+        <span class="n">ytick_labelsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">clim_low</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">clim_high</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ch_used : str, optional</span>
+<span class="sd">        time_limit_low_s : float, optional</span>
+<span class="sd">        time_limit_high_s : float, optional</span>
+<span class="sd">        normalize : bool, optional</span>
+<span class="sd">        save : bool, optional</span>
+<span class="sd">        title : str, optional</span>
+<span class="sd">            default &quot;all_feature_plt.pdf&quot;</span>
+<span class="sd">        ytick_labelsize : int, optional</span>
+<span class="sd">            by default 10</span>
+<span class="sd">        clim_low : float, optional</span>
+<span class="sd">            by default None</span>
+<span class="sd">        clim_high : float, optional</span>
+<span class="sd">            by default None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">ch_used</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">col_used</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">c</span>
+                <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">columns</span>
+                <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">ch_used</span><span class="p">)</span> <span class="ow">or</span> <span class="n">c</span> <span class="o">==</span> <span class="s2">&quot;time&quot;</span> <span class="ow">or</span> <span class="s2">&quot;LABEL&quot;</span> <span class="ow">in</span> <span class="n">c</span> <span class="ow">or</span> <span class="s2">&quot;MOV&quot;</span> <span class="ow">in</span> <span class="n">c</span>
+            <span class="p">]</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_arr</span><span class="p">[</span><span class="n">col_used</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_arr</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">columns</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+
+        <span class="n">plots</span><span class="o">.</span><span class="n">plot_all_features</span><span class="p">(</span>
+            <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+            <span class="n">time_limit_low_s</span><span class="o">=</span><span class="n">time_limit_low_s</span><span class="p">,</span>
+            <span class="n">time_limit_high_s</span><span class="o">=</span><span class="n">time_limit_high_s</span><span class="p">,</span>
+            <span class="n">normalize</span><span class="o">=</span><span class="n">normalize</span><span class="p">,</span>
+            <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+            <span class="n">ytick_labelsize</span><span class="o">=</span><span class="n">ytick_labelsize</span><span class="p">,</span>
+            <span class="n">feature_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_file</span><span class="p">,</span>
+            <span class="n">OUT_PATH</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_dir</span><span class="p">,</span>
+            <span class="n">clim_low</span><span class="o">=</span><span class="n">clim_low</span><span class="p">,</span>
+            <span class="n">clim_high</span><span class="o">=</span><span class="n">clim_high</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_performace_sub_strip</span><span class="p">(</span><span class="n">performance_sub</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">plt_grid</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="n">ecog_strip_performance</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ecog_coords_strip</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cortex_grid</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">grid_performance</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">channels_</span> <span class="o">=</span> <span class="n">performance_sub</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">channels_</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;grid&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ch</span> <span class="ow">and</span> <span class="s2">&quot;combined&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ch</span><span class="p">:</span>
+                <span class="n">ecog_coords_strip</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">performance_sub</span><span class="p">[</span><span class="n">ch</span><span class="p">][</span><span class="s2">&quot;coord&quot;</span><span class="p">])</span>
+                <span class="n">ecog_strip_performance</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">performance_sub</span><span class="p">[</span><span class="n">ch</span><span class="p">][</span><span class="s2">&quot;performance_test&quot;</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">plt_grid</span> <span class="ow">and</span> <span class="s2">&quot;gridcortex_&quot;</span> <span class="ow">in</span> <span class="n">ch</span><span class="p">:</span>
+                <span class="n">cortex_grid</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">performance_sub</span><span class="p">[</span><span class="n">ch</span><span class="p">][</span><span class="s2">&quot;coord&quot;</span><span class="p">])</span>
+                <span class="n">grid_performance</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">performance_sub</span><span class="p">[</span><span class="n">ch</span><span class="p">][</span><span class="s2">&quot;performance_test&quot;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ecog_coords_strip</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ecog_coords_strip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">ecog_coords_strip</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">ecog_strip_performance</span><span class="p">,</span>
+            <span class="n">ecog_coords_strip</span><span class="p">,</span>
+            <span class="n">cortex_grid</span><span class="p">,</span>
+            <span class="n">grid_performance</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_across_subject_grd_ch_performance</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">performance_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">plt_grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">feature_str_add</span><span class="o">=</span><span class="s2">&quot;performance_allch_allgrid&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">ecog_strip_performance</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ecog_coords_strip</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">grid_performance</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">performance_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="p">(</span>
+                <span class="n">ecog_strip_performance_sub</span><span class="p">,</span>
+                <span class="n">ecog_coords_strip_sub</span><span class="p">,</span>
+                <span class="n">_</span><span class="p">,</span>
+                <span class="n">grid_performance_sub</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_performace_sub_strip</span><span class="p">(</span><span class="n">performance_dict</span><span class="p">[</span><span class="n">sub</span><span class="p">],</span> <span class="n">plt_grid</span><span class="o">=</span><span class="n">plt_grid</span><span class="p">)</span>
+            <span class="n">ecog_strip_performance</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ecog_strip_performance_sub</span><span class="p">)</span>
+            <span class="n">ecog_coords_strip</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ecog_coords_strip_sub</span><span class="p">)</span>
+            <span class="n">grid_performance</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grid_performance_sub</span><span class="p">)</span>
+        <span class="n">grid_performance</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">grid_performance</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">coords_all</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ecog_coords_strip</span><span class="p">)</span>
+        <span class="n">coords_all</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">coords_all</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nmplotter</span><span class="o">.</span><span class="n">plot_cortex</span><span class="p">(</span>
+            <span class="n">grid_cortex</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;grid_cortex&quot;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="s2">&quot;grid_cortex&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span>
+            <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">ecog_strip</span><span class="o">=</span><span class="n">coords_all</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ecog_coords_strip</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">grid_color</span><span class="o">=</span><span class="n">grid_performance</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_performance</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">strip_color</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ecog_strip_performance</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ecog_strip_performance</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">sess_right</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;sess_right&quot;</span><span class="p">],</span>
+            <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">OUT_PATH</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_dir</span><span class="p">,</span>
+            <span class="n">feature_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_file</span><span class="p">,</span>
+            <span class="n">feature_str_add</span><span class="o">=</span><span class="n">feature_str_add</span><span class="p">,</span>
+            <span class="n">show_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="FeatureReader.plot_subject_grid_ch_performance">
+<a class="viewcode-back" href="../../feature_reader.html#analysis.feature_reader.FeatureReader.plot_subject_grid_ch_performance">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_subject_grid_ch_performance</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">subject_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">performance_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">plt_grid</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">feature_str_add</span><span class="o">=</span><span class="s2">&quot;performance_allch_allgrid&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;plot subject specific performance for individual channeal and optional grid points</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        subject_name : string, optional</span>
+<span class="sd">            used subject, by default None</span>
+<span class="sd">        performance_dict : dict, optional</span>
+<span class="sd">            by default None</span>
+<span class="sd">        plt_grid : bool, optional</span>
+<span class="sd">            True to plot grid performances, by default False</span>
+<span class="sd">        feature_str_add : string, optional</span>
+<span class="sd">            figure output_name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">ecog_strip_performance</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ecog_coords_strip</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">cortex_grid</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">grid_performance</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">subject_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">subject_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_file</span><span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">feature_file</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;sub-&quot;</span><span class="p">)</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_file</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;_ses&quot;</span><span class="p">)</span>
+            <span class="p">][</span><span class="mi">4</span><span class="p">:]</span>
+
+        <span class="p">(</span>
+            <span class="n">ecog_strip_performance</span><span class="p">,</span>
+            <span class="n">ecog_coords_strip</span><span class="p">,</span>
+            <span class="n">cortex_grid</span><span class="p">,</span>
+            <span class="n">grid_performance</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_performace_sub_strip</span><span class="p">(</span>
+            <span class="n">performance_dict</span><span class="p">[</span><span class="n">subject_name</span><span class="p">],</span> <span class="n">plt_grid</span><span class="o">=</span><span class="n">plt_grid</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nmplotter</span><span class="o">.</span><span class="n">plot_cortex</span><span class="p">(</span>
+            <span class="n">grid_cortex</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;grid_cortex&quot;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="s2">&quot;grid_cortex&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span>
+            <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">ecog_strip</span><span class="o">=</span><span class="n">ecog_coords_strip</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ecog_coords_strip</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">grid_color</span><span class="o">=</span><span class="n">grid_performance</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_performance</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">strip_color</span><span class="o">=</span><span class="n">ecog_strip_performance</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ecog_strip_performance</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">sess_right</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;sess_right&quot;</span><span class="p">],</span>
+            <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">OUT_PATH</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_dir</span><span class="p">,</span>
+            <span class="n">feature_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_file</span><span class="p">,</span>
+            <span class="n">feature_str_add</span><span class="o">=</span><span class="n">feature_str_add</span><span class="p">,</span>
+            <span class="n">show_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_feature_series_time</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">plots</span><span class="o">.</span><span class="n">plot_feature_series_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_arr</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_corr_matrix</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="n">plots</span><span class="o">.</span><span class="n">plot_corr_matrix</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_arr</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="FeatureReader.get_epochs">
+<a class="viewcode-back" href="../../feature_reader.html#analysis.feature_reader.FeatureReader.get_epochs">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_epochs</span><span class="p">(</span>
+        <span class="n">data</span><span class="p">,</span> <span class="n">y_</span><span class="p">,</span> <span class="n">epoch_len</span><span class="p">,</span> <span class="n">sfreq</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return epoched data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : np.ndarray</span>
+<span class="sd">            array of extracted features of shape (n_samples, n_channels, n_features)</span>
+<span class="sd">        y_ : np.ndarray</span>
+<span class="sd">            array of labels e.g. ones for movement and zeros for</span>
+<span class="sd">            no movement or baseline corr. rotameter data</span>
+<span class="sd">        epoch_len : int</span>
+<span class="sd">            length of epoch in seconds</span>
+<span class="sd">        sfreq : int/float</span>
+<span class="sd">            sampling frequency of data</span>
+<span class="sd">        threshold : int/float</span>
+<span class="sd">            (Optional) threshold to be used for identifying events</span>
+<span class="sd">            (default=0 for y_tr with only ones</span>
+<span class="sd">            and zeros)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        epoch_ : np.ndarray</span>
+<span class="sd">            array of epoched ieeg data with shape (epochs,samples,channels,features)</span>
+<span class="sd">        y_arr : np.ndarray</span>
+<span class="sd">            array of epoched event label data with shape (epochs,samples)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">epoch_lim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">epoch_len</span> <span class="o">*</span> <span class="n">sfreq</span><span class="p">)</span>
+
+        <span class="n">ind_mov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y_</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">low_limit</span> <span class="o">=</span> <span class="n">ind_mov</span> <span class="o">&gt;</span> <span class="n">epoch_lim</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">up_limit</span> <span class="o">=</span> <span class="n">ind_mov</span> <span class="o">&lt;</span> <span class="n">y_</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">epoch_lim</span> <span class="o">/</span> <span class="mi">2</span>
+
+        <span class="n">ind_mov</span> <span class="o">=</span> <span class="n">ind_mov</span><span class="p">[</span><span class="n">low_limit</span> <span class="o">&amp;</span> <span class="n">up_limit</span><span class="p">]</span>
+
+        <span class="n">epoch_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">ind_mov</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">epoch_lim</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]])</span>
+
+        <span class="n">y_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">ind_mov</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">epoch_lim</span><span class="p">)])</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ind_mov</span><span class="p">):</span>
+            <span class="n">epoch_</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="n">epoch_lim</span> <span class="o">//</span> <span class="mi">2</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">epoch_lim</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+
+            <span class="n">y_arr</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">y_</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="n">epoch_lim</span> <span class="o">//</span> <span class="mi">2</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">epoch_lim</span> <span class="o">//</span> <span class="mi">2</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">epoch_</span><span class="p">,</span> <span class="n">y_arr</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_decoder</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">decoder</span><span class="p">:</span> <span class="n">Decoder</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">TRAIN_VAL_SPLIT</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">RUN_BAY_OPT</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">save_coef</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">LogisticRegression</span><span class="p">,</span>
+        <span class="n">eval_method</span><span class="o">=</span><span class="n">r2_score</span><span class="p">,</span>
+        <span class="n">cv_method</span><span class="o">=</span><span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+        <span class="n">get_movement_detection_rate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">mov_detection_threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">min_consequent_count</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">threshold_score</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">bay_opt_param_space</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[],</span>
+        <span class="n">STACK_FEATURES_N_SAMPLES</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">time_stack_n_samples</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">use_nested_cv</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">VERBOSE</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">undersampling</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">oversampling</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">mrmr_select</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">pca</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">cca</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">decoder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="n">decoder</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="n">Decoder</span><span class="p">(</span>
+                <span class="n">features</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_arr</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
+                <span class="n">label_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">label_name</span><span class="p">,</span>
+                <span class="n">used_chs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">used_chs</span><span class="p">,</span>
+                <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+                <span class="n">eval_method</span><span class="o">=</span><span class="n">eval_method</span><span class="p">,</span>
+                <span class="n">cv_method</span><span class="o">=</span><span class="n">cv_method</span><span class="p">,</span>
+                <span class="n">threshold_score</span><span class="o">=</span><span class="n">threshold_score</span><span class="p">,</span>
+                <span class="n">TRAIN_VAL_SPLIT</span><span class="o">=</span><span class="n">TRAIN_VAL_SPLIT</span><span class="p">,</span>
+                <span class="n">RUN_BAY_OPT</span><span class="o">=</span><span class="n">RUN_BAY_OPT</span><span class="p">,</span>
+                <span class="n">save_coef</span><span class="o">=</span><span class="n">save_coef</span><span class="p">,</span>
+                <span class="n">get_movement_detection_rate</span><span class="o">=</span><span class="n">get_movement_detection_rate</span><span class="p">,</span>
+                <span class="n">min_consequent_count</span><span class="o">=</span><span class="n">min_consequent_count</span><span class="p">,</span>
+                <span class="n">mov_detection_threshold</span><span class="o">=</span><span class="n">mov_detection_threshold</span><span class="p">,</span>
+                <span class="n">bay_opt_param_space</span><span class="o">=</span><span class="n">bay_opt_param_space</span><span class="p">,</span>
+                <span class="n">STACK_FEATURES_N_SAMPLES</span><span class="o">=</span><span class="n">STACK_FEATURES_N_SAMPLES</span><span class="p">,</span>
+                <span class="n">time_stack_n_samples</span><span class="o">=</span><span class="n">time_stack_n_samples</span><span class="p">,</span>
+                <span class="n">VERBOSE</span><span class="o">=</span><span class="n">VERBOSE</span><span class="p">,</span>
+                <span class="n">use_nested_cv</span><span class="o">=</span><span class="n">use_nested_cv</span><span class="p">,</span>
+                <span class="n">undersampling</span><span class="o">=</span><span class="n">undersampling</span><span class="p">,</span>
+                <span class="n">oversampling</span><span class="o">=</span><span class="n">oversampling</span><span class="p">,</span>
+                <span class="n">mrmr_select</span><span class="o">=</span><span class="n">mrmr_select</span><span class="p">,</span>
+                <span class="n">sfreq</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span><span class="p">,</span>
+                <span class="n">pca</span><span class="o">=</span><span class="n">pca</span><span class="p">,</span>
+                <span class="n">cca</span><span class="o">=</span><span class="n">cca</span><span class="p">,</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="FeatureReader.run_ML_model">
+<a class="viewcode-back" href="../../feature_reader.html#analysis.feature_reader.FeatureReader.run_ML_model">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_ML_model</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">feature_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">estimate_gridpoints</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">estimate_channels</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">estimate_all_channels_combined</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">output_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;LM&quot;</span><span class="p">,</span>
+        <span class="n">save_results</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;machine learning model evaluation for ECoG strip channels and/or grid points</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        feature_file : string, optional</span>
+<span class="sd">        estimate_gridpoints : bool, optional</span>
+<span class="sd">            run ML analysis for grid points, by default True</span>
+<span class="sd">        estimate_channels : bool, optional</span>
+<span class="sd">            run ML analysis for ECoG strip channel, by default True</span>
+<span class="sd">        estimate_all_channels_combined : bool, optional</span>
+<span class="sd">            run ML analysis features of all channels concatenated, by default False</span>
+<span class="sd">        model : sklearn model, optional</span>
+<span class="sd">            ML model, needs to obtain fit and predict functions,</span>
+<span class="sd">            by default linear_model.LogisticRegression(class_weight=&quot;balanced&quot;)</span>
+<span class="sd">        eval_method : sklearn.metrics, optional</span>
+<span class="sd">            evaluation performance metric, by default metrics.balanced_accuracy_score</span>
+<span class="sd">        cv_method : sklearn.model_selection, optional</span>
+<span class="sd">            valdation strategy, by default model_selection.KFold(n_splits=3, shuffle=False)</span>
+<span class="sd">        output_name : str, optional</span>
+<span class="sd">            saving name, by default &quot;LM&quot;</span>
+<span class="sd">        save_results : boolean</span>
+<span class="sd">            if true, save model._coef trained coefficients</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">feature_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">feature_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_file</span>
+
+        <span class="k">if</span> <span class="n">estimate_gridpoints</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">set_data_grid_points</span><span class="p">()</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">run_CV_caller</span><span class="p">(</span><span class="s2">&quot;grid_points&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">estimate_channels</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">set_data_ind_channels</span><span class="p">()</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">run_CV_caller</span><span class="p">(</span><span class="s2">&quot;ind_channels&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">estimate_all_channels_combined</span><span class="p">:</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">run_CV_caller</span><span class="p">(</span><span class="s2">&quot;all_channels_combined&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">save_results</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">feature_dir</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">feature_file</span>
+                <span class="k">if</span> <span class="s2">&quot;.vhdr&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_file</span>
+                <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_file</span><span class="p">,</span>
+                <span class="n">output_name</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_results</span><span class="p">(</span>
+            <span class="n">read_grid_points</span><span class="o">=</span><span class="n">estimate_gridpoints</span><span class="p">,</span>
+            <span class="n">read_all_combined</span><span class="o">=</span><span class="n">estimate_all_channels_combined</span><span class="p">,</span>
+            <span class="n">read_channels</span><span class="o">=</span><span class="n">estimate_channels</span><span class="p">,</span>
+            <span class="n">ML_model_name</span><span class="o">=</span><span class="n">output_name</span><span class="p">,</span>
+            <span class="n">read_mov_detection_rates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">get_movement_detection_rate</span><span class="p">,</span>
+            <span class="n">read_bay_opt_params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">RUN_BAY_OPT</span><span class="p">,</span>
+            <span class="n">read_mrmr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">mrmr_select</span><span class="p">,</span>
+            <span class="n">model_save</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">model_save</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FeatureReader.read_results">
+<a class="viewcode-back" href="../../feature_reader.html#analysis.feature_reader.FeatureReader.read_results">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_results</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">performance_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{},</span>
+        <span class="n">subject_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">DEFAULT_PERFORMANCE</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">read_grid_points</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">read_channels</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">read_all_combined</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">ML_model_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;LM&quot;</span><span class="p">,</span>
+        <span class="n">read_mov_detection_rates</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">read_bay_opt_params</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">read_mrmr</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">model_save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">save_results</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">PATH_OUT</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Removed None default, save_general_dict does not handle None anyway</span>
+        <span class="n">folder_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">str_add</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save performances of a given patient into performance_dict from saved nm_decoder</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        performance_dict : dictionary</span>
+<span class="sd">            dictionary including decoding performances, by default dictionary</span>
+<span class="sd">        subject_name : string, optional</span>
+<span class="sd">            subject name, by default None</span>
+<span class="sd">        DEFAULT_PERFORMANCE : float, optional</span>
+<span class="sd">            chance performance, by default 0.5</span>
+<span class="sd">        read_grid_points : bool, optional</span>
+<span class="sd">            true if grid point performances are read, by default True</span>
+<span class="sd">        read_channels : bool, optional</span>
+<span class="sd">            true if channels performances are read, by default True</span>
+<span class="sd">        read_all_combined : bool, optional</span>
+<span class="sd">            true if all combined channel performances are read, by default False</span>
+<span class="sd">        ML_model_name : str, optional</span>
+<span class="sd">            machine learning model name, by default &#39;LM&#39;</span>
+<span class="sd">        read_mov_detection_rates : boolean, by defaulte False</span>
+<span class="sd">            if True, read movement detection rates, as well as fpr&#39;s and tpr&#39;s</span>
+<span class="sd">        read_bay_opt_params : boolean, by default False</span>
+<span class="sd">        read_mrmr : boolean, by default False</span>
+<span class="sd">        model_save : boolean, by default False</span>
+<span class="sd">        save_results : boolean, by default False</span>
+<span class="sd">        PATH_OUT : string, by default None</span>
+<span class="sd">        folder_name : string, by default None</span>
+<span class="sd">        str_add : string, by default None</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        performance_dict : dictionary</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="s2">&quot;.vhdr&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_file</span><span class="p">:</span>
+            <span class="n">feature_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_file</span><span class="p">[:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;.vhdr&quot;</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">feature_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_file</span>
+
+        <span class="k">if</span> <span class="n">subject_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">subject_name</span> <span class="o">=</span> <span class="n">feature_file</span><span class="p">[</span>
+                <span class="n">feature_file</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;sub-&quot;</span><span class="p">)</span> <span class="p">:</span> <span class="n">feature_file</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;_ses&quot;</span><span class="p">)</span>
+            <span class="p">][</span><span class="mi">4</span><span class="p">:]</span>
+
+        <span class="n">PATH_ML_</span> <span class="o">=</span> <span class="n">PurePath</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_dir</span><span class="p">,</span>
+            <span class="n">feature_file</span><span class="p">,</span>
+            <span class="n">feature_file</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">ML_model_name</span> <span class="o">+</span> <span class="s2">&quot;_ML_RES.p&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># read ML results</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">PATH_ML_</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">input</span><span class="p">:</span>
+            <span class="n">ML_res</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="n">ML_res</span>
+
+        <span class="n">performance_dict</span><span class="p">[</span><span class="n">subject_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">write_CV_res_in_performance_dict</span><span class="p">(</span>
+            <span class="n">obj_read</span><span class="p">,</span>
+            <span class="n">obj_write</span><span class="p">,</span>
+            <span class="n">read_mov_detection_rates</span><span class="o">=</span><span class="n">read_mov_detection_rates</span><span class="p">,</span>
+            <span class="n">read_bay_opt_params</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">transform_list_of_dicts_into_dict_of_lists</span><span class="p">(</span><span class="n">l_</span><span class="p">):</span>
+                <span class="n">dict_out</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">key_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">l_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">key_l</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">dict_</span> <span class="ow">in</span> <span class="n">l_</span><span class="p">:</span>
+                        <span class="n">key_l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dict_</span><span class="p">[</span><span class="n">key_</span><span class="p">])</span>
+                    <span class="n">dict_out</span><span class="p">[</span><span class="n">key_</span><span class="p">]</span> <span class="o">=</span> <span class="n">key_l</span>
+                <span class="k">return</span> <span class="n">dict_out</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">read_ML_performances</span><span class="p">(</span>
+                <span class="n">obj_read</span><span class="p">,</span> <span class="n">obj_write</span><span class="p">,</span> <span class="n">set_inner_CV_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="p">):</span>
+                <span class="k">def</span><span class="w"> </span><span class="nf">set_score</span><span class="p">(</span>
+                    <span class="n">key_set</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="n">key_get</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="n">take_mean</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                    <span class="n">val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="p">):</span>
+                    <span class="k">if</span> <span class="n">set_inner_CV_res</span><span class="p">:</span>
+                        <span class="n">key_set</span> <span class="o">=</span> <span class="s2">&quot;InnerCV_&quot;</span> <span class="o">+</span> <span class="n">key_set</span>
+                        <span class="n">key_get</span> <span class="o">=</span> <span class="s2">&quot;InnerCV_&quot;</span> <span class="o">+</span> <span class="n">key_get</span>
+                    <span class="k">if</span> <span class="n">take_mean</span><span class="p">:</span>
+                        <span class="n">val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">obj_read</span><span class="p">[</span><span class="n">key_get</span><span class="p">])</span>
+                    <span class="n">obj_write</span><span class="p">[</span><span class="n">key_set</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+                <span class="n">set_score</span><span class="p">(</span>
+                    <span class="n">key_set</span><span class="o">=</span><span class="s2">&quot;performance_test&quot;</span><span class="p">,</span>
+                    <span class="n">key_get</span><span class="o">=</span><span class="s2">&quot;score_test&quot;</span><span class="p">,</span>
+                    <span class="n">take_mean</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">set_score</span><span class="p">(</span>
+                    <span class="n">key_set</span><span class="o">=</span><span class="s2">&quot;performance_train&quot;</span><span class="p">,</span>
+                    <span class="n">key_get</span><span class="o">=</span><span class="s2">&quot;score_train&quot;</span><span class="p">,</span>
+                    <span class="n">take_mean</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="k">if</span> <span class="s2">&quot;coef&quot;</span> <span class="ow">in</span> <span class="n">obj_read</span><span class="p">:</span>
+                    <span class="n">set_score</span><span class="p">(</span>
+                        <span class="n">key_set</span><span class="o">=</span><span class="s2">&quot;coef&quot;</span><span class="p">,</span>
+                        <span class="n">key_get</span><span class="o">=</span><span class="s2">&quot;coef&quot;</span><span class="p">,</span>
+                        <span class="n">take_mean</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">val</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">obj_read</span><span class="p">[</span><span class="s2">&quot;coef&quot;</span><span class="p">]),</span>
+                    <span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">read_mov_detection_rates</span><span class="p">:</span>
+                    <span class="n">set_score</span><span class="p">(</span>
+                        <span class="n">key_set</span><span class="o">=</span><span class="s2">&quot;mov_detection_rates_test&quot;</span><span class="p">,</span>
+                        <span class="n">key_get</span><span class="o">=</span><span class="s2">&quot;mov_detection_rates_test&quot;</span><span class="p">,</span>
+                        <span class="n">take_mean</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">set_score</span><span class="p">(</span>
+                        <span class="n">key_set</span><span class="o">=</span><span class="s2">&quot;mov_detection_rates_train&quot;</span><span class="p">,</span>
+                        <span class="n">key_get</span><span class="o">=</span><span class="s2">&quot;mov_detection_rates_train&quot;</span><span class="p">,</span>
+                        <span class="n">take_mean</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">set_score</span><span class="p">(</span>
+                        <span class="n">key_set</span><span class="o">=</span><span class="s2">&quot;fprate_test&quot;</span><span class="p">,</span>
+                        <span class="n">key_get</span><span class="o">=</span><span class="s2">&quot;fprate_test&quot;</span><span class="p">,</span>
+                        <span class="n">take_mean</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">set_score</span><span class="p">(</span>
+                        <span class="n">key_set</span><span class="o">=</span><span class="s2">&quot;fprate_train&quot;</span><span class="p">,</span>
+                        <span class="n">key_get</span><span class="o">=</span><span class="s2">&quot;fprate_train&quot;</span><span class="p">,</span>
+                        <span class="n">take_mean</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">set_score</span><span class="p">(</span>
+                        <span class="n">key_set</span><span class="o">=</span><span class="s2">&quot;tprate_test&quot;</span><span class="p">,</span>
+                        <span class="n">key_get</span><span class="o">=</span><span class="s2">&quot;tprate_test&quot;</span><span class="p">,</span>
+                        <span class="n">take_mean</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">set_score</span><span class="p">(</span>
+                        <span class="n">key_set</span><span class="o">=</span><span class="s2">&quot;tprate_train&quot;</span><span class="p">,</span>
+                        <span class="n">key_get</span><span class="o">=</span><span class="s2">&quot;tprate_train&quot;</span><span class="p">,</span>
+                        <span class="n">take_mean</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">read_bay_opt_params</span><span class="p">:</span>
+                    <span class="c1"># transform dict into keys for json saving</span>
+                    <span class="n">dict_to_save</span> <span class="o">=</span> <span class="n">transform_list_of_dicts_into_dict_of_lists</span><span class="p">(</span>
+                        <span class="n">obj_read</span><span class="p">[</span><span class="s2">&quot;best_bay_opt_params&quot;</span><span class="p">]</span>
+                    <span class="p">)</span>
+                    <span class="n">set_score</span><span class="p">(</span>
+                        <span class="n">key_set</span><span class="o">=</span><span class="s2">&quot;bay_opt_best_params&quot;</span><span class="p">,</span>
+                        <span class="n">take_mean</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">val</span><span class="o">=</span><span class="n">dict_to_save</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">read_mrmr</span><span class="p">:</span>
+                    <span class="c1"># transform dict into keys for json saving</span>
+
+                    <span class="n">set_score</span><span class="p">(</span>
+                        <span class="n">key_set</span><span class="o">=</span><span class="s2">&quot;mrmr_select&quot;</span><span class="p">,</span>
+                        <span class="n">take_mean</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">val</span><span class="o">=</span><span class="n">obj_read</span><span class="p">[</span><span class="s2">&quot;mrmr_select&quot;</span><span class="p">],</span>
+                    <span class="p">)</span>
+                <span class="k">if</span> <span class="n">model_save</span><span class="p">:</span>
+                    <span class="n">set_score</span><span class="p">(</span>
+                        <span class="n">key_set</span><span class="o">=</span><span class="s2">&quot;model_save&quot;</span><span class="p">,</span>
+                        <span class="n">take_mean</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">val</span><span class="o">=</span><span class="n">obj_read</span><span class="p">[</span><span class="s2">&quot;model_save&quot;</span><span class="p">],</span>
+                    <span class="p">)</span>
+
+            <span class="n">read_ML_performances</span><span class="p">(</span><span class="n">obj_read</span><span class="p">,</span> <span class="n">obj_write</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">([</span><span class="n">key_</span> <span class="k">for</span> <span class="n">key_</span> <span class="ow">in</span> <span class="n">obj_read</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="s2">&quot;InnerCV_&quot;</span> <span class="ow">in</span> <span class="n">key_</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">read_ML_performances</span><span class="p">(</span><span class="n">obj_read</span><span class="p">,</span> <span class="n">obj_write</span><span class="p">,</span> <span class="n">set_inner_CV_res</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">read_channels</span><span class="p">:</span>
+            <span class="n">ch_to_use</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ch_names_ECOG</span>
+            <span class="n">ch_to_use</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">used_chs</span>
+            <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">ch_to_use</span><span class="p">:</span>
+                <span class="n">performance_dict</span><span class="p">[</span><span class="n">subject_name</span><span class="p">][</span><span class="n">ch</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+                <span class="k">if</span> <span class="s2">&quot;coords&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># check if coords are empty</span>
+                        <span class="n">coords_exist</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">for</span> <span class="n">cortex_loc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                            <span class="k">for</span> <span class="n">ch_name_coord_idx</span><span class="p">,</span> <span class="n">ch_name_coord</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">][</span><span class="n">cortex_loc</span><span class="p">][</span><span class="s2">&quot;ch_names&quot;</span><span class="p">]</span>
+                            <span class="p">):</span>
+                                <span class="k">if</span> <span class="n">ch</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">ch_name_coord</span><span class="p">):</span>
+                                    <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">][</span><span class="n">cortex_loc</span><span class="p">][</span>
+                                        <span class="s2">&quot;positions&quot;</span>
+                                    <span class="p">][</span><span class="n">ch_name_coord_idx</span><span class="p">]</span>
+                                    <span class="n">coords_exist</span> <span class="o">=</span> <span class="p">(</span>
+                                        <span class="kc">True</span>  <span class="c1"># optimally break out of the two loops...</span>
+                                    <span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">coords_exist</span><span class="p">:</span>
+                            <span class="n">coords</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="n">performance_dict</span><span class="p">[</span><span class="n">subject_name</span><span class="p">][</span><span class="n">ch</span><span class="p">][</span><span class="s2">&quot;coord&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">coords</span>
+                <span class="n">write_CV_res_in_performance_dict</span><span class="p">(</span>
+                    <span class="n">ML_res</span><span class="o">.</span><span class="n">ch_ind_results</span><span class="p">[</span><span class="n">ch</span><span class="p">],</span>
+                    <span class="n">performance_dict</span><span class="p">[</span><span class="n">subject_name</span><span class="p">][</span><span class="n">ch</span><span class="p">],</span>
+                    <span class="n">read_mov_detection_rates</span><span class="o">=</span><span class="n">read_mov_detection_rates</span><span class="p">,</span>
+                    <span class="n">read_bay_opt_params</span><span class="o">=</span><span class="n">read_bay_opt_params</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">read_all_combined</span><span class="p">:</span>
+            <span class="n">performance_dict</span><span class="p">[</span><span class="n">subject_name</span><span class="p">][</span><span class="s2">&quot;all_ch_combined&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">write_CV_res_in_performance_dict</span><span class="p">(</span>
+                <span class="n">ML_res</span><span class="o">.</span><span class="n">all_ch_results</span><span class="p">,</span>
+                <span class="n">performance_dict</span><span class="p">[</span><span class="n">subject_name</span><span class="p">][</span><span class="s2">&quot;all_ch_combined&quot;</span><span class="p">],</span>
+                <span class="n">read_mov_detection_rates</span><span class="o">=</span><span class="n">read_mov_detection_rates</span><span class="p">,</span>
+                <span class="n">read_bay_opt_params</span><span class="o">=</span><span class="n">read_bay_opt_params</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">read_grid_points</span><span class="p">:</span>
+            <span class="n">performance_dict</span><span class="p">[</span><span class="n">subject_name</span><span class="p">][</span><span class="s2">&quot;active_gridpoints&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">ML_res</span><span class="o">.</span><span class="n">active_gridpoints</span>
+            <span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">project_settings</span><span class="p">,</span> <span class="n">grid_type</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">&quot;project_cortex&quot;</span><span class="p">,</span> <span class="s2">&quot;project_subcortex&quot;</span><span class="p">],</span>
+                <span class="p">[</span><span class="s2">&quot;gridcortex_&quot;</span><span class="p">,</span> <span class="s2">&quot;gridsubcortex_&quot;</span><span class="p">],</span>
+            <span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">postprocessing</span><span class="p">[</span><span class="n">project_settings</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># the sidecar keys are grid_cortex and subcortex_grid</span>
+                <span class="k">for</span> <span class="n">grid_point</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span><span class="s2">&quot;grid_&quot;</span> <span class="o">+</span> <span class="n">project_settings</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]])</span>
+                <span class="p">):</span>
+                    <span class="n">gp_str</span> <span class="o">=</span> <span class="n">grid_type</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">grid_point</span><span class="p">)</span>
+
+                    <span class="n">performance_dict</span><span class="p">[</span><span class="n">subject_name</span><span class="p">][</span><span class="n">gp_str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="n">performance_dict</span><span class="p">[</span><span class="n">subject_name</span><span class="p">][</span><span class="n">gp_str</span><span class="p">][</span><span class="s2">&quot;coord&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sidecar</span><span class="p">[</span>
+                        <span class="s2">&quot;grid_&quot;</span> <span class="o">+</span> <span class="n">project_settings</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="p">][</span><span class="n">grid_point</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">gp_str</span> <span class="ow">in</span> <span class="n">ML_res</span><span class="o">.</span><span class="n">active_gridpoints</span><span class="p">:</span>
+                        <span class="n">write_CV_res_in_performance_dict</span><span class="p">(</span>
+                            <span class="n">ML_res</span><span class="o">.</span><span class="n">gridpoint_ind_results</span><span class="p">[</span><span class="n">gp_str</span><span class="p">],</span>
+                            <span class="n">performance_dict</span><span class="p">[</span><span class="n">subject_name</span><span class="p">][</span><span class="n">gp_str</span><span class="p">],</span>
+                            <span class="n">read_mov_detection_rates</span><span class="o">=</span><span class="n">read_mov_detection_rates</span><span class="p">,</span>
+                            <span class="n">read_bay_opt_params</span><span class="o">=</span><span class="n">read_bay_opt_params</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># set non interpolated grid point to default performance</span>
+                        <span class="n">performance_dict</span><span class="p">[</span><span class="n">subject_name</span><span class="p">][</span><span class="n">gp_str</span><span class="p">][</span><span class="s2">&quot;performance_test&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">DEFAULT_PERFORMANCE</span>
+                        <span class="p">)</span>
+                        <span class="n">performance_dict</span><span class="p">[</span><span class="n">subject_name</span><span class="p">][</span><span class="n">gp_str</span><span class="p">][</span><span class="s2">&quot;performance_train&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">DEFAULT_PERFORMANCE</span>
+                        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">save_results</span><span class="p">:</span>
+            <span class="n">io</span><span class="o">.</span><span class="n">save_general_dict</span><span class="p">(</span>
+                <span class="n">dict_</span><span class="o">=</span><span class="n">performance_dict</span><span class="p">,</span>
+                <span class="n">path_out</span><span class="o">=</span><span class="n">PATH_OUT</span><span class="p">,</span>
+                <span class="n">prefix</span><span class="o">=</span><span class="n">folder_name</span><span class="p">,</span>
+                <span class="n">str_add</span><span class="o">=</span><span class="n">str_add</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">performance_dict</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_dataframe_performances</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;pd.DataFrame&quot;</span><span class="p">:</span>
+        <span class="n">performances</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">p</span><span class="p">[</span><span class="n">sub</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="s2">&quot;active_gridpoints&quot;</span> <span class="ow">in</span> <span class="n">ch</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">dict_add</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="n">sub</span><span class="p">][</span><span class="n">ch</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">dict_add</span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sub</span>
+                <span class="n">dict_add</span><span class="p">[</span><span class="s2">&quot;ch&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ch</span>
+
+                <span class="k">if</span> <span class="s2">&quot;all_ch_&quot;</span> <span class="ow">in</span> <span class="n">ch</span><span class="p">:</span>
+                    <span class="n">dict_add</span><span class="p">[</span><span class="s2">&quot;ch_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all ch combinded&quot;</span>
+                <span class="k">elif</span> <span class="s2">&quot;gridcortex&quot;</span> <span class="ow">in</span> <span class="n">ch</span><span class="p">:</span>
+                    <span class="n">dict_add</span><span class="p">[</span><span class="s2">&quot;ch_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;cortex grid&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">dict_add</span><span class="p">[</span><span class="s2">&quot;ch_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;electrode ch&quot;</span>
+                <span class="n">performances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dict_add</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">performances</span><span class="p">)</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021, Timon Merk.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

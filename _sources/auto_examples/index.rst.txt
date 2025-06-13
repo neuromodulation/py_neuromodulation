@@ -1,0 +1,207 @@
+:orphan:
+
+.. _examples-index:
+
+Examples
+========
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This Demo will showcase the feature estimation and exemplar analysis using simulated data.">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_0_first_demo_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_plot_0_first_demo.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">First Demo</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="ECoG Movement decoding example">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_1_example_BIDS_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_plot_1_example_BIDS.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">ECoG Movement decoding example</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Adding New Features">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_2_example_add_feature_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_plot_2_example_add_feature.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Adding New Features</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Analyzing temporal features">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_3_example_sharpwave_analysis_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_plot_3_example_sharpwave_analysis.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Analyzing temporal features</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Grid Point Projection">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_4_example_gridPointProjection_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_plot_4_example_gridPointProjection.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Grid Point Projection</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="R-Map computation">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_5_example_rmap_computing_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_plot_5_example_rmap_computing.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">R-Map computation</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Real-time feature estimation">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_6_real_time_demo_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_plot_6_real_time_demo.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Real-time feature estimation</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This toolbox implements the lsl ecosystem which can be utilized for offline use cases as well as live streamings In this example the data introduced in the first demo is being analyzed in a similar manner, This time however integrating an lsl stream.">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_7_lsl_example_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_plot_7_lsl_example.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Lab Streaming Layer (LSL) Example</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The following example shows how to use the Cebra package for decoding without patient-individual training. Note that the plot_8_cebra_example.py file just hosts the example_cebra_decoding.html file due to computational limitations. When re-running this file, please refer to the example_cebra_decoding.ipynb in the examples directory.">
+
+.. only:: html
+
+  .. image:: /auto_examples/images/thumb/sphx_glr_plot_8_cebra_example_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_plot_8_cebra_example.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Cebra Decoding with no training Example</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/plot_0_first_demo
+   /auto_examples/plot_1_example_BIDS
+   /auto_examples/plot_2_example_add_feature
+   /auto_examples/plot_3_example_sharpwave_analysis
+   /auto_examples/plot_4_example_gridPointProjection
+   /auto_examples/plot_5_example_rmap_computing
+   /auto_examples/plot_6_real_time_demo
+   /auto_examples/plot_7_lsl_example
+   /auto_examples/plot_8_cebra_example
+
+
+.. only:: html
+
+  .. container:: sphx-glr-footer sphx-glr-footer-gallery
+
+    .. container:: sphx-glr-download sphx-glr-download-python
+
+      :download:`Download all examples in Python source code: auto_examples_python.zip </auto_examples/auto_examples_python.zip>`
+
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+      :download:`Download all examples in Jupyter notebooks: auto_examples_jupyter.zip </auto_examples/auto_examples_jupyter.zip>`
+
+
+.. only:: html
+
+ .. rst-class:: sphx-glr-signature
+
+    `Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_
