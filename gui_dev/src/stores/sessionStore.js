@@ -40,7 +40,11 @@ export const useSessionStore = createStore("session", (set, get) => ({
   // Source selection
   sourceType: null, // 'file' or 'lsl'
   isSourceValid: false,
-  fileSource: {}, // FileInfo object
+  fileSource: {
+    name: "",
+    path: "",
+    size: 0,
+  }, // FileInfo object
   lslSource: {
     selectedStream: null,
     availableStreams: [],
@@ -111,8 +115,7 @@ export const useSessionStore = createStore("session", (set, get) => ({
   checkStreamParameters: () => {
     set({
       areParametersValid:
-        get().streamParameters.samplingRate &&
-        get().streamParameters.lineNoise
+        get().streamParameters.samplingRate && get().streamParameters.lineNoise,
     });
   },
 
@@ -349,7 +352,7 @@ export const useSessionStore = createStore("session", (set, get) => ({
     get().setStateAndSync({
       sourceType: null,
       isSourceValid: false,
-      fileSource: { filePath: "" },
+      fileSource: { path: "" },
       lslSource: { streamName: "" },
       selectedChannels: [],
       analysisParams: {},
