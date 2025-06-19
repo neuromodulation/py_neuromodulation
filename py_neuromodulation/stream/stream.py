@@ -39,7 +39,7 @@ class Stream:
         path_grids: _PathLike | None = None,
         coord_names: list | None = None,
         coord_list: list | None = None,
-        verbose: bool = True,
+        verbose: bool = False,
     ) -> None:
         """Stream initialization
 
@@ -240,7 +240,8 @@ class Stream:
             verbose=self.verbose,
         )
 
-        nm.logger.log_to_file(out_dir)
+        if self.verbose:
+            nm.logger.log_to_file(out_dir)
 
         self.generator: Iterator
         if not is_stream_lsl and data is not None:
