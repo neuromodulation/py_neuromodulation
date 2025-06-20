@@ -208,6 +208,7 @@ class Stream:
         simulate_real_time: bool = False,
         decoder: RealTimeDecoder | None = None,
         backend_interface: StreamBackendInterface | None = None,
+        delete_ind_batch_files_after_stream: bool = True,
     ) -> "pd.DataFrame":
         self.is_stream_lsl = is_stream_lsl
         self.stream_lsl_name = stream_lsl_name
@@ -337,6 +338,9 @@ class Stream:
 
         self._save_after_stream()
         self.is_running = False
+
+        if delete_ind_batch_files_after_stream is True:
+            file_writer.delete_ind_files()
 
         return feature_df  # Timon: We could think of returnader instead
 
