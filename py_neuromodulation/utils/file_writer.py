@@ -108,3 +108,12 @@ class MsgPackFileWriter(AbstractFileWriter):
                 with open(outpath, "rb") as f:
                     data = msgpack.unpack(f)
                 data.to_csv(self.csv_path, index=False)
+
+    def delete_ind_files(self,):
+        """
+        Delete individual MessagePack files.
+        """
+        files_msg_pack = list(self.out_dir.glob(f"{self.name}-*.msgpack"))
+        for file in files_msg_pack:
+            file.unlink()
+        
