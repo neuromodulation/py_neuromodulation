@@ -116,4 +116,3 @@ class MsgPackFileWriter(AbstractFileWriter):
         files_msg_pack = list(self.out_dir.glob(f"{self.name}-*.msgpack"))
         for file in files_msg_pack:
             file.unlink()
-        
