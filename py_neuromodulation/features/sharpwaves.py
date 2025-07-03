@@ -144,8 +144,14 @@ class SharpwaveAnalyzer(NMFeature):
                 )
 
         self.filter_names = [name for name, _ in self.list_filter]
-        self.filters = np.vstack([filter for _, filter in self.list_filter])
-        self.filters = np.tile(self.filters[None, :, :], (len(self.ch_names), 1, 1))
+        filter_lengths = [len(f) for _, f in self.list_filter]
+
+        self.equal_filters_lengths = len(set(filter_lengths)) <= 1
+        if self.equal_filters_lengths:
+            self.filters = np.vstack([f for _, f in self.list_filter])
+            self.filters = np.tile(self.filters[None, :, :], (len(self.ch_names), 1, 1))
+        else:
+            self.filters = [np.tile(f, (len(self.ch_names), 1)) for _, f in self.list_filter]
 
         self.used_features = self.sw_settings.sharpwave_features.get_enabled()
 
@@ -235,8 +241,14 @@ class SharpwaveAnalyzer(NMFeature):
 
         from scipy.signal import fftconvolve
 
-        data = np.tile(data[:, None, :], (1, len(self.list_filter), 1))
-        data = fftconvolve(data, self.filters, axes=2, mode="same")
+        if self.equal_filters_lengths:
+            data = np.tile(data[:, None, :], (1, len(self.list_filter), 1))
+            data = fftconvolve(data, self.filters, axes=2, mode="same")
+        else:
+            len_data = len(data[0])
+            conv_results = [fftconvolve(data, f, mode="same") for f in self.filters]
+            data = np.concat(conv_results, axis=1)
+            data = data.reshape([len(self.ch_names), len(self.filters), len_data])
 
         self.filtered_data = (
             data  # TONI: Expose filtered data for example 3, need a better way
