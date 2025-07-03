@@ -246,10 +246,7 @@ class SharpwaveAnalyzer(NMFeature):
             data = fftconvolve(data, self.filters, axes=2, mode="same")
         else:
             len_data = len(data[0])
-            conv_results = []
-            for f in self.filters:
-                partial_result = fftconvolve(data, f, mode="same")
-                conv_results.append(partial_result)
+            conv_results = [fftconvolve(data, f, mode="same") for f in self.filters]
             data = np.concat(conv_results, axis=1)
             data = data.reshape([len(self.ch_names), len(self.filters), len_data])
 
