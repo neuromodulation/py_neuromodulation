@@ -144,8 +144,14 @@ class SharpwaveAnalyzer(NMFeature):
                 )
 
         self.filter_names = [name for name, _ in self.list_filter]
-        self.filters = np.vstack([filter for _, filter in self.list_filter])
-        self.filters = np.tile(self.filters[None, :, :], (len(self.ch_names), 1, 1))
+        filter_lengths = [len(f) for _, f in self.list_filter]
+
+        self.equal_filters_lengths = len(set(filter_lengths)) <= 1
+        if self.equal_filters_lengths: 
+            self.filters = np.vstack([f for _, f in self.list_filter])
+            self.filters = np.tile(self.filters[None, :, :], (len(self.ch_names), 1, 1))
+        else:
+            self.filters = [np.tile(f, (len(self.ch_names), 1)) for _, f in self.list_filter]
 
         self.used_features = self.sw_settings.sharpwave_features.get_enabled()
 
@@ -235,8 +241,30 @@ class SharpwaveAnalyzer(NMFeature):
 
         from scipy.signal import fftconvolve
 
-        data = np.tile(data[:, None, :], (1, len(self.list_filter), 1))
-        data = fftconvolve(data, self.filters, axes=2, mode="same")
+        print("\n===========================")
+        print("[TAREK][calc_feature] self.filters", self.filters)
+
+        if self.equal_filters_lengths:
+            print("[TAREK][calc_feature] np.shape(data) before", np.shape(data))
+            data = np.tile(data[:, None, :], (1, len(self.list_filter), 1))
+            print("[TAREK][calc_feature] np.shape(data) after", np.shape(data))
+            data = fftconvolve(data, self.filters, axes=2, mode="same")
+        else:
+            # New code
+            len_data = len(data[0])
+            conv_results = []
+            for f in self.filters:
+                print("[TAREK][calc_feature][DEBUG] np.shape(data)", np.shape(data))
+                print("[TAREK][calc_feature][DEBUG] np.shape(f)", np.shape(f))
+                partial_result = fftconvolve(data, f, mode="same")
+                conv_results.append(partial_result)
+            
+            data = np.concat(conv_results, axis=1)
+            data = data.reshape([len(self.ch_names), len(self.filters), len_data])
+
+        print("-----------------------")
+        print("[TAREK][calc_feature][RESULT] np.shape(data)", np.shape(data))
+        print("[TAREK][calc_feature][RESULT] data", data)
 
         self.filtered_data = (
             data  # TONI: Expose filtered data for example 3, need a better way
