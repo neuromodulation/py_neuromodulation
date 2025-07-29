@@ -24,7 +24,7 @@ jobs:
       - name: Set up Python with uv
         uses: drivendataorg/setup-python-uv-action@v1
         with:
-          python-version: '3.11'
+          python-version: '3.12'
           cache: packages
           cache-dependency-path: pyproject.toml
  

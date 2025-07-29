@@ -1,7 +1,7 @@
 Installation
 ============
 
-py_neuromodulation requires at least python 3.11. For installation you can use pip:
+py_neuromodulation requires at least python 3.12. For installation you can use pip:
 
 .. code-block::
 
@@ -12,7 +12,7 @@ We recommend, however, using the package manager `uv <https://docs.astral.sh/uv/
 .. code-block::
 
     git clone https://github.com/neuromodulation/py_neuromodulation.git
-    uv python install 3.11
+    uv python install 3.12
     uv venv
 
 And then activating the virtual environment e.g. in Windows using:
@@ -48,7 +48,7 @@ If needed, install the documentation dependencies:
 
 Alternatively, you can also install the package in a conda environment:
 
-    conda create -n pynm-test python=3.11
+    conda create -n pynm-test python=3.12
     conda activate pynm-test
 
 Then install the packages listed in the `pyproject.toml`:

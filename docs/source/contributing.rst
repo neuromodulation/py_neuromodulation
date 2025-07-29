@@ -13,7 +13,7 @@ To setup the python environment, type
 
 ::
 
-    uv python install 3.11
+    uv python install 3.12
     uv venv
 
 

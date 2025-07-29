@@ -33,7 +33,6 @@ jobs:
           - os: windows-latest
             name: Windows
         python:
-          - "3.11"
           - "3.12"
           - "3.13"
     steps:
