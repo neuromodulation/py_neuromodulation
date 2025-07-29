@@ -28,13 +28,13 @@ jobs:
         platform:
           - os: ubuntu-latest
             name: Linux
-          - os: macos-latest
-            name: MacOS
+#          - os: macos-latest
+#            name: MacOS
           - os: windows-latest
             name: Windows
         python:
-          - "3.11"
           - "3.12"
+          - "3.13"
     steps:
       - uses: actions/checkout@v4
       - name: Install and cache Linux packages

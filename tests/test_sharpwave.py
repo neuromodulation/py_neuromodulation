@@ -128,3 +128,62 @@ def test_interval_feature():
         < features["ch3_Sharpwave_Max_interval_range_5_200"]
         < features["ch4_Sharpwave_Max_interval_range_5_200"]
     ), "interval features were not calculated correctly"
+
+def test_different_filter_ranges():
+    settings = init_sw_settings()
+    sfreq = 1000
+    ch_names = ["ch1",]
+
+    # Reset features
+    settings.sharpwave_analysis_settings.disable_all_features()
+
+    settings.sharpwave_analysis_settings.sharpwave_features.prominence = True
+    settings.sharpwave_analysis_settings.estimator["max"] = ["prominence"]
+
+    settings.sharpwave_analysis_settings.filter_ranges_hz = [(1, 10), (10, 100)]
+
+    sw = SharpwaveAnalyzer(settings, ch_names, sfreq)
+
+    data = np.zeros([len(ch_names), sfreq])
+    f_ch_1 = 5
+    data[0, :] = np.sin(np.linspace(0, 2 * np.pi * f_ch_1, sfreq)) 
+
+    features = sw.calc_feature(data)
+
+    assert (
+        features["ch1_Sharpwave_Max_prominence_range_1_10"]
+        > features["ch1_Sharpwave_Max_prominence_range_10_100"]
+    ), "features with different filter ranges were not calculated correctly"
+
+def test_different_filter_ranges_multiple_channels():
+    settings = init_sw_settings()
+    sfreq = 1000
+    ch_names = ["ch1", "ch2"]
+
+    # Reset features
+    settings.sharpwave_analysis_settings.disable_all_features()
+
+    settings.sharpwave_analysis_settings.sharpwave_features.prominence = True
+    settings.sharpwave_analysis_settings.estimator["max"] = ["prominence"]
+
+    settings.sharpwave_analysis_settings.filter_ranges_hz = [(1, 10), (10, 20)]
+
+    sw = SharpwaveAnalyzer(settings, ch_names, sfreq)
+
+    data = np.zeros([len(ch_names), sfreq])
+    f_ch_1 = 5
+    data[0, :] = np.sin(np.linspace(0, 2 * np.pi * f_ch_1, sfreq))
+    f_ch_2 = 15
+    data[1, :] = np.sin(np.linspace(0, 2 * np.pi * f_ch_2, sfreq))
+
+    features = sw.calc_feature(data)
+
+    assert (
+        features["ch1_Sharpwave_Max_prominence_range_1_10"]
+        > features["ch1_Sharpwave_Max_prominence_range_10_20"]
+    ), "features with different filter ranges were not calculated correctly"
+
+    assert (
+        features["ch2_Sharpwave_Max_prominence_range_1_10"]
+        < features["ch2_Sharpwave_Max_prominence_range_10_20"]
+    ), "features with different filter ranges were not calculated correctly"
