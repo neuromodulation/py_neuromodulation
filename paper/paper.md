@@ -26,7 +26,7 @@ authors:
     orcid: 0000-0003-0657-0891
     affiliation: "1, 2, 3"
   - name: Ahmed Tarek Kamel Abdalfatah
-    affilitation: "1"
+    affiliation: "1"
   - name: Alessia Cavallo
     orcid: 0000-0003-1717-1378
     affiliation: "1, 2"
