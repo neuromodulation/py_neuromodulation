@@ -127,12 +127,12 @@ def set_channels(
     if isinstance(reference, str):
         if reference.lower() == "default":
             df = _get_default_references(df=df, ch_names=ch_names, ch_types=ch_types)
-        else:
-            raise ValueError(
-                "`reference` must be either `default`, `None` or "
-                "an iterable of new reference channel names. "
-                f"Got: {reference}."
-            )
+        # else:
+        #     raise ValueError(
+        #         "`reference` must be either `default`, `None` or "
+        #         "an iterable of new reference channel names. "
+        #         f"Got: {reference}."
+        #     )
 
     elif isinstance(reference, list):
         if len(ch_names) != len(reference):

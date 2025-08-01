@@ -87,17 +87,23 @@ class FooofAnalyzer(NMFeature):
 
         spectra = np.abs(rfft(data[:, -self.num_samples :]))  # type: ignore
 
-        self.fm.fit(self.f_vec, spectra, self.settings.freq_range_hz)
+        try:
+            self.fm.fit(self.f_vec, spectra, self.settings.freq_range_hz)
+        except:
+            failed_fits = list(range(len(self.ch_names)))
+            # raise RuntimeError("FOOOF failed to fit model to data.")
 
         if not self.fm.has_model or self.fm.null_inds_ is None:
-            raise RuntimeError("FOOOF failed to fit model to data.")
-
-        failed_fits: list[int] = self.fm.null_inds_
+            failed_fits = list(range(len(self.ch_names)))
+            #raise RuntimeError("FOOOF failed to fit model to data.")
+        else:
+            failed_fits: list[int] = self.fm.null_inds_
 
         feature_results = {}
         for ch_idx, ch_name in enumerate(self.ch_names):
             FIT_PASSED = ch_idx not in failed_fits
-            exp = self.fm.get_params("aperiodic_params", "exponent")[ch_idx]
+            if FIT_PASSED:
+                exp = self.fm.get_params("aperiodic_params", "exponent")[ch_idx]
 
             for feat in self.settings.aperiodic.get_enabled():
                 f_name = f"{ch_name}_fooof_a_{self.feat_name_map[feat]}"
