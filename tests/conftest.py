@@ -28,7 +28,67 @@ def setup_default_data():
 
 @pytest.fixture
 def setup_default_stream_fast_compute() -> tuple[np.ndarray, nm.Stream]:
-    """This test function sets a data batch and automatic initialized M1 dataframe
+    """This test function sets a data batch and automatic initialized M1 dataframe.
+    Only fft features is enabled.
+
+    Args:
+        PATH_PYNEUROMODULATION (string): Path to py_neuromodulation repository
+
+    Returns:
+        ieeg_batch (np.ndarray): (channels, samples)
+        df_M1 (pd Dataframe): auto intialized table for rereferencing
+        settings_wrapper (settings.py): settings.json
+        fs (float): example sampling frequency
+    """
+
+    (
+        RUN_NAME,
+        PATH_RUN,
+        PATH_BIDS,
+        PATH_OUT,
+        datatype,
+    ) = nm.io.get_paths_example_data()
+
+    (
+        raw,
+        data,
+        sfreq,
+        line_noise,
+        coord_list,
+        coord_names,
+    ) = nm.io.read_BIDS_data(PATH_RUN=PATH_RUN)
+
+    channels = nm.utils.set_channels(
+        ch_names=raw.ch_names,
+        ch_types=raw.get_channel_types(),
+        reference="default",
+        bads=raw.info["bads"],
+        new_names="default",
+        used_types=("ecog", "dbs", "seeg"),
+        target_keywords=("MOV_RIGHT_CLEAN",),
+    )
+
+    settings = nm.NMSettings.get_default()
+    settings.reset()
+    settings.features.fft = True
+
+    stream = nm.Stream(
+        settings=settings,
+        channels=channels,
+        path_grids=None,
+        verbose=True,
+        sfreq=sfreq,
+        line_noise=line_noise,
+        coord_list=coord_list,
+        coord_names=coord_names,
+    )
+
+    return data, stream
+
+@pytest.fixture
+def setup_default_stream_fooof() -> tuple[np.ndarray, nm.Stream]:
+    """This test function sets a data batch and automatic initialized M1 dataframe.
+    Only fooof feature is enabled.
 
     Args:
         PATH_PYNEUROMODULATION (string): Path to py_neuromodulation repository

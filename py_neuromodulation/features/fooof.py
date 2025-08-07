@@ -91,11 +91,9 @@ class FooofAnalyzer(NMFeature):
             self.fm.fit(self.f_vec, spectra, self.settings.freq_range_hz)
         except:
             failed_fits = list(range(len(self.ch_names)))
-            # raise RuntimeError("FOOOF failed to fit model to data.")
 
         if not self.fm.has_model or self.fm.null_inds_ is None:
             failed_fits = list(range(len(self.ch_names)))
-            #raise RuntimeError("FOOOF failed to fit model to data.")
         else:
             failed_fits: list[int] = self.fm.null_inds_
 
