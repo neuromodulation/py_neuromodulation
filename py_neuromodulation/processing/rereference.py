@@ -55,7 +55,7 @@ class ReReferencer(NMPreprocessor):
             # if ind not in channels_used:
             #    continue
             ref = refs[ind]
-            if ref.lower() == "none" or pd.isnull(ref):
+            if ref.lower() == "none" or pd.isnull(ref) or channels["status"][ind] != "good":
                 ref_idx = None
                 continue
             if ref.lower() == "average":
@@ -78,7 +78,12 @@ class ReReferencer(NMPreprocessor):
                         )
                     ref_idx.append(ch_names.index(ref_chan))
             ref_matrix[ind, ref_idx] = -1 / len(ref_idx)
+        
         self.ref_matrix = ref_matrix
+        
+        # only index good channels
+        good_idxs = np.where(channels["status"] == "good")[0]
+        self.ref_matrix = self.ref_matrix[good_idxs, :][:, good_idxs]
 
     def process(self, data: np.ndarray) -> np.ndarray:
         """Rereference data according to the initialized ReReferencer class.

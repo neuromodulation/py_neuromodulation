@@ -46,6 +46,7 @@ def set_channels(
             For this, the channel names must contain the substring "_L_" and/or
             "_R_" (lower or upper case). CAVE: Adjacent channels will be
             determined using the sort() function.
+            Re-reference can be also "average" for common-average-referencing
         bads :  str | list of str, default: None
             channels that should be marked as bad and not be used for
             average re-referencing etc.
@@ -127,9 +128,12 @@ def set_channels(
     if isinstance(reference, str):
         if reference.lower() == "default":
             df = _get_default_references(df=df, ch_names=ch_names, ch_types=ch_types)
+        elif reference.lower() == "average":
+            df["rereference"] = ["average" if df["used"][ch_idx] == 1 else "None"
+                                 for ch_idx in range(len(ch_names))]
         else:
             raise ValueError(
-                "`reference` must be either `default`, `None` or "
+                "`reference` must be either `default`, `None`, `average` or "
                 "an iterable of new reference channel names. "
                 f"Got: {reference}."
             )

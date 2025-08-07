@@ -25,20 +25,23 @@ def test_all_features_random_array():
         arr, out_dir="./test_data", experiment_name="test_all_features_random_array"
     )
 
-    assert df.shape[0] != 0  # terrible test
+    assert df.shape[0] != 0  # check if not exception was raised
 
 
 def test_all_features_zero_array():
     arr = np.zeros([2, 2000])
 
     stream = get_example_stream(arr)
-    stream.settings.features.fooof = False  # Can't use fooof with 0s (log(0) undefined)
+    #stream.settings.features.fooof = False  # Can't use fooof with 0s (log(0) undefined)
 
     df = stream.run(
         arr, out_dir="./test_data", experiment_name="test_all_features_zero_array"
     )
 
-    assert df.shape[0] != 0  # terrible test
+    # the issue is here that some features, like bandpass activity will be very high
+    # negative values,
+    # TODO: think about how to check that
+    assert df.shape[0] != 0  # check if not exception was raised
 
 
 def test_all_features_NaN_array():
@@ -46,10 +49,10 @@ def test_all_features_NaN_array():
     arr[:] = np.nan
 
     stream = get_example_stream(arr)
-    stream.settings.features.fooof = False  # Can't use fooof nan values
+    #stream.settings.features.fooof = False  # Can't use fooof nan values
 
     df = stream.run(
         arr, out_dir="./test_data", experiment_name="test_all_features_NaN_array"
     )
 
-    assert df.shape[0] != 0  # terrible test
+    assert df.shape[0] != 0  # check if not exception was raised

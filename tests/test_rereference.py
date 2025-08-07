@@ -142,6 +142,55 @@ def test_rereference_muliple_channels(setup_databatch):
         data_batch[0, :] - (data_batch[1, :] + data_batch[2, :]) / 2,
     )
 
+def test_rereference_non_existing_str_parameter_keyword(setup_databatch):
+    ch_names, ch_types, bads, _ = setup_databatch
+
+    with pytest.raises(ValueError):
+        nm.utils.set_channels(
+            ch_names=ch_names,
+            ch_types=ch_types,
+            reference="test",
+            bads=bads,
+            new_names="default",
+            used_types=("ecog", "dbs", "seeg"),
+            target_keywords=("MOV_RIGHT",),
+        )
+
+
+def test_reference_average_keyword(setup_databatch):
+    ch_names, ch_types, bads, data_batch = setup_databatch
+
+    channels = nm.utils.set_channels(
+        ch_names=ch_names,
+        ch_types=ch_types,
+        reference="average",
+        bads=bads,
+        new_names="default",
+        used_types=("ecog", "dbs", "seeg"),
+        target_keywords=("MOV_RIGHT",),
+    )
+
+    re_referencer = ReReferencer(1, channels)
+
+    data_used = data_batch[channels["used"] == 1]
+
+    ref_dat = re_referencer.process(data_used)
+    
+    # test for all dbs channels excpt the one that is used for the reference
+    dbs_indices = np.where(np.array(ch_types) == "dbs")[0][1:]
+    first_dbs_idx = np.where(np.array(ch_types) == "dbs")[0][0]
+    assert_allclose(
+        ref_dat[first_dbs_idx, :],
+        data_batch[first_dbs_idx, :] - data_batch[dbs_indices, :].mean(axis=0),
+    )
+
+    ecog_indices = np.where(np.array(ch_types) == "ecog")[0][1:]
+    first_ecog_idx = np.where(np.array(ch_types) == "ecog")[0][0]
+    assert_allclose(
+        ref_dat[first_ecog_idx, :],
+        data_batch[first_ecog_idx, :] - data_batch[ecog_indices, :].mean(axis=0),
+    )
+
 
 def test_rereference_same_channel(setup_databatch):
     ch_names, ch_types, bads, data_batch = setup_databatch
