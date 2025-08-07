@@ -143,11 +143,16 @@ class DataProcessor:
     ) -> tuple[list[str], list[str], list[int], np.ndarray]:
         """Get used feature and label info from channels"""
         channels = self.channels
-        ch_names_used = channels[channels["used"] == 1]["new_name"].tolist()
-        ch_types_used = channels[channels["used"] == 1]["type"].tolist()
+        ch_names_used = channels.query("used == 1 and status == 'good'")["new_name"].tolist()
+        ch_types_used = channels.query("used == 1 and status == 'good'")["type"].tolist()
 
         # used channels for feature estimation
         feature_idx = np.where(channels["used"] & ~channels["target"])[0].tolist()
+
+        # remove the idxs of status == "bad"
+        feature_idx = [
+            idx for idx in feature_idx if channels.loc[idx, "status"] == "good"
+        ]
 
         # If multiple targets exist, select only the first
         label_idx = np.where(channels["target"] == 1)[0]
