@@ -52,7 +52,7 @@ affiliations:
    index: 3
  - name: Department of Neurology with Experimental Neurology, Charité – Universitätsmedizin Berlin, Berlin, Germany
    index: 4
- - name: Department of Neurosurgery, Massachusetts General Hospital, Harvard Medical School, Boston, Massachusetts, USA
+ - name: Department of Neurosurgery, Massachusetts General Hospital, Harvard Medical School, Boston, Massachusetts, United States of America
    index: 5
 date: 5 March 2025
 bibliography: paper.bib
@@ -81,12 +81,12 @@ Finally, electrophysiological research entails multiple technical and conceptual
 
 # Parametrization
 
-A data-source can be specified to be either a two-dimensional array (channels x time) read through [mne.io.read_raw](https://mne.tools/1.8/generated/mne.io.read_raw.html) supported recording standards or a [LabStreamingLayer](https://labstreaminglayer.org/#/) stream based on [mne-lsl](https://github.com/mne-tools/mne-lsl) (\autoref{fig:FigurePyNM}). If the data is passed as a simple numpy array, the sampling rate needs to be additionally specified. The parametrization **settings** and **channels** can be passed as additional optional parameters or automatically inferred.
+A data-source can be specified to be either a two-dimensional array (channels x time) read through [mne.io.read_raw](https://mne.tools/1.8/generated/mne.io.read_raw.html) supported recording standards or a [LabStreamingLayer](https://labstreaminglayer.org/#/) stream based on [mne-lsl](https://github.com/mne-tools/mne-lsl) (\autoref{fig:FigurePyNM}). If the data is passed as a simple NumPy array, the sampling rate needs to be additionally specified. The parametrization **settings** and **channels** can be passed as additional optional parameters or automatically inferred.
 All parametrization is described in the GitHub documentation in detail [Usage page](https://neuromodulation.github.io/py_neuromodulation/). The main parameters are the *sampling_rate_features_hz* and *segment_length_ms*. The feature sampling rate defines in which interval features are computed, and the segment length defines the signal duration that is used for computation of each feature. For pre-processing we defined several methods that can be reordered freely: notch_filtering, raw_resampling, re_referencing (channel-specific common-average or individual bipolar re-referencing), raw_normalization and preprocessing_filter (lowpass, highpass, bandpass, bandstop). Additionally, a modifiable list of frequency ranges is passed, which are used for spectral feature computation. A list of currently implemented features is the following: raw_hjorth, return_raw, bandpass_filter, stft, fft, welch, sharpwave_analysis, Hjorth, line length, [bispectrum](https://github.com/braindatalab/PyBispectra), [fooof](https://fooof-tools.github.io/fooof/index.html), bursts, linelength, [coherence](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.coherence.html), [nolds](https://cschoel.github.io/nolds/), [mne_connectivity](https://mne.tools/mne-connectivity/stable/index.html) and [bispectrum](https://github.com/braindatalab/PyBispectra).
 
 ![\label{fig:FigurePyNM}py-neuromodulation pre-processing and features estimation pipeline. a) Different offline-stored or online-streamed datasets can be used for feature estimation of different modalities and subsequent machine-learning neural decoding. b) py-neuromodulation backend and frontend setup. All backend routines are python-based and linked through a webserver application to a frontend that hosts parametrization and visualization.](FigurePyNM.png)
 
-Importantly, pre-processing and feature estimation can directly affect performances of decoding models. We added a **decode** module that can be parametrized with a [scikit-learn](https://scikit-learn.org/stable/) compatible model, different cross-validation strategies, performance metrices, and dimensionality reduction methods, such that the computed features can be directly used to evaluate decoding performance within the same pipeline. A pre-trained model can also be passed to directly generate decoding outputs. 
+Importantly, pre-processing and feature estimation can directly affect performances of decoding models. We added a **decode** module that can be parametrized with a [scikit-learn](https://scikit-learn.org/stable/) compatible model, different cross-validation strategies, performance metrics, and dimensionality reduction methods, such that the computed features can be directly used to evaluate decoding performance within the same pipeline. A pre-trained model can also be passed to directly generate decoding outputs. 
 
 # Graphical User Interface (GUI)
 
