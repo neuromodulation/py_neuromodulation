@@ -55,7 +55,6 @@ The application however could be any neural decoding and analysis problem.
 Journal of Open Source Software publication
 -------------------------------------------
 
-reStructuredText:
 .. image:: https://joss.theoj.org/papers/10.21105/joss.08258/status.svg
    :target: https://doi.org/10.21105/joss.08258
 
