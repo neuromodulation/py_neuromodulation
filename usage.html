@@ -1,0 +1,1329 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Usage &#8212; py_neuromodulation  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'usage';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Examples" href="auto_examples/index.html" />
+    <link rel="prev" title="Installation" href="installation.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">py_neuromodulation  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="gui.html">
+    GUI
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api_documentation.html">
+    API Documentation
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="gui.html">
+    GUI
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="api_documentation.html">
+    API Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"></div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Usage</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Link to this heading">#</a></h1>
+<p>We will explain here the basic usage of py_neuromodulation. Check out the <a class="reference internal" href="auto_examples/index.html"><span class="doc">examples</span></a> for directly following along.</p>
+<p>In general only a time series is required with a specified sampling frequency.</p>
+<p>Here is the definition of a minimalistic example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">py_neuromodulation</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">NUM_CHANNELS</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">NUM_DATA</span> <span class="o">=</span> <span class="mi">10000</span>
+<span class="n">sfreq</span> <span class="o">=</span> <span class="mi">1000</span>  <span class="c1"># Hz</span>
+<span class="n">sampling_rate_features_hz</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># Hz</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">([</span><span class="n">NUM_CHANNELS</span><span class="p">,</span> <span class="n">NUM_DATA</span><span class="p">])</span>
+
+<span class="n">stream</span> <span class="o">=</span> <span class="n">nm</span><span class="o">.</span><span class="n">Stream</span><span class="p">(</span><span class="n">sfreq</span><span class="o">=</span><span class="n">sfreq</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">sampling_rate_features_hz</span><span class="o">=</span><span class="n">sampling_rate_features_hz</span><span class="p">)</span>
+<span class="n">features</span> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><cite>features</cite> will be a pd.DataFrame containing the computed features for each channel and each time point. In this example the default signal processing pipeline is estimated.
+An offline data-stream was initialized with raw data being common-average re-referenced. FFT, bursting features and temporal waveform-shape were computed.
+Features were calculated with a <em>sampling_rate_features_hz</em> of 3 Hz and subsequently <em>z-score</em> normalized.</p>
+<p>We can however further define channel-specific parametrization such as re-referencing, channel selection, target definition,
+and also select and define additional features.</p>
+<p>Check out the example <a class="reference internal" href="auto_examples/plot_0_first_demo.html"><span class="doc">First Demo</span></a> for a first introduction.</p>
+<p>The following sections discuss additional parametrization. In a nutshell, the <strong>settings</strong> dictionary and a <strong>channels</strong> dataframe are used for parametrization.
+The above example implicitly used the default settings and channels. However, we can also define directly specific settings and channels:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">nm_define_nmchannels</span><span class="p">,</span> <span class="n">NMSettings</span>
+
+<span class="n">channels</span> <span class="o">=</span> <span class="n">nm_define_nmchannels</span><span class="o">.</span><span class="n">get_default_channels_from_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">car_rereferencing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">settings</span> <span class="o">=</span> <span class="n">NMSettings</span><span class="o">.</span><span class="n">get_fast_compute</span><span class="p">()</span>
+</pre></div>
+</div>
+<section id="channel-parametrization">
+<h2>Channel parametrization<a class="headerlink" href="#channel-parametrization" title="Link to this heading">#</a></h2>
+<p>The channel parametrization is defined in a <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a>. The following columns are required:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Column name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>name</strong> (string)</p></td>
+<td><p>name of the channel</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>rereference</strong> (string)</p></td>
+<td><p>different channel name for
+bipolar rereferencing, or
+<em>average</em> for common average
+re-referencing</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>used</strong> (int)</p></td>
+<td><p>0 or 1, channel selection</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>target</strong> (int)</p></td>
+<td><p>0 or 1, for some decoding
+applications we can define target
+chanenls, e.g. EMG channels.
+Target channels are not used for
+feature computation.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>type</strong> (string)</p></td>
+<td><p><a class="reference external" href="https://mne.tools/stable/glossary.html#term-data-channels">mne-python</a> supported channel types
+e.g. ecog, eeg, ecg, emg, dbs,
+seeg etc.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>status</strong> (string)</p></td>
+<td><p><em>good</em> or <em>bad</em>, used for channel
+quality indication</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>new_name</strong> (string)</p></td>
+<td><p>this keyword can be specified to
+indicate the used
+re-referncing scheme</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>rereferencing</strong> constitutes an important aspect of electrophysiological signal processing.
+Most commonly bipolar and common average re-referencing are applied for separate channel modalities.
+The following possible parametrization option are available:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Rereference Type</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Example</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>average</p></td>
+<td><p>common average rereference (across a channel type, e.g. ecog or eeg)</p></td>
+<td><p><em>average</em></p></td>
+</tr>
+<tr class="row-odd"><td><p>bipolar</p></td>
+<td><p>bipolar rereferencing, specified by the channel name to rereference to</p></td>
+<td><p><em>LFP_RIGHT_0</em></p></td>
+</tr>
+<tr class="row-even"><td><p><em>combination</em></p></td>
+<td><p>combination of different channels separated by “&amp;”</p></td>
+<td><p><em>LFP_RIGHT_0&amp;LFP_RIGHT_1</em></p></td>
+</tr>
+<tr class="row-odd"><td><p>none</p></td>
+<td><p>no rereferencing being used for the particular channel</p></td>
+<td><p><em>none</em></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The <strong>channels</strong> can either be created as a <em>.tsv</em> file, or as a pandas DataFrame.
+There are some helper functions that let you create the channels without much effort:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">channels</span> <span class="o">=</span> <span class="n">nm_define_nmchannels</span><span class="o">.</span><span class="n">get_default_channels_from_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">car_rereferencing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When setting up the <code class="xref py py-class docutils literal notranslate"><span class="pre">nm_stream_abc</span></code>, <cite>nm_settings</cite> and <cite>channels</cite> can also be defined and passed to the init function:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">py_neuromodulation</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nm</span>
+
+<span class="n">stream</span> <span class="o">=</span> <span class="n">nm</span><span class="o">.</span><span class="n">Stream</span><span class="p">(</span>
+    <span class="n">sfreq</span><span class="o">=</span><span class="n">sfreq</span><span class="p">,</span>
+    <span class="n">channels</span><span class="o">=</span><span class="n">channels</span><span class="p">,</span>
+    <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="setting-definition">
+<h2>Setting definition<a class="headerlink" href="#setting-definition" title="Link to this heading">#</a></h2>
+<p>The <em>nm_settings</em> allow for parametrization of all features. Default settings are passed from the <cite>nm_settings.yaml</cite> file:</p>
+<div class="toggle docutils container">
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Settings should be modified either directly through</span>
+<span class="c1"># the default_settings.yaml file or by creating a new</span>
+<span class="c1"># settings.yaml file than can be loaded with</span>
+<span class="c1"># settings.NMSettings.load(FILE_PATH)</span>
+<span class="c1">#</span>
+<span class="c1"># Alternatively, the settings can also be modified through the</span>
+<span class="c1"># settings object directly, e.g. settings.features.raw_hjorth = False</span>
+
+<span class="c1">########################</span>
+<span class="c1">### General settings ###</span>
+<span class="c1">########################</span>
+<span class="nt">sampling_rate_features_hz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="nt">segment_length_features_ms</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+
+<span class="nt">frequency_ranges_hz</span><span class="p">:</span><span class="w"> </span><span class="c1"># frequency band ranges can be added, removed and altered</span>
+<span class="w">  </span><span class="nt">theta</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">4</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">8</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">8</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">12</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">low_beta</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">13</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">20</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">high_beta</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">20</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">35</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="c1">#low_gamma: [60, 80]</span>
+<span class="w">  </span><span class="c1">#high_gamma: [90, 200]</span>
+<span class="w">  </span><span class="c1">#HFA: [200, 400]</span>
+
+<span class="c1"># Enabled features</span>
+<span class="nt">features</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">raw_hjorth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">return_raw</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">bandpass_filter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">stft</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">fft</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">welch</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">sharpwave_analysis</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">fooof</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">bursts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">linelength</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">coherence</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">nolds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">mne_connectivity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">bispectrum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+
+<span class="c1">##############################</span>
+<span class="c1">### Preprocessing settings ###</span>
+<span class="c1">##############################</span>
+<span class="c1"># preprocessing options: raw_resampling, notch_filter, re_referencing, preprocessing_filter, raw_normalization</span>
+<span class="c1"># note: the list order specifies also the order of execution</span>
+<span class="nt">preprocessing</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">raw_resampling</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">notch_filter</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">re_referencing</span><span class="p p-Indicator">]</span>
+
+<span class="nt">raw_resampling_settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">resample_freq_hz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+
+<span class="nt">raw_normalization_settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">normalization_time_s</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">  </span><span class="nt">normalization_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">zscore</span><span class="w"> </span><span class="c1"># supported methods: mean, median, zscore, zscore-median, quantile, power, robust, minmax</span>
+<span class="w">  </span><span class="nt">clip</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+
+<span class="nt">preprocessing_filter</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">bandstop_filter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">lowpass_filter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">highpass_filter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">bandpass_filter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">bandstop_filter_settings</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">100</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">160</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># [low_hz, high_hz]</span>
+<span class="w">  </span><span class="nt">bandpass_filter_settings</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">200</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># [hz, _hz]</span>
+<span class="w">  </span><span class="nt">lowpass_filter_cutoff_hz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">200</span>
+<span class="w">  </span><span class="nt">highpass_filter_cutoff_hz</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+
+<span class="c1">################################</span>
+<span class="c1">### Postprocessing settings ####</span>
+<span class="c1">################################</span>
+<span class="nt">postprocessing</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">feature_normalization</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">project_cortex</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">project_subcortex</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+
+<span class="nt">feature_normalization_settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">normalization_time_s</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">  </span><span class="nt">normalization_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">zscore</span><span class="w"> </span><span class="c1"># supported methods: mean, median, zscore, zscore-median, quantile, power, robust, minmax</span>
+<span class="w">  </span><span class="nt">normalize_psd</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">clip</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+
+<span class="nt">project_cortex_settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">max_dist_mm</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span>
+
+<span class="nt">project_subcortex_settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">max_dist_mm</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+
+<span class="c1">#################################</span>
+<span class="c1">### Feature specific settings ###</span>
+<span class="c1">#################################</span>
+
+<span class="nt">fft_settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">windowlength_ms</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">  </span><span class="nt">log_transform</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">features</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">mean</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">median</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">std</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">return_spectrum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+
+<span class="nt">welch_settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">windowlength_ms</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">  </span><span class="nt">log_transform</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">features</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">mean</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">median</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">std</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">return_spectrum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+
+<span class="nt">stft_settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">windowlength_ms</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span>
+<span class="w">  </span><span class="nt">log_transform</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">features</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">mean</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">median</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">std</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">return_spectrum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+
+<span class="nt">bandpass_filter_settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">segment_lengths_ms</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">theta</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1000</span>
+<span class="w">    </span><span class="nt">alpha</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">500</span>
+<span class="w">    </span><span class="nt">low_beta</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">333</span>
+<span class="w">    </span><span class="nt">high_beta</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">333</span>
+<span class="w">    </span><span class="nt">low_gamma</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">    </span><span class="nt">high_gamma</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">    </span><span class="nt">HFA</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">100</span>
+<span class="w">  </span><span class="nt">bandpower_features</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">activity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">mobility</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">complexity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">log_transform</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">kalman_filter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+
+<span class="nt">kalman_filter_settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">Tp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="w">  </span><span class="nt">sigma_w</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.7</span>
+<span class="w">  </span><span class="nt">sigma_v</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">frequency_bands</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">[</span><span class="nv">theta</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">alpha</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">low_beta</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">high_beta</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">low_gamma</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">high_gamma</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">HFA</span><span class="p p-Indicator">]</span>
+
+<span class="nt">bursts_settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">75</span>
+<span class="w">  </span><span class="nt">time_duration_s</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+<span class="w">  </span><span class="nt">frequency_bands</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">low_beta</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">high_beta</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="c1"># low_gamma</span>
+<span class="w">  </span><span class="nt">burst_features</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">duration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">amplitude</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">burst_rate_per_s</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">in_burst</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="nt">sharpwave_analysis_settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sharpwave_features</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">peak_left</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">peak_right</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">num_peaks</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">trough</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">prominence</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">decay_time</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">rise_time</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">sharpness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">rise_steepness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">decay_steepness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">slope_ratio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">filter_ranges_hz</span><span class="p">:</span><span class="w"> </span><span class="c1"># list of [low_hz, high_hz]</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">5</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">80</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">5</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">30</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">detect_troughs</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">estimate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">distance_troughs_ms</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">    </span><span class="nt">distance_peaks_ms</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">  </span><span class="nt">detect_peaks</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">estimate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">distance_troughs_ms</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">    </span><span class="nt">distance_peaks_ms</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">  </span><span class="c1"># TONI: Reverse this setting? e.g. interval: [mean, var]</span>
+<span class="w">  </span><span class="nt">estimator</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">mean</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">interval</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">median</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="w">    </span><span class="nt">max</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">prominence</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">sharpness</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">min</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="w">    </span><span class="nt">var</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="w">  </span><span class="nt">apply_estimator_between_peaks_and_troughs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="nt">coherence_settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span><span class="w"> </span><span class="c1"># List of channel pairs, empty by default. Each pair is a list of two channels, where the first channel is the seed and the second channel is the target.</span>
+<span class="w">  </span><span class="c1"># Example channels: [[STN_RIGHT_0, ECOG_RIGHT_0], [STN_RIGHT_1, ECOG_RIGHT_1]]</span>
+<span class="w">  </span><span class="nt">frequency_bands</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">high_beta</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">features</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">mean_fband</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">max_fband</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">max_allfbands</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">method</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">coh</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">icoh</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">nperseg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">128</span>
+
+<span class="nt">fooof_settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">aperiodic</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">exponent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">offset</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">knee</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">periodic</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">center_frequency</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">band_width</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">height_over_ap</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">windowlength_ms</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">800</span>
+<span class="w">  </span><span class="nt">peak_width_limits</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">0.5</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">12</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">max_n_peaks</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">  </span><span class="nt">min_peak_height</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">  </span><span class="nt">peak_threshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">  </span><span class="nt">freq_range_hz</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">40</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">knee</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+
+<span class="nt">nolds_settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sample_entropy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">correlation_dimension</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">lyapunov_exponent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">hurst_exponent</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">detrended_fluctutaion_analysis</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">data</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">raw</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">frequency_bands</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">low_beta</span><span class="p p-Indicator">]</span>
+
+<span class="nt">mne_connectiviy_settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">channels</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span><span class="w"> </span><span class="c1"># List of channel pairs, empty by default. Each pair is a list of two channels, where the first channel is the seed and the second channel is the target.</span>
+<span class="w">  </span><span class="c1"># Example channels: [[STN_RIGHT_0, ECOG_RIGHT_0], [STN_RIGHT_1, ECOG_RIGHT_1]]</span>
+<span class="w">  </span><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">plv</span><span class="w"> </span><span class="c1"># One of [&#39;coh&#39;, &#39;cohy&#39;, &#39;imcoh&#39;, &#39;cacoh&#39;, &#39;mic&#39;, &#39;mim&#39;, &#39;plv&#39;, &#39;ciplv&#39;, &#39;ppc&#39;, &#39;pli&#39;, &#39;dpli&#39;,&#39;wpli&#39;, &#39;wpli2_debiased&#39;, &#39;gc&#39;, &#39;gc_tr&#39;]</span>
+<span class="w">  </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">multitaper</span><span class="w"> </span><span class="c1"># One of [&#39;multitaper&#39;, &#39;fourier&#39;, &#39;cwt_morlet&#39;]</span>
+
+<span class="nt">bispectrum_settings</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">f1s</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">5</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">35</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">f2s</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">5</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">35</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">compute_features_for_whole_fband_range</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">frequency_bands</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">theta</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">alpha</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">low_beta</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">high_beta</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">components</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">absolute</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">real</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">imag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">phase</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">bispectrum_features</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">mean</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">sum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">var</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</pre></div>
+</div>
+</div>
+<section id="preprocessing">
+<h3>Preprocessing<a class="headerlink" href="#preprocessing" title="Link to this heading">#</a></h3>
+<p>The following preprocessing options can be written in the <em>preprocessing</em> field, <strong>which will be executed in the specified order</strong>:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;documentation_preprocessing_options&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;raw_resampling&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;notch_filter&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;re_referencing&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;raw_normalization&quot;</span>
+<span class="p">],</span>
+</pre></div>
+</div>
+<section id="resampling">
+<h4>Resampling<a class="headerlink" href="#resampling" title="Link to this heading">#</a></h4>
+<p><strong>raw_resampling</strong> defines a resampling rate to which the original data is downsampled to. This can be of advantage, since high sampling frequencies automatically require usually more computational cost. In the method specific settings the resampling frequency can be defined:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;raw_resampling_settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;resample_freq_hz&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="notch-filtering">
+<h4>Notch Filtering<a class="headerlink" href="#notch-filtering" title="Link to this heading">#</a></h4>
+<p><strong>notch_filer</strong> can be enabled with the <em>line_noise</em> frequency supplied as a init parameter to <code class="xref py py-class docutils literal notranslate"><span class="pre">nm_stream_abc</span></code>.</p>
+</section>
+<section id="normalization">
+<h4>Normalization<a class="headerlink" href="#normalization" title="Link to this heading">#</a></h4>
+<p><strong>normalization</strong> allows for normalizing the past <em>normalization_time</em> in seconds according to the following options:</p>
+<ul class="simple">
+<li><p>mean</p></li>
+<li><p>median</p></li>
+<li><p>zscore</p></li>
+<li><p>zscore-median</p></li>
+<li><p>quantile</p></li>
+<li><p>power</p></li>
+<li><p>robust</p></li>
+<li><p>minmax</p></li>
+</ul>
+<p>The latter four options are obtained via wrappers around the <a class="reference external" href="https://scikit-learn.org/stable/modules/classes.html#module-sklearn.preprocessing">scikit-learn preprocessing</a> modules.</p>
+<p><em>zscore-median</em> is implemented using the following equation: <span class="math notranslate nohighlight">\(X_{norm} = \frac{X - median(X)}{median(X)}\)</span></p>
+<p>The <em>normalization_time</em> allows to specify a <strong>past</strong> time window that will be used for normalization. The setting specification for <em>raw</em> and <em>feature</em> normalization is specified in the same manner:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;raw_normalization_settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;normalization_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;normalization_method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;median&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="features">
+<h3>Features<a class="headerlink" href="#features" title="Link to this heading">#</a></h3>
+<p>Features can be enabled and disabled using the <em>features</em> key:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;features&quot;</span><span class="p">:</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;fft&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;stft&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;bandpass_filter&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;sharpwave_analysis&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;raw_hjorth&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;return_raw&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;coherence&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;fooof&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;bursts&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;linelength&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;nolds&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;mne_connectivity&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<section id="oscillatory-features">
+<h4>Oscillatory features<a class="headerlink" href="#oscillatory-features" title="Link to this heading">#</a></h4>
+<section id="frequency-band-specification">
+<h5>Frequency band specification<a class="headerlink" href="#frequency-band-specification" title="Link to this heading">#</a></h5>
+<p>Frequency bands are specified in the settings within a dictionary of frequency band names and a list of lower and upper band ranges.
+The supplied frequency ranges can be utilized by different feature modalities, e.g. fft, coherence, sharpwave etc.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;frequency_ranges_hz&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;theta&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="mi">4</span><span class="p">,</span>
+<span class="w">        </span><span class="mi">8</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;alpha&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="mi">8</span><span class="p">,</span>
+<span class="w">        </span><span class="mi">12</span>
+<span class="w">    </span><span class="p">],</span>
+</pre></div>
+</div>
+</section>
+<section id="fft-and-stft">
+<h5>FFT and STFT<a class="headerlink" href="#fft-and-stft" title="Link to this heading">#</a></h5>
+<p>Fast Fourier Transform and Short-Time Fourier Transform are both specified using the same settings parametrization:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;fft_settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;windowlength_ms&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;log_transform&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;kalman_filter&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><em>log_transform</em> is here a recommended setting.</p>
+</section>
+<section id="kalman-filtering">
+<h5>Kalman filtering<a class="headerlink" href="#kalman-filtering" title="Link to this heading">#</a></h5>
+<p><strong>kalman_filter</strong> can be enabled for all oscillatory features and is motivated by filtering estimated band power features
+using the white noise acceleration model
+(see <a class="reference external" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6927801/">“Improved detection of Parkinsonian resting tremor with feature engineering and Kalman filtering”</a> Yao et al 19).
+The white noise acceleration model get’s specified by the <span class="math notranslate nohighlight">\(T_p\)</span> prediction interval (Hz), and the process noise is then defined by <span class="math notranslate nohighlight">\(\sigma_w\)</span> and <span class="math notranslate nohighlight">\(\sigma_v\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}Q = \begin{bmatrix} \sigma_w^2 \frac{T_p^{3}}{3} &amp; \sigma_w^2 \frac{T_p^2}{2}\\
+   \sigma_w^2 \frac{T_p^2}{3} &amp; \sigma_w^2T_p\ \end{bmatrix}\end{split}\]</div>
+<p>The settings can be specified as follows:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;kalman_filter_settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;Tp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;sigma_w&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.7</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;sigma_v&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;frequency_bands&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;low gamma&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;high gamma&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;all gamma&quot;</span>
+<span class="w">        </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Individual frequency bands (specified in the <em>frequency_ranges_hz</em>) can be selected for Kalman Filtering (see <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/20172805/">Chisci et al 2010</a> for an example).</p>
+</section>
+<section id="bandpass-filter">
+<h5>Bandpass filter<a class="headerlink" href="#bandpass-filter" title="Link to this heading">#</a></h5>
+<p><strong>bandpass_filter</strong> enables band power feature estimation through precomputation of a FIR filter
+using the <a class="reference external" href="https://mne.tools/dev/generated/mne.filter.create_filter.html">mne.filter.create_filter</a> function.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;bandpass_filter_settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;segment_lengths_ms&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;theta&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;alpha&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">500</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;low beta&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">333</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;high beta&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">333</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;low gamma&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;high gamma&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;HFA&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;bandpower_features&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;activity&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;mobility&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;complexity&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;log_transform&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;kalman_filter&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The <em>segment_length_ms</em> parameter defines a time range in which FIR filtered data is used for feature estimation.
+In this example for the theta frequency band the previous 1000 ms are used to estimate features based
+on the FIR filtered signal. This might be beneficial when using shorter frequency bands, e.g. gamma,
+where estimating band power in a range of e.g. 100 ms might result in a temporal more specific feature calculation.
+A common way to estimate band power is to take the variance of FIR filtered data. This is equivalent to
+the activity <a class="reference external" href="https://en.wikipedia.org/wiki/Hjorth_parameters">Hjorth</a> parameter.
+The Hjorth parameters <em>activity</em>, <em>mobility</em> and <em>complexity</em> can be computed on bandpass filtered data as well.
+For estimating all Hjorth parameters of the raw unfiltered signal, <strong>raw_hjorth</strong> can be enabled.</p>
+</section>
+<section id="analyzing-temporal-waveform-shape">
+<h5>Analyzing temporal waveform shape<a class="headerlink" href="#analyzing-temporal-waveform-shape" title="Link to this heading">#</a></h5>
+<p><strong>sharpwave_analysis</strong> allows for calculation of temporal waveform features.
+See <a class="reference external" href="https://www.sciencedirect.com/science/article/abs/pii/S1364661316302182">“Brain Oscillations and the Importance of Waveform Shape”</a>
+Cole et al 17 for a great motivation to use these features. Here, sharpwave features are estimated using a prior bandpass filter
+between the <em>filter_low_cutoff</em> and <em>filter_high_cutoff</em> ranges.
+The sharpwave peak and trough features can be calculated, defined by the <em>estimate</em> key.
+According to a current data batch one or more temporal waveform events
+can be detected. The subsequent feature is returned as the <em>mean, median, maximum, minimum</em> or <em>variance</em>
+of all events in the feature computation batch, defined by the <em>estimator</em>.
+For further introduction see the example notebook <a class="reference internal" href="auto_examples/plot_3_example_sharpwave_analysis.html"><span class="doc">Analyzing temporal features</span></a>.</p>
+<p>Here the full parametrization in the <em>nm_settings</em>:</p>
+<div class="toggle docutils container">
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;sharpwave_analysis_settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;sharpwave_features&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;peak_left&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;peak_right&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;trough&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;width&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;prominence&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;decay_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;rise_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;sharpness&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;rise_steepness&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;decay_steepness&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;slope_ratio&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;filter_ranges_hz&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">[</span>
+<span class="w">            </span><span class="mi">5</span><span class="p">,</span>
+<span class="w">            </span><span class="mi">80</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="p">[</span>
+<span class="w">            </span><span class="mi">5</span><span class="p">,</span>
+<span class="w">            </span><span class="mi">30</span>
+<span class="w">        </span><span class="p">]</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;detect_troughs&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;estimate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;distance_troughs_ms&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;distance_peaks_ms&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;detect_peaks&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;estimate&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;distance_troughs_ms&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;distance_peaks_ms&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;estimator&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;mean&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;interval&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;median&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;max&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;prominence&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;sharpness&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="w">        </span><span class="nt">&quot;min&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;var&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;apply_estimator_between_peaks_and_troughs&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="raw-signals">
+<h4>Raw signals<a class="headerlink" href="#raw-signals" title="Link to this heading">#</a></h4>
+<p>Next, raw signals can be returned, specified by the <strong>return_raw</strong> method. This can be useful for using e.g.
+normalization, rereferencing or resampling before feeding data to a deep learning model.</p>
+</section>
+<section id="characterization-of-spectral-aperiodic-component">
+<h4>Characterization of spectral aperiodic component<a class="headerlink" href="#characterization-of-spectral-aperiodic-component" title="Link to this heading">#</a></h4>
+<p>There is also a wrapper around the <a class="reference external" href="https://fooof-tools.github.io/fooof/">fooof</a> toolbox for characterization of the periodic and aperiodic components.
+Periodic components will be returned with a <em>peak_idx</em>, the respective center frequency, bandwith, and height over the
+aperiodic component. <em>fooof</em> specific parameters, e.g. <em>knee</em> or <em>max_n_peaks</em> are passed to the fooof object as well:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;fooof&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;aperiodic&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;exponent&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;knee&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;periodic&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;center_frequency&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;band_width&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;height_over_ap&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;windowlength_ms&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">800</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;peak_width_limits&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="mf">0.5</span><span class="p">,</span>
+<span class="w">        </span><span class="mi">12</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;max_n_peaks&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;min_peak_height&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;peak_threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;freq_range_hz&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">        </span><span class="mi">40</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;knee&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When using the knee parameter, the <em>knee_frequency</em> is returned for every fit. See also the fooof <a class="reference external" href="https://fooof-tools.github.io/fooof/auto_tutorials/plot_05-AperiodicFitting.html#sphx-glr-auto-tutorials-plot-05-aperiodicfitting-py">Aperiodic Component Fitting Notebook</a>.</p>
+</div>
+</section>
+<section id="nonlinear-measures-for-dynamical-systems-nolds">
+<h4>Nonlinear measures for dynamical systems (nolds)<a class="headerlink" href="#nonlinear-measures-for-dynamical-systems-nolds" title="Link to this heading">#</a></h4>
+<p><strong>nolds</strong> features are estimates as a direct wrapper around the <a class="reference external" href="https://github.com/CSchoel/nolds">nolds toolbox</a>.
+Features can be estimated from raw data directly, or data being filtered in different frequency bands.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The computation time for this feature modality is however very high. For real time applications we tested it was not applicable.</p>
+</div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;nolds_features&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;sample_entropy&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;correlation_dimension&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;lyapunov_exponent&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;hurst_exponent&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;detrended_fluctutaion_analysis&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;data&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;raw&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;frequency_bands&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;theta&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;alpha&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;low beta&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;high beta&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;low gamma&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;high gamma&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;HFA&quot;</span>
+<span class="w">        </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="coherence">
+<h4>Coherence<a class="headerlink" href="#coherence" title="Link to this heading">#</a></h4>
+<p><strong>coherence</strong> can be calculated for channel pairs that are passed as a list of lists.
+Each list contains the channels specified in <em>channels</em>.
+The mean and/or maximum in a specific frequency band can be calculated.
+The maximum for all frequency bands can also be estimated.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;coherence&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;channels&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;STN_RIGHT_0&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s2">&quot;ECOG_RIGHT_0&quot;</span>
+<span class="w">        </span><span class="p">]</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;frequency_bands&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;high beta&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;features&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;mean_fband&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;max_fband&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;max_allfbands&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;coh&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;icoh&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="bursts">
+<h4>Bursts<a class="headerlink" href="#bursts" title="Link to this heading">#</a></h4>
+<p><strong>bursting</strong> features were previously often investigated in invasive electrophysiology.
+Here burst features for different frequency bands with specified <em>time_duration_s</em> and <em>threshold</em> can be estimated:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;burst_settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;threshold&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">75</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;time_duration_s&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;frequency_bands&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;low beta&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;high beta&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;low gamma&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;burst_features&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;amplitude&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;burst_rate_per_s&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;in_burst&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="mne-connectivity">
+<h4>MNE-connectivity<a class="headerlink" href="#mne-connectivity" title="Link to this heading">#</a></h4>
+<p><strong>MNE-connectivity</strong> is a direct wrapper around the mne_connectivity <a class="reference external" href="https://mne.tools/mne-connectivity/stable/generated/mne_connectivity.spectral_connectivity_epochs.html">spectral_connectivity_epochs</a> function.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;mne_connectiviy&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;plv&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;mode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;multitaper&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="line-length">
+<h4>Line length<a class="headerlink" href="#line-length" title="Link to this heading">#</a></h4>
+<p><strong>linelength</strong> is a very simple features that calculates in the specified batch the sum of the absolute signal of a channel <em>x</em>:</p>
+<div class="math notranslate nohighlight">
+\[LineLength(x) = \sum_{i=0}^{Batch\ Length} |x_i|\]</div>
+</section>
+</section>
+<section id="postprocessing">
+<h3>Postprocessing<a class="headerlink" href="#postprocessing" title="Link to this heading">#</a></h3>
+<section id="projection">
+<h4>Projection<a class="headerlink" href="#projection" title="Link to this heading">#</a></h4>
+<p><strong>projection_cortex</strong> and <strong>projection_subcortex</strong> allow for feature projection of individual channels to a common subcortical
+or cortical grid, defined by the <em>grid_cortex.tsv</em> and <em>subgrid_cortex.tsv</em> files.
+Example <em>.tsv</em> files can be found in the shipped py_neuromodulation package.
+For both projections a <em>max_dist_mm</em> parameter needs to be specified, in which data is linearly interpolated, weighted by their inverse grid point distance.
+For further motivation see the example notebook <a class="reference internal" href="auto_examples/plot_4_example_gridPointProjection.html"><span class="doc">Grid Point Projection</span></a>.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="nt">&quot;project_cortex_settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;max_dist_mm&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span>
+<span class="p">},</span>
+<span class="nt">&quot;project_subcortex_settings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;max_dist_mm&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="installation.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Installation</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="auto_examples/index.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Examples</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#channel-parametrization">Channel parametrization</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#setting-definition">Setting definition</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#preprocessing">Preprocessing</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#resampling">Resampling</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#notch-filtering">Notch Filtering</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#normalization">Normalization</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#features">Features</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#oscillatory-features">Oscillatory features</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#frequency-band-specification">Frequency band specification</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#fft-and-stft">FFT and STFT</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#kalman-filtering">Kalman filtering</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#bandpass-filter">Bandpass filter</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#analyzing-temporal-waveform-shape">Analyzing temporal waveform shape</a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#raw-signals">Raw signals</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#characterization-of-spectral-aperiodic-component">Characterization of spectral aperiodic component</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nonlinear-measures-for-dynamical-systems-nolds">Nonlinear measures for dynamical systems (nolds)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#coherence">Coherence</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#bursts">Bursts</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#mne-connectivity">MNE-connectivity</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#line-length">Line length</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#postprocessing">Postprocessing</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#projection">Projection</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/usage.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021, Timon Merk.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

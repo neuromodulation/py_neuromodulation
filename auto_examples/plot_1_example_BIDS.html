@@ -1,0 +1,1177 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>ECoG Movement decoding example &#8212; py_neuromodulation  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'auto_examples/plot_1_example_BIDS';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Adding New Features" href="plot_2_example_add_feature.html" />
+    <link rel="prev" title="First Demo" href="plot_0_first_demo.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">py_neuromodulation  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../usage.html">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../gui.html">
+    GUI
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api_documentation.html">
+    API Documentation
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../usage.html">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../gui.html">
+    GUI
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api_documentation.html">
+    API Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_0_first_demo.html">First Demo</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">ECoG Movement decoding example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_2_example_add_feature.html">Adding New Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_3_example_sharpwave_analysis.html">Analyzing temporal features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_4_example_gridPointProjection.html">Grid Point Projection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_5_example_rmap_computing.html">R-Map computation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_6_real_time_demo.html">Real-time feature estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_7_lsl_example.html">Lab Streaming Layer (LSL) Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_8_cebra_example.html">Cebra Decoding with no training Example</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Examples</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ECoG Movement decoding example</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-plot-1-example-bids-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="ecog-movement-decoding-example">
+<span id="sphx-glr-auto-examples-plot-1-example-bids-py"></span><h1>ECoG Movement decoding example<a class="headerlink" href="#ecog-movement-decoding-example" title="Link to this heading">#</a></h1>
+<p>This example notebook read openly accessible data from the publication
+<em>Electrocorticography is superior to subthalamic local field potentials
+for movement decoding in Parkinson’s disease</em>
+(<cite>Merk et al. 2022 &lt;https://elifesciences.org/articles/75126&gt;_</cite>).
+The dataset is available <a class="reference external" href="https://doi.org/10.7910/DVN/io.FLM">here</a>.</p>
+<p>For simplicity one example subject is automatically shipped within
+this repo at the <em>py_neuromodulation/data</em> folder, stored in
+<a class="reference external" href="https://www.nature.com/articles/s41597-019-0105-7">iEEG BIDS</a> format.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn</span><span class="w"> </span><span class="kn">import</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">model_selection</span><span class="p">,</span> <span class="n">linear_model</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">py_neuromodulation</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nm</span>
+</pre></div>
+</div>
+<p>Let’s read the example using <a class="reference external" href="https://mne.tools/mne-bids/stable/index.html">mne_bids</a>.
+The resulting raw object is of type <a class="reference external" href="https://mne.tools/stable/generated/mne.io.RawArray.html">mne.RawArray</a>.
+We can use the properties such as sampling frequency, channel names, channel types all from the mne array and create the <em>nm_channels</em> DataFrame:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">RUN_NAME</span></a><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/pathlib.html#pathlib.PurePosixPath" title="pathlib.PurePosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">PATH_RUN</span></a><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/pathlib.html#pathlib.PurePosixPath" title="pathlib.PurePosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">PATH_BIDS</span></a><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/pathlib.html#pathlib.PurePosixPath" title="pathlib.PurePosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">PATH_OUT</span></a><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">datatype</span></a><span class="p">,</span>
+<span class="p">)</span> <span class="o">=</span> <span class="n">nm</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">get_paths_example_data</span><span class="p">()</span>
+
+<span class="p">(</span>
+    <span class="n">raw</span><span class="p">,</span>
+    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sfreq</span></a><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">line_noise</span></a><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">coord_list</span></a><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">coord_names</span></a><span class="p">,</span>
+<span class="p">)</span> <span class="o">=</span> <span class="n">nm</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_BIDS_data</span><span class="p">(</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PurePosixPath" title="pathlib.PurePosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">PATH_RUN</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PurePosixPath" title="pathlib.PurePosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">PATH_RUN</span></a><span class="p">)</span>
+
+<a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.core.frame.DataFrame" class="sphx-glr-backref-module-pandas-core-frame sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">channels</span></a> <span class="o">=</span> <span class="n">nm</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">set_channels</span><span class="p">(</span>
+    <span class="n">ch_names</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">ch_names</span><span class="p">,</span>
+    <span class="n">ch_types</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">get_channel_types</span><span class="p">(),</span>
+    <span class="n">reference</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+    <span class="n">bads</span><span class="o">=</span><a href="https://mne.tools/stable/generated/mne.Info.html#mne.Info" title="mne._fiff.meas_info.Info" class="sphx-glr-backref-module-mne-_fiff-meas_info sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">raw</span><span class="o">.</span><span class="n">info</span></a><span class="p">[</span><span class="s2">&quot;bads&quot;</span><span class="p">],</span>
+    <span class="n">new_names</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+    <span class="n">used_types</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;ecog&quot;</span><span class="p">,</span> <span class="s2">&quot;dbs&quot;</span><span class="p">,</span> <span class="s2">&quot;seeg&quot;</span><span class="p">),</span>
+    <span class="n">target_keywords</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;MOV_RIGHT&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Extracting parameters from /opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/data/sub-testsub/ses-EphysMedOff/ieeg/sub-testsub_ses-EphysMedOff_task-gripforce_run-0_ieeg.vhdr...
+Setting channel info structure...
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/io.py:61: RuntimeWarning: Did not find any events.tsv associated with sub-testsub_ses-EphysMedOff_task-gripforce_run-0.
+
+The search_str was &quot;/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/data/sub-testsub/**/ieeg/sub-testsub_ses-EphysMedOff*events.tsv&quot;
+  raw_arr = read_raw_bids(bids_path)
+Reading channel info from /opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/data/sub-testsub/ses-EphysMedOff/ieeg/sub-testsub_ses-EphysMedOff_task-gripforce_run-0_channels.tsv.
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/io.py:61: RuntimeWarning: Other is not an MNE-Python coordinate frame for IEEG data and so will be set to &#39;unknown&#39;
+  raw_arr = read_raw_bids(bids_path)
+Reading electrode coords from /opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/data/sub-testsub/ses-EphysMedOff/ieeg/sub-testsub_ses-EphysMedOff_space-mni_electrodes.tsv.
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/io.py:61: RuntimeWarning: There are channels without locations (n/a) that are not marked as bad: [&#39;MOV_RIGHT&#39;]
+  raw_arr = read_raw_bids(bids_path)
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/io.py:61: RuntimeWarning: Not setting position of 1 misc channel found in montage:
+[&#39;MOV_RIGHT&#39;]
+Consider setting the channel types to be of EEG/sEEG/ECoG/DBS/fNIRS using inst.set_channel_types before calling inst.set_montage, or omit these channels when creating your montage.
+  raw_arr = read_raw_bids(bids_path)
+</pre></div>
+</div>
+<p>This example contains the grip force movement traces, we’ll use the <em>MOV_RIGHT</em> channel as a decoding target channel.
+Let’s check some of the raw feature and time series traces:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.figure.html#matplotlib.pyplot.figure" title="matplotlib.pyplot.figure" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplot.html#matplotlib.pyplot.subplot" title="matplotlib.pyplot.subplot" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">subplot</span></a><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html#matplotlib.pyplot.plot" title="matplotlib.pyplot.plot" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">times</span><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:])</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.xlabel.html#matplotlib.pyplot.xlabel" title="matplotlib.pyplot.xlabel" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="s2">&quot;Time [s]&quot;</span><span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.ylabel.html#matplotlib.pyplot.ylabel" title="matplotlib.pyplot.ylabel" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="s2">&quot;a.u.&quot;</span><span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.title.html#matplotlib.pyplot.title" title="matplotlib.pyplot.title" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="s2">&quot;Movement label&quot;</span><span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.xlim.html#matplotlib.pyplot.xlim" title="matplotlib.pyplot.xlim" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">xlim</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplot.html#matplotlib.pyplot.subplot" title="matplotlib.pyplot.subplot" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">subplot</span></a><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
+<span class="k">for</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">idx</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ch_name</span></a> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.query.html#pandas.DataFrame.query" title="pandas.DataFrame.query" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-method"><span class="n">channels</span><span class="o">.</span><span class="n">query</span></a><span class="p">(</span><span class="s2">&quot;used == 1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+    <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html#matplotlib.pyplot.plot" title="matplotlib.pyplot.plot" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">times</span><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">idx</span></a><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">idx</span></a> <span class="o">*</span> <span class="mi">300</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ch_name</span></a><span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.legend.html#matplotlib.pyplot.legend" title="matplotlib.pyplot.legend" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;center left&quot;</span><span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.title.html#matplotlib.pyplot.title" title="matplotlib.pyplot.title" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="s2">&quot;ECoG + STN-LFP time series&quot;</span><span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.xlabel.html#matplotlib.pyplot.xlabel" title="matplotlib.pyplot.xlabel" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="s2">&quot;Time [s]&quot;</span><span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.ylabel.html#matplotlib.pyplot.ylabel" title="matplotlib.pyplot.ylabel" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="s2">&quot;Voltage a.u.&quot;</span><span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.xlim.html#matplotlib.pyplot.xlim" title="matplotlib.pyplot.xlim" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">xlim</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_plot_1_example_BIDS_001.png" srcset="../_images/sphx_glr_plot_1_example_BIDS_001.png" alt="Movement label, ECoG + STN-LFP time series" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(0.0, 20.0)
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">settings</span> <span class="o">=</span> <span class="n">nm</span><span class="o">.</span><span class="n">NMSettings</span><span class="o">.</span><span class="n">get_fast_compute</span><span class="p">()</span>
+
+<a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">settings</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">welch</span></a> <span class="o">=</span> <span class="kc">True</span>
+<a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">settings</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">fft</span></a> <span class="o">=</span> <span class="kc">True</span>
+<a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">settings</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">bursts</span></a> <span class="o">=</span> <span class="kc">True</span>
+<a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">settings</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">sharpwave_analysis</span></a> <span class="o">=</span> <span class="kc">True</span>
+<a href="https://docs.python.org/3/library/functions.html#bool" title="builtins.bool" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">settings</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">coherence</span></a> <span class="o">=</span> <span class="kc">True</span>
+
+<a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">settings</span><span class="o">.</span><span class="n">coherence_settings</span><span class="o">.</span><span class="n">channels</span></a> <span class="o">=</span> <span class="p">[[</span><span class="s2">&quot;LFP_RIGHT_0&quot;</span><span class="p">,</span> <span class="s2">&quot;ECOG_RIGHT_0&quot;</span><span class="p">]]</span>
+
+<a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">settings</span><span class="o">.</span><span class="n">coherence_settings</span><span class="o">.</span><span class="n">frequency_bands</span></a> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;high beta&quot;</span><span class="p">,</span> <span class="p">]</span>
+<span class="n">settings</span><span class="o">.</span><span class="n">sharpwave_analysis_settings</span><span class="o">.</span><span class="n">estimator</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">settings</span><span class="o">.</span><span class="n">sharpwave_analysis_settings</span><span class="o">.</span><span class="n">sharpwave_features</span><span class="o">.</span><span class="n">enable_all</span><span class="p">()</span>
+<span class="k">for</span> <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sw_feature</span></a> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">sharpwave_analysis_settings</span><span class="o">.</span><span class="n">sharpwave_features</span><span class="o">.</span><span class="n">list_all</span><span class="p">():</span>
+    <span class="n">settings</span><span class="o">.</span><span class="n">sharpwave_analysis_settings</span><span class="o">.</span><span class="n">estimator</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sw_feature</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:148: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys():
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:148: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys():
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:143: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys():
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">stream</span> <span class="o">=</span> <span class="n">nm</span><span class="o">.</span><span class="n">Stream</span><span class="p">(</span>
+    <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sfreq</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sfreq</span></a><span class="p">,</span>
+    <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.core.frame.DataFrame" class="sphx-glr-backref-module-pandas-core-frame sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">channels</span></a><span class="o">=</span><a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.core.frame.DataFrame" class="sphx-glr-backref-module-pandas-core-frame sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">channels</span></a><span class="p">,</span>
+    <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">line_noise</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">line_noise</span></a><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">coord_list</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">coord_list</span></a><span class="p">,</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">coord_names</span></a><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">coord_names</span></a><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.core.frame.DataFrame" class="sphx-glr-backref-module-pandas-core-frame sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">features</span></a> <span class="o">=</span> <span class="n">stream</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a><span class="p">,</span>
+    <span class="n">out_dir</span><span class="o">=</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PurePosixPath" title="pathlib.PurePosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">PATH_OUT</span></a><span class="p">,</span>
+    <span class="n">experiment_name</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">RUN_NAME</span></a><span class="p">,</span>
+    <span class="n">save_csv</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+</pre></div>
+</div>
+<section id="feature-analysis-movement">
+<h2>Feature Analysis Movement<a class="headerlink" href="#feature-analysis-movement" title="Link to this heading">#</a></h2>
+<p>The obtained performances can now be read and visualized using the <code class="xref py py-class docutils literal notranslate"><span class="pre">analysis.Feature_Reader</span></code>.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># initialize analyzer</span>
+<span class="n">feature_reader</span> <span class="o">=</span> <span class="n">nm</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">FeatureReader</span><span class="p">(</span>
+    <span class="n">feature_dir</span><span class="o">=</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PurePosixPath" title="pathlib.PurePosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">PATH_OUT</span></a><span class="p">,</span>
+    <span class="n">feature_file</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">RUN_NAME</span></a><span class="p">,</span>
+<span class="p">)</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">feature_reader</span><span class="o">.</span><span class="n">label_name</span></a> <span class="o">=</span> <span class="s2">&quot;MOV_RIGHT&quot;</span>
+<a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="pandas.core.series.Series" class="sphx-glr-backref-module-pandas-core-series sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">feature_reader</span><span class="o">.</span><span class="n">label</span></a> <span class="o">=</span> <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.core.frame.DataFrame" class="sphx-glr-backref-module-pandas-core-frame sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">feature_reader</span><span class="o">.</span><span class="n">feature_arr</span></a><span class="p">[</span><span class="s2">&quot;MOV_RIGHT&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.iloc.html#pandas.DataFrame.iloc" title="pandas.DataFrame.iloc" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-property"><span class="n">feature_reader</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">iloc</span></a><span class="p">[</span><span class="mi">100</span><span class="p">:</span><span class="mi">108</span><span class="p">,</span> <span class="o">-</span><span class="mi">6</span><span class="p">:]</span>
+</pre></div>
+</div>
+<div class="output_subarea output_html rendered_html output_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>ECOG_RIGHT_5_avgref_bursts_high_beta_amplitude_mean</th>
+      <th>ECOG_RIGHT_5_avgref_bursts_high_beta_amplitude_max</th>
+      <th>ECOG_RIGHT_5_avgref_bursts_high_beta_burst_rate_per_s</th>
+      <th>ECOG_RIGHT_5_avgref_bursts_high_beta_in_burst</th>
+      <th>time</th>
+      <th>MOV_RIGHT</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>100</th>
+      <td>-0.086002</td>
+      <td>-0.628598</td>
+      <td>0.516769</td>
+      <td>-0.433861</td>
+      <td>11000.0</td>
+      <td>-0.150107</td>
+    </tr>
+    <tr>
+      <th>101</th>
+      <td>-0.169562</td>
+      <td>-0.622105</td>
+      <td>0.877054</td>
+      <td>-0.431331</td>
+      <td>11100.0</td>
+      <td>-0.280238</td>
+    </tr>
+    <tr>
+      <th>102</th>
+      <td>0.065565</td>
+      <td>-0.238945</td>
+      <td>1.809531</td>
+      <td>-0.428845</td>
+      <td>11200.0</td>
+      <td>-0.305062</td>
+    </tr>
+    <tr>
+      <th>103</th>
+      <td>-0.120981</td>
+      <td>0.268803</td>
+      <td>3.000000</td>
+      <td>2.262222</td>
+      <td>11300.0</td>
+      <td>-0.312851</td>
+    </tr>
+    <tr>
+      <th>104</th>
+      <td>0.240896</td>
+      <td>0.442484</td>
+      <td>2.802783</td>
+      <td>-0.439525</td>
+      <td>11400.0</td>
+      <td>-0.305154</td>
+    </tr>
+    <tr>
+      <th>105</th>
+      <td>0.112072</td>
+      <td>0.426814</td>
+      <td>2.048669</td>
+      <td>-0.437048</td>
+      <td>11500.0</td>
+      <td>-0.305200</td>
+    </tr>
+    <tr>
+      <th>106</th>
+      <td>0.256308</td>
+      <td>0.418299</td>
+      <td>1.467012</td>
+      <td>-0.434613</td>
+      <td>11600.0</td>
+      <td>-0.311440</td>
+    </tr>
+    <tr>
+      <th>107</th>
+      <td>0.150665</td>
+      <td>0.415204</td>
+      <td>0.802955</td>
+      <td>-0.432219</td>
+      <td>11700.0</td>
+      <td>-0.306840</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+<br />
+<br /><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.shape.html#pandas.DataFrame.shape" title="pandas.DataFrame.shape" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-property"><span class="n">feature_reader</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">shape</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(181, 458)
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">feature_reader</span><span class="o">.</span><span class="n">_get_target_ch</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&#39;MOV_RIGHT&#39;
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">feature_reader</span><span class="o">.</span><span class="n">plot_target_averaged_channel</span><span class="p">(</span>
+    <span class="n">ch</span><span class="o">=</span><span class="s2">&quot;ECOG_RIGHT_0&quot;</span><span class="p">,</span>
+    <span class="n">list_feature_keywords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">epoch_len</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">ytick_labelsize</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+    <span class="n">figsize_x</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+    <span class="n">figsize_y</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_plot_1_example_BIDS_002.png" srcset="../_images/sphx_glr_plot_1_example_BIDS_002.png" alt="Movement aligned features channel: ECOG_RIGHT_0, MOV_RIGHT" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">feature_reader</span><span class="o">.</span><span class="n">plot_all_features</span><span class="p">(</span>
+    <span class="n">ytick_labelsize</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">clim_low</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">clim_high</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">ch_used</span><span class="o">=</span><span class="s2">&quot;ECOG_RIGHT_0&quot;</span><span class="p">,</span>
+    <span class="n">time_limit_low_s</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">time_limit_high_s</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_plot_1_example_BIDS_003.png" srcset="../_images/sphx_glr_plot_1_example_BIDS_003.png" alt="Feature Plot sub-testsub_ses-EphysMedOff_task-gripforce_run-0" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">nm</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">plot_corr_matrix</span><span class="p">(</span>
+    <span class="n">feature</span><span class="o">=</span><a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.filter.html#pandas.DataFrame.filter" title="pandas.DataFrame.filter" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-method"><span class="n">feature_reader</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">filter</span></a><span class="p">(</span><span class="n">regex</span><span class="o">=</span><span class="s2">&quot;ECOG_RIGHT_0&quot;</span><span class="p">),</span>
+    <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ch_name</span></a><span class="o">=</span><span class="s2">&quot;ECOG_RIGHT_0_avgref&quot;</span><span class="p">,</span>
+    <span class="n">feature_names</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span>
+        <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.filter.html#pandas.DataFrame.filter" title="pandas.DataFrame.filter" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-method"><span class="n">feature_reader</span><span class="o">.</span><span class="n">feature_arr</span><span class="o">.</span><span class="n">filter</span></a><span class="p">(</span><span class="n">regex</span><span class="o">=</span><span class="s2">&quot;ECOG_RIGHT_0_avgref&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span>
+    <span class="p">),</span>
+    <span class="n">feature_file</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">feature_reader</span><span class="o">.</span><span class="n">feature_file</span></a><span class="p">,</span>
+    <span class="n">show_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_plot_1_example_BIDS_004.png" srcset="../_images/sphx_glr_plot_1_example_BIDS_004.png" alt="Correlation matrix features channel: ECOG_RIGHT_0_avgref" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;Axes: title={&#39;center&#39;: &#39;Correlation matrix features channel: ECOG_RIGHT_0_avgref&#39;}&gt;
+</pre></div>
+</div>
+</section>
+<section id="decoding">
+<h2>Decoding<a class="headerlink" href="#decoding" title="Link to this heading">#</a></h2>
+<p>The main focus of the <em>py_neuromodulation</em> pipeline is feature estimation.
+Nevertheless, the user can also use the pipeline for machine learning decoding.
+It can be used for regression and classification problems and also dimensionality reduction such as PCA and CCA.</p>
+<p>Here, we show an example using a sklearn linear regression model. The used labels came from a continuous grip force movement target, named “MOV_RIGHT”.</p>
+<p>First we initialize the <code class="xref py py-class docutils literal notranslate"><span class="pre">Decoder</span></code> class, which the specified <em>validation method</em>, here being a simple 3-fold cross validation,
+the evaluation metric, used machine learning model, and the channels we want to evaluate performances for.</p>
+<p>There are many more implemented methods, but we will here limit it to the ones presented.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">linear_model</span><span class="o">.</span><span class="n">LinearRegression</span><span class="p">()</span>
+
+<span class="n">feature_reader</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="n">nm</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">Decoder</span><span class="p">(</span>
+    <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.core.frame.DataFrame" class="sphx-glr-backref-module-pandas-core-frame sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">features</span></a><span class="o">=</span><a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.core.frame.DataFrame" class="sphx-glr-backref-module-pandas-core-frame sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">feature_reader</span><span class="o">.</span><span class="n">feature_arr</span></a><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><a href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="pandas.core.series.Series" class="sphx-glr-backref-module-pandas-core-series sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">feature_reader</span><span class="o">.</span><span class="n">label</span></a><span class="p">,</span>
+    <span class="n">label_name</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">feature_reader</span><span class="o">.</span><span class="n">label_name</span></a><span class="p">,</span>
+    <span class="n">used_chs</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">feature_reader</span><span class="o">.</span><span class="n">used_chs</span></a><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+    <span class="n">eval_method</span><span class="o">=</span><span class="n">metrics</span><span class="o">.</span><span class="n">r2_score</span><span class="p">,</span>
+    <span class="n">cv_method</span><span class="o">=</span><span class="n">model_selection</span><span class="o">.</span><span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">performances</span></a> <span class="o">=</span> <span class="n">feature_reader</span><span class="o">.</span><span class="n">run_ML_model</span><span class="p">(</span>
+    <span class="n">estimate_channels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">estimate_gridpoints</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">estimate_all_channels_combined</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">save_results</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The performances are a dictionary that can be transformed into a DataFrame:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.core.frame.DataFrame" class="sphx-glr-backref-module-pandas-core-frame sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">df_per</span></a> <span class="o">=</span> <span class="n">feature_reader</span><span class="o">.</span><span class="n">get_dataframe_performances</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">performances</span></a><span class="p">)</span>
+
+<a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.core.frame.DataFrame" class="sphx-glr-backref-module-pandas-core-frame sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">df_per</span></a>
+</pre></div>
+</div>
+<div class="output_subarea output_html rendered_html output_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>performance_test</th>
+      <th>performance_train</th>
+      <th>sub</th>
+      <th>ch</th>
+      <th>ch_type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.077847</td>
+      <td>0.800795</td>
+      <td>testsub</td>
+      <td>LFP_RIGHT_0_LFP_RIGHT_2</td>
+      <td>electrode ch</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.000000</td>
+      <td>0.580918</td>
+      <td>testsub</td>
+      <td>LFP_RIGHT_1_LFP_RIGHT_0</td>
+      <td>electrode ch</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.051098</td>
+      <td>0.549442</td>
+      <td>testsub</td>
+      <td>LFP_RIGHT_2_LFP_RIGHT_1</td>
+      <td>electrode ch</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.000000</td>
+      <td>0.673371</td>
+      <td>testsub</td>
+      <td>ECOG_RIGHT_0_avgref</td>
+      <td>electrode ch</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.000000</td>
+      <td>0.699438</td>
+      <td>testsub</td>
+      <td>ECOG_RIGHT_1_avgref</td>
+      <td>electrode ch</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>0.058051</td>
+      <td>0.723743</td>
+      <td>testsub</td>
+      <td>ECOG_RIGHT_2_avgref</td>
+      <td>electrode ch</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>0.133915</td>
+      <td>0.712544</td>
+      <td>testsub</td>
+      <td>ECOG_RIGHT_3_avgref</td>
+      <td>electrode ch</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>0.000000</td>
+      <td>0.678555</td>
+      <td>testsub</td>
+      <td>ECOG_RIGHT_4_avgref</td>
+      <td>electrode ch</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>0.025921</td>
+      <td>0.683417</td>
+      <td>testsub</td>
+      <td>ECOG_RIGHT_5_avgref</td>
+      <td>electrode ch</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>0.427371</td>
+      <td>1.000000</td>
+      <td>testsub</td>
+      <td>all_ch_combined</td>
+      <td>all ch combinded</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+<br />
+<br /><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ax</span></a> <span class="o">=</span> <span class="n">nm</span><span class="o">.</span><span class="n">analysis</span><span class="o">.</span><span class="n">plot_df_subjects</span><span class="p">(</span>
+    <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.core.frame.DataFrame" class="sphx-glr-backref-module-pandas-core-frame sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">df_per</span></a><span class="p">,</span>
+    <span class="n">x_col</span><span class="o">=</span><span class="s2">&quot;sub&quot;</span><span class="p">,</span>
+    <span class="n">y_col</span><span class="o">=</span><span class="s2">&quot;performance_test&quot;</span><span class="p">,</span>
+    <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;ch_type&quot;</span><span class="p">,</span>
+    <span class="n">PATH_SAVE</span><span class="o">=</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PurePosixPath" title="pathlib.PurePosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">PATH_OUT</span></a> <span class="o">/</span> <a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">RUN_NAME</span></a> <span class="o">/</span> <span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">RUN_NAME</span></a> <span class="o">+</span> <span class="s2">&quot;_decoding_performance.png&quot;</span><span class="p">),</span>
+    <span class="n">figsize_tuple</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+<span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_ylabel.html#matplotlib.axes.Axes.set_ylabel" title="matplotlib.axes.Axes.set_ylabel" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$R^2$ Correlation&quot;</span><span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xlabel.html#matplotlib.axes.Axes.set_xlabel" title="matplotlib.axes.Axes.set_xlabel" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span></a><span class="p">(</span><span class="s2">&quot;Subject 000&quot;</span><span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_title.html#matplotlib.axes.Axes.set_title" title="matplotlib.axes.Axes.set_title" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_title</span></a><span class="p">(</span><span class="s2">&quot;Performance comparison Movement decoding&quot;</span><span class="p">)</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.tight_layout.html#matplotlib.pyplot.tight_layout" title="matplotlib.pyplot.tight_layout" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../_images/sphx_glr_plot_1_example_BIDS_005.png" srcset="../_images/sphx_glr_plot_1_example_BIDS_005.png" alt="Performance comparison Movement decoding" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/seaborn/categorical.py:700: PendingDeprecationWarning: vert: bool will be deprecated in a future version. Use orientation: {&#39;vertical&#39;, &#39;horizontal&#39;} instead.
+  artists = ax.bxp(**boxplot_kws)
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/seaborn/categorical.py:700: PendingDeprecationWarning: vert: bool will be deprecated in a future version. Use orientation: {&#39;vertical&#39;, &#39;horizontal&#39;} instead.
+  artists = ax.bxp(**boxplot_kws)
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 9.144 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-1-example-bids-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/0dc588ba0560fad53b77fac59849f12c/plot_1_example_BIDS.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_1_example_BIDS.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/3b4900a2b2818ff30362215b76f7d5eb/plot_1_example_BIDS.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_1_example_BIDS.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/fe17e643a44c3ece0162c9f580459c57/plot_1_example_BIDS.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_1_example_BIDS.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="plot_0_first_demo.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">First Demo</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="plot_2_example_add_feature.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Adding New Features</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#feature-analysis-movement">Feature Analysis Movement</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#decoding">Decoding</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/auto_examples/plot_1_example_BIDS.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021, Timon Merk.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

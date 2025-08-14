@@ -1,0 +1,741 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>stats &#8212; py_neuromodulation  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'stats';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="bispectra" href="bispectra.html" />
+    <link rel="prev" title="RMAP" href="RMAP.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">py_neuromodulation  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="usage.html">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="gui.html">
+    GUI
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="api_documentation.html">
+    API Documentation
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="usage.html">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="gui.html">
+    GUI
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="api_documentation.html">
+    API Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="decode.html">decode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="feature_reader.html">feature_reader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plots.html">plots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RMAP.html">RMAP</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">stats</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="bispectra.html">bispectra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bursts.html">bursts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coherence.html">coherence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fooof.html">fooof</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hjorth.html">hjorth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linelength.html">linelength</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mne_connectivity.html">mne_connectivity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nolds.html">nolds</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oscillatory.html">oscillatory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sharpwaves.html">sharpwaves</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandpower.html">bandpower</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mne_filter.html">mne_filter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notch_filter.html">notch_filter</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="artifacts.html">artifacts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="normalization.html">normalization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="projection.html">projection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rereference.html">rereference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resample.html">resample</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generator.html">generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mnelsl_player.html">mnelsl_player</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mnelsl_stream.html">mnelsl_stream</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="channels.html">channels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="io.html">io</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">types</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="api_documentation.html" class="nav-link">API Documentation</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">stats</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-analysis.stats">
+<span id="stats"></span><h1>stats<a class="headerlink" href="#module-analysis.stats" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="analysis.stats.cluster_wise_p_val_correction">
+<span class="sig-prename descclassname"><span class="pre">analysis.stats.</span></span><span class="sig-name descname"><span class="pre">cluster_wise_p_val_correction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_sig</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_permutations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analysis/stats.html#cluster_wise_p_val_correction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.stats.cluster_wise_p_val_correction" title="Link to this definition">#</a></dt>
+<dd><p>Obtain cluster-wise corrected p values.</p>
+<p>Based on: <a class="github reference external" href="https://github.com/neuromodulation/wjn_toolbox/blob/4745557040ad26f3b8498ca5d0c5d5dece2d3ba1/mypcluster.m">neuromodulation/wjn_toolbox</a>
+<a class="reference external" href="https://garstats.wordpress.com/2018/09/06/cluster/">https://garstats.wordpress.com/2018/09/06/cluster/</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>(</strong><strong>np.array</strong><strong>)</strong> (<em>p_arr</em>)</p></li>
+<li><p><strong>(</strong><strong>float</strong><strong>)</strong> (<em>p_sig</em>)</p></li>
+<li><p><strong>(</strong><strong>int</strong><strong>)</strong> (<em>num_permutations</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>p (float)</strong> (<em>significance level of highest cluster</em>)</p></li>
+<li><p><strong>p_min_index</strong> (<em>indices of significant samples</em>)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="analysis.stats.cluster_wise_p_val_correction_numba">
+<span class="sig-prename descclassname"><span class="pre">analysis.stats.</span></span><span class="sig-name descname"><span class="pre">cluster_wise_p_val_correction_numba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_sig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_perm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analysis/stats.html#cluster_wise_p_val_correction_numba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.stats.cluster_wise_p_val_correction_numba" title="Link to this definition">#</a></dt>
+<dd><p>Calculate significant clusters and their corresponding p-values.</p>
+<p>Based on:
+<a class="github reference external" href="https://github.com/neuromodulation/wjn_toolbox/blob/4745557040ad26f3b8498ca5d0c5d5dece2d3ba1/mypcluster.m">neuromodulation/wjn_toolbox</a>
+<a class="reference external" href="https://garstats.wordpress.com/2018/09/06/cluster/">https://garstats.wordpress.com/2018/09/06/cluster/</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>p_arr</strong> (<em>array-like</em>) – Array of p-values. WARNING: MUST be one-dimensional</p></li>
+<li><p><strong>p_sig</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Significance level</p></li>
+<li><p><strong>n_perm</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – No. of random permutations for building cluster null-distribution</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>p</strong> (<em>list of floats</em>) – List of p-values for each cluster</p></li>
+<li><p><strong>p_min_index</strong> (<em>list of numpy array</em>) – List of indices of each significant cluster</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="analysis.stats.permutationTest">
+<span class="sig-prename descclassname"><span class="pre">analysis.stats.</span></span><span class="sig-name descname"><span class="pre">permutationTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_distr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analysis/stats.html#permutationTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.stats.permutationTest" title="Link to this definition">#</a></dt>
+<dd><p>Calculate permutation test
+<a class="reference external" href="https://towardsdatascience.com/how-to-assess-statistical-significance-in-your-data-with-permutation-tests-8bb925b2113d">https://towardsdatascience.com/how-to-assess-statistical-significance-in-your-data-with-permutation-tests-8bb925b2113d</a></p>
+<p>x (np array) : first distr.
+y (np array) : first distr.
+plot_distr (boolean) : if True: plot permutation histplot and ground truth
+x_unit (str) : histplot xlabel
+p (int): number of permutations</p>
+<p>returns:
+gT (float) : estimated ground truth, here absolute difference of
+distribution means
+p (float) : p value of permutation test</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="analysis.stats.permutationTestSpearmansRho">
+<span class="sig-prename descclassname"><span class="pre">analysis.stats.</span></span><span class="sig-name descname"><span class="pre">permutationTestSpearmansRho</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_distr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analysis/stats.html#permutationTestSpearmansRho"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.stats.permutationTestSpearmansRho" title="Link to this definition">#</a></dt>
+<dd><p>Calculate permutation test for multiple repetitions of Spearmans Rho
+<a class="reference external" href="https://towardsdatascience.com/how-to-assess-statistical-significance-in-your-data-with-permutation-tests-8bb925b2113d">https://towardsdatascience.com/how-to-assess-statistical-significance-in-your-data-with-permutation-tests-8bb925b2113d</a></p>
+<p>x (np array) : first distibution e.g. R^2
+y (np array) : second distribution e.g. UPDRS
+plot_distr (boolean) : if True: permutation histplot and ground truth will be
+plotted
+x_unit (str) : histplot xlabel
+p (int): number of permutations</p>
+<p>returns:
+gT (float) : estimated ground truth, here spearman’s rho
+p (float) : p value of permutation test</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="analysis.stats.permutationTest_relative">
+<span class="sig-prename descclassname"><span class="pre">analysis.stats.</span></span><span class="sig-name descname"><span class="pre">permutationTest_relative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_distr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analysis/stats.html#permutationTest_relative"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.stats.permutationTest_relative" title="Link to this definition">#</a></dt>
+<dd><p>Calculate permutation test
+<a class="reference external" href="https://towardsdatascience.com/how-to-assess-statistical-significance-in-your-data-with-permutation-tests-8bb925b2113d">https://towardsdatascience.com/how-to-assess-statistical-significance-in-your-data-with-permutation-tests-8bb925b2113d</a></p>
+<p>x (np array) : first distr.
+y (np array) : first distr.
+plot_distr (boolean) : if True: plot permutation histplot and ground truth
+x_unit (str) : histplot xlabel
+p (int): number of permutations</p>
+<p>returns:
+gT (float) : estimated ground truth, here absolute difference of
+distribution means
+p (float) : p value of permutation test</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="analysis.stats.permutation_numba_onesample">
+<span class="sig-prename descclassname"><span class="pre">analysis.stats.</span></span><span class="sig-name descname"><span class="pre">permutation_numba_onesample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_perm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">two_tailed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analysis/stats.html#permutation_numba_onesample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.stats.permutation_numba_onesample" title="Link to this definition">#</a></dt>
+<dd><p>Perform permutation test with one-sample distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em>) – First distribution</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a>) – Baseline against which to check for statistical significane</p></li>
+<li><p><strong>n_perm</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of permutations</p></li>
+<li><p><strong>two_tailed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>default: True</em>) – Set to False if you would like to perform a one-sampled permutation
+test, else True</p></li>
+<li><p><strong>two_tailed</strong> – Set to False if you would like to perform a one-tailed permutation
+test, else True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>float</em> – Estimated difference of distribution from baseline</p></li>
+<li><p><em>float</em> – P-value of permutation test</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="analysis.stats.permutation_numba_twosample">
+<span class="sig-prename descclassname"><span class="pre">analysis.stats.</span></span><span class="sig-name descname"><span class="pre">permutation_numba_twosample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_perm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">two_tailed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analysis/stats.html#permutation_numba_twosample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#analysis.stats.permutation_numba_twosample" title="Link to this definition">#</a></dt>
+<dd><p>Perform permutation test.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>array_like</em>) – First distribution</p></li>
+<li><p><strong>y</strong> (<em>array_like</em>) – Second distribution</p></li>
+<li><p><strong>n_perm</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Number of permutations</p></li>
+<li><p><strong>two_tailed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>default: True</em>) – Set to False if you would like to perform a one-sampled permutation
+test, else True</p></li>
+<li><p><strong>two_tailed</strong> – Set to False if you would like to perform a one-tailed permutation
+test, else True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>float</em> – Estimated difference of distribution means</p></li>
+<li><p><em>float</em> – P-value of permutation test</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="RMAP.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">RMAP</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="bispectra.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">bispectra</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#analysis.stats.cluster_wise_p_val_correction"><code class="docutils literal notranslate"><span class="pre">cluster_wise_p_val_correction()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#analysis.stats.cluster_wise_p_val_correction_numba"><code class="docutils literal notranslate"><span class="pre">cluster_wise_p_val_correction_numba()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#analysis.stats.permutationTest"><code class="docutils literal notranslate"><span class="pre">permutationTest()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#analysis.stats.permutationTestSpearmansRho"><code class="docutils literal notranslate"><span class="pre">permutationTestSpearmansRho()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#analysis.stats.permutationTest_relative"><code class="docutils literal notranslate"><span class="pre">permutationTest_relative()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#analysis.stats.permutation_numba_onesample"><code class="docutils literal notranslate"><span class="pre">permutation_numba_onesample()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#analysis.stats.permutation_numba_twosample"><code class="docutils literal notranslate"><span class="pre">permutation_numba_twosample()</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/stats.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021, Timon Merk.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

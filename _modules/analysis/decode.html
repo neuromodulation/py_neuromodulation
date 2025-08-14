@@ -1,0 +1,1490 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>analysis.decode &#8212; py_neuromodulation  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/analysis/decode';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">py_neuromodulation  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../usage.html">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../gui.html">
+    GUI
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api_documentation.html">
+    API Documentation
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../usage.html">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../gui.html">
+    GUI
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api_documentation.html">
+    API Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">analysis.decode</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for analysis.decode</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn</span><span class="w"> </span><span class="kn">import</span> <span class="n">model_selection</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearRegression</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">clone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">r2_score</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span><span class="p">,</span> <span class="n">PurePath</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.utils.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">_PathLike</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">RealTimeDecoder</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_path</span><span class="p">:</span> <span class="n">_PathLike</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model file </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_path</span><span class="si">}</span><span class="s2"> not found&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">IsADirectoryError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model file </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_path</span><span class="si">}</span><span class="s2"> is a directory&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_path</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.skops&quot;</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">skops</span><span class="w"> </span><span class="kn">import</span> <span class="n">io</span> <span class="k">as</span> <span class="n">skops_io</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">skops_io</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Only skops models are supported&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">feature_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">channel</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">fft_bands_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">channel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">features_ch</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">f</span><span class="p">:</span> <span class="n">feature_dict</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">feature_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+                <span class="p">}</span>
+                <span class="k">if</span> <span class="n">fft_bands_only</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="n">features_ch_fft</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="n">f</span><span class="p">:</span> <span class="n">features_ch</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>
+                        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">features_ch</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="s2">&quot;fft&quot;</span> <span class="ow">in</span> <span class="n">f</span> <span class="ow">and</span> <span class="s2">&quot;psd&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">f</span>
+                    <span class="p">}</span>
+                    <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">features_ch_fft</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">features_ch</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">feature_dict</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">decode_output_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">feature_dict</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;decode_</span><span class="si">{</span><span class="n">decode_output_idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">out</span><span class="p">)[</span>
+                    <span class="n">decode_output_idx</span>
+                <span class="p">]</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Decoded values: </span><span class="si">{</span><span class="n">out</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">feature_dict</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error in decoding: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">feature_dict</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CV_res</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">get_movement_detection_rate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">RUN_BAY_OPT</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">mrmr_select</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">model_save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">score_train</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">score_test</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_test</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_train</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_test_pr</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_train_pr</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_test</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_train</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coef</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">get_movement_detection_rate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mov_detection_rates_test</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tprate_test</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fprate_test</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mov_detection_rates_train</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tprate_train</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fprate_train</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">RUN_BAY_OPT</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">best_bay_opt_params</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">mrmr_select</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mrmr_select</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">model_save</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_save</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+<div class="viewcode-block" id="Decoder">
+<a class="viewcode-back" href="../../decode.html#analysis.decode.Decoder">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Decoder</span><span class="p">:</span>
+<div class="viewcode-block" id="Decoder.ClassMissingException">
+<a class="viewcode-back" href="../../decode.html#analysis.decode.Decoder.ClassMissingException">[docs]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">ClassMissingException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Only one class present.&quot;</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">features</span><span class="p">:</span> <span class="s2">&quot;pd.DataFrame| None &quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">label</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">label_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">used_chs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">LinearRegression</span><span class="p">(),</span>
+        <span class="n">eval_method</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">r2_score</span><span class="p">,</span>
+        <span class="n">cv_method</span><span class="o">=</span><span class="n">model_selection</span><span class="o">.</span><span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+        <span class="n">use_nested_cv</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">threshold_score</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">mov_detection_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">TRAIN_VAL_SPLIT</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">RUN_BAY_OPT</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">STACK_FEATURES_N_SAMPLES</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">time_stack_n_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">save_coef</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">get_movement_detection_rate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">min_consequent_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">bay_opt_param_space</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[],</span>
+        <span class="n">VERBOSE</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">sfreq</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">undersampling</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">oversampling</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">mrmr_select</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">pca</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">cca</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">model_save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize here a feature file for processing</span>
+<span class="sd">        Read settings.json channels.csv and features.csv</span>
+<span class="sd">        Read target label</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model : machine learning model</span>
+<span class="sd">            model that utilizes fit and predict functions</span>
+<span class="sd">        eval_method : sklearn metrics</span>
+<span class="sd">            evaluation scoring method, will default to r2_score if not passed</span>
+<span class="sd">        cv_method : sklearm model_selection method</span>
+<span class="sd">        threshold_score : boolean</span>
+<span class="sd">            if True set lower threshold at zero (useful for r2),</span>
+<span class="sd">        mov_detection_threshold : float</span>
+<span class="sd">            if get_movement_detection_rate is True, find given minimum &#39;threshold&#39; respective</span>
+<span class="sd">            consecutive movement blocks, by default 0.5</span>
+<span class="sd">        TRAIN_VAL_SPLIT (boolean):</span>
+<span class="sd">            if true split data into additinal validation, and run class weighted CV</span>
+<span class="sd">        save_coef (boolean):</span>
+<span class="sd">            if true, save model._coef trained coefficients</span>
+<span class="sd">        get_movement_detection_rate (boolean):</span>
+<span class="sd">            save detection rate and tpr / fpr as well</span>
+<span class="sd">        min_consequent_count (int):</span>
+<span class="sd">            if get_movement_detection_rate is True, find given &#39;min_consequent_count&#39; respective</span>
+<span class="sd">            consecutive movement blocks with minimum size of &#39;min_consequent_count&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eval_method</span> <span class="o">=</span> <span class="n">eval_method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cv_method</span> <span class="o">=</span> <span class="n">cv_method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_nested_cv</span> <span class="o">=</span> <span class="n">use_nested_cv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold_score</span> <span class="o">=</span> <span class="n">threshold_score</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mov_detection_threshold</span> <span class="o">=</span> <span class="n">mov_detection_threshold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">TRAIN_VAL_SPLIT</span> <span class="o">=</span> <span class="n">TRAIN_VAL_SPLIT</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">RUN_BAY_OPT</span> <span class="o">=</span> <span class="n">RUN_BAY_OPT</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_coef</span> <span class="o">=</span> <span class="n">save_coef</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span> <span class="o">=</span> <span class="n">sfreq</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_movement_detection_rate</span> <span class="o">=</span> <span class="n">get_movement_detection_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_consequent_count</span> <span class="o">=</span> <span class="n">min_consequent_count</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">STACK_FEATURES_N_SAMPLES</span> <span class="o">=</span> <span class="n">STACK_FEATURES_N_SAMPLES</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_stack_n_samples</span> <span class="o">=</span> <span class="n">time_stack_n_samples</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bay_opt_param_space</span> <span class="o">=</span> <span class="n">bay_opt_param_space</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">VERBOSE</span> <span class="o">=</span> <span class="n">VERBOSE</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">undersampling</span> <span class="o">=</span> <span class="n">undersampling</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oversampling</span> <span class="o">=</span> <span class="n">oversampling</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mrmr_select</span> <span class="o">=</span> <span class="n">mrmr_select</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">used_chs</span> <span class="o">=</span> <span class="n">used_chs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_name</span> <span class="o">=</span> <span class="n">label_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cca</span> <span class="o">=</span> <span class="n">cca</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pca</span> <span class="o">=</span> <span class="n">pca</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_save</span> <span class="o">=</span> <span class="n">model_save</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ch_ind_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_point_ind_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">active_gridpoints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ch_ind_results</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gridpoint_ind_results</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_ch_results</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">columns_names_single_ch</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">undersampling</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">imblearn.under_sampling</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomUnderSampler</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">rus</span> <span class="o">=</span> <span class="n">RandomUnderSampler</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">oversampling</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">imblearn.over_sampling</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomOverSampler</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">ros</span> <span class="o">=</span> <span class="n">RandomOverSampler</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">features</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="o">=</span> <span class="n">features</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">col</span>
+                <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">columns</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">used_ch</span><span class="p">)</span> <span class="k">for</span> <span class="n">used_ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">used_chs</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span><span class="p">]))</span>
+
+<div class="viewcode-block" id="Decoder.set_data_ind_channels">
+<a class="viewcode-back" href="../../decode.html#analysis.decode.Decoder.set_data_ind_channels">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_data_ind_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;specified channel individual data&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ch_ind_data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">used_chs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ch_ind_data</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span>
+                        <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">ch</span><span class="p">)]</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Decoder.set_CV_results">
+<a class="viewcode-back" href="../../decode.html#analysis.decode.Decoder.set_CV_results">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_CV_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">contact_point</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;set CV results in respectie nm_decode attributes</span>
+<span class="sd">        The reference is first stored in obj_set, and the used lateron</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        attr_name : string</span>
+<span class="sd">            is either all_ch_results, ch_ind_results, gridpoint_ind_results</span>
+<span class="sd">        contact_point : object, optional</span>
+<span class="sd">            usually an int specifying the grid_point or string, specifying the used channel,</span>
+<span class="sd">            by default None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">contact_point</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)[</span><span class="n">contact_point</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">obj_set</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)[</span><span class="n">contact_point</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">obj_set</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">set_scores</span><span class="p">(</span><span class="n">cv_res</span><span class="p">:</span> <span class="n">CV_res</span><span class="p">,</span> <span class="n">set_inner_CV_res</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            This function renames the CV_res keys for InnerCV</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">set_score</span><span class="p">(</span><span class="n">key_</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">set_inner_CV_res</span><span class="p">:</span>
+                    <span class="n">key_</span> <span class="o">=</span> <span class="s2">&quot;InnerCV_&quot;</span> <span class="o">+</span> <span class="n">key_</span>
+                <span class="n">obj_set</span><span class="p">[</span><span class="n">key_</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+            <span class="n">set_score</span><span class="p">(</span><span class="s2">&quot;score_train&quot;</span><span class="p">,</span> <span class="n">cv_res</span><span class="o">.</span><span class="n">score_train</span><span class="p">)</span>
+            <span class="n">set_score</span><span class="p">(</span><span class="s2">&quot;score_test&quot;</span><span class="p">,</span> <span class="n">cv_res</span><span class="o">.</span><span class="n">score_test</span><span class="p">)</span>
+            <span class="n">set_score</span><span class="p">(</span><span class="s2">&quot;y_test&quot;</span><span class="p">,</span> <span class="n">cv_res</span><span class="o">.</span><span class="n">y_test</span><span class="p">)</span>
+            <span class="n">set_score</span><span class="p">(</span><span class="s2">&quot;y_train&quot;</span><span class="p">,</span> <span class="n">cv_res</span><span class="o">.</span><span class="n">y_train</span><span class="p">)</span>
+            <span class="n">set_score</span><span class="p">(</span><span class="s2">&quot;y_test_pr&quot;</span><span class="p">,</span> <span class="n">cv_res</span><span class="o">.</span><span class="n">y_test_pr</span><span class="p">)</span>
+            <span class="n">set_score</span><span class="p">(</span><span class="s2">&quot;y_train_pr&quot;</span><span class="p">,</span> <span class="n">cv_res</span><span class="o">.</span><span class="n">y_train_pr</span><span class="p">)</span>
+            <span class="n">set_score</span><span class="p">(</span><span class="s2">&quot;X_train&quot;</span><span class="p">,</span> <span class="n">cv_res</span><span class="o">.</span><span class="n">X_train</span><span class="p">)</span>
+            <span class="n">set_score</span><span class="p">(</span><span class="s2">&quot;X_test&quot;</span><span class="p">,</span> <span class="n">cv_res</span><span class="o">.</span><span class="n">X_test</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_coef</span><span class="p">:</span>
+                <span class="n">set_score</span><span class="p">(</span><span class="s2">&quot;coef&quot;</span><span class="p">,</span> <span class="n">cv_res</span><span class="o">.</span><span class="n">coef</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_movement_detection_rate</span><span class="p">:</span>
+                <span class="n">set_score</span><span class="p">(</span><span class="s2">&quot;mov_detection_rates_test&quot;</span><span class="p">,</span> <span class="n">cv_res</span><span class="o">.</span><span class="n">mov_detection_rates_test</span><span class="p">)</span>
+                <span class="n">set_score</span><span class="p">(</span>
+                    <span class="s2">&quot;mov_detection_rates_train&quot;</span><span class="p">,</span>
+                    <span class="n">cv_res</span><span class="o">.</span><span class="n">mov_detection_rates_train</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">set_score</span><span class="p">(</span><span class="s2">&quot;fprate_test&quot;</span><span class="p">,</span> <span class="n">cv_res</span><span class="o">.</span><span class="n">fprate_test</span><span class="p">)</span>
+                <span class="n">set_score</span><span class="p">(</span><span class="s2">&quot;fprate_train&quot;</span><span class="p">,</span> <span class="n">cv_res</span><span class="o">.</span><span class="n">fprate_train</span><span class="p">)</span>
+                <span class="n">set_score</span><span class="p">(</span><span class="s2">&quot;tprate_test&quot;</span><span class="p">,</span> <span class="n">cv_res</span><span class="o">.</span><span class="n">tprate_test</span><span class="p">)</span>
+                <span class="n">set_score</span><span class="p">(</span><span class="s2">&quot;tprate_train&quot;</span><span class="p">,</span> <span class="n">cv_res</span><span class="o">.</span><span class="n">tprate_train</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">RUN_BAY_OPT</span><span class="p">:</span>
+                <span class="n">set_score</span><span class="p">(</span><span class="s2">&quot;best_bay_opt_params&quot;</span><span class="p">,</span> <span class="n">cv_res</span><span class="o">.</span><span class="n">best_bay_opt_params</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mrmr_select</span><span class="p">:</span>
+                <span class="n">set_score</span><span class="p">(</span><span class="s2">&quot;mrmr_select&quot;</span><span class="p">,</span> <span class="n">cv_res</span><span class="o">.</span><span class="n">mrmr_select</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_save</span><span class="p">:</span>
+                <span class="n">set_score</span><span class="p">(</span><span class="s2">&quot;model_save&quot;</span><span class="p">,</span> <span class="n">cv_res</span><span class="o">.</span><span class="n">model_save</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">obj_set</span>
+
+        <span class="n">obj_set</span> <span class="o">=</span> <span class="n">set_scores</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cv_res</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_nested_cv</span><span class="p">:</span>
+            <span class="n">obj_set</span> <span class="o">=</span> <span class="n">set_scores</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cv_res_inner</span><span class="p">,</span> <span class="n">set_inner_CV_res</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Decoder.run_CV_caller">
+<a class="viewcode-back" href="../../decode.html#analysis.decode.Decoder.run_CV_caller">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_CV_caller</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_contacts</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ind_channels&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrapper that call for all channels / grid points / combined channels the CV function</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        feature_contacts : str, optional</span>
+<span class="sd">            &quot;grid_points&quot;, &quot;ind_channels&quot; or &quot;all_channels_combined&quot; , by default &quot;ind_channels&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">valid_feature_contacts</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;ind_channels&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;all_channels_combined&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;grid_points&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">feature_contacts</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_feature_contacts</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">feature_contacts</span><span class="si">}</span><span class="s2"> not in </span><span class="si">{</span><span class="n">valid_feature_contacts</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">feature_contacts</span> <span class="o">==</span> <span class="s2">&quot;grid_points&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">grid_point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_gridpoints</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">run_CV</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grid_point_ind_data</span><span class="p">[</span><span class="n">grid_point</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_CV_results</span><span class="p">(</span><span class="s2">&quot;gridpoint_ind_results&quot;</span><span class="p">,</span> <span class="n">contact_point</span><span class="o">=</span><span class="n">grid_point</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">gridpoint_ind_results</span>
+
+        <span class="k">if</span> <span class="n">feature_contacts</span> <span class="o">==</span> <span class="s2">&quot;ind_channels&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">used_chs</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ch_name_tested</span> <span class="o">=</span> <span class="n">ch</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">run_CV</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ch_ind_data</span><span class="p">[</span><span class="n">ch</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">set_CV_results</span><span class="p">(</span><span class="s2">&quot;ch_ind_results&quot;</span><span class="p">,</span> <span class="n">contact_point</span><span class="o">=</span><span class="n">ch</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ch_ind_results</span>
+
+        <span class="k">if</span> <span class="n">feature_contacts</span> <span class="o">==</span> <span class="s2">&quot;all_channels_combined&quot;</span><span class="p">:</span>
+            <span class="n">dat_combined</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">run_CV</span><span class="p">(</span><span class="n">dat_combined</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_CV_results</span><span class="p">(</span><span class="s2">&quot;all_ch_results&quot;</span><span class="p">,</span> <span class="n">contact_point</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_ch_results</span></div>
+
+
+<div class="viewcode-block" id="Decoder.set_data_grid_points">
+<a class="viewcode-back" href="../../decode.html#analysis.decode.Decoder.set_data_grid_points">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_data_grid_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cortex_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">subcortex_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read the run_analysis</span>
+<span class="sd">        Projected data has the shape (samples, grid points, features)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># activate_gridpoints stores cortex + subcortex data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">active_gridpoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">i</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">i</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">columns</span>
+                <span class="k">if</span> <span class="s2">&quot;grid&quot;</span> <span class="ow">in</span> <span class="n">i</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">cortex_only</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">active_gridpoints</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_gridpoints</span> <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;gridcortex&quot;</span><span class="p">)</span>
+            <span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">subcortex_only</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">active_gridpoints</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_gridpoints</span> <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;gridsubcortex&quot;</span><span class="p">)</span>
+            <span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">i</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">active_gridpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="p">:]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">columns</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_gridpoints</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="ow">in</span> <span class="n">i</span>
+        <span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_point_ind_data</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_point_ind_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">grid_point</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span>
+                    <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">grid_point</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="ow">in</span> <span class="n">i</span><span class="p">]</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">grid_point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">active_gridpoints</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="Decoder.get_movement_grouped_array">
+<a class="viewcode-back" href="../../decode.html#analysis.decode.Decoder.get_movement_grouped_array">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_movement_grouped_array</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">min_consequent_count</span><span class="o">=</span><span class="mi">5</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return given a 1D numpy array, an array of same size with grouped consective blocks</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        prediction : np.ndarray</span>
+<span class="sd">            numpy array of either predictions or labels, that is going to be grouped</span>
+<span class="sd">        threshold : float, optional</span>
+<span class="sd">            threshold to be applied to &#39;prediction&#39;, by default 0.5</span>
+<span class="sd">        min_consequent_count : int, optional</span>
+<span class="sd">            minimum required consective samples higher than &#39;threshold&#39;, by default 5</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        labeled_array : np.ndarray</span>
+<span class="sd">            grouped vector with incrementing number for movement blocks</span>
+<span class="sd">        labels_count : int</span>
+<span class="sd">            count of individual movement blocks</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.ndimage</span><span class="w"> </span><span class="kn">import</span> <span class="n">label</span> <span class="k">as</span> <span class="n">label_ndimage</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.ndimage</span><span class="w"> </span><span class="kn">import</span> <span class="n">binary_dilation</span><span class="p">,</span> <span class="n">binary_erosion</span>
+
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">prediction</span> <span class="o">&gt;</span> <span class="n">threshold</span>
+        <span class="n">structure</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="n">min_consequent_count</span>  <span class="c1"># used for erosion and dilation</span>
+        <span class="n">eroded</span> <span class="o">=</span> <span class="n">binary_erosion</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">structure</span><span class="p">)</span>
+        <span class="n">dilated</span> <span class="o">=</span> <span class="n">binary_dilation</span><span class="p">(</span><span class="n">eroded</span><span class="p">,</span> <span class="n">structure</span><span class="p">)</span>
+        <span class="n">labeled_array</span><span class="p">,</span> <span class="n">labels_count</span> <span class="o">=</span> <span class="n">label_ndimage</span><span class="p">(</span><span class="n">dilated</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">labeled_array</span><span class="p">,</span> <span class="n">labels_count</span></div>
+
+
+<div class="viewcode-block" id="Decoder.calc_movement_detection_rate">
+<a class="viewcode-back" href="../../decode.html#analysis.decode.Decoder.calc_movement_detection_rate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calc_movement_detection_rate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">y_label</span><span class="p">,</span> <span class="n">prediction</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">min_consequent_count</span><span class="o">=</span><span class="mi">3</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Given a label and prediction, return the movement detection rate on the basis of</span>
+<span class="sd">        movements classified in blocks of &#39;min_consequent_count&#39;.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        y_label : [type]</span>
+<span class="sd">            [description]</span>
+<span class="sd">        prediction : [type]</span>
+<span class="sd">            [description]</span>
+<span class="sd">        threshold : float, optional</span>
+<span class="sd">            threshold to be applied to &#39;prediction&#39;, by default 0.5</span>
+<span class="sd">        min_consequent_count : int, optional</span>
+<span class="sd">            minimum required consective samples higher than &#39;threshold&#39;, by default 3</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mov_detection_rate : float</span>
+<span class="sd">            movement detection rate, where at least &#39;min_consequent_count&#39; samples where high in prediction</span>
+<span class="sd">        fpr : np.ndarray</span>
+<span class="sd">            sklearn.metrics false positive rate np.ndarray</span>
+<span class="sd">        tpr : np.ndarray</span>
+<span class="sd">            sklearn.metrics true positive rate np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">confusion_matrix</span>
+
+        <span class="n">pred_grouped</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_movement_grouped_array</span><span class="p">(</span>
+            <span class="n">prediction</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">min_consequent_count</span>
+        <span class="p">)</span>
+        <span class="n">y_grouped</span><span class="p">,</span> <span class="n">labels_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_movement_grouped_array</span><span class="p">(</span>
+            <span class="n">y_label</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">min_consequent_count</span>
+        <span class="p">)</span>
+
+        <span class="n">hit_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">labels_count</span><span class="p">)</span>
+        <span class="n">pred_group_bin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pred_grouped</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">label_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">labels_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>  <span class="c1"># labeling starts from 1</span>
+            <span class="n">hit_rate</span><span class="p">[</span><span class="n">label_number</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                <span class="n">pred_group_bin</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">y_grouped</span> <span class="o">==</span> <span class="n">label_number</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mov_detection_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">hit_rate</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">labels_count</span>
+        <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;no movements in label&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+
+        <span class="c1"># calculating TPR and FPR: https://stackoverflow.com/a/40324184/5060208</span>
+        <span class="n">CM</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_label</span><span class="p">,</span> <span class="n">prediction</span><span class="p">)</span>
+
+        <span class="n">TN</span> <span class="o">=</span> <span class="n">CM</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">FN</span> <span class="o">=</span> <span class="n">CM</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">TP</span> <span class="o">=</span> <span class="n">CM</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">FP</span> <span class="o">=</span> <span class="n">CM</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">fpr</span> <span class="o">=</span> <span class="n">FP</span> <span class="o">/</span> <span class="p">(</span><span class="n">FP</span> <span class="o">+</span> <span class="n">TN</span><span class="p">)</span>
+        <span class="n">tpr</span> <span class="o">=</span> <span class="n">TP</span> <span class="o">/</span> <span class="p">(</span><span class="n">TP</span> <span class="o">+</span> <span class="n">FN</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">mov_detection_rate</span><span class="p">,</span> <span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">init_cv_res</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">CV_res</span><span class="p">(</span>
+            <span class="n">get_movement_detection_rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_movement_detection_rate</span><span class="p">,</span>
+            <span class="n">RUN_BAY_OPT</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">RUN_BAY_OPT</span><span class="p">,</span>
+            <span class="n">mrmr_select</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mrmr_select</span><span class="p">,</span>
+            <span class="n">model_save</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_save</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># @staticmethod</span>
+    <span class="c1"># @jit(nopython=True)</span>
+<div class="viewcode-block" id="Decoder.append_previous_n_samples">
+<a class="viewcode-back" href="../../decode.html#analysis.decode.Decoder.append_previous_n_samples">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">append_previous_n_samples</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        stack feature vector for n samples</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">TIME_DIM</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">n</span>
+        <span class="n">FEATURE_DIM</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">time_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">TIME_DIM</span><span class="p">,</span> <span class="n">FEATURE_DIM</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">time_idx</span><span class="p">,</span> <span class="n">time_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+            <span class="k">for</span> <span class="n">time_point</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                <span class="n">time_arr</span><span class="p">[</span>
+                    <span class="n">time_idx</span><span class="p">,</span>
+                    <span class="n">time_point</span> <span class="o">*</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">:</span> <span class="p">(</span><span class="n">time_point</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">time_</span> <span class="o">-</span> <span class="n">time_point</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="k">return</span> <span class="n">time_arr</span><span class="p">,</span> <span class="n">y</span><span class="p">[</span><span class="n">n</span><span class="p">:]</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">append_samples_val</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span> <span class="o">=</span> <span class="n">Decoder</span><span class="o">.</span><span class="n">append_previous_n_samples</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span> <span class="o">=</span> <span class="n">Decoder</span><span class="o">.</span><span class="n">append_previous_n_samples</span><span class="p">(</span><span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">TRAIN_VAL_SPLIT</span><span class="p">:</span>
+            <span class="n">X_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_val</span> <span class="o">=</span> <span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span>
+                <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">y_train</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">y_val</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">Decoder</span><span class="o">.</span><span class="n">ClassMissingException</span>
+
+            <span class="c1"># if type(model) is xgboost.sklearn.XGBClassifier:</span>
+            <span class="c1">#     classes_weights = class_weight.compute_sample_weight(</span>
+            <span class="c1">#         class_weight=&quot;balanced&quot;, y=y_train</span>
+            <span class="c1">#     )</span>
+            <span class="c1">#     model.set_params(eval_metric=&quot;logloss&quot;)</span>
+            <span class="c1">#     model.fit(</span>
+            <span class="c1">#         X_train,</span>
+            <span class="c1">#         y_train,</span>
+            <span class="c1">#         eval_set=[(X_val, y_val)],</span>
+            <span class="c1">#         early_stopping_rounds=7,</span>
+            <span class="c1">#         sample_weight=classes_weights,</span>
+            <span class="c1">#         verbose=self.VERBOSE,</span>
+            <span class="c1">#     )</span>
+            <span class="c1"># elif type(model) is xgboost.sklearn.XGBRegressor:</span>
+            <span class="c1">#     # might be necessary to adapt for other classifiers</span>
+            <span class="c1">#</span>
+            <span class="c1">#     def evalerror(preds, dtrain):</span>
+            <span class="c1">#         labels = dtrain.get_label()</span>
+            <span class="c1">#         # return a pair metric_name, result. The metric name must not contain a</span>
+            <span class="c1">#         # colon (:) or a space since preds are margin(before logistic</span>
+            <span class="c1">#         # transformation, cutoff at 0)</span>
+            <span class="c1">#</span>
+            <span class="c1">#         r2 = metrics.r2_score(labels, preds)</span>
+            <span class="c1">#</span>
+            <span class="c1">#         if r2 &lt; 0:</span>
+            <span class="c1">#             r2 = 0</span>
+            <span class="c1">#</span>
+            <span class="c1">#         return &quot;r2&quot;, -r2</span>
+            <span class="c1">#</span>
+            <span class="c1">#     model.set_params(eval_metric=evalerror)</span>
+            <span class="c1">#     model.fit(</span>
+            <span class="c1">#         X_train,</span>
+            <span class="c1">#         y_train,</span>
+            <span class="c1">#         eval_set=[(X_val, y_val)],</span>
+            <span class="c1">#         early_stopping_rounds=10,</span>
+            <span class="c1">#         verbose=self.VERBOSE,</span>
+            <span class="c1">#     )</span>
+            <span class="c1"># else:</span>
+            <span class="c1">#     model.fit(X_train, y_train, eval_set=[(X_val, y_val)])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># check for LDA; and apply rebalancing</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">oversampling</span><span class="p">:</span>
+                <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ros</span><span class="o">.</span><span class="n">fit_resample</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">undersampling</span><span class="p">:</span>
+                <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rus</span><span class="o">.</span><span class="n">fit_resample</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+            <span class="c1"># if type(model) is xgboost.sklearn.XGBClassifier:</span>
+            <span class="c1">#    model.set_params(eval_metric=&quot;logloss&quot;)</span>
+            <span class="c1">#    model.fit(X_train, y_train)</span>
+            <span class="c1"># else:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">model</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">eval_model</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model_train</span><span class="p">,</span>
+        <span class="n">X_train</span><span class="p">,</span>
+        <span class="n">X_test</span><span class="p">,</span>
+        <span class="n">y_train</span><span class="p">,</span>
+        <span class="n">y_test</span><span class="p">,</span>
+        <span class="n">cv_res</span><span class="p">:</span> <span class="n">CV_res</span><span class="p">,</span>
+        <span class="n">save_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">save_probabilities</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CV_res</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_coef</span><span class="p">:</span>
+            <span class="n">cv_res</span><span class="o">.</span><span class="n">coef</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model_train</span><span class="o">.</span><span class="n">coef_</span><span class="p">)</span>
+
+        <span class="n">y_test_pr</span> <span class="o">=</span> <span class="n">model_train</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+        <span class="n">y_train_pr</span> <span class="o">=</span> <span class="n">model_train</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+
+        <span class="n">sc_te</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_method</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_test_pr</span><span class="p">)</span>
+        <span class="n">sc_tr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_method</span><span class="p">(</span><span class="n">y_train</span><span class="p">,</span> <span class="n">y_train_pr</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold_score</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sc_tr</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">sc_tr</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">sc_te</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">sc_te</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_movement_detection_rate</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_movement_detection_rates</span><span class="p">(</span>
+                <span class="n">y_test</span><span class="p">,</span> <span class="n">y_test_pr</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_train_pr</span><span class="p">,</span> <span class="n">cv_res</span>
+            <span class="p">)</span>
+
+        <span class="n">cv_res</span><span class="o">.</span><span class="n">score_train</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sc_tr</span><span class="p">)</span>
+        <span class="n">cv_res</span><span class="o">.</span><span class="n">score_test</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sc_te</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_data</span><span class="p">:</span>
+            <span class="n">cv_res</span><span class="o">.</span><span class="n">X_train</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+            <span class="n">cv_res</span><span class="o">.</span><span class="n">X_test</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_save</span><span class="p">:</span>
+            <span class="n">cv_res</span><span class="o">.</span><span class="n">model_save</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">model_train</span><span class="p">))</span>  <span class="c1"># clone won&#39;t copy params</span>
+        <span class="n">cv_res</span><span class="o">.</span><span class="n">y_train</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_train</span><span class="p">)</span>
+        <span class="n">cv_res</span><span class="o">.</span><span class="n">y_test</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_test</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">save_probabilities</span><span class="p">:</span>
+            <span class="n">cv_res</span><span class="o">.</span><span class="n">y_train_pr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_train_pr</span><span class="p">)</span>
+            <span class="n">cv_res</span><span class="o">.</span><span class="n">y_test_pr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y_test_pr</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cv_res</span><span class="o">.</span><span class="n">y_train_pr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model_train</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_train</span><span class="p">))</span>
+            <span class="n">cv_res</span><span class="o">.</span><span class="n">y_test_pr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model_train</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">cv_res</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_set_movement_detection_rates</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">y_test</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y_test_pr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y_train_pr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">cv_res</span><span class="p">:</span> <span class="n">CV_res</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CV_res</span><span class="p">:</span>
+        <span class="n">mov_detection_rate</span><span class="p">,</span> <span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_movement_detection_rate</span><span class="p">(</span>
+            <span class="n">y_test</span><span class="p">,</span>
+            <span class="n">y_test_pr</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mov_detection_threshold</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">min_consequent_count</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">cv_res</span><span class="o">.</span><span class="n">mov_detection_rates_test</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mov_detection_rate</span><span class="p">)</span>
+        <span class="n">cv_res</span><span class="o">.</span><span class="n">tprate_test</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tpr</span><span class="p">)</span>
+        <span class="n">cv_res</span><span class="o">.</span><span class="n">fprate_test</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fpr</span><span class="p">)</span>
+
+        <span class="n">mov_detection_rate</span><span class="p">,</span> <span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_movement_detection_rate</span><span class="p">(</span>
+            <span class="n">y_train</span><span class="p">,</span>
+            <span class="n">y_train_pr</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mov_detection_threshold</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">min_consequent_count</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">cv_res</span><span class="o">.</span><span class="n">mov_detection_rates_train</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mov_detection_rate</span><span class="p">)</span>
+        <span class="n">cv_res</span><span class="o">.</span><span class="n">tprate_train</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tpr</span><span class="p">)</span>
+        <span class="n">cv_res</span><span class="o">.</span><span class="n">fprate_train</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fpr</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cv_res</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">wrapper_model_train</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X_train</span><span class="p">,</span>
+        <span class="n">y_train</span><span class="p">,</span>
+        <span class="n">X_test</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">y_test</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">cv_res</span><span class="p">:</span> <span class="n">CV_res</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">return_fitted_model_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">save_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">cv_res</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cv_res</span> <span class="o">=</span> <span class="n">CV_res</span><span class="p">(</span>
+                <span class="n">get_movement_detection_rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_movement_detection_rate</span><span class="p">,</span>
+                <span class="n">RUN_BAY_OPT</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">RUN_BAY_OPT</span><span class="p">,</span>
+                <span class="n">mrmr_select</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mrmr_select</span><span class="p">,</span>
+                <span class="n">model_save</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_save</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">model_train</span> <span class="o">=</span> <span class="n">clone</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">STACK_FEATURES_N_SAMPLES</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">X_test</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">Decoder</span><span class="o">.</span><span class="n">append_samples_val</span><span class="p">(</span>
+                    <span class="n">X_train</span><span class="p">,</span>
+                    <span class="n">y_train</span><span class="p">,</span>
+                    <span class="n">X_test</span><span class="p">,</span>
+                    <span class="n">y_test</span><span class="p">,</span>
+                    <span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">time_stack_n_samples</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span> <span class="o">=</span> <span class="n">Decoder</span><span class="o">.</span><span class="n">append_previous_n_samples</span><span class="p">(</span>
+                    <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">time_stack_n_samples</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">y_train</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span>
+            <span class="n">y_test</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">y_test</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="p">):</span>  <span class="c1"># only one class present</span>
+            <span class="k">raise</span> <span class="n">Decoder</span><span class="o">.</span><span class="n">ClassMissingException</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">RUN_BAY_OPT</span><span class="p">:</span>
+            <span class="n">model_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bay_opt_wrapper</span><span class="p">(</span><span class="n">model_train</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mrmr_select</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">mrmr</span><span class="w"> </span><span class="kn">import</span> <span class="n">mrmr_classif</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="c1"># analyze induvidual ch</span>
+                <span class="n">columns_names</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">col</span>
+                    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span>
+                    <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ch_name_tested</span><span class="p">)</span>
+                <span class="p">]</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns_names_single_ch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">columns_names_single_ch</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">f</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ch_name_tested</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">columns_names</span>
+                    <span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># analyze all_ch_combined</span>
+                <span class="n">columns_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_names</span>
+            <span class="n">X_train</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns_names</span><span class="p">)</span>
+            <span class="n">X_test</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns_names</span><span class="p">)</span>
+
+            <span class="n">y_train</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">y_train</span><span class="p">)</span>
+            <span class="n">selected_features</span> <span class="o">=</span> <span class="n">mrmr_classif</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_train</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+
+            <span class="n">X_train</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="n">selected_features</span><span class="p">]</span>
+            <span class="n">X_test</span> <span class="o">=</span> <span class="n">X_test</span><span class="p">[</span><span class="n">selected_features</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pca</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.decomposition</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCA</span>
+
+            <span class="n">pca</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+            <span class="n">pca</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+            <span class="n">X_train</span> <span class="o">=</span> <span class="n">pca</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+            <span class="n">X_test</span> <span class="o">=</span> <span class="n">pca</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cca</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.cross_decomposition</span><span class="w"> </span><span class="kn">import</span> <span class="n">CCA</span>
+
+            <span class="n">cca</span> <span class="o">=</span> <span class="n">CCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+            <span class="n">cca</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+            <span class="n">X_train</span> <span class="o">=</span> <span class="n">cca</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+            <span class="n">X_test</span> <span class="o">=</span> <span class="n">cca</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">STACK_FEATURES_N_SAMPLES</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">return_fitted_model_only</span><span class="p">:</span>
+                <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">append_previous_n_samples</span><span class="p">(</span>
+                    <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_stack_n_samples</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">append_samples_val</span><span class="p">(</span>
+                    <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_stack_n_samples</span>
+                <span class="p">)</span>
+
+        <span class="c1"># fit model</span>
+        <span class="n">model_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_model</span><span class="p">(</span><span class="n">model_train</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">return_fitted_model_only</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">model_train</span>
+
+        <span class="n">cv_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_model</span><span class="p">(</span>
+            <span class="n">model_train</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">cv_res</span><span class="p">,</span> <span class="n">save_data</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mrmr_select</span><span class="p">:</span>
+            <span class="n">cv_res</span><span class="o">.</span><span class="n">mrmr_select</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">selected_features</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cv_res</span>
+
+<div class="viewcode-block" id="Decoder.run_CV">
+<a class="viewcode-back" href="../../decode.html#analysis.decode.Decoder.run_CV">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_CV</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate model performance on the specified cross validation.</span>
+<span class="sd">        If no data and label is specified, use whole feature class attributes.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data (np.ndarray):</span>
+<span class="sd">            data to train and test with shape samples, features</span>
+<span class="sd">        label (np.ndarray):</span>
+<span class="sd">            label to train and test with shape samples, features</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">split_data</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cv_method</span> <span class="o">==</span> <span class="s2">&quot;NonShuffledTrainTestSplit&quot;</span><span class="p">:</span>
+                <span class="c1"># set outer 10s set to train index</span>
+                <span class="c1"># test index is thus in the middle starting at random number</span>
+                <span class="n">N_samples</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">test_area_points</span> <span class="o">=</span> <span class="p">(</span><span class="n">N_samples</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span>
+                <span class="n">test_points</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">N_samples</span> <span class="o">*</span> <span class="mf">0.3</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">test_area_points</span> <span class="o">&gt;</span> <span class="n">test_points</span><span class="p">:</span>
+                    <span class="n">start_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span>
+                        <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span> <span class="o">*</span> <span class="mi">10</span><span class="p">),</span>
+                        <span class="n">N_samples</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfreq</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">-</span> <span class="n">test_points</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">test_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start_index</span><span class="p">,</span> <span class="n">start_index</span> <span class="o">+</span> <span class="n">test_points</span><span class="p">)</span>
+                    <span class="n">train_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">start_index</span><span class="p">),</span>
+                            <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start_index</span> <span class="o">+</span> <span class="n">test_points</span><span class="p">,</span> <span class="n">N_samples</span><span class="p">),</span>
+                        <span class="p">),</span>
+                        <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+                    <span class="k">yield</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">cv_single_tr_te_split</span> <span class="o">=</span> <span class="n">model_selection</span><span class="o">.</span><span class="n">check_cv</span><span class="p">(</span>
+                        <span class="n">cv</span><span class="o">=</span><span class="p">[</span>
+                            <span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span>
+                                <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                                <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+                                <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="p">)</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
+                    <span class="k">for</span> <span class="p">(</span>
+                        <span class="n">train_index</span><span class="p">,</span>
+                        <span class="n">test_index</span><span class="p">,</span>
+                    <span class="p">)</span> <span class="ow">in</span> <span class="n">cv_single_tr_te_split</span><span class="o">.</span><span class="n">split</span><span class="p">():</span>
+                        <span class="k">yield</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cv_method</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+                    <span class="k">yield</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span>
+
+        <span class="n">cv_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_cv_res</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_nested_cv</span><span class="p">:</span>
+            <span class="n">cv_res_inner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_cv_res</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span> <span class="ow">in</span> <span class="n">split_data</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">train_index</span><span class="p">,</span> <span class="p">:],</span> <span class="n">label</span><span class="p">[</span><span class="n">train_index</span><span class="p">]</span>
+            <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">test_index</span><span class="p">],</span> <span class="n">label</span><span class="p">[</span><span class="n">test_index</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cv_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrapper_model_train</span><span class="p">(</span>
+                    <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">cv_res</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">Decoder</span><span class="o">.</span><span class="n">ClassMissingException</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_nested_cv</span><span class="p">:</span>
+                <span class="n">data_inner</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">train_index</span><span class="p">]</span>
+                <span class="n">label_inner</span> <span class="o">=</span> <span class="n">label</span><span class="p">[</span><span class="n">train_index</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">train_index_inner</span><span class="p">,</span> <span class="n">test_index_inner</span> <span class="ow">in</span> <span class="n">split_data</span><span class="p">(</span><span class="n">data_inner</span><span class="p">):</span>
+                    <span class="n">X_train_inner</span> <span class="o">=</span> <span class="n">data_inner</span><span class="p">[</span><span class="n">train_index_inner</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="n">y_train_inner</span> <span class="o">=</span> <span class="n">label_inner</span><span class="p">[</span><span class="n">train_index_inner</span><span class="p">]</span>
+                    <span class="n">X_test_inner</span> <span class="o">=</span> <span class="n">data_inner</span><span class="p">[</span><span class="n">test_index_inner</span><span class="p">]</span>
+                    <span class="n">y_test_inner</span> <span class="o">=</span> <span class="n">label_inner</span><span class="p">[</span><span class="n">test_index_inner</span><span class="p">]</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">cv_res_inner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrapper_model_train</span><span class="p">(</span>
+                            <span class="n">X_train_inner</span><span class="p">,</span>
+                            <span class="n">y_train_inner</span><span class="p">,</span>
+                            <span class="n">X_test_inner</span><span class="p">,</span>
+                            <span class="n">y_test_inner</span><span class="p">,</span>
+                            <span class="n">cv_res_inner</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="k">except</span> <span class="n">Decoder</span><span class="o">.</span><span class="n">ClassMissingException</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cv_res</span> <span class="o">=</span> <span class="n">cv_res</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_nested_cv</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cv_res_inner</span> <span class="o">=</span> <span class="n">cv_res_inner</span></div>
+
+
+<div class="viewcode-block" id="Decoder.bay_opt_wrapper">
+<a class="viewcode-back" href="../../decode.html#analysis.decode.Decoder.bay_opt_wrapper">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bay_opt_wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_train</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run bayesian optimization and test best params to model_train</span>
+<span class="sd">        Save best params into self.best_bay_opt_params</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="p">(</span>
+            <span class="n">X_train_bo</span><span class="p">,</span>
+            <span class="n">X_test_bo</span><span class="p">,</span>
+            <span class="n">y_train_bo</span><span class="p">,</span>
+            <span class="n">y_test_bo</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">model_selection</span><span class="o">.</span><span class="n">train_test_split</span><span class="p">(</span>
+            <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">y_train_bo</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">y_test_bo</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s2">&quot;could not start Bay. Opt. with no labels &gt; 0&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">Decoder</span><span class="o">.</span><span class="n">ClassMissingException</span>
+
+        <span class="n">params_bo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_Bay_Opt</span><span class="p">(</span>
+            <span class="n">X_train_bo</span><span class="p">,</span> <span class="n">y_train_bo</span><span class="p">,</span> <span class="n">X_test_bo</span><span class="p">,</span> <span class="n">y_test_bo</span><span class="p">,</span> <span class="n">rounds</span><span class="o">=</span><span class="mi">10</span>
+        <span class="p">)</span>
+
+        <span class="c1"># set bay. opt. obtained best params to model</span>
+        <span class="n">params_bo_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">params_bo</span><span class="p">)):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">model_train</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bay_opt_param_space</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">params_bo</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">params_bo_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">bay_opt_param_space</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">params_bo</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_bay_opt_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">params_bo_dict</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">model_train</span></div>
+
+
+<div class="viewcode-block" id="Decoder.run_Bay_Opt">
+<a class="viewcode-back" href="../../decode.html#analysis.decode.Decoder.run_Bay_Opt">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run_Bay_Opt</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X_train</span><span class="p">,</span>
+        <span class="n">y_train</span><span class="p">,</span>
+        <span class="n">X_test</span><span class="p">,</span>
+        <span class="n">y_test</span><span class="p">,</span>
+        <span class="n">rounds</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="n">base_estimator</span><span class="o">=</span><span class="s2">&quot;GP&quot;</span><span class="p">,</span>
+        <span class="n">acq_func</span><span class="o">=</span><span class="s2">&quot;EI&quot;</span><span class="p">,</span>
+        <span class="n">acq_optimizer</span><span class="o">=</span><span class="s2">&quot;sampling&quot;</span><span class="p">,</span>
+        <span class="n">initial_point_generator</span><span class="o">=</span><span class="s2">&quot;lhs&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run skopt bayesian optimization</span>
+<span class="sd">        skopt.Optimizer:</span>
+<span class="sd">        https://scikit-optimize.github.io/stable/modules/generated/skopt.Optimizer.html#skopt.Optimizer</span>
+
+<span class="sd">        example:</span>
+<span class="sd">        https://scikit-optimize.github.io/stable/auto_examples/ask-and-tell.html#sphx-glr-auto-examples-ask-and-tell-py</span>
+
+<span class="sd">        Special attention needs to be made with the run_CV output,</span>
+<span class="sd">        some metrics are minimized (MAE), some are maximized (r^2)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        X_train: np.ndarray</span>
+<span class="sd">        y_train: np.ndarray</span>
+<span class="sd">        X_test: np.ndarray</span>
+<span class="sd">        y_test: np.ndarray</span>
+<span class="sd">        rounds : int, optional</span>
+<span class="sd">            optimizing rounds, by default 10</span>
+<span class="sd">        base_estimator : str, optional</span>
+<span class="sd">            surrogate model, used as optimization function instead of cross validation, by default &quot;GP&quot;</span>
+<span class="sd">        acq_func : str, optional</span>
+<span class="sd">            function to minimize over the posterior distribution, by default &quot;EI&quot;</span>
+<span class="sd">        acq_optimizer : str, optional</span>
+<span class="sd">            method to minimize the acquisition function, by default &quot;sampling&quot;</span>
+<span class="sd">        initial_point_generator : str, optional</span>
+<span class="sd">            sets a initial point generator, by default &quot;lhs&quot;</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        skopt result parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">get_f_val</span><span class="p">(</span><span class="n">model_bo</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">model_bo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_model</span><span class="p">(</span><span class="n">model_bo</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">Decoder</span><span class="o">.</span><span class="n">ClassMissingException</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">eval_method</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">model_bo</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">))</span>
+
+        <span class="kn">from</span><span class="w"> </span><span class="nn">skopt</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optimizer</span>
+
+        <span class="n">opt</span> <span class="o">=</span> <span class="n">Optimizer</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bay_opt_param_space</span><span class="p">,</span>
+            <span class="n">base_estimator</span><span class="o">=</span><span class="n">base_estimator</span><span class="p">,</span>
+            <span class="n">acq_func</span><span class="o">=</span><span class="n">acq_func</span><span class="p">,</span>
+            <span class="n">acq_optimizer</span><span class="o">=</span><span class="n">acq_optimizer</span><span class="p">,</span>
+            <span class="n">initial_point_generator</span><span class="o">=</span><span class="n">initial_point_generator</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rounds</span><span class="p">):</span>
+            <span class="n">next_x</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">ask</span><span class="p">()</span>
+            <span class="c1"># set model values</span>
+            <span class="n">model_bo</span> <span class="o">=</span> <span class="n">clone</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">next_x</span><span class="p">)):</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">model_bo</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bay_opt_param_space</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">next_x</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">f_val</span> <span class="o">=</span> <span class="n">get_f_val</span><span class="p">(</span><span class="n">model_bo</span><span class="p">)</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">opt</span><span class="o">.</span><span class="n">tell</span><span class="p">(</span><span class="n">next_x</span><span class="p">,</span> <span class="n">f_val</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f_val</span><span class="p">)</span>
+
+        <span class="c1"># res is here automatically appended by skopt</span>
+        <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="Decoder.save">
+<a class="viewcode-back" href="../../decode.html#analysis.decode.Decoder.save">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">feature_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">str_save_add</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save decoder object to pickle&quot;&quot;&quot;</span>
+
+        <span class="c1"># why is the decoder not saved to a .json?</span>
+
+        <span class="k">if</span> <span class="n">str_save_add</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">PATH_OUT</span> <span class="o">=</span> <span class="n">PurePath</span><span class="p">(</span><span class="n">feature_path</span><span class="p">,</span> <span class="n">feature_file</span><span class="p">,</span> <span class="n">feature_file</span> <span class="o">+</span> <span class="s2">&quot;_ML_RES.p&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">PATH_OUT</span> <span class="o">=</span> <span class="n">PurePath</span><span class="p">(</span>
+                <span class="n">feature_path</span><span class="p">,</span>
+                <span class="n">feature_file</span><span class="p">,</span>
+                <span class="n">feature_file</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">str_save_add</span> <span class="o">+</span> <span class="s2">&quot;_ML_RES.p&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;model being saved to: </span><span class="si">{</span><span class="n">PATH_OUT</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">PATH_OUT</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">output</span><span class="p">:</span>  <span class="c1"># Overwrites any existing file.</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021, Timon Merk.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

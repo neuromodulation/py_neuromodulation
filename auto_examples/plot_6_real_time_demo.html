@@ -1,0 +1,824 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Real-time feature estimation &#8212; py_neuromodulation  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'auto_examples/plot_6_real_time_demo';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Lab Streaming Layer (LSL) Example" href="plot_7_lsl_example.html" />
+    <link rel="prev" title="R-Map computation" href="plot_5_example_rmap_computing.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">py_neuromodulation  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../usage.html">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../gui.html">
+    GUI
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api_documentation.html">
+    API Documentation
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../usage.html">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../gui.html">
+    GUI
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api_documentation.html">
+    API Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="plot_0_first_demo.html">First Demo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_1_example_BIDS.html">ECoG Movement decoding example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_2_example_add_feature.html">Adding New Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_3_example_sharpwave_analysis.html">Analyzing temporal features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_4_example_gridPointProjection.html">Grid Point Projection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_5_example_rmap_computing.html">R-Map computation</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Real-time feature estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_7_lsl_example.html">Lab Streaming Layer (LSL) Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_8_cebra_example.html">Cebra Decoding with no training Example</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Examples</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Real-time feature estimation</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-plot-6-real-time-demo-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="real-time-feature-estimation">
+<span id="sphx-glr-auto-examples-plot-6-real-time-demo-py"></span><h1>Real-time feature estimation<a class="headerlink" href="#real-time-feature-estimation" title="Link to this heading">#</a></h1>
+<section id="implementation-of-individual-nm-streams">
+<h2>Implementation of individual nm_streams<a class="headerlink" href="#implementation-of-individual-nm-streams" title="Link to this heading">#</a></h2>
+<p><em>py_neuromodulation</em> was optimized for computation of real-time data streams.
+There are however center -and lab specific hardware acquisition systems. Therefore, each experiment requires modules to interact with hardware platforms
+which periodically acquire data.</p>
+<p>Given the raw data, data can be analyzed using <em>py_neuromodulation</em>. Preprocessing methods, such as re-referencing and normalization,
+feature computation and decoding can be performed then in real-time.</p>
+<p>For online as well as as offline analysis, the <code class="xref py py-class docutils literal notranslate"><span class="pre">nm_stream_abc</span></code> class needs to be instantiated.
+Here the <cite>nm_settings</cite> and <cite>channels</cite> are required to be defined.
+Previously for the offline analysis, an offline <code class="xref py py-class docutils literal notranslate"><span class="pre">nm_generator</span></code> object was defined that periodically yielded data.
+For online data, the <code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code> function therefore needs to be overwritten, which first acquires data and then calls
+the <code class="xref py py-meth docutils literal notranslate"><span class="pre">process()</span></code> function.</p>
+<p>The following illustrates in pseudo-code how such a stream could be initialized:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">nm_stream_abc</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyStream</span><span class="p">(</span><span class="n">nm_stream_abc</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">channels</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="n">channels</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+   <span class="n">features_</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+       <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">acquire_data</span><span class="p">()</span>
+       <span class="n">features_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_analysis</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a><span class="p">))</span>
+       <span class="c1"># potentially use machine learning model for decoding</span>
+</pre></div>
+</div>
+</section>
+<section id="computation-time-examples">
+<h2>Computation time examples<a class="headerlink" href="#computation-time-examples" title="Link to this heading">#</a></h2>
+<p>The following example calculates for six channels, CAR re-referencing, z-score normalization and FFT features results the following computation time:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">py_neuromodulation</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">NMSettings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">timeit</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_fast_compute_settings</span><span class="p">():</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">NMSettings</span><span class="o">.</span><span class="n">get_fast_compute</span><span class="p">()</span>
+
+    <span class="n">settings</span><span class="o">.</span><span class="n">preprocessing</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;re_referencing&quot;</span><span class="p">,</span> <span class="s2">&quot;notch_filter&quot;</span><span class="p">]</span>
+    <span class="n">settings</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">fft</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">settings</span><span class="o">.</span><span class="n">postprocessing</span><span class="o">.</span><span class="n">feature_normalization</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">settings</span>
+
+
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.random.html#numpy.random.random" title="numpy.random.random" class="sphx-glr-backref-module-numpy-random sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span></a><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;FFT Features, CAR re-referencing, z-score normalization&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computation time for single ECoG channel: &quot;</span><span class="p">)</span>
+<span class="n">stream</span> <span class="o">=</span> <span class="n">nm</span><span class="o">.</span><span class="n">Stream</span><span class="p">(</span>
+    <span class="n">sfreq</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a><span class="p">,</span>
+    <span class="n">sampling_rate_features_hz</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">settings</span><span class="o">=</span><span class="n">get_fast_compute_settings</span><span class="p">(),</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.round.html#numpy.round" title="numpy.round" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">round</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/timeit.html#timeit.timeit" title="timeit.timeit" class="sphx-glr-backref-module-timeit sphx-glr-backref-type-py-function"><span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span></a><span class="p">(</span><span class="k">lambda</span><span class="p">:</span><span class="w"> </span><span class="n">stream</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a><span class="p">),</span><span class="w"> </span><span class="n">number</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span><span class="o">/</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> s&quot;</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computation time for 6 ECoG channels: &quot;</span><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.random.html#numpy.random.random" title="numpy.random.random" class="sphx-glr-backref-module-numpy-random sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span></a><span class="p">([</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1000</span><span class="p">])</span>
+<span class="n">stream</span> <span class="o">=</span> <span class="n">nm</span><span class="o">.</span><span class="n">Stream</span><span class="p">(</span>
+    <span class="n">sfreq</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a><span class="p">,</span>
+    <span class="n">sampling_rate_features_hz</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">settings</span><span class="o">=</span><span class="n">get_fast_compute_settings</span><span class="p">(),</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.round.html#numpy.round" title="numpy.round" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">round</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/timeit.html#timeit.timeit" title="timeit.timeit" class="sphx-glr-backref-module-timeit sphx-glr-backref-type-py-function"><span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span></a><span class="p">(</span><span class="k">lambda</span><span class="p">:</span><span class="w"> </span><span class="n">stream</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a><span class="p">),</span><span class="w"> </span><span class="n">number</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span><span class="o">/</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> s&quot;</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span>
+    <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">FFT Features &amp; Temporal Waveform Shape &amp; Hjorth &amp; Bursts, CAR re-referencing, z-score normalization&quot;</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Computation time for single ECoG channel: &quot;</span><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/random/generated/numpy.random.random.html#numpy.random.random" title="numpy.random.random" class="sphx-glr-backref-module-numpy-random sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span></a><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1000</span><span class="p">])</span>
+<span class="n">stream</span> <span class="o">=</span> <span class="n">nm</span><span class="o">.</span><span class="n">Stream</span><span class="p">(</span><span class="n">sfreq</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a><span class="o">=</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a><span class="p">,</span> <span class="n">sampling_rate_features_hz</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.round.html#numpy.round" title="numpy.round" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">round</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/timeit.html#timeit.timeit" title="timeit.timeit" class="sphx-glr-backref-module-timeit sphx-glr-backref-type-py-function"><span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span></a><span class="p">(</span><span class="k">lambda</span><span class="p">:</span><span class="w"> </span><span class="n">stream</span><span class="o">.</span><span class="n">data_processor</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data</span></a><span class="p">),</span><span class="w"> </span><span class="n">number</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">/</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> s&quot;</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>FFT Features, CAR re-referencing, z-score normalization
+
+Computation time for single ECoG channel:
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:148: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys():
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:148: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys():
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+0.001 s
+Computation time for 6 ECoG channels:
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:148: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys():
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:148: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys():
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+0.001 s
+
+FFT Features &amp; Temporal Waveform Shape &amp; Hjorth &amp; Bursts, CAR re-referencing, z-score normalization
+Computation time for single ECoG channel:
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+/opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/py_neuromodulation/utils/types.py:138: PydanticDeprecatedSince211: Accessing the &#39;model_fields&#39; attribute on the instance is deprecated. Instead, you should access this attribute from the model class. Deprecated in Pydantic V2.11 to be removed in V3.0.
+  for f in self.model_fields.keys()
+0.003 s
+</pre></div>
+</div>
+<p>Those results show that the computation time for a typical pipeline (FFT, re-referencing, notch-filtering, feature normalization)
+is well below 10 ms, which is fast enough for real-time analysis with feature sampling rates below 100 Hz.
+Computation of more complex features could still result in feature sampling rates of more than 30 Hz.</p>
+</section>
+<section id="real-time-movement-decoding-using-the-tmsi-saga-amplifier">
+<h2>Real-time movement decoding using the TMSi-SAGA amplifier<a class="headerlink" href="#real-time-movement-decoding-using-the-tmsi-saga-amplifier" title="Link to this heading">#</a></h2>
+<p>In the following example, we will show how we setup a real-time movement decoding experiment using the TMSi-SAGA amplifier.
+First, we relied on different software modules for data streaming and visualization.
+<a class="reference external" href="https://labstreaminglayer.org">LabStreamingLayer</a> allows for real-time data streaming and synchronization across multiple devices.
+We used <a class="reference external" href="https://timeflux.io">timeflux</a> for real-time data visualization of features, decoded output.
+For raw data visualization we used <a class="reference external" href="https://fcbg-hnp-meeg.github.io/bsl/dev/index.html">Brain Streaming Layer</a>.</p>
+<p>The code for real-time movement decoding is added in the GitHub branch <a class="reference external" href="https://github.com/neuromodulation/py_neuromodulation/tree/realtime_decoding">realtime_decoding</a>.
+Here we relied on the <a class="reference external" href="https://gitlab.com/tmsi/tmsi-python-interface">TMSI SAGA Python interface</a>.</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.343 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-plot-6-real-time-demo-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/5471d61c0ef5854ecd111aca54bf2606/plot_6_real_time_demo.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_6_real_time_demo.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/c2db0bf2b334d541b00662b991682256/plot_6_real_time_demo.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_6_real_time_demo.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/de72d291541c7be184bd7f20fe4d30a5/plot_6_real_time_demo.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_6_real_time_demo.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="plot_5_example_rmap_computing.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">R-Map computation</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="plot_7_lsl_example.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Lab Streaming Layer (LSL) Example</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#implementation-of-individual-nm-streams">Implementation of individual nm_streams</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#computation-time-examples">Computation time examples</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#real-time-movement-decoding-using-the-tmsi-saga-amplifier">Real-time movement decoding using the TMSi-SAGA amplifier</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/auto_examples/plot_6_real_time_demo.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021, Timon Merk.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

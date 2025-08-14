@@ -1,0 +1,916 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>API Documentation &#8212; py_neuromodulation  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api_documentation';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="decode" href="decode.html" />
+    <link rel="prev" title="GUI" href="gui.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">py_neuromodulation  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="usage.html">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="gui.html">
+    GUI
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    API Documentation
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="usage.html">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="gui.html">
+    GUI
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="#">
+    API Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="decode.html">decode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="feature_reader.html">feature_reader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plots.html">plots</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RMAP.html">RMAP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stats.html">stats</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="bispectra.html">bispectra</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bursts.html">bursts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coherence.html">coherence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fooof.html">fooof</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hjorth.html">hjorth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linelength.html">linelength</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mne_connectivity.html">mne_connectivity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nolds.html">nolds</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oscillatory.html">oscillatory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sharpwaves.html">sharpwaves</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandpower.html">bandpower</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mne_filter.html">mne_filter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notch_filter.html">notch_filter</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="artifacts.html">artifacts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="normalization.html">normalization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="projection.html">projection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rereference.html">rereference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resample.html">resample</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="generator.html">generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mnelsl_player.html">mnelsl_player</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mnelsl_stream.html">mnelsl_stream</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="channels.html">channels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="io.html">io</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">types</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">API Documentation</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="api-documentation">
+<h1>API Documentation<a class="headerlink" href="#api-documentation" title="Link to this heading">#</a></h1>
+<section id="analysis">
+<h2>Analysis<a class="headerlink" href="#analysis" title="Link to this heading">#</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="decode.html">decode</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="decode.html#analysis.decode.Decoder"><code class="docutils literal notranslate"><span class="pre">Decoder</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="decode.html#analysis.decode.Decoder.ClassMissingException"><code class="docutils literal notranslate"><span class="pre">Decoder.ClassMissingException</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="decode.html#analysis.decode.Decoder.append_previous_n_samples"><code class="docutils literal notranslate"><span class="pre">Decoder.append_previous_n_samples()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="decode.html#analysis.decode.Decoder.bay_opt_wrapper"><code class="docutils literal notranslate"><span class="pre">Decoder.bay_opt_wrapper()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="decode.html#analysis.decode.Decoder.calc_movement_detection_rate"><code class="docutils literal notranslate"><span class="pre">Decoder.calc_movement_detection_rate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="decode.html#analysis.decode.Decoder.get_movement_grouped_array"><code class="docutils literal notranslate"><span class="pre">Decoder.get_movement_grouped_array()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="decode.html#analysis.decode.Decoder.run_Bay_Opt"><code class="docutils literal notranslate"><span class="pre">Decoder.run_Bay_Opt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="decode.html#analysis.decode.Decoder.run_CV"><code class="docutils literal notranslate"><span class="pre">Decoder.run_CV()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="decode.html#analysis.decode.Decoder.run_CV_caller"><code class="docutils literal notranslate"><span class="pre">Decoder.run_CV_caller()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="decode.html#analysis.decode.Decoder.save"><code class="docutils literal notranslate"><span class="pre">Decoder.save()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="decode.html#analysis.decode.Decoder.set_CV_results"><code class="docutils literal notranslate"><span class="pre">Decoder.set_CV_results()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="decode.html#analysis.decode.Decoder.set_data_grid_points"><code class="docutils literal notranslate"><span class="pre">Decoder.set_data_grid_points()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="decode.html#analysis.decode.Decoder.set_data_ind_channels"><code class="docutils literal notranslate"><span class="pre">Decoder.set_data_ind_channels()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="feature_reader.html">feature_reader</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="feature_reader.html#analysis.feature_reader.FeatureReader"><code class="docutils literal notranslate"><span class="pre">FeatureReader</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="feature_reader.html#analysis.feature_reader.FeatureReader.filter_features"><code class="docutils literal notranslate"><span class="pre">FeatureReader.filter_features()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="feature_reader.html#analysis.feature_reader.FeatureReader.get_epochs"><code class="docutils literal notranslate"><span class="pre">FeatureReader.get_epochs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="feature_reader.html#analysis.feature_reader.FeatureReader.normalize_features"><code class="docutils literal notranslate"><span class="pre">FeatureReader.normalize_features()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="feature_reader.html#analysis.feature_reader.FeatureReader.plot_all_features"><code class="docutils literal notranslate"><span class="pre">FeatureReader.plot_all_features()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="feature_reader.html#analysis.feature_reader.FeatureReader.plot_cort_projection"><code class="docutils literal notranslate"><span class="pre">FeatureReader.plot_cort_projection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="feature_reader.html#analysis.feature_reader.FeatureReader.plot_subject_grid_ch_performance"><code class="docutils literal notranslate"><span class="pre">FeatureReader.plot_subject_grid_ch_performance()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="feature_reader.html#analysis.feature_reader.FeatureReader.plot_target_averaged_channel"><code class="docutils literal notranslate"><span class="pre">FeatureReader.plot_target_averaged_channel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="feature_reader.html#analysis.feature_reader.FeatureReader.plot_target_avg_all_channels"><code class="docutils literal notranslate"><span class="pre">FeatureReader.plot_target_avg_all_channels()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="feature_reader.html#analysis.feature_reader.FeatureReader.read_results"><code class="docutils literal notranslate"><span class="pre">FeatureReader.read_results()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="feature_reader.html#analysis.feature_reader.FeatureReader.read_target_ch"><code class="docutils literal notranslate"><span class="pre">FeatureReader.read_target_ch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="feature_reader.html#analysis.feature_reader.FeatureReader.run_ML_model"><code class="docutils literal notranslate"><span class="pre">FeatureReader.run_ML_model()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="plots.html">plots</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="plots.html#analysis.plots.NM_Plot"><code class="docutils literal notranslate"><span class="pre">NM_Plot</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="plots.html#analysis.plots.NM_Plot.plot_cortex"><code class="docutils literal notranslate"><span class="pre">NM_Plot.plot_cortex()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="RMAP.html">RMAP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RMAP.html#analysis.RMAP.ConnectivityChannelSelector"><code class="docutils literal notranslate"><span class="pre">ConnectivityChannelSelector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="RMAP.html#analysis.RMAP.ConnectivityChannelSelector.get_available_connectomes"><code class="docutils literal notranslate"><span class="pre">ConnectivityChannelSelector.get_available_connectomes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="RMAP.html#analysis.RMAP.ConnectivityChannelSelector.get_closest_node"><code class="docutils literal notranslate"><span class="pre">ConnectivityChannelSelector.get_closest_node()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="RMAP.html#analysis.RMAP.ConnectivityChannelSelector.get_rmap_correlations"><code class="docutils literal notranslate"><span class="pre">ConnectivityChannelSelector.get_rmap_correlations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="RMAP.html#analysis.RMAP.ConnectivityChannelSelector.load_connectome"><code class="docutils literal notranslate"><span class="pre">ConnectivityChannelSelector.load_connectome()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="RMAP.html#analysis.RMAP.ConnectivityChannelSelector.plot_grid"><code class="docutils literal notranslate"><span class="pre">ConnectivityChannelSelector.plot_grid()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="RMAP.html#analysis.RMAP.RMAPCross_Val_ChannelSelector"><code class="docutils literal notranslate"><span class="pre">RMAPCross_Val_ChannelSelector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="RMAP.html#analysis.RMAP.RMAPCross_Val_ChannelSelector.load_fingerprint"><code class="docutils literal notranslate"><span class="pre">RMAPCross_Val_ChannelSelector.load_fingerprint()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stats.html">stats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stats.html#analysis.stats.cluster_wise_p_val_correction"><code class="docutils literal notranslate"><span class="pre">cluster_wise_p_val_correction()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="stats.html#analysis.stats.cluster_wise_p_val_correction_numba"><code class="docutils literal notranslate"><span class="pre">cluster_wise_p_val_correction_numba()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="stats.html#analysis.stats.permutationTest"><code class="docutils literal notranslate"><span class="pre">permutationTest()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="stats.html#analysis.stats.permutationTestSpearmansRho"><code class="docutils literal notranslate"><span class="pre">permutationTestSpearmansRho()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="stats.html#analysis.stats.permutationTest_relative"><code class="docutils literal notranslate"><span class="pre">permutationTest_relative()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="stats.html#analysis.stats.permutation_numba_onesample"><code class="docutils literal notranslate"><span class="pre">permutation_numba_onesample()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="stats.html#analysis.stats.permutation_numba_twosample"><code class="docutils literal notranslate"><span class="pre">permutation_numba_twosample()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="feature-classes">
+<h2>Feature Classes<a class="headerlink" href="#feature-classes" title="Link to this heading">#</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="bispectra.html">bispectra</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bispectra.html#features.bispectra.Bispectra"><code class="docutils literal notranslate"><span class="pre">Bispectra</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bispectra.html#features.bispectra.Bispectra.calc_feature"><code class="docutils literal notranslate"><span class="pre">Bispectra.calc_feature()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bursts.html">bursts</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bursts.html#features.bursts.Bursts"><code class="docutils literal notranslate"><span class="pre">Bursts</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bursts.html#features.bursts.Bursts.calc_feature"><code class="docutils literal notranslate"><span class="pre">Bursts.calc_feature()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="coherence.html">coherence</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="coherence.html#features.coherence.Coherence"><code class="docutils literal notranslate"><span class="pre">Coherence</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="coherence.html#features.coherence.Coherence.calc_feature"><code class="docutils literal notranslate"><span class="pre">Coherence.calc_feature()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="fooof.html">fooof</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="fooof.html#features.fooof.FooofAnalyzer"><code class="docutils literal notranslate"><span class="pre">FooofAnalyzer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="fooof.html#features.fooof.FooofAnalyzer.calc_feature"><code class="docutils literal notranslate"><span class="pre">FooofAnalyzer.calc_feature()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hjorth.html">hjorth</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hjorth.html#features.hjorth_raw.Hjorth"><code class="docutils literal notranslate"><span class="pre">Hjorth</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hjorth.html#features.hjorth_raw.Hjorth.calc_feature"><code class="docutils literal notranslate"><span class="pre">Hjorth.calc_feature()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="linelength.html">linelength</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="linelength.html#features.linelength.LineLength"><code class="docutils literal notranslate"><span class="pre">LineLength</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="linelength.html#features.linelength.LineLength.calc_feature"><code class="docutils literal notranslate"><span class="pre">LineLength.calc_feature()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mne_connectivity.html">mne_connectivity</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mne_connectivity.html#features.mne_connectivity.MNEConnectivity"><code class="docutils literal notranslate"><span class="pre">MNEConnectivity</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mne_connectivity.html#features.mne_connectivity.MNEConnectivity.calc_feature"><code class="docutils literal notranslate"><span class="pre">MNEConnectivity.calc_feature()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="nolds.html">nolds</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nolds.html#features.nolds.Nolds"><code class="docutils literal notranslate"><span class="pre">Nolds</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nolds.html#features.nolds.Nolds.calc_feature"><code class="docutils literal notranslate"><span class="pre">Nolds.calc_feature()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="oscillatory.html">oscillatory</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="oscillatory.html#features.oscillatory.FFT"><code class="docutils literal notranslate"><span class="pre">FFT</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="oscillatory.html#features.oscillatory.FFT.calc_feature"><code class="docutils literal notranslate"><span class="pre">FFT.calc_feature()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="oscillatory.html#features.oscillatory.Welch"><code class="docutils literal notranslate"><span class="pre">Welch</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="oscillatory.html#features.oscillatory.Welch.calc_feature"><code class="docutils literal notranslate"><span class="pre">Welch.calc_feature()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="oscillatory.html#features.oscillatory.STFT"><code class="docutils literal notranslate"><span class="pre">STFT</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="oscillatory.html#features.oscillatory.STFT.calc_feature"><code class="docutils literal notranslate"><span class="pre">STFT.calc_feature()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="sharpwaves.html">sharpwaves</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sharpwaves.html#features.sharpwaves.SharpwaveAnalyzer"><code class="docutils literal notranslate"><span class="pre">SharpwaveAnalyzer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sharpwaves.html#features.sharpwaves.SharpwaveAnalyzer.analyze_waveform"><code class="docutils literal notranslate"><span class="pre">SharpwaveAnalyzer.analyze_waveform()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="sharpwaves.html#features.sharpwaves.SharpwaveAnalyzer.calc_feature"><code class="docutils literal notranslate"><span class="pre">SharpwaveAnalyzer.calc_feature()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bandpower.html">bandpower</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bandpower.html#features.bandpower.BandPower"><code class="docutils literal notranslate"><span class="pre">BandPower</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bandpower.html#features.bandpower.BandPower.calc_feature"><code class="docutils literal notranslate"><span class="pre">BandPower.calc_feature()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="filter">
+<h2>Filter<a class="headerlink" href="#filter" title="Link to this heading">#</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="mne_filter.html">mne_filter</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mne_filter.html#filter.mne_filter.MNEFilter"><code class="docutils literal notranslate"><span class="pre">MNEFilter</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mne_filter.html#filter.mne_filter.MNEFilter.filter_bank"><code class="docutils literal notranslate"><span class="pre">MNEFilter.filter_bank</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mne_filter.html#filter.mne_filter.MNEFilter.filter_data"><code class="docutils literal notranslate"><span class="pre">MNEFilter.filter_data()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="notch_filter.html">notch_filter</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="notch_filter.html#filter.notch_filter.NotchFilter"><code class="docutils literal notranslate"><span class="pre">NotchFilter</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="processing">
+<h2>Processing<a class="headerlink" href="#processing" title="Link to this heading">#</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="artifacts.html">artifacts</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="artifacts.html#processing.artifacts.PARRMArtifactRejection"><code class="docutils literal notranslate"><span class="pre">PARRMArtifactRejection</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="normalization.html">normalization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="normalization.html#processing.normalization.Normalizer"><code class="docutils literal notranslate"><span class="pre">Normalizer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="normalization.html#processing.normalization.Normalizer.process"><code class="docutils literal notranslate"><span class="pre">Normalizer.process()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="projection.html">projection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="projection.html#processing.projection.Projection"><code class="docutils literal notranslate"><span class="pre">Projection</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="projection.html#processing.projection.Projection.calc_proj_matrix"><code class="docutils literal notranslate"><span class="pre">Projection.calc_proj_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="projection.html#processing.projection.Projection.calc_projection_matrix"><code class="docutils literal notranslate"><span class="pre">Projection.calc_projection_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="projection.html#processing.projection.Projection.get_projected_cortex_subcortex_data"><code class="docutils literal notranslate"><span class="pre">Projection.get_projected_cortex_subcortex_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="projection.html#processing.projection.Projection.init_projection_run"><code class="docutils literal notranslate"><span class="pre">Projection.init_projection_run()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="projection.html#processing.projection.Projection.project_features"><code class="docutils literal notranslate"><span class="pre">Projection.project_features()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rereference.html">rereference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rereference.html#processing.rereference.ReReferencer"><code class="docutils literal notranslate"><span class="pre">ReReferencer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="rereference.html#processing.rereference.ReReferencer.process"><code class="docutils literal notranslate"><span class="pre">ReReferencer.process()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="resample.html">resample</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="resample.html#processing.resample.Resampler"><code class="docutils literal notranslate"><span class="pre">Resampler</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="resample.html#processing.resample.Resampler.up"><code class="docutils literal notranslate"><span class="pre">Resampler.up</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="resample.html#processing.resample.Resampler.process"><code class="docutils literal notranslate"><span class="pre">Resampler.process()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="stream">
+<h2>stream<a class="headerlink" href="#stream" title="Link to this heading">#</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="generator.html">generator</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="generator.html#stream.generator.RawDataGenerator"><code class="docutils literal notranslate"><span class="pre">RawDataGenerator</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mnelsl_player.html">mnelsl_player</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mnelsl_player.html#stream.mnelsl_player.LSLOfflinePlayer"><code class="docutils literal notranslate"><span class="pre">LSLOfflinePlayer</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mnelsl_player.html#stream.mnelsl_player.LSLOfflinePlayer.start_player"><code class="docutils literal notranslate"><span class="pre">LSLOfflinePlayer.start_player()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mnelsl_player.html#stream.mnelsl_player.LSLOfflinePlayer.stop_player"><code class="docutils literal notranslate"><span class="pre">LSLOfflinePlayer.stop_player()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="mnelsl_player.html#stream.mnelsl_player.LSLOfflinePlayer.wait_for_completion"><code class="docutils literal notranslate"><span class="pre">LSLOfflinePlayer.wait_for_completion()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mnelsl_stream.html">mnelsl_stream</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mnelsl_stream.html#stream.mnelsl_stream.LSLStream"><code class="docutils literal notranslate"><span class="pre">LSLStream</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">settings</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="settings.html#stream.settings.NMSettings"><code class="docutils literal notranslate"><span class="pre">NMSettings</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="settings.html#stream.settings.NMSettings.from_file"><code class="docutils literal notranslate"><span class="pre">NMSettings.from_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="settings.html#stream.settings.NMSettings.model_config"><code class="docutils literal notranslate"><span class="pre">NMSettings.model_config</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="stream.html">Stream</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="stream.html#stream.stream.Stream"><code class="docutils literal notranslate"><span class="pre">Stream</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="stream.html#stream.stream.Stream.plot_raw_signal"><code class="docutils literal notranslate"><span class="pre">Stream.plot_raw_signal()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="utils">
+<h2>utils<a class="headerlink" href="#utils" title="Link to this heading">#</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="channels.html">channels</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="channels.html#utils.channels.get_default_channels_from_data"><code class="docutils literal notranslate"><span class="pre">get_default_channels_from_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="channels.html#utils.channels.set_channels"><code class="docutils literal notranslate"><span class="pre">set_channels()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">database</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="database.html#utils.database.NMDatabase"><code class="docutils literal notranslate"><span class="pre">NMDatabase</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="database.html#utils.database.NMDatabase.create_table"><code class="docutils literal notranslate"><span class="pre">NMDatabase.create_table()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="database.html#utils.database.NMDatabase.fetch_all"><code class="docutils literal notranslate"><span class="pre">NMDatabase.fetch_all()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="database.html#utils.database.NMDatabase.head"><code class="docutils literal notranslate"><span class="pre">NMDatabase.head()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="database.html#utils.database.NMDatabase.infer_type"><code class="docutils literal notranslate"><span class="pre">NMDatabase.infer_type()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="database.html#utils.database.NMDatabase.insert_data"><code class="docutils literal notranslate"><span class="pre">NMDatabase.insert_data()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="io.html">io</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="io.html#utils.io.get_coord_list"><code class="docutils literal notranslate"><span class="pre">get_coord_list()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="io.html#utils.io.get_paths_example_data"><code class="docutils literal notranslate"><span class="pre">get_paths_example_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="io.html#utils.io.load_channels"><code class="docutils literal notranslate"><span class="pre">load_channels()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="io.html#utils.io.loadmat"><code class="docutils literal notranslate"><span class="pre">loadmat()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="io.html#utils.io.read_BIDS_data"><code class="docutils literal notranslate"><span class="pre">read_BIDS_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="io.html#utils.io.read_grid"><code class="docutils literal notranslate"><span class="pre">read_grid()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="io.html#utils.io.read_mne_data"><code class="docutils literal notranslate"><span class="pre">read_mne_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="io.html#utils.io.read_plot_modules"><code class="docutils literal notranslate"><span class="pre">read_plot_modules()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="io.html#utils.io.write_csv"><code class="docutils literal notranslate"><span class="pre">write_csv()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">logging</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="logging.html#utils.logging.NMLogger"><code class="docutils literal notranslate"><span class="pre">NMLogger</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="logging.html#utils.logging.NMLogger.log_to_file"><code class="docutils literal notranslate"><span class="pre">NMLogger.log_to_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="logging.html#utils.logging.NMLogger.set_level"><code class="docutils literal notranslate"><span class="pre">NMLogger.set_level()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="types.html#utils.types.BoolSelector"><code class="docutils literal notranslate"><span class="pre">BoolSelector</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="types.html#utils.types.BoolSelector.model_config"><code class="docutils literal notranslate"><span class="pre">BoolSelector.model_config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="types.html#utils.types.FileInfo"><code class="docutils literal notranslate"><span class="pre">FileInfo</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="types.html#utils.types.FileInfo.model_config"><code class="docutils literal notranslate"><span class="pre">FileInfo.model_config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="types.html#utils.types.FrequencyRange"><code class="docutils literal notranslate"><span class="pre">FrequencyRange</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="types.html#utils.types.FrequencyRange.check_input"><code class="docutils literal notranslate"><span class="pre">FrequencyRange.check_input()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="types.html#utils.types.FrequencyRange.model_config"><code class="docutils literal notranslate"><span class="pre">FrequencyRange.model_config</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="gui.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">GUI</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="decode.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">decode</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#analysis">Analysis</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#feature-classes">Feature Classes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#filter">Filter</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#processing">Processing</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stream">stream</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#utils">utils</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/api_documentation.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021, Timon Merk.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

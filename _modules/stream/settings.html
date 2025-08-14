@@ -1,0 +1,824 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>stream.settings &#8212; py_neuromodulation  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/stream/settings';</script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">py_neuromodulation  documentation</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../usage.html">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../gui.html">
+    GUI
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api_documentation.html">
+    API Documentation
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../usage.html">
+    Usage
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../auto_examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../gui.html">
+    GUI
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../api_documentation.html">
+    API Documentation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../contributing.html">
+    Contribution Guide
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuromodulation/py_neuromodulation" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">stream.settings</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for stream.settings</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module for handling settings.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">get_args</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">model_validator</span><span class="p">,</span> <span class="n">ValidationError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic.functional_validators</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelWrapValidatorHandler</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span><span class="p">,</span> <span class="n">user_features</span><span class="p">,</span> <span class="n">PYNM_DIR</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.utils.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BoolSelector</span><span class="p">,</span>
+    <span class="n">FrequencyRange</span><span class="p">,</span>
+    <span class="n">_PathLike</span><span class="p">,</span>
+    <span class="n">NMBaseModel</span><span class="p">,</span>
+    <span class="n">NORM_METHOD</span><span class="p">,</span>
+    <span class="n">PREPROCESSOR_NAME</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.utils.pydantic_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NMErrorList</span><span class="p">,</span> <span class="n">NMField</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.processing.filter_preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FilterSettings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.processing.normalization</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">FeatureNormalizationSettings</span><span class="p">,</span>
+    <span class="n">NormalizationSettings</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.processing.resample</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResamplerSettings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.processing.projection</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProjectionSettings</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.filter</span><span class="w"> </span><span class="kn">import</span> <span class="n">KalmanSettings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.features</span><span class="w"> </span><span class="kn">import</span> <span class="n">BispectraSettings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.features</span><span class="w"> </span><span class="kn">import</span> <span class="n">NoldsSettings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.features</span><span class="w"> </span><span class="kn">import</span> <span class="n">MNEConnectivitySettings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.features</span><span class="w"> </span><span class="kn">import</span> <span class="n">FooofSettings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.features</span><span class="w"> </span><span class="kn">import</span> <span class="n">CoherenceSettings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.features</span><span class="w"> </span><span class="kn">import</span> <span class="n">SharpwaveSettings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.features</span><span class="w"> </span><span class="kn">import</span> <span class="n">OscillatorySettings</span><span class="p">,</span> <span class="n">BandPowerSettings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">py_neuromodulation.features</span><span class="w"> </span><span class="kn">import</span> <span class="n">BurstsSettings</span>
+
+
+<span class="c1"># TONI: this class has the proble that if a feature is absent,</span>
+<span class="c1"># it won&#39;t default to False but to whatever is defined here as default</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FeatureSelector</span><span class="p">(</span><span class="n">BoolSelector</span><span class="p">):</span>
+    <span class="n">raw_hjorth</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">return_raw</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">bandpass_filter</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">stft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">fft</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">welch</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">sharpwave_analysis</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">fooof</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">nolds</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">coherence</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">bursts</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">linelength</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">mne_connectivity</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">bispectrum</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">PostprocessingSettings</span><span class="p">(</span><span class="n">BoolSelector</span><span class="p">):</span>
+    <span class="n">feature_normalization</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">project_cortex</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">project_subcortex</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<span class="n">DEFAULT_PREPROCESSORS</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PREPROCESSOR_NAME</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;raw_resampling&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;notch_filter&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;re_referencing&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="NMSettings">
+<a class="viewcode-back" href="../../settings.html#stream.settings.NMSettings">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NMSettings</span><span class="p">(</span><span class="n">NMBaseModel</span><span class="p">):</span>
+    <span class="c1"># Class variable to store instances</span>
+    <span class="n">_instances</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="s2">&quot;NMSettings&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># General settings</span>
+    <span class="n">sampling_rate_features_hz</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">NMField</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">gt</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">custom_metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Hz&quot;</span><span class="p">}</span>
+    <span class="p">)</span>
+    <span class="n">segment_length_features_ms</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">NMField</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">gt</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">custom_metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;ms&quot;</span><span class="p">}</span>
+    <span class="p">)</span>
+    <span class="n">frequency_ranges_hz</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">FrequencyRange</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;theta&quot;</span><span class="p">:</span> <span class="n">FrequencyRange</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+        <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="n">FrequencyRange</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
+        <span class="s2">&quot;low_beta&quot;</span><span class="p">:</span> <span class="n">FrequencyRange</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
+        <span class="s2">&quot;high_beta&quot;</span><span class="p">:</span> <span class="n">FrequencyRange</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">35</span><span class="p">),</span>
+        <span class="s2">&quot;low_gamma&quot;</span><span class="p">:</span> <span class="n">FrequencyRange</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">80</span><span class="p">),</span>
+        <span class="s2">&quot;high_gamma&quot;</span><span class="p">:</span> <span class="n">FrequencyRange</span><span class="p">(</span><span class="mi">90</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span>
+        <span class="s2">&quot;HFA&quot;</span><span class="p">:</span> <span class="n">FrequencyRange</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">400</span><span class="p">),</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Preproceessing settings</span>
+    <span class="n">preprocessing</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PREPROCESSOR_NAME</span><span class="p">]</span> <span class="o">=</span> <span class="n">NMField</span><span class="p">(</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">DEFAULT_PREPROCESSORS</span><span class="p">,</span>
+        <span class="n">custom_metadata</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;field_type&quot;</span><span class="p">:</span> <span class="s2">&quot;PreprocessorList&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;valid_values&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">get_args</span><span class="p">(</span><span class="n">PREPROCESSOR_NAME</span><span class="p">)),</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="n">raw_resampling_settings</span><span class="p">:</span> <span class="n">ResamplerSettings</span> <span class="o">=</span> <span class="n">ResamplerSettings</span><span class="p">()</span>
+    <span class="n">preprocessing_filter</span><span class="p">:</span> <span class="n">FilterSettings</span> <span class="o">=</span> <span class="n">FilterSettings</span><span class="p">()</span>
+    <span class="n">raw_normalization_settings</span><span class="p">:</span> <span class="n">NormalizationSettings</span> <span class="o">=</span> <span class="n">NormalizationSettings</span><span class="p">()</span>
+
+    <span class="c1"># Postprocessing settings</span>
+    <span class="n">postprocessing</span><span class="p">:</span> <span class="n">PostprocessingSettings</span> <span class="o">=</span> <span class="n">PostprocessingSettings</span><span class="p">()</span>
+    <span class="n">feature_normalization_settings</span><span class="p">:</span> <span class="n">FeatureNormalizationSettings</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">FeatureNormalizationSettings</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="n">project_cortex_settings</span><span class="p">:</span> <span class="n">ProjectionSettings</span> <span class="o">=</span> <span class="n">ProjectionSettings</span><span class="p">(</span><span class="n">max_dist_mm</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">project_subcortex_settings</span><span class="p">:</span> <span class="n">ProjectionSettings</span> <span class="o">=</span> <span class="n">ProjectionSettings</span><span class="p">(</span><span class="n">max_dist_mm</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+    <span class="c1"># Feature settings</span>
+    <span class="n">features</span><span class="p">:</span> <span class="n">FeatureSelector</span> <span class="o">=</span> <span class="n">FeatureSelector</span><span class="p">()</span>
+
+    <span class="n">fft_settings</span><span class="p">:</span> <span class="n">OscillatorySettings</span> <span class="o">=</span> <span class="n">OscillatorySettings</span><span class="p">()</span>
+    <span class="n">welch_settings</span><span class="p">:</span> <span class="n">OscillatorySettings</span> <span class="o">=</span> <span class="n">OscillatorySettings</span><span class="p">()</span>
+    <span class="n">stft_settings</span><span class="p">:</span> <span class="n">OscillatorySettings</span> <span class="o">=</span> <span class="n">OscillatorySettings</span><span class="p">()</span>
+    <span class="n">bandpass_filter_settings</span><span class="p">:</span> <span class="n">BandPowerSettings</span> <span class="o">=</span> <span class="n">BandPowerSettings</span><span class="p">()</span>
+    <span class="n">kalman_filter_settings</span><span class="p">:</span> <span class="n">KalmanSettings</span> <span class="o">=</span> <span class="n">KalmanSettings</span><span class="p">()</span>
+    <span class="n">bursts_settings</span><span class="p">:</span> <span class="n">BurstsSettings</span> <span class="o">=</span> <span class="n">BurstsSettings</span><span class="p">()</span>
+    <span class="n">sharpwave_analysis_settings</span><span class="p">:</span> <span class="n">SharpwaveSettings</span> <span class="o">=</span> <span class="n">SharpwaveSettings</span><span class="p">()</span>
+    <span class="n">mne_connectivity_settings</span><span class="p">:</span> <span class="n">MNEConnectivitySettings</span> <span class="o">=</span> <span class="n">MNEConnectivitySettings</span><span class="p">()</span>
+    <span class="n">coherence_settings</span><span class="p">:</span> <span class="n">CoherenceSettings</span> <span class="o">=</span> <span class="n">CoherenceSettings</span><span class="p">()</span>
+    <span class="n">fooof_settings</span><span class="p">:</span> <span class="n">FooofSettings</span> <span class="o">=</span> <span class="n">FooofSettings</span><span class="p">()</span>
+    <span class="n">nolds_features</span><span class="p">:</span> <span class="n">NoldsSettings</span> <span class="o">=</span> <span class="n">NoldsSettings</span><span class="p">()</span>
+    <span class="n">bispectrum_settings</span><span class="p">:</span> <span class="n">BispectraSettings</span> <span class="o">=</span> <span class="n">BispectraSettings</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">feat_name</span> <span class="ow">in</span> <span class="n">user_features</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">,</span> <span class="n">feat_name</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">NMSettings</span><span class="o">.</span><span class="n">_add_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_add_instance</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">instance</span><span class="p">:</span> <span class="s2">&quot;NMSettings&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Keep track of all instances created in class variable&quot;&quot;&quot;</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_instances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_add_feature</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">feature</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">instance</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instances</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">features</span><span class="p">,</span> <span class="n">feature</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_remove_feature</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">feature</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">instance</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instances</span><span class="p">:</span>
+            <span class="nb">delattr</span><span class="p">(</span><span class="n">instance</span><span class="o">.</span><span class="n">features</span><span class="p">,</span> <span class="n">feature</span><span class="p">)</span>
+
+    <span class="nd">@model_validator</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;wrap&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore[reportIncompatibleMethodOverride]</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handler</span><span class="p">:</span> <span class="n">ModelWrapValidatorHandler</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="c1"># Perform all necessary custom validations in the settings class and also</span>
+        <span class="c1"># all validations in the feature classes that need additional information from</span>
+        <span class="c1"># the settings class</span>
+        <span class="n">errors</span><span class="p">:</span> <span class="n">NMErrorList</span> <span class="o">=</span> <span class="n">NMErrorList</span><span class="p">()</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">remove_private_keys</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">if</span> <span class="s2">&quot;__value__&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;__value__&quot;</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">{</span>
+                        <span class="n">key</span><span class="p">:</span> <span class="n">remove_private_keys</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">)</span>
+                    <span class="p">}</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">set</span><span class="p">)):</span>
+                <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)(</span><span class="n">remove_private_keys</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">data</span>
+
+        <span class="bp">self</span> <span class="o">=</span> <span class="n">remove_private_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>  <span class="c1"># validate the model</span>
+        <span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span> <span class="o">=</span> <span class="n">NMSettings</span><span class="o">.</span><span class="n">unvalidated</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">NMErrorList</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">errors</span><span class="p">()))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">get_enabled</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">add_error</span><span class="p">(</span><span class="s2">&quot;At least one feature must be selected.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Replace spaces with underscores in frequency band names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frequency_ranges_hz</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">):</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency_ranges_hz</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">bandpass_filter</span><span class="p">:</span>
+            <span class="c1"># Check BandPass settings frequency bands</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bandpass_filter_settings</span><span class="o">.</span><span class="n">validate_fbands</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+            <span class="c1"># Check Kalman filter frequency bands</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bandpass_filter_settings</span><span class="o">.</span><span class="n">kalman_filter</span><span class="p">:</span>
+                <span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kalman_filter_settings</span><span class="o">.</span><span class="n">validate_fbands</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">create_error</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;NMSettings&quot;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">disable_all</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preprocessing</span> <span class="o">=</span> <span class="n">DEFAULT_PREPROCESSORS</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">postprocessing</span><span class="o">.</span><span class="n">disable_all</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_fast_compute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;NMSettings&quot;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">fft</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preprocessing</span> <span class="o">=</span> <span class="n">DEFAULT_PREPROCESSORS</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">postprocessing</span><span class="o">.</span><span class="n">feature_normalization</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">postprocessing</span><span class="o">.</span><span class="n">project_cortex</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">postprocessing</span><span class="o">.</span><span class="n">project_subcortex</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">enable_all_features</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">enable_all</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">disable_all_features</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="o">.</span><span class="n">disable_all</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_fast_compute</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s2">&quot;NMSettings&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">NMSettings</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span><span class="o">.</span><span class="n">set_fast_compute</span><span class="p">()</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="s2">&quot;NMSettings | _PathLike | None&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;NMSettings&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">settings</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">settings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="p">))</span>
+
+<div class="viewcode-block" id="NMSettings.from_file">
+<a class="viewcode-back" href="../../settings.html#stream.settings.NMSettings.from_file">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_file</span><span class="p">(</span><span class="n">PATH</span><span class="p">:</span> <span class="n">_PathLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;NMSettings&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load settings from file or a directory.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            PATH (_PathLike): Path to settings file or to directory containing settings file,</span>
+<span class="sd">                              or path to experiment including experiment prefix</span>
+<span class="sd">                              (e.g. /path/to/exp/exp_prefix[_SETTINGS.json]).</span>
+<span class="sd">                              Supported file types are .json and .yaml</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: when file format is not supported.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            NMSettings: PyNM settings object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">PATH</span><span class="p">)</span>
+
+        <span class="c1"># If directory is passed, look for settings file inside</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">path</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">suffix</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="s2">&quot;.yaml&quot;</span><span class="p">]:</span>
+                    <span class="n">path</span> <span class="o">=</span> <span class="n">child</span>
+                    <span class="k">break</span>
+
+        <span class="c1"># If prefix is passed, look for settings file matching prefix</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+                <span class="n">ext</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">child</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
+                    <span class="ow">and</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="s2">&quot;.yaml&quot;</span><span class="p">]</span>
+                    <span class="ow">and</span> <span class="n">child</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">path</span><span class="o">.</span><span class="n">stem</span> <span class="o">+</span> <span class="s2">&quot;_SETTINGS&quot;</span> <span class="o">+</span> <span class="n">ext</span>
+                <span class="p">):</span>
+                    <span class="n">path</span> <span class="o">=</span> <span class="n">child</span>
+                    <span class="k">break</span>
+
+        <span class="k">match</span> <span class="n">path</span><span class="o">.</span><span class="n">suffix</span><span class="p">:</span>
+            <span class="k">case</span> <span class="s2">&quot;.json&quot;</span><span class="p">:</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">model_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="k">case</span> <span class="s2">&quot;.yaml&quot;</span><span class="p">:</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+
+                <span class="c1"># with open(path) as f:</span>
+                <span class="c1">#    model_dict = yaml.safe_load(f)</span>
+
+                <span class="c1"># Timon: this is potentially dangerous since python code is directly executed</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">model_dict</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">yaml</span><span class="o">.</span><span class="n">Loader</span><span class="p">)</span>
+
+            <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;File format not supported.&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">NMSettings</span><span class="p">(</span><span class="o">**</span><span class="n">model_dict</span><span class="p">)</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_default</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s2">&quot;NMSettings&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">NMSettings</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">PYNM_DIR</span> <span class="o">/</span> <span class="s2">&quot;default_settings.yaml&quot;</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">list_normalization_methods</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">NORM_METHOD</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">NormalizationSettings</span><span class="o">.</span><span class="n">list_normalization_methods</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">:</span> <span class="n">_PathLike</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;yaml&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_SETTINGS.</span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">prefix</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;SETTINGS.</span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="n">path_out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">prefix</span> <span class="o">/</span> <span class="n">filename</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path_out</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">match</span> <span class="nb">format</span><span class="p">:</span>
+                <span class="k">case</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_dump_json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+                <span class="k">case</span> <span class="s2">&quot;yaml&quot;</span><span class="p">:</span>
+                    <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+
+                    <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span> <span class="n">f</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Settings saved to </span><span class="si">{</span><span class="n">path_out</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># For retrocompatibility with previous versions of PyNM</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_default_settings</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">NMSettings</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">NMSettings</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">reset_settings</span><span class="p">(</span><span class="n">settings</span><span class="p">:</span> <span class="n">NMSettings</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NMSettings</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">settings</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_fast_compute</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">NMSettings</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">NMSettings</span><span class="o">.</span><span class="n">get_fast_compute</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_settings</span><span class="p">(</span><span class="n">settings</span><span class="p">:</span> <span class="n">NMSettings</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NMSettings</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">settings</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021, Timon Merk.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>
