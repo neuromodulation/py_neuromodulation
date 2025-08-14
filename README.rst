@@ -83,6 +83,14 @@ Contact information
 For any question or suggestion please find my contact
 information at `my GitHub profile <https://github.com/timonmerk>`_.
 
+Journal of Open Source Software publication
+-------------------------------------------
+
+reStructuredText:
+.. image:: https://joss.theoj.org/papers/10.21105/joss.08258/status.svg
+   :target: https://doi.org/10.21105/joss.08258
+
+
 Contributing guide
 ------------------
 https://neuromodulation.github.io/py_neuromodulation/contributing.html
