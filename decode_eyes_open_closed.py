@@ -7,9 +7,11 @@ import numpy as np
 from sklearn import metrics, model_selection, linear_model
 from joblib import Parallel, delayed
 from catboost import CatBoostClassifier
+from tqdm import tqdm
 
 PATH_FEATURES = r"C:\Users\ICN_admin\OneDrive - Charité - Universitätsmedizin Berlin\Dokumente\Decoding toolbox\EyesOpenBeijing\2708\features_all_with_lfa.csv"
 PATH_FEATURES = r"C:\Users\ICN_admin\OneDrive - Charité - Universitätsmedizin Berlin\Dokumente\Decoding toolbox\EyesOpenBeijing\0210\raw_new\features_all_with_lfa.csv"
+PATH_FEATURES = r'/Users/Timon/Library/CloudStorage/OneDrive-Charité-UniversitätsmedizinBerlin/Dokumente/Decoding toolbox/EyesOpenBeijing/0210/raw_new/features_all_with_lfa.csv'
 
 def balance_classes(df, target_column):
     min_class_size = df[target_column].value_counts().min()
@@ -54,11 +56,11 @@ def run_cv(df):
 
         
         # plot the confusion matrix
-        cm = metrics.confusion_matrix(y_test, pred, normalize="true")
-        #disp = metrics.ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["SLEEP", "EyesOpen", "EyesClosed"])
-        #disp.plot(cmap=plt.cm.Blues)
-        #plt.title("Confusion Matrix")
-        #plt.show(block=True)
+        cm = metrics.confusion_matrix(y_test, pred, ) # normalize="false"
+        # disp = metrics.ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["EyesOpen", "EyesClosed"])
+        # disp.plot(cmap=plt.cm.Blues)
+        # plt.title("Confusion Matrix")
+        # plt.show(block=True)
 
         cm_list.append(cm)
         ba_list.append(metrics.balanced_accuracy_score(y_test, pred))
@@ -103,6 +105,7 @@ def compute_modality(sub, mod):
         chs_ = np.unique([c.split("_")[0] for c in df_sub_loc.columns if "label" not in c])
         for ch in chs_:
             print(ch)
+            #ch = 'RSTN3-RSTN4'
             df_sub_ch = df_sub_loc[[c for c in df_sub_loc.columns if ch in c or "label" in c]].copy()
             f_bands = [c.split("_")[2] for c in df_sub_ch.columns if "label" not in c]
             ba_mean, cm_mean, coef_mean = run_cv(df_sub_ch.copy())
@@ -133,15 +136,27 @@ if __name__ == "__main__":
     subs = df_all["sub"].unique()
     diseases = df_all["disease"].unique()
 
-    #compute_modality(subs[0], modality_[0])
+    # # 059GZ ch RSTN3-RSTN4 loc STN
+    #compute_modality("059GZ", "fft")
+    SHUFFLED = True
     
     PATH_BASE = r"C:\Users\ICN_admin\OneDrive - Charité - Universitätsmedizin Berlin\Dokumente\Decoding toolbox\EyesOpenBeijing\0210\raw_new"
-    for mod in modality_:  # 
-        l_df_ = Parallel(n_jobs=len(subs))(delayed(compute_modality)(sub, mod) for sub in subs)
+    PATH_BASE = r'/Users/Timon/Library/CloudStorage/OneDrive-Charité-UniversitätsmedizinBerlin/Dokumente/Decoding toolbox/EyesOpenBeijing/0210/raw_new'
+
     
-        df_per = pd.DataFrame(list(np.concatenate(l_df_)))
+
+    for idx_shuffle in tqdm(range(100)):
+        if SHUFFLED:
+            df_all["label_enc"] = np.random.permutation(df_all["label_enc"].values)
+        for mod in modality_:  # 
+            l_df_ = Parallel(n_jobs=len(subs))(delayed(compute_modality)(sub, mod) for sub in subs)
         
-        df_per.to_csv(os.path.join(PATH_BASE, f"out_per_loc_mod_{mod}_fft_with_lfa_CB.csv"), index=False)
+            df_per = pd.DataFrame(list(np.concatenate(l_df_)))
+            if SHUFFLED:
+                PATH_SAVE = os.path.join(PATH_BASE, f"out_per_loc_mod_{mod}_fft_with_lfa_CB_shuffled_{idx_shuffle}.csv")
+            else:
+                PATH_SAVE = os.path.join(PATH_BASE, f"out_per_loc_mod_{mod}_fft_with_lfa_CB.csv")
+            df_per.to_csv(PATH_SAVE, index=False)
 
 
 

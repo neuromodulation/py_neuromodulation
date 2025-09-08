@@ -8,9 +8,13 @@ from py_neuromodulation import nm_stats
 from scipy import stats
 
 PATH_ = r"C:\Users\ICN_admin\OneDrive - Charité - Universitätsmedizin Berlin\Dokumente\Decoding toolbox\EyesOpenBeijing\0210\raw_new"
+PATH_ = r'/Users/Timon/Library/CloudStorage/OneDrive-Charité-UniversitätsmedizinBerlin/Dokumente/Decoding toolbox/EyesOpenBeijing/0210/raw_new'
+
 PATH_FIGURES = os.path.join(PATH_, "figures")
 fontsize_ = 10
-mods = ["alpha", "fft"]
+mods = ["alpha", "fft"][::-1]
+
+# 059GZ ch RSTN3-RSTN4 loc STN
 
 l_ = []
 for mod in mods:
