@@ -18056,7 +18056,7 @@ function requirePlotlyBasic_min() {
               for (var t3, r3, n2, a2, i2 = e3.x, o2 = e3.y, l2 = Ft._; l2; ) if ((n2 = Wt(l2, o2) - i2) > Se) l2 = l2.L;
               else {
                 if (!((a2 = i2 - Jt(l2, o2)) > Se)) {
-                  n2 > -1e-6 ? (t3 = l2.P, r3 = l2) : a2 > -1e-6 ? (t3 = l2, r3 = l2.N) : t3 = r3 = l2;
+                  n2 > -Se ? (t3 = l2.P, r3 = l2) : a2 > -Se ? (t3 = l2, r3 = l2.N) : t3 = r3 = l2;
                   break;
                 }
                 if (!l2.R) {
@@ -18106,7 +18106,7 @@ function requirePlotlyBasic_min() {
                 var n2 = t3.site, a2 = e3.site, i2 = r3.site;
                 if (n2 !== i2) {
                   var o2 = a2.x, l2 = a2.y, s2 = n2.x - o2, c2 = n2.y - l2, u2 = i2.x - o2, f2 = 2 * (s2 * (g2 = i2.y - l2) - c2 * u2);
-                  if (!(f2 >= -1e-12)) {
+                  if (!(f2 >= -Ce)) {
                     var d2 = s2 * s2 + c2 * c2, h2 = u2 * u2 + g2 * g2, p2 = (g2 * d2 - c2 * h2) / f2, v2 = (s2 * h2 - u2 * d2) / f2, g2 = v2 + l2, m2 = Yt.pop() || new Qt();
                     m2.arc = e3, m2.site = a2, m2.x = p2 + o2, m2.y = g2 + Math.sqrt(p2 * p2 + v2 * v2), m2.cy = g2, e3.circle = m2;
                     for (var y2 = null, x2 = Bt._; x2; ) if (m2.y < x2.y || m2.y === x2.y && m2.x <= x2.x) {

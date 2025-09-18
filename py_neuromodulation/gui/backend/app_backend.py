@@ -79,6 +79,11 @@ class PyNMBackend(FastAPI):
                 StaticFiles(directory=PYNM_DIR / "gui" / "frontend", html=True),
                 name="static",
             )
+            # self.mount(
+            #     "/",
+            #     StaticFiles(directory=PYNM_DIR / "gui" / "frontend", html=True),
+            #     name="frontend",
+            # )
 
         self.websocket_manager = WebsocketManager()
         self.pynm_state = app_pynm.PyNMState()
