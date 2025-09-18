@@ -1,3 +1,18 @@
+"""
+This script helps to start the backend and creating a webview.
+A .dmg can be created by running the following
+
+
+    pyinstaller --noconsole --onefile --name NeuromodApp main.py
+
+    -> Will use this script to run the backend and serve the FE files
+
+    hdiutil create -volname "NeuromodApp" -srcfolder dist/NeuromodApp.app -ov -format UDZO NeuromodApp.dmg
+
+    -> Will create a .dmg file
+
+"""
+
 import threading
 import uvicorn
 import webview
