@@ -5,10 +5,11 @@ from typing import (
     get_args,
     get_type_hints,
     Literal,
+    Unpack,
+    TypedDict,
     cast,
     Sequence,
 )
-from typing_extensions import Unpack, TypedDict
 from pydantic import BaseModel, GetCoreSchemaHandler, ConfigDict
 
 from pydantic_core import (
@@ -118,23 +119,13 @@ class _NMExtraFieldInputs(TypedDict, total=False):
     custom_metadata: dict[str, Any]
 
 
-class _NMFieldInfoInputs(_FieldInfoInputs, _NMExtraFieldInputs, total=False):
-    """Combine pydantic FieldInfo inputs with PyNM additional inputs"""
-
-    pass
-
-
-class _NMFromFieldInfoInputs(_FromFieldInfoInputs, _NMExtraFieldInputs, total=False):
-    """Combine pydantic FieldInfo.from_field inputs with PyNM additional inputs"""
-
-    pass
-
-
 class NMFieldInfo(FieldInfo):
     # Add default values for any other custom fields here
     _default_values = {}
 
-    def __init__(self, **kwargs: Unpack[_NMFieldInfoInputs]) -> None:
+    def __init__(
+        self, **kwargs: Unpack[_FieldInfoInputs | _NMExtraFieldInputs]
+    ) -> None:
         self.sequence: bool = kwargs.pop("sequence", False)  # type: ignore
         self.custom_metadata: dict[str, Any] = kwargs.pop("custom_metadata", {})
         super().__init__(**kwargs)
@@ -162,7 +153,7 @@ class NMFieldInfo(FieldInfo):
     @staticmethod
     def from_field(
         default: Any = PydanticUndefined,
-        **kwargs: Unpack[_NMFromFieldInfoInputs],
+        **kwargs: Unpack[_FromFieldInfoInputs | _NMExtraFieldInputs],
     ) -> "NMFieldInfo":
         if "annotation" in kwargs:
             raise TypeError('"annotation" is not permitted as a Field keyword argument')
@@ -178,7 +169,7 @@ class NMFieldInfo(FieldInfo):
 
 def NMField(
     default: Any = PydanticUndefined,
-    **kwargs: Unpack[_NMFromFieldInfoInputs],
+    **kwargs: Unpack[_FromFieldInfoInputs | _NMExtraFieldInputs],
 ) -> Any:
     return NMFieldInfo.from_field(default=default, **kwargs)
 

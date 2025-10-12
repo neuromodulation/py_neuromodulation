@@ -85,16 +85,16 @@ class SharpwaveSettings(NMBaseModel):
             self.estimator[est] = []
 
     @model_validator(mode="after")
-    def test_settings(cls, settings):
+    def test_settings(self):
         # check if all features are also enabled via an estimator
-        estimator_list = [est for list_ in settings.estimator.values() for est in list_]
+        estimator_list = [est for list_ in self.estimator.values() for est in list_]
 
-        for used_feature in settings.sharpwave_features.get_enabled():
+        for used_feature in self.sharpwave_features.get_enabled():
             assert (
                 used_feature in estimator_list
             ), f"Add estimator key for {used_feature}"
 
-        return settings
+        return self
 
 
 class SharpwaveAnalyzer(NMFeature):
@@ -151,7 +151,9 @@ class SharpwaveAnalyzer(NMFeature):
             self.filters = np.vstack([f for _, f in self.list_filter])
             self.filters = np.tile(self.filters[None, :, :], (len(self.ch_names), 1, 1))
         else:
-            self.filters = [np.tile(f, (len(self.ch_names), 1)) for _, f in self.list_filter]
+            self.filters = [
+                np.tile(f, (len(self.ch_names), 1)) for _, f in self.list_filter
+            ]
 
         self.used_features = self.sw_settings.sharpwave_features.get_enabled()
 
@@ -282,7 +284,9 @@ class SharpwaveAnalyzer(NMFeature):
                 if feature_name == "num_peaks":
                     key_name = f"{ch_name}_Sharpwave_{feature_name}_{filter_name}"
                     if len(waveform_results[feature_name]) == 1:
-                        dict_ch_features[key_name][key_name_pt] = waveform_results[feature_name][0]
+                        dict_ch_features[key_name][key_name_pt] = waveform_results[
+                            feature_name
+                        ][0]
                         continue
                     else:
                         raise ValueError("num_peaks should be a list with length 1")
@@ -317,8 +321,12 @@ class SharpwaveAnalyzer(NMFeature):
                 for ch_name in self.ch_names:
                     for filter_name in self.filter_names:
                         key_name = f"{ch_name}_Sharpwave_num_peaks_{filter_name}"
-                        feature_results[key_name] = np_mean([dict_ch_features[key_name]["Peak"],
-                                                            dict_ch_features[key_name]["Trough"]])
+                        feature_results[key_name] = np_mean(
+                            [
+                                dict_ch_features[key_name]["Peak"],
+                                dict_ch_features[key_name]["Trough"],
+                            ]
+                        )
         else:
             # otherwise, save all write all "flattened" key value pairs in feature_results
             for key, subdict in dict_ch_features.items():
