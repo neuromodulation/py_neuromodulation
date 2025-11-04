@@ -43,17 +43,13 @@ jobs:
         with:
           packages: binutils qtbase5-dev qt5-qmake libpugixml1v5
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v7
         with:
-          version: "0.4.12"
-          enable-cache: true
+          python-version: "${{ matrix.python }}"
+          enable-cache: auto
+          activate-environment: "true"
           cache-dependency-glob: "**/pyproject.toml"
-      - name: Install Python and dependencies
-        run: |
-          uv python install ${{ matrix.python }}
-          uv venv
-          uv pip install .[test]
+      - name: Install dependencies
+        run: uv pip install .[test]
       - name: Run tests
-        run: |
-          ${{ (runner.os == 'Windows' && '.venv\Scripts\activate') || 'source .venv/bin/activate' }}
-          pytest -n auto tests/
+        run: pytest -n auto tests/
