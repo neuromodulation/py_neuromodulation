@@ -52,6 +52,4 @@ jobs:
       - name: Install dependencies
         run: uv pip install .[test]
       - name: Run tests
-        run: |
-          ${{ (runner.os == 'Windows' && '.venv\Scripts\activate') || 'source .venv/bin/activate' }}
-          pytest -n auto tests/
+        run: pytest -n auto tests/
