@@ -188,7 +188,7 @@ class NMBaseModel(BaseModel):
             super().__init__(*args, **kwargs)
             return
 
-        field_names = list(self.model_fields.keys())
+        field_names = list(self.__class__.model_fields.keys())
         # If we have more positional args than fields, that's an error
         if len(args) > len(field_names):
             raise ValueError(
@@ -229,7 +229,7 @@ class NMBaseModel(BaseModel):
 
     @property
     def fields(self) -> dict[str, FieldInfo | NMFieldInfo]:
-        return self.model_fields  # type: ignore
+        return self.__class__.model_fields  # type: ignore
 
     def serialize_with_metadata(self):
         result: dict[str, Any] = {"__field_type__": self.__class__.__name__}

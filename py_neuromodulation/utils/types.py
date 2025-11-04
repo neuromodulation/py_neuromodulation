@@ -135,17 +135,17 @@ class BoolSelector(NMBaseModel):
     def get_enabled(self):
         return [
             f
-            for f in self.model_fields.keys()
+            for f in self.__class__.model_fields.keys()
             if (isinstance(self[f], bool) and self[f])
         ]
 
     def enable_all(self):
-        for f in self.model_fields.keys():
+        for f in self.__class__.model_fields.keys():
             if isinstance(self[f], bool):
                 self[f] = True
 
     def disable_all(self):
-        for f in self.model_fields.keys():
+        for f in self.__class__.model_fields.keys():
             if isinstance(self[f], bool):
                 self[f] = False
 
