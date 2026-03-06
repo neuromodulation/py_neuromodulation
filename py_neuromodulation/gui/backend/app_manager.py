@@ -14,7 +14,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from multiprocessing.synchronize import Event
 
-
 # Shared memory configuration
 ARRAY_SIZE = 1000  # Adjust based on your needs
 
